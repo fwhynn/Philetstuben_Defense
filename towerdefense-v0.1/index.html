@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hex Bastion v0.7-dev</title>
+  <link rel="stylesheet" href="style.css" />
+  <script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script>
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div>
+        <h1>Hex Bastion <span>v0.7-dev</span></h1>
+        <p>Map bauen → Türme setzen → Wave überleben → Deck erweitern</p>
+      </div>
+      <div class="stats">
+        <div>❤️ <strong id="hp">20</strong>/20</div>
+        <details class="statDetails"><summary aria-label="Goldplanung öffnen">🪙 <strong id="gold">70</strong> <span id="bonusIncome">(+0)</span> ▾</summary>
+          <div class="statPopup"><h2>Goldplanung</h2><p id="goldForecast" class="hint"></p><p id="towerBudget" class="hint"></p><h3>Goldquellen &amp; Run-Einnahmen</h3><p id="goldSources" class="hint"></p></div>
+        </details>
+        <details class="statDetails"><summary aria-label="Waveplanung öffnen">🌊 <strong id="wave">0</strong> ▾</summary>
+          <div class="statPopup"><h2>Waveplanung</h2><p id="waveForecast" class="hint"></p><p id="liveWaveInfo" class="hint"></p></div>
+        </details>
+        <details id="deckDropdown" class="statDetails"><summary aria-label="Deck und Kartenstapel öffnen">🃏 <strong id="deckCount">5</strong> ▾</summary><div class="statPopup"><h2>Deck &amp; Kartenstapel</h2><p class="hint">Die Ziehreihenfolge bleibt verborgen.</p><div id="deckOverview" class="deckOverview"></div></div></details>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="boardWrap">
+        <svg id="board" viewBox="-545 -375 1100 760" aria-label="Hex-Karte"></svg>
+        <div class="mapControls">
+          <button id="zoomInBtn" class="secondary" aria-label="Map vergrößern">+</button>
+          <button id="zoomOutBtn" class="secondary" aria-label="Map verkleinern">−</button>
+          <button id="resetViewBtn" class="secondary">Zur Base</button>
+          <span>Mausrad: Zoom · rechte Maustaste ziehen: verschieben</span>
+        </div>
+        <div id="message" class="message">Wähle eine Hexkarte und lege sie an die offene Straße der Base.</div>
+        <section id="towerPanel" class="towerPanel hidden" aria-label="Ausgewählter Turm">
+          <div class="panelHead"><h2 id="towerPanelTitle">Turm</h2><button id="closeTowerPanel" class="secondary" aria-label="Turminfos schließen">×</button></div>
+          <p id="selectedTowerInfo" class="hint"></p>
+          <div id="towerUpgrades" class="towerUpgrades"></div>
+          <button id="sellTowerBtn" class="secondary" disabled>Bau rückgängig</button>
+        </section>
+        <section id="buildingPanel" class="towerPanel hidden" aria-label="Gebäudeslot">
+          <div class="panelHead"><h2 id="buildingPanelTitle">Gebäudeslot</h2><button id="closeBuildingPanel" class="secondary" aria-label="Gebäudeinfos schließen">×</button></div>
+          <p id="buildingPanelInfo" class="hint"></p><div id="buildingOptions" class="towerUpgrades"></div>
+        </section>
+      </section>
+
+      <aside class="sidepanel">
+        <section class="panel">
+          <div class="panelHead">
+            <h2>1. Hex wählen</h2>
+          </div>
+          <div id="hand" class="hand"></div>
+          <p class="hint">Ziehe 3, spiele 1. Danach wird die ganze Hand abgeworfen.</p>
+        </section>
+
+        <section class="panel">
+          <h2>2. Bauphase</h2>
+          <div id="towerMenu" class="towerMenu"></div>
+          <p class="hint">↑ Upgrade bezahlbar · 2 Spezialisierung · 3 finale Stufe. Turm anklicken für Werte und Upgrades.</p>
+          <p class="hint">Bauen auch während der Wave. Rückgabe in der aktuellen Bauphase: 100 %. Danach Verkauf: 50 % inklusive Upgrades.</p>
+        </section>
+
+        <section class="panel actions">
+          <strong id="phaseLabel">Hex platzieren</strong>
+          <label class="toggle"><input id="doubleSpeed" type="checkbox" /> 2× Spieltempo (F)</label>
+          <label class="toggle"><input id="autoStart" type="checkbox" /> Wave nach Platzierung automatisch starten</label>
+          <label class="toggle"><input id="soundEnabled" type="checkbox" checked /> Sounds aktiv</label>
+          <label class="toggle">Lautstärke <input id="soundVolume" type="range" min="0" max="100" value="35" aria-label="Sound-Lautstärke" /></label>
+          <button id="startWaveBtn" class="primary" disabled>Wave starten (Leertaste)</button>
+          <button id="newRunBtn" class="danger">Neuer Run</button>
+          <label class="toggle">Startwert für nächsten Run (Seed) <input id="runSeed" type="text" maxlength="100" placeholder="Leer = zufälliger Run" /></label>
+          <small class="hint">Derselbe Startwert wiederholt bei gleichen Entscheidungen die Karten und Belohnungen.</small>
+          <small class="hint">Aktueller Seed: <span id="activeSeed"></span></small>
+        </section>
+
+        <section class="panel rules">
+          <h2>V0.1-Regeln</h2>
+          <ul>
+            <li>Base hat 20 HP.</li>
+            <li>Jedes offene Straßenende ist ein Spawnpunkt.</li>
+            <li>Gegner nehmen den kürzesten Weg zur Base.</li>
+            <li>Alle 2 Waves: 1 von 3 neuen Hexkarten ins Deck.</li>
+            <li>Sicht ab jedem gesetzten Hex: Radius 2 klar, bis Radius 6 Nebel, danach unsichtbar. ? = unbekanntes Sonderfeld. ◆ Schatz, ✦ Shrine, ☠ Boss. Feste Sonderfelder werden durch passende Nachbarstraßen angeschlossen.</li>
+          </ul>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <div id="rewardOverlay" class="overlay hidden" role="dialog" aria-modal="true">
+    <div class="rewardBox">
+      <h2 id="rewardTitle">Deck erweitern</h2>
+      <p id="rewardDescription">Wähle 1 von 3 Hexkarten.</p>
+      <div id="rewardChoices" class="rewardChoices"></div>
+      <button id="skipRemovalBtn" class="secondary hidden">Keine Karte entfernen</button>
+    </div>
+  </div>
+
+  <script src="sound.js"></script>
+  <script src="camera.js"></script>
+  <script src="data.js"></script>
+  <script src="map.js"></script>
+  <script src="random.js"></script>
+  <script src="waves.js"></script>
+  <script src="combat.js"></script>
+  <script src="deck.js"></script>
+  <script src="buildings.js"></script>
+  <script src="exploration.js"></script>
+  <script src="svg-renderer.js"></script>
+  <script src="model-map.js"></script>
+  <script type="module">
+    // 3D nur über http(s) (Modelle werden per fetch geladen); ?svg erzwingt den SVG-Prototyp, Doppelklick (file://) nutzt ihn automatisch.
+    if(location.protocol.startsWith('http')&&!new URLSearchParams(location.search).has('svg')){
+      try{await import('./three-renderer.js');}catch(error){console.warn('3D nicht verfügbar, verwende SVG:',error);}
+    }
+    await new Promise((done,fail)=>{const s=document.createElement('script');s.src='game.js';s.onload=done;s.onerror=fail;document.body.appendChild(s);});
+  </script>
+</body>
+</html>
+
+
+
+

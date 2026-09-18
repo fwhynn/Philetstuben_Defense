@@ -1,0 +1,32 @@
+const {test}=require('node:test'),assert=require('node:assert/strict');
+const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+function load(){const context={};for(const file of ['data.js','map.js','model-map.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../'+file),'utf8'),context);vm.runInNewContext('globalThis.data=HexData;globalThis.map=HexMap;globalThis.models=HexModelMap;',context);return context;}
+test('every card type has a model and its road edges match the shape table',()=>{
+  const {data,models}=load();
+  for(const [id,card] of Object.entries(data.CARD_LIBRARY)){
+    const m=models.modelFor({type:id,rotation:0,roads:card.roads});assert.equal(m.name,id);assert.equal(m.rotation,0);
+  }
+});
+test('tiles keep their stored rotation and base uses the base model',()=>{
+  const {models}=load();
+  assert.deepEqual({...models.modelFor({type:'tee',rotation:4,roads:[4,0,2]})},{name:'tee',rotation:4});
+  assert.equal(models.modelFor({type:'base',roads:[0]}).name,'base');
+});
+test('rescue hexes pick a model by road shape and rotation, with a procedural fallback',()=>{
+  const {models}=load();
+  const straight=models.modelFor({type:'rescue',roads:[1,4]});assert.equal(straight.name,'rescue');assert.equal(straight.rotation,1);
+  const curve=models.modelFor({type:'rescue',roads:[3,4]});assert.equal(curve.name,'smallCurve');assert.equal(curve.rotation,3);
+  const odd=models.modelFor({type:'rescue',roads:[0,1,2]});assert.equal(odd.name,'rescue');assert.equal(odd.proceduralRoads,true);
+});
+test('claimed landmark prefabs resolve to a tile model with their rotation',()=>{
+  const {models,map}=load(),prefab={type:'tJunction',rotation:2,roads:[2,4,5]};
+  const m=models.modelFor({type:prefab.type,rotation:prefab.rotation,roads:prefab.roads});assert.equal(m.name,'tJunction');assert.equal(m.rotation,2);
+  assert.deepEqual([...map.rotatedRoads({roads:models.SHAPES.tJunction},2)].sort(),[...prefab.roads].sort());
+});
+test('landmark props avoid roads and the tower slot side',()=>{
+  const {models}=load();
+  for(const shape of ['straight','smallCurve','bigCurve','tee','tJunction']){
+    const angle=models.propAngle(shape);assert.ok(Math.abs(angle-90)>=35,shape+' prop must not sit at the slot');
+    const gaps=models.SHAPES[shape].map(d=>Math.min(Math.abs(angle-d*60)%360,360-Math.abs(angle-d*60)%360));assert.ok(Math.min(...gaps)>=30,shape+' prop must not sit on a road');
+  }
+});

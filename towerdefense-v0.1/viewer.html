@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hex Bastion – Modell-Viewer</title>
+  <style>
+    html,body{margin:0;height:100%;background:#1c2620;color:#eee1c2;font:14px Inter,system-ui,sans-serif;overflow:hidden}
+    #info{position:fixed;left:12px;top:10px;z-index:3;background:rgba(23,39,30,.88);border:1px solid #718a6c;border-radius:8px;padding:8px 12px;line-height:1.5}
+    #info b{color:#f1ddb1}
+    .tag{position:fixed;left:0;top:0;z-index:2;transform:translate(-50%,0);font-size:11px;color:#fff;background:rgba(20,30,24,.72);padding:1px 6px;border-radius:4px;pointer-events:none;white-space:nowrap}
+  </style>
+  <script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script>
+</head>
+<body>
+<div id="info"><b>Modell-Galerie</b> · <span id="status">Lade Modelle…</span><br>Links ziehen: drehen · Rechts ziehen: verschieben · Mausrad: Zoom · Türme drehen sich zur Ansicht</div>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+const scene=new THREE.Scene();scene.background=new THREE.Color('#9fc4d9');
+const camera=new THREE.PerspectiveCamera(35,innerWidth/innerHeight,.1,100);camera.position.set(7,13,13);
+const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;
+document.body.appendChild(renderer.domElement);
+const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(6.4,0,3.4);controls.maxPolarAngle=Math.PI/2.05;controls.update();
+scene.add(new THREE.HemisphereLight('#dff0ff','#5a6a48',1.1));
+const sun=new THREE.DirectionalLight('#fff1d0',2.6);sun.position.set(10,16,8);sun.target.position.set(6.4,0,3.4);sun.castShadow=true;sun.shadow.mapSize.set(4096,4096);
+Object.assign(sun.shadow.camera,{left:-11,right:11,top:11,bottom:-11,near:1,far:40});sun.shadow.bias=-.0004;scene.add(sun,sun.target);
+
+const loader=new GLTFLoader(),cache=new Map();
+const load=url=>cache.get(url)||(cache.set(url,new Promise((ok,fail)=>loader.load(url,g=>ok(g.scene),undefined,fail))),cache.get(url));
+const prep=o=>{o.traverse(c=>{if(c.isMesh){c.castShadow=true;c.receiveShadow=true;}});return o;};
+const T=n=>`assets/tiles/tile_${n}.glb`,L=n=>`assets/landmarks/landmark_${n}.glb`,W=n=>`assets/towers/tower_${n}.glb`;
+const rows=[
+  ['base','straight','smallCurve','bigCurve','longRoad','empty','village'].map(n=>[T(n),n]),
+  ['tee','tJunction','cross','fullCross','grove','highGround','treasury'].map(n=>[T(n),n]),
+  ['battlefield','watchtower','citadel','royalVillage','warCross','rescue','fog'].map(n=>[T(n),n]),
+  [[L('boss'),'boss'],[L('shrine'),'shrine'],[L('treasure'),'treasure'],[W('archer'),'archer'],[W('catapult'),'catapult'],[W('chain'),'chain'],[W('freeze'),'freeze']]
+];
+const turrets=[],labels=[],SP=2.05;
+const status=document.getElementById('status');
+try{
+  for(let r=0;r<rows.length;r++)for(let c=0;c<rows[r].length;c++){
+    const [url,name]=rows[r][c],x=c*SP+(r%2?SP/2:0),z=r*1.75*1.0;   // versetzt wie ein Hexraster
+    const isTower=url.includes('/towers/'),g=new THREE.Group();g.position.set(x,0,z);scene.add(g);
+    if(isTower){                                                   // Turm auf leerem Tile am Turmplatz (0,39 nördlich)
+      g.add(prep((await load(T('empty'))).clone()));
+      const t=prep((await load(url)).clone());t.position.set(-0.33,0,-0.37);g.add(t);
+      const u=t.getObjectByName('turret');if(u)turrets.push(u);
+    }else g.add(prep((await load(url)).clone()));
+    const el=document.createElement('div');el.className='tag';el.textContent=name;document.body.appendChild(el);labels.push([el,new THREE.Vector3(x,0,z+0.92)]);
+  }
+  status.textContent='24 Modelle geladen';
+}catch(e){status.textContent='Fehler: '+e.message;console.error(e);}
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+const v=new THREE.Vector3();
+renderer.setAnimationLoop(t=>{for(const u of turrets)u.rotation.y=t/1500;controls.update();renderer.render(scene,camera);
+  for(const [el,p] of labels){v.copy(p).project(camera);el.style.left=((v.x+1)/2*innerWidth)+'px';el.style.top=((1-v.y)/2*innerHeight)+'px';}});
+</script>
+</body>
+</html>
