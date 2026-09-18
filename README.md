@@ -118,4 +118,4 @@ Vanilla JavaScript ohne Build-Schritt, [Three.js](https://threejs.org) für die 
 
 ## Lizenz
 
-Noch nicht festgelegt.
+Alle Rechte vorbehalten (siehe [LICENSE](LICENSE)). Quellcode, Modelle und Texte dürfen ohne Erlaubnis nicht kopiert, weiterverbreitet oder kommerziell genutzt werden. Three.js steht unter der MIT-Lizenz und wird per npm installiert.
