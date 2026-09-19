@@ -62,7 +62,11 @@ function makeTemplate(name,scene,kind){
 function create(host0,commands){
     const {HEX,key,axialToWorld,slotPositions,buildingPosition,neighbor}=HexMap;
   const {CARD_LIBRARY}=HexData;
-  const gl=new THREE.WebGLRenderer({antialias:true});gl.setPixelRatio(Math.min(devicePixelRatio||1,2));   // wirft ohne WebGL -> Controller fällt auf SVG zurück
+  // Qualität: 'high' oder 'low'. ?low bzw. ?high in der Adresse erzwingt eine Stufe; sonst gilt die zuletzt gespeicherte.
+  // Bricht die Bildrate während einer Wave dauerhaft ein, schaltet der Renderer selbst auf 'low' (siehe loop).
+  const readQuality=()=>{const q=new URLSearchParams(location.search);if(q.has('low')) return 'low';if(q.has('high')) return 'high';try{return localStorage.getItem('hexQuality')==='low'?'low':'high';}catch{return 'high';}};
+  let quality=readQuality();
+  const gl=new THREE.WebGLRenderer({antialias:quality==='high',powerPreference:'high-performance'});gl.setPixelRatio(quality==='high'?Math.min(devicePixelRatio||1,1.5):1);   // wirft ohne WebGL -> Controller fällt auf SVG zurück
   const wrap=host0.parentElement;wrap.classList.add('is3d');
   const hintText=wrap.querySelector('.mapControls span'),oldHint=hintText?.textContent;
   if(hintText) hintText.textContent='Mausrad: Zoom · links ziehen: verschieben · rechts ziehen: drehen und kippen';
@@ -79,7 +83,7 @@ function create(host0,commands){
   const dom=gl.domElement,scene=new THREE.Scene();scene.background=new THREE.Color(SKY);scene.fog=new THREE.Fog(SKY,2600,6500);
   const camera=new THREE.PerspectiveCamera(35,1,20,12000);
   scene.add(new THREE.HemisphereLight('#dff0ff','#6b7a4c',1.15));
-  const sun=new THREE.DirectionalLight('#fff1d0',2.5);sun.castShadow=true;sun.shadow.mapSize.set(4096,4096);sun.shadow.bias=-.0004;
+  const sun=new THREE.DirectionalLight('#fff1d0',2.5);sun.castShadow=true;sun.shadow.mapSize.set(quality==='high'?2048:1024,quality==='high'?2048:1024);sun.shadow.bias=-.0004;
   Object.assign(sun.shadow.camera,{left:-1100,right:1100,top:1100,bottom:-1100,near:100,far:3500});scene.add(sun,sun.target);
 
   // ---- Kamera: Blick von schräg oben, verschieben (rechte/mittlere Maustaste) und zoomen (Mausrad) ----
@@ -397,9 +401,25 @@ function create(host0,commands){
   function reset(){rebuildAll();for(const obj of enemyObjects.values()) layer.dynamic.remove(obj.group);enemyObjects.clear();for(const mesh of mineObjects.values())layer.dynamic.remove(mesh);mineObjects.clear();state=null;hoverPick=null;resetView(false);}
 
   // ---- Animation ----
-  let last=performance.now(),raf=0;
+  let last=performance.now(),raf=0,lastDraw=0,slowFrames=0;
+  function lowerQuality(){
+    if(quality==='low') return;quality='low';
+    try{localStorage.setItem('hexQuality','low');}catch{/* Speichern nicht möglich */}
+    gl.setPixelRatio(1);gl.setSize(Math.max(1,host.clientWidth),Math.max(1,host.clientHeight));
+    sun.shadow.mapSize.set(1024,1024);if(sun.shadow.map){sun.shadow.map.dispose();sun.shadow.map=null;}
+    console.info('Hex Bastion: Grafik automatisch auf "niedrig" gestellt (?high in der Adresse stellt sie zurück).');
+  }
   function loop(now){
-    raf=requestAnimationFrame(loop);const dt=Math.min((now-last)/1000,.1);last=now;
+    raf=requestAnimationFrame(loop);
+    // Bildrate begrenzen: 60/s während einer Wave, sonst 30/s. Schont vor allem 120/144-Hz-Bildschirme und Laptops.
+    const running=!!state?.waveRunning,interval=running?1000/60:1000/30;
+    if(now-lastDraw<interval-2) return;
+    const frame=now-lastDraw;lastDraw=now;
+    if(quality==='high'&&running){                                     // dauerhaft unter ca. 30 Bildern/s in einer Wave: Grafik senken
+      if(frame>34) slowFrames++;else slowFrames=Math.max(0,slowFrames-2);
+      if(slowFrames>90) lowerQuality();
+    }else slowFrames=0;
+    const dt=Math.min((now-last)/1000,.1);last=now;
     if(state&&ready){
       const enemies=state.enemies||[];
       for(const record of objectRecords.values()) for(const obj of record.towers){
