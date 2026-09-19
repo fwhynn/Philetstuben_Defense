@@ -1,0 +1,2342 @@
+[
+  {
+    "seed": "balance-1",
+    "strategy": "archers",
+    "wave": 40,
+    "hp": 7,
+    "history": [
+      {
+        "wave": 1,
+        "hp": 15,
+        "gold": 61,
+        "towers": 1
+      },
+      {
+        "wave": 2,
+        "hp": 12,
+        "gold": 64,
+        "towers": 2
+      },
+      {
+        "wave": 3,
+        "hp": 10,
+        "gold": 76,
+        "towers": 3
+      },
+      {
+        "wave": 4,
+        "hp": 8,
+        "gold": 94,
+        "towers": 4
+      },
+      {
+        "wave": 5,
+        "hp": 7,
+        "gold": 121,
+        "towers": 5
+      },
+      {
+        "wave": 6,
+        "hp": 7,
+        "gold": 157,
+        "towers": 6
+      },
+      {
+        "wave": 7,
+        "hp": 7,
+        "gold": 199,
+        "towers": 7
+      },
+      {
+        "wave": 8,
+        "hp": 7,
+        "gold": 247,
+        "towers": 8
+      },
+      {
+        "wave": 9,
+        "hp": 7,
+        "gold": 276,
+        "towers": 10
+      },
+      {
+        "wave": 10,
+        "hp": 7,
+        "gold": 333,
+        "towers": 11
+      },
+      {
+        "wave": 11,
+        "hp": 7,
+        "gold": 365,
+        "towers": 13
+      },
+      {
+        "wave": 12,
+        "hp": 7,
+        "gold": 397,
+        "towers": 15
+      },
+      {
+        "wave": 13,
+        "hp": 7,
+        "gold": 429,
+        "towers": 17
+      },
+      {
+        "wave": 14,
+        "hp": 7,
+        "gold": 486,
+        "towers": 18
+      },
+      {
+        "wave": 15,
+        "hp": 7,
+        "gold": 543,
+        "towers": 19
+      },
+      {
+        "wave": 16,
+        "hp": 7,
+        "gold": 575,
+        "towers": 21
+      },
+      {
+        "wave": 17,
+        "hp": 7,
+        "gold": 607,
+        "towers": 23
+      },
+      {
+        "wave": 18,
+        "hp": 7,
+        "gold": 664,
+        "towers": 24
+      },
+      {
+        "wave": 19,
+        "hp": 7,
+        "gold": 721,
+        "towers": 25
+      },
+      {
+        "wave": 20,
+        "hp": 7,
+        "gold": 753,
+        "towers": 27
+      },
+      {
+        "wave": 21,
+        "hp": 7,
+        "gold": 834,
+        "towers": 28
+      },
+      {
+        "wave": 22,
+        "hp": 7,
+        "gold": 870,
+        "towers": 30
+      },
+      {
+        "wave": 23,
+        "hp": 7,
+        "gold": 931,
+        "towers": 31
+      },
+      {
+        "wave": 24,
+        "hp": 7,
+        "gold": 967,
+        "towers": 33
+      },
+      {
+        "wave": 25,
+        "hp": 7,
+        "gold": 1028,
+        "towers": 34
+      },
+      {
+        "wave": 26,
+        "hp": 7,
+        "gold": 1064,
+        "towers": 36
+      },
+      {
+        "wave": 27,
+        "hp": 7,
+        "gold": 1125,
+        "towers": 37
+      },
+      {
+        "wave": 28,
+        "hp": 7,
+        "gold": 1186,
+        "towers": 38
+      },
+      {
+        "wave": 29,
+        "hp": 7,
+        "gold": 1247,
+        "towers": 39
+      },
+      {
+        "wave": 30,
+        "hp": 7,
+        "gold": 1283,
+        "towers": 41
+      },
+      {
+        "wave": 31,
+        "hp": 7,
+        "gold": 1344,
+        "towers": 42
+      },
+      {
+        "wave": 32,
+        "hp": 7,
+        "gold": 1405,
+        "towers": 43
+      },
+      {
+        "wave": 33,
+        "hp": 7,
+        "gold": 1441,
+        "towers": 45
+      },
+      {
+        "wave": 34,
+        "hp": 7,
+        "gold": 1507,
+        "towers": 46
+      },
+      {
+        "wave": 35,
+        "hp": 7,
+        "gold": 1548,
+        "towers": 48
+      },
+      {
+        "wave": 36,
+        "hp": 7,
+        "gold": 1614,
+        "towers": 49
+      },
+      {
+        "wave": 37,
+        "hp": 7,
+        "gold": 1680,
+        "towers": 50
+      },
+      {
+        "wave": 38,
+        "hp": 7,
+        "gold": 1721,
+        "towers": 52
+      },
+      {
+        "wave": 39,
+        "hp": 7,
+        "gold": 1787,
+        "towers": 53
+      },
+      {
+        "wave": 40,
+        "hp": 7,
+        "gold": 1853,
+        "towers": 54
+      }
+    ]
+  },
+  {
+    "seed": "balance-2",
+    "strategy": "archers",
+    "wave": 40,
+    "hp": 9,
+    "history": [
+      {
+        "wave": 1,
+        "hp": 15,
+        "gold": 61,
+        "towers": 1
+      },
+      {
+        "wave": 2,
+        "hp": 11,
+        "gold": 61,
+        "towers": 2
+      },
+      {
+        "wave": 3,
+        "hp": 11,
+        "gold": 79,
+        "towers": 3
+      },
+      {
+        "wave": 4,
+        "hp": 10,
+        "gold": 75,
+        "towers": 5
+      },
+      {
+        "wave": 5,
+        "hp": 9,
+        "gold": 102,
+        "towers": 6
+      },
+      {
+        "wave": 6,
+        "hp": 9,
+        "gold": 113,
+        "towers": 8
+      },
+      {
+        "wave": 7,
+        "hp": 9,
+        "gold": 130,
+        "towers": 10
+      },
+      {
+        "wave": 8,
+        "hp": 9,
+        "gold": 153,
+        "towers": 12
+      },
+      {
+        "wave": 9,
+        "hp": 9,
+        "gold": 182,
+        "towers": 14
+      },
+      {
+        "wave": 10,
+        "hp": 9,
+        "gold": 214,
+        "towers": 16
+      },
+      {
+        "wave": 11,
+        "hp": 9,
+        "gold": 246,
+        "towers": 18
+      },
+      {
+        "wave": 12,
+        "hp": 9,
+        "gold": 313,
+        "towers": 21
+      },
+      {
+        "wave": 13,
+        "hp": 9,
+        "gold": 345,
+        "towers": 23
+      },
+      {
+        "wave": 14,
+        "hp": 9,
+        "gold": 377,
+        "towers": 25
+      },
+      {
+        "wave": 15,
+        "hp": 9,
+        "gold": 409,
+        "towers": 27
+      },
+      {
+        "wave": 16,
+        "hp": 9,
+        "gold": 441,
+        "towers": 29
+      },
+      {
+        "wave": 17,
+        "hp": 9,
+        "gold": 473,
+        "towers": 31
+      },
+      {
+        "wave": 18,
+        "hp": 9,
+        "gold": 525,
+        "towers": 33
+      },
+      {
+        "wave": 19,
+        "hp": 9,
+        "gold": 582,
+        "towers": 34
+      },
+      {
+        "wave": 20,
+        "hp": 9,
+        "gold": 614,
+        "towers": 36
+      },
+      {
+        "wave": 21,
+        "hp": 9,
+        "gold": 671,
+        "towers": 37
+      },
+      {
+        "wave": 22,
+        "hp": 9,
+        "gold": 703,
+        "towers": 39
+      },
+      {
+        "wave": 23,
+        "hp": 9,
+        "gold": 760,
+        "towers": 40
+      },
+      {
+        "wave": 24,
+        "hp": 9,
+        "gold": 792,
+        "towers": 42
+      },
+      {
+        "wave": 25,
+        "hp": 9,
+        "gold": 824,
+        "towers": 44
+      },
+      {
+        "wave": 26,
+        "hp": 9,
+        "gold": 881,
+        "towers": 45
+      },
+      {
+        "wave": 27,
+        "hp": 9,
+        "gold": 913,
+        "towers": 47
+      },
+      {
+        "wave": 28,
+        "hp": 9,
+        "gold": 945,
+        "towers": 49
+      },
+      {
+        "wave": 29,
+        "hp": 9,
+        "gold": 1002,
+        "towers": 50
+      },
+      {
+        "wave": 30,
+        "hp": 9,
+        "gold": 1034,
+        "towers": 52
+      },
+      {
+        "wave": 31,
+        "hp": 9,
+        "gold": 1066,
+        "towers": 54
+      },
+      {
+        "wave": 32,
+        "hp": 9,
+        "gold": 1123,
+        "towers": 55
+      },
+      {
+        "wave": 33,
+        "hp": 9,
+        "gold": 1155,
+        "towers": 57
+      },
+      {
+        "wave": 34,
+        "hp": 9,
+        "gold": 1187,
+        "towers": 59
+      },
+      {
+        "wave": 35,
+        "hp": 9,
+        "gold": 1219,
+        "towers": 61
+      },
+      {
+        "wave": 36,
+        "hp": 9,
+        "gold": 1251,
+        "towers": 63
+      },
+      {
+        "wave": 37,
+        "hp": 9,
+        "gold": 1308,
+        "towers": 64
+      },
+      {
+        "wave": 38,
+        "hp": 9,
+        "gold": 1340,
+        "towers": 66
+      },
+      {
+        "wave": 39,
+        "hp": 9,
+        "gold": 1397,
+        "towers": 67
+      },
+      {
+        "wave": 40,
+        "hp": 9,
+        "gold": 1429,
+        "towers": 69
+      }
+    ]
+  },
+  {
+    "seed": "balance-3",
+    "strategy": "archers",
+    "wave": 40,
+    "hp": 5,
+    "history": [
+      {
+        "wave": 1,
+        "hp": 15,
+        "gold": 61,
+        "towers": 1
+      },
+      {
+        "wave": 2,
+        "hp": 11,
+        "gold": 61,
+        "towers": 2
+      },
+      {
+        "wave": 3,
+        "hp": 11,
+        "gold": 79,
+        "towers": 3
+      },
+      {
+        "wave": 4,
+        "hp": 9,
+        "gold": 97,
+        "towers": 4
+      },
+      {
+        "wave": 5,
+        "hp": 8,
+        "gold": 124,
+        "towers": 5
+      },
+      {
+        "wave": 6,
+        "hp": 6,
+        "gold": 154,
+        "towers": 6
+      },
+      {
+        "wave": 7,
+        "hp": 5,
+        "gold": 193,
+        "towers": 7
+      },
+      {
+        "wave": 8,
+        "hp": 5,
+        "gold": 241,
+        "towers": 8
+      },
+      {
+        "wave": 9,
+        "hp": 5,
+        "gold": 270,
+        "towers": 10
+      },
+      {
+        "wave": 10,
+        "hp": 5,
+        "gold": 327,
+        "towers": 11
+      },
+      {
+        "wave": 11,
+        "hp": 5,
+        "gold": 384,
+        "towers": 12
+      },
+      {
+        "wave": 12,
+        "hp": 5,
+        "gold": 441,
+        "towers": 13
+      },
+      {
+        "wave": 13,
+        "hp": 5,
+        "gold": 498,
+        "towers": 14
+      },
+      {
+        "wave": 14,
+        "hp": 5,
+        "gold": 530,
+        "towers": 16
+      },
+      {
+        "wave": 15,
+        "hp": 5,
+        "gold": 587,
+        "towers": 17
+      },
+      {
+        "wave": 16,
+        "hp": 5,
+        "gold": 644,
+        "towers": 18
+      },
+      {
+        "wave": 17,
+        "hp": 5,
+        "gold": 676,
+        "towers": 20
+      },
+      {
+        "wave": 18,
+        "hp": 5,
+        "gold": 708,
+        "towers": 22
+      },
+      {
+        "wave": 19,
+        "hp": 5,
+        "gold": 765,
+        "towers": 23
+      },
+      {
+        "wave": 20,
+        "hp": 5,
+        "gold": 797,
+        "towers": 25
+      },
+      {
+        "wave": 21,
+        "hp": 5,
+        "gold": 854,
+        "towers": 26
+      },
+      {
+        "wave": 22,
+        "hp": 5,
+        "gold": 886,
+        "towers": 28
+      },
+      {
+        "wave": 23,
+        "hp": 5,
+        "gold": 943,
+        "towers": 29
+      },
+      {
+        "wave": 24,
+        "hp": 5,
+        "gold": 975,
+        "towers": 31
+      },
+      {
+        "wave": 25,
+        "hp": 5,
+        "gold": 1007,
+        "towers": 33
+      },
+      {
+        "wave": 26,
+        "hp": 5,
+        "gold": 1064,
+        "towers": 34
+      },
+      {
+        "wave": 27,
+        "hp": 5,
+        "gold": 1096,
+        "towers": 36
+      },
+      {
+        "wave": 28,
+        "hp": 5,
+        "gold": 1153,
+        "towers": 37
+      },
+      {
+        "wave": 29,
+        "hp": 5,
+        "gold": 1185,
+        "towers": 39
+      },
+      {
+        "wave": 30,
+        "hp": 5,
+        "gold": 1217,
+        "towers": 41
+      },
+      {
+        "wave": 31,
+        "hp": 5,
+        "gold": 1249,
+        "towers": 43
+      },
+      {
+        "wave": 32,
+        "hp": 5,
+        "gold": 1306,
+        "towers": 44
+      },
+      {
+        "wave": 33,
+        "hp": 5,
+        "gold": 1363,
+        "towers": 45
+      },
+      {
+        "wave": 34,
+        "hp": 5,
+        "gold": 1415,
+        "towers": 47
+      },
+      {
+        "wave": 35,
+        "hp": 5,
+        "gold": 1472,
+        "towers": 48
+      },
+      {
+        "wave": 36,
+        "hp": 5,
+        "gold": 1529,
+        "towers": 49
+      },
+      {
+        "wave": 37,
+        "hp": 5,
+        "gold": 1561,
+        "towers": 51
+      },
+      {
+        "wave": 38,
+        "hp": 5,
+        "gold": 1618,
+        "towers": 52
+      },
+      {
+        "wave": 39,
+        "hp": 5,
+        "gold": 1650,
+        "towers": 54
+      },
+      {
+        "wave": 40,
+        "hp": 5,
+        "gold": 1682,
+        "towers": 56
+      }
+    ]
+  },
+  {
+    "seed": "balance-4",
+    "strategy": "archers",
+    "wave": 40,
+    "hp": 8,
+    "history": [
+      {
+        "wave": 1,
+        "hp": 14,
+        "gold": 58,
+        "towers": 1
+      },
+      {
+        "wave": 2,
+        "hp": 11,
+        "gold": 61,
+        "towers": 2
+      },
+      {
+        "wave": 3,
+        "hp": 11,
+        "gold": 79,
+        "towers": 3
+      },
+      {
+        "wave": 4,
+        "hp": 10,
+        "gold": 75,
+        "towers": 5
+      },
+      {
+        "wave": 5,
+        "hp": 9,
+        "gold": 102,
+        "towers": 6
+      },
+      {
+        "wave": 6,
+        "hp": 8,
+        "gold": 135,
+        "towers": 7
+      },
+      {
+        "wave": 7,
+        "hp": 8,
+        "gold": 152,
+        "towers": 9
+      },
+      {
+        "wave": 8,
+        "hp": 8,
+        "gold": 200,
+        "towers": 10
+      },
+      {
+        "wave": 9,
+        "hp": 8,
+        "gold": 254,
+        "towers": 11
+      },
+      {
+        "wave": 10,
+        "hp": 8,
+        "gold": 286,
+        "towers": 13
+      },
+      {
+        "wave": 11,
+        "hp": 8,
+        "gold": 343,
+        "towers": 14
+      },
+      {
+        "wave": 12,
+        "hp": 8,
+        "gold": 375,
+        "towers": 16
+      },
+      {
+        "wave": 13,
+        "hp": 8,
+        "gold": 432,
+        "towers": 17
+      },
+      {
+        "wave": 14,
+        "hp": 8,
+        "gold": 464,
+        "towers": 19
+      },
+      {
+        "wave": 15,
+        "hp": 8,
+        "gold": 496,
+        "towers": 21
+      },
+      {
+        "wave": 16,
+        "hp": 8,
+        "gold": 528,
+        "towers": 23
+      },
+      {
+        "wave": 17,
+        "hp": 8,
+        "gold": 585,
+        "towers": 24
+      },
+      {
+        "wave": 18,
+        "hp": 8,
+        "gold": 617,
+        "towers": 26
+      },
+      {
+        "wave": 19,
+        "hp": 8,
+        "gold": 649,
+        "towers": 28
+      },
+      {
+        "wave": 20,
+        "hp": 8,
+        "gold": 706,
+        "towers": 29
+      },
+      {
+        "wave": 21,
+        "hp": 8,
+        "gold": 738,
+        "towers": 31
+      },
+      {
+        "wave": 22,
+        "hp": 8,
+        "gold": 770,
+        "towers": 33
+      },
+      {
+        "wave": 23,
+        "hp": 8,
+        "gold": 802,
+        "towers": 35
+      },
+      {
+        "wave": 24,
+        "hp": 8,
+        "gold": 834,
+        "towers": 37
+      },
+      {
+        "wave": 25,
+        "hp": 8,
+        "gold": 866,
+        "towers": 39
+      },
+      {
+        "wave": 26,
+        "hp": 8,
+        "gold": 923,
+        "towers": 40
+      },
+      {
+        "wave": 27,
+        "hp": 8,
+        "gold": 955,
+        "towers": 42
+      },
+      {
+        "wave": 28,
+        "hp": 8,
+        "gold": 987,
+        "towers": 44
+      },
+      {
+        "wave": 29,
+        "hp": 8,
+        "gold": 1044,
+        "towers": 45
+      },
+      {
+        "wave": 30,
+        "hp": 8,
+        "gold": 1076,
+        "towers": 47
+      },
+      {
+        "wave": 31,
+        "hp": 8,
+        "gold": 1133,
+        "towers": 48
+      },
+      {
+        "wave": 32,
+        "hp": 8,
+        "gold": 1165,
+        "towers": 50
+      },
+      {
+        "wave": 33,
+        "hp": 8,
+        "gold": 1222,
+        "towers": 51
+      },
+      {
+        "wave": 34,
+        "hp": 8,
+        "gold": 1254,
+        "towers": 53
+      },
+      {
+        "wave": 35,
+        "hp": 8,
+        "gold": 1286,
+        "towers": 55
+      },
+      {
+        "wave": 36,
+        "hp": 8,
+        "gold": 1318,
+        "towers": 57
+      },
+      {
+        "wave": 37,
+        "hp": 8,
+        "gold": 1350,
+        "towers": 59
+      },
+      {
+        "wave": 38,
+        "hp": 8,
+        "gold": 1407,
+        "towers": 60
+      },
+      {
+        "wave": 39,
+        "hp": 8,
+        "gold": 1464,
+        "towers": 61
+      },
+      {
+        "wave": 40,
+        "hp": 8,
+        "gold": 1496,
+        "towers": 63
+      }
+    ]
+  },
+  {
+    "seed": "balance-1",
+    "strategy": "catapult",
+    "wave": 40,
+    "hp": 20,
+    "history": [
+      {
+        "wave": 1,
+        "hp": 20,
+        "gold": 61,
+        "towers": 1
+      },
+      {
+        "wave": 2,
+        "hp": 20,
+        "gold": 53,
+        "towers": 1
+      },
+      {
+        "wave": 3,
+        "hp": 20,
+        "gold": 66,
+        "towers": 2
+      },
+      {
+        "wave": 4,
+        "hp": 20,
+        "gold": 80,
+        "towers": 2
+      },
+      {
+        "wave": 5,
+        "hp": 20,
+        "gold": 65,
+        "towers": 2
+      },
+      {
+        "wave": 6,
+        "hp": 20,
+        "gold": 66,
+        "towers": 2
+      },
+      {
+        "wave": 7,
+        "hp": 20,
+        "gold": 93,
+        "towers": 3
+      },
+      {
+        "wave": 8,
+        "hp": 20,
+        "gold": 81,
+        "towers": 4
+      },
+      {
+        "wave": 9,
+        "hp": 20,
+        "gold": 90,
+        "towers": 4
+      },
+      {
+        "wave": 10,
+        "hp": 20,
+        "gold": 87,
+        "towers": 5
+      },
+      {
+        "wave": 11,
+        "hp": 20,
+        "gold": 94,
+        "towers": 6
+      },
+      {
+        "wave": 12,
+        "hp": 20,
+        "gold": 106,
+        "towers": 6
+      },
+      {
+        "wave": 13,
+        "hp": 20,
+        "gold": 93,
+        "towers": 6
+      },
+      {
+        "wave": 14,
+        "hp": 20,
+        "gold": 105,
+        "towers": 6
+      },
+      {
+        "wave": 15,
+        "hp": 20,
+        "gold": 102,
+        "towers": 7
+      },
+      {
+        "wave": 16,
+        "hp": 20,
+        "gold": 114,
+        "towers": 7
+      },
+      {
+        "wave": 17,
+        "hp": 20,
+        "gold": 111,
+        "towers": 8
+      },
+      {
+        "wave": 18,
+        "hp": 20,
+        "gold": 83,
+        "towers": 9
+      },
+      {
+        "wave": 19,
+        "hp": 20,
+        "gold": 90,
+        "towers": 10
+      },
+      {
+        "wave": 20,
+        "hp": 20,
+        "gold": 102,
+        "towers": 10
+      },
+      {
+        "wave": 21,
+        "hp": 20,
+        "gold": 113,
+        "towers": 10
+      },
+      {
+        "wave": 22,
+        "hp": 20,
+        "gold": 114,
+        "towers": 11
+      },
+      {
+        "wave": 23,
+        "hp": 20,
+        "gold": 90,
+        "towers": 12
+      },
+      {
+        "wave": 24,
+        "hp": 20,
+        "gold": 91,
+        "towers": 13
+      },
+      {
+        "wave": 25,
+        "hp": 20,
+        "gold": 107,
+        "towers": 13
+      },
+      {
+        "wave": 26,
+        "hp": 20,
+        "gold": 118,
+        "towers": 14
+      },
+      {
+        "wave": 27,
+        "hp": 20,
+        "gold": 99,
+        "towers": 14
+      },
+      {
+        "wave": 28,
+        "hp": 20,
+        "gold": 125,
+        "towers": 14
+      },
+      {
+        "wave": 29,
+        "hp": 20,
+        "gold": 86,
+        "towers": 16
+      },
+      {
+        "wave": 30,
+        "hp": 20,
+        "gold": 102,
+        "towers": 16
+      },
+      {
+        "wave": 31,
+        "hp": 20,
+        "gold": 103,
+        "towers": 17
+      },
+      {
+        "wave": 32,
+        "hp": 20,
+        "gold": 89,
+        "towers": 18
+      },
+      {
+        "wave": 33,
+        "hp": 20,
+        "gold": 95,
+        "towers": 18
+      },
+      {
+        "wave": 34,
+        "hp": 20,
+        "gold": 116,
+        "towers": 18
+      },
+      {
+        "wave": 35,
+        "hp": 20,
+        "gold": 107,
+        "towers": 19
+      },
+      {
+        "wave": 36,
+        "hp": 20,
+        "gold": 113,
+        "towers": 20
+      },
+      {
+        "wave": 37,
+        "hp": 20,
+        "gold": 94,
+        "towers": 21
+      },
+      {
+        "wave": 38,
+        "hp": 20,
+        "gold": 95,
+        "towers": 21
+      },
+      {
+        "wave": 39,
+        "hp": 20,
+        "gold": 116,
+        "towers": 21
+      },
+      {
+        "wave": 40,
+        "hp": 20,
+        "gold": 107,
+        "towers": 22
+      }
+    ]
+  },
+  {
+    "seed": "balance-2",
+    "strategy": "catapult",
+    "wave": 40,
+    "hp": 20,
+    "history": [
+      {
+        "wave": 1,
+        "hp": 20,
+        "gold": 61,
+        "towers": 1
+      },
+      {
+        "wave": 2,
+        "hp": 20,
+        "gold": 53,
+        "towers": 1
+      },
+      {
+        "wave": 3,
+        "hp": 20,
+        "gold": 66,
+        "towers": 2
+      },
+      {
+        "wave": 4,
+        "hp": 20,
+        "gold": 80,
+        "towers": 2
+      },
+      {
+        "wave": 5,
+        "hp": 20,
+        "gold": 65,
+        "towers": 2
+      },
+      {
+        "wave": 6,
+        "hp": 20,
+        "gold": 66,
+        "towers": 2
+      },
+      {
+        "wave": 7,
+        "hp": 20,
+        "gold": 93,
+        "towers": 3
+      },
+      {
+        "wave": 8,
+        "hp": 20,
+        "gold": 81,
+        "towers": 4
+      },
+      {
+        "wave": 9,
+        "hp": 20,
+        "gold": 90,
+        "towers": 4
+      },
+      {
+        "wave": 10,
+        "hp": 20,
+        "gold": 87,
+        "towers": 5
+      },
+      {
+        "wave": 11,
+        "hp": 20,
+        "gold": 99,
+        "towers": 5
+      },
+      {
+        "wave": 12,
+        "hp": 20,
+        "gold": 96,
+        "towers": 6
+      },
+      {
+        "wave": 13,
+        "hp": 20,
+        "gold": 83,
+        "towers": 6
+      },
+      {
+        "wave": 14,
+        "hp": 20,
+        "gold": 85,
+        "towers": 8
+      },
+      {
+        "wave": 15,
+        "hp": 20,
+        "gold": 82,
+        "towers": 9
+      },
+      {
+        "wave": 16,
+        "hp": 20,
+        "gold": 94,
+        "towers": 9
+      },
+      {
+        "wave": 17,
+        "hp": 20,
+        "gold": 86,
+        "towers": 9
+      },
+      {
+        "wave": 18,
+        "hp": 20,
+        "gold": 88,
+        "towers": 10
+      },
+      {
+        "wave": 19,
+        "hp": 20,
+        "gold": 100,
+        "towers": 10
+      },
+      {
+        "wave": 20,
+        "hp": 20,
+        "gold": 87,
+        "towers": 10
+      },
+      {
+        "wave": 21,
+        "hp": 20,
+        "gold": 84,
+        "towers": 11
+      },
+      {
+        "wave": 22,
+        "hp": 20,
+        "gold": 96,
+        "towers": 11
+      },
+      {
+        "wave": 23,
+        "hp": 20,
+        "gold": 93,
+        "towers": 12
+      },
+      {
+        "wave": 24,
+        "hp": 20,
+        "gold": 105,
+        "towers": 12
+      },
+      {
+        "wave": 25,
+        "hp": 20,
+        "gold": 102,
+        "towers": 13
+      },
+      {
+        "wave": 26,
+        "hp": 20,
+        "gold": 84,
+        "towers": 14
+      },
+      {
+        "wave": 27,
+        "hp": 20,
+        "gold": 91,
+        "towers": 15
+      },
+      {
+        "wave": 28,
+        "hp": 20,
+        "gold": 113,
+        "towers": 15
+      },
+      {
+        "wave": 29,
+        "hp": 20,
+        "gold": 110,
+        "towers": 16
+      },
+      {
+        "wave": 30,
+        "hp": 20,
+        "gold": 82,
+        "towers": 17
+      },
+      {
+        "wave": 31,
+        "hp": 20,
+        "gold": 89,
+        "towers": 18
+      },
+      {
+        "wave": 32,
+        "hp": 20,
+        "gold": 101,
+        "towers": 18
+      },
+      {
+        "wave": 33,
+        "hp": 20,
+        "gold": 103,
+        "towers": 18
+      },
+      {
+        "wave": 34,
+        "hp": 20,
+        "gold": 115,
+        "towers": 18
+      },
+      {
+        "wave": 35,
+        "hp": 20,
+        "gold": 97,
+        "towers": 19
+      },
+      {
+        "wave": 36,
+        "hp": 20,
+        "gold": 94,
+        "towers": 20
+      },
+      {
+        "wave": 37,
+        "hp": 20,
+        "gold": 106,
+        "towers": 20
+      },
+      {
+        "wave": 38,
+        "hp": 20,
+        "gold": 103,
+        "towers": 21
+      },
+      {
+        "wave": 39,
+        "hp": 20,
+        "gold": 85,
+        "towers": 22
+      },
+      {
+        "wave": 40,
+        "hp": 20,
+        "gold": 87,
+        "towers": 22
+      }
+    ]
+  },
+  {
+    "seed": "balance-3",
+    "strategy": "catapult",
+    "wave": 40,
+    "hp": 20,
+    "history": [
+      {
+        "wave": 1,
+        "hp": 20,
+        "gold": 61,
+        "towers": 1
+      },
+      {
+        "wave": 2,
+        "hp": 20,
+        "gold": 53,
+        "towers": 1
+      },
+      {
+        "wave": 3,
+        "hp": 20,
+        "gold": 66,
+        "towers": 2
+      },
+      {
+        "wave": 4,
+        "hp": 20,
+        "gold": 80,
+        "towers": 2
+      },
+      {
+        "wave": 5,
+        "hp": 20,
+        "gold": 65,
+        "towers": 2
+      },
+      {
+        "wave": 6,
+        "hp": 20,
+        "gold": 66,
+        "towers": 2
+      },
+      {
+        "wave": 7,
+        "hp": 20,
+        "gold": 93,
+        "towers": 3
+      },
+      {
+        "wave": 8,
+        "hp": 20,
+        "gold": 81,
+        "towers": 4
+      },
+      {
+        "wave": 9,
+        "hp": 20,
+        "gold": 115,
+        "towers": 4
+      },
+      {
+        "wave": 10,
+        "hp": 20,
+        "gold": 87,
+        "towers": 5
+      },
+      {
+        "wave": 11,
+        "hp": 20,
+        "gold": 99,
+        "towers": 5
+      },
+      {
+        "wave": 12,
+        "hp": 20,
+        "gold": 106,
+        "towers": 6
+      },
+      {
+        "wave": 13,
+        "hp": 20,
+        "gold": 83,
+        "towers": 6
+      },
+      {
+        "wave": 14,
+        "hp": 20,
+        "gold": 105,
+        "towers": 6
+      },
+      {
+        "wave": 15,
+        "hp": 20,
+        "gold": 102,
+        "towers": 7
+      },
+      {
+        "wave": 16,
+        "hp": 20,
+        "gold": 114,
+        "towers": 7
+      },
+      {
+        "wave": 17,
+        "hp": 20,
+        "gold": 111,
+        "towers": 8
+      },
+      {
+        "wave": 18,
+        "hp": 20,
+        "gold": 83,
+        "towers": 9
+      },
+      {
+        "wave": 19,
+        "hp": 20,
+        "gold": 90,
+        "towers": 10
+      },
+      {
+        "wave": 20,
+        "hp": 20,
+        "gold": 97,
+        "towers": 11
+      },
+      {
+        "wave": 21,
+        "hp": 20,
+        "gold": 119,
+        "towers": 11
+      },
+      {
+        "wave": 22,
+        "hp": 20,
+        "gold": 86,
+        "towers": 11
+      },
+      {
+        "wave": 23,
+        "hp": 20,
+        "gold": 98,
+        "towers": 11
+      },
+      {
+        "wave": 24,
+        "hp": 20,
+        "gold": 95,
+        "towers": 12
+      },
+      {
+        "wave": 25,
+        "hp": 20,
+        "gold": 107,
+        "towers": 12
+      },
+      {
+        "wave": 26,
+        "hp": 20,
+        "gold": 104,
+        "towers": 13
+      },
+      {
+        "wave": 27,
+        "hp": 20,
+        "gold": 86,
+        "towers": 14
+      },
+      {
+        "wave": 28,
+        "hp": 20,
+        "gold": 93,
+        "towers": 15
+      },
+      {
+        "wave": 29,
+        "hp": 20,
+        "gold": 115,
+        "towers": 15
+      },
+      {
+        "wave": 30,
+        "hp": 20,
+        "gold": 82,
+        "towers": 15
+      },
+      {
+        "wave": 31,
+        "hp": 20,
+        "gold": 84,
+        "towers": 17
+      },
+      {
+        "wave": 32,
+        "hp": 20,
+        "gold": 91,
+        "towers": 18
+      },
+      {
+        "wave": 33,
+        "hp": 20,
+        "gold": 103,
+        "towers": 18
+      },
+      {
+        "wave": 34,
+        "hp": 20,
+        "gold": 90,
+        "towers": 18
+      },
+      {
+        "wave": 35,
+        "hp": 20,
+        "gold": 97,
+        "towers": 19
+      },
+      {
+        "wave": 36,
+        "hp": 20,
+        "gold": 119,
+        "towers": 19
+      },
+      {
+        "wave": 37,
+        "hp": 20,
+        "gold": 86,
+        "towers": 19
+      },
+      {
+        "wave": 38,
+        "hp": 20,
+        "gold": 83,
+        "towers": 20
+      },
+      {
+        "wave": 39,
+        "hp": 20,
+        "gold": 95,
+        "towers": 20
+      },
+      {
+        "wave": 40,
+        "hp": 20,
+        "gold": 92,
+        "towers": 21
+      }
+    ]
+  },
+  {
+    "seed": "balance-4",
+    "strategy": "catapult",
+    "wave": 40,
+    "hp": 19,
+    "history": [
+      {
+        "wave": 1,
+        "hp": 19,
+        "gold": 58,
+        "towers": 1
+      },
+      {
+        "wave": 2,
+        "hp": 19,
+        "gold": 50,
+        "towers": 1
+      },
+      {
+        "wave": 3,
+        "hp": 19,
+        "gold": 63,
+        "towers": 2
+      },
+      {
+        "wave": 4,
+        "hp": 19,
+        "gold": 77,
+        "towers": 2
+      },
+      {
+        "wave": 5,
+        "hp": 19,
+        "gold": 62,
+        "towers": 2
+      },
+      {
+        "wave": 6,
+        "hp": 19,
+        "gold": 63,
+        "towers": 2
+      },
+      {
+        "wave": 7,
+        "hp": 19,
+        "gold": 90,
+        "towers": 3
+      },
+      {
+        "wave": 8,
+        "hp": 19,
+        "gold": 78,
+        "towers": 4
+      },
+      {
+        "wave": 9,
+        "hp": 19,
+        "gold": 87,
+        "towers": 4
+      },
+      {
+        "wave": 10,
+        "hp": 19,
+        "gold": 84,
+        "towers": 5
+      },
+      {
+        "wave": 11,
+        "hp": 19,
+        "gold": 96,
+        "towers": 5
+      },
+      {
+        "wave": 12,
+        "hp": 19,
+        "gold": 103,
+        "towers": 6
+      },
+      {
+        "wave": 13,
+        "hp": 19,
+        "gold": 115,
+        "towers": 6
+      },
+      {
+        "wave": 14,
+        "hp": 19,
+        "gold": 102,
+        "towers": 6
+      },
+      {
+        "wave": 15,
+        "hp": 19,
+        "gold": 99,
+        "towers": 7
+      },
+      {
+        "wave": 16,
+        "hp": 19,
+        "gold": 111,
+        "towers": 7
+      },
+      {
+        "wave": 17,
+        "hp": 19,
+        "gold": 108,
+        "towers": 8
+      },
+      {
+        "wave": 18,
+        "hp": 19,
+        "gold": 120,
+        "towers": 8
+      },
+      {
+        "wave": 19,
+        "hp": 19,
+        "gold": 87,
+        "towers": 10
+      },
+      {
+        "wave": 20,
+        "hp": 19,
+        "gold": 99,
+        "towers": 10
+      },
+      {
+        "wave": 21,
+        "hp": 19,
+        "gold": 86,
+        "towers": 10
+      },
+      {
+        "wave": 22,
+        "hp": 19,
+        "gold": 83,
+        "towers": 11
+      },
+      {
+        "wave": 23,
+        "hp": 19,
+        "gold": 95,
+        "towers": 11
+      },
+      {
+        "wave": 24,
+        "hp": 19,
+        "gold": 92,
+        "towers": 12
+      },
+      {
+        "wave": 25,
+        "hp": 19,
+        "gold": 104,
+        "towers": 12
+      },
+      {
+        "wave": 26,
+        "hp": 19,
+        "gold": 101,
+        "towers": 13
+      },
+      {
+        "wave": 27,
+        "hp": 19,
+        "gold": 83,
+        "towers": 14
+      },
+      {
+        "wave": 28,
+        "hp": 19,
+        "gold": 90,
+        "towers": 15
+      },
+      {
+        "wave": 29,
+        "hp": 19,
+        "gold": 112,
+        "towers": 15
+      },
+      {
+        "wave": 30,
+        "hp": 19,
+        "gold": 109,
+        "towers": 16
+      },
+      {
+        "wave": 31,
+        "hp": 19,
+        "gold": 121,
+        "towers": 16
+      },
+      {
+        "wave": 32,
+        "hp": 19,
+        "gold": 88,
+        "towers": 16
+      },
+      {
+        "wave": 33,
+        "hp": 19,
+        "gold": 85,
+        "towers": 17
+      },
+      {
+        "wave": 34,
+        "hp": 19,
+        "gold": 97,
+        "towers": 17
+      },
+      {
+        "wave": 35,
+        "hp": 19,
+        "gold": 114,
+        "towers": 18
+      },
+      {
+        "wave": 36,
+        "hp": 19,
+        "gold": 96,
+        "towers": 19
+      },
+      {
+        "wave": 37,
+        "hp": 19,
+        "gold": 93,
+        "towers": 20
+      },
+      {
+        "wave": 38,
+        "hp": 19,
+        "gold": 105,
+        "towers": 20
+      },
+      {
+        "wave": 39,
+        "hp": 19,
+        "gold": 102,
+        "towers": 21
+      },
+      {
+        "wave": 40,
+        "hp": 19,
+        "gold": 84,
+        "towers": 22
+      }
+    ]
+  },
+  {
+    "seed": "balance-1",
+    "strategy": "lightning",
+    "wave": 5,
+    "hp": 0,
+    "history": [
+      {
+        "wave": 1,
+        "hp": 14,
+        "gold": 38,
+        "towers": 1
+      },
+      {
+        "wave": 2,
+        "hp": 11,
+        "gold": 36,
+        "towers": 2
+      },
+      {
+        "wave": 3,
+        "hp": 9,
+        "gold": 38,
+        "towers": 2
+      },
+      {
+        "wave": 4,
+        "hp": 4,
+        "gold": 72,
+        "towers": 2
+      },
+      {
+        "wave": 5,
+        "hp": 0,
+        "gold": 54,
+        "towers": 2
+      }
+    ]
+  },
+  {
+    "seed": "balance-2",
+    "strategy": "lightning",
+    "wave": 5,
+    "hp": 0,
+    "history": [
+      {
+        "wave": 1,
+        "hp": 14,
+        "gold": 38,
+        "towers": 1
+      },
+      {
+        "wave": 2,
+        "hp": 11,
+        "gold": 36,
+        "towers": 2
+      },
+      {
+        "wave": 3,
+        "hp": 9,
+        "gold": 38,
+        "towers": 2
+      },
+      {
+        "wave": 4,
+        "hp": 3,
+        "gold": 69,
+        "towers": 2
+      },
+      {
+        "wave": 5,
+        "hp": 0,
+        "gold": 45,
+        "towers": 2
+      }
+    ]
+  },
+  {
+    "seed": "balance-3",
+    "strategy": "lightning",
+    "wave": 40,
+    "hp": 1,
+    "history": [
+      {
+        "wave": 1,
+        "hp": 14,
+        "gold": 38,
+        "towers": 1
+      },
+      {
+        "wave": 2,
+        "hp": 11,
+        "gold": 36,
+        "towers": 2
+      },
+      {
+        "wave": 3,
+        "hp": 11,
+        "gold": 44,
+        "towers": 2
+      },
+      {
+        "wave": 4,
+        "hp": 8,
+        "gold": 84,
+        "towers": 2
+      },
+      {
+        "wave": 5,
+        "hp": 1,
+        "gold": 73,
+        "towers": 2
+      },
+      {
+        "wave": 6,
+        "hp": 1,
+        "gold": 64,
+        "towers": 2
+      },
+      {
+        "wave": 7,
+        "hp": 1,
+        "gold": 71,
+        "towers": 2
+      },
+      {
+        "wave": 8,
+        "hp": 1,
+        "gold": 99,
+        "towers": 3
+      },
+      {
+        "wave": 9,
+        "hp": 1,
+        "gold": 88,
+        "towers": 4
+      },
+      {
+        "wave": 10,
+        "hp": 1,
+        "gold": 100,
+        "towers": 4
+      },
+      {
+        "wave": 11,
+        "hp": 1,
+        "gold": 92,
+        "towers": 5
+      },
+      {
+        "wave": 12,
+        "hp": 1,
+        "gold": 104,
+        "towers": 5
+      },
+      {
+        "wave": 13,
+        "hp": 1,
+        "gold": 111,
+        "towers": 6
+      },
+      {
+        "wave": 14,
+        "hp": 1,
+        "gold": 88,
+        "towers": 6
+      },
+      {
+        "wave": 15,
+        "hp": 1,
+        "gold": 110,
+        "towers": 6
+      },
+      {
+        "wave": 16,
+        "hp": 1,
+        "gold": 102,
+        "towers": 7
+      },
+      {
+        "wave": 17,
+        "hp": 1,
+        "gold": 114,
+        "towers": 7
+      },
+      {
+        "wave": 18,
+        "hp": 1,
+        "gold": 106,
+        "towers": 8
+      },
+      {
+        "wave": 19,
+        "hp": 1,
+        "gold": 118,
+        "towers": 8
+      },
+      {
+        "wave": 20,
+        "hp": 1,
+        "gold": 110,
+        "towers": 9
+      },
+      {
+        "wave": 21,
+        "hp": 1,
+        "gold": 92,
+        "towers": 10
+      },
+      {
+        "wave": 22,
+        "hp": 1,
+        "gold": 94,
+        "towers": 11
+      },
+      {
+        "wave": 23,
+        "hp": 1,
+        "gold": 116,
+        "towers": 11
+      },
+      {
+        "wave": 24,
+        "hp": 1,
+        "gold": 83,
+        "towers": 11
+      },
+      {
+        "wave": 25,
+        "hp": 1,
+        "gold": 120,
+        "towers": 12
+      },
+      {
+        "wave": 26,
+        "hp": 1,
+        "gold": 87,
+        "towers": 12
+      },
+      {
+        "wave": 27,
+        "hp": 1,
+        "gold": 94,
+        "towers": 14
+      },
+      {
+        "wave": 28,
+        "hp": 1,
+        "gold": 96,
+        "towers": 14
+      },
+      {
+        "wave": 29,
+        "hp": 1,
+        "gold": 108,
+        "towers": 14
+      },
+      {
+        "wave": 30,
+        "hp": 1,
+        "gold": 85,
+        "towers": 15
+      },
+      {
+        "wave": 31,
+        "hp": 1,
+        "gold": 122,
+        "towers": 15
+      },
+      {
+        "wave": 32,
+        "hp": 1,
+        "gold": 89,
+        "towers": 16
+      },
+      {
+        "wave": 33,
+        "hp": 1,
+        "gold": 126,
+        "towers": 16
+      },
+      {
+        "wave": 34,
+        "hp": 1,
+        "gold": 83,
+        "towers": 18
+      },
+      {
+        "wave": 35,
+        "hp": 1,
+        "gold": 85,
+        "towers": 18
+      },
+      {
+        "wave": 36,
+        "hp": 1,
+        "gold": 97,
+        "towers": 18
+      },
+      {
+        "wave": 37,
+        "hp": 1,
+        "gold": 119,
+        "towers": 18
+      },
+      {
+        "wave": 38,
+        "hp": 1,
+        "gold": 111,
+        "towers": 19
+      },
+      {
+        "wave": 39,
+        "hp": 1,
+        "gold": 123,
+        "towers": 19
+      },
+      {
+        "wave": 40,
+        "hp": 1,
+        "gold": 115,
+        "towers": 20
+      }
+    ]
+  },
+  {
+    "seed": "balance-4",
+    "strategy": "lightning",
+    "wave": 4,
+    "hp": 0,
+    "history": [
+      {
+        "wave": 1,
+        "hp": 13,
+        "gold": 35,
+        "towers": 1
+      },
+      {
+        "wave": 2,
+        "hp": 10,
+        "gold": 33,
+        "towers": 2
+      },
+      {
+        "wave": 3,
+        "hp": 6,
+        "gold": 64,
+        "towers": 2
+      },
+      {
+        "wave": 4,
+        "hp": 0,
+        "gold": 40,
+        "towers": 2
+      }
+    ]
+  }
+]
