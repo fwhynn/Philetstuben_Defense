@@ -5,7 +5,8 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 
 const S=54,STEP=Math.PI/3,TILT=55*Math.PI/180,PITCH_MIN=12*Math.PI/180,PITCH_MAX=88*Math.PI/180,DIST_MIN=220,DIST_MAX=3400,DIST_START=950,SKY='#a9cbd8';
-const PREFIX={tiles:'tile',landmarks:'landmark',towers:'tower'};
+const PREFIX={tiles:'tile',landmarks:'landmark',towers:'tower',enemies:'enemy'};
+const LIMBS=['leg_l','leg_r','arm_l','arm_r'];
 const LANDMARK_LABEL={shrine:'Shrine · Bonus unbekannt',boss:'Wächter · inaktiv',treasure:'Schatz +20 · ungesammelt'};
 const STATUS_LABEL={ready:'☠ bereit',fighting:'☠ Kampf',defeated:'☠ besiegt',escaped:'☠ entkommen'};
 const ENEMY_COLOR={boss:'#934f9e',armored:'#78818c',swarm:'#b87832',normal:'#8d3c34'};
@@ -33,6 +34,12 @@ function boundsOf(parts){const box=new THREE.Box3();for(const part of parts){par
 function makeTemplate(name,scene,kind){
   scene.updateMatrixWorld(true);
   const isSlot=n=>/^tower_slot_\d+$/.test(n.name),isPad=n=>n.name==='building_pad',template={name};
+  if(kind==='enemies'){                                              // Gliedmaßen (optional) als eigene Teile für die Laufanimation
+    const limbs=[];scene.traverse(n=>{if(LIMBS.includes(n.name)) limbs.push({name:n.name,pos:worldPosition(n),parts:bake(n)});});
+    template.parts=bake(scene,n=>LIMBS.includes(n.name));template.limbs=limbs;
+    template.height=boundsOf([...template.parts,...limbs.flatMap(l=>l.parts)]).max.y;
+    return template;
+  }
   if(kind==='towers'){
     const part=id=>{let node;scene.traverse(n=>{if(n.name===id&&!node) node=n;});return node?{pos:worldPosition(node),parts:bake(node)}:null;};
     template.turret=part('turret');template.aura=part('aura');template.parts=bake(scene,n=>n.name==='turret'||n.name==='aura');
@@ -98,7 +105,8 @@ function create(host0,commands){
   const templates=new Map();let ready=false,destroyed=false;
   const loader=new GLTFLoader();
   const wanted=Object.entries(HexModelMap.ALL_MODELS).flatMap(([kind,names])=>names.map(name=>({kind,id:`${PREFIX[kind]}_${name}`})));
-  Promise.all(wanted.map(({kind,id})=>new Promise(done=>loader.load(`assets/${kind}/${id}.glb`,gltf=>{try{templates.set(id,makeTemplate(id,gltf.scene,kind));}catch(e){console.warn('Modell unbrauchbar:',id,e);}done();},undefined,e=>{console.warn('Modell fehlt:',id,e?.message||e);done();})))).then(()=>{ready=true;loading.remove();rebuildAll();if(state) render(state,targetList);});
+  const inventory=fetch('assets/index.json').then(r=>r.ok?r.json():null).catch(()=>null);   // nur vom mitgelieferten Server; sonst wird alles versucht
+  inventory.then(list=>{const available=list&&new Set(list);return Promise.all(wanted.filter(({kind,id})=>!available||available.has(`${kind}/${id}.glb`)).map(({kind,id})=>new Promise(done=>loader.load(`assets/${kind}/${id}.glb`,gltf=>{try{templates.set(id,makeTemplate(id,gltf.scene,kind));}catch(e){console.warn('Modell unbrauchbar:',id,e);}done();},undefined,e=>{console.warn('Modell fehlt:',id,e?.message||e);done();}))));}).then(()=>{ready=true;loading.remove();rebuildAll();if(state) render(state,targetList);});
 
   // ---- gemeinsame Ressourcen ----
   const invisible=new THREE.MeshBasicMaterial({visible:false});
@@ -299,19 +307,33 @@ function create(host0,commands){
   }
 
   // ---- Gegner und Geschosse ----
+  function makeEnemy(e){
+    const type=ENEMY_COLOR[e.type]?e.type:'normal',boss=type==='boss',template=templates.get('enemy_'+type),group=new THREE.Group(),bar=new THREE.Group();
+    const obj={group,bar,radius:boss?15:9,phase:0,angle:0,targetAngle:0,last:null,slowed:false,limbs:[],barY:0};
+    if(template){
+      obj.pivot=new THREE.Group();const model=new THREE.Group();model.scale.setScalar(S);obj.pivot.add(model);addParts(model,template.parts);
+      for(const limb of template.limbs){const g=new THREE.Group();g.position.copy(limb.pos);addParts(g,limb.parts);model.add(g);obj.limbs.push({name:limb.name,g});}
+      obj.ice=new THREE.Mesh(torus,basic('#79cdd9'));obj.ice.scale.setScalar(obj.radius+4);obj.ice.position.y=2;obj.ice.visible=false;
+      group.add(obj.pivot,obj.ice);obj.barY=template.height*S+12;obj.baseY=0;
+    }else{                                                             // Fallback ohne Modell: farbige Kugel
+      obj.body=new THREE.Mesh(boss?enemyGeometry.boss:enemyGeometry.small,std(ENEMY_COLOR[type]));obj.body.castShadow=true;obj.color=ENEMY_COLOR[type];
+      group.add(obj.body);obj.barY=obj.radius*2+14;obj.baseY=obj.radius+3;
+    }
+    const bg=new THREE.Mesh(barGeometry,mats.bar),fg=new THREE.Mesh(barGeometry,mats.hp);bg.scale.set(26,4,1);fg.scale.set(26,4,1);fg.position.z=.1;bar.position.y=obj.barY;bar.add(bg,fg);group.add(bar);
+    obj.fg=fg;layer.dynamic.add(group);return obj;
+  }
   function syncEnemies(){
     const alive=new Set();
     for(const e of state.enemies){
-      alive.add(e.id);let obj=enemyObjects.get(e.id);
-      if(!obj){
-        const boss=e.type==='boss',body=new THREE.Mesh(boss?enemyGeometry.boss:enemyGeometry.small,std(ENEMY_COLOR[e.type]||ENEMY_COLOR.normal)),group=new THREE.Group(),bar=new THREE.Group(),bg=new THREE.Mesh(barGeometry,mats.bar),fg=new THREE.Mesh(barGeometry,mats.hp);
-        body.castShadow=true;bg.scale.set(26,4,1);fg.scale.set(26,4,1);fg.position.z=.1;bar.position.y=(boss?15:9)*2+14;bar.add(bg,fg);group.add(body,bar);layer.dynamic.add(group);
-        obj={group,body,bar,fg,radius:boss?15:9,slowed:false};enemyObjects.set(e.id,obj);
-      }
-      const slowed=e.slowFactor<1;if(slowed!==obj.slowed){obj.slowed=slowed;obj.body.material.color.set(slowed?'#79cdd9':ENEMY_COLOR[e.type]||ENEMY_COLOR.normal);}
-      obj.group.position.set(e.x,obj.radius+3,e.y);const ratio=clamp(e.hp/e.maxHp,0,1);obj.fg.scale.x=Math.max(.001,26*ratio);obj.fg.position.x=-13*(1-ratio);
+      alive.add(e.id);let obj=enemyObjects.get(e.id);if(!obj){obj=makeEnemy(e);enemyObjects.set(e.id,obj);}
+      const slowed=e.slowFactor<1;
+      if(slowed!==obj.slowed){obj.slowed=slowed;if(obj.body) obj.body.material.color.set(slowed?'#79cdd9':obj.color);if(obj.ice) obj.ice.visible=slowed;}
+      if(obj.last){const dx=e.x-obj.last.x,dy=e.y-obj.last.y,moved=Math.hypot(dx,dy);   // Laufrichtung und Schrittphase aus der Bewegung
+        if(moved>.05){obj.targetAngle=Math.atan2(-dy,dx);obj.phase+=moved*.14;if(!obj.oriented){obj.angle=obj.targetAngle;obj.oriented=true;}}}
+      obj.last={x:e.x,y:e.y};
+      obj.group.position.set(e.x,obj.baseY,e.y);const ratio=clamp(e.hp/e.maxHp,0,1);obj.fg.scale.x=Math.max(.001,26*ratio);obj.fg.position.x=-13*(1-ratio);
     }
-    for(const [id,obj] of [...enemyObjects]) if(!alive.has(id)){layer.dynamic.remove(obj.group);obj.body.material.dispose();enemyObjects.delete(id);}
+    for(const [id,obj] of [...enemyObjects]) if(!alive.has(id)){layer.dynamic.remove(obj.group);obj.body?.material.dispose();enemyObjects.delete(id);}
   }
   function syncProjectiles(){
     const segments=[];
@@ -379,7 +401,13 @@ function create(host0,commands){
         for(const e of enemies){const d=Math.hypot(e.x-obj.pos.x,e.y-obj.pos.y);if(d<=bestDistance){best=e;bestDistance=d;}}
         if(best){const wanted=Math.atan2(-(best.y-obj.pos.y),best.x-obj.pos.x),diff=Math.atan2(Math.sin(wanted-obj.angle),Math.cos(wanted-obj.angle));obj.angle+=diff*Math.min(1,dt*10);obj.turret.rotation.y=obj.angle;}
       }
-      for(const obj of enemyObjects.values()) obj.bar.quaternion.copy(camera.quaternion);
+      for(const obj of enemyObjects.values()){
+        obj.bar.quaternion.copy(camera.quaternion);
+        if(!obj.pivot) continue;
+        const diff=Math.atan2(Math.sin(obj.targetAngle-obj.angle),Math.cos(obj.targetAngle-obj.angle));obj.angle+=diff*Math.min(1,dt*10);obj.pivot.rotation.y=obj.angle;
+        const swing=Math.sin(obj.phase)*.7;obj.pivot.position.y=Math.abs(Math.sin(obj.phase))*1.6;
+        for(const limb of obj.limbs) limb.g.rotation.z=limb.name==='leg_l'?swing:limb.name==='leg_r'?-swing:limb.name==='arm_l'?-swing*.8:swing*.8;
+      }
     }
     placeLabels();gl.render(scene,camera);
   }

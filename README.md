@@ -99,7 +99,7 @@ Die Tests prüfen Spiellogik, Kampf, Deck, Exploration, Kamera, den SVG-Renderer
 
 Alle 3D-Modelle sind von Hand gebaut. Maße, Ursprung, Kantennummerierung, Turmplätze und benannte Objekte (`turret`, `arm`, `aura`) beschreibt [ASSET_SPEC.md](towerdefense-v0.1/ASSET_SPEC.md). Neue Modelle als `.glb` in den passenden Ordner unter `assets/` legen.
 
-Noch fehlend: Gebäudemodelle, Gegnermodelle und Turm-Upgrade-Varianten. Bis dahin zeigt das Spiel dafür einfache Platzhalter.
+Noch fehlend: Gebäudemodelle, Gegnermodelle (Fantasy: Goblins, Orks, Obsidian-Wächter) und Turm-Upgrade-Varianten. Bis dahin zeigt das Spiel dafür einfache Platzhalter.
 
 ## Roadmap
 

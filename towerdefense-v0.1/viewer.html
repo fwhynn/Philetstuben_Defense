@@ -34,18 +34,26 @@ const loader=new GLTFLoader(),cache=new Map();
 const load=url=>cache.get(url)||(cache.set(url,new Promise((ok,fail)=>loader.load(url,g=>ok(g.scene),undefined,fail))),cache.get(url));
 const prep=o=>{o.traverse(c=>{if(c.isMesh){c.castShadow=true;c.receiveShadow=true;}});return o;};
 const T=n=>`assets/tiles/tile_${n}.glb`,L=n=>`assets/landmarks/landmark_${n}.glb`,W=n=>`assets/towers/tower_${n}.glb`;
+const E=n=>`assets/enemies/enemy_${n}.glb`;
 const rows=[
   ['base','straight','smallCurve','bigCurve','longRoad','empty','village'].map(n=>[T(n),n]),
   ['tee','tJunction','cross','fullCross','grove','highGround','treasury'].map(n=>[T(n),n]),
   ['battlefield','watchtower','citadel','royalVillage','warCross','rescue','fog'].map(n=>[T(n),n]),
-  [[L('boss'),'boss'],[L('shrine'),'shrine'],[L('treasure'),'treasure'],[W('archer'),'archer'],[W('catapult'),'catapult'],[W('chain'),'chain'],[W('freeze'),'freeze']]
+  [[L('boss'),'boss'],[L('shrine'),'shrine'],[L('treasure'),'treasure'],[W('archer'),'archer'],[W('catapult'),'catapult'],[W('chain'),'chain'],[W('freeze'),'freeze']],
+  ['normal','armored','swarm','boss'].map(n=>[E(n),n])          // Gegner (optional, fehlende werden übersprungen)
 ];
 const turrets=[],labels=[],SP=2.05;
 const status=document.getElementById('status');
 try{
   for(let r=0;r<rows.length;r++)for(let c=0;c<rows[r].length;c++){
     const [url,name]=rows[r][c],x=c*SP+(r%2?SP/2:0),z=r*1.75*1.0;   // versetzt wie ein Hexraster
-    const isTower=url.includes('/towers/'),g=new THREE.Group();g.position.set(x,0,z);scene.add(g);
+    const isTower=url.includes('/towers/'),isEnemy=url.includes('/enemies/'),g=new THREE.Group();g.position.set(x,0,z);
+    if(isEnemy){                                                   // Gegner mittig auf gerader Straße (Größenvergleich)
+      let model;try{model=await load(url);}catch{continue;}
+      scene.add(g);g.add(prep((await load(T('straight'))).clone()));const m=prep(model.clone());g.add(m);
+      const el=document.createElement('div');el.className='tag';el.textContent=name;document.body.appendChild(el);labels.push([el,new THREE.Vector3(x,0,z+0.92)]);continue;
+    }
+    scene.add(g);
     if(isTower){                                                   // Turm auf leerem Tile am Turmplatz (0,39 nördlich)
       g.add(prep((await load(T('empty'))).clone()));
       const t=prep((await load(url)).clone());t.position.set(-0.33,0,-0.37);g.add(t);

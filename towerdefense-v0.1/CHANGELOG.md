@@ -4,6 +4,11 @@ Die folgenden Einträge dokumentieren frühere Zwischenstände. Verbindlicher ak
 
 # Hex Bastion – V0.7-dev
 
+## V0.7 – Gegnermodelle (Vorbereitung)
+
+- Der 3D-Renderer lädt optional `assets/enemies/enemy_normal|armored|swarm|boss.glb`, dreht Gegner in Laufrichtung, animiert Wippen sowie optionale Gliedmaßen (`leg_l/leg_r/arm_l/arm_r`) und zeigt Verlangsamung als blauen Ring. Ohne Datei bleiben die farbigen Kugeln. Modellvorgaben in ASSET_SPEC.md (Goblins, Orks, Obsidian-Wächter).
+- Der mitgelieferte Server liefert `/assets/index.json` mit allen vorhandenen Modellen; der Renderer lädt nur diese (keine 404-Meldungen für noch fehlende Modelle).
+
 ## V0.7 – 3D-Kamera frei bewegbar
 
 - Linke Maustaste ziehen verschiebt die Karte (ein Klick ohne Ziehen wählt weiterhin, ab 5 Pixel Bewegung wird gezogen). Rechte oder mittlere Maustaste ziehen dreht die Ansicht um den Blickpunkt (Yaw) und kippt sie (Neigung 12°–88°), wie die mittlere Maustaste in Blender. Mausrad zoomt zum Mauszeiger. "Zur Base" setzt auch Drehung und Neigung zurück.

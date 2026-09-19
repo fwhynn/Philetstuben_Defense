@@ -91,6 +91,25 @@ Upgrades (später): zwei Zweige pro Turm und je eine Endstufe. Am einfachsten si
 
 Alternativ nur Zusatzteile (`upgrade_marksman.glb` usw.), die auf den Basisturm gesetzt werden.
 
+## Gegner
+
+Thema: **Fantasy** (Goblins, Orks). Der Boss ist der **Obsidian-Wächter** (passt zum Boss-Feld mit Obsidian-Spitzen und Glutkern).
+
+- **Ursprung:** Mitte der Füße auf Höhe 0. **Blickrichtung +X** (Osten) bei Rotation 0. Das Spiel dreht den Gegner selbst in Laufrichtung.
+- Die Straße ist 0,33 breit; normale Gegner sollen darauf passen. Ablage: `assets/enemies/`.
+- Farben klar unterscheidbar halten, sie werden von weitem in Gruppen gesehen.
+
+| Datei | Figur | Höhe | max. Breite | Dreiecke |
+|---|---|---|---|---|
+| `enemy_normal` | Goblin-Krieger, schlichte Silhouette, grüne Haut | ca. 0,30 | 0,28 | bis ca. 600 |
+| `enemy_armored` | Ork mit Rüstung und Schild, breiter und schwerer, grau-grün mit Stahl | ca. 0,34 | 0,32 | bis ca. 800 |
+| `enemy_swarm` | Kleiner Goblin-Läufer/Kobold, sehr wenige Flächen, wirkt flink | ca. 0,16 | 0,18 | bis ca. 300 |
+| `enemy_boss` | Obsidian-Wächter mit orange glühendem Kern (Emissive-Material erlaubt), darf breiter als die Straße sein | ca. 0,70 | 0,55 | bis ca. 1500 |
+
+**Laufanimation (optional):** Arme und Beine als eigene Objekte `leg_l`, `leg_r`, `arm_l`, `arm_r` benennen. **Pivot (Drehpunkt) im Gelenk** (Hüfte bzw. Schulter, nicht in der Mitte des Gliedes). Sie schwingen dann gegengleich vor und zurück. Ohne diese Objekte wippt der Gegner nur leicht beim Laufen.
+
+Nicht modellieren muss man: Lebensbalken (schwebt automatisch über dem Kopf) und den Freeze-Effekt (der Renderer legt einen blauen Ring um verlangsamte Gegner). Fehlende Gegnermodelle ersetzt das Spiel durch farbige Kugeln; einzelne Dateien können also nach und nach kommen.
+
 ## Gebäude (später)
 `building_house`, `building_forge`, `building_market`: passen auf den quadratischen Gebäudeplatz (ca. 0,33 breit, Höhe bis 0,4).
 
