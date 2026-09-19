@@ -7,7 +7,9 @@ const HexModelMap=(()=>{
     tiles:['base','rescue','fog',...TILE_MODELS],
     landmarks:['boss','shrine','treasure'],
     towers:['archer','catapult','chain','freeze','mine','ballista','flame'],
-    enemies:['normal','armored','swarm','boss']   // optional: ohne Datei zeichnet der Renderer Kugeln
+    enemies:['normal','armored','warded','swarm','boss'],   // optional: ohne Datei zeichnet der Renderer Kugeln
+    buildings:['house','forge','market'],                   // optional: ohne Datei Platzhalter
+    effects:['pickup']                                      // optional: assets/effects/mine_pickup.glb (Mine auf der Straße)
   };
   const sameRoads=(a,b)=>a.length===b.length&&[...a].sort().join()===[...b].sort().join();
   function matchShape(roads){

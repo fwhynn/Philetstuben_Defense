@@ -5,7 +5,7 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 
 const S=54,STEP=Math.PI/3,TILT=55*Math.PI/180,PITCH_MIN=12*Math.PI/180,PITCH_MAX=88*Math.PI/180,DIST_MIN=220,DIST_MAX=3400,DIST_START=950,SKY='#a9cbd8';
-const PREFIX={tiles:'tile',landmarks:'landmark',towers:'tower',enemies:'enemy'};
+const PREFIX={tiles:'tile',landmarks:'landmark',towers:'tower',enemies:'enemy',buildings:'building',effects:'mine'};
 const LIMBS=['leg_l','leg_r','arm_l','arm_r'];
 const LANDMARK_LABEL={shrine:'Shrine · Bonus unbekannt',boss:'Wächter · inaktiv',treasure:'Schatz +20 · ungesammelt'};
 const STATUS_LABEL={ready:'☠ bereit',fighting:'☠ Kampf',defeated:'☠ besiegt',escaped:'☠ entkommen'};
@@ -62,7 +62,11 @@ function makeTemplate(name,scene,kind){
 function create(host0,commands){
     const {HEX,key,axialToWorld,slotPositions,buildingPosition,neighbor}=HexMap;
   const {CARD_LIBRARY}=HexData;
-  const gl=new THREE.WebGLRenderer({antialias:true});gl.setPixelRatio(Math.min(devicePixelRatio||1,2));   // wirft ohne WebGL -> Controller fällt auf SVG zurück
+  // Qualität: 'high' oder 'low'. ?low bzw. ?high in der Adresse erzwingt eine Stufe; sonst gilt die zuletzt gespeicherte.
+  // Bricht die Bildrate während einer Wave dauerhaft ein, schaltet der Renderer selbst auf 'low' (siehe loop).
+  const readQuality=()=>{const q=new URLSearchParams(location.search);if(q.has('low')) return 'low';if(q.has('high')) return 'high';try{return localStorage.getItem('hexQuality')==='low'?'low':'high';}catch{return 'high';}};
+  let quality=readQuality();
+  const gl=new THREE.WebGLRenderer({antialias:quality==='high',powerPreference:'high-performance'});gl.setPixelRatio(quality==='high'?Math.min(devicePixelRatio||1,1.5):1);   // wirft ohne WebGL -> Controller fällt auf SVG zurück
   const wrap=host0.parentElement;wrap.classList.add('is3d');
   const hintText=wrap.querySelector('.mapControls span'),oldHint=hintText?.textContent;
   if(hintText) hintText.textContent='Mausrad: Zoom · links ziehen: verschieben · rechts ziehen: drehen und kippen';
@@ -79,7 +83,7 @@ function create(host0,commands){
   const dom=gl.domElement,scene=new THREE.Scene();scene.background=new THREE.Color(SKY);scene.fog=new THREE.Fog(SKY,2600,6500);
   const camera=new THREE.PerspectiveCamera(35,1,20,12000);
   scene.add(new THREE.HemisphereLight('#dff0ff','#6b7a4c',1.15));
-  const sun=new THREE.DirectionalLight('#fff1d0',2.5);sun.castShadow=true;sun.shadow.mapSize.set(4096,4096);sun.shadow.bias=-.0004;
+  const sun=new THREE.DirectionalLight('#fff1d0',2.5);sun.castShadow=true;sun.shadow.mapSize.set(quality==='high'?2048:1024,quality==='high'?2048:1024);sun.shadow.bias=-.0004;
   Object.assign(sun.shadow.camera,{left:-1100,right:1100,top:1100,bottom:-1100,near:100,far:3500});scene.add(sun,sun.target);
 
   // ---- Kamera: Blick von schräg oben, verschieben (rechte/mittlere Maustaste) und zoomen (Mausrad) ----
@@ -240,7 +244,9 @@ function create(host0,commands){
   }
   function buildingObject(tile,index,building){
     const p=buildingPosition(tile),group=new THREE.Group(),type=building?.type;group.position.set(p.x,0,p.y);
-    if(building){
+    const model=building&&templates.get('building_'+type);
+    if(model){const g=new THREE.Group();g.scale.setScalar(S);addParts(g,model.parts);group.add(g);}
+    else if(building){
       const palette={house:['#c9a066','#a94a3a'],forge:['#6b6e75','#3d3f45'],market:['#d8c48a','#b8443a']}[type]||['#bc914d','#7a5a2c'];
       const body=new THREE.Mesh(new THREE.BoxGeometry(26,18,22).translate(0,9,0),std(palette[0])),roof=new THREE.Mesh(new THREE.ConeGeometry(21,13,4).rotateY(Math.PI/4).translate(0,24.5,0),std(palette[1]));
       body.castShadow=roof.castShadow=true;group.add(body,roof);
@@ -307,6 +313,7 @@ function create(host0,commands){
   }
 
   // ---- Gegner und Geschosse ----
+  const model0=m=>m.isGroup;
   function makeEnemy(e){
     const type=ENEMY_COLOR[e.type]?e.type:'normal',boss=type==='boss',template=templates.get('enemy_'+type),group=new THREE.Group(),bar=new THREE.Group();
     const obj={group,bar,radius:boss?15:9,phase:0,angle:0,targetAngle:0,last:null,slowed:false,limbs:[],barY:0};
@@ -336,8 +343,8 @@ function create(host0,commands){
     for(const [id,obj] of [...enemyObjects]) if(!alive.has(id)){layer.dynamic.remove(obj.group);obj.body?.material.dispose();enemyObjects.delete(id);}
   }
   function syncMines(){
-    const alive=new Set();for(const mine of state.mines||[]){alive.add(mine.id);let mesh=mineObjects.get(mine.id);if(!mesh){mesh=new THREE.Mesh(new THREE.CylinderGeometry(7,7,3,10),std(mine.color||'#e6a75f',{metalness:.25}));mesh.castShadow=true;layer.dynamic.add(mesh);mineObjects.set(mine.id,mesh);}mesh.position.set(mine.x,2,mine.y);}
-    for(const [id,mesh] of [...mineObjects])if(!alive.has(id)){layer.dynamic.remove(mesh);mesh.geometry.dispose();mesh.material.dispose();mineObjects.delete(id);}
+    const alive=new Set();for(const mine of state.mines||[]){alive.add(mine.id);let mesh=mineObjects.get(mine.id);if(!mesh){const model=templates.get('mine_pickup');if(model){mesh=new THREE.Group();const g=new THREE.Group();g.scale.setScalar(S);addParts(g,model.parts);mesh.add(g);}else{mesh=new THREE.Mesh(new THREE.CylinderGeometry(7,7,3,10),std(mine.color||'#e6a75f',{metalness:.25}));mesh.castShadow=true;}layer.dynamic.add(mesh);mineObjects.set(mine.id,mesh);}mesh.position.set(mine.x,model0(mesh)?0:2,mine.y);}
+    for(const [id,mesh] of [...mineObjects])if(!alive.has(id)){layer.dynamic.remove(mesh);if(mesh.isMesh){mesh.geometry.dispose();mesh.material.dispose();}mineObjects.delete(id);}
   }
   function syncProjectiles(){
     const segments=[];
@@ -394,9 +401,25 @@ function create(host0,commands){
   function reset(){rebuildAll();for(const obj of enemyObjects.values()) layer.dynamic.remove(obj.group);enemyObjects.clear();for(const mesh of mineObjects.values())layer.dynamic.remove(mesh);mineObjects.clear();state=null;hoverPick=null;resetView(false);}
 
   // ---- Animation ----
-  let last=performance.now(),raf=0;
+  let last=performance.now(),raf=0,lastDraw=0,slowFrames=0;
+  function lowerQuality(){
+    if(quality==='low') return;quality='low';
+    try{localStorage.setItem('hexQuality','low');}catch{/* Speichern nicht möglich */}
+    gl.setPixelRatio(1);gl.setSize(Math.max(1,host.clientWidth),Math.max(1,host.clientHeight));
+    sun.shadow.mapSize.set(1024,1024);if(sun.shadow.map){sun.shadow.map.dispose();sun.shadow.map=null;}
+    console.info('Hex Bastion: Grafik automatisch auf "niedrig" gestellt (?high in der Adresse stellt sie zurück).');
+  }
   function loop(now){
-    raf=requestAnimationFrame(loop);const dt=Math.min((now-last)/1000,.1);last=now;
+    raf=requestAnimationFrame(loop);
+    // Bildrate begrenzen: 60/s während einer Wave, sonst 30/s. Schont vor allem 120/144-Hz-Bildschirme und Laptops.
+    const running=!!state?.waveRunning,interval=running?1000/60:1000/30;
+    if(now-lastDraw<interval-2) return;
+    const frame=now-lastDraw;lastDraw=now;
+    if(quality==='high'&&running){                                     // dauerhaft unter ca. 30 Bildern/s in einer Wave: Grafik senken
+      if(frame>34) slowFrames++;else slowFrames=Math.max(0,slowFrames-2);
+      if(slowFrames>90) lowerQuality();
+    }else slowFrames=0;
+    const dt=Math.min((now-last)/1000,.1);last=now;
     if(state&&ready){
       const enemies=state.enemies||[];
       for(const record of objectRecords.values()) for(const obj of record.towers){
