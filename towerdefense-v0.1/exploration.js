@@ -20,13 +20,13 @@ const HexExploration=(()=>{
     const cells=region(map);landmarks.surveyed??=new Set();
     for(const [id,cell] of cells){
       if(landmarks.surveyed.has(id)) continue;landmarks.surveyed.add(id);
-      if(distance(cell,{q:0,r:0})<3||map.has(id)||landmarks.has(id)) continue;
+      const baseDistance=distance(cell,{q:0,r:0});if(baseDistance<3||map.has(id)||landmarks.has(id)) continue;
       const roll=hash(landmarks.seed||0,cell.q,cell.r);
-      if(roll<.045){const kind=hash((landmarks.seed||0)^1234567,cell.q,cell.r),type=kind<.55?'treasure':kind<.85?'shrine':'boss';landmarks.set(id,{q:cell.q,r:cell.r,type,claimed:false,prefab:prefab(landmarks.seed||0,cell,type)});}
+      if(roll<.045){const kind=hash((landmarks.seed||0)^1234567,cell.q,cell.r),type=kind<.55?'treasure':kind<.85?'shrine':'boss';if(type==='boss'&&baseDistance<=4)continue;landmarks.set(id,{q:cell.q,r:cell.r,type,claimed:false,prefab:prefab(landmarks.seed||0,cell,type)});}
     }
     return cells;
   }
-  function bossProfile(wave){return {type:'boss',name:'Wächter',hp:300+wave*45,speed:24,armor:true,baseDamage:5,killGold:50};}
+  function bossProfile(wave){const hp=240+wave*36;return {type:'boss',name:'Wächter',hp,armorHp:Math.round(hp*.25),magicHp:Math.round(hp*.2),speed:24,baseDamage:5,killGold:50};}
   function prefab(seed,position,type){
     const shapes=[['straight',[0,3]],['smallCurve',[0,1]],['bigCurve',[0,2]],['tee',[0,2,4]],['tJunction',[0,2,3]]];
     const rotation=Math.floor(hash(seed^97531,position.q,position.r)*6),shape=shapes[Math.floor(hash(seed^86420,position.q,position.r)*shapes.length)];
@@ -49,7 +49,7 @@ const HexExploration=(()=>{
     const roll=hash((landmarks.seed||0)^987654321,landmark.q,landmark.r);
     return roll<.3?'remove':roll<.6?'card':roll<.9?'epic':'legendary';
   }
-  function bossRewardRarity(seed,id){const landmark=id.split(',').map(Number);let value=0;for(const char of String(seed)) value=Math.imul(value,31)+char.charCodeAt(0)|0;return hash(value^246813579,landmark[0],landmark[1])<.1?'Legendary':'Epic';}
+  function bossRewardRarity(seed,id){const landmark=id.startsWith('wave:')?[-Number(id.slice(5)),0]:id.split(',').map(Number);let value=0;for(const char of String(seed)) value=Math.imul(value,31)+char.charCodeAt(0)|0;return hash(value^246813579,landmark[0],landmark[1])<.1?'Legendary':'Epic';}
   function visibility(map,position){
     let nearest=Infinity;for(const tile of map.values()) nearest=Math.min(nearest,distance(tile,position));
     return nearest<=clearRadius?'clear':nearest<=fogRadius?'fog':'hidden';

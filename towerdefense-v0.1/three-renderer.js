@@ -9,7 +9,7 @@ const PREFIX={tiles:'tile',landmarks:'landmark',towers:'tower',enemies:'enemy'};
 const LIMBS=['leg_l','leg_r','arm_l','arm_r'];
 const LANDMARK_LABEL={shrine:'Shrine · Bonus unbekannt',boss:'Wächter · inaktiv',treasure:'Schatz +20 · ungesammelt'};
 const STATUS_LABEL={ready:'☠ bereit',fighting:'☠ Kampf',defeated:'☠ besiegt',escaped:'☠ entkommen'};
-const ENEMY_COLOR={boss:'#934f9e',armored:'#78818c',swarm:'#b87832',normal:'#8d3c34'};
+const ENEMY_COLOR={boss:'#934f9e',armored:'#78818c',warded:'#477da4',swarm:'#b87832',normal:'#8d3c34'};
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 
 /** Fasst alle Meshes unterhalb von root je Material zu einem Mesh zusammen (Koordinaten relativ zu root). */
@@ -120,7 +120,7 @@ function create(host0,commands){
   const basic=(color,opacity=1)=>new THREE.MeshBasicMaterial({color,transparent:opacity<1,opacity,depthWrite:opacity>=1});
   const std=(color,extra={})=>new THREE.MeshStandardMaterial({color,roughness:.85,metalness:0,...extra});
   const mats={empty:std('#4e6355',{transparent:true,opacity:.6}),legal:basic('#7fcf6a',.25),illegal:basic('#c0594c',.16),outlineLegal:basic('#a9dc93'),outlineIllegal:basic('#ba6b60'),
-    hint:basic('#ffe39a'),slot:basic('#f4d36d',.9),select:basic('#f4d36d',.9),bar:basic('#321a18'),hp:basic('#78b95f')};
+    hint:basic('#ffe39a'),slot:basic('#f4d36d',.9),select:basic('#f4d36d',.9),bar:basic('#321a18'),hp:basic('#78b95f'),armor:basic('#df8b3a'),magic:basic('#69aee8')};
   const enemyGeometry={small:new THREE.SphereGeometry(9,14,10),boss:new THREE.SphereGeometry(15,16,12)},barGeometry=new THREE.PlaneGeometry(1,1);
   const ghostMaterials=new Map();
   function ghostMaterial(material,legal){
@@ -136,7 +136,7 @@ function create(host0,commands){
   let state,targetList=[],hoverPick=null;
   const tileRecords=new Map(),landmarkRecords=new Map(),objectRecords=new Map(),labels=new Map(),usedLabels=new Set();
   let emptySig='',targetSig='',ghostSig='',pickables=[],pickDirty=true,runToken=null;
-  const enemyObjects=new Map(),beamPool=[],rangeFill=new THREE.Mesh(circle,basic('#ffffff',.13)),rangeRing=new THREE.Mesh(circleRing,basic('#ffffff',.65)),selectRing=new THREE.Mesh(torus,mats.select);
+  const enemyObjects=new Map(),mineObjects=new Map(),beamPool=[],rangeFill=new THREE.Mesh(circle,basic('#ffffff',.13)),rangeRing=new THREE.Mesh(circleRing,basic('#ffffff',.65)),selectRing=new THREE.Mesh(torus,mats.select);
   rangeFill.visible=rangeRing.visible=selectRing.visible=false;layer.dynamic.add(rangeFill,rangeRing,selectRing);
 
   function clearGroup(group){for(const child of [...group.children]) group.remove(child);}
@@ -232,7 +232,7 @@ function create(host0,commands){
     }else{const mesh=new THREE.Mesh(new THREE.CylinderGeometry(12,14,40,8).translate(0,20,0),std(def.color));mesh.castShadow=true;holder.add(mesh);}
     const visual=HexData.BRANCH_VISUALS[tower.branch];
     if(visual){const ring=new THREE.Mesh(torus,basic(visual.color));ring.scale.setScalar(20);ring.position.y=2;holder.add(ring);
-      if(tower.finalUpgrade){const gold=new THREE.Mesh(torus,basic('#ffe39a'));gold.scale.setScalar(24);gold.position.y=2;holder.add(gold);}}
+      if(tower.finalUpgrade){const gold=new THREE.Mesh(torus,basic(tower.ultimate?'#8de8ff':'#ffe39a'));gold.scale.setScalar(tower.ultimate?28:24);gold.position.y=2;holder.add(gold);}}
     if(def.aura){const fill=new THREE.Mesh(circle,basic(def.color,.06)),edge=new THREE.Mesh(circleRing,basic(def.color,.22));for(const m of [fill,edge]){m.scale.setScalar(def.range);m.position.set(0,1.5,0);holder.add(m);}}
     obj.hint=new THREE.Mesh(hintGeometry,mats.hint);obj.hint.position.y=66;obj.hint.visible=false;holder.add(obj.hint);
     const pick=new THREE.Mesh(towerPick,invisible);pick.userData.pick={kind:'tower',q:tile.q,r:tile.r,index};holder.add(pick);obj.pick=pick;
@@ -249,7 +249,7 @@ function create(host0,commands){
     const pick=new THREE.Mesh(buildingPick,invisible);pick.userData.pick={kind:'building',q:tile.q,r:tile.r,index};group.add(pick);
     return {group,pick};
   }
-  function objectSig(tile){return JSON.stringify([tile.slots,tile.buildingSlots,tile.type,tile.rotation,(tile.towers||[]).map(t=>t&&[t.type,t.branch,t.finalUpgrade,t.level,t.tileType]),(tile.buildings||[]).map(b=>b&&b.type)]);}
+  function objectSig(tile){return JSON.stringify([tile.slots,tile.buildingSlots,tile.type,tile.rotation,(tile.towers||[]).map(t=>t&&[t.type,t.branch,t.finalUpgrade,t.ultimate,t.level,t.tileType]),(tile.buildings||[]).map(b=>b&&b.type)]);}
   function syncObjects(){
     const seen=new Set();
     for(const tile of state.map.values()){
@@ -319,8 +319,8 @@ function create(host0,commands){
       obj.body=new THREE.Mesh(boss?enemyGeometry.boss:enemyGeometry.small,std(ENEMY_COLOR[type]));obj.body.castShadow=true;obj.color=ENEMY_COLOR[type];
       group.add(obj.body);obj.barY=obj.radius*2+14;obj.baseY=obj.radius+3;
     }
-    const bg=new THREE.Mesh(barGeometry,mats.bar),fg=new THREE.Mesh(barGeometry,mats.hp);bg.scale.set(26,4,1);fg.scale.set(26,4,1);fg.position.z=.1;bar.position.y=obj.barY;bar.add(bg,fg);group.add(bar);
-    obj.fg=fg;layer.dynamic.add(group);return obj;
+    obj.fgs={};obj.barBgs={};[['hp',mats.hp,0],['armorHp',mats.armor,5],['magicHp',mats.magic,10]].forEach(([field,material,offset])=>{const bg=new THREE.Mesh(barGeometry,mats.bar),fg=new THREE.Mesh(barGeometry,material);bg.scale.set(26,3,1);fg.scale.set(26,3,1);fg.position.z=.1;bg.position.y=fg.position.y=offset;bar.add(bg,fg);obj.fgs[field]=fg;obj.barBgs[field]=bg;});bar.position.y=obj.barY;group.add(bar);
+    layer.dynamic.add(group);return obj;
   }
   function syncEnemies(){
     const alive=new Set();
@@ -331,14 +331,20 @@ function create(host0,commands){
       if(obj.last){const dx=e.x-obj.last.x,dy=e.y-obj.last.y,moved=Math.hypot(dx,dy);   // Laufrichtung und Schrittphase aus der Bewegung
         if(moved>.05){obj.targetAngle=Math.atan2(-dy,dx);obj.phase+=moved*.14;if(!obj.oriented){obj.angle=obj.targetAngle;obj.oriented=true;}}}
       obj.last={x:e.x,y:e.y};
-      obj.group.position.set(e.x,obj.baseY,e.y);const ratio=clamp(e.hp/e.maxHp,0,1);obj.fg.scale.x=Math.max(.001,26*ratio);obj.fg.position.x=-13*(1-ratio);
+      obj.group.position.set(e.x,obj.baseY,e.y);for(const [field,max] of [['hp','maxHp'],['armorHp','maxArmorHp'],['magicHp','maxMagicHp']]){const fg=obj.fgs[field],visible=e[max]>0,ratio=visible?clamp((e[field]||0)/e[max],0,1):0;fg.visible=obj.barBgs[field].visible=visible;fg.scale.x=Math.max(.001,26*ratio);fg.position.x=-13*(1-ratio);}
     }
     for(const [id,obj] of [...enemyObjects]) if(!alive.has(id)){layer.dynamic.remove(obj.group);obj.body?.material.dispose();enemyObjects.delete(id);}
+  }
+  function syncMines(){
+    const alive=new Set();for(const mine of state.mines||[]){alive.add(mine.id);let mesh=mineObjects.get(mine.id);if(!mesh){mesh=new THREE.Mesh(new THREE.CylinderGeometry(7,7,3,10),std(mine.color||'#e6a75f',{metalness:.25}));mesh.castShadow=true;layer.dynamic.add(mesh);mineObjects.set(mine.id,mesh);}mesh.position.set(mine.x,2,mine.y);}
+    for(const [id,mesh] of [...mineObjects])if(!alive.has(id)){layer.dynamic.remove(mesh);mesh.geometry.dispose();mesh.material.dispose();mineObjects.delete(id);}
   }
   function syncProjectiles(){
     const segments=[];
     for(const p of state.projectiles){
-      if(p.kind==='chain') for(let i=0;i<p.pts.length-1;i++) segments.push([p.pts[i].x,p.pts[i].y,p.pts[i+1].x,p.pts[i+1].y,p.color]);
+      if(p.kind==='blast'){
+        for(let i=0;i<12;i++){const a=i*Math.PI/6,b=(i+1)*Math.PI/6;segments.push([p.x+Math.cos(a)*p.r,p.y+Math.sin(a)*p.r,p.x+Math.cos(b)*p.r,p.y+Math.sin(b)*p.r,p.color]);}
+      }else if(p.kind==='chain') for(let i=0;i<p.pts.length-1;i++) segments.push([p.pts[i].x,p.pts[i].y,p.pts[i+1].x,p.pts[i+1].y,p.color]);
       else segments.push([p.x1,p.y1,p.x2,p.y2,p.color]);
     }
     while(beamPool.length<segments.length){const mesh=new THREE.Mesh(beam,basic('#ffffff'));layer.dynamic.add(mesh);beamPool.push(mesh);}
@@ -377,7 +383,7 @@ function create(host0,commands){
   function render(nextState,placementTargets=[]){
     if(state!==nextState){if(state) rebuildAll();state=nextState;}
     targetList=placementTargets;if(!ready) return;
-    syncTiles();syncLandmarks();syncEmpty();syncObjects();syncTargets();syncGhost();syncSelection();syncEnemies();syncProjectiles();syncLabels();
+    syncTiles();syncLandmarks();syncEmpty();syncObjects();syncTargets();syncGhost();syncSelection();syncMines();syncEnemies();syncProjectiles();syncLabels();
     if(pickDirty){pickables=[...objectRecords.values()].flatMap(r=>r.picks).concat(layer.targets.children.map(g=>g.children[1]));pickDirty=false;}
   }
   function project(position,height=30){
@@ -385,7 +391,7 @@ function create(host0,commands){
     const box=host.getBoundingClientRect(),outer=wrap.getBoundingClientRect();
     return {x:(tmp.x+1)/2*box.width+box.left-outer.left,y:(1-tmp.y)/2*box.height+box.top-outer.top,width:outer.width,height:outer.height};
   }
-  function reset(){rebuildAll();for(const obj of enemyObjects.values()) layer.dynamic.remove(obj.group);enemyObjects.clear();state=null;hoverPick=null;resetView(false);}
+  function reset(){rebuildAll();for(const obj of enemyObjects.values()) layer.dynamic.remove(obj.group);enemyObjects.clear();for(const mesh of mineObjects.values())layer.dynamic.remove(mesh);mineObjects.clear();state=null;hoverPick=null;resetView(false);}
 
   // ---- Animation ----
   let last=performance.now(),raf=0;

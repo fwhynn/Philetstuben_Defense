@@ -21,10 +21,13 @@ const HexData=(()=>{
   };
 
   const TOWERS = {
-    archer: {name:'Archer',cost:25,range:150,damage:9,cooldown:0.55,color:'#e7d89b',desc:'Schneller Single-Target-Schaden.'},
-    catapult: {name:'Katapult',cost:40,range:190,damage:18,cooldown:1.35,color:'#c88954',pierce:true,desc:'Stein fliegt geradlinig durch mehrere Gegner.'},
-    chain: {name:'Kettenblitz',cost:45,range:135,damage:8,cooldown:0.9,color:'#7fc6ff',chain:3,jumpRange:75,desc:'Bis zu 3 Ziele, maximal 75 Abstand je Sprung.'},
-    freeze: {name:'Freeze',cost:30,range:145,damage:0,cooldown:1,color:'#a4eef5',aura:true,slow:.5,desc:'Aura: halbiert das Tempo aller Gegner in Reichweite.'}
+    archer: {name:'Archer',cost:25,range:150,damage:9,cooldown:0.55,color:'#e7d89b',damageMultipliers:{hp:1.25,armor:1,magic:.65},desc:'Schneller Single-Target-Schaden.'},
+    catapult: {name:'Katapult',cost:40,range:190,damage:18,cooldown:1.35,color:'#c88954',damageMultipliers:{hp:1,armor:1.5,magic:.6},pierce:true,pierceTargets:3,desc:'Stein durchschlägt bis zu 3 Gegner in einer Linie.'},
+    chain: {name:'Kettenblitz',cost:45,range:135,damage:8,cooldown:0.9,color:'#7fc6ff',damageMultipliers:{hp:1,armor:.65,magic:1.5},chain:3,jumpRange:75,desc:'Bis zu 3 Ziele, maximal 75 Abstand je Sprung.'},
+    freeze: {name:'Freeze',cost:30,range:145,damage:0,cooldown:1,color:'#a4eef5',aura:true,slow:.5,role:'Support',desc:'Aura: halbiert das Tempo aller Gegner in Reichweite.'},
+    mine: {name:'Minenleger',cost:35,range:150,damage:24,cooldown:1.4,color:'#e6a75f',damageMultipliers:{hp:1.1,armor:1.4,magic:.65},mine:true,splash:45,role:'Wegkontrolle',desc:'Legt dauerhaft stapelbare Sprengminen auf Straßen.'},
+    ballista: {name:'Balliste',cost:55,range:235,damage:46,cooldown:1.9,color:'#d9c08b',damageMultipliers:{hp:1.45,armor:1.15,magic:.7},bossMultiplier:1.3,role:'Bosskiller',desc:'Extrem weitreichender Einzelschuss gegen Eliten und Bosse.'},
+    flame: {name:'Flammenturm',cost:50,range:115,damage:14,cooldown:.7,splash:48,color:'#ff754b',damageMultipliers:{hp:1.35,armor:.55,magic:.8},role:'Flächenkontrolle',desc:'Kurze Reichweite, aber dauerhafter Schaden gegen dichte Gruppen.'}
   };
 
   const UPGRADES={
@@ -43,11 +46,33 @@ const HexData=(()=>{
     tempest:{tower:'chain',requires:'storm',name:'Gewitter',cost:70,damage:11,chain:7,jumpRange:110,desc:'Großes Blitznetz für dichte Gruppen.'},
     thunder:{tower:'chain',requires:'overload',name:'Donnerschlag',cost:70,damage:32,chain:3,range:175,desc:'Starke Blitze für robuste Ziele.'},
     absoluteZero:{tower:'freeze',requires:'deepFrost',name:'Eisstarre',cost:60,slow:.25,range:145,desc:'75 % Slow in der Killzone.'},
-    winter:{tower:'freeze',requires:'frostField',name:'Winterfeld',cost:60,slow:.5,range:250,desc:'50 % Slow auf großem Gebiet.'}
+    winter:{tower:'freeze',requires:'frostField',name:'Winterfeld',cost:60,slow:.5,range:250,desc:'50 % Slow auf großem Gebiet.'},
+    demolition:{tower:'mine',name:'Sprengmeister',cost:40,damage:42,cooldown:1.8,range:170,splash:60,desc:'Langsam gelegte schwere Minen für robuste Gegner.'},
+    minefield:{tower:'mine',name:'Minenfeld',cost:40,damage:16,cooldown:.75,range:140,splash:42,desc:'Legt schnell viele kleinere Minen gegen Gruppen.'},
+    earthquake:{tower:'mine',requires:'demolition',name:'Erdbrecher',cost:65,damage:75,cooldown:1.9,range:185,splash:80,desc:'Finale Großmine mit gewaltigem Explosionsradius.'},
+    carpet:{tower:'mine',requires:'minefield',name:'Minenteppich',cost:65,damage:24,cooldown:.5,range:155,splash:55,desc:'Finales dichtes Minenfeld für dauerhaften Flächenschaden.'},
+    harpoon:{tower:'ballista',name:'Harpunenbolzen',cost:55,damage:72,cooldown:2.2,range:255,desc:'Massiver Treffer für Bosse und gepanzerte Ziele.'},
+    repeater:{tower:'ballista',name:'Repetierwerk',cost:55,damage:30,cooldown:1.05,range:215,desc:'Schnellere Bolzen für verlässlichen Einzelzielschaden.'},
+    dragonSlayer:{tower:'ballista',requires:'harpoon',name:'Drachentöter',cost:80,damage:125,cooldown:2.25,range:285,desc:'Finaler Fernschuss mit extremem Einzelschaden.'},
+    boltStorm:{tower:'ballista',requires:'repeater',name:'Bolzensturm',cost:80,damage:48,cooldown:.72,range:235,desc:'Finales Repetierwerk mit hoher Feuerrate.'},
+    inferno:{tower:'flame',name:'Inferno',cost:50,damage:25,cooldown:.85,range:125,splash:65,desc:'Größere, schwerere Feuerstöße für dichte Gruppen.'},
+    wildfire:{tower:'flame',name:'Lauffeuer',cost:50,damage:10,cooldown:.38,range:120,splash:42,desc:'Sehr schnelle Flammenstöße halten Schwärme unter Druck.'},
+    sunfire:{tower:'flame',requires:'inferno',name:'Sonnenfeuer',cost:75,damage:43,cooldown:.8,range:140,splash:82,desc:'Finaler großer Feuerbereich mit hohem Schaden.'},
+    firestorm:{tower:'flame',requires:'wildfire',name:'Feuersturm',cost:75,damage:20,cooldown:.25,range:115,splash:52,desc:'Finales Flammenmeer mit kurzer Reichweite und extremer Angriffsdichte.'}
   };
-  const BRANCH_VISUALS={marksman:{icon:'◎',color:'#f5d06e'},volley:{icon:'≋',color:'#96d47c'},siege:{icon:'◆',color:'#e99a5c'},barrage:{icon:'⋮',color:'#ffdca1'},storm:{icon:'ϟ',color:'#93a5ff'},overload:{icon:'✦',color:'#e2a1ff'},deepFrost:{icon:'❄',color:'#70d5ff'},frostField:{icon:'❆',color:'#c0f6ea'}};
+  const ULTIMATES={
+    archer:{name:'Großmeister',cost:100,damageFactor:1.3,rangeFactor:1.1,desc:'Vollendete Bogentechnik: mehr Schaden und Reichweite für beide Spezialisierungen.'},
+    catapult:{name:'Titanenwerk',cost:110,damageFactor:1.35,rangeFactor:1.08,desc:'Verstärkt jede Katapult-Spezialisierung mit schwereren Geschossen.'},
+    chain:{name:'Arkankern',cost:110,damageFactor:1.3,chainBonus:2,jumpBonus:15,desc:'Zusätzliche Blitzenergie, zwei weitere Ziele und größere Sprungweite.'},
+    freeze:{name:'Permafrost',cost:95,rangeFactor:1.15,slowFactor:.8,desc:'Vergrößert die Aura und verstärkt ihre Verlangsamung.'},
+    mine:{name:'Endloses Arsenal',cost:105,damageFactor:1.3,cooldownFactor:.8,splashBonus:15,desc:'Legt schneller und verstärkt jede Mine samt Explosionsradius.'},
+    ballista:{name:'Apex-Bolzen',cost:125,damageFactor:1.35,rangeFactor:1.08,bossFactor:1.2,desc:'Maximale Durchschlagskraft mit zusätzlichem Bossschaden.'},
+    flame:{name:'Phönixkern',cost:120,damageFactor:1.3,splashBonus:15,desc:'Verstärkt Schaden und Fläche beider Flammenspezialisierungen.'}
+  };
+  const BRANCH_VISUALS={marksman:{icon:'◎',color:'#f5d06e'},volley:{icon:'≋',color:'#96d47c'},siege:{icon:'◆',color:'#e99a5c'},barrage:{icon:'⋮',color:'#ffdca1'},storm:{icon:'ϟ',color:'#93a5ff'},overload:{icon:'✦',color:'#e2a1ff'},deepFrost:{icon:'❄',color:'#70d5ff'},frostField:{icon:'❆',color:'#c0f6ea'},demolition:{icon:'✹',color:'#ff9b55'},minefield:{icon:'••',color:'#d9bc72'},harpoon:{icon:'➶',color:'#e7d39e'},repeater:{icon:'»',color:'#d4b979'},inferno:{icon:'☀',color:'#ff7448'},wildfire:{icon:'≋',color:'#ff9b55'}};
   function towerDefinition(tower,definitions=TOWERS){
     const def={...definitions[tower.type],...(tower.branch?UPGRADES[tower.branch]:{}),...(tower.finalUpgrade?UPGRADES[tower.finalUpgrade]:{})},terrain=CARD_LIBRARY[tower.tileType];
+    const ultimate=tower.ultimate&&ULTIMATES[tower.type];if(ultimate){def.name=ultimate.name;def.damage=(def.damage||0)*(ultimate.damageFactor||1);def.range=(def.range||0)*(ultimate.rangeFactor||1);def.cooldown=(def.cooldown||1)*(ultimate.cooldownFactor||1);if(def.slow)def.slow*=ultimate.slowFactor||1;if(def.splash)def.splash+=ultimate.splashBonus||0;if(def.chain)def.chain+=ultimate.chainBonus||0;if(def.jumpRange)def.jumpRange+=ultimate.jumpBonus||0;if(def.bossMultiplier)def.bossMultiplier*=ultimate.bossFactor||1;}
     def.range=Math.round(def.range*(terrain?.towerRange||1));
     def.damage=def.damage*(tower.type==='archer'?(terrain?.archerDamage||1):1)*(terrain?.towerDamage||1)*(tower.supportDamage||1);
     def.damage=Number(def.damage.toFixed(2));
@@ -59,5 +84,5 @@ const HexData=(()=>{
     const full=state.phase==='build'&&!state.waveRunning&&tower.builtOnWave===state.wave;
     return {amount:full?tower.paid:Math.floor(tower.paid*.5),percent:full?100:50};
   }
-  return {CARD_LIBRARY,TOWERS,UPGRADES,BRANCH_VISUALS,towerDefinition,availableUpgrades,towerRefund};
+  return {CARD_LIBRARY,TOWERS,UPGRADES,ULTIMATES,BRANCH_VISUALS,towerDefinition,availableUpgrades,towerRefund};
 })();

@@ -83,9 +83,10 @@ function create(svg,commands){
 
     drawFreezeAuras();drawSelectedRange();
     hintLayer.innerHTML='';scene=hintLayer;drawUpgradeHints();scene=worldLayer;
+    for(const mine of state.mines||[]) drawMine(mine);
     for(const e of state.enemies) drawEnemy(e);
     for(const p of state.projectiles) drawProjectile(p);
-    const nextObjectKey=JSON.stringify([[...state.map.values()].map(t=>[t.q,t.r,t.rotation,t.slots,t.income,t.buildings,t.towers.map(tw=>[tw?.type,tw?.branch,tw?.finalUpgrade])]),state.selectedSlot,state.selectedBuilding]);
+    const nextObjectKey=JSON.stringify([[...state.map.values()].map(t=>[t.q,t.r,t.rotation,t.slots,t.income,t.buildings,t.towers.map(tw=>[tw?.type,tw?.branch,tw?.finalUpgrade,tw?.ultimate])]),state.selectedSlot,state.selectedBuilding]);
     if(nextObjectKey!==objectKey){
       objectKey=nextObjectKey;objectLayer.innerHTML='';scene=objectLayer;
       for(const tile of state.map.values()) drawTile(tile,'objects');
@@ -173,8 +174,8 @@ function create(svg,commands){
       commands.selectTower(tile.q,tile.r,index);
     });
     const base=document.createElementNS(NS,'circle');base.setAttribute('cx',p.x);base.setAttribute('cy',p.y);base.setAttribute('r',14);base.setAttribute('fill','#202821');base.setAttribute('stroke',def.color);base.setAttribute('stroke-width',3);g.appendChild(base);
-    const visual=HexData.BRANCH_VISUALS[tw.branch],icon=visual?.icon||(tw.type==='archer'?'A':tw.type==='catapult'?'K':tw.type==='freeze'?'❄':'⚡');
-    if(visual){base.setAttribute('stroke',visual.color);const ring=document.createElementNS(NS,'circle');ring.setAttribute('cx',p.x);ring.setAttribute('cy',p.y);ring.setAttribute('r',17);ring.setAttribute('fill','none');ring.setAttribute('stroke',tw.finalUpgrade?'#ffe39a':visual.color);ring.setAttribute('stroke-width',1.5);g.appendChild(ring);}
+    const visual=HexData.BRANCH_VISUALS[tw.branch],icon=visual?.icon||(tw.type==='archer'?'A':tw.type==='catapult'?'K':tw.type==='freeze'?'❄':tw.type==='mine'?'✹':tw.type==='ballista'?'➶':tw.type==='flame'?'♨':'⚡');
+    if(visual){base.setAttribute('stroke',visual.color);const ring=document.createElementNS(NS,'circle');ring.setAttribute('cx',p.x);ring.setAttribute('cy',p.y);ring.setAttribute('r',tw.ultimate?19:17);ring.setAttribute('fill','none');ring.setAttribute('stroke',tw.ultimate?'#8de8ff':tw.finalUpgrade?'#ffe39a':visual.color);ring.setAttribute('stroke-width',tw.ultimate?3:1.5);g.appendChild(ring);}
     const tx=text(p.x,p.y+5,icon,14,visual?.color||def.color,'800');g.appendChild(tx);
     if(tw.branch){const badge=document.createElementNS(NS,'circle');badge.setAttribute('cx',p.x+11);badge.setAttribute('cy',p.y+12);badge.setAttribute('r',6);badge.setAttribute('fill','#172019');badge.setAttribute('stroke',visual.color);g.appendChild(badge);g.appendChild(text(p.x+11,p.y+15,String(tw.level),8,'#fff','700'));}
     const title=document.createElementNS(NS,'title');title.textContent=`${def.name} · Stufe ${tw.level}${tw.branch?' · '+HexData.UPGRADES[tw.branch].name:''}`;g.appendChild(title);scene.appendChild(g);
@@ -183,12 +184,16 @@ function create(svg,commands){
   function drawEnemy(e){
     const g=document.createElementNS(NS,'g');
     const c=document.createElementNS(NS,'circle');c.setAttribute('cx',e.x);c.setAttribute('cy',e.y);c.setAttribute('r',e.type==='boss'?15:9);c.setAttribute('fill',e.slowFactor<1?'#79cdd9':e.type==='boss'?'#934f9e':e.type==='armored'?'#78818c':e.type==='swarm'?'#b87832':'#8d3c34');c.setAttribute('stroke','#26120f');c.setAttribute('stroke-width',2);g.appendChild(c);
-    const w=24,h=4; const bg=document.createElementNS(NS,'rect');bg.setAttribute('x',e.x-w/2);bg.setAttribute('y',e.y-17);bg.setAttribute('width',w);bg.setAttribute('height',h);bg.setAttribute('fill','#321a18');g.appendChild(bg);
-    const hp=document.createElementNS(NS,'rect');hp.setAttribute('x',e.x-w/2);hp.setAttribute('y',e.y-17);hp.setAttribute('width',w*Math.max(0,e.hp/e.maxHp));hp.setAttribute('height',h);hp.setAttribute('fill','#78b95f');g.appendChild(hp);scene.appendChild(g);
+    const w=24,h=3,pools=[['hp','maxHp','#78b95f'],['armorHp','maxArmorHp','#df8b3a'],['magicHp','maxMagicHp','#69aee8']].filter(([,max])=>e[max]>0);
+    pools.forEach(([field,max,color],i)=>{const y=e.y-17-i*4,bg=document.createElementNS(NS,'rect');bg.setAttribute('x',e.x-w/2);bg.setAttribute('y',y);bg.setAttribute('width',w);bg.setAttribute('height',h);bg.setAttribute('fill','#321a18');g.appendChild(bg);const bar=document.createElementNS(NS,'rect');bar.setAttribute('x',e.x-w/2);bar.setAttribute('y',y);bar.setAttribute('width',w*Math.max(0,(e[field]||0)/e[max]));bar.setAttribute('height',h);bar.setAttribute('fill',color);g.appendChild(bar);});scene.appendChild(g);
   }
 
+  function drawMine(mine){const g=document.createElementNS(NS,'g'),outer=document.createElementNS(NS,'circle');outer.setAttribute('cx',mine.x);outer.setAttribute('cy',mine.y);outer.setAttribute('r',7);outer.setAttribute('fill','#3a3023');outer.setAttribute('stroke',mine.color||'#e6a75f');outer.setAttribute('stroke-width',2);g.appendChild(outer);g.appendChild(text(mine.x,mine.y+3,'✹',8,'#ffe0a3','700'));scene.appendChild(g);}
+
   function drawProjectile(p){
-    if(p.kind==='chain'){
+    if(p.kind==='blast'){
+      const c=document.createElementNS(NS,'circle');c.setAttribute('cx',p.x);c.setAttribute('cy',p.y);c.setAttribute('r',p.r);c.setAttribute('fill',p.color);c.setAttribute('fill-opacity','.18');c.setAttribute('stroke',p.color);c.setAttribute('stroke-width','3');scene.appendChild(c);
+    }else if(p.kind==='chain'){
       for(let i=0;i<p.pts.length-1;i++){const l=line(p.pts[i].x,p.pts[i].y,p.pts[i+1].x,p.pts[i+1].y,p.color,3);scene.appendChild(l);}
     }else scene.appendChild(line(p.x1,p.y1,p.x2,p.y2,p.color,3));
   }
@@ -204,4 +209,3 @@ function create(svg,commands){
 }
 return {create};
 })();
-

@@ -6,7 +6,7 @@ const HexModelMap=(()=>{
   const ALL_MODELS={
     tiles:['base','rescue','fog',...TILE_MODELS],
     landmarks:['boss','shrine','treasure'],
-    towers:['archer','catapult','chain','freeze'],
+    towers:['archer','catapult','chain','freeze','mine','ballista','flame'],
     enemies:['normal','armored','swarm','boss']   // optional: ohne Datei zeichnet der Renderer Kugeln
   };
   const sameRoads=(a,b)=>a.length===b.length&&[...a].sort().join()===[...b].sort().join();

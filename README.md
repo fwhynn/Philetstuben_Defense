@@ -2,7 +2,7 @@
 
 Ein Tower-Defense-Roguelite auf einer Hex-Karte, die du selbst baust. Du legst Straßen-Hexe aus einem Deck, bestimmst damit den Weg der Gegner und verteidigst deine Base mit Türmen. Die Darstellung ist stilisiertes 3D im Stil von Dorfromantik.
 
-> **Status:** spielbarer Prototyp (V0.7-dev). Kernschleife, Kartenbau, Türme, Exploration, Sonderfelder und Bosse laufen. Balancing, Meta-Progression und viele geplante Inhalte fehlen noch.
+> **Status:** spielbarer Prototyp (V0.7-dev). Kernschleife, Kartenbau, fünf Türme, Loadouts, erste Meta-Progression, Exploration, Sonderfelder und Bosse laufen. Balancing und viele geplante Inhalte fehlen noch.
 
 ## Spielidee
 
@@ -56,7 +56,7 @@ Ohne WebGL fällt das Spiel automatisch auf die SVG-Ansicht zurück.
 ## Inhalte
 
 - **18 Hex-Karten** in fünf Raritäten, von der einfachen Geraden bis zur Kriegskreuzung mit Schadensbonus.
-- **4 Türme** mit je zwei Upgrade-Zweigen und einer Endstufe: Archer, Katapult, Kettenblitz, Freeze.
+- **5 Starttürme** plus freischaltbare Balliste und Flammenturm, jeweils mit zwei Upgrade-Zweigen und einer Endstufe. Pro Run werden genau fünf ausgewählt.
 - **3 Gebäude** auf Dorf-Hexen: Haus (Gold), Schmiede (Schaden), Markt (Rabatt).
 - **Gegnertypen** mit Rüstungsarten (normal, gepanzert, Schwarm) und ein Boss.
 - **Exploration** mit Sichtradius, Nebel und seedbasierten Sonderfeldern. Der Startwert (Seed) wiederholt einen Run.
@@ -106,8 +106,8 @@ Noch fehlend: Gebäudemodelle, Gegnermodelle (Fantasy: Goblins, Orks, Obsidian-W
 Fest vorgemerkt, noch nicht umgesetzt:
 
 - Verschiedene Starthelden und Startfestungen mit eigenen Effekten
-- Meta-Progression mit Diamanten und freischaltbaren Inhalten
-- Weitere Biome, Karten, Türme (Minenleger, Nekromant) und Bossbeute
+- Meta-Arsenal mit freischaltbaren Inhalten; Diamanten und Profilstatistiken funktionieren bereits
+- Weitere Biome, Karten, Türme (unter anderem Nekromant) und Bossbeute
 - Schwierigkeitsstufen und ein Hardcore-Modus
 - Speichern und Laden
 

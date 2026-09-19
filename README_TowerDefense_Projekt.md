@@ -12,7 +12,7 @@ Aktuell implementiert:
 - Browser-/SVG-Prototyp; Start mit 20 HP, 70 Gold, fünf Deckkarten. Drei ziehen, ein Hex legen, bauen und Wave überleben; alle zwei Waves Kartenreward.
 - Straßenanschlüsse, längengewichtete kürzeste Wege und Aufteilung gleich langer Wege. Letzter Eingang darf nicht geschlossen werden; Rettungshex bei blockiertem Deck.
 - Drehen per R mit Hinweis an der Hovervorschau. Turmverkauf für 50 % inklusive aller Upgrades; in aktueller ursprünglicher Bauphase vor Wave weiterhin 100 % Rückgabe.
-- Archer, Katapult, Kettenblitz und Freeze-Aura; zwei Upgradezweige plus passende finale Stufe pro Turm. Bauen auch während Waves, kontextuelle Turm-/Gebäudemenüs.
+- Archer, Katapult, Kettenblitz, Freeze-Aura und Minenleger; zwei Upgradezweige plus passende finale Stufe pro Turm. Jeder Run bestätigt ein Profil-gespeichertes Loadout aus genau fünf unterschiedlichen freigeschalteten Turmtypen. Bauen auch während Waves, kontextuelle Turm-/Gebäudemenüs.
 - Dorf mit automatischem Einkommen; optional Haus, Schmiede oder Markt. Gold-/Wave-/Deckplanung in Header-Dropdowns, Leertaste zum Start und F für 2×.
 - Klare Sicht Radius 2, Nebel bis Gesamtradius 6 von jedem gesetzten Hex, danach unsichtbar. Sparsame ursprüngliche Hex-Ansicht; dynamische seedbasierte Sonderfelder.
 - Alte T-Kreuzung in Y-Kreuzung umbenannt, echte T-Kreuzung und Sechserkreuzung ergänzt. Sonderfelder haben feste Straßen/Rotation und werden automatisch durch passende Nachbarstraßen aktiviert; keine Handkarte überschreibt sie. Bossfelder immer sechs Öffnungen.
@@ -1607,7 +1607,6 @@ Aktueller Teststand: 60 Tests und JS-Syntaxprüfungen bestanden. Fragezeichen nu
 
 
 Aktueller Ausbau: 64 Tests und Syntaxprüfungen bestanden. Drei verdeckte Shrine-Boni umgesetzt (40 % Entfernen, 40 % zusätzliche Karte, 20 % Epic). Sonderfelder unverändert 4,5 %, davon Schatz 55 %, Shrine 30 %, Boss 15 %. Nächster Ausbau: Sonderfeld-/Bossloot-Pool und Vorbereitung 3D-Renderer.
-
 
 
 

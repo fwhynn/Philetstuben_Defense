@@ -23,6 +23,7 @@
           <div class="statPopup"><h2>Waveplanung</h2><p id="waveForecast" class="hint"></p><p id="liveWaveInfo" class="hint"></p></div>
         </details>
         <details id="deckDropdown" class="statDetails"><summary aria-label="Deck und Kartenstapel öffnen">🃏 <strong id="deckCount">5</strong> ▾</summary><div class="statPopup"><h2>Deck &amp; Kartenstapel</h2><p class="hint">Die Ziehreihenfolge bleibt verborgen.</p><div id="deckOverview" class="deckOverview"></div></div></details>
+        <details class="statDetails"><summary aria-label="Profilfortschritt öffnen">◆ <strong id="profileDiamonds">0</strong> ▾</summary><div class="statPopup"><h2>Meta-Fortschritt</h2><p id="profileStats" class="hint"></p><p class="hint">Diamanten werden am Runende ausgezahlt und im Arsenal für neue Turmtypen verwendet.</p><button id="openArsenalBtn" class="secondary">Arsenal öffnen</button></div></details>
       </div>
     </header>
 
@@ -60,7 +61,7 @@
         <section class="panel">
           <h2>2. Bauphase</h2>
           <div id="towerMenu" class="towerMenu"></div>
-          <p class="hint">↑ Upgrade bezahlbar · 2 Spezialisierung · 3 finale Stufe. Turm anklicken für Werte und Upgrades.</p>
+          <p class="hint">↑ Upgrade bezahlbar · 2 Spezialisierung · 3 Zweigfinale · 4 freischaltbare Meta-Stufe. Turm anklicken für Werte und Upgrades.</p>
           <p class="hint">Bauen auch während der Wave. Rückgabe in der aktuellen Bauphase: 100 %. Danach Verkauf: 50 % inklusive Upgrades.</p>
         </section>
 
@@ -78,11 +79,12 @@
         </section>
 
         <section class="panel rules">
-          <h2>V0.1-Regeln</h2>
+          <h2>Spielregeln</h2>
           <ul>
             <li>Base hat 20 HP.</li>
             <li>Jedes offene Straßenende ist ein Spawnpunkt.</li>
-            <li>Gegner nehmen den kürzesten Weg zur Base.</li>
+            <li>Alle 10 Waves erscheint ein Boss an einem zufälligen Eingang. Bosswellen werden vor dem Start angekündigt.</li>
+            <li>Jeder Gegner entscheidet an jeder Gabelung zufällig zwischen allen Wegen zur Base. Sackgassen und Schleifen werden ausgeschlossen.</li>
             <li>Alle 2 Waves: 1 von 3 neuen Hexkarten ins Deck.</li>
             <li>Sicht ab jedem gesetzten Hex: Radius 2 klar, bis Radius 6 Nebel, danach unsichtbar. ? = unbekanntes Sonderfeld. ◆ Schatz, ✦ Shrine, ☠ Boss. Feste Sonderfelder werden durch passende Nachbarstraßen angeschlossen.</li>
           </ul>
@@ -100,9 +102,40 @@
     </div>
   </div>
 
+  <div id="loadoutOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="loadoutTitle">
+    <div class="loadoutBox">
+      <p class="eyebrow">RUNVORBEREITUNG</p>
+      <h2 id="loadoutTitle">Wähle fünf Türme</h2>
+      <p>Nur diese fünf Turmtypen stehen im nächsten Run zur Verfügung. Sie werden weiterhin mit Gold gebaut.</p>
+      <div class="loadoutSummary"><strong id="loadoutCount">5/5 gewählt</strong><span id="diamondCount">◆ 0 Diamanten</span></div>
+      <div id="loadoutPresets" class="loadoutPresets"></div>
+      <div id="loadoutChoices" class="loadoutChoices"></div>
+      <p id="loadoutWarning" class="loadoutWarning" aria-live="polite"></p>
+      <div class="loadoutActions"><button id="cancelLoadoutBtn" class="secondary">Zurück zum Run</button><button id="confirmLoadoutBtn" class="primary">Run mit diesem Loadout starten</button></div>
+    </div>
+  </div>
+
+  <div id="gameOverOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle">
+    <div class="gameOverBox">
+      <p class="eyebrow">RUN BEENDET</p><h2 id="gameOverTitle">Die Bastion ist gefallen</h2>
+      <p id="gameOverResult"></p><div id="diamondBreakdown" class="diamondBreakdown"></div>
+      <div class="profileTotals"><span>◆ <strong id="gameOverDiamonds">0</strong> Diamanten gesamt</span><span>Bestmarke: Wave <strong id="gameOverBest">0</strong></span></div>
+      <div class="loadoutActions"><button id="changeLoadoutBtn" class="secondary">Loadout ändern</button><button id="retryLoadoutBtn" class="primary">Noch einmal mit diesem Loadout</button></div>
+    </div>
+  </div>
+
+  <div id="arsenalOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="arsenalTitle">
+    <div class="loadoutBox"><p class="eyebrow">META-FORTSCHRITT</p><h2 id="arsenalTitle">Arsenal</h2><p>Schalte neue Turmrollen und ihre vierte Upgrade-Stufe dauerhaft frei. Freigeschaltete Stufe-4-Upgrades werden im Run zusätzlich mit Gold gebaut.</p>
+      <div class="loadoutSummary"><strong>Verfügbare Freischaltungen</strong><span>◆ <strong id="arsenalDiamonds">0</strong> Diamanten</span></div>
+      <div id="arsenalChoices" class="arsenalChoices"></div><p id="arsenalMessage" class="loadoutWarning" aria-live="polite"></p>
+      <div class="loadoutActions"><button id="closeArsenalBtn" class="primary">Schließen</button></div>
+    </div>
+  </div>
+
   <script src="sound.js"></script>
   <script src="camera.js"></script>
   <script src="data.js"></script>
+  <script src="profile.js"></script>
   <script src="map.js"></script>
   <script src="random.js"></script>
   <script src="waves.js"></script>
@@ -121,7 +154,3 @@
   </script>
 </body>
 </html>
-
-
-
-

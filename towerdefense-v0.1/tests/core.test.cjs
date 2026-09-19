@@ -4,17 +4,7 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 const path=require('node:path');
 
-function load(){
-  const elements=new Map();
-  function element(){return {textContent:'',innerHTML:'',style:{},children:[],attributes:{},listeners:{},classList:{add(){},remove(){}},setAttribute(name,value){this.attributes[name]=value;},addEventListener(name,fn){this.listeners[name]=fn;},appendChild(e){this.children.push(e);}};}
-  const timers=new Map();let next=1;
-  const context={document:{getElementById(id){if(!elements.has(id)) elements.set(id,element());return elements.get(id);},createElement:element,createElementNS:element,addEventListener(){}},performance:{now:()=>0},requestAnimationFrame(){},setTimeout(fn){const id=next++;timers.set(id,fn);return id;},clearTimeout(id){timers.delete(id);},Math};
-  let source=fs.readFileSync(path.join(__dirname,'../game.js'),'utf8');
-  for(const file of ['data.js','map.js','random.js','waves.js','combat.js','deck.js','buildings.js','exploration.js','camera.js','svg-renderer.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../'+file),'utf8'),context);
-  source=source.replace('newRun(); requestAnimationFrame(frame);','newRun(); globalThis.api={get state(){return state;},newRun,canPlace,rotatedRoads,neighbor,edgePoint,axialToPixel:axialToWorld,buildGraph,pathToBase,spawnSources,startWave,update,drawHand,showRewards,placeTile,finishRemoval,renderAll,endWave,showBossReward,finishBossReward,CARD_LIBRARY};');
-  vm.runInNewContext(source.replace('newRun(); globalThis.api=', 'newRun(); globalThis.upgradeSelectedTower=upgradeSelectedTower;globalThis.selectSlot=selectSlot;globalThis.sellSelectedTower=sellSelectedTower;globalThis.buyTower=buyTower;globalThis.slotPositions=slotPositions; globalThis.nextSourcePoints=nextSourcePoints; globalThis.api='),context);
-  return {a:context.api,upgradeSelectedTower:context.upgradeSelectedTower,selectSlot:context.selectSlot,buyTower:context.buyTower,sellSelectedTower:context.sellSelectedTower,slotPositions:context.slotPositions,nextSourcePoints:context.nextSourcePoints,timers,elements};
-}
+const {load}=require('./helpers/game.cjs');
 
 test('all rotations agree with neighbor direction and reciprocal road connections',()=>{
   const {a}=load();
@@ -80,10 +70,20 @@ test('wave waits for pending spawns and ends in an explicit reward phase',()=>{
   a.update(0,0);assert.equal(a.state.waveRunning,true);
   a.state.projectiles=[{ttl:.1}];a.state.pendingSpawns=0;a.update(0,0);assert.equal(a.state.phase,'reward');assert.equal(a.state.waveRunning,false);assert.equal(a.state.projectiles.length,0);
 });
+test('untriggered mines are cleared when a wave ends',()=>{
+  const {a}=load();a.state.phase='wave';a.state.waveRunning=true;a.state.wave=1;a.state.pendingSpawns=0;a.state.enemies=[];a.state.mines=[{id:1,x:0,y:0},{id:2,x:0,y:0}];a.update(0,0);assert.equal(a.state.mines.length,0);assert.equal(a.state.waveRunning,false);
+});
 
 test('game over cancels pending spawns and disables the run',()=>{
-  const {a,timers}=load();a.state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:0,towers:[]});a.state.phase='build';a.startWave();a.state.hp=0;a.update(0,0);
+  const {a,timers,elements}=load();a.state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:0,towers:[]});a.state.phase='build';a.startWave();a.state.hp=0;a.update(0,0);
   assert.equal(a.state.phase,'gameover');assert.equal(timers.size,0);assert.equal(a.state.waveRunning,false);
+  assert.match(elements.get('gameOverResult').textContent,/Wave 1/);assert.match(elements.get('diamondBreakdown').innerHTML,/Wave-Fortschritt/);assert.equal(a.state.metaSettled,true);
+});
+
+test('game over pays accumulated run progress once',()=>{
+  const {a,elements}=load();a.state.phase='wave';a.state.waveRunning=true;a.state.wave=23;a.state.hp=0;a.state.earnedMeta={normalKills:99,periodicBosses:2,explorationBosses:1};
+  a.update(0,0);assert.match(elements.get('diamondBreakdown').innerHTML,/\+11/);assert.match(elements.get('diamondBreakdown').innerHTML,/\+13/);assert.match(elements.get('diamondBreakdown').innerHTML,/\+4/);assert.equal(elements.get('gameOverDiamonds').textContent,28);
+  a.update(0,0);assert.equal(elements.get('gameOverDiamonds').textContent,28);
 });
 
 test('a deck with no legal placement advances to building without losing cards',()=>{
@@ -92,19 +92,14 @@ test('a deck with no legal placement advances to building without losing cards',
   assert.equal(a.state.phase,'build');assert.equal(a.state.drawPile.length+a.state.discard.length+a.state.hand.length,before);
 });
 
-test('equal shortest branches alternate per entrance and ignore longer alternatives',()=>{
+test('each enemy chooses independently among every non-cyclic branch that can reach base',()=>{
   const {a,nextSourcePoints}=load();
   const graph=new Map([['1,1',['0,1','1,0','2,1']],['0,1',['0,0']],['1,0',['0,0']],['2,1',['2,0']],['2,0',['1,0']],['0,0',[]]]);
   const routes=new Map([...graph].map(([id,nexts])=>[id,nexts.map(next=>{const [q,r]=id.split(',').map(Number),[nq,nr]=next.split(',').map(Number);return {next,cost:1,points:[a.axialToPixel(q,r),a.axialToPixel(nq,nr)]};})]));
   const makeSource=()=>({tile:{q:1,r:1},points:[{x:0,y:0},a.axialToPixel(1,1)],routes:{graph:routes,distances:new Map([['1,1',2],['0,1',1],['1,0',1],['2,1',3],['2,0',2],['0,0',0]])},branchCounts:new Map()});
-  const source=makeSource(),left=a.axialToPixel(0,1),right=a.axialToPixel(1,0);
-  for(let i=0;i<10;i++){
-    const points=nextSourcePoints(source);
-    assert.equal(points.length,4);
-    assert.equal(points[2].x,(i%2===0?left:right).x);
-    assert.equal(points[2].y,(i%2===0?left:right).y);
-  }
-  assert.equal(nextSourcePoints(makeSource())[2].x,left.x);
+  const source=makeSource(),left=a.axialToPixel(0,1),right=a.axialToPixel(1,0),detour=a.axialToPixel(2,1),seen=new Set();
+  for(let i=0;i<120;i++){const points=nextSourcePoints(source);assert.ok(points.length>=4);assert.deepEqual(points.at(-1),a.axialToPixel(0,0));if(points.some(p=>p.x===left.x&&p.y===left.y))seen.add('left');if(points.some(p=>p.x===right.x&&p.y===right.y))seen.add('right');if(points.some(p=>p.x===detour.x&&p.y===detour.y))seen.add('detour');}
+  assert.deepEqual([...seen].sort(),['detour','left','right']);
 });
 
 test('construction undo refunds exactly once and allows rebuilding in the same phase',()=>{
@@ -156,7 +151,7 @@ test('a tower can be selected and bought during a wave and immediately participa
   selectSlot(1,0,0);buyTower('archer');a.state.selectedTower={q:1,r:0,index:0};assert.equal(a.state.gold,45);assert.ok(tile.towers[0]);
   const p=slotPositions(tile)[0];
   const enemy={alive:true,hp:35,maxHp:35,index:0,t:0,speed:0,points:[p,{x:p.x+10,y:p.y}],x:p.x,y:p.y};
-  a.state.enemies.push(enemy);a.update(0,1000);assert.equal(enemy.hp,26);
+  a.state.enemies.push(enemy);a.update(0,1000);assert.equal(enemy.hp,23.75);
   a.state.phase='build';a.state.waveRunning=false;sellSelectedTower();assert.equal(a.state.gold,57);assert.equal(tile.towers[0],null);
 });
 
@@ -177,31 +172,39 @@ test('wave animation keeps slot click targets and gold changes keep purchase but
   const before=objects.children.length;a.update(0,100);
   assert.equal(objects.children.length,before);assert.ok(objects.children.includes(slot));
   slot.listeners.click();
-  const button=elements.get('towerMenu').children.at(-4);
+  const button=elements.get('towerMenu').children[0];
   a.state.gold+=3;a.update(0,200);
-  assert.equal(elements.get('towerMenu').children.at(-4),button);
+  assert.equal(elements.get('towerMenu').children[0],button);
   button.listeners.click();assert.equal(tile.towers[0].type,'archer');assert.equal(a.state.gold,48);
+});
+
+test('every run has exactly five tower choices and rejects towers outside its loadout',()=>{
+  const {a,elements,buyTower}=load();
+  assert.deepEqual(Array.from(a.state.towerLoadout),['archer','catapult','chain','freeze','mine']);
+  assert.equal(elements.get('towerMenu').children.length,5);
+  const tile={q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[null]};a.state.map.set('1,0',tile);a.state.phase='build';a.state.selectedSlot={q:1,r:0,index:0};
+  a.state.towerLoadout=['archer','catapult','chain','freeze','mine'];buyTower('unknown');assert.equal(tile.towers[0],null);
+  a.newRun(['archer','archer']);assert.equal(a.state.towerLoadout.length,5);assert.equal(new Set(a.state.towerLoadout).size,5);
 });
 
 test('forecast uses the same wave and gold rules as actual spawning and completion',()=>{
   const context={};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../waves.js'),'utf8')+';globalThis.plan=HexWaves.plan;',context);
   const first=context.plan(1,4);assert.equal(first.count,7);assert.equal(first.hp,35);assert.equal(first.killGold,21);assert.equal(first.maxGold,35);
-  const late=context.plan(100,0);assert.equal(late.count,24);assert.equal(late.maxGold,82);
+  const late=context.plan(100,0);assert.equal(late.count,205);assert.equal(late.maxGold,675);
   const {a,elements}=load();a.state.income=4;a.state.wave=1;a.state.phase='wave';a.state.waveRunning=true;a.state.pendingSpawns=0;
   a.update(0,0);assert.equal(a.state.gold,84);assert.equal(a.state.goldEarned.completion,10);assert.equal(a.state.goldEarned.income,4);
   assert.ok(elements.get('goldForecast').textContent.includes('Maximal +41 Gold'));
 });
 
-test('real road lengths split symmetric routes but exclude a longer detour',()=>{
+test('real road branches include longer valid detours without allowing loops',()=>{
   const {a,nextSourcePoints}=load();a.state.map.clear();
   for(const tile of [{q:0,r:0,type:'base',roads:[0,5]},{q:0,r:1,type:'empty',roads:[0,2]},{q:1,r:0,type:'empty',roads:[3,5]},{q:1,r:1,type:'tee',roads:[2,3,5]}]) a.state.map.set(`${tile.q},${tile.r}`,tile);
   let source=a.spawnSources()[0];
   const left=a.axialToPixel(0,1),right=a.axialToPixel(1,0);
   const contains=(points,p)=>points.some(v=>Math.hypot(v.x-p.x,v.y-p.y)<1e-8);
-  const first=nextSourcePoints(source),second=nextSourcePoints(source);
-  assert.notEqual(contains(first,left),contains(second,left));assert.notEqual(contains(first,right),contains(second,right));
+  let usesLeft=false,usesRight=false;for(let i=0;i<80;i++){const points=nextSourcePoints(source);usesLeft||=contains(points,left);usesRight||=contains(points,right);}assert.ok(usesLeft&&usesRight);
   a.state.map.get('1,0').type='longRoad';source=a.spawnSources()[0];
-  for(let i=0;i<8;i++){const points=nextSourcePoints(source);assert.ok(contains(points,left));assert.ok(!contains(points,right));}
+  usesLeft=false;usesRight=false;for(let i=0;i<80;i++){const points=nextSourcePoints(source);usesLeft||=contains(points,left);usesRight||=contains(points,right);}assert.ok(usesLeft&&usesRight);
 });
 
 test('all road geometries meet exact edges and the long road really increases travel distance',()=>{
@@ -220,7 +223,8 @@ test('wave profiles are predictable and introduce swarm and armor gradually',()=
   const context={};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../waves.js'),'utf8')+';globalThis.plan=HexWaves.plan;',context);
   assert.ok(context.plan(1).enemies.every(e=>e.type==='normal'));
   assert.ok(context.plan(3).enemies.some(e=>e.type==='swarm'));assert.ok(!context.plan(3).enemies.some(e=>e.armor));
-  const fourth=context.plan(4);assert.equal(fourth.enemies.length,fourth.count);assert.ok(fourth.enemies.some(e=>e.armor));assert.equal(fourth.maxGold,fourth.count*3+10);
+  const fourth=context.plan(4);assert.equal(fourth.enemies.length,fourth.count);assert.ok(fourth.enemies.some(e=>e.armorHp>0));assert.equal(fourth.maxGold,fourth.count*3+10);
+  assert.ok(context.plan(5).enemies.some(e=>e.magicHp>0));
 });
 
 test('branch choice charges once and same-phase undo includes the upgrade purchase',()=>{
@@ -239,6 +243,12 @@ test('buying a tower leaves its menu closed; clicking the placed tower selects i
   assert.ok(tower);tower.listeners.click({stopPropagation(){}});assert.equal(a.state.selectedTower.q,1);assert.equal(a.state.selectedTower.index,0);
 });
 
+test('tower panel exposes three ordered target priorities and swaps duplicate choices',()=>{
+  const {a,elements,selectSlot,buyTower}=load();const tile={q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[null]};a.state.map.set('1,0',tile);a.state.phase='build';selectSlot(1,0,0);buyTower('archer');a.state.selectedTower={q:1,r:0,index:0};a.renderAll();
+  const targeting=elements.get('towerUpgrades').children[0];assert.equal(targeting.className,'targetPriorities');assert.equal(targeting.children.length,3);
+  const first=targeting.children[0].children[0];first.value='mostHealth';first.listeners.change();assert.deepEqual(Array.from(tile.towers[0].targetPriority),['mostHealth','closestBase','boss']);
+});
+
 test('final upgrade requires the chosen branch, charges once and prevents further upgrades',()=>{
   const {a,buyTower,selectSlot,upgradeSelectedTower,sellSelectedTower}=load();
   a.state.gold=200;const tile={q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[null]};a.state.map.set('1,0',tile);a.state.phase='build';
@@ -249,10 +259,17 @@ test('final upgrade requires the chosen branch, charges once and prevents furthe
   upgradeSelectedTower('eagleEye');assert.equal(a.state.gold,80);sellSelectedTower();assert.equal(a.state.gold,200);
 });
 
+test('fourth tower stage is blocked by meta progression and costs run gold after unlock',()=>{
+  const {a,data,selectSlot,buyTower,upgradeSelectedTower}=load();a.state.gold=400;const tile={q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[null]};a.state.map.set('1,0',tile);a.state.phase='build';selectSlot(1,0,0);buyTower('archer');a.state.selectedTower={q:1,r:0,index:0};upgradeSelectedTower('marksman');upgradeSelectedTower('eagleEye');const before=a.state.gold;
+  upgradeSelectedTower('ultimate:archer');assert.equal(tile.towers[0].level,3);assert.equal(a.state.gold,before);
+  a.state.ultimateUnlocks.push('ultimate:archer');upgradeSelectedTower('ultimate:archer');assert.equal(tile.towers[0].level,4);assert.equal(a.state.gold,before-data.ULTIMATES.archer.cost);assert.equal(tile.towers[0].ultimate,'archer');assert.ok(data.towerDefinition(tile.towers[0]).damage>data.towerDefinition({...tile.towers[0],ultimate:null}).damage);
+});
+
 test('every tower offers two branches and each branch exactly one final upgrade',()=>{
   const context={};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../data.js'),'utf8')+';globalThis.data=HexData;',context);
   const data=context.data;
   for(const type of Object.keys(data.TOWERS)){
+    assert.ok(data.ULTIMATES[type]);assert.ok(data.ULTIMATES[type].cost>0);
     const initial=data.availableUpgrades({type});assert.equal(initial.length,2);
     for(const [branch] of initial){
       assert.ok(data.BRANCH_VISUALS[branch]);const next=data.availableUpgrades({type,branch});assert.equal(next.length,1);
@@ -268,6 +285,12 @@ test('sixth wave reward offers optional removal before drawing and preserves map
   elements.get('rewardChoices').children.at(-1).listeners.click();assert.equal(a.state.phase,'removal');assert.equal(a.state.deck.length,6);
   elements.get('rewardChoices').children.at(-1).listeners.click();assert.equal(a.state.phase,'place');assert.equal(a.state.deck.length,5);assert.equal(a.state.map.size,1);
   assert.equal(a.state.hand.length+a.state.drawPile.length+a.state.discard.length,5);
+});
+
+test('deck thinning sorts cards from Common through Legendary regardless of deck order',()=>{
+  const {a,elements}=load();a.state.deck=['citadel','battlefield','cross','tee','straight'];a.showRemoval();
+  const labels=elements.get('rewardChoices').children.map(card=>(card.className.match(/rarity-([^ ]+)/)||[])[1]);
+  assert.deepEqual(labels,['common','uncommon','rare','epic','legendary']);
 });
 
 test('placement cannot close the last base-connected entrance but may form a loop with another exit',()=>{
@@ -311,7 +334,7 @@ test('boss joins the normal next wave and starts on its own triggered hex',()=>{
   const {a}=load();a.state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:0,towers:[]});
   const landmark={q:1,r:0,type:'boss',claimed:true,status:'ready'};a.state.landmarks=new Map([['1,0',landmark]]);a.state.phase='build';
   assert.equal(a.state.enemies.length,0);a.startWave();assert.equal(a.state.wave,1);assert.equal(landmark.status,'fighting');
-  const boss=a.state.enemies.find(e=>e.type==='boss');assert.ok(boss);const spawn=a.axialToPixel(1,0);assert.equal(boss.x,spawn.x);assert.equal(boss.y,spawn.y);assert.equal(boss.landmarkId,'1,0');assert.equal(boss.maxHp,345);assert.equal(boss.baseDamage,5);assert.equal(boss.killGold,50);assert.equal(a.state.pendingSpawns,7);
+  const boss=a.state.enemies.find(e=>e.type==='boss');assert.ok(boss);const spawn=a.axialToPixel(1,0);assert.equal(boss.x,spawn.x);assert.equal(boss.y,spawn.y);assert.equal(boss.landmarkId,'1,0');assert.equal(boss.maxHp,276);assert.equal(boss.maxArmorHp,69);assert.equal(boss.maxMagicHp,55);assert.equal(boss.baseDamage,5);assert.equal(boss.killGold,50);assert.equal(a.state.pendingSpawns,7);
   const base=a.axialToPixel(0,0);assert.equal(boss.points.at(-1).x,base.x);assert.equal(boss.points.at(-1).y,base.y);
   a.startWave();assert.equal(a.state.enemies.length,1);
 });
@@ -320,7 +343,7 @@ test('boss joins the normal next wave and starts on its own triggered hex',()=>{
 test('placing a boss hex then auto-starting includes the boss once',()=>{
   const {a,elements,timers}=load();a.state.map.clear();a.state.map.set('0,0',{q:0,r:0,type:'base',roads:[0],towers:[],slots:0});
   a.state.landmarks=new Map([['1,0',{q:1,r:0,type:'boss',claimed:false}]]);a.state.hand=['straight'];a.state.selectedCard=0;a.state.rotation=0;a.state.phase='place';elements.get('autoStart').checked=true;
-  a.placeTile(1,0);assert.equal(a.state.landmarks.get('1,0').status,'ready');assert.ok(elements.get('waveForecast').textContent.includes('345 HP'));assert.ok(elements.get('goldForecast').textContent.includes('Bossloot +50'));
+  a.placeTile(1,0);assert.equal(a.state.landmarks.get('1,0').status,'ready');assert.ok(elements.get('waveForecast').textContent.includes('276 Leben + 69 Rüstung + 55 Magieresistenz'));assert.ok(elements.get('goldForecast').textContent.includes('Bossloot +50'));
   const callback=[...timers.values()][0];callback();assert.equal(a.state.enemies.filter(e=>e.type==='boss').length,1);callback();assert.equal(a.state.enemies.filter(e=>e.type==='boss').length,1);
 });
 test('all activated bosses spawn on their own tiles in the same next wave',()=>{
@@ -384,3 +407,4 @@ test('prefab chain connections process multiple shrines before auto-starting the
   const {a,elements,timers}=load();a.state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:0,towers:[]});a.state.landmarks=new Map([3,4].map(q=>[q+',0',{q,r:0,type:'shrine',shrineEffect:'remove',claimed:false,prefab:{type:'straight',roads:[0,3],rotation:0,slots:1}}]));a.state.hand=['straight'];a.state.selectedCard=0;a.state.rotation=0;a.state.phase='place';elements.get('autoStart').checked=true;
   a.placeTile(2,0);assert.equal(a.state.pendingShrine,'3,0');assert.equal(a.state.map.has('4,0'),true);assert.equal(timers.size,0);a.finishRemoval();assert.equal(a.state.pendingShrine,'4,0');assert.equal(a.state.phase,'removal');assert.equal(timers.size,0);a.finishRemoval();assert.equal(a.state.phase,'build');assert.equal(timers.size,1);
 });
+

@@ -30,7 +30,7 @@ Optionaler Auto-Start startet eine Wave nach dem Placement beziehungsweise nach 
 - Nach dem Placement Türme beziehungsweise Gebäude bauen und die Wave starten. Bauen und Tower-Upgrades bleiben auch während der Wave möglich.
 - Nach jeder überlebten Wave: Abschlussgold und laufendes Hex-/Gebäudeeinkommen. Alle zwei Waves eine von drei Karten für das Deck auswählen.
 - Zusätzlich gibt es vorläufig nach dem Reward jeder sechsten Wave eine kostenlose optionale Kartenentfernung. Mindestens fünf Deckkarten müssen verbleiben.
-- Der Run endet bei erschöpften Base-HP. Noch kein Speichern/Laden, kein Meta-Fortschritt und kein endgültiges Siegziel.
+- Der Run endet bei erschöpften Base-HP und zahlt dann Diamanten ins lokale Meta-Profil aus. Laufende Runs können noch nicht gespeichert oder geladen werden; ein endgültiges Siegziel fehlt ebenfalls.
 
 ### Platzierung und Straßen
 
@@ -76,13 +76,16 @@ Listenwerte vor Terrain-, Gebäude- und Upgradeboni:
 | Turm | Preis | Schaden | Reichweite | Schussintervall / Wirkung |
 |---|---:|---:|---:|---|
 | Archer | 25 | 9 | 150 | 0,55 s; Einzelziel |
-| Katapult | 40 | 18 | 190 | 1,35 s; geradlinig durch mehrere Gegner |
+| Katapult | 40 | 18 | 190 | 1,35 s; geradlinig durch maximal drei Gegner (auch mit Upgrades) |
 | Kettenblitz | 45 | 8 | 135 | 0,9 s; bis drei Ziele, Sprungabstand 75 |
 | Freeze | 30 | 0 | 145 | Permanente Aura: Gegner bewegen sich mit 50 % Tempo |
+| Minenleger | 35 | 24 | 150 | Legt während einer Wave stapelbare Wegminen; nicht ausgelöste Minen verschwinden am Wave-Ende |
+| Balliste | 55 | 46 | 235 | 1,9 s; freischaltbarer Elite-/Bosskiller |
+| Flammenturm | 50 | 14 | 115 | 0,7 s; freischaltbarer Flächenschaden im Radius 48 |
 
 Freeze schießt nicht. Seine Aura bleibt leicht sichtbar; mehrere Freeze-Auren stapeln sich nicht, die stärkste Verlangsamung wirkt. Angeclickte Türme zeigen einen halbtransparenten Reichweitenkreis. Nach dem Platzieren öffnet sich kein Upgradefenster automatisch.
 
-Jeder Turm hat zwei alternative Spezialisierungen und anschließend eine zum gewählten Zweig passende finale Stufe:
+Jeder Turm hat zwei alternative Spezialisierungen und anschließend eine zum gewählten Zweig passende finale Stufe. Darüber liegt eine vierte, turmweite Meta-Stufe: Sie muss einmal im Arsenal mit Diamanten freigeschaltet und danach in jedem Run mit Gold gekauft werden.
 
 | Turm | Zweig A | Zweig B |
 |---|---|---|
@@ -90,10 +93,23 @@ Jeder Turm hat zwei alternative Spezialisierungen und anschließend eine zum gew
 | Katapult | Belagerung: schwere Treffer/Reichweite | Steinhagel: schneller schießen |
 | Kettenblitz | Sturmnetz: mehr Ziele/Sprungweite | Überladung: stärkere Treffer |
 | Freeze | Tiefenfrost: stärkerer Slow | Frostfeld: größere Aura |
+| Minenleger | Sprengmeister: schwere Großminen | Minenfeld: schnelle Gruppenminen |
+| Balliste | Harpunenbolzen: maximale Einzeltreffer | Repetierwerk: höhere Feuerrate |
+| Flammenturm | Inferno: großer, schwerer Flächenschaden | Lauffeuer: schnelle kleine Feuerstöße |
 
 Das Turmmenü zeigt aktuelle Werte und Änderungen durch Upgrades. Symbole, Farben, Ringe und Stufenanzeigen machen den Ausbau sichtbar. Ein kleiner überlappender Pfeil zeigt bezahlbare Upgrades an.
 
 Turmrückgabe erstattet 100 % der tatsächlich investierten Kosten inklusive Upgrades, solange der Turm in der aktuellen Bauphase gebaut wurde und die Wave noch nicht begonnen hat. Danach und in anderen laufenden Spielphasen ist Verkauf für 50 % der Gesamtinvestition möglich, einschließlich finaler Upgrades. Ungerade Rückzahlungen werden abgerundet; Rabatte zählen anhand tatsächlich bezahlter Preise. Das Turmmenü nennt Quote und Goldbetrag. Nach Game Over kein Verkauf. Gebäude sind dauerhaft und haben noch keine Upgrades oder Verkäufe.
+
+## Turm-Loadout
+
+Vor jedem neuen Run wird ein Loadout aus genau fünf unterschiedlichen freigeschalteten Turmtypen bestätigt. Neue Profile starten mit Archer, Katapult, Kettenblitz, Freeze und Minenleger. Nur diese fünf Typen erscheinen während des Runs im Baumenü; sie werden weiterhin mit Run-Gold gebaut. Das aktive Loadout wird lokal im Browserprofil gespeichert und beim Runstart in den Runzustand kopiert.
+
+## Meta-Profil und Diamanten
+
+Am Runende werden Diamanten ausgezahlt: `floor(erreichte Wave / 2)`, zusätzlich +5 je besiegtem regelmäßigen Zehnerboss, +3 je Erkundungsboss und +2 je erstmals erreichtem Zehnerwellen-Meilenstein. Runs vor Wave 2 geben keine reine Wave-Belohnung. Der Game-over-Bildschirm zeigt die Bestandteile einzeln. Profil, Diamanten, Bestwave, Runanzahl, Bosskills, normale Kills und die letzten abgerechneten Run-IDs werden in `localStorage` gespeichert; jede Run-ID kann nur einmal ausgezahlt werden.
+
+Im Arsenal können die Balliste für 20 Diamanten und der Flammenturm für 35 Diamanten dauerhaft freigeschaltet werden. Zusätzlich besitzt jeder Turm ein eigenes Stufe-4-Upgrade für 20 Diamanten bei Starttürmen beziehungsweise 30 Diamanten bei den zusätzlichen Türmen. Drei Loadout-Presets, Rollenwarnungen und lokale Statistiken zu Käufen, Upgrades, Nutzung und bester Wave schließen Etappe 3 ab. Freigeschaltete Türme erscheinen in der Runvorbereitung, erhöhen aber nicht die fünf Loadoutplätze.
 
 ## Dorfgebäude
 
@@ -109,10 +125,12 @@ Gleiche Supporteffekte stapeln sich nicht. Rabatte werden auf volle Goldstücke 
 
 ## Waves, Gegner und Gold
 
-Jedes offene Straßenende auf einem erreichbaren Nicht-Base-Hex ist ein Spawnpunkt. Normale Gegner verteilen sich über diese Fronten. Gegner nehmen den nach tatsächlicher Straßenlänge kürzesten Weg zur Base. Gleich lange Alternativen werden je Eingang abwechselnd genutzt; ungerade Gegnerzahlen können sich um einen Gegner unterscheiden.
+Jedes offene Straßenende auf einem erreichbaren Nicht-Base-Hex ist ein Spawnpunkt. Normale Gegner verteilen sich über diese Fronten. Jede Einheit entscheidet an jeder Gabelung unabhängig und gleichverteilt zwischen allen noch nicht besuchten Ausgängen, von denen die Base erreichbar bleibt. Damit werden auch längere Umwege genutzt, während Sackgassen und Kreisläufe ausgeschlossen sind.
 
-- Wavegröße: `min(5 + 2 × Wave, 24)` normale Gegner. Grund-HP: `28 + 7 × Wave`.
-- Ab Wave 3 Schwarmgegner: weniger HP, höheres Tempo. Ab Wave 4 gepanzerte Gegner: mehr HP, langsamer und 50 % weniger Archer-Schaden.
+- Wavegröße: `5 + 2 × Wave` normale Gegner, ohne die bisherige 24er-Grenze. Grund-HP: `round((28 + 7 × Wave) × 1,10^max(0, Wave − 3))`. Die ersten drei Waves bleiben beim bisherigen HP-Verlauf.
+- Alle zehn Waves erscheint zusätzlich ein Belagerungswächter an einem zufälligen erreichbaren Eingang. Der Startbutton und die Wave-Vorschau kündigen ihn an.
+- Ab Wave 3 erscheinen schnelle Schwarmgegner. Ab Wave 4 kommen gepanzerte Gegner mit einem separaten Rüstungspool, ab Wave 5 magiegeschützte Gegner mit separater Magieresistenz. Bosse besitzen alle drei Pools. Rüstung und Magieresistenz sind zusätzliche Trefferpunkte und werden in eigenen Balken dargestellt.
+- Jeder Schadensturm zeigt seine Werte gegen Leben, Rüstung und Magieresistenz. Für normale Angriffstürme lassen sich drei geordnete Zielprioritäten einstellen, darunter Boss, meiste Rüstung, meiste Magieresistenz, meistes/wenigstes Leben sowie Nähe zu Turm oder Base.
 - Normaler Kill: +3 Gold. Überlebte Wave: +10 Gold plus Hex-/Hausboni. Normaler Gegner an der Base: 1 Schaden.
 - Wave-Dropdown zeigt nächste Gegnerzusammensetzung, HP und bereitstehende Bosse. Gold-Dropdown zeigt Quellen, maximale Einnahmen und Towerpreise. Laufende Prognosen berücksichtigen verbleibende Gegner und Bossloot.
 - 2× beschleunigt Bewegung, Spawnabstände, Cooldowns und Effektzeiten gemeinsam. Nach Wave-Ende bleiben keine eingefrorenen Schusslinien stehen.
@@ -130,7 +148,7 @@ Neue erkundete Koordinaten erzeugen seedbasiert weitere Sonderfelder. Bereits er
 | Boss | 15 % | 0,675 % |
 | Insgesamt | 100 % | 4,5 % |
 
-Keine garantierte Anzahl oder feste Startliste. Im Nebel erscheinen Sonderfelder als `?`, bei klarer Sicht als graues Symbol mit ungesammeltem beziehungsweise inaktivem Status. Sonderfelder sind **vorgefertigte Hexe mit fester Straßengeometrie und Rotation**. Schatz und Shrine verwenden Gerade, Kleine/Große Kurve, Y- oder T-Kreuzung; Bossfelder haben immer alle sechs Öffnungen. Im Nebel ist die Geometrie verborgen, bei klarer Sicht werden graue Straßen und mögliche Slots angezeigt. Diese Felder dürfen nicht mit einer Handkarte überschrieben oder gedreht werden. Eine passende Straße vom gebauten Nachbarhex schließt das Feld automatisch ans Netz an und aktiviert es; eine vorbeiführende Straße reicht nicht. Beim Bauen müssen auch die festen Nachbaranschlüsse passen. Anschluss kostet keine zusätzliche Handkarte. Sonderfelder geben nur ihren Sonderbonus, keine zusätzlichen Einkommens-/Terrainboni der normalen Karten; Schatz/Shrine haben einen Turmplatz, Boss keinen. Angeschlossene Sonderfelder zählen zur Sichtregion. Ketten aus passend verbundenen Sonderfeldern werden gemeinsam erschlossen; mehrere Shrines erscheinen nacheinander.
+Keine garantierte Anzahl oder feste Startliste. Wächterfelder entstehen nie innerhalb von vier Hexen um die Base; der früheste mögliche Abstand ist fünf. Im Nebel erscheinen Sonderfelder als `?`, bei klarer Sicht als graues Symbol mit ungesammeltem beziehungsweise inaktivem Status. Sonderfelder sind **vorgefertigte Hexe mit fester Straßengeometrie und Rotation**. Schatz und Shrine verwenden Gerade, Kleine/Große Kurve, Y- oder T-Kreuzung; Bossfelder haben immer alle sechs Öffnungen. Im Nebel ist die Geometrie verborgen, bei klarer Sicht werden graue Straßen und mögliche Slots angezeigt. Diese Felder dürfen nicht mit einer Handkarte überschrieben oder gedreht werden. Eine passende Straße vom gebauten Nachbarhex schließt das Feld automatisch ans Netz an und aktiviert es; eine vorbeiführende Straße reicht nicht. Sonderfelder geben nur ihren Sonderbonus, Schatz und Shrine haben einen Turmplatz, Bossfelder keinen.
 
 ### Schatz und Shrine
 
@@ -147,9 +165,13 @@ Der Epic-Pool enthält Höhenkreuzung, Kampfstraße und Wachtkurve; der Legendar
 
 ### Boss
 
-Ein durch passende Nachbarstraße erschlossenes Bossfeld mit sechs Straßenöffnungen aktiviert einen Wächter für die **nächste reguläre Wave**. Wave-Button, Leertaste und Auto-Start nutzen denselben Ablauf. Alle bereiten Bosse spawnen genau einmal auf dem Straßenhub ihres eigenen ausgelösten Hexes, nicht an zufälligen Eingängen, und laufen den kürzesten Weg zur Base.
+**Regelmäßige Bosswellen:** In Wave 10, 20, 30 usw. erscheint ein Belagerungswächter unabhängig von erkundeten Sonderfeldern. Der Eingang wird gleichverteilt aus den aktuellen erreichbaren Straßenenden gewählt; gleiche Seeds und Kartenentscheidungen wiederholen die Auswahl. Basisleben: `round(1200 × (Wave / 10)^1,8)`, dazu 25 % Rüstung und 20 % Magieresistenz, Tempo 28 und fünf Basisschaden. Freeze kann ihn höchstens um 40 % verlangsamen. Sieg gibt 50 Gold und nach überlebter Wave eine zusätzliche Kartenbelohnung.
 
-Wächterwerte: `300 + 45 × Wave` HP, Rüstung, Tempo 24, fünf Basisschaden. Sieg: einmalig +50 Gold mit Collect-Sound und nach überlebter Wave eine zusätzliche Kartenauswahl (90 % Epic, 10 % Legendary). Rarität und Angebote sind seed-/Bossfeld-basiert. Bei mehreren besiegten Bossen erscheinen die Auswahlen nacheinander, danach folgen normale Wave-Rewards. Die Kartenbeute kann übersprungen werden. Entkommt der Boss, gibt es keinen Loot. Dies ist eine erste Bossversion; weitere Lootvarianten und endgültiges Balancing fehlen noch.
+**Erkundungsbosse:**
+
+Ein durch passende Nachbarstraße erschlossenes Bossfeld mit sechs Straßenöffnungen aktiviert einen Wächter für die **nächste reguläre Wave**. Alle bereiten Bosse spawnen genau einmal auf dem Straßenhub ihres eigenen ausgelösten Hexes und verwenden dieselben zufälligen, schleifenfreien Gabelungsentscheidungen wie normale Gegner.
+
+Wächterwerte: `240 + 36 × Wave` Leben, dazu 25 % Rüstung und 20 % Magieresistenz, Tempo 24 und fünf Basisschaden. Sieg: einmalig +50 Gold mit Collect-Sound und nach überlebter Wave eine zusätzliche Kartenauswahl (90 % Epic, 10 % Legendary).
 
 ## Seeds und technische Basis
 
@@ -179,8 +201,3 @@ Für später vorgemerkt, noch nicht implementiert:
 - 3D-Renderer und passende Modelle, Kamera und Picking.
 
 Prioritäten und offene Entscheidungen werden in [BRAIN.md](../BRAIN.md) gepflegt.
-
-
-
-
-

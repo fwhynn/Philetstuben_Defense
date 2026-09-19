@@ -4,7 +4,10 @@ function load(){const context={};for(const file of ['random.js','map.js','explor
 test('landmarks are distinct, seeded and outside the starting clear area',()=>{
   const {rules,random}=load(),first=rules.create(random('exploration')),second=rules.create(random('exploration'));
   assert.ok(first.size>0);assert.equal(JSON.stringify([...first]),JSON.stringify([...second]));
-  for(const landmark of first.values()){const distance=rules.distance(landmark,{q:0,r:0});assert.ok(distance>=3&&distance<=6);}
+  for(const landmark of first.values()){const distance=rules.distance(landmark,{q:0,r:0});assert.ok(distance>=3&&distance<=6);if(landmark.type==='boss')assert.ok(distance>=5);}
+});
+test('guardian events never generate within four hexes of the base',()=>{
+  const {rules,random}=load();let bosses=0;for(let seed=0;seed<100;seed++)for(const landmark of rules.create(random('guard-'+seed)).values())if(landmark.type==='boss'){bosses++;assert.ok(rules.distance(landmark,{q:0,r:0})>=5);}assert.ok(bosses>0);
 });
 test('map growth reveals fog landmarks before identifying them',()=>{
   const {rules}=load(),map=new Map([['0,0',{q:0,r:0}]]);
