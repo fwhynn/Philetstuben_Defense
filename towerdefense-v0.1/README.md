@@ -1,6 +1,6 @@
 # Hex Bastion – V0.7-dev
 
-Stand: 18.09.2026. Spielbarer Browser-Prototyp eines Hex-Tower-Defense-Deckbuilders. Diese Datei beschreibt den aktuell implementierten Stand. Frühere Zwischenstände stehen im [Entwicklungsverlauf](CHANGELOG.md), spätere Ziele im [Projektgedächtnis](../BRAIN.md). Das ausführliche [Übergabeprotokoll](../README_TowerDefense_Projekt.md) enthält die Konzepthistorie.
+Stand: 19.09.2026. Spielbarer Browser-Prototyp eines Hex-Tower-Defense-Deckbuilders. Diese Datei beschreibt den aktuell implementierten Stand. Frühere Zwischenstände stehen im [Entwicklungsverlauf](CHANGELOG.md), spätere Ziele im [Projektgedächtnis](../BRAIN.md). Das ausführliche [Übergabeprotokoll](../README_TowerDefense_Projekt.md) enthält die Konzepthistorie.
 
 ## Starten und Bedienung
 
@@ -130,6 +130,8 @@ Jedes offene Straßenende auf einem erreichbaren Nicht-Base-Hex ist ein Spawnpun
 - Wavegröße: `5 + 2 × Wave` normale Gegner, ohne die bisherige 24er-Grenze. Grund-HP: `round((28 + 7 × Wave) × 1,10^max(0, Wave − 3))`. Die ersten drei Waves bleiben beim bisherigen HP-Verlauf.
 - Alle zehn Waves erscheint zusätzlich ein Belagerungswächter an einem zufälligen erreichbaren Eingang. Der Startbutton und die Wave-Vorschau kündigen ihn an.
 - Ab Wave 3 erscheinen schnelle Schwarmgegner. Ab Wave 4 kommen gepanzerte Gegner mit einem separaten Rüstungspool, ab Wave 5 magiegeschützte Gegner mit separater Magieresistenz. Bosse besitzen alle drei Pools. Rüstung und Magieresistenz sind zusätzliche Trefferpunkte und werden in eigenen Balken dargestellt.
+- Gegner halten Abstand: Ein neuer Gegner erscheint frühestens nach der Zeit, die sein Vordermann für 20 Einheiten braucht (mindestens 320 ms). Unterwegs bremst ein Gegner vor dem Vordermann (Bremszone ab 18, Halt bei 12 Einheiten), statt hineinzulaufen. Bosse sind davon ausgenommen. Ein Schwarmgegner hinter einem langsameren Gegner verliert dadurch seinen Tempovorteil.
+- 3D-Modelle: normal = Kiwi-Krieger mit Hammer, Schwert und der Widmung „VIK“ auf dem Bauch, gepanzert = Ork mit Schild, Schwarm = Kobold, magiegeschützt = Goblin-Runenmeister mit Schutzsphäre, Boss = Obsidian-Wächter. Ohne Modell zeichnet der Renderer farbige Kugeln.
 - Jeder Schadensturm zeigt seine Werte gegen Leben, Rüstung und Magieresistenz. Für normale Angriffstürme lassen sich drei geordnete Zielprioritäten einstellen, darunter Boss, meiste Rüstung, meiste Magieresistenz, meistes/wenigstes Leben sowie Nähe zu Turm oder Base.
 - Normaler Kill: +3 Gold. Überlebte Wave: +10 Gold plus Hex-/Hausboni. Normaler Gegner an der Base: 1 Schaden.
 - Wave-Dropdown zeigt nächste Gegnerzusammensetzung, HP und bereitstehende Bosse. Gold-Dropdown zeigt Quellen, maximale Einnahmen und Towerpreise. Laufende Prognosen berücksichtigen verbleibende Gegner und Bossloot.
@@ -183,13 +185,13 @@ Finales Ziel bleibt **stilisiertes 3D wie Dorfromantik**. Die Regeln sollen weit
 
 ## Prüfung und offene Arbeit
 
-Zuletzt **87 automatisierte Tests und JavaScript-Syntaxprüfungen bestanden**. Tests ab diesem Appordner:
+Zuletzt **121 automatisierte Tests bestanden**. Tests ab diesem Appordner:
 
 ```powershell
-node --test --test-isolation=none tests/*.test.cjs
+node --test tests/*.test.cjs
 ```
 
-`--test-isolation=none` vermeidet die Prozess-Spawn-Einschränkung dieser Arbeitsumgebung. Die Tests decken unter anderem Straßen/Placement, gleich lange Wege, Waveablauf, Bau während Waves, Upgrades, Gebäude, Seeds, Rettungshex, Sichtgrenzen, Bossstart/-loot, Shrine-Auszahlungen sowie Renderer-Commands, Zustandsunveränderlichkeit, Reset, Bildschirmprojektion, Weltursprung und Kamerazoom ab.
+In Umgebungen, die keine Unterprozesse starten dürfen, hilft `--test-isolation=none` (erst ab neueren Node-Versionen verfügbar). Die Tests decken unter anderem Straßen/Placement, gleich lange Wege, Waveablauf, Bau während Waves, Upgrades, Gebäude, Seeds, Rettungshex, Sichtgrenzen, Bossstart/-loot, Shrine-Auszahlungen sowie Renderer-Commands, Zustandsunveränderlichkeit, Reset, Bildschirmprojektion, Weltursprung und Kamerazoom ab.
 
 Noch offen: manueller visueller Spieltest neuer Änderungen, Audio-Hörprobe, Langzeit-/Economybalancing. Markt und Schmiede wurden vom Nutzer noch nicht im Spiel verifiziert; Logiktests ersetzen diese Prüfung nicht.
 

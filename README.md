@@ -33,10 +33,11 @@ Danach `http://localhost:8080` im Browser öffnen. Die 3D-Modelle (`.glb`) lasse
 |---|---|
 | `http://localhost:8080` | 3D-Ansicht (Three.js) |
 | `http://localhost:8080/?svg` | Ursprüngliche SVG-Ansicht |
+| `http://localhost:8080/?low` / `?high` | Grafikstufe erzwingen (niedrig: weniger Pixel, kleinere Schatten, keine Kantenglättung) |
 | `http://localhost:8080/viewer.html` | Galerie aller 3D-Modelle |
 | `index.html` per Doppelklick | SVG-Ansicht ohne Server |
 
-Ohne WebGL fällt das Spiel automatisch auf die SVG-Ansicht zurück.
+Ohne WebGL fällt das Spiel automatisch auf die SVG-Ansicht zurück. Bricht die Bildrate in einer Wave dauerhaft ein, stellt der Renderer die Grafik selbst auf „niedrig“. Läuft das Spiel auf einem starken Rechner trotzdem schlecht, hilft [PERFORMANCE_TROUBLESHOOTING.md](PERFORMANCE_TROUBLESHOOTING.md).
 
 ## Bedienung
 
@@ -58,7 +59,7 @@ Ohne WebGL fällt das Spiel automatisch auf die SVG-Ansicht zurück.
 - **18 Hex-Karten** in fünf Raritäten, von der einfachen Geraden bis zur Kriegskreuzung mit Schadensbonus.
 - **5 Starttürme** plus freischaltbare Balliste und Flammenturm, jeweils mit zwei Upgrade-Zweigen und einer Endstufe. Pro Run werden genau fünf ausgewählt.
 - **3 Gebäude** auf Dorf-Hexen: Haus (Gold), Schmiede (Schaden), Markt (Rabatt).
-- **Gegnertypen** mit Rüstungsarten (normal, gepanzert, Schwarm) und ein Boss.
+- **Gegnertypen** mit gestaffeltem Schutz im Fantasy-Stil: Kobold-Schwarm (ungeschützt), grüner Kiwi-Krieger (normal, leichte Rüstung), Ork-Wächter (gepanzert), Goblin-Runenmeister (magiegeschützt) und der Obsidian-Wächter als Boss. Gegner halten Abstand zueinander und laufen nicht ineinander.
 - **Exploration** mit Sichtradius, Nebel und seedbasierten Sonderfeldern. Der Startwert (Seed) wiederholt einen Run.
 - **Sounds** werden lokal mit WebAudio erzeugt.
 
@@ -78,7 +79,8 @@ towerdefense-v0.1/
 ├── three-renderer.js         3D-Darstellung (Three.js)
 ├── model-map.js              Zuordnung Spielzustand → 3D-Modell
 ├── camera.js, sound.js       Kamera und Audio
-├── assets/                   glTF-Modelle: tiles/, towers/, landmarks/
+├── assets/                   glTF-Modelle: tiles/, towers/, landmarks/, enemies/,
+│                             buildings/, effects/
 ├── viewer.html               Modell-Galerie
 ├── serve.cjs                 Lokaler Entwicklungsserver
 └── tests/                    Automatisierte Tests
@@ -93,13 +95,13 @@ cd towerdefense-v0.1
 node --test tests/*.test.cjs
 ```
 
-Die Tests prüfen Spiellogik, Kampf, Deck, Exploration, Kamera, den SVG-Renderer und die Modellzuordnung. Die 3D-Darstellung selbst ist bisher nur manuell im Browser geprüft.
+Aktuell 121 Tests. Sie prüfen Spiellogik, Kampf (inklusive Gegnerabstand), Wellen, Profil und Meta-Progression, Deck, Exploration, Kamera, den SVG-Renderer und die Modellzuordnung. Die 3D-Darstellung selbst ist bisher nur manuell im Browser geprüft.
 
 ## Eigene Modelle
 
-Alle 3D-Modelle sind von Hand gebaut. Maße, Ursprung, Kantennummerierung, Turmplätze und benannte Objekte (`turret`, `arm`, `aura`) beschreibt [ASSET_SPEC.md](towerdefense-v0.1/ASSET_SPEC.md). Neue Modelle als `.glb` in den passenden Ordner unter `assets/` legen.
+Alle 3D-Modelle sind von Hand gebaut. Maße, Ursprung, Kantennummerierung, Turmplätze und benannte Objekte (`turret`, `arm`, `aura`) beschreibt [ASSET_SPEC.md](towerdefense-v0.1/ASSET_SPEC.md). Die Vorgaben für Minenleger, Balliste, Flammenturm, die fünf Gegner und die Gebäude stehen in [ASSET_SPEC_v2.md](towerdefense-v0.1/ASSET_SPEC_v2.md). Neue Modelle als `.glb` in den passenden Ordner unter `assets/` legen.
 
-Noch fehlend: Gebäudemodelle, Gegnermodelle (Fantasy: Goblins, Orks, Obsidian-Wächter) und Turm-Upgrade-Varianten. Bis dahin zeigt das Spiel dafür einfache Platzhalter.
+Vorhanden sind Tiles, Sonderfelder, alle sieben Türme, alle fünf Gegner, die drei Gebäude und die Straßenmine. Noch fehlend: die Upgrade-Varianten der Türme. Fehlende Modelle ersetzt das Spiel durch einfache Platzhalter.
 
 ## Roadmap
 

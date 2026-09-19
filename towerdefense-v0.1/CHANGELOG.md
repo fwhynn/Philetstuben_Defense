@@ -4,6 +4,13 @@ Die folgenden Einträge dokumentieren frühere Zwischenstände. Verbindlicher ak
 
 # Hex Bastion – V0.7-dev
 
+## V0.7 – Modelle, Gegnerabstand und Grafikstufen
+
+- Neue Modelle eingebunden: Minenleger, Balliste, Flammenturm, fünf Gegner (Kiwi-Krieger „Vik“, Ork-Wächter, Goblin-Runenmeister, Kobold, Obsidian-Wächter), Haus, Schmiede, Markt und die Straßenmine. Vorgaben in ASSET_SPEC_v2.md. `enemy_warded` wird geladen, Gebäude und Minen nutzen ihre Modelle statt Platzhalter. Nur die Upgrade-Varianten der Türme fehlen noch.
+- Gegner laufen nicht mehr ineinander: Spawnabstand hängt vom Tempo ab, Nachfolger bremsen vor dem Vordermann (Bosse ausgenommen). Neuer Test in combat.test.cjs. Das Balancing (`scripts/balance-*.json`) stammt noch aus der Zeit davor.
+- Performance des 3D-Renderers: Bildrate begrenzt (60/s in Waves, sonst 30/s), Schattenkarte 2048 statt 4096, Pixeldichte höchstens 1,5. Grafikstufe „niedrig“ per `?low` oder automatisch bei dauerhaft niedriger Bildrate. Anleitung: PERFORMANCE_TROUBLESHOOTING.md.
+- Repo: Projekt liegt wieder direkt im Root, der Unterordner Philetstuben_Defense-main ist entfernt. 121 Tests.
+
 ## V0.7 – Gegnermodelle (Vorbereitung)
 
 - Der 3D-Renderer lädt optional `assets/enemies/enemy_normal|armored|swarm|boss.glb`, dreht Gegner in Laufrichtung, animiert Wippen sowie optionale Gliedmaßen (`leg_l/leg_r/arm_l/arm_r`) und zeigt Verlangsamung als blauen Ring. Ohne Datei bleiben die farbigen Kugeln. Modellvorgaben in ASSET_SPEC.md (Goblins, Orks, Obsidian-Wächter).

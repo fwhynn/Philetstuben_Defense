@@ -1,6 +1,6 @@
 # Hex Bastion – Projektgedächtnis
 
-Stand: 18.09.2026. Kompakte Übersicht über Ziele, Entscheidungen und spätere Ideen. Ausführlicher Verlauf: [Übergabeprotokoll](README_TowerDefense_Projekt.md). Technische Grenzen: [Architektur](towerdefense-v0.1/ARCHITECTURE.md). Änderungen: [App-README](towerdefense-v0.1/README.md).
+Stand: 19.09.2026. Kompakte Übersicht über Ziele, Entscheidungen und spätere Ideen. Ausführlicher Verlauf: [Übergabeprotokoll](README_TowerDefense_Projekt.md). Technische Grenzen: [Architektur](towerdefense-v0.1/ARCHITECTURE.md). Änderungen: [App-README](towerdefense-v0.1/README.md).
 
 ## Festgelegte Richtung
 - Hex-Tower-Defense mit Straßenbau und Map-Deckbuilding.
@@ -15,6 +15,7 @@ Stand: 18.09.2026. Kompakte Übersicht über Ziele, Entscheidungen und spätere 
 - Meta-Arsenal umgesetzt: Balliste kostet 20 Diamanten, Flammenturm 35. Beide haben zwei Upgradezweige und finale Stufen. Nach der Freischaltung erscheinen sie in der Runvorbereitung, während das Run-Loadout auf fünf Plätze begrenzt bleibt. Eigene 3D-Modelle fehlen noch; der Renderer nutzt Platzhalter.
 - Etappe 3 abgeschlossen: drei persistente Loadout-Presets, Warnungen für fehlende Kampfrollen und lokale Statistiken je Turm. Jeder der sieben Türme besitzt eine zusätzliche vierte Stufe, die im Arsenal dauerhaft mit Diamanten freigeschaltet und anschließend pro Run mit Gold gekauft wird.
 - Turmverkauf: 100 % inklusive Upgrades in ursprünglicher aktueller Bauphase vor Wave; sonst 50 % tatsächlicher Gesamtinvestition, abgerundet, auch während Waves. Keine Verkäufe nach Game Over.
+- Modelle vorhanden: alle sieben Türme, fünf Gegner (Kiwi-Krieger „Vik“ als Standardgegner, Widmung an eine Freundin), drei Gebäude und die Straßenmine. Es fehlen nur die Turm-Upgrade-Varianten. Gegner halten Abstand (Spawnabstand nach Tempo, Bremsen vor dem Vordermann, Bosse ausgenommen). Grafikstufen `?low`/`?high`, automatische Absenkung bei niedriger Bildrate.
 - Bauen auch während Waves. Turm-Upgrades nur im angeklickten Turmmenü. Wave-/Gold-/Deckinfos als Dropdowns.
 
 ## Für später fest vorgemerkt

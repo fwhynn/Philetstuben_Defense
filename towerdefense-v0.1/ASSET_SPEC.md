@@ -1,5 +1,7 @@
 # Modellspezifikation für 3D-Assets (glTF/.glb)
 
+> Für die neuen Türme (Minenleger, Balliste, Flammenturm), die fünf Gegner und die Gebäude siehe [ASSET_SPEC_v2.md](ASSET_SPEC_v2.md).
+
 Damit deine Modelle ohne Nacharbeit zur Spiellogik passen. Alle Maße sind aus `map.js` abgeleitet. Das Spiel skaliert später einheitlich (Faktor 54), du modellierst also im kleinen Maßstab.
 
 ## Allgemein
