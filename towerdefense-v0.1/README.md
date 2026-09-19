@@ -185,7 +185,7 @@ Finales Ziel bleibt **stilisiertes 3D wie Dorfromantik**. Die Regeln sollen weit
 
 ## Prüfung und offene Arbeit
 
-Zuletzt **121 automatisierte Tests bestanden**. Tests ab diesem Appordner:
+Zuletzt **122 automatisierte Tests bestanden**. Tests ab diesem Appordner:
 
 ```powershell
 node --test tests/*.test.cjs

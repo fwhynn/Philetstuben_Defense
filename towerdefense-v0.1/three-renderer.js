@@ -52,9 +52,13 @@ function makeTemplate(name,scene,kind){
   template.slots=slotNodes.sort((a,b)=>a.name.localeCompare(b.name)).map(n=>({pos:worldPosition(n),parts:bake(n)}));
   template.pad=padNodes[0]?{pos:worldPosition(padNodes[0]),parts:bake(padNodes[0])}:null;
   if(kind==='landmarks'&&name!=='landmark_boss'){                    // Deko separat, damit sie auf jede Straßenform passt
-    const root=scene.children[0]||scene,keep=/^(shrine|treasure|crate)/;
-    template.props=bake(root,n=>n.parent===root&&!keep.test(n.name));
-    const box=boundsOf(template.props);template.propCenter=box.getCenter(new THREE.Vector3());
+    // Hauptobjekt (Schatztruhe bzw. Shrine) plus nahe Kisten. Bezugspunkt ist die Mitte des Hauptobjekts, nicht die aller Deko,
+    // sonst rutscht die Truhe bei weit verstreuten Kisten aus dem Hex. Weit entfernte Kisten (auf der anderen Straßenseite) entfallen.
+    const root=scene.children[0]||scene,main=/^(shrine|treasure)/;
+    const mainNode=root.children.find(n=>main.test(n.name)),mainCenter=mainNode?new THREE.Box3().setFromObject(mainNode).getCenter(new THREE.Vector3()):new THREE.Vector3();
+    const near=n=>{const c=new THREE.Box3().setFromObject(n).getCenter(new THREE.Vector3());return Math.hypot(c.x-mainCenter.x,c.z-mainCenter.z)<=.45;};
+    template.props=bake(root,n=>n.parent===root&&!(main.test(n.name)||(/^crate/.test(n.name)&&near(n))));
+    template.propCenter=mainCenter;
   }
   return template;
 }
@@ -162,7 +166,11 @@ function create(host0,commands){
     if(buildingSlots&&template.pad){const group=new THREE.Group();group.position.copy(template.pad.pos);addParts(group,template.pad.parts,ghost,legal);model.add(group);}
     if(prop){
       const template2=modelTemplate(prop.name,'landmark');
-      if(template2?.props){const a=prop.angle*Math.PI/180,group=new THREE.Group();group.position.set(Math.cos(a)*.55-template2.propCenter.x,0,-Math.sin(a)*.55-template2.propCenter.z);addParts(group,template2.props,false,true);model.add(group);}
+      if(template2?.props){                            // Hauptobjekt auf Radius .55 in Richtung prop.angle, Kisten behalten ihre Lage relativ dazu (Modell: Hauptobjekt liegt im Süden, +Z)
+        const a=prop.angle*Math.PI/180,outer=new THREE.Group(),inner=new THREE.Group();
+        outer.position.set(Math.cos(a)*.55,0,-Math.sin(a)*.55);outer.rotation.y=Math.atan2(Math.cos(a),-Math.sin(a));
+        inner.position.set(-template2.propCenter.x,0,-template2.propCenter.z);addParts(inner,template2.props,false,true);outer.add(inner);model.add(outer);
+      }
     }
     if(spec.proceduralRoads&&!ghost){
       const road=template.parts.find(p=>/road/.test(p.material.name||''))?.material||fallbackMaterial;

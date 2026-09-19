@@ -95,7 +95,7 @@ cd towerdefense-v0.1
 node --test tests/*.test.cjs
 ```
 
-Aktuell 121 Tests. Sie prüfen Spiellogik, Kampf (inklusive Gegnerabstand), Wellen, Profil und Meta-Progression, Deck, Exploration, Kamera, den SVG-Renderer und die Modellzuordnung. Die 3D-Darstellung selbst ist bisher nur manuell im Browser geprüft.
+Aktuell 122 Tests. Sie prüfen Spiellogik, Kampf (inklusive Gegnerabstand), Wellen, Profil und Meta-Progression, Deck, Exploration, Kamera, den SVG-Renderer und die Modellzuordnung. Die 3D-Darstellung selbst ist bisher nur manuell im Browser geprüft.
 
 ## Eigene Modelle
 

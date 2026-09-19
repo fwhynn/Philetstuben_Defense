@@ -43,7 +43,7 @@ const HexMap=(()=>{
     grove: [[2,32]],
     citadel: [[14,-24],[14,24]],
     battlefield: [[-14,-24]],
-    watchtower: [[14,-24],[0,24]],
+    watchtower: [[20,-28],[2,32]],
     royalVillage: [[-14,-24]],
     warCross: [[-14,-24],[14,24]]
   };
@@ -119,10 +119,29 @@ const HexMap=(()=>{
     return path;
   }
 
+  // Straßenmittellinien der 3D-Modelle (Rotation 0, Weltmaß, y nach unten, relativ zur Hexmitte), von der ersten zur zweiten Straßenkante.
+  // Gegner sollen genau auf der gezeichneten Straße laufen. Die Kurven-Tiles teilen sich eine Form; Lange Straße ist punktsymmetrisch.
+  const CURVE_CENTERLINE=[[46.8,0],[41.6,-0.1],[36.7,-0.5],[31.8,-1.1],[27.1,-2],[22.6,-3.1],[18.2,-4.5],[13.9,-6.1],[9.8,-8],[5.8,-10.1],[2,-12.5],[-1.7,-15.1],[-5.2,-18],[-8.6,-21.1],[-11.8,-24.5],[-14.9,-28.1],[-17.9,-32],[-20.7,-36.1],[-23.4,-40.5]];
+  const LONGROAD_CENTERLINE=[[46.8,0],[45,0.2],[43.3,0.4],[41.5,0.5],[39.7,0.8],[37.4,1.3],[34.5,2.4],[31.3,3.8],[28,5.1],[24.6,5.8],[20.3,5.8],[15.4,4.8],[10.3,3.2],[5.1,1.5],[0,0],[-5.1,-1.5],[-10.3,-3.2],[-15.4,-4.8],[-20.3,-5.8],[-24.6,-5.8],[-28,-5.1],[-31.3,-3.8],[-34.5,-2.4],[-37.4,-1.3],[-39.7,-0.8],[-41.5,-0.5],[-43.3,-0.4],[-45,-0.2],[-46.8,0]];
+  const MODEL_ROADS={bigCurve:{roads:[0,2],line:CURVE_CENTERLINE},village:{roads:[0,2],line:CURVE_CENTERLINE},grove:{roads:[0,2],line:CURVE_CENTERLINE},watchtower:{roads:[0,2],line:CURVE_CENTERLINE},longRoad:{roads:[0,3],line:LONGROAD_CENTERLINE}};
+  function modelRoadLegs(center,type,roads){
+    const model=MODEL_ROADS[type];if(!model||roads.length!==2) return null;
+    const want=[...roads].sort().join();let rot=-1;
+    for(let r=0;r<6;r++) if(model.roads.map(d=>(d+r)%6).sort().join()===want){rot=r;break;}
+    if(rot<0) return null;
+    const theta=-Math.PI/3*rot,cos=Math.cos(theta),sin=Math.sin(theta);
+    const line=model.line.map(([x,y])=>({x:center.x+x*cos-y*sin,y:center.y+x*sin+y*cos}));
+    const a=(model.roads[0]+rot)%6,b=(model.roads[1]+rot)%6;
+    line[0]=edgePoint(center.x,center.y,a,1);line[line.length-1]=edgePoint(center.x,center.y,b,1);   // Enden exakt auf die Hexkante
+    const mid=Math.floor(line.length/2),legs=new Map();
+    legs.set(a,line.slice(0,mid+1).reverse());legs.set(b,line.slice(mid));
+    return {hub:line[mid],legs};
+  }
   function roadGeometry(tile){
     const center=axialToWorld(tile.q,tile.r),roads=tile.roads||[];
+    const modeled=modelRoadLegs(center,tile.type,roads);if(modeled) return modeled;
     let hub={...center};
-    if(roads.length===2&&['smallCurve','bigCurve','village','grove'].includes(tile.type)){
+    if(roads.length===2&&['smallCurve'].includes(tile.type)){
       const edges=roads.map(d=>edgePoint(center.x,center.y,d,1));
       const bias=tile.type==='smallCurve'?.5:-.45;
       hub={x:center.x+((edges[0].x+edges[1].x)/2-center.x)*bias,y:center.y+((edges[0].y+edges[1].y)/2-center.y)*bias};
@@ -133,7 +152,7 @@ const HexMap=(()=>{
       if(tile.type==='longRoad'){
         const dx=edge.x-hub.x,dy=edge.y-hub.y,length=Math.hypot(dx,dy);
         for(const [t,offset] of [[.28,14],[.6,-14]]) points.push({x:hub.x+dx*t-dy/length*offset,y:hub.y+dy*t+dx/length*offset});
-      }else if(roads.length===2&&['smallCurve','bigCurve','village','grove'].includes(tile.type)){
+      }else if(roads.length===2&&['smallCurve'].includes(tile.type)){
         const control={x:(hub.x+edge.x)/2+(center.x-hub.x)*.5,y:(hub.y+edge.y)/2+(center.y-hub.y)*.5};
         for(let i=1;i<12;i++){const t=i/12,u=1-t;points.push({x:u*u*hub.x+2*u*t*control.x+t*t*edge.x,y:u*u*hub.y+2*u*t*control.y+t*t*edge.y});}
       }

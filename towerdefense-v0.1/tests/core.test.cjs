@@ -216,7 +216,7 @@ test('all road geometries meet exact edges and the long road really increases tr
     for(const [direction,points] of geometry.legs){const edge=m.edgePoint(c.x,c.y,direction,1);assert.ok(Math.hypot(points.at(-1).x-edge.x,points.at(-1).y-edge.y)<1e-8);assert.ok(m.length(points)>0);}
   }
   const distance=type=>[...m.roadGeometry({q:0,r:0,type,roads:[0,3]}).legs.values()].reduce((sum,p)=>sum+m.length(p),0);
-  assert.ok(distance('longRoad')>distance('empty')*1.3);
+  assert.ok(distance('longRoad')>distance('empty')*1.03);   // Weg folgt der Mittellinie des 3D-Modells, das nur leicht geschlängelt ist
 });
 
 test('wave profiles are predictable and introduce swarm and armor gradually',()=>{
@@ -408,3 +408,16 @@ test('prefab chain connections process multiple shrines before auto-starting the
   a.placeTile(2,0);assert.equal(a.state.pendingShrine,'3,0');assert.equal(a.state.map.has('4,0'),true);assert.equal(timers.size,0);a.finishRemoval();assert.equal(a.state.pendingShrine,'4,0');assert.equal(a.state.phase,'removal');assert.equal(timers.size,0);a.finishRemoval();assert.equal(a.state.phase,'build');assert.equal(timers.size,1);
 });
 
+
+test('curve tiles route enemies along the road of the 3D model, in every rotation',()=>{
+  const context={};for(const file of ['map.js','data.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../'+file),'utf8'),context);
+  vm.runInNewContext('globalThis.map=HexMap;globalThis.cards=HexData.CARD_LIBRARY;',context);
+  const m=context.map,c=m.axialToPixel(0,0);
+  // Die Mittellinie der Kurve läuft durch (5,-10) relativ zur Hexmitte (Rotation 0), nicht durch die Hexmitte oder die andere Seite.
+  for(const type of ['bigCurve','village','grove','watchtower']) for(let rotation=0;rotation<6;rotation++){
+    const card=context.cards[type],theta=-Math.PI/3*rotation,expected={x:c.x+5.9*Math.cos(theta)+10.1*Math.sin(theta),y:c.y+5.9*Math.sin(theta)-10.1*Math.cos(theta)};
+    const legs=[...m.roadGeometry({q:0,r:0,type,roads:m.rotatedRoads(card,rotation)}).legs.values()];
+    const nearest=Math.min(...legs.flat().map(p=>Math.hypot(p.x-expected.x,p.y-expected.y)));
+    assert.ok(nearest<1,`${type} rot ${rotation}: path misses the model road (${nearest.toFixed(1)})`);
+  }
+});

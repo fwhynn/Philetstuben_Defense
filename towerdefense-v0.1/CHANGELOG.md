@@ -4,6 +4,16 @@ Die folgenden Einträge dokumentieren frühere Zwischenstände. Verbindlicher ak
 
 # Hex Bastion – V0.7-dev
 
+## V0.7 – Schatztruhe im Hex
+
+- Auf Schatz- und Shrinefeldern stand die Truhe teilweise außerhalb des Hexes. Der Renderer setzte die Deko um die Mitte aller Objekte (auch weit verstreuter Kisten) statt um die Truhe, wodurch sie um bis zu 0,5 Hexradien nach außen rutschte. Jetzt gilt die Mitte der Truhe (bzw. des Shrines) als Bezugspunkt, nur Kisten in deren Nähe (bis 0,45) werden mitgenommen, und die Gruppe wird so gedreht, dass die Kisten ihre Lage zur Truhe behalten.
+
+## V0.7 – Gegner bleiben auf der Straße (Kurven)
+
+- Der Spielpfad großer Kurven wich bis zu 22 Einheiten von der gezeichneten Straße ab (Straßenhalbbreite 8,9), Gegner liefen sichtbar über die Wiese. Betroffen waren Große Kurve, Dorf, Wäldchen und Wachtkurve (alle gleiche Straßenform) sowie die Lange Straße (17,6). `HexMap.roadGeometry` nutzt für diese Tiles jetzt die Mittellinie des 3D-Modells (`MODEL_ROADS` in map.js). Abweichung zum Modell danach unter 0,2 Einheiten, in allen Rotationen.
+- Wachtkurve: Turmplätze neu gesetzt, weil die Straße jetzt anders verläuft.
+- Folge: Die Lange Straße ist im Modell nur leicht geschlängelt und verlängert den Weg nur um ca. 4 % statt vorher ca. 30 %. Soll sie stärker wirken, braucht das Modell eine kräftigere S-Kurve. Test entsprechend angepasst, zwei neue Prüfungen (122 Tests).
+
 ## V0.7 – Modelle, Gegnerabstand und Grafikstufen
 
 - Neue Modelle eingebunden: Minenleger, Balliste, Flammenturm, fünf Gegner (Kiwi-Krieger „Vik“, Ork-Wächter, Goblin-Runenmeister, Kobold, Obsidian-Wächter), Haus, Schmiede, Markt und die Straßenmine. Vorgaben in ASSET_SPEC_v2.md. `enemy_warded` wird geladen, Gebäude und Minen nutzen ihre Modelle statt Platzhalter. Nur die Upgrade-Varianten der Türme fehlen noch.
