@@ -13,7 +13,8 @@ Stand: 18.09.2026. Spielbarer Browser-Prototyp eines Hex-Tower-Defense-Deckbuild
 | Wave starten | Leertaste oder Wave-Button |
 | Doppeltes Spieltempo | F oder 2×-Toggle |
 | Kamera zoomen | Mausrad oder +/− |
-| Karte verschieben | Rechte oder mittlere Maustaste ziehen |
+| Karte verschieben | 3D: linke Maustaste ziehen (SVG: rechte oder mittlere) |
+| Ansicht drehen und kippen | Nur 3D: rechte oder mittlere Maustaste ziehen |
 | Kamera zurücksetzen | Zur Base |
 | Turm kaufen | Freien Turmplatz anklicken, dann Turmangebot wählen |
 | Turmwerte / Upgrades | Gesetzten Turm anklicken |

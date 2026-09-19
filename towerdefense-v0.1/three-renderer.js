@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 
-const S=54,STEP=Math.PI/3,TILT=55*Math.PI/180,DIST_MIN=220,DIST_MAX=3400,DIST_START=950,SKY='#a9cbd8';
+const S=54,STEP=Math.PI/3,TILT=55*Math.PI/180,PITCH_MIN=12*Math.PI/180,PITCH_MAX=88*Math.PI/180,DIST_MIN=220,DIST_MAX=3400,DIST_START=950,SKY='#a9cbd8';
 const PREFIX={tiles:'tile',landmarks:'landmark',towers:'tower'};
 const LANDMARK_LABEL={shrine:'Shrine · Bonus unbekannt',boss:'Wächter · inaktiv',treasure:'Schatz +20 · ungesammelt'};
 const STATUS_LABEL={ready:'☠ bereit',fighting:'☠ Kampf',defeated:'☠ besiegt',escaped:'☠ entkommen'};
@@ -57,6 +57,8 @@ function create(host0,commands){
   const {CARD_LIBRARY}=HexData;
   const gl=new THREE.WebGLRenderer({antialias:true});gl.setPixelRatio(Math.min(devicePixelRatio||1,2));   // wirft ohne WebGL -> Controller fällt auf SVG zurück
   const wrap=host0.parentElement;wrap.classList.add('is3d');
+  const hintText=wrap.querySelector('.mapControls span'),oldHint=hintText?.textContent;
+  if(hintText) hintText.textContent='Mausrad: Zoom · links ziehen: verschieben · rechts ziehen: drehen und kippen';
   host0.style.display='none';
   const host=document.createElement('div');host.className='board3d';host.style.cssText='position:absolute;inset:0;touch-action:none;background:'+SKY;
   wrap.insertBefore(host,wrap.firstChild);
@@ -74,9 +76,10 @@ function create(host0,commands){
   Object.assign(sun.shadow.camera,{left:-1100,right:1100,top:1100,bottom:-1100,near:100,far:3500});scene.add(sun,sun.target);
 
   // ---- Kamera: Blick von schräg oben, verschieben (rechte/mittlere Maustaste) und zoomen (Mausrad) ----
-  const cam={x:0,z:0,dist:DIST_START};
+  const cam={x:0,z:0,dist:DIST_START,yaw:0,pitch:TILT};
   function applyCamera(){
-    camera.position.set(cam.x,Math.sin(TILT)*cam.dist,cam.z+Math.cos(TILT)*cam.dist);camera.lookAt(cam.x,0,cam.z);camera.updateMatrixWorld();
+    const flat=Math.cos(cam.pitch)*cam.dist;
+    camera.position.set(cam.x+Math.sin(cam.yaw)*flat,Math.sin(cam.pitch)*cam.dist,cam.z+Math.cos(cam.yaw)*flat);camera.lookAt(cam.x,0,cam.z);camera.updateMatrixWorld();
     sun.target.position.set(cam.x,0,cam.z);sun.position.set(cam.x+650,1100,cam.z+450);
   }
   const ray=new THREE.Raycaster(),ndc=new THREE.Vector2(),ground=new THREE.Plane(new THREE.Vector3(0,1,0),0);
@@ -88,8 +91,8 @@ function create(host0,commands){
     const after=event&&groundPoint(event);if(before&&after){cam.x+=before.x-after.x;cam.z+=before.z-after.z;applyCamera();}
     commands.viewChanged?.();
   }
-  function resetView(notify=true){cam.x=0;cam.z=0;cam.dist=DIST_START;applyCamera();if(notify) commands.viewChanged?.();}
-  function getView(){return {x:cam.x,y:cam.z,w:cam.dist,h:cam.dist};}
+  function resetView(notify=true){cam.x=0;cam.z=0;cam.dist=DIST_START;cam.yaw=0;cam.pitch=TILT;applyCamera();if(notify) commands.viewChanged?.();}
+  function getView(){return {x:cam.x,y:cam.z,w:cam.dist,h:cam.dist,yaw:cam.yaw,pitch:cam.pitch};}
 
   // ---- Modelle laden ----
   const templates=new Map();let ready=false,destroyed=false;
@@ -389,16 +392,30 @@ function create(host0,commands){
     if(id!==hoverPick){if(hoverPick) commands.leavePlacement(hoverPick);if(id) commands.hoverPlacement(id);hoverPick=id;render(state,targetList);}
     dom.style.cursor=found?(found.kind==='target'&&!found.legal?'not-allowed':'pointer'):'';
   }
+  const capture=e=>{try{dom.setPointerCapture(e.pointerId);}catch{/* Zeiger nicht mehr aktiv */}};
   const on=(name,fn,options)=>{dom.addEventListener(name,fn,options);return [name,fn,options];};
   const listeners=[
     on('wheel',e=>{e.preventDefault();zoom(Math.exp(clamp(e.deltaY,-200,200)*.0015),e);},{passive:false}),
     on('contextmenu',e=>e.preventDefault()),
     on('pointerdown',e=>{
-      if(e.button===2||e.button===1){const p=groundPoint(e);if(!p) return;e.preventDefault();drag={id:e.pointerId,p};dom.setPointerCapture(e.pointerId);dom.style.cursor='grabbing';}
+      if(e.button===2||e.button===1){e.preventDefault();drag={mode:'orbit',id:e.pointerId,x:e.clientX,y:e.clientY};capture(e);dom.style.cursor='grabbing';}
       else if(e.button===0) press={x:e.clientX,y:e.clientY};
     }),
     on('pointermove',e=>{
-      if(drag&&drag.id===e.pointerId){const p=groundPoint(e);if(p){cam.x+=drag.p.x-p.x;cam.z+=drag.p.z-p.z;applyCamera();commands.viewChanged?.();}return;}
+      if(drag&&drag.id===e.pointerId){
+        if(drag.mode==='orbit'){
+          cam.yaw-=(e.clientX-drag.x)*.006;cam.pitch=clamp(cam.pitch+(e.clientY-drag.y)*.005,PITCH_MIN,PITCH_MAX);drag.x=e.clientX;drag.y=e.clientY;
+          applyCamera();commands.viewChanged?.();
+        }else{const p=groundPoint(e);if(p){cam.x+=drag.p.x-p.x;cam.z+=drag.p.z-p.z;applyCamera();commands.viewChanged?.();}}
+        return;
+      }
+      if(press&&!(e.buttons&1)) press=null;
+      if(press&&Math.hypot(e.clientX-press.x,e.clientY-press.y)>5){          // linke Taste gezogen: Karte verschieben statt klicken
+        const p=groundPoint({clientX:press.x,clientY:press.y});press=null;
+        if(p){drag={mode:'pan',id:e.pointerId,p};capture(e);dom.style.cursor='grabbing';
+          if(hoverPick){commands.leavePlacement(hoverPick);hoverPick=null;if(state&&ready) render(state,targetList);}}
+        return;
+      }
       if(state&&ready) updateHover(e);
     }),
     on('pointerup',e=>{
@@ -420,7 +437,7 @@ function create(host0,commands){
   return {render,reset,project,zoom:factor=>zoom(factor),resetView:()=>resetView(true),getView,
     destroy(){
       destroyed=true;cancelAnimationFrame(raf);resize.disconnect();for(const [name,fn,options] of listeners) dom.removeEventListener(name,fn,options);
-      gl.dispose();host.remove();wrap.classList.remove('is3d');host0.style.display='';
+      gl.dispose();host.remove();wrap.classList.remove('is3d');if(hintText) hintText.textContent=oldHint;host0.style.display='';
     }};
 }
 

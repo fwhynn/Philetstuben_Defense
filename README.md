@@ -47,7 +47,8 @@ Ohne WebGL fällt das Spiel automatisch auf die SVG-Ansicht zurück.
 | Wave starten | `Leertaste` oder Button |
 | Doppeltes Tempo | `F` |
 | Kamera zoomen | Mausrad oder `+` / `−` |
-| Karte verschieben | Rechte oder mittlere Maustaste ziehen |
+| Karte verschieben | Linke Maustaste ziehen (3D) |
+| Ansicht drehen und kippen | Rechte oder mittlere Maustaste ziehen (3D) |
 | Turm kaufen | Freien Turmplatz anklicken, dann Turm wählen |
 | Werte, Upgrades, Verkauf | Gesetzten Turm anklicken |
 | Gebäude bauen | Gebäudeplatz auf einem Dorf-Hex anklicken |

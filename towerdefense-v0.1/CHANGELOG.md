@@ -4,6 +4,10 @@ Die folgenden Einträge dokumentieren frühere Zwischenstände. Verbindlicher ak
 
 # Hex Bastion – V0.7-dev
 
+## V0.7 – 3D-Kamera frei bewegbar
+
+- Linke Maustaste ziehen verschiebt die Karte (ein Klick ohne Ziehen wählt weiterhin, ab 5 Pixel Bewegung wird gezogen). Rechte oder mittlere Maustaste ziehen dreht die Ansicht um den Blickpunkt (Yaw) und kippt sie (Neigung 12°–88°), wie die mittlere Maustaste in Blender. Mausrad zoomt zum Mauszeiger. "Zur Base" setzt auch Drehung und Neigung zurück.
+
 ## V0.7 – Turmplätze neben der Straße
 
 - Turmplätze hängen jetzt von der Hexart ab (`SLOT_LAYOUTS`, `HexMap.slotOffsets`). Vorher lagen sie für alle Tiles gleich und überlappten bei 14 von 17 Hexarten die Straße, teils lag der Turm mittig darauf. Jetzt mindestens 4 Einheiten Abstand (Sechserkreuzung bauartbedingt 1) und innerhalb des Hex. Der 3D-Renderer setzt die Plattformen an diese Positionen; SVG und Kampf nutzen dieselben Werte.
