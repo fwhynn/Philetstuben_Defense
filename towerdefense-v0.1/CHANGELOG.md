@@ -4,6 +4,11 @@ Die folgenden Einträge dokumentieren frühere Zwischenstände. Verbindlicher ak
 
 # Hex Bastion – V0.7-dev
 
+## V0.7 – Turmplätze neben der Straße
+
+- Turmplätze hängen jetzt von der Hexart ab (`SLOT_LAYOUTS`, `HexMap.slotOffsets`). Vorher lagen sie für alle Tiles gleich und überlappten bei 14 von 17 Hexarten die Straße, teils lag der Turm mittig darauf. Jetzt mindestens 4 Einheiten Abstand (Sechserkreuzung bauartbedingt 1) und innerhalb des Hex. Der 3D-Renderer setzt die Plattformen an diese Positionen; SVG und Kampf nutzen dieselben Werte.
+- Neuer Test prüft alle Hexarten in allen sechs Rotationen. 93 Tests.
+
 ## V0.7 – 3D-Renderer (Three.js)
 
 - `three-renderer.js`: Three.js-Adapter mit derselben Schnittstelle wie der SVG-Renderer (render/reset/project/zoom/resetView/getView/destroy). Lädt 28 `.glb`-Modelle aus `assets/` (21 Tiles, 3 Sonderfelder, 4 Türme), fasst sie je Material zusammen und zeichnet Tiles, Türme, Gebäude-Platzhalter, Gegner, Geschosse, Reichweiten, Upgrade-Hinweise und Beschriftungen. Turrets zielen auf den nächsten Gegner.

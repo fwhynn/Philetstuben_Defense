@@ -23,10 +23,24 @@ test('claimed landmark prefabs resolve to a tile model with their rotation',()=>
   const m=models.modelFor({type:prefab.type,rotation:prefab.rotation,roads:prefab.roads});assert.equal(m.name,'tJunction');assert.equal(m.rotation,2);
   assert.deepEqual([...map.rotatedRoads({roads:models.SHAPES.tJunction},2)].sort(),[...prefab.roads].sort());
 });
-test('landmark props avoid roads and the tower slot side',()=>{
-  const {models}=load();
+test('landmark props avoid roads and the tower slot',()=>{
+  const {models,map}=load();
   for(const shape of ['straight','smallCurve','bigCurve','tee','tJunction']){
-    const angle=models.propAngle(shape);assert.ok(Math.abs(angle-90)>=35,shape+' prop must not sit at the slot');
+    const slots=map.slotOffsets(shape,1),angle=models.propAngle(shape,slots),slotAngle=Math.atan2(-slots[0].y,slots[0].x)*180/Math.PI,gap=Math.abs(angle-slotAngle)%360;assert.ok(Math.min(gap,360-gap)>=40,shape+' prop must not sit at the slot');
     const gaps=models.SHAPES[shape].map(d=>Math.min(Math.abs(angle-d*60)%360,360-Math.abs(angle-d*60)%360));assert.ok(Math.min(...gaps)>=30,shape+' prop must not sit on a road');
+  }
+});
+test('tower slots never overlap the road, stay inside the hex and keep their distance, for every rotation',()=>{
+  const {data,map}=load();
+  const dist=(p,a,b)=>{const dx=b.x-a.x,dy=b.y-a.y,l2=dx*dx+dy*dy||1,t=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/l2));return Math.hypot(p.x-a.x-t*dx,p.y-a.y-t*dy);};
+  for(const [id,card] of Object.entries(data.CARD_LIBRARY)) for(let rotation=0;rotation<6;rotation++){
+    const tile={q:0,r:0,type:id,rotation,roads:map.rotatedRoads(card,rotation),slots:card.slots||0,buildingSlots:card.buildingSlots||0};
+    const legs=[...map.roadGeometry(tile).legs.values()],slots=map.slotPositions(tile);assert.equal(slots.length,tile.slots,id);
+    slots.forEach((p,i)=>{
+      let nearest=Infinity;for(const points of legs) for(let k=0;k<points.length-1;k++) nearest=Math.min(nearest,dist(p,points[k],points[k+1]));
+      assert.ok(nearest-9-11>=0,`${id} rot ${rotation} slot ${i}: tower touches the road (${(nearest-20).toFixed(1)})`);
+      assert.ok(Math.hypot(p.x,p.y)<=54,`${id} slot ${i} outside hex`);
+      if(i) assert.ok(Math.hypot(p.x-slots[0].x,p.y-slots[0].y)>=22,`${id} slots too close`);
+    });
   }
 });

@@ -27,17 +27,37 @@ const HexMap=(()=>{
   function neighbor(q,r,d){return {q:q+DIRS[d][0],r:r+DIRS[d][1]};}
   function rotatedRoads(card,rot){return card.roads.map(d=>(d+rot)%6);}
 
+  // Turmplätze je Hexart bei Rotation 0 (Weltmaß, y nach unten, relativ zur Hexmitte). Berechnet so, dass Türme (Radius ~11) neben der Straße (Halbbreite 9) stehen.
+  const SLOT_LAYOUTS = {
+    straight: [[-14,-24]],
+    smallCurve: [[-6,-4]],
+    bigCurve: [[2,32]],
+    tee: [[14,-24],[14,24]],
+    tJunction: [[-30,24],[-4,24]],
+    fullCross: [[0,-42],[0,42]],
+    cross: [[-14,-24],[14,24]],
+    village: [[4,-40]],
+    empty: [[-14,-24],[-30,24]],
+    longRoad: [[12,-32],[-12,32]],
+    highGround: [[14,-24]],
+    grove: [[2,32]],
+    citadel: [[14,-24],[14,24]],
+    battlefield: [[-14,-24]],
+    watchtower: [[14,-24],[0,24]],
+    royalVillage: [[-14,-24]],
+    warCross: [[-14,-24],[14,24]]
+  };
+  // Unrotierte Turmplatz-Offsets einer Hexart. Unbekannte Arten fallen auf die alte Standardlage zurück.
+  function slotOffsets(type,count){
+    const layout=SLOT_LAYOUTS[type];if(layout) return layout.slice(0,count).map(([x,y])=>({x,y}));
+    if(count===1) return [{x:0,y:-21}];
+    if(count===2) return [{x:-18,y:-20},{x:18,y:18}];
+    return [];
+  }
   function slotPositions(tile){
     const c=axialToWorld(tile.q,tile.r);
-    const out=[];
-    const count=tile.slots||0;
-    if(count===1) out.push({x:c.x,y:c.y-21});
-    if(count===2){out.push({x:c.x-18,y:c.y-20},{x:c.x+18,y:c.y+18});}
     const angle=-(tile.rotation||0)*Math.PI/3;
-    return out.map(p=>{
-      const x=p.x-c.x,y=p.y-c.y;
-      return {x:c.x+x*Math.cos(angle)-y*Math.sin(angle),y:c.y+x*Math.sin(angle)+y*Math.cos(angle)};
-    });
+    return slotOffsets(tile.type,tile.slots||0).map(p=>({x:c.x+p.x*Math.cos(angle)-p.y*Math.sin(angle),y:c.y+p.x*Math.sin(angle)+p.y*Math.cos(angle)}));
   }
 
   function buildingPosition(tile){const c=axialToWorld(tile.q,tile.r),angle=-(tile.rotation||0)*Math.PI/3;return {x:c.x-30*Math.sin(angle),y:c.y+30*Math.cos(angle)};}
@@ -140,7 +160,7 @@ const HexMap=(()=>{
     }
     return {graph,geometry,distances};
   }
-  return {SQRT3,HEX,OPP,key,axialToWorld,hexPoints,edgePoint,neighbor,rotatedRoads,canPlace,rescue,buildGraph,pathToBase,roadGeometry,routeGraph,length,slotPositions,buildingPosition,axialToPixel:axialToWorld};
+  return {SQRT3,HEX,OPP,key,axialToWorld,hexPoints,edgePoint,neighbor,rotatedRoads,canPlace,rescue,buildGraph,pathToBase,roadGeometry,routeGraph,length,slotOffsets,slotPositions,buildingPosition,axialToPixel:axialToWorld};
 })();
 
 

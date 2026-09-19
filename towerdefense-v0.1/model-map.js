@@ -25,16 +25,17 @@ const HexModelMap=(()=>{
   const angleGap=(a,b)=>{const d=Math.abs(a-b)%360;return Math.min(d,360-d);};
   /**
    * Winkel (Grad, 0 = Osten, gegen den Uhrzeigersinn) für Deko auf einem Sonderfeld:
-   * zwischen zwei Kanten, möglichst weit von Straßen und dem Turmplatz (Norden, 90°) entfernt.
+   * zwischen zwei Kanten, weit weg von Straßen und Turmplätzen (slots: unrotierte Offsets, y nach unten).
    */
-  function propAngle(shape){
-    const roads=(SHAPES[shape]||[]).map(d=>d*60);let best=null;
+  function propAngle(shape,slots=[{x:0,y:-21}]){
+    const roads=(SHAPES[shape]||[]).map(d=>d*60),slotAngles=slots.map(p=>Math.atan2(-p.y,p.x)*180/Math.PI);let best=null;
     for(let k=0;k<6;k++){
-      const angle=30+60*k;if(angleGap(angle,90)<35) continue;
+      const angle=30+60*k,slotGap=slotAngles.length?Math.min(...slotAngles.map(s=>angleGap(angle,s))):180;
+      if(slotGap<40) continue;
       const score=roads.length?Math.min(...roads.map(r=>angleGap(angle,r))):180;
-      if(!best||score>best.score||(score===best.score&&angle===270)) best={angle,score};
+      if(!best||score>best.score||(score===best.score&&slotGap>best.slotGap)) best={angle,score,slotGap};
     }
-    return best.angle;
+    return best?best.angle:270;
   }
   return {SHAPES,TILE_MODELS,ALL_MODELS,matchShape,modelFor,propAngle};
 })();

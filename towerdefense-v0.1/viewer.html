@@ -10,6 +10,7 @@
     #info b{color:#f1ddb1}
     .tag{position:fixed;left:0;top:0;z-index:2;transform:translate(-50%,0);font-size:11px;color:#fff;background:rgba(20,30,24,.72);padding:1px 6px;border-radius:4px;pointer-events:none;white-space:nowrap}
   </style>
+  <script src="data.js"></script><script src="map.js"></script>
   <script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script>
 </head>
 <body>
@@ -49,7 +50,19 @@ try{
       g.add(prep((await load(T('empty'))).clone()));
       const t=prep((await load(url)).clone());t.position.set(-0.33,0,-0.37);g.add(t);
       const u=t.getObjectByName('turret');if(u)turrets.push(u);
-    }else g.add(prep((await load(url)).clone()));
+    }else{
+      const tile=prep((await load(url)).clone()),card=HexData.CARD_LIBRARY[name],slots=[];
+      if(card&&card.slots){                                          // Plattformen und Türme an die Spielpositionen setzen
+        tile.traverse(n=>{if(/^tower_slot_\d+$/.test(n.name)) slots.push(n);});slots.sort((a,b)=>a.name.localeCompare(b.name));
+        const pads=slots.map(n=>n.clone());slots.forEach(n=>n.parent.remove(n));
+        const offsets=HexMap.slotOffsets(name,card.slots);
+        for(let i=0;i<offsets.length;i++){
+          const o=offsets[i],pad=(pads[i]||pads[0]).clone();pad.position.set(o.x/54,pad.position.y,o.y/54);tile.add(pad);
+          const t=prep((await load(W('archer'))).clone());t.position.set(o.x/54,0,o.y/54);g.add(t);
+        }
+      }
+      g.add(tile);
+    }
     const el=document.createElement('div');el.className='tag';el.textContent=name;document.body.appendChild(el);labels.push([el,new THREE.Vector3(x,0,z+0.92)]);
   }
   status.textContent='24 Modelle geladen';

@@ -139,9 +139,10 @@ function create(host0,commands){
     const template=spec.kind==='landmark'?modelTemplate(spec.name,'landmark'):modelTemplate(spec.name);
     if(!template){const mesh=new THREE.Mesh(hexPad,fallbackMaterial);mesh.scale.setScalar(1);holder.add(mesh);return holder;}
     addParts(model,spec.proceduralRoads&&template.noRoad?template.noRoad:template.parts,ghost,legal);
-    template.slots.forEach((slot,i)=>{
-      if(i>=slotCount) return;const group=new THREE.Group();
-      group.position.copy(slotCount===1&&template.slots.length>1?new THREE.Vector3(0,slot.pos.y,-.389):slot.pos);addParts(group,slot.parts,ghost,legal);model.add(group);
+    // Turmplätze liegen an den Spielpositionen (HexMap.slotOffsets), nicht an den im Modell gespeicherten.
+    HexMap.slotOffsets(tile.type,slotCount).forEach((offset,i)=>{
+      const slot=template.slots[i]||template.slots[0];if(!slot) return;
+      const group=new THREE.Group();group.position.set(offset.x/S,slot.pos.y,offset.y/S);addParts(group,slot.parts,ghost,legal);model.add(group);
     });
     if(buildingSlots&&template.pad){const group=new THREE.Group();group.position.copy(template.pad.pos);addParts(group,template.pad.parts,ghost,legal);model.add(group);}
     if(prop){
@@ -191,7 +192,7 @@ function create(host0,commands){
         let holder;
         if(!clear) holder=buildTile({kind:'tile',name:'fog',rotation:0},{...tile,slots:0});
         else if(landmark.type==='boss') holder=buildTile({kind:'landmark',name:'boss',rotation:0},{...tile,slots:0});
-        else holder=buildTile({kind:'tile',...HexModelMap.modelFor(tile)},tile,{prop:{name:landmark.type,angle:HexModelMap.propAngle(p.type)}});
+        else holder=buildTile({kind:'tile',...HexModelMap.modelFor(tile)},tile,{prop:{name:landmark.type,angle:HexModelMap.propAngle(p.type,HexMap.slotOffsets(p.type,p.slots))}});
         layer.landmarks.add(holder);record={sig,holder};landmarkRecords.set(id,record);
       }
       label(`lm:${id}`,c.x,c.y,clear?LANDMARK_LABEL[landmark.type]:'?',clear?'':'big',clear?30:0);

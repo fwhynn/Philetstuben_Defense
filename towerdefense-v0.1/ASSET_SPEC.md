@@ -21,15 +21,11 @@ Damit deine Modelle ohne Nacharbeit zur Spiellogik passen. Alle Maße sind aus `
 - Die Straßenmittellinie soll dem Spiel-Wegverlauf folgen, da Gegner darauf laufen. Gerade = Linie. Kurven = weiche Bögen über einen Punkt zwischen Mitte und Kanten. `longRoad` = leicht geschlängelt.
 
 ### Turm- und Gebäudeplätze
-Flache Bauplattformen (Sockel/Steinplatte, Radius ca. 0,22), auf denen später der Turm steht. Positionen bei Rotation 0, Einheit = Hexradius, x = Ost, „Nord“ = Richtung Kante 1/2:
+Flache Bauplattformen (Sockel/Steinplatte, Radius ca. 0,22), auf denen später der Turm steht. Als Objekt `tower_slot_1`, `tower_slot_2` (Gruppe aus Sockel und Platte) modellieren, Platte auf Höhe ca. 0,03–0,05.
 
-| Slots | Positionen |
-|---|---|
-| 1 | (0, 0,39 Nord) |
-| 2 | (−0,33, 0,37 Nord) und (0,33, 0,33 Süd) |
-| Gebäude | (0, 0,56 Süd) – quadratischer Platz ca. 0,33 breit |
+**Die Position bestimmt das Spiel, nicht das Modell.** Der Renderer verschiebt die Plattformen an die Spielpositionen aus `map.js` (`SLOT_LAYOUTS`, je Hexart eigene Lage, damit Türme neben der Straße statt darauf stehen). Die Position im Modell ist nur ein Platzhalter; wichtig sind Anzahl (`tower_slot_N` für alle Plätze der Karte) und die Höhe. Der Gebäudeplatz bleibt bei (0, 0,56 Süd), ein quadratischer Platz von ca. 0,33 Breite (`building_pad`).
 
-Die Plätze dürfen nicht auf der Straße liegen. Das Spiel platziert die Türme selbst, du brauchst keine Marker im Modell.
+Beim Modellieren der Deko (Büsche, Steine, Bäume) beachten: Die Spielpositionen der Türme stehen in `SLOT_LAYOUTS` in `map.js`. Plattformen dort nicht mit großer Deko zustellen.
 
 ### Benötigte Tiles
 
