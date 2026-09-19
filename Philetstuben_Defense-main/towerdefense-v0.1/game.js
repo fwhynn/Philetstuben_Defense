@@ -262,6 +262,7 @@
     return [];
   }
 
+  const SPAWN_SPACING=20;   // Weltmaß zwischen zwei nacheinander gespawnten Gegnern
   function startWave(){
     if(state.waveRunning||state.phase!=='build') return;
     const sources=spawnSources();
@@ -270,13 +271,15 @@
     state.phase='wave'; state.selectedSlot=null;state.previewTower=null;
     sound.play('wave');
     startWaveBtn.disabled=true;
-    const count=HexWaves.plan(state.wave,state.income).count;
+    const wavePlan=HexWaves.plan(state.wave,state.income),count=wavePlan.count;
     state.waveKills=0;
     state.pendingSpawns=count;
+    let spawnAt=state.elapsedMs;
     for(let i=0;i<count;i++){
       const src=sources[i%sources.length];
       const run=state;
-      state.spawnQueue.push({due:state.elapsedMs+i*320,callback:()=>{
+      if(i>0) spawnAt+=Math.max(320,SPAWN_SPACING/wavePlan.enemies[i].speed*1000);   // Abstand zum Vordermann mindestens eine Körperlänge
+      state.spawnQueue.push({due:spawnAt,callback:()=>{
         if(state!==run) return;
         if(!state.waveRunning) return;
         spawnEnemy(nextSourcePoints(src),i);
