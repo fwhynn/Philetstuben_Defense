@@ -4,6 +4,13 @@ Die folgenden Einträge dokumentieren frühere Zwischenstände. Verbindlicher ak
 
 # Hex Bastion – V0.7-dev
 
+## V0.7 – Angriffseffekte (Schritt 1)
+
+- Archer und Balliste schießen sichtbare Pfeile und Bolzen im Bogenflug (Spitze, Federn, Schweif, Aufprallfunke). Das Katapult wirft einen Felsbrocken, der die Schusslinie entlang hüpft, mit Staub an den getroffenen Gegnern. Der Kettenblitz ist ein gezackter, flackernder Blitz mit Glühen und Funken an jedem Treffer.
+- Alle Türme haben einen Mündungsblitz und einen kurzen Rückstoß; getroffene Gegner plustern sich kurz auf.
+- Der Schaden wird weiterhin sofort beim Schuss verrechnet, die Effekte sind reine Darstellung. `combat.js` liefert dafür pro Geschoss Id, Turmtyp, Trefferpositionen und Flugdauer; die Lebensdauer von Pfeil, Bolzen, Fels und Blitz ist länger (0,24 bis 0,38 s), damit man sie sieht. Flammenturm, Minen und Freeze bleiben vorerst unverändert (Schritt 2).
+- Alle Effekte laufen über fünf `InstancedMesh`-Pools (wenige Draw-Calls). In der Grafikstufe „niedrig“ entfallen die Leuchtschweife und das Blitzglühen.
+
 ## V0.7 – Schatztruhe im Hex
 
 - Auf Schatz- und Shrinefeldern stand die Truhe teilweise außerhalb des Hexes. Der Renderer setzte die Deko um die Mitte aller Objekte (auch weit verstreuter Kisten) statt um die Truhe, wodurch sie um bis zu 0,5 Hexradien nach außen rutschte. Jetzt gilt die Mitte der Truhe (bzw. des Shrines) als Bezugspunkt, nur Kisten in deren Nähe (bis 0,45) werden mitgenommen, und die Gruppe wird so gedreht, dass die Kisten ihre Lage zur Truhe behalten.

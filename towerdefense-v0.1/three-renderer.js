@@ -127,6 +127,25 @@ function create(host0,commands){
   const torus=new THREE.TorusGeometry(1,.09,6,28).rotateX(Math.PI/2),hintGeometry=new THREE.ConeGeometry(5,11,6),beam=new THREE.CylinderGeometry(1,1,1,6);
   const basic=(color,opacity=1)=>new THREE.MeshBasicMaterial({color,transparent:opacity<1,opacity,depthWrite:opacity>=1});
   const std=(color,extra={})=>new THREE.MeshStandardMaterial({color,roughness:.85,metalness:0,...extra});
+  // ---- Effekt-Pools: alle Strahlen, Spitzen, Blitze und Funken laufen über wenige InstancedMeshes (kaum Draw-Calls) ----
+  const additive=()=>new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,depthWrite:false,blending:THREE.AdditiveBlending});
+  function makePool(geometry,max,material){
+    const mesh=new THREE.InstancedMesh(geometry,material,max);mesh.frustumCulled=false;mesh.count=0;mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    const m=new THREE.Matrix4(),c=new THREE.Color(),q=new THREE.Quaternion(),up=new THREE.Vector3(0,1,0),d=new THREE.Vector3(),pos=new THREE.Vector3(),sc=new THREE.Vector3();
+    mesh.setColorAt(0,c.set('#ffffff'));   // Farbpuffer von Anfang an anlegen, sonst kompiliert der Shader ohne Instanzfarben
+    const put=(color,fade)=>{mesh.setMatrixAt(mesh.count,m);mesh.setColorAt(mesh.count,c.set(color).multiplyScalar(fade));mesh.count++;};
+    return {mesh,
+      begin(){mesh.count=0;},
+      segment(ax,ay,az,bx,by,bz,radius,color,fade=1){if(mesh.count>=max) return;d.set(bx-ax,by-ay,bz-az);const len=Math.max(d.length(),.01);q.setFromUnitVectors(up,d.divideScalar(len));pos.set((ax+bx)/2,(ay+by)/2,(az+bz)/2);sc.set(radius,len,radius);m.compose(pos,q,sc);put(color,fade);},
+      ball(x,y,z,radius,color,fade=1){if(mesh.count>=max) return;q.identity();pos.set(x,y,z);sc.setScalar(radius);m.compose(pos,q,sc);put(color,fade);},
+      cone(x,y,z,dx,dy,dz,length,radius,color){if(mesh.count>=max) return;d.set(dx,dy,dz).normalize();q.setFromUnitVectors(up,d);pos.set(x,y,z);sc.set(radius,length,radius);m.compose(pos,q,sc);put(color,1);},
+      end(){mesh.instanceMatrix.needsUpdate=true;if(mesh.instanceColor) mesh.instanceColor.needsUpdate=true;}};
+  }
+  const fx={solid:makePool(new THREE.CylinderGeometry(1,1,1,6),700,new THREE.MeshBasicMaterial({color:'#ffffff'})),
+    glow:makePool(new THREE.CylinderGeometry(1,1,1,6),700,additive()),
+    tips:makePool(new THREE.ConeGeometry(1,1,6).translate(0,-.5,0),160,new THREE.MeshBasicMaterial({color:'#ffffff'})),   // Spitze zeigt in +Y, Ursprung an der Spitze
+    flash:makePool(new THREE.SphereGeometry(1,10,8),220,additive()),
+    rocks:makePool(new THREE.IcosahedronGeometry(1,0),48,new THREE.MeshStandardMaterial({color:'#ffffff',roughness:.95,metalness:0}))};
   const mats={empty:std('#4e6355',{transparent:true,opacity:.6}),legal:basic('#7fcf6a',.25),illegal:basic('#c0594c',.16),outlineLegal:basic('#a9dc93'),outlineIllegal:basic('#ba6b60'),
     hint:basic('#ffe39a'),slot:basic('#f4d36d',.9),select:basic('#f4d36d',.9),bar:basic('#321a18'),hp:basic('#78b95f'),armor:basic('#df8b3a'),magic:basic('#69aee8')};
   const enemyGeometry={small:new THREE.SphereGeometry(9,14,10),boss:new THREE.SphereGeometry(15,16,12)},barGeometry=new THREE.PlaneGeometry(1,1);
@@ -144,8 +163,8 @@ function create(host0,commands){
   let state,targetList=[],hoverPick=null;
   const tileRecords=new Map(),landmarkRecords=new Map(),objectRecords=new Map(),labels=new Map(),usedLabels=new Set();
   let emptySig='',targetSig='',ghostSig='',pickables=[],pickDirty=true,runToken=null;
-  const enemyObjects=new Map(),mineObjects=new Map(),beamPool=[],rangeFill=new THREE.Mesh(circle,basic('#ffffff',.13)),rangeRing=new THREE.Mesh(circleRing,basic('#ffffff',.65)),selectRing=new THREE.Mesh(torus,mats.select);
-  rangeFill.visible=rangeRing.visible=selectRing.visible=false;layer.dynamic.add(rangeFill,rangeRing,selectRing);
+  const enemyObjects=new Map(),mineObjects=new Map(),rangeFill=new THREE.Mesh(circle,basic('#ffffff',.13)),rangeRing=new THREE.Mesh(circleRing,basic('#ffffff',.65)),selectRing=new THREE.Mesh(torus,mats.select);
+  rangeFill.visible=rangeRing.visible=selectRing.visible=false;layer.dynamic.add(rangeFill,rangeRing,selectRing,...Object.values(fx).map(pool=>pool.mesh));
 
   function clearGroup(group){for(const child of [...group.children]) group.remove(child);}
   function rebuildAll(){for(const [map,group] of [[tileRecords,layer.tiles],[landmarkRecords,layer.landmarks],[objectRecords,layer.objects]]){map.clear();clearGroup(group);}emptySig=targetSig=ghostSig='';pickDirty=true;}
@@ -239,7 +258,7 @@ function create(host0,commands){
     const model=new THREE.Group();model.scale.setScalar(S);holder.add(model);
     if(template){
       addParts(model,template.parts);
-      if(template.turret){obj.turret=new THREE.Group();obj.turret.position.copy(template.turret.pos);addParts(obj.turret,template.turret.parts);model.add(obj.turret);}
+      if(template.turret){obj.turret=new THREE.Group();obj.turret.position.copy(template.turret.pos);obj.turretBase=obj.turret.position.clone();addParts(obj.turret,template.turret.parts);model.add(obj.turret);}
       if(template.aura){obj.auraModel=new THREE.Group();obj.auraModel.position.copy(template.aura.pos);addParts(obj.auraModel,template.aura.parts);model.add(obj.auraModel);}
     }else{const mesh=new THREE.Mesh(new THREE.CylinderGeometry(12,14,40,8).translate(0,20,0),std(def.color));mesh.castShadow=true;holder.add(mesh);}
     const visual=HexData.BRANCH_VISUALS[tower.branch];
@@ -354,20 +373,75 @@ function create(host0,commands){
     const alive=new Set();for(const mine of state.mines||[]){alive.add(mine.id);let mesh=mineObjects.get(mine.id);if(!mesh){const model=templates.get('mine_pickup');if(model){mesh=new THREE.Group();const g=new THREE.Group();g.scale.setScalar(S);addParts(g,model.parts);mesh.add(g);}else{mesh=new THREE.Mesh(new THREE.CylinderGeometry(7,7,3,10),std(mine.color||'#e6a75f',{metalness:.25}));mesh.castShadow=true;}layer.dynamic.add(mesh);mineObjects.set(mine.id,mesh);}mesh.position.set(mine.x,model0(mesh)?0:2,mine.y);}
     for(const [id,mesh] of [...mineObjects])if(!alive.has(id)){layer.dynamic.remove(mesh);if(mesh.isMesh){mesh.geometry.dispose();mesh.material.dispose();}mineObjects.delete(id);}
   }
-  function syncProjectiles(){
-    const segments=[];
-    for(const p of state.projectiles){
-      if(p.kind==='blast'){
-        for(let i=0;i<12;i++){const a=i*Math.PI/6,b=(i+1)*Math.PI/6;segments.push([p.x+Math.cos(a)*p.r,p.y+Math.sin(a)*p.r,p.x+Math.cos(b)*p.r,p.y+Math.sin(b)*p.r,p.color]);}
-      }else if(p.kind==='chain') for(let i=0;i<p.pts.length-1;i++) segments.push([p.pts[i].x,p.pts[i].y,p.pts[i+1].x,p.pts[i+1].y,p.color]);
-      else segments.push([p.x1,p.y1,p.x2,p.y2,p.color]);
+  // ---- Geschosse und Treffereffekte (nur Darstellung; der Schaden ist beim Schuss schon verrechnet) ----
+  const seenShots=new Map();                                          // Geschoss-Id -> bereits ausgelöste Effekte (Rückstoß, Trefferpop)
+  const rnd=(i,seed)=>{const v=Math.sin(i*127.1+seed*311.7)*43758.5453;return v-Math.floor(v);};
+  const lerp=(a,b,t)=>a+(b-a)*t,clamp01=t=>Math.max(0,Math.min(1,t));
+  const SRC_H=34,DST_H=12,MUZZLE='#ffe9a8';
+  function towerAt(x,y){for(const record of objectRecords.values()) for(const obj of record.towers) if(Math.abs(obj.pos.x-x)<.5&&Math.abs(obj.pos.y-y)<.5) return obj;return null;}
+  function popEnemy(id){const obj=enemyObjects.get(id);if(obj) obj.pop=1;}
+  function lightning(p,a,b,seed,fade,high){                           // gezackter Blitz zwischen zwei Punkten, flackert etwa 22-mal pro Sekunde
+    const dx=b.x-a.x,dz=b.z-a.z,len=Math.hypot(dx,dz)||1,px=-dz/len,pz=dx/len,amp=Math.min(7,len*.2),N=8;
+    let last=a;
+    for(let i=1;i<=N;i++){
+      const t=i/N,edge=i===N?0:Math.sin(Math.PI*t),j=(rnd(i,seed)-.5)*2*amp*edge,v=(rnd(i+40,seed)-.5)*amp*.7*edge;
+      const cur={x:lerp(a.x,b.x,t)+px*j,y:lerp(a.y,b.y,t)+v,z:lerp(a.z,b.z,t)+pz*j};
+      if(high) fx.glow.segment(last.x,last.y,last.z,cur.x,cur.y,cur.z,3.4,p.color||'#93a5ff',.55*fade);
+      fx.solid.segment(last.x,last.y,last.z,cur.x,cur.y,cur.z,.9*fade,'#f2f5ff');
+      last=cur;
     }
-    while(beamPool.length<segments.length){const mesh=new THREE.Mesh(beam,basic('#ffffff'));layer.dynamic.add(mesh);beamPool.push(mesh);}
-    beamPool.forEach((mesh,i)=>{
-      const s=segments[i];mesh.visible=!!s;if(!s) return;
-      const a=new THREE.Vector3(s[0],34,s[1]),b=new THREE.Vector3(s[2],34,s[3]),dir=b.clone().sub(a),length=Math.max(dir.length(),.01);
-      mesh.position.copy(a).add(b).multiplyScalar(.5);mesh.scale.set(1.6,length,1.6);mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir.normalize());mesh.material.color.set(s[4]||'#ffffff');
-    });
+  }
+  function syncProjectiles(){
+    const high=quality==='high',now=performance.now();
+    for(const pool of Object.values(fx)) pool.begin();
+    const live=new Set();
+    for(const p of state.projectiles){
+      if(p.kind==='blast'){                                            // Explosionsring wie bisher
+        for(let i=0;i<12;i++){const a=i*Math.PI/6,b=(i+1)*Math.PI/6;fx.solid.segment(p.x+Math.cos(a)*p.r,34,p.y+Math.sin(a)*p.r,p.x+Math.cos(b)*p.r,34,p.y+Math.sin(b)*p.r,1.6,p.color||'#ffffff');}
+        continue;
+      }
+      if(p.id===undefined||!p.max){                                    // ältere Geschosse ohne Effektdaten (z. B. Flammenturm): einfacher Strahl
+        if(p.kind==='chain') for(let i=0;i<p.pts.length-1;i++) fx.solid.segment(p.pts[i].x,34,p.pts[i].y,p.pts[i+1].x,34,p.pts[i+1].y,1.6,p.color||'#ffffff');
+        else fx.solid.segment(p.x1,34,p.y1,p.x2,34,p.y2,1.6,p.color||'#ffffff');
+        continue;
+      }
+      live.add(p.id);const t=clamp01(1-p.ttl/p.max),done=seenShots.get(p.id)||seenShots.set(p.id,{}).get(p.id);
+      const src=p.kind==='chain'?p.pts[0]:{x:p.x1,y:p.y1},dst=p.kind==='chain'?p.pts.at(-1):{x:p.x2,y:p.y2};
+      if(!done.kick){done.kick=true;const tower=towerAt(src.x,src.y);if(tower) tower.kick=1;}   // Rückstoß des Turms
+      const dirx=dst.x-src.x,diry=dst.y-src.y,dlen=Math.hypot(dirx,diry)||1,ux=dirx/dlen,uy=diry/dlen;
+      if(t<.3){const k=1-t/.3;fx.flash.ball(src.x+ux*7,SRC_H+2,src.y+uy*7,1.5+3*k,MUZZLE,k*.9);}   // Mündungsblitz
+      if(p.kind==='chain'){
+        const fade=1-t*.8,seed=p.id*13+Math.floor(now/45);
+        for(let i=0;i<p.pts.length-1;i++){
+          const a={x:p.pts[i].x,y:i?DST_H:SRC_H,z:p.pts[i].y},b={x:p.pts[i+1].x,y:DST_H,z:p.pts[i+1].y};
+          lightning(p,a,b,seed+i*7,fade,high);
+        }
+        if(t<.5){const k=1-t/.5;p.pts.slice(1).forEach(pt=>fx.flash.ball(pt.x,DST_H,pt.y,2+3.5*k,p.color||'#93a5ff',k*.8));}   // Funken an jedem getroffenen Gegner
+        if(!done.hit){done.hit=true;(p.hits||[]).forEach(popEnemy);}
+      }else if(p.tower==='catapult'){                                   // Felsbrocken rollt und hüpft die Schusslinie entlang
+        const f=clamp01(t/.9),x=lerp(src.x,dst.x,f),y=lerp(src.y,dst.y,f),hop=Math.abs(Math.sin(f*Math.PI*5))*9*(1-f*.4)+5;
+        if(f<1){fx.rocks.ball(x,hop,y,5.5,'#9a8f7e');if(high) fx.glow.segment(lerp(src.x,x,.75),hop,lerp(src.y,y,.75),x,hop,y,2,'#d8c9a3',.25);
+        }
+        (p.hitAt||[]).forEach((h,i)=>{const start=(h.along??1)*.9,k=(t-start)/.35;if(k>=0&&k<1) fx.flash.ball(h.x,6,h.y,4+7*k,'#d9c7a0',(1-k)*.6);   // Staubwolke am Einschlag
+          const key='pop'+i;if(t>=start&&!done[key]){done[key]=true;popEnemy(p.hits[i]);}});
+      }else{                                                            // Pfeil (Archer) und Bolzen (Balliste)
+        const bolt=p.tower==='ballista',f=clamp01(t/.8),arc=bolt?3:12,length=bolt?15:9,radius=bolt?1.1:.65;
+        const at=u=>({x:lerp(src.x,dst.x,u),y:lerp(SRC_H,DST_H,u)+Math.sin(Math.PI*u)*arc,z:lerp(src.y,dst.y,u)});
+        if(f<1){
+          const head=at(f),before=at(Math.max(0,f-.06)),vx=head.x-before.x,vy=head.y-before.y,vz=head.z-before.z,vl=Math.hypot(vx,vy,vz)||1,nx=vx/vl,ny=vy/vl,nz=vz/vl;
+          const tail={x:head.x-nx*length,y:head.y-ny*length,z:head.z-nz*length};
+          fx.solid.segment(tail.x,tail.y,tail.z,head.x,head.y,head.z,radius,bolt?'#5b4a36':'#8b6b43');
+          fx.tips.cone(head.x+nx*2.5,head.y+ny*2.5,head.z+nz*2.5,nx,ny,nz,bolt?7:5,radius*2.2,bolt?'#c9ced6':'#d9dde3');
+          fx.solid.segment(tail.x-nx*.5,tail.y-ny*.5,tail.z-nz*.5,tail.x+nx*length*.28,tail.y+ny*length*.28,tail.z+nz*length*.28,radius*2.4,'#e9e2cf');   // Federn
+          if(high){const back=at(Math.max(0,f-.35));fx.glow.segment(back.x,back.y,back.z,tail.x,tail.y,tail.z,bolt?1.6:.9,p.color||'#f5d06e',.5);}
+        }else{
+          const k=clamp01((t-.8)/.2),h=at(1);fx.flash.ball(h.x,h.y,h.z,2+4.5*k,bolt?'#ffb060':'#ffe08a',(1-k)*.85);   // Aufprallfunke
+          if(!done.hit){done.hit=true;(p.hits||[]).forEach(popEnemy);}
+        }
+      }
+    }
+    for(const id of [...seenShots.keys()]) if(!live.has(id)) seenShots.delete(id);
+    for(const pool of Object.values(fx)) pool.end();
   }
 
   // ---- Beschriftungen (HTML über der Szene) ----
@@ -406,7 +480,7 @@ function create(host0,commands){
     const box=host.getBoundingClientRect(),outer=wrap.getBoundingClientRect();
     return {x:(tmp.x+1)/2*box.width+box.left-outer.left,y:(1-tmp.y)/2*box.height+box.top-outer.top,width:outer.width,height:outer.height};
   }
-  function reset(){rebuildAll();for(const obj of enemyObjects.values()) layer.dynamic.remove(obj.group);enemyObjects.clear();for(const mesh of mineObjects.values())layer.dynamic.remove(mesh);mineObjects.clear();state=null;hoverPick=null;resetView(false);}
+  function reset(){seenShots.clear();rebuildAll();for(const obj of enemyObjects.values()) layer.dynamic.remove(obj.group);enemyObjects.clear();for(const mesh of mineObjects.values())layer.dynamic.remove(mesh);mineObjects.clear();state=null;hoverPick=null;resetView(false);}
 
   // ---- Animation ----
   let last=performance.now(),raf=0,lastDraw=0,slowFrames=0;
@@ -437,11 +511,13 @@ function create(host0,commands){
         let best=null,bestDistance=obj.def.range;
         for(const e of enemies){const d=Math.hypot(e.x-obj.pos.x,e.y-obj.pos.y);if(d<=bestDistance){best=e;bestDistance=d;}}
         if(best){const wanted=Math.atan2(-(best.y-obj.pos.y),best.x-obj.pos.x),diff=Math.atan2(Math.sin(wanted-obj.angle),Math.cos(wanted-obj.angle));obj.angle+=diff*Math.min(1,dt*10);obj.turret.rotation.y=obj.angle;}
+        if(obj.kick>0){obj.kick=Math.max(0,obj.kick-dt*9);const k=obj.kick*obj.kick*.045;obj.turret.position.set(obj.turretBase.x-Math.cos(obj.angle)*k,obj.turretBase.y,obj.turretBase.z+Math.sin(obj.angle)*k);}   // Rückstoß entgegen der Schussrichtung
       }
       for(const obj of enemyObjects.values()){
         obj.bar.quaternion.copy(camera.quaternion);
         if(!obj.pivot) continue;
         const diff=Math.atan2(Math.sin(obj.targetAngle-obj.angle),Math.cos(obj.targetAngle-obj.angle));obj.angle+=diff*Math.min(1,dt*10);obj.pivot.rotation.y=obj.angle;
+        if(obj.pop>0){obj.pop=Math.max(0,obj.pop-dt*7);obj.pivot.scale.setScalar(1+.2*obj.pop);}else if(obj.pivot.scale.x!==1) obj.pivot.scale.setScalar(1);   // kurzes Aufplustern beim Treffer
         const swing=Math.sin(obj.phase)*.7;obj.pivot.position.y=Math.abs(Math.sin(obj.phase))*1.6;
         for(const limb of obj.limbs) limb.g.rotation.z=limb.name==='leg_l'?swing:limb.name==='leg_r'?-swing:limb.name==='arm_l'?-swing*.8:swing*.8;
       }
