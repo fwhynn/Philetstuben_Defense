@@ -5,7 +5,7 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 
 const S=54,STEP=Math.PI/3,TILT=55*Math.PI/180,PITCH_MIN=12*Math.PI/180,PITCH_MAX=88*Math.PI/180,DIST_MIN=220,DIST_MAX=3400,DIST_START=950,SKY='#a9cbd8';
-const PREFIX={tiles:'tile',landmarks:'landmark',towers:'tower',enemies:'enemy'};
+const PREFIX={tiles:'tile',landmarks:'landmark',towers:'tower',enemies:'enemy',buildings:'building',effects:'mine'};
 const LIMBS=['leg_l','leg_r','arm_l','arm_r'];
 const LANDMARK_LABEL={shrine:'Shrine · Bonus unbekannt',boss:'Wächter · inaktiv',treasure:'Schatz +20 · ungesammelt'};
 const STATUS_LABEL={ready:'☠ bereit',fighting:'☠ Kampf',defeated:'☠ besiegt',escaped:'☠ entkommen'};
@@ -240,7 +240,9 @@ function create(host0,commands){
   }
   function buildingObject(tile,index,building){
     const p=buildingPosition(tile),group=new THREE.Group(),type=building?.type;group.position.set(p.x,0,p.y);
-    if(building){
+    const model=building&&templates.get('building_'+type);
+    if(model){const g=new THREE.Group();g.scale.setScalar(S);addParts(g,model.parts);group.add(g);}
+    else if(building){
       const palette={house:['#c9a066','#a94a3a'],forge:['#6b6e75','#3d3f45'],market:['#d8c48a','#b8443a']}[type]||['#bc914d','#7a5a2c'];
       const body=new THREE.Mesh(new THREE.BoxGeometry(26,18,22).translate(0,9,0),std(palette[0])),roof=new THREE.Mesh(new THREE.ConeGeometry(21,13,4).rotateY(Math.PI/4).translate(0,24.5,0),std(palette[1]));
       body.castShadow=roof.castShadow=true;group.add(body,roof);
@@ -307,6 +309,7 @@ function create(host0,commands){
   }
 
   // ---- Gegner und Geschosse ----
+  const model0=m=>m.isGroup;
   function makeEnemy(e){
     const type=ENEMY_COLOR[e.type]?e.type:'normal',boss=type==='boss',template=templates.get('enemy_'+type),group=new THREE.Group(),bar=new THREE.Group();
     const obj={group,bar,radius:boss?15:9,phase:0,angle:0,targetAngle:0,last:null,slowed:false,limbs:[],barY:0};
@@ -336,8 +339,8 @@ function create(host0,commands){
     for(const [id,obj] of [...enemyObjects]) if(!alive.has(id)){layer.dynamic.remove(obj.group);obj.body?.material.dispose();enemyObjects.delete(id);}
   }
   function syncMines(){
-    const alive=new Set();for(const mine of state.mines||[]){alive.add(mine.id);let mesh=mineObjects.get(mine.id);if(!mesh){mesh=new THREE.Mesh(new THREE.CylinderGeometry(7,7,3,10),std(mine.color||'#e6a75f',{metalness:.25}));mesh.castShadow=true;layer.dynamic.add(mesh);mineObjects.set(mine.id,mesh);}mesh.position.set(mine.x,2,mine.y);}
-    for(const [id,mesh] of [...mineObjects])if(!alive.has(id)){layer.dynamic.remove(mesh);mesh.geometry.dispose();mesh.material.dispose();mineObjects.delete(id);}
+    const alive=new Set();for(const mine of state.mines||[]){alive.add(mine.id);let mesh=mineObjects.get(mine.id);if(!mesh){const model=templates.get('mine_pickup');if(model){mesh=new THREE.Group();const g=new THREE.Group();g.scale.setScalar(S);addParts(g,model.parts);mesh.add(g);}else{mesh=new THREE.Mesh(new THREE.CylinderGeometry(7,7,3,10),std(mine.color||'#e6a75f',{metalness:.25}));mesh.castShadow=true;}layer.dynamic.add(mesh);mineObjects.set(mine.id,mesh);}mesh.position.set(mine.x,model0(mesh)?0:2,mine.y);}
+    for(const [id,mesh] of [...mineObjects])if(!alive.has(id)){layer.dynamic.remove(mesh);if(mesh.isMesh){mesh.geometry.dispose();mesh.material.dispose();}mineObjects.delete(id);}
   }
   function syncProjectiles(){
     const segments=[];
