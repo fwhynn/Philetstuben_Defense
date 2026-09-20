@@ -1,4 +1,4 @@
-# Autohex TD läuft schlecht? Schritt für Schritt prüfen
+# Hex Bastion läuft schlecht? Schritt für Schritt prüfen
 
 Diese Anleitung hilft, wenn das Spiel im Browser ruckelt, der Rechner stark ausgelastet ist oder die Lüfter hochdrehen. Sie ist für ein starkes System gedacht (z. B. Ryzen 9 7950X3D mit Radeon RX 7900 XTX), bei dem das Spiel eigentlich **kein Problem** sein sollte. Mögliche Ursachen sind fehlende Hardwarebeschleunigung, die GPU-Auswahl oder hohe Last durch Szene und Spiellogik.
 

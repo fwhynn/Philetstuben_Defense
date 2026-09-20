@@ -710,16 +710,13 @@ R dreht die Karte, dann Feld anklicken.`;}
     document.getElementById('loadoutCount').textContent=`${pendingLoadout.length}/5 gewählt`;
     document.getElementById('diamondCount').textContent=`◆ ${profile.diamonds} Diamanten`;
     const warnings=loadoutWarnings(pendingLoadout);document.getElementById('loadoutWarning').textContent=warnings.length?`Hinweis: ${warnings.join(' ')}`:'Ausgewogenes Loadout: Leben, Rüstung, Magieresistenz, Support und Gruppen sind abgedeckt.';
-    document.getElementById('confirmLoadoutBtn').disabled=pendingLoadout.length!==5;document.getElementById('confirmLoadoutBtn').textContent=loadoutEdit?'Loadout speichern':'Run mit diesem Loadout starten';
-    document.getElementById('cancelLoadoutBtn').textContent=hasActiveRun&&!loadoutEdit?'Zurück zum Run':'Zurück zum Hauptmenü';
+    document.getElementById('confirmLoadoutBtn').disabled=pendingLoadout.length!==5;
+    document.getElementById('cancelLoadoutBtn').classList.toggle('hidden',!hasActiveRun);
   }
-  let loadoutEdit=false;   // true: vom Hauptmenü geöffnet, Bestätigen speichert nur und startet keinen Run
-  function openLoadout(edit=false){loadoutEdit=edit===true;pendingHero=profile.activeHero;pendingLoadout=[...profile.activeLoadout];renderLoadout();loadoutOverlay.classList.remove('hidden');}
+  function openLoadout(){pendingHero=profile.activeHero;pendingLoadout=[...profile.activeLoadout];renderLoadout();loadoutOverlay.classList.remove('hidden');}
   function confirmLoadout(){
     const saved=HexProfile.setLoadout({...profile,activeHero:pendingHero},pendingLoadout,TOWERS);if(!saved) return;
-    profile=saved;loadoutOverlay.classList.add('hidden');
-    if(loadoutEdit){loadoutEdit=false;openMainMenu();return;}
-    newRun(profile.activeLoadout);
+    profile=saved;loadoutOverlay.classList.add('hidden');newRun(profile.activeLoadout);
   }
   function showGameOver(){
     let reward={wave:0,bosses:0,milestones:0,total:0,duplicate:true};
@@ -759,20 +756,9 @@ R dreht die Karte, dann Feld anklicken.`;}
   for(const [kind,id] of [['walls','baseWallsBtn'],['weapon','baseWeaponBtn']])document.getElementById(id).addEventListener('click',()=>{if(HexHeroes.buy(state,kind)){sound.play('build');renderAll();}});
   globalThis.addEventListener?.('resize',layoutMenus);document.addEventListener('toggle',layoutMenus,true);document.addEventListener('click',()=>requestAnimationFrame(layoutMenus));
   startWaveBtn.addEventListener('click',startWave);
-  // ---- Hauptmenü ----
-  const mainMenu=document.getElementById('mainMenu'),menuRules=document.getElementById('menuRules');
-  function openMainMenu(){document.getElementById('menuContinueBtn').classList.toggle('hidden',!hasActiveRun||state.hp<=0);document.getElementById('menuPlayBtn').textContent=hasActiveRun?'Neuer Run':'Spielen';document.getElementById('menuLoadoutInfo').textContent='Loadout: '+profile.activeLoadout.map(id=>TOWERS[id]?.name||id).join(' · ');mainMenu.classList.remove('hidden');}
-  document.getElementById('menuPlayBtn').addEventListener('click',()=>{mainMenu.classList.add('hidden');if(profile.activeLoadout.length===5) newRun(profile.activeLoadout,profile.activeHero);else openLoadout();});
-  document.getElementById('menuLoadoutBtn').addEventListener('click',()=>{mainMenu.classList.add('hidden');openLoadout(true);});
-  document.getElementById('menuContinueBtn').addEventListener('click',()=>mainMenu.classList.add('hidden'));
-  document.getElementById('menuArsenalBtn').addEventListener('click',openArsenal);
-  document.getElementById('menuRulesBtn').addEventListener('click',()=>{if(!menuRules.innerHTML) menuRules.innerHTML=document.getElementById('rulesDrawer').querySelector('ul').outerHTML;menuRules.classList.toggle('hidden');});
-  document.getElementById('openMainMenuBtn').addEventListener('click',()=>{document.getElementById('settingsDrawer').classList.add('hidden');openMainMenu();});
-  const menuSound=document.getElementById('menuSound'),soundToggle=document.getElementById('soundEnabled');
-  menuSound.addEventListener('change',()=>{soundToggle.checked=menuSound.checked;soundToggle.dispatchEvent(new Event('change'));});
   newRunBtn.addEventListener('click',openLoadout);
   document.getElementById('confirmLoadoutBtn').addEventListener('click',confirmLoadout);
-  document.getElementById('cancelLoadoutBtn').addEventListener('click',()=>{loadoutOverlay.classList.add('hidden');if(!hasActiveRun||loadoutEdit) openMainMenu();loadoutEdit=false;});
+  document.getElementById('cancelLoadoutBtn').addEventListener('click',()=>loadoutOverlay.classList.add('hidden'));
   document.getElementById('retryLoadoutBtn').addEventListener('click',()=>newRun(state.towerLoadout,state.heroId));
   document.getElementById('changeLoadoutBtn').addEventListener('click',()=>{gameOverOverlay.classList.add('hidden');openLoadout();});
   document.getElementById('openArsenalBtn').addEventListener('click',openArsenal);
@@ -805,5 +791,5 @@ R dreht die Karte, dann Feld anklicken.`;}
   function togglePause(){paused=!paused;document.getElementById('app').classList.toggle('paused',paused);const b=document.getElementById('pauseBtn');if(b) b.textContent=paused?'▶ Weiter (P)':'⏸ Pause (P)';}
   document.getElementById('pauseBtn')?.addEventListener('click',togglePause);
   function frame(now){const dt=paused?0:Math.min((now-last)/1000,.05);last=now;update(dt,now);requestAnimationFrame(frame);}  
-  newRun(); hasActiveRun=false; openMainMenu(); requestAnimationFrame(frame);
+  newRun(); hasActiveRun=false; openLoadout(); requestAnimationFrame(frame);
 })();

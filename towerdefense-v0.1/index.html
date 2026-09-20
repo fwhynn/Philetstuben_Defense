@@ -3,8 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Autohex TD v0.7-dev</title>
-  <link rel="icon" type="image/png" href="assets/favicon.png" />
+  <title>Hex Bastion v0.7-dev</title>
   <link rel="stylesheet" href="style.css" />
   <script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script>
 </head>
@@ -34,7 +33,7 @@
 
     <!-- Oben links: Titel und Menü -->
     <nav class="dockTL" aria-label="Menü">
-      <h1>Autohex TD <span>v0.7-dev</span></h1>
+      <h1>Hex Bastion <span>v0.7-dev</span></h1>
       <div class="dockButtons">
         <button class="secondary drawerBtn" data-drawer="rulesDrawer">📜 Regeln</button>
         <button class="secondary drawerBtn" data-drawer="settingsDrawer">⚙ Einstellungen</button>
@@ -96,7 +95,6 @@
     <aside id="settingsDrawer" class="drawer hidden actions" aria-label="Einstellungen">
       <div class="panelHead"><h2>Einstellungen</h2><button class="secondary drawerClose" aria-label="Schließen">×</button></div>
       <label class="toggle"><input id="slotHints" type="checkbox" checked /> Freie Turmplätze hervorheben</label>
-      <button id="openMainMenuBtn" class="secondary">Hauptmenü</button>
       <button id="restartTutorialBtn" class="secondary">Mini-Tutorial starten</button>
       <label class="toggle"><input id="hexGrid" type="checkbox" /> Hex-Grid anzeigen (G)</label>
       <label class="toggle"><input id="autoStart" type="checkbox" /> Wave nach Platzierung automatisch starten</label>
@@ -120,26 +118,6 @@
     </aside>
   </div>
 
-
-  <div id="mainMenu" class="overlay mainMenu hidden" role="dialog" aria-modal="true" aria-labelledby="mainMenuTitle">
-    <div class="menuBox">
-      <img class="menuLogo" src="assets/favicon.png" alt="" />
-      <p class="eyebrow">TOWER DEFENSE</p>
-      <h1 id="mainMenuTitle">Autohex TD</h1>
-      <p class="menuTagline">Map bauen → Türme setzen → Wave überleben → Deck erweitern</p>
-      <p id="menuLoadoutInfo" class="menuLoadoutInfo"></p>
-      <div class="menuButtons">
-        <button id="menuContinueBtn" class="primary hidden">Weiterspielen</button>
-        <button id="menuPlayBtn" class="primary">Neuer Run</button>
-        <button id="menuLoadoutBtn" class="secondary">🛡 Loadout &amp; Festung</button>
-        <button id="menuArsenalBtn" class="secondary">◆ Arsenal</button>
-        <button id="menuRulesBtn" class="secondary">📜 Spielregeln</button>
-      </div>
-      <div id="menuRules" class="menuRules hidden"></div>
-      <div class="menuSound"><label class="toggle"><input id="menuSound" type="checkbox" checked /> Sounds aktiv</label></div>
-      <small class="menuVersion">v0.7-dev</small>
-    </div>
-  </div>
 
   <div id="rewardOverlay" class="overlay hidden" role="dialog" aria-modal="true">
     <div class="rewardBox">
@@ -232,7 +210,6 @@
   <script type="module">
     // 3D nur über http(s) (Modelle werden per fetch geladen); ?svg erzwingt den SVG-Prototyp, Doppelklick (file://) nutzt ihn automatisch.
     if(location.protocol.startsWith('http')&&!new URLSearchParams(location.search).has('svg')){
-      import('./menu-backdrop.js').catch(error=>console.warn('Menühintergrund nicht verfügbar:',error));
       try{await import('./three-renderer.js');}catch(error){console.warn('3D nicht verfügbar, verwende SVG:',error);}
     }
     await new Promise((done,fail)=>{const s=document.createElement('script');s.src='game.js';s.onload=done;s.onerror=fail;document.body.appendChild(s);});

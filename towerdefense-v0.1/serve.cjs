@@ -26,4 +26,4 @@ http.createServer((req,res)=>{
     if(err){res.writeHead(404);return res.end('Not found');}
     res.writeHead(200,{'Content-Type':types[path.extname(file).toLowerCase()]||'application/octet-stream','Cache-Control':'no-cache'});res.end(data);
   });
-}).listen(port,()=>console.log(`Autohex TD: http://localhost:${port}/  (Viewer: /viewer.html)`));
+}).listen(port,()=>console.log(`Hex Bastion: http://localhost:${port}/  (Viewer: /viewer.html)`));

@@ -1,4 +1,4 @@
-# Autohex TD – aktuelle Architektur
+# Hex Bastion – aktuelle Architektur
 
 Stand: 20.09.2026, einschließlich lokaler Änderungen. Historische Zwischenstände stehen im [CHANGELOG](CHANGELOG.md).
 
