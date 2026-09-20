@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Autohex TD v0.7-dev</title>
+  <title>Autohex TD</title>
   <link rel="icon" type="image/png" href="assets/favicon.png" />
   <link rel="stylesheet" href="style.css" />
   <script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script>
@@ -34,7 +34,7 @@
 
     <!-- Oben links: Titel und Menü -->
     <nav class="dockTL" aria-label="Menü">
-      <h1>Autohex TD <span>v0.7-dev</span></h1>
+      <h1>Autohex TD <span data-app-version></span></h1>
       <div class="dockButtons">
         <button class="secondary drawerBtn" data-drawer="rulesDrawer">📜 Regeln</button>
         <button class="secondary drawerBtn" data-drawer="settingsDrawer">⚙ Einstellungen</button>
@@ -138,7 +138,7 @@
       </div>
       <div id="menuRules" class="menuRules hidden"></div>
       <div class="menuSound"><label class="toggle"><input id="menuSound" type="checkbox" checked /> Sounds aktiv</label></div>
-      <small class="menuVersion">v0.7-dev</small>
+      <small class="menuVersion" data-app-version></small>
     </div>
   </div>
 
@@ -190,6 +190,19 @@
       document.querySelectorAll('.drawerBtn').forEach(b=>b.addEventListener('click',()=>{const d=document.getElementById(b.dataset.drawer),open=d.classList.contains('hidden');close();if(open) d.classList.remove('hidden');}));
       document.querySelectorAll('.drawerClose').forEach(b=>b.addEventListener('click',close));
       addEventListener('keydown',e=>{if(e.key==='Escape') close();});})();
+
+    (()=>{
+      const applyVersion=(version)=>{
+        if(!version) return;
+        const label=`v${String(version).replace(/^v/, '')}`;
+        document.title=`Autohex TD ${label}`;
+        document.querySelectorAll('[data-app-version]').forEach(node=>{node.textContent=label;});
+      };
+      fetch('./package.json',{cache:'no-store'})
+        .then(response=>response.ok?response.json():null)
+        .then(pkg=>applyVersion(pkg&&pkg.version))
+        .catch(()=>{});
+    })();
 
     (()=>{
       const status=document.getElementById('renderModeStatus');
