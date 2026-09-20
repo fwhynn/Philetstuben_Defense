@@ -7,7 +7,7 @@ const REMOTE_NAME = 'origin';
 const SECRET_FILE = REPO_ROOT . '/.deploy-webhook-secret';
 const LOCK_FILE = '/tmp/autohextd-tag-webhook.lock';
 const RUN_NPM_CI = true;
-const ALLOWED_ACTORS = ['autophil317'];
+const ALLOWED_ACTORS = ['autophil317', 'fwhynn', 'zlyfer'];
 
 header('Content-Type: application/json; charset=utf-8');
 
