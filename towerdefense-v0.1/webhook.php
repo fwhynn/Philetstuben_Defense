@@ -16,7 +16,7 @@ try {
     if ($method === 'GET') {
         respond(200, [
             'ok' => true,
-            'message' => 'Send a signed GitHub tag-push webhook via POST to deploy. Only phil and zlyfer can deploy.',
+            'message' => 'Send a signed GitHub tag-push webhook via POST to deploy. Only phil can deploy.',
             'repoRoot' => REPO_ROOT,
         ]);
     }
@@ -58,7 +58,7 @@ try {
     if (!isAllowedActor($actor)) {
         respond(403, [
             'ok' => false,
-            'message' => 'Deployment ignored because only phil and zlyfer may deploy tags.',
+            'message' => 'Deployment ignored because only phil may deploy tags.',
             'actor' => $actor,
             'tag' => $tag,
         ]);

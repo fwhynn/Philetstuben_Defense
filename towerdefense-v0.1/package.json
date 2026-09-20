@@ -5,7 +5,8 @@
   "description": "Hex Bastion - Hex-Tower-Defense-Prototyp",
   "scripts": {
     "start": "node serve.cjs",
-    "generate-assets-index": "node serve.cjs --write-index"
+    "generate-assets-index": "node serve.cjs --write-index",
+    "tag": "node tag-and-push.cjs"
   },
   "dependencies": {
     "three": "^0.186.0"
