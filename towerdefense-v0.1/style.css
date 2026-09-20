@@ -172,3 +172,20 @@ html,body{height:100%;overflow:hidden}
 @media(max-width:1100px){.handDock:has(.openingHand){width:calc(100% - 24px)}}
 .handDock .openingHand{display:flex;overflow-x:auto;padding:12px 2px 4px;margin-top:0;align-items:stretch}
 .handDock .openingHand .card{flex:1 0 150px;min-width:0}
+
+/* ===== Hauptmenü ===== */
+.mainMenu,#loadoutOverlay,#arsenalOverlay{background:radial-gradient(circle at 50% 35%,#2f4a36,#0b110d 75%)}
+.mainMenu{z-index:40}#arsenalOverlay{z-index:45}
+#menuBackdrop{position:fixed;inset:0;z-index:9;display:none;background:radial-gradient(circle at 50% 35%,#2f4a36,#0b110d 75%);pointer-events:none}#menuBackdrop.on{display:block}#menuBackdrop canvas{width:100%;height:100%;display:block;opacity:.32}
+.menuBackdropOn .mainMenu,.menuBackdropOn #loadoutOverlay,.menuBackdropOn #arsenalOverlay{background:transparent}
+.menuBox{width:min(460px,94vw);text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}
+.menuBox h1{font-size:clamp(40px,8vw,68px);margin:0;letter-spacing:.02em;text-shadow:0 4px 24px #000c;color:#f5ecd0}
+.menuTagline{color:var(--muted);margin:0 0 22px;font-size:14px}
+.menuButtons{display:flex;flex-direction:column;gap:10px;width:100%}
+.menuButtons .primary,.menuButtons .secondary{width:100%;padding:14px;font-size:17px}
+.menuButtons .secondary{background:#2c3f33;border:1px solid #4d684f}
+.menuRules{text-align:left;background:#162019;border:1px solid #3b5242;border-radius:12px;padding:12px 16px;margin-top:12px;max-height:38vh;overflow:auto}
+.menuRules ul{margin:0;padding-left:18px;font-size:13px;line-height:1.55;color:#d3dccf}
+.menuSound{margin-top:14px}.menuVersion{color:#6f7f70;margin-top:6px}
+.menuLoadoutInfo{color:#cfd8c9;font-size:12px;margin:0 0 12px;line-height:1.4}
+.menuLogo{width:120px;height:120px;filter:drop-shadow(0 6px 14px #000a);margin-bottom:-4px}
