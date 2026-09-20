@@ -8,8 +8,15 @@ function listModels(dir=path.join(root,'assets'),base='',out=[]){
     const rel=base?base+'/'+entry.name:entry.name;
     if(entry.isDirectory()) listModels(path.join(dir,entry.name),rel,out);else if(/.glb$/i.test(entry.name)) out.push(rel);
   }
-  return out;
+  return base===''?out.sort():out;
 }
+function writeIndex(){
+  const dir=path.join(root,'assets');
+  fs.mkdirSync(dir,{recursive:true});
+  fs.writeFileSync(path.join(dir,'index.json'),JSON.stringify(listModels()));
+}
+writeIndex();
+if(process.argv.includes('--write-index')) process.exit(0);
 http.createServer((req,res)=>{
   let p=decodeURIComponent(new URL(req.url,'http://x').pathname);if(p.endsWith('/')) p+='index.html';
   if(p==='/assets/index.json'){res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-cache'});return res.end(JSON.stringify(listModels()));}

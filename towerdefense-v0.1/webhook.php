@@ -1,0 +1,269 @@
+<?php
+declare(strict_types=1);
+
+const REPO_ROOT = __DIR__ . '/..';
+const APP_ROOT = __DIR__;
+const REMOTE_NAME = 'origin';
+const SECRET_FILE = REPO_ROOT . '/.deploy-webhook-secret';
+const LOCK_FILE = '/tmp/autohextd-tag-webhook.lock';
+const RUN_NPM_CI = true;
+const ALLOWED_ACTORS = ['autophil317'];
+
+header('Content-Type: application/json; charset=utf-8');
+
+try {
+    $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+    if ($method === 'GET') {
+        respond(200, [
+            'ok' => true,
+            'message' => 'Send a signed GitHub tag-push webhook via POST to deploy. Only phil and zlyfer can deploy.',
+            'repoRoot' => REPO_ROOT,
+        ]);
+    }
+    if ($method !== 'POST') {
+        respond(405, ['ok' => false, 'message' => 'Only GET and POST are allowed.']);
+    }
+
+    $payloadRaw = file_get_contents('php://input');
+    if ($payloadRaw === false || $payloadRaw === '') {
+        respond(400, ['ok' => false, 'message' => 'Missing request body.']);
+    }
+
+    $secret = loadSecret();
+    if ($secret === '') {
+        respond(500, [
+            'ok' => false,
+            'message' => 'Webhook secret missing. Create ../.deploy-webhook-secret next to the git repo root.',
+        ]);
+    }
+
+    verifyGithubSignature($payloadRaw, $secret);
+
+    $event = $_SERVER['HTTP_X_GITHUB_EVENT'] ?? '';
+    if ($event === 'ping') {
+        respond(200, ['ok' => true, 'message' => 'Ping received.']);
+    }
+
+    $payload = json_decode($payloadRaw, true, 512, JSON_THROW_ON_ERROR);
+    $tag = extractTagName($event, $payload);
+    if ($tag === null) {
+        respond(202, [
+            'ok' => true,
+            'message' => 'Webhook ignored because the event is not a tag push.',
+            'event' => $event,
+        ]);
+    }
+
+    $actor = extractActor($payload);
+    if (!isAllowedActor($actor)) {
+        respond(403, [
+            'ok' => false,
+            'message' => 'Deployment ignored because only phil and zlyfer may deploy tags.',
+            'actor' => $actor,
+            'tag' => $tag,
+        ]);
+    }
+
+    ensureDeployPreconditions();
+
+    $lockHandle = fopen(LOCK_FILE, 'c');
+    if ($lockHandle === false) {
+        respond(500, ['ok' => false, 'message' => 'Could not open deployment lock file.']);
+    }
+    if (!flock($lockHandle, LOCK_EX | LOCK_NB)) {
+        respond(409, ['ok' => false, 'message' => 'Another deployment is already running.']);
+    }
+
+    try {
+        $dirty = runCommand(gitCommand('status --porcelain --untracked-files=no'), REPO_ROOT);
+        if ($dirty['exitCode'] !== 0) {
+            respond(500, ['ok' => false, 'message' => 'Git status failed.', 'command' => $dirty]);
+        }
+        if (trim($dirty['stdout']) !== '') {
+            respond(409, [
+                'ok' => false,
+                'message' => 'Deployment aborted because the repository has tracked local changes.',
+                'details' => trim($dirty['stdout']),
+            ]);
+        }
+
+        $steps = [];
+
+        $steps[] = runCheckedCommand(gitCommand('fetch --prune --tags ' . escapeshellarg(REMOTE_NAME)), REPO_ROOT, 'Fetching tags failed.');
+        $steps[] = runCheckedCommand(gitCommand('rev-parse --verify --quiet ' . escapeshellarg('refs/tags/' . $tag)), REPO_ROOT, 'Requested tag does not exist after fetch.');
+        $steps[] = runCheckedCommand(gitCommand('checkout --force --detach ' . escapeshellarg($tag)), REPO_ROOT, 'Checking out the tag failed.');
+
+        if (RUN_NPM_CI && file_exists(APP_ROOT . '/package-lock.json')) {
+            $steps[] = runCheckedCommand('npm ci --omit=dev', APP_ROOT, 'npm ci failed.');
+        }
+
+        $steps[] = writeAssetsIndex(APP_ROOT);
+
+        $head = runCheckedCommand(gitCommand('rev-parse HEAD'), REPO_ROOT, 'Could not read deployed commit.');
+
+        respond(200, [
+            'ok' => true,
+            'message' => 'Tag deployed successfully.',
+            'actor' => $actor,
+            'tag' => $tag,
+            'commit' => trim($head['stdout']),
+            'steps' => $steps,
+        ]);
+    } finally {
+        flock($lockHandle, LOCK_UN);
+        fclose($lockHandle);
+    }
+} catch (JsonException $exception) {
+    respond(400, ['ok' => false, 'message' => 'Invalid JSON payload.', 'error' => $exception->getMessage()]);
+} catch (RuntimeException $exception) {
+    respond(500, ['ok' => false, 'message' => $exception->getMessage()]);
+} catch (Throwable $exception) {
+    respond(500, ['ok' => false, 'message' => 'Unhandled deployment error.', 'error' => $exception->getMessage()]);
+}
+
+function extractTagName(string $event, array $payload): ?string
+{
+    if ($event !== 'push' || !empty($payload['deleted'])) {
+        return null;
+    }
+
+    $ref = (string)($payload['ref'] ?? '');
+    if (!str_starts_with($ref, 'refs/tags/')) {
+        return null;
+    }
+
+    return normalizeTag(substr($ref, 10));
+}
+
+function extractActor(array $payload): string
+{
+    foreach ([$payload['sender']['login'] ?? null, $payload['pusher']['name'] ?? null] as $candidate) {
+        if (is_string($candidate) && $candidate !== '') {
+            return $candidate;
+        }
+    }
+    return '';
+}
+
+function isAllowedActor(string $actor): bool
+{
+    return in_array(strtolower($actor), ALLOWED_ACTORS, true);
+}
+
+function normalizeTag(mixed $tag): ?string
+{
+    if (!is_string($tag) || $tag === '') {
+        return null;
+    }
+    if (!preg_match('/\A[0-9A-Za-z._\/-]+\z/', $tag)) {
+        return null;
+    }
+    return $tag;
+}
+
+function loadSecret(): string
+{
+    $envSecret = getenv('AUTOHEXTD_WEBHOOK_SECRET');
+    if (is_string($envSecret) && $envSecret !== '') {
+        return trim($envSecret);
+    }
+    if (!is_file(SECRET_FILE)) {
+        return '';
+    }
+    $fileSecret = file_get_contents(SECRET_FILE);
+    return $fileSecret === false ? '' : trim($fileSecret);
+}
+
+function verifyGithubSignature(string $payload, string $secret): void
+{
+    $signatureHeader = $_SERVER['HTTP_X_HUB_SIGNATURE_256'] ?? '';
+    if (!str_starts_with($signatureHeader, 'sha256=')) {
+        respond(401, ['ok' => false, 'message' => 'Missing GitHub sha256 signature header.']);
+    }
+    $expected = 'sha256=' . hash_hmac('sha256', $payload, $secret);
+    if (!hash_equals($expected, $signatureHeader)) {
+        respond(401, ['ok' => false, 'message' => 'Signature verification failed.']);
+    }
+}
+
+function ensureDeployPreconditions(): void
+{
+    if (!is_dir(REPO_ROOT . '/.git')) {
+        throw new RuntimeException('Git repository not found at repo root.');
+    }
+    if (!is_writable(REPO_ROOT) || !is_writable(REPO_ROOT . '/.git')) {
+        throw new RuntimeException('Repository is not writable for PHP-FPM. Grant the PHP user write access before using this webhook.');
+    }
+    if (RUN_NPM_CI && file_exists(APP_ROOT . '/package-lock.json') && !is_writable(APP_ROOT)) {
+        throw new RuntimeException('App directory is not writable for npm ci. Grant the PHP user write access before using this webhook.');
+    }
+}
+
+function gitCommand(string $arguments): string
+{
+    return 'git -c safe.directory=' . escapeshellarg(REPO_ROOT) . ' ' . $arguments;
+}
+
+function writeAssetsIndex(string $appRoot): array
+{
+    $assetsDir = $appRoot . '/assets';
+    $models = [];
+    if (is_dir($assetsDir)) {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($assetsDir, FilesystemIterator::SKIP_DOTS)
+        );
+        foreach ($iterator as $file) {
+            if ($file->isFile() && strcasecmp($file->getExtension(), 'glb') === 0) {
+                $models[] = str_replace('\\', '/', substr($file->getPathname(), strlen($assetsDir) + 1));
+            }
+        }
+        sort($models);
+    }
+    $indexFile = $assetsDir . '/index.json';
+    if (!is_dir($assetsDir) && !mkdir($assetsDir, 0755, true) && !is_dir($assetsDir)) {
+        throw new RuntimeException('Could not create assets directory for index.json.');
+    }
+    if (file_put_contents($indexFile, json_encode($models, JSON_UNESCAPED_SLASHES)) === false) {
+        throw new RuntimeException('Could not write assets/index.json.');
+    }
+    return [
+        'cwd' => $appRoot,
+        'command' => 'write assets/index.json',
+        'stdout' => count($models) . ' models',
+        'exitCode' => 0,
+    ];
+}
+
+function runCheckedCommand(string $command, string $cwd, string $failureMessage): array
+{
+    $result = runCommand($command, $cwd);
+    if ($result['exitCode'] !== 0) {
+        respond(500, [
+            'ok' => false,
+            'message' => $failureMessage,
+            'command' => $result,
+        ]);
+    }
+    return $result;
+}
+
+function runCommand(string $command, string $cwd): array
+{
+    $fullCommand = 'cd ' . escapeshellarg($cwd) . ' && ' . $command . ' 2>&1';
+    $output = [];
+    $exitCode = 0;
+    exec($fullCommand, $output, $exitCode);
+    return [
+        'cwd' => $cwd,
+        'command' => $command,
+        'stdout' => trim(implode("\n", $output)),
+        'exitCode' => $exitCode,
+    ];
+}
+
+function respond(int $statusCode, array $payload): never
+{
+    http_response_code($statusCode);
+    echo json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . "\n";
+    exit;
+}
