@@ -147,10 +147,10 @@ function create(host0,commands){
     tips:makePool(new THREE.ConeGeometry(1,1,6).translate(0,-.5,0),160,new THREE.MeshBasicMaterial({color:'#ffffff'})),   // Spitze zeigt in +Y, Ursprung an der Spitze
     flash:makePool(new THREE.SphereGeometry(1,10,8),220,additive()),
     rocks:makePool(new THREE.IcosahedronGeometry(1,0),48,new THREE.MeshStandardMaterial({color:'#ffffff',roughness:.95,metalness:0}))};
-  const mats={empty:std('#4e6355',{transparent:true,opacity:.6}),legal:basic('#7fcf6a',.25),illegal:basic('#c0594c',.16),outlineLegal:basic('#a9dc93'),outlineIllegal:basic('#ba6b60'),
+  const mats={empty:std('#ffffff',{transparent:true,opacity:.6}),legal:basic('#7fcf6a',.25),illegal:basic('#c0594c',.16),outlineLegal:basic('#a9dc93'),outlineIllegal:basic('#ba6b60'),
     hint:basic('#ffe39a'),slot:basic('#f4d36d',.9),select:basic('#f4d36d',.9),bar:basic('#321a18'),hp:basic('#78b95f'),armor:basic('#df8b3a'),magic:basic('#69aee8')};
   const enemyGeometry={small:new THREE.SphereGeometry(9,14,10),boss:new THREE.SphereGeometry(15,16,12)},barGeometry=new THREE.PlaneGeometry(1,1);
-  const ghostMaterials=new Map();
+  const ghostMaterials=new Map(),biomeMaterials=new Map();
   function ghostMaterial(material,legal){
     const id=material.uuid+legal;if(!ghostMaterials.has(id)){const m=material.clone();m.transparent=false;m.opacity=1;if(m.color){const g=m.color.r*.3+m.color.g*.59+m.color.b*.11;m.color.lerp(new THREE.Color(g,g,g),.5);}ghostMaterials.set(id,m);}
     return ghostMaterials.get(id);
@@ -168,6 +168,21 @@ function create(host0,commands){
   for(const mesh of [rangeFill,rangeRing]){mesh.material.depthTest=false;mesh.material.depthWrite=false;mesh.renderOrder=20;}
   rangeFill.visible=rangeRing.visible=selectRing.visible=false;layer.dynamic.add(rangeFill,rangeRing,selectRing,...Object.values(fx).map(pool=>pool.mesh));
 
+  const windPool=makePool(new THREE.CylinderGeometry(1,1,1,5),240,new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:.35,depthWrite:false}));
+  const mistPool=makePool(new THREE.SphereGeometry(1,8,4),60,new THREE.MeshBasicMaterial({color:'#dce8ee',transparent:true,opacity:.07,depthWrite:false}));
+  layer.dynamic.add(windPool.mesh,mistPool.mesh);
+  const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
+  function animateBiomeWind(now){
+    windPool.begin();mistPool.begin();
+    if(state&&ready&&!reducedMotion.matches){
+      const tiles=[...state.map.values(),...[...state.landmarks.values()].filter(l=>!l.claimed&&HexExploration.visibility(state.map,l)==='clear')].filter(tile=>HexBiomes.forTile(state,tile)==='storm').map(tile=>({...tile,p:axialToWorld(tile.q,tile.r)})).sort((a,b)=>Math.hypot(a.p.x-cam.x,a.p.y-cam.z)-Math.hypot(b.p.x-cam.x,b.p.y-cam.z)).slice(0,quality==='high'?60:20);
+      for(const tile of tiles){const phase=tile.q*1.7+tile.r*2.3;
+        for(let i=0;i<3;i++){const t=((now*.00018+phase+i/3)%1+1)%1,x=tile.p.x-27+t*48,z=tile.p.y+(i-1)*13+Math.sin(t*5+phase)*3,y=9+i*3;windPool.segment(x,y,z,x+9,y,z+2,.55,'#e6f5ff',.6+Math.sin(t*Math.PI)*.4);}
+        mistPool.ball(tile.p.x+Math.sin(now*.0002+phase)*16,8,tile.p.y+Math.cos(phase)*14,12,'#dce8ee',1);
+      }
+    }
+    windPool.end();mistPool.end();
+  }
   function clearGroup(group){for(const child of [...group.children]) group.remove(child);}
   function rebuildAll(){for(const [map,group] of [[tileRecords,layer.tiles],[landmarkRecords,layer.landmarks],[objectRecords,layer.objects]]){map.clear();clearGroup(group);}emptySig=targetSig=ghostSig='';pickDirty=true;}
 
@@ -193,6 +208,8 @@ function create(host0,commands){
     const template=spec.kind==='landmark'?modelTemplate(spec.name,'landmark'):modelTemplate(spec.name);
     if(!template){const mesh=new THREE.Mesh(hexPad,fallbackMaterial);mesh.scale.setScalar(1);holder.add(mesh);return holder;}
     addParts(model,spec.proceduralRoads&&template.noRoad?template.noRoad:template.parts,ghost,legal);
+    const biome=spec.name==='fog'?'grass':HexBiomes.forTile(state,tile);
+    if(biome!=='grass')model.traverse(mesh=>{if(!mesh.isMesh||!/(grass|foliage|soil)/i.test(mesh.material.name||''))return;const id=mesh.material.uuid+'|'+biome;let material=biomeMaterials.get(id);if(!material){material=mesh.material.clone();material.vertexColors=false;material.color.set(HexBiomes.definitions[biome].color);if(/soil/i.test(material.name))material.color.multiplyScalar(.6);else if(/foliage/i.test(material.name))material.color.multiplyScalar(.8);biomeMaterials.set(id,material);}mesh.material=material;});
     // Turmplätze liegen an den Spielpositionen (HexMap.slotOffsets), nicht an den im Modell gespeicherten.
     HexMap.slotOffsets(tile.type,slotCount).forEach((offset,i)=>{
       const slot=template.slots[i]||template.slots[0];if(!slot) return;
@@ -265,7 +282,7 @@ function create(host0,commands){
     const adjacent=new Map();
     for(const tile of state.map.values()) for(let d=0;d<6;d++){const n=neighbor(tile.q,tile.r,d),id=key(n.q,n.r);if(!state.map.has(id)&&!landmarkVisible.includes(id)) adjacent.set(id,n);}
     const mesh=new THREE.InstancedMesh(hexPad,mats.empty,Math.max(1,adjacent.size)),matrix=new THREE.Matrix4();let i=0;
-    for(const n of adjacent.values()){const c=axialToWorld(n.q,n.r);mesh.setMatrixAt(i++,matrix.makeTranslation(c.x,0,c.y));}
+    for(const n of adjacent.values()){const c=axialToWorld(n.q,n.r);mesh.setMatrixAt(i,matrix.makeTranslation(c.x,0,c.y));mesh.setColorAt(i++,new THREE.Color(HexBiomes.definitions[HexBiomes.forTile(state,n)].color));}
     mesh.count=adjacent.size;mesh.receiveShadow=true;layer.empty.add(mesh);
   }
 
@@ -356,7 +373,7 @@ function create(host0,commands){
     const selected=state.selectedTower||state.hoverTower||(state.previewTower?state.selectedSlot:null);
     const tile=selected&&state.map.get(key(selected.q,selected.r)),tower=tile?.towers[selected.index],type=tower?.type||state.previewTower;
     if(tile&&type){
-      const p=slotPositions(tile)[selected.index],def=HexData.towerDefinition(tower||{type,tileType:tile.type});
+      const p=slotPositions(tile)[selected.index],def=HexData.towerDefinition(tower||{type,biome:HexBiomes.forTile(state,tile),rangeFactor:state.challengeDay?.85:1,tileType:tile.type});
       for(const m of [rangeFill,rangeRing]){m.visible=true;m.position.set(p.x,.8,p.y);m.scale.setScalar(def.range);m.material.color.set(def.color);}
     }else rangeFill.visible=rangeRing.visible=false;
     if(state.selectedBase&&!state.hoverTower){const weapon=HexHeroes.weapon(state);if(weapon)for(const mesh of [rangeFill,rangeRing]){mesh.visible=true;mesh.position.set(0,.8,0);mesh.scale.setScalar(weapon.range);mesh.material.color.set(weapon.color);}}
@@ -485,9 +502,11 @@ function create(host0,commands){
     entry.pos.set(x,lift+6,z);
   }
   function syncLabels(){
+    for(const e of state.enemies)if(e.alive&&e.caravan)label('caravan:'+e.id,e.x,e.y,'◆ Kasse +15 / −10','',55);
     for(const tile of state.map.values()){
       const c=axialToWorld(tile.q,tile.r),terrain=CARD_LIBRARY[tile.type],id=key(tile.q,tile.r);
       if(tile.income) label(`inc:${id}`,c.x,c.y+44,'+'+tile.income+' Gold');
+      const biome=HexBiomes.forTile(state,tile);if(biome!=='grass')label('biome:'+id,c.x,c.y-32,HexBiomes.definitions[biome].name);
       const bonus=terrain?.towerRange?'+'+Math.round((terrain.towerRange-1)*100)+' % Reichweite':terrain?.towerDamage?'+'+Math.round((terrain.towerDamage-1)*100)+' % Schaden':terrain?.archerDamage?'+25 % Archer':null;
       if(bonus) label(`bon:${id}`,c.x,c.y+35,bonus);
     }
@@ -556,7 +575,7 @@ function create(host0,commands){
         for(const limb of obj.limbs) limb.g.rotation.z=limb.name==='leg_l'?swing:limb.name==='leg_r'?-swing:limb.name==='arm_l'?-swing*.8:swing*.8;
       }
     }
-    placeLabels();gl.render(scene,camera);
+    animateBiomeWind(now);placeLabels();gl.render(scene,camera);
   }
 
   // ---- Eingabe ----
@@ -619,7 +638,9 @@ function create(host0,commands){
   return {render,reset,project,rotateView,zoom:factor=>zoom(factor),resetView:()=>resetView(true),getView,
     destroy(){
       destroyed=true;cancelAnimationFrame(raf);resize.disconnect();for(const [name,fn,options] of listeners) dom.removeEventListener(name,fn,options);
+      windPool.mesh.geometry.dispose();windPool.mesh.material.dispose();windPool.mesh.dispose();mistPool.mesh.geometry.dispose();mistPool.mesh.material.dispose();mistPool.mesh.dispose();
       clearOverlays();slotDiamondGeometry.dispose();gridGeometry.dispose();buffGeometry.dispose();gridMaterial.dispose();buffMaterial.dispose();buffBorderMaterial.dispose();
+      for(const material of biomeMaterials.values())material.dispose();biomeMaterials.clear();
       gl.dispose();host.remove();wrap.classList.remove('is3d');if(hintText) hintText.textContent=oldHint;host0.style.display='';
     }};
 }

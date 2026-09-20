@@ -90,7 +90,8 @@ const HexData=(()=>{
   function towerDefinition(tower,definitions=TOWERS){
     const def={...definitions[tower.type],...(tower.branch?UPGRADES[tower.branch]:{}),...(tower.finalUpgrade?UPGRADES[tower.finalUpgrade]:{})},terrain=CARD_LIBRARY[tower.tileType];
     const ultimate=tower.ultimate&&ULTIMATES[tower.type];if(ultimate){def.name=ultimate.name;def.damage=(def.damage||0)*(ultimate.damageFactor||1);def.range=(def.range||0)*(ultimate.rangeFactor||1);def.cooldown=(def.cooldown||1)*(ultimate.cooldownFactor||1);if(def.slow)def.slow*=ultimate.slowFactor||1;if(def.splash)def.splash+=ultimate.splashBonus||0;if(def.chain)def.chain+=ultimate.chainBonus||0;if(def.jumpRange)def.jumpRange+=ultimate.jumpBonus||0;if(def.bossMultiplier)def.bossMultiplier*=ultimate.bossFactor||1;}
-    def.range=Math.round(def.range*(terrain?.towerRange||1));
+    if(typeof HexBiomes!=='undefined')HexBiomes.apply(def,tower);
+    def.range=Math.round(def.range*(terrain?.towerRange||1)*(tower.rangeFactor||1));
     def.damage=def.damage*(tower.type==='archer'?(terrain?.archerDamage||1):1)*(terrain?.towerDamage||1)*(tower.supportDamage||1);
     def.damage=Number(def.damage.toFixed(2));
     if(def.soulDamage)def.soulDamage*= (terrain?.towerDamage||1)*(tower.supportDamage||1)*(ultimate?.damageFactor||1);

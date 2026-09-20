@@ -1,5 +1,21 @@
 # Autohex TD – V0.7-dev
 
+## Regionale Biome
+
+Die Base und Radius 2 bleiben Grasland. Ab Radius 3 liegen drei zusammenhängende, leicht geschwungene Regionen, deren Ausrichtung vom Run-Seed abhängt. Beim Erkunden werden Bauplätze und Sonderfelder passend eingefärbt; Nebelfelder verraten ihr Biom nicht. Gelegte Hexe tragen den Biomnamen. Details stehen in den Einstellungen.
+
+- Dünenmeer: Gegner innerhalb der Region bewegen sich 15 % langsamer. Türme dort haben 15 % weniger Reichweite.
+- Sturmhochland: Kettenblitze springen 25 % weiter, Wind-Elementtürme durchschlagen ein zusätzliches Ziel. Archer und Balliste greifen 15 % seltener an.
+- Aschelande: Flammentürme und Feuer-Elementtürme verursachen 20 % mehr Schaden. Freeze hat 15 % weniger Reichweite, Wasser-Slow hält 25 % kürzer.
+
+Turmeffekte richten sich nach dem Standort des Turms, auch bei Angriffen über eine Biomgrenze. Sie werden mit Hex-, Gebäude- und Upgradeboni kombiniert; Vorschau und Turmwerte berücksichtigen sie. Nur das Wüstentempo richtet sich nach dem aktuellen Ort des Gegners. Die Herausforderung „Die letzte Karawane“ bleibt von diesen regionalen Effekten ausgenommen.
+
+## Die letzte Karawane
+
+Dauerhaft verfügbare tägliche Herausforderung im Hauptmenü, täglich neuer Seed um 00:00 UTC. Standardfestung, zwei zufällige Base-Ausgänge und zwei Startplatzierungen aus fünf Karten: zweimal Gerade, Lange Straße, Handelsstraße, Dorfstraße. Festes temporäres Loadout: Archer, Balliste, Katapult, Minenleger, Freeze; keine Stufe-4-Upgrades. Sandsturm senkt Gegnertempo und Turmreichweite um 15 %. Jeder zehnte normale Gegner über alle Waves trägt eine sichtbare Kasse: 18 statt 3 Killgold; beim Durchbruch zusätzlich zum HP-Schaden 10 Gold Verlust, maximal vorhandenes Gold. Überlebe Wave 20: einmal pro Tag 10 Diamanten. Wiederholungen nutzen denselben Tages-Seed, Tagesbestmarken werden separat lokal gespeichert. Keine normale Run-Diamantenabrechnung oder normale Bestwave durch diesen Modus.
+
+Standard-Runs und Zwei Fronten besitzen regionale Biome; die Karawane verwendet ihre eigene Sandsturmregel ohne zusätzliche Biommodifikatoren.
+
 ## Schwierigkeit „Zwei Fronten“
 
 In der Runvorbereitung lässt sich Stufe 2 wählen. Die Base erhält zwei verschiedene, zufällige Ausgänge; gleicher Seed ergibt dieselben Ausgänge. Gegenüberliegende, benachbarte und versetzte Kombinationen sind möglich. Du beginnst mit fünf Handkarten und legst zwei davon nacheinander: eine direkt an jeden Ausgang. Erst danach kannst du Türme bauen und Wave 1 starten. Die erste Platzierung wird nur zugelassen, wenn der zweite Ausgang mit der restlichen Hand noch bebaubar bleibt. Alle fünf Karten gehen anschließend regulär auf den Ablagestapel. Ab dem nächsten Zug gelten wieder drei Handkarten und eine Platzierung. Startgold, Wave-Gegnerzahl und Diamantenformel bleiben gleich. Auswahl und Wiederholungsbutton behalten die Schwierigkeit.

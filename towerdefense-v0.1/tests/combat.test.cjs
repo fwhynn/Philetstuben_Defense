@@ -155,3 +155,12 @@ test('escaped enemies do not provide souls',()=>{
   const {state,step,towers}=setup(),tw={type:'necromancer',lastShot:0},e=enemy(0);e.index=1;state.enemies=[e];
   step(state,[{tw,pos:{x:0,y:0}}],towers,0,2000);assert.equal(tw.souls.length,0);assert.equal(state.waveKills,0);
 });
+
+
+test('caravan carriers pay once on kill and lose gold without going negative on escape',()=>{
+  const {state,step,towers}=setup(),carrier=enemy(20,0,1);carrier.killGold=18;carrier.goldLoss=10;state.enemies=[carrier];
+  step(state,[{tw:{type:'archer',lastShot:0},pos:{x:0,y:0}}],towers,0,2000);assert.equal(state.gold,18);assert.equal(state.goldEarned.kills,18);
+  step(state,[],towers,0,3000);assert.equal(state.gold,18);
+  const escape=enemy(0);escape.index=1;escape.goldLoss=10;state.gold=4;state.enemies=[escape];step(state,[],towers,0,4000);
+  assert.equal(state.gold,0);assert.equal(state.hp,19);assert.equal(state.waveKills,1);
+});

@@ -116,7 +116,7 @@ Fest vorgemerkt, noch nicht umgesetzt:
 
 - Weitere Heroes, Festungen und Base-Ausbaupfade; drei Startprofile und zwei Ausbaupfade sind bereits umgesetzt
 - Erweiterung des vorhandenen Meta-Arsenals um weitere Inhalte; Balliste, Flammenturm, Stufe-4-Upgrades und drei Presets sind umgesetzt
-- Weitere Biome, Karten, Türme (unter anderem Nekromant) und Bossbeute
+- Zusätzliche Biome, Karten, Türme und Bossbeute; Dünenmeer, Sturmhochland und Aschelande sind als Mapregionen umgesetzt
 - Weitere Schwierigkeitsstufen und ein Hardcore-Modus; Stufe 2 mit zwei zufälligen Base-Ausgängen und zwei Startplatzierungen ist umgesetzt
 - Laufende Runs speichern/laden sowie Profil exportieren/importieren
 

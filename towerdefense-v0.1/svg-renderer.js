@@ -23,7 +23,7 @@ function create(svg,commands){
         const n=neighbor(tile.q,tile.r,d);if(!state.map.has(key(n.q,n.r))) adjacent.set(key(n.q,n.r),n);
       }
       for(const position of adjacent.values()){
-        const c=axialToWorld(position.q,position.r);drawPoly(c.x,c.y,HEX-2,'#202c25','#34453b',.72);
+        const c=axialToWorld(position.q,position.r);drawPoly(c.x,c.y,HEX-2,HexBiomes.definitions[HexBiomes.forTile(state,position)].color,'#34453b',.72);
       }
       scene=worldLayer;
     }
@@ -31,7 +31,7 @@ function create(svg,commands){
     for(const landmark of state.landmarks?.values()||[]){
       if(landmark.claimed) continue;const visibility=HexExploration.visibility(state.map,landmark);if(visibility==='hidden') continue;
       const c=axialToWorld(landmark.q,landmark.r);
-      drawPoly(c.x,c.y,HEX-2,'#303735','#68716c',.8);
+      drawPoly(c.x,c.y,HEX-2,visibility==='clear'?HexBiomes.definitions[HexBiomes.forTile(state,landmark)].color:'#303735','#68716c',.8);
       if(visibility==='clear'&&landmark.prefab){
         const p=landmark.prefab,geometry=HexMap.roadGeometry({q:landmark.q,r:landmark.r,type:p.type,roads:p.roads});
         for(const points of geometry.legs.values()) roadPolyline(points,'#69756b',9);
@@ -132,7 +132,7 @@ function create(svg,commands){
     const selected=state.selectedTower||(state.previewTower?state.selectedSlot:null);if(!selected) return;
     const tile=state.map.get(key(selected.q,selected.r)),tw=tile?.towers[selected.index];
     const type=tw?.type||state.previewTower;if(!tile||!type) return;
-    const p=slotPositions(tile)[selected.index],def=HexData.towerDefinition(tw||{type,tileType:tile.type});
+    const p=slotPositions(tile)[selected.index],def=HexData.towerDefinition(tw||{type,biome:HexBiomes.forTile(state,tile),rangeFactor:state.challengeDay?.85:1,tileType:tile.type});
     const circle=document.createElementNS(NS,'circle');
     circle.setAttribute('cx',p.x);circle.setAttribute('cy',p.y);circle.setAttribute('r',def.range);
     circle.setAttribute('fill',def.color);circle.setAttribute('fill-opacity','.13');
@@ -142,12 +142,16 @@ function create(svg,commands){
 
   function drawTile(tile,layer){
     const c=axialToWorld(tile.q,tile.r);
-    if(layer==='terrain'){drawPoly(c.x,c.y,HEX-2,({base:'#657264',highGround:'#8d8472',grove:'#3f754e',treasury:'#998454',battlefield:'#7b6556',watchtower:'#667c81',citadel:'#8d8058',royalVillage:'#977b52',warCross:'#855f58'})[tile.type]||'#688653','#2e4334',1);return;}
+    if(layer==='terrain'){const biome=HexBiomes.forTile(state,tile);if(biome!=='grass'){drawPoly(c.x,c.y,HEX-2,HexBiomes.definitions[biome].color,'#2e4334',1);scene.appendChild(text(c.x,c.y-32,HexBiomes.definitions[biome].name,8,'#fff4c3'));return;}drawPoly(c.x,c.y,HEX-2,({base:'#657264',highGround:'#8d8472',grove:'#3f754e',treasury:'#998454',battlefield:'#7b6556',watchtower:'#667c81',citadel:'#8d8058',royalVillage:'#977b52',warCross:'#855f58'})[tile.type]||'#688653','#2e4334',1);return;}
     if(layer==='roads'){
       const geometry=HexMap.roadGeometry(tile);
       for(const points of geometry.legs.values()) roadPolyline(points,'#d0aa6d',18);
       for(const points of geometry.legs.values()) roadPolyline(points,'#ead19a',3,scene,true);
       return;
+    }
+    if(layer==='objects'&&HexBiomes.forTile(state,tile)==='storm'){
+      const wind=document.createElementNS(NS,'g');wind.setAttribute('class','biomeWind');wind.style.pointerEvents='none';
+      for(let i=0;i<3;i++)wind.appendChild(line(c.x-24+i*6,c.y-10+i*10,c.x-10+i*6,c.y-8+i*10,'#e5f4ff',1.5));scene.appendChild(wind);
     }
     if(tile.type==='base'){
       const g=document.createElementNS(NS,'g');
@@ -194,6 +198,7 @@ function create(svg,commands){
   }
 
   function drawEnemy(e){
+    if(e.caravan)scene.appendChild(text(e.x,e.y-34,'◆ Kasse',10,'#ffe08a','700'));
     const g=document.createElementNS(NS,'g');
     const c=document.createElementNS(NS,'circle');c.setAttribute('cx',e.x);c.setAttribute('cy',e.y);c.setAttribute('r',e.type==='boss'?15:9);c.setAttribute('fill',e.slowFactor<1?'#79cdd9':e.type==='boss'?'#934f9e':e.type==='armored'?'#78818c':e.type==='swarm'?'#b87832':'#8d3c34');c.setAttribute('stroke','#26120f');c.setAttribute('stroke-width',2);g.appendChild(c);
     const w=24,h=3,pools=[['hp','maxHp','#78b95f'],['armorHp','maxArmorHp','#df8b3a'],['magicHp','maxMagicHp','#69aee8']].filter(([,max])=>e[max]>0);

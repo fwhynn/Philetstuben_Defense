@@ -56,5 +56,10 @@ const HexProfile=(()=>{
     return save({...clean,diamonds:clean.diamonds-offer.cost,unlockedTowers:[...clean.unlockedTowers,id],unlocks:[...clean.unlocks,'tower:'+id]},definitions);
   }
   function unlockUltimate(profile,id,definitions){const offer=ULTIMATE_UNLOCKS[id],clean=normalize(profile,definitions),key='ultimate:'+id;if(!offer||!clean.unlockedTowers.includes(id)||clean.unlocks.includes(key)||clean.diamonds<offer.cost)return null;return save({...clean,diamonds:clean.diamonds-offer.cost,unlocks:[...clean.unlocks,key]},definitions);}
-  return {STORAGE_KEY,START_TOWERS,TOWER_UNLOCKS,ULTIMATE_UNLOCKS,defaults,normalize,load,save,setLoadout,savePreset,runReward,settleRun,unlockTower,unlockUltimate};
+  function settleDaily(profile,day,wave,definitions){
+    const clean=normalize(profile,definitions),results={...(clean.dailyResults||{})},old=results[day]||{},won=wave>=20,reward=won&&!old.won?10:0;
+    results[day]={best:Math.max(Number(old.best)||0,wave),won:!!old.won||won};
+    return {profile:save({...clean,dailyResults:results,diamonds:clean.diamonds+reward,lifetime:{...clean.lifetime,diamondsEarned:clean.lifetime.diamondsEarned+reward}},definitions),reward};
+  }
+  return {STORAGE_KEY,START_TOWERS,TOWER_UNLOCKS,ULTIMATE_UNLOCKS,defaults,normalize,load,save,setLoadout,savePreset,runReward,settleRun,settleDaily,unlockTower,unlockUltimate};
 })();

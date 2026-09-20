@@ -96,6 +96,7 @@
     <aside id="settingsDrawer" class="drawer hidden actions" aria-label="Einstellungen">
       <div class="panelHead"><h2>Einstellungen</h2><button class="secondary drawerClose" aria-label="Schließen" title="Schließen (Escape)"><small>Esc</small> ×</button></div>
       <p class="hint">Escape schließt offene Menüs und Infofenster.</p>
+      <details class="biomeRules"><summary>Biome und ihre Effekte</summary><p>Die Base startet im Grasland. Beim Erkunden ab drei Hexen Entfernung erscheinen Regionen; Effekte gelten lokal.</p><p>🟨 Dünenmeer: Gegner −15 % Tempo, Türme −15 % Reichweite.</p><p>🟦 Sturmhochland: Kettenblitz +25 % Sprungweite, Wind +1 Durchschlagziel; Archer/Balliste −15 % Angriffsrate.</p><p>🟥 Aschelande: Feuer +20 % Schaden; Freeze −15 % Reichweite, Wasser-Slow −25 % Dauer.</p></details>
       <label class="toggle"><input id="slotHints" type="checkbox" checked /> Freie Turmplätze hervorheben</label>
       <button id="openMainMenuBtn" class="secondary">Hauptmenü</button>
       <button id="restartTutorialBtn" class="secondary">Mini-Tutorial starten</button>
@@ -116,7 +117,7 @@
       </section>
       <label class="toggle">Startwert für nächsten Run (Seed) <input id="runSeed" type="text" maxlength="100" placeholder="Leer = zufälliger Run" /></label>
       <small class="hint">Derselbe Startwert wiederholt bei gleichen Entscheidungen die Karten und Belohnungen.</small>
-      <small class="hint">Aktueller Seed: <span id="activeSeed"></span></small>
+      <small class="hint">Aktueller Seed: <span id="activeSeed"></span></small><small id="dailyRunStatus" class="hint"></small>
       <button id="newRunBtn" class="danger">Neuer Run</button>
     </aside>
   </div>
@@ -136,18 +137,41 @@
         <button id="menuArsenalBtn" class="secondary">◆ Arsenal</button>
         <button id="menuRulesBtn" class="secondary">📜 Spielregeln</button>
       </div>
-      <div id="menuRules" class="menuRules hidden"></div>
+
       <div class="menuSound"><label class="toggle"><input id="menuSound" type="checkbox" checked /> Sounds aktiv</label></div>
       <small class="menuVersion">v0.7-dev</small>
     </div>
   </div>
 
+  <div id="playModeOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="playModeTitle">
+    <div class="modeBox"><h2 id="playModeTitle">Wie möchtest du spielen?</h2>
+      <div id="playModeChoices" class="modeChoices">
+        <button id="standardModeBtn" class="modeChoice"><strong>Standardspiel</strong><span>Schwierigkeit wählen</span><small>Eigene Festung und eigenes Loadout · regionale Biome</small></button>
+        <button id="dailyModeBtn" class="modeChoice"><strong>Tägliche Herausforderung</strong><span>Die letzte Karawane</span><small>Feste Startbedingungen · neuer Tages-Seed · Ziel: Wave 20</small></button>
+      </div>
+      <div id="dailyModeDetails" class="hidden"><section class="dailyChallenge"><strong>Die letzte Karawane · Tägliche Herausforderung</strong><p>Wave 20 überleben. Feste Standardfestung, zwei zufällige Ausgänge. Deck: 2× Gerade, Lange Straße, Handelsstraße, Dorfstraße. Türme: Archer, Balliste, Katapult, Minenleger, Freeze – für diesen Run kostenlos freigeschaltet; Stufe 4 gesperrt.</p><p>Sandsturm: −15 % Gegnertempo und Turmreichweite. Jeder zehnte normale Gegner trägt eine Kasse: +15 Gold extra beim Kill, −10 Gold bei Durchbruch. Einmal täglich +10 Diamanten beim Sieg. Gleicher Tages-Seed für alle; Wechsel um 00:00 UTC. Regeln bleiben dauerhaft verfügbar.</p><p id="dailyProgress"></p><button id="dailyStartBtn" class="primary">Heutige Karawane starten</button></section></div>
+      <button id="playModeBackBtn" class="secondary">Zurück</button>
+    </div>
+  </div>
+  <div id="menuRulesOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-label="Spielregeln"><div class="modeBox"><h2>Spielregeln</h2><div id="menuRules" class="menuRules"></div><button id="menuRulesBackBtn" class="secondary">Zurück</button></div></div>
+
+  <div id="celebration" class="celebration hidden" role="dialog" aria-modal="true" aria-labelledby="celebrationTitle">
+    <div class="celebrationCard"><div class="celebrationTrophy" aria-hidden="true">✦ 🏆 ✦</div><p id="celebrationWave"></p><h2 id="celebrationTitle"></h2><p id="celebrationText"></p><button id="celebrationContinue" class="primary">Weiter geht’s!</button></div>
+  </div>
   <div id="rewardOverlay" class="overlay hidden" role="dialog" aria-modal="true">
     <div class="rewardBox">
+      <div id="rewardSelection">
       <h2 id="rewardTitle">Deck erweitern</h2>
       <p id="rewardDescription">Wähle 1 von 3 Hexkarten.</p>
       <div id="rewardChoices" class="rewardChoices"></div>
       <button id="skipRemovalBtn" class="secondary hidden">Keine Karte entfernen</button>
+      </div>
+      <section id="rewardDeck" class="hidden" aria-label="Deckübersicht"><h2>Dein Deck</h2><div id="rewardDeckOverview" class="deckOverview"></div></section>
+      <div class="rewardInspectActions">
+        <button id="rewardBackBtn" class="primary hidden">Zurück zur Auswahl</button>
+        <button id="rewardDeckBtn" class="secondary">Deck anschauen</button>
+        <button id="rewardMapBtn" class="secondary">Map anschauen</button>
+      </div>
     </div>
   </div>
 
@@ -216,6 +240,7 @@
   </script>
   <script src="sound.js"></script>
   <script src="camera.js"></script>
+  <script src="biomes.js"></script>
   <script src="data.js"></script>
   <script src="ui-layout.js"></script>
   <script src="tutorial.js"></script>

@@ -189,3 +189,39 @@ html,body{height:100%;overflow:hidden}
 .menuSound{margin-top:14px}.menuVersion{color:#6f7f70;margin-top:6px}
 .menuLoadoutInfo{color:#cfd8c9;font-size:12px;margin:0 0 12px;line-height:1.4}
 .menuLogo{width:120px;height:120px;filter:drop-shadow(0 6px 14px #000a);margin-bottom:-4px}
+
+.rewardInspectActions{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:12px;margin-top:24px}
+#rewardDeck{max-height:60vh;overflow:auto}
+#rewardOverlay.inspectMap{background:transparent;pointer-events:none}
+#rewardOverlay.inspectMap .rewardBox{display:contents}
+#rewardOverlay.inspectMap .rewardInspectActions{position:fixed;left:50%;bottom:76px;transform:translateX(-50%);max-width:calc(100vw - 32px);margin:0;padding:12px;background:#1d2922f7;border:1px solid #4d684f;border-radius:12px;pointer-events:auto}
+.celebration{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at center,#e1b74f30,transparent 65%),#08120de8;backdrop-filter:blur(5px)}
+.celebration.hidden{display:none}
+.celebrationCard{position:relative;overflow:hidden;max-width:720px;box-sizing:border-box;text-align:center;padding:48px 40px;border:2px solid #e1b74f;border-radius:24px;background:linear-gradient(145deg,#354b31,#14251c);box-shadow:0 0 70px #e1b74f55,inset 0 0 40px #e1b74f18;animation:victoryEnter .6s ease-out}
+.celebrationTrophy{font-size:clamp(40px,7vw,76px);color:#ffe8a0;text-shadow:0 0 28px #ffc849;margin-bottom:20px}
+#celebrationWave{color:#e9c878;letter-spacing:.2em;font-weight:800}
+.celebrationCard h2{font-size:clamp(25px,4vw,44px);line-height:1.15;color:#fff0b5;margin:18px 0;text-shadow:0 2px 20px #e1b74f55}
+#celebrationText{font-size:18px;line-height:1.6;color:#f2ead5}
+#celebrationContinue{margin-top:24px;padding:14px 32px;font-size:18px;box-shadow:0 0 24px #e1b74f30}
+@keyframes victoryEnter{from{opacity:0;transform:scale(.8) translateY(25px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@media(prefers-reduced-motion:reduce){.celebrationCard{animation:none}}
+
+.dailyChallenge{padding:16px;border:1px solid #b89958;border-radius:12px;background:#463b2380;text-align:left}.dailyChallenge p{font-size:12px;line-height:1.5}.mainMenu .menuBox{max-height:none;overflow:visible}
+
+.mainMenu{overflow:hidden;box-sizing:border-box;padding:16px}
+.mainMenu .menuLogo{width:clamp(48px,12vh,104px);height:clamp(48px,12vh,104px)}
+.mainMenu .menuBox{gap:4px}
+.mainMenu .menuTagline,.mainMenu .menuLoadoutInfo{margin:8px 0}
+.mainMenu .eyebrow{margin:4px 0}
+.modeBox{width:min(780px,94vw);box-sizing:border-box;padding:28px;background:#1d2922f5;border:1px solid #607d65;border-radius:18px;max-height:90dvh;overflow:auto;text-align:center}
+#playModeOverlay,#menuRulesOverlay{z-index:42}
+.modeChoices{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:24px 0}
+.modeChoices.hidden{display:none}
+.modeChoice{display:flex;flex-direction:column;gap:14px;padding:28px 20px;border:1px solid #879a6c;border-radius:14px;background:#2c3f33;min-height:190px;text-align:left}
+.modeChoice strong{font-size:22px;color:#f5df9a}.modeChoice small{line-height:1.5;color:#c1cbbd}
+#playModeBackBtn,#menuRulesBackBtn{margin-top:20px}
+@media(max-height:700px){.mainMenu .menuLogo{width:58px;height:58px}.mainMenu .menuBox h1{font-size:40px}.mainMenu .menuButtons{gap:6px}.mainMenu .menuButtons button{padding:9px;font-size:15px}.mainMenu .menuTagline,.mainMenu .menuLoadoutInfo{margin:4px 0;font-size:11px}}
+@media(max-height:500px){.mainMenu .menuLogo,.mainMenu .eyebrow,.mainMenu .menuTagline,.mainMenu .menuLoadoutInfo,.mainMenu .menuVersion{display:none}.mainMenu .menuBox h1{font-size:30px}.mainMenu .menuButtons{display:grid;grid-template-columns:1fr 1fr}.mainMenu .menuSound{margin:0}}
+@media(max-width:550px){.modeChoices{grid-template-columns:1fr}.modeChoice{min-height:0;padding:18px}}
+
+.biomeWind{opacity:.45;animation:biomeWindDrift 4s ease-in-out infinite alternate}@keyframes biomeWindDrift{from{transform:translateX(-8px);opacity:.15}to{transform:translateX(12px);opacity:.6}}@media(prefers-reduced-motion:reduce){.biomeWind{animation:none;opacity:.25}}
