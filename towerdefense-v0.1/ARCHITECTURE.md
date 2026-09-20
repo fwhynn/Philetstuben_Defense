@@ -15,9 +15,13 @@ Vanilla JavaScript, HTML und CSS ohne Build-Schritt. Node.js betreibt den lokale
 | random.js | Seedbasierte Zufallsströme |
 | waves.js | Gegnerzusammensetzung, reguläre Bosswellen, Wave- und Goldwerte |
 | combat.js | Bewegung, Zielprioritäten, Schaden, Slow, Minen und Kampfereignisse ohne DOM |
+| rewards.js | Heilung/Vorräte, kostenlose Loadout-Turmupgrades und alternative Boss-Runsegen |
 | deck.js | Ziehen und Ablegen |
 | buildings.js | Gebäude, Kosten, Buffs und Wirkungsbereich für Hervorhebungen |
 | exploration.js | Sichtregion, seedbasierte Eventfelder, Anschluss und Erkundungsboss-/Shrine-Regeln |
+| ui-layout.js | DOM-freie Berechnung freier Menüflächen zwischen festen Bedienelementen |
+| tutorial.js | Aktionsbasierte Tutorialschritte; Speicherung und Oberfläche im Controller |
+| heroes.js | Drei Startprofile, Initialisierung des Runs, Base-Upgrades und Waffenwerte ohne DOM |
 | profile.js | Browserprofil, Freischaltungen, Loadouts/Presets, Statistiken und Diamantenabrechnung/-prognose |
 | game.js | Runsteuerung, Aktionen, Eingaben und HUD; noch nicht vollständig voneinander getrennt |
 | svg-renderer.js | SVG-Karte, Vorschauen, Klickflächen, Reichweiten und Hex-Markierungen |
@@ -44,15 +48,17 @@ Die Trennung ist nicht vollständig: game.js enthält weiterhin DOM und Runlogik
 
 ## Persistenz und Lebenszyklus
 
-localStorage enthält das versionierte Profil mit Diamanten, freigeschalteten Türmen und Stufe-4-Upgrades, aktivem Loadout, drei Presets und Statistiken. Die letzten 100 abgerechneten Run-IDs verhindern erneute Auszahlung. Run und Profil sind getrennte Zustände, aber der laufende Run wird nicht gespeichert. Hex-Grid und Grafikqualität haben separate Einstellungen.
+localStorage enthält das versionierte Profil mit Diamanten, freigeschalteten Türmen und Stufe-4-Upgrades, aktivem Hero und Loadout, drei Presets und Statistiken. Die letzten 100 abgerechneten Run-IDs verhindern erneute Auszahlung. Run und Profil sind getrennte Zustände, aber der laufende Run wird nicht gespeichert. Hex-Grid und Grafikqualität haben separate Einstellungen.
 
-Diamanten werden bei Game Over abgerechnet; ein manueller Neustart zahlt den abgebrochenen Run derzeit nicht aus. Die Prognose berechnet denselben Ertrag ohne Speichervorgang. Neue Runs übernehmen Loadout und Freischaltungen, setzen Karte und Kamera zurück und verwerfen ausstehende Spawn-/Runaktionen.
+Diamanten werden bei Game Over abgerechnet; ein manueller Neustart zahlt den abgebrochenen Run derzeit nicht aus. Die Prognose berechnet denselben Ertrag ohne Speichervorgang. Neue Runs übernehmen Hero, Loadout und Freischaltungen, setzen Karte und Kamera zurück und verwerfen ausstehende Spawn-/Runaktionen.
+
+Die Base-Waffe wird als zusätzliche Kampfreferenz mit eigenen Werten an combat.js übergeben. Dadurch verwendet sie dieselbe Zielsuche, Schadens- und Beuteabrechnung wie die Türme, ohne einen Loadoutplatz oder Turmstatistiken zu belegen. Base-Upgrades und Waffen-Cooldown sind ausschließlich Runzustand.
 
 ## Modelle, Performance und Prüfung
 
 Basismodelle für Tiles, Sonderfelder, sieben Türme, fünf Gegner, drei Gebäude und Straßenminen sind eingebunden. Eigene Upgrade-Modelle fehlen. Grafikstufen, automatische Qualitätsabsenkung, Render-Taktung und gebündelte Effekte/Overlays sind vorhanden; große Karten und viele Gegner bleiben Gegenstand der Performanceprüfung.
 
-Zuletzt 133 automatisierte Tests bestanden (20.09.2026). Sie prüfen Regeln, Controller mit DOM-Ersatz, SVG-Renderer, Kamera und Modellzuordnung. Sie ersetzen keinen WebGL- oder visuellen Test. Browsertests übernimmt der Nutzer, außer er beauftragt sie ausdrücklich.
+Zuletzt 149 automatisierte Tests bestanden (20.09.2026). Sie prüfen Regeln, Controller mit DOM-Ersatz, SVG-Renderer, Kamera und Modellzuordnung. Sie ersetzen keinen WebGL- oder visuellen Test. Browsertests übernimmt der Nutzer, außer er beauftragt sie ausdrücklich.
 
 ## Offene technische Arbeit
 

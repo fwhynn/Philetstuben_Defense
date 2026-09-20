@@ -1,5 +1,7 @@
 const HexData=(()=>{
   const CARD_LIBRARY = {
+    supplyRoad:{id:'supplyRoad',name:'Versorgungsweg',rarity:'Rare',roads:[0,3],slots:1,income:2,desc:'+2 Gold je Wave, ein Turmplatz an einer geraden Straße.'},
+    signalCross:{id:'signalCross',name:'Signalkreuzung',rarity:'Epic',roads:[0,1,3,4],slots:2,towerRange:1.2,desc:'+20 % Reichweite, zwei Turmplätze und vier Straßenenden.'},
     straight: {id:'straight',name:'Gerade',rarity:'Common',roads:[0,3],slots:1,desc:'Zuverlässiger Weg.'},
     smallCurve: {id:'smallCurve',name:'Kleine Kurve',rarity:'Common',roads:[0,1],slots:1,desc:'Enge 60°-Kurve.'},
     bigCurve: {id:'bigCurve',name:'Große Kurve',rarity:'Common',roads:[0,2],slots:1,desc:'Weite Kurve, gut für Reichweite.'},

@@ -65,7 +65,7 @@ const HexExploration=(()=>{
   function shrineEffect(landmarks,id){
     const landmark=landmarks.get(id);if(landmark.shrineEffect) return landmark.shrineEffect;
     const roll=hash((landmarks.seed||0)^987654321,landmark.q,landmark.r);
-    return roll<.3?'remove':roll<.6?'card':roll<.9?'epic':'legendary';
+    return roll<.2?'remove':roll<.4?'card':roll<.6?'epic':roll<.7?'legendary':roll<.85?'repair':'upgrade';
   }
   function bossRewardRarity(seed,id){const landmark=id.startsWith('wave:')?[-Number(id.slice(5)),0]:id.split(',').map(Number);let value=0;for(const char of String(seed)) value=Math.imul(value,31)+char.charCodeAt(0)|0;return hash(value^246813579,landmark[0],landmark[1])<.1?'Legendary':'Epic';}
   function visibility(map,position){

@@ -27,7 +27,7 @@ Optionaler Auto-Start startet eine Wave nach dem Placement beziehungsweise nach 
 
 Die HUD-Dropdownpfeile zeigen den Öffnungszustand an. Neben dem Diamantenbestand steht in Klammern der aktuell auszahlbare Ertrag dieses Runs. In den Einstellungen lässt sich ein dauerhaft gespeichertes Hex-Grid für SVG und 3D aktivieren (Hotkey G). Q/E drehen die 3D-Kamera nach links/rechts. Gebäude markieren bei Auswahl und Hover ihre betroffenen Hexe: Schmiede und Markt das eigene Feld und direkte Nachbarn, das Haus nur sein eigenes Feld.
 
-- Start: 20 Base-HP, 70 Gold, eine Straßenöffnung an der Base und fünf Deckkarten: zweimal Gerade, Kleine Kurve, Große Kurve, Y-Kreuzung.
+- Standard-Start: 20 Base-HP, 70 Gold (andere Heroes siehe unten), eine Straßenöffnung an der Base und fünf Deckkarten: zweimal Gerade, Kleine Kurve, Große Kurve, Y-Kreuzung.
 - Drei Karten ziehen, eine auswählen und platzieren. Danach wird die gesamte Hand abgelegt. Ein leerer Nachziehstapel wird aus dem gemischten Ablagestapel aufgefüllt.
 - Nach dem Placement Türme beziehungsweise Gebäude bauen und die Wave starten. Bauen und Tower-Upgrades bleiben auch während der Wave möglich.
 - Nach jeder überlebten Wave: Abschlussgold und laufendes Hex-/Gebäudeeinkommen. Alle zwei Waves eine von drei Karten für das Deck auswählen.
@@ -42,12 +42,40 @@ Unspielbare Hände werden neu gezogen. Passt keine Karte aus dem gesamten Deck, 
 
 Die Platzierungsvorschau erscheint nur an der Cursorposition und enthält rotierte Turm- und Gebäudeslots. Straßen treffen sich an gemeinsamen Hexkanten und werden unter allen Türmen gezeichnet.
 
+## Einstieg und Bedienhilfen
+
+Neue Spielende erhalten beim ersten Run ein kurzes Tutorial im mittigen Hinweisfeld über der Karte: Karte wählen/drehen, Hex platzieren, freien Turmplatz wählen, Turm kaufen und Wave starten. Schritte folgen den tatsächlichen Aktionen. Überspringen und Abschluss werden gespeichert; in den Einstellungen lässt sich das Tutorial erneut starten. Auto-Start wird während des Tutorials zurückgehalten. Profile mit bereits abgeschlossenen Runs bekommen keine automatische Einführung.
+
+Freie Turmplätze sind während Bau- und Wavephase mit schwebenden, langsam rotierenden goldenen Diamanten markiert. Die gespeicherte Einstellung „Freie Turmplätze hervorheben“ schaltet das aus. Menüs nutzen den Bereich zwischen den festen Bedienelementen und scrollen bei langen Inhalten; Wave-Start, Tempo, Hand/Bauphase, Kamera und Turm-Shop bleiben ausgespart.
+
+## Heroes und Base-Ausbau
+
+Vor dem Run wird neben den fünf Türmen ein gemeinsames Hero-/Festungsprofil gewählt. Alle drei sind frei verfügbar; die bestätigte Auswahl wird im Browserprofil gespeichert. Der laufende Run behält seinen Hero. Erneuter Run mit gleichem Loadout übernimmt auch den Hero, setzt jedoch alle Base-Upgrades zurück.
+
+| Profil | HP | Startgold | Besonderheit |
+|---|---:|---:|---|
+| Standardfestung | 20 | 70 | Zwei Stufen je Ausbaupfad |
+| Festungsbauer | 20 | 55 | 25 % günstigere Base-Upgrades (Kosten aufgerundet), dritte Stufe |
+| Händlerstadt | 15 | 90 | +2 Gold je überlebter Wave, Base-Waffe −25 % Schaden |
+
+Klick auf die Base oder den Base-Button im HUD öffnet das Ausbaumenü. Käufe sind während Hex-Platzierung, Bau- und Wavephase möglich und kosten Run-Gold. Die HP-Anzeige nennt aktuelle und maximale HP. Eine gekaufte Waffe zeigt bei geöffnetem Base-Menü ihre Reichweite.
+
+| Stufe | Mauern: Kosten / zusätzliche HP | Waffe: Kosten / Schaden / Reichweite / Intervall |
+|---|---|---|
+| 1 | 35 Gold / +5 | 45 Gold / 12 / 150 / 1 s |
+| 2 | 60 Gold / +5 | 80 Gold / 24 / 165 / 0,9 s |
+| 3 (nur Festungsbauer) | 90 Gold / +10 | 120 Gold / 38 / 180 / 0,8 s |
+
+Tabellenwerte vor Hero-Modifikatoren. Mauern erhöhen maximale und aktuelle HP um den genannten Betrag; bestehender Schaden wird nicht vollständig repariert. Waffenstufen ersetzen die vorherigen Waffenwerte. Die automatische Base-Waffe verursacht Einzelzielschaden gegen Leben, Rüstung und Magieresistenz und nutzt die normale Kill-/Bossabrechnung. Sie belegt keinen Turmplatz im Loadout und erhält keine Turm-Upgrades oder Schmiede-/Marktboni. Eigene Modelle für Ausbauzustände sind noch nicht vorhanden; die Waffe nutzt sichtbare Pfeileffekte.
+
 ## Deck und Hexkarten
 
 Das Deck enthält ausschließlich Maphex-Karten. Gezogene Belohnungen werden erst nach Auswahl ins Deck und den Ablagestapel aufgenommen. Kartenentfernung löscht genau eine Kopie; bereits platzierte Hexe und Türme bleiben bestehen. Der Deck-Dropdown zeigt Gesamtdeck, Nachzieh- und Ablagestapel, aber keine zukünftige Ziehreihenfolge.
 
 | Hex | Rarität | Turmplätze | Effekt |
 |---|---|---:|---|
+| Versorgungsweg | Rare | 1 | Gerade Straße, +2 Gold je überlebter Wave |
+| Signalkreuzung | Epic | 2 | Vier Straßenenden, +20 % Turmreichweite |
 | Gerade | Common | 1 | Gerade Straße |
 | Kleine Kurve | Common | 1 | Enge 60°-Kurve |
 | Große Kurve | Common | 1 | Weite Kurve |
@@ -160,22 +188,28 @@ Schätze geben einmalig +20 Gold. Shrines verbergen ihren konkreten Effekt bis z
 
 | Shrine-Effekt | Wahrscheinlichkeit |
 |---|---:|
-| Eine Kartenkopie entfernen, Mindestdeckgröße fünf | 30 % |
-| Eine zusätzliche Karte aus bis zu drei Angeboten wählen | 30 % |
-| Eine Epic-Karte erhalten | 30 % |
+| Eine Kartenkopie entfernen, Mindestdeckgröße fünf | 20 % |
+| Eine zusätzliche Karte aus bis zu drei Angeboten wählen | 20 % |
+| Eine Epic-Karte erhalten | 20 % |
 | Eine Legendary-Karte erhalten | 10 % |
+| Heilquelle: bis zu +5 HP, bei voller Gesundheit +30 Gold | 15 % |
+| Werksegen: kostenloses Turm-Upgrade, sonst +30 Gold | 15 % |
 
-Der Epic-Pool enthält Höhenkreuzung, Kampfstraße und Wachtkurve; der Legendary-Pool Bastionskreuzung, Königsstraße und Kriegskreuzung. Raritätsspezifische Shrine-Rewards bieten damit jeweils drei Karten zur Auswahl. Das Fenster nennt direkt „Shrine erschlossen“ und den Effekt. Auswahl oder Überspringen verbraucht den Shrine. Danach Bauphase ohne erneutes Handziehen; Auto-Start wartet auf die Entscheidung. Schatz und Shrine haben einen Collect-Sound.
+Der Epic-Pool enthält Höhenkreuzung, Kampfstraße, Wachtkurve und Signalkreuzung; der Legendary-Pool Bastionskreuzung, Königsstraße und Kriegskreuzung. Raritätsspezifische Shrine-Rewards bieten bis zu drei Karten zur Auswahl. Der Werksegen bietet normale Upgradezweige bzw. deren finale Stufen für bereits gebaute Loadout-Türme; keine gesperrten Stufe-4-Upgrades. Gratis-Upgrades erhöhen den Verkaufswert nicht. Das Fenster nennt direkt „Shrine erschlossen“ und den Effekt. Auswahl oder Überspringen verbraucht den Shrine. Danach Bauphase ohne erneutes Handziehen; Auto-Start wartet auf die Entscheidung. Schatz und Shrine haben einen Collect-Sound.
 
 ### Boss
 
-**Regelmäßige Bosswellen:** In Wave 15, 25, 35 usw. erscheint ein Belagerungswächter unabhängig von erkundeten Sonderfeldern. Der Eingang wird gleichverteilt aus den aktuellen erreichbaren Straßenenden gewählt; gleiche Seeds und Kartenentscheidungen wiederholen die Auswahl. Basisleben: `round(1200 × ((Wave − 5) / 10)^1,8)`, dazu 25 % Rüstung und 20 % Magieresistenz, Tempo 28 und fünf Basisschaden. Freeze kann ihn höchstens um 40 % verlangsamen. Sieg gibt 50 Gold und nach überlebter Wave eine zusätzliche Kartenbelohnung.
+**Regelmäßige Bosswellen:** In Wave 15, 25, 35 usw. erscheint ein Belagerungswächter unabhängig von erkundeten Sonderfeldern. Der Eingang wird gleichverteilt aus den aktuellen erreichbaren Straßenenden gewählt; gleiche Seeds und Kartenentscheidungen wiederholen die Auswahl. Basisleben: `round(1200 × ((Wave − 5) / 10)^1,8)`, dazu 25 % Rüstung und 20 % Magieresistenz, Tempo 28 und fünf Basisschaden. Freeze kann ihn höchstens um 40 % verlangsamen. Sieg gibt 50 Gold und nach überlebter Wave eine zusätzliche Beuteauswahl.
 
 **Erkundungsbosse:**
 
 Ein durch passende Nachbarstraße erschlossenes Bossfeld mit sechs Straßenöffnungen aktiviert einen Wächter für die **nächste reguläre Wave**. Alle bereiten Bosse spawnen genau einmal auf dem Straßenhub ihres eigenen ausgelösten Hexes und verwenden dieselben zufälligen, schleifenfreien Gabelungsentscheidungen wie normale Gegner.
 
-Wächterwerte: `240 + 36 × Wave` Leben, dazu 25 % Rüstung und 20 % Magieresistenz, Tempo 24 und fünf Basisschaden. Sieg: einmalig +50 Gold mit Collect-Sound und nach überlebter Wave eine zusätzliche Kartenauswahl (90 % Epic, 10 % Legendary).
+Wächterwerte: `240 + 36 × Wave` Leben, dazu 25 % Rüstung und 20 % Magieresistenz, Tempo 24 und fünf Basisschaden. Sieg: einmalig +50 Gold mit Collect-Sound und nach überlebter Wave eine zusätzliche Beuteauswahl (Kartenpool: 90 % Epic, 10 % Legendary).
+
+Für jede Bossbeute darf genau eine Karte oder alternativ ein Run-Segen gewählt werden: **Bastionssegen** erhöht maximale und aktuelle Base-HP um fünf, **Handelspakt** erhöht Einkommen um zwei Gold je künftig überlebter Wave. Mehrere Segen können sich addieren; beim Run-Neustart verfallen sie. Die normalen 50 Gold pro Boss bleiben unabhängig von der Beuteauswahl.
+
+Die zwei neuen Hexkarten verwenden vorhandene Straßenmodelle mit passenden Slotpositionen; eigene Modelle sind noch nicht vorhanden.
 
 ## Seeds und technische Basis
 
@@ -185,7 +219,7 @@ Vanilla HTML/CSS/JavaScript ohne Build-Schritt. Three.js übernimmt standardmä�
 
 ## Prüfung und offene Arbeit
 
-Zuletzt **133 automatisierte Tests bestanden**. Tests ab diesem Appordner:
+Zuletzt **149 automatisierte Tests bestanden**. Tests ab diesem Appordner:
 
 ```powershell
 node --test tests/*.test.cjs
@@ -197,10 +231,10 @@ Noch offen: manueller visueller Spieltest neuer Änderungen, Audio-Hörprobe, La
 
 Für später vorgemerkt, noch nicht implementiert:
 
-- Verschiedene Starthelden / Startfestungen mit eigenen Effekten, Startprofilen und Spielstilen.
+- Weitere Heroes/Startfestungen über Standard, Festungsbauer und Händler hinaus.
 - Weitere Karten und Lootvarianten sowie zusätzliche Shrine-Boni wie besondere Upgrades.
 - Weitere Biome, Ausbau der vorhandenen Meta-Progression, zusätzliche Towerrollen, Run-Speicherung und Profil-Export/-Import.
-- Base-Ausbau mit eigener Verteidigung und spezialisiertem Hero; Umfang für andere Heroes noch offen.
+- Zusätzliche Base-Ausbaupfade und sichtbare Modelle der Ausbaustufen.
 - Turm-Upgrade-Modelle und weitere visuelle Effekte.
 
 Prioritäten und offene Entscheidungen werden in [BRAIN.md](../BRAIN.md) gepflegt.

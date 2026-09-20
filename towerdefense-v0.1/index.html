@@ -18,7 +18,7 @@
         <button id="resetViewBtn" class="secondary">Zur Base</button>
         <span>Mausrad: Zoom · rechte Maustaste ziehen: verschieben</span>
       </div>
-      <div id="message" class="message">Wähle eine Hexkarte und lege sie an die offene Straße der Base.</div>
+      <div id="message" class="message"><span id="messageText">Wähle eine Hexkarte und lege sie an die offene Straße der Base.</span><section id="tutorialPanel" class="tutorialPanel hidden" aria-label="Mini-Tutorial"><strong id="tutorialTitle"></strong><p id="tutorialText" aria-live="polite"></p><button id="skipTutorialBtn" class="secondary">Tutorial überspringen</button></section></div>
       <section id="towerPanel" class="towerPanel hidden" aria-label="Ausgewählter Turm">
         <div class="panelHead"><h2 id="towerPanelTitle">Turm</h2><button id="closeTowerPanel" class="secondary" aria-label="Turminfos schließen">×</button></div>
         <p id="selectedTowerInfo" class="hint"></p>
@@ -43,7 +43,7 @@
 
     <!-- Oben rechts: Leben, Gold, Wave, Deck -->
     <header class="hud">
-      <div class="hudStat">❤️ <strong id="hp">20</strong>/20</div>
+      <div class="hudStat">❤️ <strong id="hp">20/20</strong></div>
       <details class="statDetails"><summary aria-label="Goldplanung öffnen">🪙 <strong id="gold">70</strong> <span id="bonusIncome">(+0)</span> <span class="dropdownArrow" aria-hidden="true">▾</span></summary>
         <div class="statPopup"><h2>Goldplanung</h2><p id="goldForecast" class="hint"></p><p id="towerBudget" class="hint"></p><h3>Goldquellen &amp; Run-Einnahmen</h3><p id="goldSources" class="hint"></p></div>
       </details>
@@ -52,6 +52,7 @@
       </details>
       <details id="deckDropdown" class="statDetails"><summary aria-label="Deck und Kartenstapel öffnen">🃏 <strong id="deckCount">5</strong> <span class="dropdownArrow" aria-hidden="true">▾</span></summary><div class="statPopup"><h2>Deck &amp; Kartenstapel</h2><p class="hint">Die Ziehreihenfolge bleibt verborgen.</p><div id="deckOverview" class="deckOverview"></div></div></details>
       <details class="statDetails"><summary aria-label="Profilfortschritt öffnen">◆ <strong id="profileDiamonds">0</strong> <span id="runDiamonds" title="Diamanten bei Ende des aktuellen Runs">(+0)</span> <span class="dropdownArrow" aria-hidden="true">▾</span></summary><div class="statPopup"><h2>Meta-Fortschritt</h2><p id="profileStats" class="hint"></p><p class="hint">Diamanten werden am Runende ausgezahlt und im Arsenal für neue Turmtypen verwendet.</p><button id="openArsenalBtn" class="secondary">Arsenal öffnen</button></div></details>
+      <details id="baseDropdown" class="statDetails"><summary>🏰 Base <span class="dropdownArrow" aria-hidden="true">▾</span></summary><div class="statPopup"><h2 id="baseTitle">Base-Ausbau</h2><p id="baseStats"></p><p id="baseWeaponStats" class="hint"></p><button id="baseWallsBtn" class="secondary"></button><button id="baseWeaponBtn" class="secondary"></button><p class="hint">Mit Run-Gold ausbauen. Käufe sind beim Hex-Platzieren, in der Bauphase und während einer Wave möglich. Ausbau gilt nur für diesen Run.</p></div></details>
     </header>
 
     <!-- Unten Mitte: die drei spielbaren Karten -->
@@ -82,9 +83,9 @@
     <aside id="rulesDrawer" class="drawer hidden rules" aria-label="Spielregeln">
       <div class="panelHead"><h2>Spielregeln</h2><button class="secondary drawerClose" aria-label="Schließen">×</button></div>
       <ul>
-        <li>Base hat 20 HP.</li>
+        <li>Die Startfestung bestimmt HP und Gold; die Base lässt sich ausbauen.</li>
         <li>Jedes offene Straßenende ist ein Spawnpunkt.</li>
-        <li>Alle 10 Waves erscheint ein Boss an einem zufälligen Eingang. Bosswellen werden vor dem Start angekündigt.</li>
+        <li>Ab Wave 15 erscheint alle 10 Waves ein Boss an einem zufälligen Eingang. Bosswellen werden vor dem Start angekündigt.</li>
         <li>Jeder Gegner entscheidet an jeder Gabelung zufällig zwischen allen Wegen zur Base. Sackgassen und Schleifen werden ausgeschlossen.</li>
         <li>Alle 2 Waves: 1 von 3 neuen Hexkarten ins Deck.</li>
         <li>Sicht ab jedem gesetzten Hex: Radius 2 klar, bis Radius 6 Nebel, danach unsichtbar. ? = unbekanntes Sonderfeld. ◆ Schatz, ✦ Shrine, ☠ Boss. Feste Sonderfelder werden durch passende Nachbarstraßen angeschlossen.</li>
@@ -93,6 +94,8 @@
 
     <aside id="settingsDrawer" class="drawer hidden actions" aria-label="Einstellungen">
       <div class="panelHead"><h2>Einstellungen</h2><button class="secondary drawerClose" aria-label="Schließen">×</button></div>
+      <label class="toggle"><input id="slotHints" type="checkbox" checked /> Freie Turmplätze hervorheben</label>
+      <button id="restartTutorialBtn" class="secondary">Mini-Tutorial starten</button>
       <label class="toggle"><input id="hexGrid" type="checkbox" /> Hex-Grid anzeigen (G)</label>
       <label class="toggle"><input id="autoStart" type="checkbox" /> Wave nach Platzierung automatisch starten</label>
       <label class="toggle"><input id="soundEnabled" type="checkbox" checked /> Sounds aktiv</label>
@@ -128,7 +131,8 @@
   <div id="loadoutOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="loadoutTitle">
     <div class="loadoutBox">
       <p class="eyebrow">RUNVORBEREITUNG</p>
-      <h2 id="loadoutTitle">Wähle fünf Türme</h2>
+      <h2 id="loadoutTitle">Wähle deine Festung und fünf Türme</h2>
+      <div id="heroChoices" class="heroChoices" aria-label="Startfestung"></div>
       <p>Nur diese fünf Turmtypen stehen im nächsten Run zur Verfügung. Sie werden weiterhin mit Gold gebaut.</p>
       <div class="loadoutSummary"><strong id="loadoutCount">5/5 gewählt</strong><span id="diamondCount">◆ 0 Diamanten</span></div>
       <div id="loadoutPresets" class="loadoutPresets"></div>
@@ -189,11 +193,15 @@
   <script src="sound.js"></script>
   <script src="camera.js"></script>
   <script src="data.js"></script>
+  <script src="ui-layout.js"></script>
+  <script src="tutorial.js"></script>
+  <script src="heroes.js"></script>
   <script src="profile.js"></script>
   <script src="map.js"></script>
   <script src="random.js"></script>
   <script src="waves.js"></script>
   <script src="combat.js"></script>
+  <script src="rewards.js"></script>
   <script src="deck.js"></script>
   <script src="buildings.js"></script>
   <script src="exploration.js"></script>

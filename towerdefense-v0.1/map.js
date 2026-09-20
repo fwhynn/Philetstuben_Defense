@@ -29,6 +29,8 @@ const HexMap=(()=>{
 
   // Turmplätze je Hexart bei Rotation 0 (Weltmaß, y nach unten, relativ zur Hexmitte). Berechnet so, dass Türme (Radius ~11) neben der Straße (Halbbreite 9) stehen.
   const SLOT_LAYOUTS = {
+    supplyRoad:[[-14,-24]],
+    signalCross:[[-14,-24],[14,24]],
     straight: [[-14,-24]],
     smallCurve: [[-6,-4]],
     bigCurve: [[2,32]],
