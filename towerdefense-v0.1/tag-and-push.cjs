@@ -18,10 +18,10 @@ function readVersion() {
 }
 
 const dirty = git(['status', '--porcelain', '--untracked-files=no'], { stdio: ['ignore', 'pipe', 'inherit'] }).trim();
-// if (dirty) {
-//   console.error('Working tree has tracked changes. Commit or stash first.');
-//   process.exit(1);
-// }
+if (dirty) {
+  console.error('Working tree has tracked changes. Commit or stash first.');
+  process.exit(1);
+}
 
 const previousVersion = readVersion();
 npm(['version', bumpInput, '--no-git-tag-version'], { stdio: 'inherit' });
@@ -35,5 +35,5 @@ if (version === previousVersion) {
 }
 
 git(['tag', '-a', tag, '-m', tag], { stdio: 'inherit' });
-// git(['push', 'origin', tag], { stdio: 'inherit' });
+git(['push', 'origin', tag], { stdio: 'inherit' });
 console.log(`Tagged ${tag}`);
