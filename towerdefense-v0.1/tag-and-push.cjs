@@ -4,13 +4,14 @@ const path = require('path');
 const repo = path.join(__dirname, '..');
 const packageJsonPath = path.join(__dirname, 'package.json');
 const bumpInput = (process.argv[2] || 'patch').replace(/^v/, '');
+const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 
 function git(args, opts = {}) {
   return execFileSync('git', args, { cwd: repo, encoding: 'utf8', ...opts });
 }
 
 function npm(args, opts = {}) {
-  return execFileSync('npm', args, { cwd: __dirname, encoding: 'utf8', ...opts });
+  return execFileSync(npmCommand, args, { cwd: __dirname, encoding: 'utf8', ...opts });
 }
 
 function readVersion() {
