@@ -108,13 +108,19 @@ test('damage terrain composes with upgrades and forge while freeze remains harml
   const {state,step,towers}=setup(),e=enemy(10,0,1000);state.enemies=[e];step(state,[{tw:{type:'archer',tileType:'warCross',branch:'marksman',supportDamage:1.2,lastShot:0},pos:{x:0,y:0}}],towers,0,1000);assert.ok(Math.abs(e.hp-(1000-42.9))<1e-8);
   const fresh=enemy(10);state.enemies=[fresh];state.projectiles=[];step(state,[{tw:{type:'freeze',tileType:'battlefield',lastShot:0},pos:{x:0,y:0}}],towers,0,2000);assert.equal(fresh.hp,100);assert.equal(state.projectiles.length,0);
 });
-test('faster enemy queues behind the one ahead instead of merging into it; bosses are exempt',()=>{
-  const {state,step,towers}=setup(),slow=enemy(40),fast=enemy(0),path=[{x:0,y:0},{x:600,y:0}];slow.points=fast.points=path;slow.t=40/600;slow.speed=20;fast.speed=60;
-  state.enemies=[slow,fast];
-  let minGap=Infinity;
-  for(let i=0;i<100;i++){step(state,[],towers,.1,i*100);minGap=Math.min(minGap,Math.hypot(slow.x-fast.x,slow.y-fast.y));}
-  assert.ok(minGap>=11.5,'minimum gap '+minGap);
-  assert.ok(fast.x>0&&slow.x>40,'both still advance');
-  const boss=Object.assign(enemy(0),{type:'boss',speed:60}),ahead=Object.assign(enemy(5),{speed:0});boss.points=ahead.points=path;boss.t=0;ahead.t=5/600;
-  state.enemies=[ahead,boss];step(state,[],towers,.1,0);assert.ok(boss.x>5,'boss is not blocked');
+test('all enemy types pass through stationary units and faster enemies overtake',()=>{
+  for(const type of ['normal','swarm','armored','warded','boss']){
+    const {state,step,towers}=setup(),path=[{x:0,y:0},{x:600,y:0}];
+    const ahead=Object.assign(enemy(5),{points:path,t:5/600,speed:0});
+    const moving=Object.assign(enemy(0),{type,points:path,speed:60});
+    state.enemies=[ahead,moving];step(state,[],towers,.1,100);assert.equal(moving.x,6);
+    ahead.speed=20;for(let i=0;i<20;i++)step(state,[],towers,.1,200+i*100);
+    assert.ok(moving.x>ahead.x);assert.ok(Math.abs(moving.x-126)<1e-8);
+  }
+});
+test('enemies on crossing paths do not stop each other at junctions',()=>{
+  const {state,step,towers}=setup();
+  const a=Object.assign(enemy(-5),{speed:10,points:[{x:-5,y:0},{x:100,y:0}]});
+  const b=Object.assign(enemy(0,-5),{speed:20,points:[{x:0,y:-5},{x:0,y:100}]});
+  state.enemies=[a,b];step(state,[],towers,1,1000);assert.equal(a.x,5);assert.equal(b.y,15);
 });

@@ -4,6 +4,28 @@ Die folgenden Einträge dokumentieren frühere Zwischenstände. Verbindlicher ak
 
 # Hex Bastion – V0.7-dev
 
+## V0.7 – Kamera-Hotkeys, Reichweite und späterer erster Boss
+
+- Q/E drehen die 3D-Kamera nach links/rechts, auch wiederholt beim Gedrückthalten. G schaltet das Hex-Grid samt gespeicherter Einstellung um; die Hotkeys stehen in den Einstellungen.
+- Reichweitenflächen und -ränder aller Türme werden über der Szene gezeichnet, damit Nebel und höher liegende Hexmodelle sie nicht verdecken.
+- Erste normale Wave: fünf statt sieben Gegner. Weitere normale Waves behalten ihre bisherigen Werte.
+- Regelmäßige Bosse erscheinen ab Wave 15, danach in 25, 35 usw. Ihre Stärkeskalierung verschiebt sich um fünf Waves: Der erste besitzt weiterhin 1200 Leben, 300 Rüstung und 240 Magieresistenz. Erkundungsbosse bleiben unverändert.
+
+## V0.7 – HUD-Prognose, Gebäude-Wirkungsbereiche und Hex-Grid
+
+- HUD-Dropdownpfeile drehen sich beim Öffnen; der zugehörige Button bekommt eine hervorgehobene Umrandung.
+- Neben dem Diamantenbestand steht die aktuelle Run-Prognose als (+N). Vorschau und Auszahlung verwenden dieselbe Berechnung einschließlich Bossen und neuen Meilensteinen; nach Auszahlung wird kein bereits verbuchter Ertrag erneut angezeigt.
+- Auswahl und Hover markieren den Wirkungsbereich von Gebäuden in SVG und 3D. Schmiede orange, Markt türkis, Haus gelb auf seinem eigenen Hex. Buffs und Markierung nutzen die Reichweite aus der Gebäudedefinition.
+- Gespeicherte Option „Hex-Grid anzeigen“ zeichnet Grenzen der dargestellten Hexfelder. Die 3D-Markierungen werden gebündelt gezeichnet und nur bei Änderungen neu aufgebaut.
+- 130 automatisierte Tests bestanden; visuelle Prüfung erfolgt durch den Nutzer.
+
+## V0.7 – Hex drehen, freie Gegnerbewegung und Arsenal-Loadout
+
+- Mausrad-Klick dreht das ausgewählte Hex im Uhrzeigersinn, sowohl in 3D als auch in SVG. R bleibt unverändert verfügbar; während der Platzierung hat die Drehung Vorrang vor der mittleren Kamerataste.
+- Gegner bremsen nicht mehr wegen anderer Gegner ab und können sich durchlaufen und überholen, auch an Kreuzungen. Freeze-Effekte und die bisherige Spawn-Taktung bleiben bestehen.
+- Arsenal-Freischaltungen aktualisieren die offene Loadout-Auswahl sofort. Bei fünf belegten Plätzen erklärt ein Hinweis, dass zunächst ein ausgewählter Turm abgewählt werden muss.
+- Automatisierte Regressionstests prüfen Rotation, Überholen/Kreuzungen und den Ablauf Freischalten → Auswählen → Run starten → Bauen → Profil erneut laden. Browsertest übernimmt der Nutzer.
+
 ## V0.7 – Verbundene benachbarte Eventfelder
 
 - Benachbarte Sonderfelder erhalten passende Straßen auf beiden Seiten ihrer gemeinsamen Kante. Ihre Form berücksichtigt seedbasiert auch Nachbarn außerhalb des aktuell erkundeten Bereichs, ohne bereits erzeugte Felder nachträglich zu drehen.

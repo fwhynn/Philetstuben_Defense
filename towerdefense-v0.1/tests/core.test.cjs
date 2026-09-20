@@ -60,7 +60,7 @@ test('turret slots rotate with the tile and return after a full turn',()=>{
 
 test('new run cancels timers and even stale callbacks cannot mutate it',()=>{
   const {a,timers}=load();a.state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:0,towers:[]});a.state.phase='build';a.startWave();
-  const old=a.state.spawnQueue.map(spawn=>spawn.callback);assert.equal(old.length,7);
+  const old=a.state.spawnQueue.map(spawn=>spawn.callback);assert.equal(old.length,5);
   a.newRun();assert.equal(timers.size,0);old.forEach(fn=>fn());
   assert.equal(a.state.enemies.length,0);assert.equal(a.state.wave,0);assert.equal(a.state.phase,'place');
 });
@@ -189,8 +189,8 @@ test('every run has exactly five tower choices and rejects towers outside its lo
 
 test('forecast uses the same wave and gold rules as actual spawning and completion',()=>{
   const context={};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../waves.js'),'utf8')+';globalThis.plan=HexWaves.plan;',context);
-  const first=context.plan(1,4);assert.equal(first.count,7);assert.equal(first.hp,35);assert.equal(first.killGold,21);assert.equal(first.maxGold,35);
-  const late=context.plan(100,0);assert.equal(late.count,205);assert.equal(late.maxGold,675);
+  const first=context.plan(1,4);assert.equal(first.count,5);assert.equal(first.hp,35);assert.equal(first.killGold,15);assert.equal(first.maxGold,29);
+  const late=context.plan(100,0);assert.equal(late.count,205);assert.equal(late.maxGold,625);
   const {a,elements}=load();a.state.income=4;a.state.wave=1;a.state.phase='wave';a.state.waveRunning=true;a.state.pendingSpawns=0;
   a.update(0,0);assert.equal(a.state.gold,84);assert.equal(a.state.goldEarned.completion,10);assert.equal(a.state.goldEarned.income,4);
   assert.ok(elements.get('goldForecast').textContent.includes('Maximal +41 Gold'));
@@ -334,7 +334,7 @@ test('boss joins the normal next wave and starts on its own triggered hex',()=>{
   const {a}=load();a.state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:0,towers:[]});
   const landmark={q:1,r:0,type:'boss',claimed:true,status:'ready'};a.state.landmarks=new Map([['1,0',landmark]]);a.state.phase='build';
   assert.equal(a.state.enemies.length,0);a.startWave();assert.equal(a.state.wave,1);assert.equal(landmark.status,'fighting');
-  const boss=a.state.enemies.find(e=>e.type==='boss');assert.ok(boss);const spawn=a.axialToPixel(1,0);assert.equal(boss.x,spawn.x);assert.equal(boss.y,spawn.y);assert.equal(boss.landmarkId,'1,0');assert.equal(boss.maxHp,276);assert.equal(boss.maxArmorHp,69);assert.equal(boss.maxMagicHp,55);assert.equal(boss.baseDamage,5);assert.equal(boss.killGold,50);assert.equal(a.state.pendingSpawns,7);
+  const boss=a.state.enemies.find(e=>e.type==='boss');assert.ok(boss);const spawn=a.axialToPixel(1,0);assert.equal(boss.x,spawn.x);assert.equal(boss.y,spawn.y);assert.equal(boss.landmarkId,'1,0');assert.equal(boss.maxHp,276);assert.equal(boss.maxArmorHp,69);assert.equal(boss.maxMagicHp,55);assert.equal(boss.baseDamage,5);assert.equal(boss.killGold,50);assert.equal(a.state.pendingSpawns,5);
   const base=a.axialToPixel(0,0);assert.equal(boss.points.at(-1).x,base.x);assert.equal(boss.points.at(-1).y,base.y);
   a.startWave();assert.equal(a.state.enemies.length,1);
 });

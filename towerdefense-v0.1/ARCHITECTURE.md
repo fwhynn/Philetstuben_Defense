@@ -1,65 +1,62 @@
-# Zielarchitektur: stilisiertes 3D wie Dorfromantik
+# Hex Bastion – aktuelle Architektur
 
-Das finale Spiel soll ein stilisiertes 3D-Spiel mit gut lesbaren Hexlandschaften, Straßen und Türmen werden. SVG ist die aktuelle Prototypdarstellung. Die Wahl der 3D-Engine ist noch offen.
+Stand: 20.09.2026, einschließlich lokaler Änderungen. Historische Zwischenstände stehen im [CHANGELOG](CHANGELOG.md).
 
-## Bereits getrennt
+## Laufzeit und Darstellung
 
-- `data.js`: Karten- und Towerdefinitionen.
-- `map.js`: Hexkoordinaten, Anschlussregeln, Graph und kürzeste Wege. Kein DOM.
-- `random.js`: Seedbasierter Zufall.
-- `waves.js`: Wave- und Economywerte.
-- `combat.js`: Bewegung, Zielsuche, Schaden und Statuswirkungen. Erhält Zustand, Towerpositionen, Definitionen und Zeitschritt; gibt Sound-/Kampfereignisse über einen Callback aus. Kein DOM oder SVG.
-- `sound.js`: aktuelle Audioausgabe.
-- `camera.js`: DOM-freies Weltkamera-Modell plus SVG-Eingabe-/Projektionsadapter, vom Renderer verwaltet.
-- `svg-renderer.js`: SVG-Kartendarstellung mit Ebenen, Picking, Vorschau, Towern, Gegnern und Effekten. Renderer liest Zustand und meldet logische Aktionen an den Controller.
-- `game.js`: Runsteuerung, Aktionen und HUD inklusive SVG-Kartenminiaturen. Diese Bereiche sind noch nicht vollständig getrennt.
+Vanilla JavaScript, HTML und CSS ohne Build-Schritt. Node.js betreibt den lokalen Server und die automatisierten Tests. Three.js ist die implementierte 3D-Bibliothek; SVG bleibt alternative Darstellung und Fallback. index.html lädt die Regelmodule und anschließend den passenden Renderer sowie game.js. serve.cjs liefert statische Dateien und unter /assets/index.json die vorhandenen GLB-Modelle.
 
-## Vor dem 3D-Wechsel
+## Verantwortlichkeiten
 
-1. Umgesetzt: Weltkoordinaten um den Ursprung, Base bei (0,0), Geometrie/Simulation ohne Bildschirmoffset. In 3D können planare x/y-Werte auf x/z abgebildet werden; Bildschirmprojektion liegt im Kameraadapter.
-2. Straßen als gemeinsame lokale Punktfolgen je Hex modellieren. Rendering, tatsächliche Weglänge und Gegnerbewegung verwenden dieselben Daten. Das ermöglicht wirklich unterschiedliche Kurven und lange Straßen.
-3. Runsteuerung und Commands (Hex legen, Slot auswählen, Tower kaufen, Wave starten) von DOM-Ereignissen trennen. Renderer und HUD lesen den Zustand; sie legen keine Gameplayregeln fest.
-4. Kampf-/Bauereignisse für Audio und visuelle Effekte von der Simulation ausgeben. Die aktuelle Callback-Schnittstelle ist der erste Schritt.
-5. Umgesetzt für die Karte: SVG hinter Renderer-Schnittstelle, DOM-freies Kameramodell und separater SVG-Eingabe-/Projektionsadapter. 3D ersetzt Darstellung, Picking und Kameraadapter; logische Hex-/Slotreferenzen bleiben.
-6. Gameplaytests gegen die Simulation weiterverwenden. Für die 3D-Implementierung zusätzlich Picking, Kamerabewegung, Darstellung und Performance prüfen.
+| Datei | Aufgabe |
+|---|---|
+| data.js | Karten, sieben Türme, Upgradezweige, Stufe 4 und Wertberechnung |
+| map.js | Axiale Hexkoordinaten, Platzierung, gemeinsame Straßen- und Slotgeometrie, Routengraph |
+| random.js | Seedbasierte Zufallsströme |
+| waves.js | Gegnerzusammensetzung, reguläre Bosswellen, Wave- und Goldwerte |
+| combat.js | Bewegung, Zielprioritäten, Schaden, Slow, Minen und Kampfereignisse ohne DOM |
+| deck.js | Ziehen und Ablegen |
+| buildings.js | Gebäude, Kosten, Buffs und Wirkungsbereich für Hervorhebungen |
+| exploration.js | Sichtregion, seedbasierte Eventfelder, Anschluss und Erkundungsboss-/Shrine-Regeln |
+| profile.js | Browserprofil, Freischaltungen, Loadouts/Presets, Statistiken und Diamantenabrechnung/-prognose |
+| game.js | Runsteuerung, Aktionen, Eingaben und HUD; noch nicht vollständig voneinander getrennt |
+| svg-renderer.js | SVG-Karte, Vorschauen, Klickflächen, Reichweiten und Hex-Markierungen |
+| three-renderer.js | Three.js-Szene, GLB-Modelle, Kamera, Raycast-Picking, Animationen, Qualität und Overlays |
+| model-map.js | Rendererunabhängige Modellzuordnung und Rotation |
+| camera.js | DOM-freies Pan-/Zoommodell und SVG-Eingabe-/Projektionsadapter |
+| sound.js | Lokal erzeugte WebAudio-Effekte |
 
-Ein Browser-3D-Renderer kann JavaScript-Logik unmittelbar weiterverwenden. Bei einem Wechsel zu einer Engine mit anderer Sprache müssen Logikmodule portiert werden; Daten, Regeln und Tests dienen als Referenz. Ein vollständig aufwandsfreier Enginewechsel ist nicht zugesichert.
+## Weltgeometrie und Routing
 
-## V0.3 – Straßenmodell
+Die Base liegt bei (0,0). Hexe, Straßen, Gegner und Turmplätze verwenden gemeinsame planare Weltkoordinaten. Three.js bildet x/y auf x/z ab und skaliert Modelle mit Hexradius 1 um Faktor 54. Straßen aus roadGeometry und Modellmittellinien werden auch für die Bewegung verwendet.
 
-`roadGeometry(tile)` liefert einen gemeinsamen Hub und Punktfolgen zu den Straßenkanten. Karte, Hover-Vorschau und Spielfeld rendern diese Daten. `routeGraph(map)` verbindet die Hubs über exakt gemeinsame Kanten, gewichtet Verbindungen nach Punktfolgen-Länge und ermittelt Distanzen zur Base. Gegner laufen dieselben Punktfolgen ab; gleich lange Alternativen bleiben gleichmäßig verteilt. Ein 3D-Renderer kann entlang dieser Punktfolgen Straßenmeshes erzeugen und planare x/y-Koordinaten auf x/z abbilden. Die Bildschirmzentrierung und UI-/Runtrennung sind weiterhin umzubauen.
+Der Routengraph enthält längengewichtete Verbindungen und Distanzen zur Base. Gegner wählen jedoch nicht ausschließlich den kürzesten Weg: Pro Einheit werden an Gabelungen zufällige, schleifenfreie Wege mit erreichbarer Base gewählt. Bewegung folgt der tatsächlichen Segmentlänge. Einheiten können sich durchlaufen und überholen; nur Gameplay-Effekte wie Freeze verlangsamen sie.
 
-## V0.3, vorheriger erster Teil
+Eventformen berücksichtigen seedbasierte benachbarte Events, auch außerhalb des bereits erkundeten Bereichs. Gemeinsame Kanten haben auf beiden Seiten Straßen; bestehende Eventgeometrien bleiben beim weiteren Erkunden unverändert.
 
-Gleichmäßige Bewegung nach tatsächlicher Länge der bestehenden Punktfolgen, Kettenblitz mit begrenzten Sprüngen und Freeze Tower sind umgesetzt. Straßen verlaufen weiterhin über Hexzentren; echte individuelle Kurvengeometrie und gewichtet kürzeste Wege sind der nächste Teil.
+## Renderer und Eingaben
 
-## V0.7 – Exploration
-Sichtregion, Koordinatenhash für dynamische Landmarken, Erschließung und Bosswerte leben rendererunabhängig in exploration.js. SVG zeichnet klare/neblige Hexflächen in einem gecachten Hintergrundlayer. Ein 3D-Renderer kann dieselben axialen Sichtdaten für Terrain-/Nebelmaterialien nutzen. Bosskampf nutzt vorhandene Straßenrouten und Combat-Logik; UI/Run-Steuerung verbleibt noch in game.js.
+Beide Renderer bieten render, reset, project, zoom, resetView, getView und destroy. Sie erhalten Zustand und bereits auf Legalität geprüfte Platzierungsziele. Logische Commands melden Platzierung, Auswahl und Hover an den Controller. 3D bietet zusätzlich rotateView für Q/E. Kartenvorschauen im HUD bleiben SVG.
 
-## V0.7 – Bonusdaten und Bossbeute
-Neue Hexe nutzen generische towerDamage/towerRange/income/buildingSlots-Daten. Towerwerte werden gemeinsam für Vorschau, Upgradeanzeige und Combat aufgelöst. Combat merkt Bossbelohnungen als logische Hex-IDs vor; UI verarbeitet sie erst nach Wave-Ende. Bossloot-Rarität wird rendererunabhängig ermittelt. Die SVG-Kartendarstellung wurde anschließend hinter die Renderer-Schnittstelle ausgelagert.
+Die 3D-Kamera unterstützt Pan, Orbit, Kippen und Zoom. Mausrad-Klick dreht während der Platzierung das Hex im Uhrzeigersinn; ansonsten dient die mittlere Taste der Kamera. R bleibt verfügbar. Gebäudemarkierungen verwenden dieselbe Radiusdefinition wie die Buffregeln. G schaltet das gespeicherte Hex-Grid um. Reichweiten werden als Overlay gezeichnet, damit Nebelmodelle sie nicht verdecken.
 
+Die Trennung ist nicht vollständig: game.js enthält weiterhin DOM und Runlogik; der 3D-Renderer schreibt aktuell auch den Turm-Hoverzustand. Der SVG-Renderer wird auf Zustandsunveränderlichkeit geprüft. Ein späterer Enginewechsel benötigt weiterhin Portierungsarbeit.
 
-## Kartendarstellung hinter einer Schnittstelle
+## Persistenz und Lebenszyklus
 
-`HexSvgRenderer.create(surface, commands)` erzeugt den aktuellen Adapter:
-- `render(state, placementTargets)` liest aktuellen Zustand; Placementtargets enthalten bereits geprüfte Legalität. Keine direkte Zustandsmutation durch Rendering oder Klickflächen.
-- `reset()` verwirft Run-/Objektcaches für Neustarts.
-- `project(position)` liefert lokale Bildschirmkoordinaten und Viewportgröße für kontextuelle HUD-Panels; der Controller benötigt kein SVG-Matrixwissen mehr.
-- `destroy()` entfernt Adapterlayer und seinen Hintergrundlistener. Kamera/HUD sind separat verwaltet und werden damit nicht entsorgt.
+localStorage enthält das versionierte Profil mit Diamanten, freigeschalteten Türmen und Stufe-4-Upgrades, aktivem Loadout, drei Presets und Statistiken. Die letzten 100 abgerechneten Run-IDs verhindern erneute Auszahlung. Run und Profil sind getrennte Zustände, aber der laufende Run wird nicht gespeichert. Hex-Grid und Grafikqualität haben separate Einstellungen.
 
-Commands: Hex platzieren, Slot/Turm/Gebäude auswählen, Hover betreten/verlassen, Auswahl leeren. Identität besteht aus axialen Koordinaten und Slotindex. Preis-/Upgradeprüfungen bleiben Controller-/Regelaufgabe. Die Rotation/Slotpositionen werden in map.js gemeinsam von Combat, Renderer und Panelpositionierung verwendet.
+Diamanten werden bei Game Over abgerechnet; ein manueller Neustart zahlt den abgebrochenen Run derzeit nicht aus. Die Prognose berechnet denselben Ertrag ohne Speichervorgang. Neue Runs übernehmen Loadout und Freischaltungen, setzen Karte und Kamera zurück und verwerfen ausstehende Spawn-/Runaktionen.
 
-Dies ist eine echte Modulgrenze für die Karte, noch keine fertige 3D-Unterstützung. Renderer nutzt weiterhin planare Geometrie mit SVG-Zentrum; Kamera und Kartenminiaturen im HUD sind SVG-spezifisch. Nächster struktureller Schritt: Weltursprung und Kamera-/Projektionsabstraktion, danach Run-/HUDtrennung. Ein 3D-Adapter braucht weiterhin Modelle, Materialien, Picking und Kamera. 73 Tests inklusive eigenständiger Renderer-Tests bestanden; visueller Regressionstest offen.
+## Modelle, Performance und Prüfung
 
+Basismodelle für Tiles, Sonderfelder, sieben Türme, fünf Gegner, drei Gebäude und Straßenminen sind eingebunden. Eigene Upgrade-Modelle fehlen. Grafikstufen, automatische Qualitätsabsenkung, Render-Taktung und gebündelte Effekte/Overlays sind vorhanden; große Karten und viele Gegner bleiben Gegenstand der Performanceprüfung.
 
-## Weltursprung und Kamera – aktueller Stand
+Zuletzt 133 automatisierte Tests bestanden (20.09.2026). Sie prüfen Regeln, Controller mit DOM-Ersatz, SVG-Renderer, Kamera und Modellzuordnung. Sie ersetzen keinen WebGL- oder visuellen Test. Browsertests übernimmt der Nutzer, außer er beauftragt sie ausdrücklich.
 
-axialToWorld(q,r) liefert planare Weltkoordinaten mit Base (0,0). Straßenrouten, Gegnerpositionen, Reichweiten und Slotpositionen nutzen diese Werte. Bildschirmoffset 545/375 gehört ausschließlich zum anfänglichen Kamerabildausschnitt (viewBox -545/-375/1100/760). Kartenminiaturen skalieren lokale Straßenpunkte um ihren eigenen Bildmittelpunkt. axialToPixel bleibt als Kompatibilitätsalias für bestehende Tests, neue Module nutzen axialToWorld.
+## Offene technische Arbeit
 
-HexCamera.create() ist DOM-frei: getView/reset/pan/zoom, begrenzte Zoomweite und gleicher Ankerpunkt beim Zoomen. HexSvgCamera kapselt Pointereingabe, SVG-Matrizen und Bildschirmprojektion. Renderer bietet zoom/resetView/getView/project, meldet ViewChanged an Controller und entfernt Kameralistener bei destroy. Neuer Run setzt Bildausschnitt und Dragzustand zurück. Noch offen: vollständige Run-/HUDtrennung, 3D-Kamera/Picking und Engineentscheidung. 78 Tests bestanden; visueller Regressionstest offen.
-
-
-## 3D-Renderer (Three.js) – aktueller Stand
-
-`three-renderer.js` ersetzt Darstellung, Picking und Kameraadapter hinter der bestehenden Renderer-Schnittstelle; Spiellogik, Daten und Tests blieben unverändert. Spielweltkoordinaten (x, y) liegen auf x/z, Modelle (Hexradius 1) werden mit 54 skaliert, Rotation entspricht 60° gegen den Uhrzeigersinn je Schritt. `model-map.js` bestimmt renderer-unabhängig, welches Modell zu welchem Tile gehört. Modellvorgaben: [ASSET_SPEC.md](ASSET_SPEC.md). Der Controller wählt den Renderer (`globalThis.HexThreeRenderer` oder SVG) und fällt bei Fehlern auf SVG zurück. Offen: Run-/HUD-Trennung, Kamerarotation, Gebäude-/Gegnermodelle, Performance bei sehr großen Karten.
+- Runsteuerung und HUD weiter trennen.
+- Laufende Runs versioniert speichern und laden, einschließlich Zufallszustand und ausstehender Entscheidungen.
+- Profil-Export/-Import und belastbare Migrationen bei künftigen Schemaänderungen.
+- Weitere Performance- und Balanceauswertung sowie Modelle für Upgrade-Stufen.

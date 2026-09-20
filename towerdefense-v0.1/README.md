@@ -1,6 +1,6 @@
 # Hex Bastion – V0.7-dev
 
-Stand: 19.09.2026. Spielbarer Browser-Prototyp eines Hex-Tower-Defense-Deckbuilders. Diese Datei beschreibt den aktuell implementierten Stand. Frühere Zwischenstände stehen im [Entwicklungsverlauf](CHANGELOG.md), spätere Ziele im [Projektgedächtnis](../BRAIN.md). Das ausführliche [Übergabeprotokoll](../README_TowerDefense_Projekt.md) enthält die Konzepthistorie.
+Stand: 20.09.2026, einschließlich lokaler Änderungen. Spielbarer Browser-Prototyp eines Hex-Tower-Defense-Deckbuilders. Diese Datei beschreibt den aktuell implementierten Stand. Frühere Zwischenstände stehen im [Entwicklungsverlauf](CHANGELOG.md), spätere Ziele im [Projektgedächtnis](../BRAIN.md). Das ausführliche [Übergabeprotokoll](../README_TowerDefense_Projekt.md) enthält die Konzepthistorie.
 
 ## Starten und Bedienung
 
@@ -9,12 +9,12 @@ Stand: 19.09.2026. Spielbarer Browser-Prototyp eines Hex-Tower-Defense-Deckbuild
 | Aktion | Bedienung |
 |---|---|
 | Karte auswählen / Hex platzieren | Karte anklicken, dann freie Position anklicken |
-| Hex drehen | R; Hinweis direkt an der Vorschau beim Hovern |
+| Hex drehen | R oder Mausrad-Klick (im Uhrzeigersinn); Hinweis an der Vorschau |
 | Wave starten | Leertaste oder Wave-Button |
 | Doppeltes Spieltempo | F oder 2×-Toggle |
 | Kamera zoomen | Mausrad oder +/− |
 | Karte verschieben | 3D: linke Maustaste ziehen (SVG: rechte oder mittlere) |
-| Ansicht drehen und kippen | Nur 3D: rechte oder mittlere Maustaste ziehen |
+| Ansicht drehen und kippen | Nur 3D: rechte oder mittlere Maustaste ziehen; Q/E drehen links/rechts. Mausrad-Klick dreht während der Platzierung das Hex |
 | Kamera zurücksetzen | Zur Base |
 | Turm kaufen | Freien Turmplatz anklicken, dann Turmangebot wählen |
 | Turmwerte / Upgrades | Gesetzten Turm anklicken |
@@ -24,6 +24,8 @@ Stand: 19.09.2026. Spielbarer Browser-Prototyp eines Hex-Tower-Defense-Deckbuild
 Optionaler Auto-Start startet eine Wave nach dem Placement beziehungsweise nach Abschluss einer Shrine-Auswahl. Sounds lassen sich ausschalten; Lautstärke ist einstellbar. Die Effekte werden lokal mit WebAudio erzeugt.
 
 ## Run und Rundenablauf
+
+Die HUD-Dropdownpfeile zeigen den Öffnungszustand an. Neben dem Diamantenbestand steht in Klammern der aktuell auszahlbare Ertrag dieses Runs. In den Einstellungen lässt sich ein dauerhaft gespeichertes Hex-Grid für SVG und 3D aktivieren (Hotkey G). Q/E drehen die 3D-Kamera nach links/rechts. Gebäude markieren bei Auswahl und Hover ihre betroffenen Hexe: Schmiede und Markt das eigene Feld und direkte Nachbarn, das Haus nur sein eigenes Feld.
 
 - Start: 20 Base-HP, 70 Gold, eine Straßenöffnung an der Base und fünf Deckkarten: zweimal Gerade, Kleine Kurve, Große Kurve, Y-Kreuzung.
 - Drei Karten ziehen, eine auswählen und platzieren. Danach wird die gesamte Hand abgelegt. Ein leerer Nachziehstapel wird aus dem gemischten Ablagestapel aufgefüllt.
@@ -107,7 +109,7 @@ Vor jedem neuen Run wird ein Loadout aus genau fünf unterschiedlichen freigesch
 
 ## Meta-Profil und Diamanten
 
-Am Runende werden Diamanten ausgezahlt: `floor(erreichte Wave / 2)`, zusätzlich +5 je besiegtem regelmäßigen Zehnerboss, +3 je Erkundungsboss und +2 je erstmals erreichtem Zehnerwellen-Meilenstein. Runs vor Wave 2 geben keine reine Wave-Belohnung. Der Game-over-Bildschirm zeigt die Bestandteile einzeln. Profil, Diamanten, Bestwave, Runanzahl, Bosskills, normale Kills und die letzten abgerechneten Run-IDs werden in `localStorage` gespeichert; jede Run-ID kann nur einmal ausgezahlt werden.
+Am Runende werden Diamanten ausgezahlt: `floor(erreichte Wave / 2)`, zusätzlich +5 je besiegtem regelmäßigen Boss, +3 je Erkundungsboss und +2 je erstmals erreichtem Zehnerwellen-Meilenstein. Runs vor Wave 2 geben keine reine Wave-Belohnung. Der Game-over-Bildschirm zeigt die Bestandteile einzeln. Profil, Diamanten, Bestwave, Runanzahl, Bosskills, normale Kills und die letzten abgerechneten Run-IDs werden in `localStorage` gespeichert; die letzten 100 abgerechneten Run-IDs schützen vor wiederholter Auszahlung. Ein manueller Run-Neustart rechnet den abgebrochenen Run derzeit nicht ab.
 
 Im Arsenal können die Balliste für 20 Diamanten und der Flammenturm für 35 Diamanten dauerhaft freigeschaltet werden. Zusätzlich besitzt jeder Turm ein eigenes Stufe-4-Upgrade für 20 Diamanten bei Starttürmen beziehungsweise 30 Diamanten bei den zusätzlichen Türmen. Drei Loadout-Presets, Rollenwarnungen und lokale Statistiken zu Käufen, Upgrades, Nutzung und bester Wave schließen Etappe 3 ab. Freigeschaltete Türme erscheinen in der Runvorbereitung, erhöhen aber nicht die fünf Loadoutplätze.
 
@@ -127,10 +129,10 @@ Gleiche Supporteffekte stapeln sich nicht. Rabatte werden auf volle Goldstücke 
 
 Jedes offene Straßenende auf einem erreichbaren Nicht-Base-Hex ist ein Spawnpunkt. Normale Gegner verteilen sich über diese Fronten. Jede Einheit entscheidet an jeder Gabelung unabhängig und gleichverteilt zwischen allen noch nicht besuchten Ausgängen, von denen die Base erreichbar bleibt. Damit werden auch längere Umwege genutzt, während Sackgassen und Kreisläufe ausgeschlossen sind.
 
-- Wavegröße: `5 + 2 × Wave` normale Gegner, ohne die bisherige 24er-Grenze. Grund-HP: `round((28 + 7 × Wave) × 1,10^max(0, Wave − 3))`. Die ersten drei Waves bleiben beim bisherigen HP-Verlauf.
-- Alle zehn Waves erscheint zusätzlich ein Belagerungswächter an einem zufälligen erreichbaren Eingang. Der Startbutton und die Wave-Vorschau kündigen ihn an.
+- Wavegröße: fünf Gegner in Wave 1, danach `5 + 2 × Wave` normale Gegner, ohne die bisherige 24er-Grenze. Grund-HP: `round((28 + 7 × Wave) × 1,10^max(0, Wave − 3))`. Die ersten drei Waves bleiben beim bisherigen HP-Verlauf.
+- Ab Wave 15 erscheint alle zehn Waves zusätzlich ein Belagerungswächter an einem zufälligen erreichbaren Eingang. Der Startbutton und die Wave-Vorschau kündigen ihn an.
 - Ab Wave 3 erscheinen schnelle Schwarmgegner. Ab Wave 4 kommen gepanzerte Gegner mit einem separaten Rüstungspool, ab Wave 5 magiegeschützte Gegner mit separater Magieresistenz. Bosse besitzen alle drei Pools. Rüstung und Magieresistenz sind zusätzliche Trefferpunkte und werden in eigenen Balken dargestellt.
-- Gegner halten Abstand: Ein neuer Gegner erscheint frühestens nach der Zeit, die sein Vordermann für 20 Einheiten braucht (mindestens 320 ms). Unterwegs bremst ein Gegner vor dem Vordermann (Bremszone ab 18, Halt bei 12 Einheiten), statt hineinzulaufen. Bosse sind davon ausgenommen. Ein Schwarmgegner hinter einem langsameren Gegner verliert dadurch seinen Tempovorteil.
+- Gegner können sich durchlaufen und überholen. Ein neuer Gegner erscheint frühestens nach der Zeit, die sein Vordermann für 20 Einheiten braucht (mindestens 320 ms). Unterwegs beeinflussen andere Einheiten das Bewegungstempo nicht; Verlangsamungen durch Türme bleiben wirksam.
 - 3D-Modelle: normal = Kiwi-Krieger mit Hammer, Schwert und der Widmung „VIK“ auf dem Bauch, gepanzert = Ork mit Schild, Schwarm = Kobold, magiegeschützt = Goblin-Runenmeister mit Schutzsphäre, Boss = Obsidian-Wächter. Ohne Modell zeichnet der Renderer farbige Kugeln.
 - Jeder Schadensturm zeigt seine Werte gegen Leben, Rüstung und Magieresistenz. Für normale Angriffstürme lassen sich drei geordnete Zielprioritäten einstellen, darunter Boss, meiste Rüstung, meiste Magieresistenz, meistes/wenigstes Leben sowie Nähe zu Turm oder Base.
 - Normaler Kill: +3 Gold. Überlebte Wave: +10 Gold plus Hex-/Hausboni. Normaler Gegner an der Base: 1 Schaden.
@@ -150,7 +152,7 @@ Neue erkundete Koordinaten erzeugen seedbasiert weitere Sonderfelder. Bereits er
 | Boss | 15 % | 0,675 % |
 | Insgesamt | 100 % | 4,5 % |
 
-Keine garantierte Anzahl oder feste Startliste. Wächterfelder entstehen nie innerhalb von vier Hexen um die Base; der früheste mögliche Abstand ist fünf. Im Nebel erscheinen Sonderfelder als `?`, bei klarer Sicht als graues Symbol mit ungesammeltem beziehungsweise inaktivem Status. Sonderfelder sind **vorgefertigte Hexe mit fester Straßengeometrie und Rotation**. Schatz und Shrine verwenden Gerade, Kleine/Große Kurve, Y- oder T-Kreuzung; Bossfelder haben immer alle sechs Öffnungen. Im Nebel ist die Geometrie verborgen, bei klarer Sicht werden graue Straßen und mögliche Slots angezeigt. Diese Felder dürfen nicht mit einer Handkarte überschrieben oder gedreht werden. Eine passende Straße vom gebauten Nachbarhex schließt das Feld automatisch ans Netz an und aktiviert es; eine vorbeiführende Straße reicht nicht. Sonderfelder geben nur ihren Sonderbonus, Schatz und Shrine haben einen Turmplatz, Bossfelder keinen.
+Keine garantierte Anzahl oder feste Startliste. Wächterfelder entstehen nie innerhalb von vier Hexen um die Base; der früheste mögliche Abstand ist fünf. Im Nebel erscheinen Sonderfelder als `?`, bei klarer Sicht als graues Symbol mit ungesammeltem beziehungsweise inaktivem Status. Sonderfelder sind **vorgefertigte Hexe mit fester Straßengeometrie und Rotation**. Schatz und Shrine verwenden Gerade, Kleine/Große Kurve, Y- oder T-Kreuzung, bei Bedarf eine Sechserkreuzung; Bossfelder haben immer alle sechs Öffnungen. Direkt benachbarte Eventfelder erhalten beidseitig passende Straßenanschlüsse. Die Generierung berücksichtigt auch noch nicht erkundete Nachbarn und verändert bestehende Formen später nicht. Im Nebel ist die Geometrie verborgen, bei klarer Sicht werden graue Straßen und mögliche Slots angezeigt. Diese Felder dürfen nicht mit einer Handkarte überschrieben oder gedreht werden. Eine passende Straße vom gebauten Nachbarhex schließt das Feld automatisch ans Netz an und aktiviert es; eine vorbeiführende Straße reicht nicht. Sonderfelder geben nur ihren Sonderbonus, Schatz und Shrine haben einen Turmplatz, Bossfelder keinen.
 
 ### Schatz und Shrine
 
@@ -167,7 +169,7 @@ Der Epic-Pool enthält Höhenkreuzung, Kampfstraße und Wachtkurve; der Legendar
 
 ### Boss
 
-**Regelmäßige Bosswellen:** In Wave 10, 20, 30 usw. erscheint ein Belagerungswächter unabhängig von erkundeten Sonderfeldern. Der Eingang wird gleichverteilt aus den aktuellen erreichbaren Straßenenden gewählt; gleiche Seeds und Kartenentscheidungen wiederholen die Auswahl. Basisleben: `round(1200 × (Wave / 10)^1,8)`, dazu 25 % Rüstung und 20 % Magieresistenz, Tempo 28 und fünf Basisschaden. Freeze kann ihn höchstens um 40 % verlangsamen. Sieg gibt 50 Gold und nach überlebter Wave eine zusätzliche Kartenbelohnung.
+**Regelmäßige Bosswellen:** In Wave 15, 25, 35 usw. erscheint ein Belagerungswächter unabhängig von erkundeten Sonderfeldern. Der Eingang wird gleichverteilt aus den aktuellen erreichbaren Straßenenden gewählt; gleiche Seeds und Kartenentscheidungen wiederholen die Auswahl. Basisleben: `round(1200 × ((Wave − 5) / 10)^1,8)`, dazu 25 % Rüstung und 20 % Magieresistenz, Tempo 28 und fünf Basisschaden. Freeze kann ihn höchstens um 40 % verlangsamen. Sieg gibt 50 Gold und nach überlebter Wave eine zusätzliche Kartenbelohnung.
 
 **Erkundungsbosse:**
 
@@ -179,27 +181,26 @@ Wächterwerte: `240 + 36 × Wave` Leben, dazu 25 % Rüstung und 20 % Magieresist
 
 Optionaler Seed für den nächsten Run; leer bedeutet zufälliger Seed. Gleicher Seed und gleiche Entscheidungen reproduzieren Karten, Rewards und Sonderfelder innerhalb derselben Spielversion. Separate Zufallsströme für Exploration und Shrine-Rewards. Kein Savegame und keine Garantie gleicher Ergebnisse über unterschiedliche Spielversionen.
 
-Vanilla HTML/CSS/JavaScript mit SVG-Renderer. Daten und Regeln sind in `data.js`, `map.js`, `random.js`, `waves.js`, `combat.js`, `deck.js`, `buildings.js` und `exploration.js` ausgelagert. `game.js` enthält Runsteuerung und HUD. `svg-renderer.js` kapselt die Kartendarstellung, ihre Ebenen, Vorschauen und Klickflächen hinter render/reset/project/destroy. Eingaben gehen als logische Commands an den Controller; gemeinsame Slotpositionen liegen in map.js. camera.js trennt ein DOM-freies Kameramodell (Zoom/Pan/Reset) von SVG-Eingabe und Bildschirmprojektion. Der Renderer verwaltet seine Kamera; das HUD nutzt Zoom-/Reset-/ViewChanged-Schnittstellen. Audio bleibt in sound.js. Kartenvorschauen im HUD sind weiterhin SVG.
-
-Finales Ziel bleibt **stilisiertes 3D wie Dorfromantik**. Die Regeln sollen weiterverwendbar bleiben; Die Kartendarstellung besitzt jetzt eine Renderer-Schnittstelle. Weltkoordinaten liegen jetzt um den Ursprung: Base bei (0,0), Straßen, Gegner und Slots in planaren Weltmaßen. Nur die Kamera bestimmt den Bildausschnitt. Vollständige UI-/Runtrennung und Engineentscheidung stehen noch aus; der aktuelle Eingabe-/Projektionsadapter ist weiterhin SVG-spezifisch. Ein Enginewechsel ist nicht aufwandsfrei. Details in [ARCHITECTURE.md](ARCHITECTURE.md).
+Vanilla HTML/CSS/JavaScript ohne Build-Schritt. Three.js übernimmt standardmäßig die 3D-Darstellung unter HTTP(S); SVG ist alternative Ansicht und Fallback. Spiellogik, Daten, Exploration, Profil und Renderer sind in eigene Dateien aufgeteilt; Runsteuerung und HUD teilen sich weiterhin `game.js`. Die gemeinsame Weltgeometrie liegt um Base (0,0), 3D bildet x/y auf x/z ab. Kamera, Picking, Modelle, Gebäude-Hervorhebungen und Hex-Grid sind umgesetzt. Die vollständige Trennung von Run und HUD bleibt offen. Details: [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Prüfung und offene Arbeit
 
-Zuletzt **122 automatisierte Tests bestanden**. Tests ab diesem Appordner:
+Zuletzt **133 automatisierte Tests bestanden**. Tests ab diesem Appordner:
 
 ```powershell
 node --test tests/*.test.cjs
 ```
 
-In Umgebungen, die keine Unterprozesse starten dürfen, hilft `--test-isolation=none` (erst ab neueren Node-Versionen verfügbar). Die Tests decken unter anderem Straßen/Placement, gleich lange Wege, Waveablauf, Bau während Waves, Upgrades, Gebäude, Seeds, Rettungshex, Sichtgrenzen, Bossstart/-loot, Shrine-Auszahlungen sowie Renderer-Commands, Zustandsunveränderlichkeit, Reset, Bildschirmprojektion, Weltursprung und Kamerazoom ab.
+In Umgebungen, die keine Unterprozesse starten dürfen, hilft `--test-isolation=none` (erst ab neueren Node-Versionen verfügbar). Die Tests decken unter anderem Straßen/Placement, zufällige schleifenfreie Wege, Waveablauf, Bau während Waves, Upgrades, Gebäude, Seeds, Rettungshex, Sichtgrenzen, Bossstart/-loot, Shrine-Auszahlungen sowie Renderer-Commands, Zustandsunveränderlichkeit, Reset, Bildschirmprojektion, Weltursprung und Kamerazoom ab.
 
-Noch offen: manueller visueller Spieltest neuer Änderungen, Audio-Hörprobe, Langzeit-/Economybalancing. Markt und Schmiede wurden vom Nutzer noch nicht im Spiel verifiziert; Logiktests ersetzen diese Prüfung nicht.
+Noch offen: manueller visueller Spieltest neuer Änderungen, Audio-Hörprobe, Langzeit-/Economybalancing. Die jüngsten visuellen Änderungen wurden nicht im Browser geprüft; der Nutzer übernimmt diese Prüfung. Logiktests ersetzen sie nicht.
 
 Für später vorgemerkt, noch nicht implementiert:
 
 - Verschiedene Starthelden / Startfestungen mit eigenen Effekten, Startprofilen und Spielstilen.
 - Weitere Karten und Lootvarianten sowie zusätzliche Shrine-Boni wie besondere Upgrades.
-- Weitere Biome, Meta-Progression, zusätzliche Towerrollen und Speichern/Laden.
-- 3D-Renderer und passende Modelle, Kamera und Picking.
+- Weitere Biome, Ausbau der vorhandenen Meta-Progression, zusätzliche Towerrollen, Run-Speicherung und Profil-Export/-Import.
+- Base-Ausbau mit eigener Verteidigung und spezialisiertem Hero; Umfang für andere Heroes noch offen.
+- Turm-Upgrade-Modelle und weitere visuelle Effekte.
 
 Prioritäten und offene Entscheidungen werden in [BRAIN.md](../BRAIN.md) gepflegt.

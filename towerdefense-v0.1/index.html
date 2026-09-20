@@ -44,14 +44,14 @@
     <!-- Oben rechts: Leben, Gold, Wave, Deck -->
     <header class="hud">
       <div class="hudStat">❤️ <strong id="hp">20</strong>/20</div>
-      <details class="statDetails"><summary aria-label="Goldplanung öffnen">🪙 <strong id="gold">70</strong> <span id="bonusIncome">(+0)</span> ▾</summary>
+      <details class="statDetails"><summary aria-label="Goldplanung öffnen">🪙 <strong id="gold">70</strong> <span id="bonusIncome">(+0)</span> <span class="dropdownArrow" aria-hidden="true">▾</span></summary>
         <div class="statPopup"><h2>Goldplanung</h2><p id="goldForecast" class="hint"></p><p id="towerBudget" class="hint"></p><h3>Goldquellen &amp; Run-Einnahmen</h3><p id="goldSources" class="hint"></p></div>
       </details>
-      <details class="statDetails"><summary aria-label="Waveplanung öffnen">🌊 <strong id="wave">0</strong> ▾<div class="waveBarWrap"><i id="waveBar"></i></div></summary>
+      <details class="statDetails"><summary aria-label="Waveplanung öffnen">🌊 <strong id="wave">0</strong> <span class="dropdownArrow" aria-hidden="true">▾</span><div class="waveBarWrap"><i id="waveBar"></i></div></summary>
         <div class="statPopup"><h2>Waveplanung</h2><p id="waveForecast" class="hint"></p><p id="liveWaveInfo" class="hint"></p></div>
       </details>
-      <details id="deckDropdown" class="statDetails"><summary aria-label="Deck und Kartenstapel öffnen">🃏 <strong id="deckCount">5</strong> ▾</summary><div class="statPopup"><h2>Deck &amp; Kartenstapel</h2><p class="hint">Die Ziehreihenfolge bleibt verborgen.</p><div id="deckOverview" class="deckOverview"></div></div></details>
-      <details class="statDetails"><summary aria-label="Profilfortschritt öffnen">◆ <strong id="profileDiamonds">0</strong> ▾</summary><div class="statPopup"><h2>Meta-Fortschritt</h2><p id="profileStats" class="hint"></p><p class="hint">Diamanten werden am Runende ausgezahlt und im Arsenal für neue Turmtypen verwendet.</p><button id="openArsenalBtn" class="secondary">Arsenal öffnen</button></div></details>
+      <details id="deckDropdown" class="statDetails"><summary aria-label="Deck und Kartenstapel öffnen">🃏 <strong id="deckCount">5</strong> <span class="dropdownArrow" aria-hidden="true">▾</span></summary><div class="statPopup"><h2>Deck &amp; Kartenstapel</h2><p class="hint">Die Ziehreihenfolge bleibt verborgen.</p><div id="deckOverview" class="deckOverview"></div></div></details>
+      <details class="statDetails"><summary aria-label="Profilfortschritt öffnen">◆ <strong id="profileDiamonds">0</strong> <span id="runDiamonds" title="Diamanten bei Ende des aktuellen Runs">(+0)</span> <span class="dropdownArrow" aria-hidden="true">▾</span></summary><div class="statPopup"><h2>Meta-Fortschritt</h2><p id="profileStats" class="hint"></p><p class="hint">Diamanten werden am Runende ausgezahlt und im Arsenal für neue Turmtypen verwendet.</p><button id="openArsenalBtn" class="secondary">Arsenal öffnen</button></div></details>
     </header>
 
     <!-- Unten Mitte: die drei spielbaren Karten -->
@@ -93,11 +93,12 @@
 
     <aside id="settingsDrawer" class="drawer hidden actions" aria-label="Einstellungen">
       <div class="panelHead"><h2>Einstellungen</h2><button class="secondary drawerClose" aria-label="Schließen">×</button></div>
+      <label class="toggle"><input id="hexGrid" type="checkbox" /> Hex-Grid anzeigen (G)</label>
       <label class="toggle"><input id="autoStart" type="checkbox" /> Wave nach Platzierung automatisch starten</label>
       <label class="toggle"><input id="soundEnabled" type="checkbox" checked /> Sounds aktiv</label>
       <label class="toggle">Lautstärke <input id="soundVolume" type="range" min="0" max="100" value="35" aria-label="Sound-Lautstärke" /></label>
       <section class="renderModes" aria-label="Ansicht wählen">
-        <strong>Ansicht</strong>
+        <strong>Ansicht</strong><p class="hint">3D-Kamera drehen: Q nach links, E nach rechts.</p>
         <p id="renderModeStatus" class="hint">HTTP(S): 3D automatisch, Datei direkt geöffnet: SVG.</p>
         <div class="renderModeLinks">
           <a class="secondary renderLink" href="./">Automatisch</a>

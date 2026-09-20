@@ -1,6 +1,13 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+test('live diamond forecast equals settlement without writing the profile',()=>{
+  const {profile,definitions,storage}=setup(),data=profile.defaults();data.records.highestWave=10;
+  const summary={runId:'forecast',wave:21,periodicBosses:2,explorationBosses:1};
+  const before=JSON.stringify(data),reward=profile.runReward(data,summary);
+  assert.equal(reward.total,25);assert.equal(JSON.stringify(data),before);assert.equal(storage.size,0);
+  assert.equal(profile.settleRun(data,summary,definitions).reward.total,reward.total);
+});
 function setup(value){
   const storage=new Map();if(value!==undefined)storage.set('hex-bastion-profile-v1',value);
   const context={localStorage:{getItem:key=>storage.get(key)||null,setItem:(key,item)=>storage.set(key,String(item))}};

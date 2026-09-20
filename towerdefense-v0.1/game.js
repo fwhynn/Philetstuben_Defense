@@ -4,6 +4,8 @@
   const svg = document.getElementById('board');
   const rendererCommands={
     placeTile,selectSlot,
+    hoverBuilding(slot){state.hoverBuilding=slot;renderBoard();},
+    rotatePlacement(){return rotateSelected(-1);},
     viewChanged:positionTowerPanel,
     hoverPlacement(id){state.hoveredPlacement=id;},
     leavePlacement(id){if(state.hoveredPlacement===id) state.hoveredPlacement=null;},
@@ -44,6 +46,7 @@
 
   const {CARD_LIBRARY,TOWERS}=HexData;
 
+  let showHexGrid=false;try{showHexGrid=localStorage.getItem('hexGrid')==='true';}catch{}
   let state;
   let random;
   let towerMenuKey='';
@@ -74,7 +77,7 @@
       deck:['straight','straight','smallCurve','bigCurve','tee'],
       drawPile:[],discard:[],hand:[],
       selectedCard:0,rotation:0,hoveredPlacement:null,
-      phase:'place',selectedSlot:null,selectedTower:null,selectedBuilding:null,previewTower:null,
+      showHexGrid,hoverBuilding:null,phase:'place',selectedSlot:null,selectedTower:null,selectedBuilding:null,previewTower:null,
       enemies:[],mines:[],projectiles:[],waveRunning:false,bossRewards:[],towerLoadout:[...profile.activeLoadout],ultimateUnlocks:profile.unlocks.filter(id=>id.startsWith('ultimate:')),runTowerStats:{},
       runId:HexRandom.freshSeed(),earnedMeta:{normalKills:0,periodicBosses:0,explorationBosses:0},metaSettled:false,
       income:0,nextEnemyId:1,pendingSpawns:0,elapsedMs:0,spawnQueue:[]
@@ -475,6 +478,7 @@ R dreht die Karte, dann Feld anklicken.`;}
     uxFeedback();
     hpEl.textContent=state.hp;goldEl.textContent=state.gold;waveEl.textContent=state.wave;deckCountEl.textContent=state.deck.length;
     document.getElementById('profileDiamonds').textContent=profile.diamonds;
+    document.getElementById('runDiamonds').textContent=`(+${state.metaSettled?0:HexProfile.runReward(profile,{wave:state.wave,...state.earnedMeta}).total})`;
     document.getElementById('profileStats').textContent=`${profile.records.runsPlayed} Runs · Bestmarke Wave ${profile.records.highestWave} · ${profile.records.bossesKilled} Bosse besiegt · ${profile.lifetime.normalKills} normale Gegner besiegt.`;
     document.getElementById('bonusIncome').textContent=`(+${state.income})`;
     renderBuildingPanel();
@@ -612,9 +616,9 @@ R dreht die Karte, dann Feld anklicken.`;}
   }
   function setMessage(s){messageEl.textContent=s;messageEl.classList.remove('show');void messageEl.offsetWidth;messageEl.classList.add('show');}
 
-  function rotateSelected(){
-    if(state.phase!=='place'||!state.hand.length) return;
-    state.rotation=(state.rotation+1)%6; renderAll();
+  function rotateSelected(direction=1){
+    if(state.phase!=='place'||!state.hand.length) return false;
+    state.rotation=(state.rotation+direction+6)%6; renderAll();return true;
   }
 
   function newRun(loadout=profile.activeLoadout){
@@ -648,7 +652,7 @@ R dreht die Karte, dann Feld anklicken.`;}
       const tower=TOWERS[id];if(!tower) continue;
       const selected=pendingLoadout.includes(id),button=document.createElement('button');button.type='button';button.className='loadoutChoice'+(selected?' selected':'');
       button.innerHTML=`<span class="loadoutRole">${towerRole(id)}</span><strong>${tower.name}</strong><small>${tower.desc}</small><small>${tower.cost} Startpreis · ${towerStats(tower)}</small><span class="loadoutCheck">${selected?'✓ Im Loadout':'Auswählen'}</span>`;
-      button.addEventListener('click',()=>{if(selected)pendingLoadout=pendingLoadout.filter(value=>value!==id);else if(pendingLoadout.length<5)pendingLoadout.push(id);renderLoadout();});loadoutChoices.appendChild(button);
+      button.addEventListener('click',()=>{if(selected)pendingLoadout=pendingLoadout.filter(value=>value!==id);else if(pendingLoadout.length<5)pendingLoadout.push(id);else{document.getElementById('loadoutWarning').textContent='Alle fünf Plätze sind belegt. Wähle zuerst einen markierten Turm ab, um diesen Turm mitzunehmen.';return;}renderLoadout();});loadoutChoices.appendChild(button);
     }
     document.getElementById('loadoutCount').textContent=`${pendingLoadout.length}/5 gewählt`;
     document.getElementById('diamondCount').textContent=`◆ ${profile.diamonds} Diamanten`;
@@ -667,7 +671,7 @@ R dreht die Karte, dann Feld anklicken.`;}
     document.getElementById('gameOverResult').textContent=`Wave ${state.wave} erreicht · ${state.earnedMeta.normalKills} normale Gegner · ${state.earnedMeta.periodicBosses+state.earnedMeta.explorationBosses} Bosse besiegt`;
     document.getElementById('diamondBreakdown').innerHTML=`<div><strong>+${reward.wave}</strong>Wave-Fortschritt</div><div><strong>+${reward.bosses}</strong>Boss-Siege</div><div><strong>+${reward.milestones}</strong>Neue Bestmarken</div>`;
     document.getElementById('gameOverDiamonds').textContent=profile.diamonds;document.getElementById('gameOverBest').textContent=profile.records.highestWave;
-    document.getElementById('profileDiamonds').textContent=profile.diamonds;gameOverOverlay.classList.remove('hidden');
+    document.getElementById('profileDiamonds').textContent=profile.diamonds;document.getElementById('runDiamonds').textContent='(+0)';gameOverOverlay.classList.remove('hidden');
   }
   function renderArsenal(message=''){
     document.getElementById('arsenalDiamonds').textContent=profile.diamonds;const content=document.getElementById('arsenalChoices');content.innerHTML='';
@@ -675,7 +679,7 @@ R dreht die Karte, dann Feld anklicken.`;}
       const tower=TOWERS[id];if(!tower)continue;const unlocked=profile.unlockedTowers.includes(id),card=document.createElement('article');card.className='arsenalCard';
       card.innerHTML=`<h3>${tower.name}</h3><strong>${towerRole(id)}</strong><p>${tower.desc}<br>${tower.cost} Gold im Run · ${towerStats(tower)}</p>`;
       if(unlocked){const status=document.createElement('span');status.className='unlocked';status.textContent='✓ Freigeschaltet';card.appendChild(status);}
-      else{const button=document.createElement('button');button.className='primary';button.textContent=`Für ◆ ${offer.cost} freischalten`;button.disabled=profile.diamonds<offer.cost;button.addEventListener('click',()=>{const next=HexProfile.unlockTower(profile,id,TOWERS);if(!next)return;profile=next;renderArsenal(`${tower.name} freigeschaltet. Der Turm kann ab dem nächsten Run ins Loadout.`);renderUI();});card.appendChild(button);}
+      else{const button=document.createElement('button');button.className='primary';button.textContent=`Für ◆ ${offer.cost} freischalten`;button.disabled=profile.diamonds<offer.cost;button.addEventListener('click',()=>{const next=HexProfile.unlockTower(profile,id,TOWERS);if(!next)return;profile=next;renderLoadout();renderArsenal(`${tower.name} freigeschaltet. Der Turm kann ab dem nächsten Run ins Loadout.`);renderUI();});card.appendChild(button);}
       content.appendChild(card);
     }
     for(const [id,offer] of Object.entries(HexProfile.ULTIMATE_UNLOCKS)){
@@ -689,6 +693,9 @@ R dreht die Karte, dann Feld anklicken.`;}
   }
   function openArsenal(){renderArsenal();arsenalOverlay.classList.remove('hidden');}
 
+  const gridToggle=document.getElementById('hexGrid');gridToggle.checked=showHexGrid;
+  function setHexGrid(enabled){showHexGrid=enabled;gridToggle.checked=enabled;state.showHexGrid=enabled;try{localStorage.setItem('hexGrid',String(enabled));}catch{}renderBoard();}
+  gridToggle.addEventListener('change',()=>setHexGrid(gridToggle.checked));
   startWaveBtn.addEventListener('click',startWave);
   newRunBtn.addEventListener('click',openLoadout);
   document.getElementById('confirmLoadoutBtn').addEventListener('click',confirmLoadout);
@@ -696,7 +703,7 @@ R dreht die Karte, dann Feld anklicken.`;}
   document.getElementById('retryLoadoutBtn').addEventListener('click',()=>newRun(state.towerLoadout));
   document.getElementById('changeLoadoutBtn').addEventListener('click',()=>{gameOverOverlay.classList.add('hidden');openLoadout();});
   document.getElementById('openArsenalBtn').addEventListener('click',openArsenal);
-  document.getElementById('closeArsenalBtn').addEventListener('click',()=>arsenalOverlay.classList.add('hidden'));
+  document.getElementById('closeArsenalBtn').addEventListener('click',()=>{arsenalOverlay.classList.add('hidden');renderLoadout();});
   document.getElementById('sellTowerBtn').addEventListener('click',sellSelectedTower);
   document.getElementById('closeBuildingPanel').addEventListener('click',()=>{state.selectedBuilding=null;renderAll();});
   document.getElementById('skipRemovalBtn').addEventListener('click',()=>{if(state.phase==='bossReward') finishBossReward();else if(['removal','shrineReward'].includes(state.phase)) finishRemoval();});
@@ -708,6 +715,9 @@ R dreht die Karte, dann Feld anklicken.`;}
   document.addEventListener('keydown',e=>{
     if(e.key.toLowerCase()==='f'&&!e.repeat&&e.target?.id==='doubleSpeed'){e.preventDefault();e.target.checked=!e.target.checked;return;}
     if(['INPUT','TEXTAREA','SELECT','BUTTON','SUMMARY'].includes(e.target?.tagName)||e.target?.isContentEditable) return;
+    if(e.ctrlKey||e.metaKey||e.altKey)return;
+    if(e.key.toLowerCase()==='g'&&!e.repeat){e.preventDefault();setHexGrid(!showHexGrid);}
+    if(e.key.toLowerCase()==='q'||e.key.toLowerCase()==='e'){e.preventDefault();renderer.rotateView?.(e.key.toLowerCase()==='q'?-1:1);}
     if(e.code==='Space'&&!e.repeat){e.preventDefault();startWave();}
     if(/^[1-9]$/.test(e.key)){const n=Number(e.key)-1;
       if(state.selectedSlot){const b=[...towerButtons.values()][n];if(b&&!b.disabled) b.click();}

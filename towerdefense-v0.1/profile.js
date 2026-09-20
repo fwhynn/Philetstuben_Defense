@@ -33,13 +33,19 @@ const HexProfile=(()=>{
     const clean=normalize(profile,definitions),selected=validIds(ids,definitions);if(index<0||index>2||selected.length!==5||selected.some(id=>!clean.unlockedTowers.includes(id)))return null;
     const presets=clean.loadoutPresets.map((preset,i)=>i===index?{...preset,towers:selected}:preset);return save({...clean,loadoutPresets:presets},definitions);
   }
-  function settleRun(profile,summary,definitions){
-    const clean=normalize(profile,definitions),runId=String(summary.runId||'');
-    if(!runId||clean.settledRuns.includes(runId)) return {profile:clean,reward:{wave:0,bosses:0,milestones:0,total:0,duplicate:true}};
+  function runReward(clean,summary){
     const wave=Math.max(0,Math.floor(Number(summary.wave)||0)),periodic=Math.max(0,Math.floor(Number(summary.periodicBosses)||0)),exploration=Math.max(0,Math.floor(Number(summary.explorationBosses)||0));
     const waveDiamonds=wave>=2?Math.floor(wave/2):0,bossDiamonds=periodic*5+exploration*3,oldBest=Math.max(0,Number(clean.records.highestWave)||0);
     let milestoneDiamonds=0;for(let mark=10;mark<=wave;mark+=10)if(mark>oldBest)milestoneDiamonds+=2;
     const total=waveDiamonds+bossDiamonds+milestoneDiamonds;
+    return {wave:waveDiamonds,bosses:bossDiamonds,milestones:milestoneDiamonds,total};
+  }
+  function settleRun(profile,summary,definitions){
+    const clean=normalize(profile,definitions),runId=String(summary.runId||'');
+    if(!runId||clean.settledRuns.includes(runId)) return {profile:clean,reward:{wave:0,bosses:0,milestones:0,total:0,duplicate:true}};
+    const reward=runReward(clean,summary),{wave:waveDiamonds,bosses:bossDiamonds,milestones:milestoneDiamonds,total}=reward;
+    const wave=Math.max(0,Math.floor(Number(summary.wave)||0)),periodic=Math.max(0,Math.floor(Number(summary.periodicBosses)||0)),exploration=Math.max(0,Math.floor(Number(summary.explorationBosses)||0));
+    const oldBest=Math.max(0,Number(clean.records.highestWave)||0);
     const towers={...clean.lifetime.towers};for(const [id,usage] of Object.entries(summary.towers||{})){const old=towers[id]||{builds:0,upgrades:0,runsUsed:0,highestWave:0};towers[id]={builds:old.builds+Math.max(0,usage.builds||0),upgrades:old.upgrades+Math.max(0,usage.upgrades||0),runsUsed:old.runsUsed+(usage.builds>0?1:0),highestWave:Math.max(old.highestWave||0,usage.builds>0?wave:0)};}
     const next={...clean,diamonds:clean.diamonds+total,settledRuns:[...clean.settledRuns,runId].slice(-100),records:{...clean.records,highestWave:Math.max(oldBest,wave),bossesKilled:clean.records.bossesKilled+periodic+exploration,runsPlayed:clean.records.runsPlayed+1},lifetime:{...clean.lifetime,normalKills:clean.lifetime.normalKills+Math.max(0,Math.floor(Number(summary.normalKills)||0)),diamondsEarned:clean.lifetime.diamondsEarned+total,towers}};
     return {profile:save(next,definitions),reward:{wave:waveDiamonds,bosses:bossDiamonds,milestones:milestoneDiamonds,total,duplicate:false}};
@@ -50,5 +56,5 @@ const HexProfile=(()=>{
     return save({...clean,diamonds:clean.diamonds-offer.cost,unlockedTowers:[...clean.unlockedTowers,id],unlocks:[...clean.unlocks,'tower:'+id]},definitions);
   }
   function unlockUltimate(profile,id,definitions){const offer=ULTIMATE_UNLOCKS[id],clean=normalize(profile,definitions),key='ultimate:'+id;if(!offer||!clean.unlockedTowers.includes(id)||clean.unlocks.includes(key)||clean.diamonds<offer.cost)return null;return save({...clean,diamonds:clean.diamonds-offer.cost,unlocks:[...clean.unlocks,key]},definitions);}
-  return {STORAGE_KEY,START_TOWERS,TOWER_UNLOCKS,ULTIMATE_UNLOCKS,defaults,normalize,load,save,setLoadout,savePreset,settleRun,unlockTower,unlockUltimate};
+  return {STORAGE_KEY,START_TOWERS,TOWER_UNLOCKS,ULTIMATE_UNLOCKS,defaults,normalize,load,save,setLoadout,savePreset,runReward,settleRun,unlockTower,unlockUltimate};
 })();

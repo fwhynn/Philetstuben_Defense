@@ -1,6 +1,6 @@
 # Modellspezifikation v2: neue Türme, Gegner, Gebäude
 
-Ergänzung zu [ASSET_SPEC.md](ASSET_SPEC.md). Tiles, Landmarks, Slots und die vier ersten Türme (Archer, Katapult, Kettenblitz, Freeze) stehen dort und gelten unverändert. Diese Datei beschreibt nur, was neu dazukommt:
+Ergänzung zu [ASSET_SPEC.md](ASSET_SPEC.md). Tiles, Landmarks, Slots und die vier ersten Türme (Archer, Katapult, Kettenblitz, Freeze) stehen dort und gelten unverändert. Stand: 20.09.2026. Die folgenden Basismodelle sind vorhanden und eingebunden; diese Spezifikation bleibt Grundlage für Änderungen und Erweiterungen:
 
 1. Türme: Minenleger, Balliste, Flammenturm
 2. Gegner: fünf Gegnertypen mit klar abgestuften Rüstungsgraden (Fantasy)
@@ -130,7 +130,7 @@ Der Standardgegner ist ein grüner **Kiwi-Krieger** und trägt den Namen einer F
 - Breiter und schwerer als der Goblin, kräftige Schultern, kurzer Hals, Hauer im Gesicht.
 - **Schwere Rüstung**: Stahlhelm mit Hörnern oder Nasenschutz, Brustpanzer, Schulterplatten und ein **großes Schild** im linken Arm (`arm_l`). Rechts eine Axt oder Keule (`arm_r`).
 - Farbe: **Grau-Grün** (Haut) mit **Stahlgrau** und dunklen Beschlägen. Metall soll matt, aber leicht glänzend wirken.
-- Er bewegt sich langsamer. Wenn du willst, lass ihn beim Laufen stärker wippen (der Renderer übernimmt das nicht selbst, es reicht die Pose der Beine).
+- Er bewegt sich langsamer. Wenn du willst, lass ihn beim Laufen stärker wippen (der Renderer animiert Wippen sowie benannte Gliedmaßen; die Modellpose legt die Grundhaltung fest).
 - Bis 800 Dreiecke.
 
 ### `enemy_warded` (Goblin-Runenmeister, magisch geschützt)
@@ -205,19 +205,8 @@ assets/effects/mine_pickup.glb          (optional)
 
 Der Server (`npm start`) listet vorhandene Modelle selbst über `/assets/index.json`. Fehlende Dateien erzeugen keine Fehlermeldung, sie werden einfach durch Platzhalter ersetzt. Du kannst also Datei für Datei nachliefern.
 
-### Empfohlene Reihenfolge
+### Aktueller Implementierungsstand
 
-1. **`tower_mine`, `tower_ballista`, `tower_flame`**: die drei Türme sind bereits spielbar.
-2. **`enemy_normal`, `enemy_armored`** als Stilprobe für die Gegner. Danach `enemy_swarm`, `enemy_warded` und zuletzt `enemy_boss`.
-3. **`building_house`, `building_forge`, `building_market`**.
-4. Upgrade-Varianten und `mine_pickup.glb` ganz zum Schluss.
+Alle sieben Turm-Basismodelle, fünf Gegner inklusive `enemy_warded`, Haus, Schmiede, Markt und `mine_pickup.glb` sind vorhanden und werden geladen. `model-map.js` enthält die Kategorien für Gebäude und Effekte; fehlende Dateien erhalten Platzhalter.
 
-### Was im Code noch fehlt (Stand dieser Spec)
-
-Diese Punkte sind noch nicht umgesetzt. Ich baue sie ein, sobald du die passenden Modelle lieferst. Bis dahin funktionieren die Dateien nicht von selbst:
-
-- **`warded`**: `model-map.js` kennt bei den Gegnern nur `normal`, `armored`, `swarm` und `boss`. Das Modell `enemy_warded` muss dort und in `three-renderer.js` (`ENEMY_COLOR`, Ladeliste) ergänzt werden.
-- **Gebäude**: Die Ladeliste (`ALL_MODELS`) hat noch keine Kategorie `buildings`. Der Renderer zeichnet Haus, Schmiede und Markt bisher als Quader mit Dach.
-- **Türme `mine`, `ballista`, `flame`** stehen schon in `ALL_MODELS`, es fehlt nur die Datei.
-- **`mine_pickup`**: Minen auf der Straße werden noch nicht als Modell gezeichnet.
-- **Sonderobjekte** (`bolt`, `ward`, `core`, `smoke`) sind Vorschläge und werden nur benutzt, wenn du sie modellierst.
+Noch offen sind eigene Modelle für die Turm-Upgrade-Stufen. Zusätzliche benannte Objekte wie `bolt`, `ward`, `core` und `smoke` sind Gestaltungsvorschläge; ihre Namen allein garantieren keine Animation. Unterstützte bewegliche Teile und Effekte richten sich nach `three-renderer.js`.

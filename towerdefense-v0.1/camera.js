@@ -12,7 +12,7 @@ const HexCamera=(()=>{
 })();
 /* SVG input/projection adapter. A future 3D camera replaces this adapter. */
 const HexSvgCamera=(()=>{
-  function create(board,onChange=()=>{}){
+  function create(board,onChange=()=>{},rotatePlacement=()=>false){
     const model=HexCamera.create(),listeners=[];let drag=null;
     function apply(notify=true){const view=model.getView();board.setAttribute('viewBox',`${view.x} ${view.y} ${view.w} ${view.h}`);if(notify) onChange();}
     function listen(name,callback,options){board.addEventListener(name,callback,options);listeners.push([name,callback,options]);}
@@ -21,7 +21,8 @@ const HexSvgCamera=(()=>{
     function stop(){drag=null;board.style.cursor='';}
     listen('wheel',event=>{event.preventDefault();const anchor=point(event);if(anchor) zoom(Math.exp(Math.max(-200,Math.min(200,event.deltaY))*.0015),anchor);},{passive:false});
     listen('contextmenu',event=>event.preventDefault());
-    listen('pointerdown',event=>{if(event.button!==2&&event.button!==1) return;const position=point(event);if(!position) return;event.preventDefault();drag={id:event.pointerId,point:position};board.setPointerCapture(event.pointerId);board.style.cursor='grabbing';});
+    listen('auxclick',event=>{if(event.button===1)event.preventDefault();});
+    listen('pointerdown',event=>{if(event.button===1&&rotatePlacement()){event.preventDefault();return;}if(event.button!==2&&event.button!==1) return;const position=point(event);if(!position) return;event.preventDefault();drag={id:event.pointerId,point:position};board.setPointerCapture(event.pointerId);board.style.cursor='grabbing';});
     listen('pointermove',event=>{if(!drag||drag.id!==event.pointerId) return;const position=point(event);if(!position) return;model.pan(drag.point.x-position.x,drag.point.y-position.y);apply();});
     for(const name of ['pointerup','pointercancel','lostpointercapture']) listen(name,stop);
     function project(position){const matrix=board.getScreenCTM?.();if(!matrix||!board.createSVGPoint) return null;const point=board.createSVGPoint();point.x=position.x;point.y=position.y;const screen=point.matrixTransform(matrix),wrap=board.parentElement.getBoundingClientRect();return {x:screen.x-wrap.left,y:screen.y-wrap.top,width:wrap.width,height:wrap.height};}

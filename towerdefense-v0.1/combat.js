@@ -31,22 +31,9 @@ const HexCombat=(()=>{
   // Nur für die Darstellung: Kennung, Turmtyp, Trefferpositionen und Lebensdauer eines Geschosses. Der Schaden wird sofort beim Schuss verrechnet.
   const nextProjectileId=state=>state.nextProjectileId=(state.nextProjectileId||0)+1;
   const FLIGHT_TTL={archer:.24,ballista:.3};   // sichtbare Flugzeit von Pfeil und Bolzen (Sekunden)
-  const FOLLOW_MIN=12,FOLLOW_GAP=18;   // Mindestabstand und Beginn der Bremszone zwischen Gegnern (Weltmaß)
   function step(state,towerRefs,definitions,dt,time,emit=()=>{}){
     const TOWERS=definitions;state.mines??=[];const arrive=e=>{e.alive=false;state.hp-=e.baseDamage??1;const landmark=state.landmarks?.get(e.landmarkId);if(landmark)landmark.status='escaped';emit('hit');};
-    // Abstand halten: Nachfolger bremsen vor dem Vordermann, damit Gegner nicht ineinander laufen (Bosse ausgenommen).
-    const progress=new Map();for(const e of state.enemies) if(e.alive&&e.type!=='boss') progress.set(e,remainingDistance(e));
-    const followFactor=e=>{
-      const mine=progress.get(e);if(mine===undefined||!Number.isFinite(mine)) return 1;
-      let factor=1;
-      for(const [other,rest] of progress){
-        if(other===e||!other.alive||mine-rest<=.5) continue;
-        const gap=Math.hypot(other.x-e.x,other.y-e.y);
-        if(gap<FOLLOW_GAP) factor=Math.min(factor,Math.max(0,(gap-FOLLOW_MIN)/(FOLLOW_GAP-FOLLOW_MIN)));
-      }
-      return factor;
-    };
-    for(const e of state.enemies){if(!e.alive)continue;if(e.index>=e.points.length-1){arrive(e);continue;}e.slowFactor=1;for(const ref of towerRefs){const def=HexData.towerDefinition(ref.tw,TOWERS);if(def.aura&&Math.hypot(e.x-ref.pos.x,e.y-ref.pos.y)<=def.range)e.slowFactor=Math.min(e.slowFactor,def.slow);}e.slowFactor=Math.max(e.minSpeedFactor||0,e.slowFactor);let distance=e.speed*dt*e.slowFactor*followFactor(e);while(e.index<e.points.length-1){const a=e.points[e.index],b=e.points[e.index+1],length=Math.hypot(b.x-a.x,b.y-a.y),remaining=length*(1-e.t);if(length>0&&distance<remaining){e.t+=distance/length;break;}distance-=remaining;e.t=0;e.index++;if(e.index>=e.points.length-1){arrive(e);break;}}if(e.alive){const a=e.points[e.index],b=e.points[e.index+1];e.x=a.x+(b.x-a.x)*e.t;e.y=a.y+(b.y-a.y)*e.t;}}
+    for(const e of state.enemies){if(!e.alive)continue;if(e.index>=e.points.length-1){arrive(e);continue;}e.slowFactor=1;for(const ref of towerRefs){const def=HexData.towerDefinition(ref.tw,TOWERS);if(def.aura&&Math.hypot(e.x-ref.pos.x,e.y-ref.pos.y)<=def.range)e.slowFactor=Math.min(e.slowFactor,def.slow);}e.slowFactor=Math.max(e.minSpeedFactor||0,e.slowFactor);let distance=e.speed*dt*e.slowFactor;while(e.index<e.points.length-1){const a=e.points[e.index],b=e.points[e.index+1],length=Math.hypot(b.x-a.x,b.y-a.y),remaining=length*(1-e.t);if(length>0&&distance<remaining){e.t+=distance/length;break;}distance-=remaining;e.t=0;e.index++;if(e.index>=e.points.length-1){arrive(e);break;}}if(e.alive){const a=e.points[e.index],b=e.points[e.index+1];e.x=a.x+(b.x-a.x)*e.t;e.y=a.y+(b.y-a.y)*e.t;}}
     triggerMines(state,emit);state.enemies=state.enemies.filter(e=>e.alive&&durability(e)>0);
     for(const ref of towerRefs){const def=HexData.towerDefinition(ref.tw,TOWERS);if(def.aura)continue;if(def.mine){layMine(state,ref,def,time);continue;}if(time-ref.tw.lastShot<def.cooldown*1000)continue;const inRange=state.enemies.filter(e=>e.alive&&durability(e)>0&&Math.hypot(e.x-ref.pos.x,e.y-ref.pos.y)<=def.range);if(!inRange.length)continue;const primary=targetByPriority(inRange,ref.tw,ref.pos);ref.tw.lastShot=time;emit(ref.tw.type);
       if(def.chain){const hit=[primary];while(hit.length<def.chain){const last=hit.at(-1),next=state.enemies.filter(e=>e.alive&&durability(e)>0&&!hit.includes(e)&&Math.hypot(e.x-last.x,e.y-last.y)<=def.jumpRange).sort((a,b)=>Math.hypot(a.x-last.x,a.y-last.y)-Math.hypot(b.x-last.x,b.y-last.y))[0];if(!next)break;hit.push(next);}hit.forEach((e,i)=>damageEnemy(e,def.damage*Math.max(.25,1-i*.18),def,state,emit));state.projectiles.push({kind:'chain',pts:[ref.pos,...hit.map(e=>({x:e.x,y:e.y}))],ttl:.24,max:.24,color:def.color,tower:ref.tw.type,id:nextProjectileId(state),hits:hit.map(e=>e.id),hitAt:hit.map(e=>({x:e.x,y:e.y}))});}

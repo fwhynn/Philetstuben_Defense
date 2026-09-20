@@ -1,7 +1,7 @@
 /* SVG adapter. Reads gameplay state; sends logical actions back to the controller. */
 const HexSvgRenderer=(()=>{
 function create(svg,commands){
-  const camera=HexSvgCamera.create(svg,()=>commands.viewChanged?.());
+  const camera=HexSvgCamera.create(svg,()=>commands.viewChanged?.(),()=>commands.rotatePlacement?.());
   const NS='http://www.w3.org/2000/svg';
   const {HEX,key,axialToWorld,hexPoints,neighbor,rotatedRoads,slotPositions,buildingPosition}=HexMap;
   const {CARD_LIBRARY,TOWERS}=HexData;
@@ -67,7 +67,7 @@ function create(svg,commands){
         }
         if(card.buildingSlots){const p=buildingPosition({q:s.q,r:s.r,rotation:state.rotation}),slot=document.createElementNS(NS,'rect');slot.setAttribute('x',p.x-9);slot.setAttribute('y',p.y-9);slot.setAttribute('width',18);slot.setAttribute('height',18);slot.setAttribute('rx',3);slot.setAttribute('fill','#344c3b');slot.setAttribute('stroke','#f0d795');preview.appendChild(slot);preview.appendChild(text(p.x,p.y+4,'⌂',11,'#fff4c3','700'));}
         const rotateHint=document.createElementNS(NS,'rect');rotateHint.setAttribute('x',c.x-32);rotateHint.setAttribute('y',c.y+HEX+2);rotateHint.setAttribute('width',64);rotateHint.setAttribute('height',20);rotateHint.setAttribute('rx',6);rotateHint.setAttribute('fill','#17271e');rotateHint.setAttribute('stroke','#718a6c');rotateHint.setAttribute('fill-opacity','.95');preview.appendChild(rotateHint);
-        preview.appendChild(text(c.x,c.y+HEX+16,'R · Drehen',10,'#eee1c2','600'));
+        preview.appendChild(text(c.x,c.y+HEX+16,'R / Mausrad-Klick · Drehen',10,'#eee1c2','600'));
         scene.appendChild(preview);
         // Invisible full-hex hit area; only the hovered position shows a preview.
         const hit=document.createElementNS(NS,'polygon');
@@ -82,7 +82,7 @@ function create(svg,commands){
     }
 
     drawFreezeAuras();drawSelectedRange();
-    hintLayer.innerHTML='';scene=hintLayer;drawUpgradeHints();scene=worldLayer;
+    hintLayer.innerHTML='';scene=hintLayer;drawUpgradeHints();drawTileOverlays();scene=worldLayer;
     for(const mine of state.mines||[]) drawMine(mine);
     for(const e of state.enemies) drawEnemy(e);
     for(const p of state.projectiles) drawProjectile(p);
@@ -94,6 +94,13 @@ function create(svg,commands){
     }
   }
 
+  function drawTileOverlays(){
+    if(state.showHexGrid)for(const tile of HexExploration.gridCells(state.map,state.landmarks)){
+      const c=axialToWorld(tile.q,tile.r),p=drawPoly(c.x,c.y,HEX-1,'none','#d4e7d2',.8);p.setAttribute('stroke-width',1.5);p.setAttribute('data-overlay','grid');
+    }
+    const highlight=HexBuildings.highlight(state);
+    for(const tile of highlight.tiles){const c=axialToWorld(tile.q,tile.r),p=drawPoly(c.x,c.y,HEX-3,highlight.color,highlight.color,1);p.setAttribute('fill-opacity',.18);p.setAttribute('stroke-width',3);p.setAttribute('data-overlay','building');}
+  }
   function roadPolyline(points,color,width,parent=scene,dashed=false){
     const path=document.createElementNS(NS,'polyline');
     path.setAttribute('points',points.map(p=>p.x+','+p.y).join(' '));path.setAttribute('fill','none');
@@ -153,6 +160,8 @@ function create(svg,commands){
     for(let i=0;i<(tile.buildingSlots||0);i++){
       const p=buildingPosition(tile),building=tile.buildings?.[i],slot=document.createElementNS(NS,'rect');
       slot.setAttribute('x',p.x-9);slot.setAttribute('y',p.y-9);slot.setAttribute('width',18);slot.setAttribute('height',18);slot.setAttribute('rx',3);slot.setAttribute('fill',building?'#bc914d':'#344c3b');slot.setAttribute('stroke','#f0d795');slot.style.cursor='pointer';
+      slot.addEventListener('pointerenter',()=>commands.hoverBuilding?.({q:tile.q,r:tile.r,index:i}));
+      slot.addEventListener('pointerleave',()=>commands.hoverBuilding?.(null));
       slot.addEventListener('click',e=>{e.stopPropagation();commands.selectBuilding(tile.q,tile.r,i);});scene.appendChild(slot);
       const label=text(p.x,p.y+4,building?HexBuildings.definitions[building.type].icon:'⌂',11,'#fff4c3','700');label.style.pointerEvents='none';scene.appendChild(label);
     }

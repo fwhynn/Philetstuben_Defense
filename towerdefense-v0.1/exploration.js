@@ -72,6 +72,12 @@ const HexExploration=(()=>{
     let nearest=Infinity;for(const tile of map.values()) nearest=Math.min(nearest,distance(tile,position));
     return nearest<=clearRadius?'clear':nearest<=fogRadius?'fog':'hidden';
   }
+  function gridCells(map,landmarks){
+    const cells=new Map(map);
+    for(const tile of map.values())for(let d=0;d<6;d++){const n=HexMap.neighbor(tile.q,tile.r,d);cells.set(n.q+','+n.r,n);}
+    for(const landmark of landmarks?.values()||[])if(visibility(map,landmark)!=='hidden')cells.set(landmark.q+','+landmark.r,landmark);
+    return [...cells.values()];
+  }
   function claim(state,q,r){
     const id=q+','+r,landmark=state.landmarks?.get(id);
     if(!landmark||landmark.claimed||!state.map.has(id)) return 0;
@@ -82,5 +88,5 @@ const HexExploration=(()=>{
     if(landmark.type==='boss'){landmark.status='ready';return 0;}
     state.gold+=treasureGold;state.goldEarned.treasure=(state.goldEarned.treasure||0)+treasureGold;return treasureGold;
   }
-  return {clearRadius,fogRadius,treasureGold,distance,create,region,expand,visibility,claim,bossProfile,shrineEffect,bossRewardRarity,prefab,attach};
+  return {clearRadius,fogRadius,treasureGold,distance,create,region,expand,visibility,claim,bossProfile,shrineEffect,bossRewardRarity,prefab,attach,gridCells};
 })();
