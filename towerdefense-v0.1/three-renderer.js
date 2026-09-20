@@ -509,7 +509,7 @@ function create(host0,commands){
     try{localStorage.setItem('hexQuality','low');}catch{/* Speichern nicht möglich */}
     gl.setPixelRatio(1);gl.setSize(Math.max(1,host.clientWidth),Math.max(1,host.clientHeight));
     sun.shadow.mapSize.set(1024,1024);if(sun.shadow.map){sun.shadow.map.dispose();sun.shadow.map=null;}
-    console.info('Hex Bastion: Grafik automatisch auf "niedrig" gestellt (?high in der Adresse stellt sie zurück).');
+    console.info('Autohex TD: Grafik automatisch auf "niedrig" gestellt (?high in der Adresse stellt sie zurück).');
   }
   function loop(now){
     for(const record of objectRecords.values())for(const diamond of record.slotHints||[])if(diamond.visible){diamond.rotation.y=now*.0006;diamond.position.y=22+Math.sin(now*.0022+diamond.position.x)*3;}

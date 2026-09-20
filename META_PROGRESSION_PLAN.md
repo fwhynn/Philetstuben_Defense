@@ -1,4 +1,4 @@
-# Hex Bastion – Meta-Progression und Turm-Loadouts
+# Autohex TD – Meta-Progression und Turm-Loadouts
 
 Stand: 20.09.2026, einschließlich lokaler Änderungen. Status: Umsetzungsstand und Designplan. Etappe 1 bis 3 sind umgesetzt. Das Meta-Arsenal enthält Balliste, Flammenturm und eine dauerhaft freischaltbare vierte Stufe für jeden vorhandenen Turm. Der komplexere Nekromant bleibt für eine spätere Erweiterung.
 

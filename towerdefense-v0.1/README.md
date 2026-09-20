@@ -1,4 +1,4 @@
-# Hex Bastion – V0.7-dev
+# Autohex TD – V0.7-dev
 
 Stand: 20.09.2026, einschließlich lokaler Änderungen. Spielbarer Browser-Prototyp eines Hex-Tower-Defense-Deckbuilders. Diese Datei beschreibt den aktuell implementierten Stand. Frühere Zwischenstände stehen im [Entwicklungsverlauf](CHANGELOG.md), spätere Ziele im [Projektgedächtnis](../BRAIN.md). Das ausführliche [Übergabeprotokoll](../README_TowerDefense_Projekt.md) enthält die Konzepthistorie.
 
