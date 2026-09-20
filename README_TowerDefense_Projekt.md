@@ -11,8 +11,8 @@ Die aktuelle Regelbeschreibung steht in [towerdefense-v0.1/README.md](towerdefen
 - Gegner wählen schleifenfreie Wege und können sich durchlaufen. Wave 1 hat fünf Gegner; regelmäßige Bosse ab 15, dann 25, 35 usw. Erkundungsbosse erscheinen nach Anschluss in der nächsten Wave.
 - Event-Nachbarfelder sind verbunden. Gebäudebuffs werden bei Auswahl/Hover markiert, Diamantenprognose und optionale Hexgrenzen sind vorhanden.
 - R und Mausrad-Klick drehen Hexe; Q/E drehen die 3D-Kamera, G schaltet das Hex-Grid um.
-- Zuletzt 133 automatisierte Tests bestanden. Aktuelle Browsertests übernimmt der Nutzer.
-- Offen: Heroes/Startfestungen und Base-Ausbau, Run-Speicherung, weitere Inhalte und Langzeitbalancing. Profil-Speicherung ist bereits vorhanden.
+- Zuletzt 149 automatisierte Tests bestanden. Aktuelle Browsertests übernimmt der Nutzer.
+- Drei Startprofile und Base-Ausbau für Mauern/automatische Waffe sind umgesetzt. Offen: Run-Speicherung, weitere Inhalte, Upgrade-Modelle und Langzeitbalancing.
 
 ## Historisches Konzeptprotokoll
 

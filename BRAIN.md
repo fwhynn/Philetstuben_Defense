@@ -3,6 +3,9 @@
 Stand: 20.09.2026, einschließlich der aktuellen lokalen Änderungen. Kompakte Übersicht über Ziele, Entscheidungen und spätere Ideen. Ausführlicher Verlauf: [Übergabeprotokoll](README_TowerDefense_Projekt.md). Technische Grenzen: [Architektur](towerdefense-v0.1/ARCHITECTURE.md). Änderungen: [App-README](towerdefense-v0.1/README.md).
 
 ## Festgelegte Richtung
+- Inhaltspaket Schritt 4 umgesetzt: Versorgungsweg (Rare, +2 Einkommen, ein Slot) und Signalkreuzung (Epic, +20 % Reichweite, zwei Slots). Neue Shrine-Effekte Heilquelle und Werksegen; Bossbeute bietet alternativ +5 aktuelle/maximale Base-HP oder +2 Einkommen pro künftiger Wave. Diese Boni gelten nur im Run.
+- Base-Upgrades sind in Platzierungs-, Bau- und Wavephase kaufbar; bei fehlendem Gold, Maximalstufe, offenen Belohnungen oder Game Over wird der Sperrgrund angezeigt. Pop-ups reservieren Platz für HUD, Hand und feste Bedienelemente; lange Inhalte scrollen. Freie Turmplätze werden optional mit schwebenden, langsam rotierenden goldenen Diamanten markiert (gespeicherte Einstellung). Neues Profil erhält ein überspringbares Mini-Tutorial; Wiederholung über Einstellungen, Auto-Start wartet während des Tutorials.
+- Heroes/Base-Ausbau umgesetzt: Standard (20 HP/70 Gold), Festungsbauer (20 HP/55 Gold, Base-Upgrades 25 % günstiger, dritte Stufe), Händler (15 HP/90 Gold, +2 Wave-Einkommen, Base-Waffe −25 % Schaden). Alle drei frei auswählbar; gemeinsame Hero-/Festungsauswahl vor dem Run. Alle Heroes können Mauern und eine automatische Base-Waffe mit Run-Gold ausbauen. Auswahl wird gespeichert, Ausbau beim Neustart zurückgesetzt.
 - Regelmäßige Bosswellen: erstmals Wave 15, dann alle zehn Waves (25, 35 …), Stärke wie zuvor fünf Waves früher. Wave 1 hat fünf Gegner. Q/E drehen die 3D-Kamera, G schaltet das gespeicherte Hex-Grid um. Turmreichweiten müssen auch über Nebel und unbebauten Hexen vollständig sichtbar bleiben.
 - Gebäude zeigen bei Auswahl und Hover ihren Wirkungsbereich farbig: Schmiede/Markt eigenes Hex plus direkte Nachbarn, Haus eigenes Hex. Künftige Gebäude sollen dieselbe datengetriebene Regel für Effekt und Hervorhebung verwenden. Optionales Hex-Grid in den Einstellungen, lokal gespeichert, für SVG und 3D.
 - Arbeitsweise: Keine eigenständigen Browsertests, außer ausdrücklich angefordert. Der Nutzer übernimmt die Prüfung im Browser; gezielte automatisierte Logiktests bleiben möglich.
@@ -23,28 +26,28 @@ Stand: 20.09.2026, einschließlich der aktuellen lokalen Änderungen. Kompakte �
 
 ## Für später fest vorgemerkt
 - Meta-Progression und Turm-Loadouts sind in [META_PROGRESSION_PLAN.md](META_PROGRESSION_PLAN.md) konkretisiert. Loadout, Diamanten, Arsenal, Minenleger sowie die ersten zwei freischaltbaren Türme sind umgesetzt. Keine fünf kostenlosen platzierten Türme. Meta-Unlocks sollen vor allem Optionen statt permanenter globaler Stärke geben.
-- Verschiedene Starthelden / Startfestungen mit eigenen Effekten und unterschiedlichen Spielstilen. Erneut vom Nutzer gewünscht. Noch nicht implementiert.
-- Ein Startheld soll besonders gut darin sein, die eigene Base zu verstärken und zu einer selbstverteidigenden Festung auszubauen. Offen bleibt, ob der Base-Ausbau grundsätzlich allen Helden zur Verfügung steht und dieser Held besondere Vorteile dabei erhält. Für später vorgemerkt, noch nicht implementiert.
+- Weitere Startprofile über die drei implementierten Heroes hinaus.
+- Weitere Base-Ausbaupfade können später folgen; Mauern und automatische Waffe sind umgesetzt.
 - Bisherige Ideen (keine finalen Werte): neutrale Standardfestung, Händlerstadt mit Goldbonus/Nachteil, Frostfestung mit Freeze-Bonus, Nekromanten-Zitadelle mit Bonus auf spätere Nekromantentürme.
-- Vor Umsetzung klären: Held und Festung ein gemeinsames Startprofil oder getrennte Auswahl; Startdeck, Ressourcen, passive Effekte und mögliche Nachteile datengetrieben definieren.
-- Mehr Shrine-Bonusvarianten, insbesondere besondere Upgrades. Effekt bleibt vor Erschließung verborgen.
+- Held und Festung bilden aktuell ein gemeinsames Startprofil. Startdeck und fünf Turmplätze bleiben gleich; Hero-Werte und Base-Upgrades liegen in heroes.js.
+- Weitere Shrine-Bonusvarianten über Heilquelle und Werksegen hinaus. Effekt bleibt vor Erschließung verborgen.
 - Weitere Karten und Bosslootvarianten. Erster Ausbau auf drei Karten je hoher Rarität und zusätzliche Boss-Kartenbeute umgesetzt.
 - Weitere Biome, spätere Meta-Progression und zusätzliche Towerrollen: Details im Übergabeprotokoll.
 
 ## Aktueller Stand / nächste Arbeit
-- Shrine: 30 % Kartenkopie entfernen, 30 % zusätzliche Kartenauswahl, 30 % Epic, 10 % Legendary. Mindestdeckgröße 5; Auswahl oder Überspringen verbraucht Shrine.
-- Epic-Pool: Höhenkreuzung, Kampfstraße (+20 % Schaden), Wachtkurve (2 Slots/+15 % Reichweite). Legendary-Pool: Bastionskreuzung, Königsstraße (+5 Gold/Gebäudeslot), Kriegskreuzung (+30 % Schaden/4 Straßenenden). Legendary kann durch vorhandene geringe Raritätsgewichtung auch im normalen Reward vorkommen.
+- Shrine: 20 % Kartenkopie entfernen, 20 % zusätzliche Kartenauswahl, 20 % Epic, 10 % Legendary, 15 % Heilquelle (+5 HP bis Maximum, bei voller Gesundheit 30 Gold), 15 % Werksegen (kostenloses normales Upgrade eines gebauten Loadout-Turms; sonst 30 Gold). Mindestdeckgröße 5; Auswahl oder Überspringen verbraucht Shrine.
+- Epic-Pool: Signalkreuzung (+20 % Reichweite, zwei Slots), Höhenkreuzung, Kampfstraße (+20 % Schaden), Wachtkurve (2 Slots/+15 % Reichweite). Legendary-Pool: Bastionskreuzung, Königsstraße (+5 Gold/Gebäudeslot), Kriegskreuzung (+30 % Schaden/4 Straßenenden). Legendary kann durch vorhandene geringe Raritätsgewichtung auch im normalen Reward vorkommen.
 - Kreuzungen: bisherige tee-Karte heißt Y-Kreuzung; neue echte T-Kreuzung und Sechserkreuzung im Rewardpool. Startdeck behält tee/Y.
 - Sonderfelder vorgefertigt: feste Straßen/Rotation, keine Handkarte darüber platzieren; passende Nachbarstraße aktiviert automatisch. Schatz/Shrine gerade/kurvig/Y/T mit 1 Slot, Boss immer sechs Öffnungen ohne Slots. Nachbaranschlüsse beim Bauen berücksichtigen, mehrere Shrines nacheinander.
 - Sonderfelder: 4,5 % geeigneter Koordinaten; darunter 55 % Schatz / 30 % Shrine / 15 % Boss. Keine Sonderfelder in Radius 2 um die Base; Wächterfelder zusätzlich nie innerhalb von vier Hexen.
 - Direkt benachbarte Sonderfelder erhalten immer beidseitige Straßenanschlüsse an ihrer gemeinsamen Kante. Die Generierung berücksichtigt auch noch nicht erkundete Nachbarn; feste Geometrien bleiben später unverändert. Bei Bedarf erhalten Schatz/Shrine eine Sechserkreuzung mit weiterhin einem Turmplatz.
 - Für später vorgemerkt: ein Elementturm, bei dem der Spieler selbst ein Element wie Feuer, Wasser oder Wind auswählt. Elemente sollen unterschiedliche Rollen und Matchups erhalten.
-- Bossloot: +50 Gold und nach überlebter Wave zusätzliche Kartenauswahl (90 % Epic, 10 % Legendary), alle Bosse nacheinander vor normalen Wave-Rewards.
+- Bossloot: +50 Gold und nach überlebter Wave genau eine Wahl aus Karten (90 % Epic, 10 % Legendary als Pool) oder Run-Segen (+5 aktuelle/maximale HP bzw. +2 Einkommen je künftiger Wave). Alle Bosse nacheinander vor normalen Wave-Rewards.
 - Kartendarstellung in svg-renderer.js ausgelagert: render/reset/project/destroy, logische Aktionen an Controller, keine direkte Mutation des Spielzustands. Gemeinsame Slotpositionen in map.js.
 - Weltkoordinaten: Base (0,0), keine Bildschirmzentrierung in Spiellogik. camera.js: DOM-freies Kameramodell plus austauschbarer SVG-Adapter; Renderer besitzt Kamera.
-- Prioritäten: aktuelle Änderungen im Spiel durch den Nutzer prüfen, Gameplay/Balance, Startprofile und Base-Ausbau konkretisieren. Danach Run-Speicherung und weitere Karten/Bonusvarianten. Diese Reihenfolge ist ein Vorschlag; Details sind noch nicht beschlossen.
+- Prioritäten: aktuelle Änderungen im Spiel durch den Nutzer prüfen, Gameplay/Balance, Hero-/Base-Balancing anhand der ersten Spieltests. Danach Run-Speicherung und weitere Karten/Bonusvarianten. Diese Reihenfolge ist ein Vorschlag; Details sind noch nicht beschlossen.
 - Visuelle Prüfung, Audio-Hörprobe, Gebäude-Wirkungsbereiche im Spiel und langfristiges Balancing sind nicht durch aktuelle Browsertests bestätigt. Provisorisches Card Removal jede sechste Wave bleibt zusätzlich zu Shrines.
 
-Zuletzt 133 automatisierte Tests bestanden (20.09.2026); für die jüngsten Änderungen keine Browsertests durchgeführt. Laufende Runs sind nicht persistent; Profil, Freischaltungen, Presets und Hex-Grid-Einstellung werden lokal gespeichert.
+Zuletzt 149 automatisierte Tests bestanden (20.09.2026); für die jüngsten Änderungen keine Browsertests durchgeführt. Laufende Runs sind nicht persistent; Profil, Freischaltungen, Presets und Hex-Grid-Einstellung werden lokal gespeichert.
 
 Bei neuen Entscheidungen diesen Stand aktualisieren; offene Ideen nicht als implementierte Features behandeln.
