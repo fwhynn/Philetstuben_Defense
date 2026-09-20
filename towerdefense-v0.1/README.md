@@ -1,4 +1,4 @@
-# Hex Bastion – V0.7-dev
+# Autohex TD – V0.7-dev
 
 ## Schwierigkeit „Zwei Fronten“
 

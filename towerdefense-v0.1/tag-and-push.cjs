@@ -3,8 +3,11 @@ const fs = require('fs');
 const path = require('path');
 const repo = path.join(__dirname, '..');
 const packageJsonPath = path.join(__dirname, 'package.json');
+const packageLockPath = path.join(__dirname, 'package-lock.json');
 const bumpInput = (process.argv[2] || 'patch').replace(/^v/, '');
 const npmCliPath = process.env.npm_execpath;
+const packageJsonGitPath = path.relative(repo, packageJsonPath);
+const packageLockGitPath = path.relative(repo, packageLockPath);
 
 function git(args, opts = {}) {
   return execFileSync('git', args, { cwd: repo, encoding: 'utf8', ...opts });
@@ -51,6 +54,12 @@ if (version === previousVersion) {
   process.exit(1);
 }
 
+const filesToCommit = [packageJsonGitPath];
+if (fs.existsSync(packageLockPath)) filesToCommit.push(packageLockGitPath);
+
+git(['add', ...filesToCommit], { stdio: 'inherit' });
+git(['commit', '-m', `chore: release ${tag}`], { stdio: 'inherit' });
 git(['tag', '-a', tag, '-m', tag], { stdio: 'inherit' });
+git(['push', 'origin', 'HEAD'], { stdio: 'inherit' });
 git(['push', 'origin', tag], { stdio: 'inherit' });
-console.log(`Tagged ${tag}`);
+console.log(`Released ${tag}`);

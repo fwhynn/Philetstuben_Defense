@@ -1,4 +1,4 @@
-# Hex Bastion – Projektübersicht und Übergabeprotokoll
+# Autohex TD – Projektübersicht und Übergabeprotokoll
 
 Stand: 20.09.2026 · **V0.7-dev**, einschließlich lokaler Änderungen
 
@@ -1361,7 +1361,7 @@ Aktuell sollte aber V0.1.1 als Basis verwendet werden.
 
 Im Screenshot war der Prototyp unter dem Namen:
 
-**Hex Bastion v0.1**
+**Autohex TD v0.1**
 
 zu sehen.
 
