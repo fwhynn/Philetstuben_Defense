@@ -6,6 +6,7 @@ const APP_ROOT = __DIR__;
 const REMOTE_NAME = 'origin';
 const SECRET_FILE = REPO_ROOT . '/.deploy-webhook-secret';
 const LOCK_FILE = '/tmp/autohextd-tag-webhook.lock';
+const ERROR_LOG_FILE = APP_ROOT . '/webhook-error.log';
 const RUN_NPM_CI = true;
 const ALLOWED_ACTORS = ['autophil317', 'fwhynn', 'zlyfer'];
 
@@ -263,7 +264,38 @@ function runCommand(string $command, string $cwd): array
 
 function respond(int $statusCode, array $payload): never
 {
+    if ($statusCode >= 400) {
+        logWebhookError($statusCode, $payload);
+    }
     http_response_code($statusCode);
     echo json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . "\n";
     exit;
+}
+
+function logWebhookError(int $statusCode, array $payload): void
+{
+    $context = [
+        'timestamp' => gmdate('c'),
+        'statusCode' => $statusCode,
+        'method' => $_SERVER['REQUEST_METHOD'] ?? '',
+        'uri' => $_SERVER['REQUEST_URI'] ?? '',
+        'remoteAddr' => $_SERVER['REMOTE_ADDR'] ?? '',
+        'event' => $_SERVER['HTTP_X_GITHUB_EVENT'] ?? '',
+        'payload' => $payload,
+    ];
+
+    $encoded = json_encode($context, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    if (!is_string($encoded)) {
+        $encoded = json_encode([
+            'timestamp' => gmdate('c'),
+            'statusCode' => $statusCode,
+            'message' => 'Failed to encode webhook error payload.',
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    }
+
+    if (!is_string($encoded)) {
+        return;
+    }
+
+    @file_put_contents(ERROR_LOG_FILE, $encoded . "\n", FILE_APPEND | LOCK_EX);
 }
