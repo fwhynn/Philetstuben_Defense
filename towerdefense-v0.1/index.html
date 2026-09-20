@@ -96,6 +96,17 @@
       <label class="toggle"><input id="autoStart" type="checkbox" /> Wave nach Platzierung automatisch starten</label>
       <label class="toggle"><input id="soundEnabled" type="checkbox" checked /> Sounds aktiv</label>
       <label class="toggle">Lautstärke <input id="soundVolume" type="range" min="0" max="100" value="35" aria-label="Sound-Lautstärke" /></label>
+      <section class="renderModes" aria-label="Ansicht wählen">
+        <strong>Ansicht</strong>
+        <p id="renderModeStatus" class="hint">HTTP(S): 3D automatisch, Datei direkt geöffnet: SVG.</p>
+        <div class="renderModeLinks">
+          <a class="secondary renderLink" href="./">Automatisch</a>
+          <a class="secondary renderLink" href="./?low">3D Low Poly</a>
+          <a class="secondary renderLink" href="./?high">3D Hoch</a>
+          <a class="secondary renderLink" href="./?svg">SVG</a>
+          <a class="secondary renderLink" href="./viewer.html">Modell-Galerie</a>
+        </div>
+      </section>
       <label class="toggle">Startwert für nächsten Run (Seed) <input id="runSeed" type="text" maxlength="100" placeholder="Leer = zufälliger Run" /></label>
       <small class="hint">Derselbe Startwert wiederholt bei gleichen Entscheidungen die Karten und Belohnungen.</small>
       <small class="hint">Aktueller Seed: <span id="activeSeed"></span></small>
@@ -150,6 +161,29 @@
       document.querySelectorAll('.drawerBtn').forEach(b=>b.addEventListener('click',()=>{const d=document.getElementById(b.dataset.drawer),open=d.classList.contains('hidden');close();if(open) d.classList.remove('hidden');}));
       document.querySelectorAll('.drawerClose').forEach(b=>b.addEventListener('click',close));
       addEventListener('keydown',e=>{if(e.key==='Escape') close();});})();
+
+    (()=>{
+      const status=document.getElementById('renderModeStatus');
+      if(!status) return;
+      const query=new URLSearchParams(location.search);
+      if(query.has('svg')){
+        status.textContent='Aktiv: SVG-Ansicht. 3D ist unter Automatisch, 3D Low Poly oder 3D Hoch erreichbar.';
+        return;
+      }
+      if(!location.protocol.startsWith('http')){
+        status.textContent='Aktiv: SVG-Ansicht per Datei-Start. Für 3D die Seite über HTTP(S) öffnen.';
+        return;
+      }
+      if(query.has('low')){
+        status.textContent='Aktiv: 3D Low Poly. Weniger Pixel, kleinere Schatten, stabiler auf schwächeren Geräten.';
+        return;
+      }
+      if(query.has('high')){
+        status.textContent='Aktiv: 3D Hoch. Maximale Qualität, falls WebGL und Three.js verfügbar sind.';
+        return;
+      }
+      status.textContent='Aktiv: Automatisch. Unter HTTP(S) startet 3D, bei Problemen fällt das Spiel auf SVG zurück.';
+    })();
   </script>
   <script src="sound.js"></script>
   <script src="camera.js"></script>

@@ -29,6 +29,8 @@ npm start
 
 Danach `http://localhost:8080` im Browser öffnen. Die 3D-Modelle (`.glb`) lassen sich nur über einen Server laden, deshalb reicht ein Doppelklick auf `index.html` für die 3D-Ansicht nicht.
 
+Auf der bereitgestellten Subdomain gilt dasselbe: unter HTTP(S) startet die 3D-Version automatisch, solange `node_modules/three` im Projekt vorhanden ist. Über das Einstellungsmenü im Spiel kannst du zwischen `Automatisch`, `3D Low Poly`, `3D Hoch` und `SVG` umschalten.
+
 | Aufruf | Ergebnis |
 |---|---|
 | `http://localhost:8080` | 3D-Ansicht (Three.js) |
@@ -118,6 +120,17 @@ Die Ideen und Entscheidungen dazu stehen in [BRAIN.md](BRAIN.md), die ausführli
 ## Technik
 
 Vanilla JavaScript ohne Build-Schritt, [Three.js](https://threejs.org) für die 3D-Ansicht, WebAudio für Sounds, Node.js nur für Tests und den lokalen Server.
+
+## Deployment Webhook
+
+Unter [towerdefense-v0.1/tag-webhook.php](towerdefense-v0.1/tag-webhook.php) liegt ein GitHub-Webhook-Endpunkt für Tag-Deployments.
+
+- Der Endpunkt verarbeitet die GitHub-Events `create`, `push` auf `refs/tags/*` und `release.published`.
+- Das Deployment holt die Tags von `origin`, checkt den ausgelösten Tag per `git checkout --force --detach <tag>` aus und führt anschließend in `towerdefense-v0.1/` ein `npm ci --omit=dev` aus.
+- Das Secret kommt entweder aus der Umgebungsvariable `AUTOHEXTD_WEBHOOK_SECRET` oder aus der Datei `.deploy-webhook-secret` im Repo-Root `Philetstuben_Defense/`.
+- Der Webhook bricht absichtlich ab, wenn das Checkout lokale getrackte Änderungen hat oder wenn der PHP-User keine Schreibrechte auf Repo und App-Verzeichnis besitzt.
+
+Für GitHub den Webhook auf `https://autohextd.zlyfer.net/tag-webhook.php` zeigen lassen, `application/json` senden und dasselbe Secret hinterlegen.
 
 ## Lizenz
 
