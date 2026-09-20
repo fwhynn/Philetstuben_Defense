@@ -1,27 +1,18 @@
 # Hex Bastion – Projektübersicht und Übergabeprotokoll
 
-Stand: 18.09.2026 · **V0.7-dev**
+Stand: 20.09.2026 · **V0.7-dev**, einschließlich lokaler Änderungen
 
-## Verbindlicher aktueller Spielstand
+## Aktueller Spielstand
 
-Die vollständige, mit dem Code abgeglichene Beschreibung steht in [towerdefense-v0.1/README.md](towerdefense-v0.1/README.md): Start/Bedienung, Ablauf, Hexkarten, Türme, Upgrades, Gebäude, Gold, Gegner, Sichtregeln, Sonderfelder und technische Grenzen.
+Die aktuelle Regelbeschreibung steht in [towerdefense-v0.1/README.md](towerdefense-v0.1/README.md), die Architektur in [ARCHITECTURE.md](towerdefense-v0.1/ARCHITECTURE.md), Entscheidungen und offene Ideen in [BRAIN.md](BRAIN.md). Der [Meta-Plan](META_PROGRESSION_PLAN.md) trennt Umsetzung und spätere Vorschläge.
 
-Kompaktes Projektgedächtnis und spätere Ideen: [BRAIN.md](BRAIN.md). Technische 3D-Vorbereitung: [ARCHITECTURE.md](towerdefense-v0.1/ARCHITECTURE.md). Frühere Implementierungsschritte: [CHANGELOG.md](towerdefense-v0.1/CHANGELOG.md).
-
-Aktuell implementiert:
-- Browser-/SVG-Prototyp; Start mit 20 HP, 70 Gold, fünf Deckkarten. Drei ziehen, ein Hex legen, bauen und Wave überleben; alle zwei Waves Kartenreward.
-- Straßenanschlüsse, längengewichtete kürzeste Wege und Aufteilung gleich langer Wege. Letzter Eingang darf nicht geschlossen werden; Rettungshex bei blockiertem Deck.
-- Drehen per R mit Hinweis an der Hovervorschau. Turmverkauf für 50 % inklusive aller Upgrades; in aktueller ursprünglicher Bauphase vor Wave weiterhin 100 % Rückgabe.
-- Archer, Katapult, Kettenblitz, Freeze-Aura und Minenleger; zwei Upgradezweige plus passende finale Stufe pro Turm. Jeder Run bestätigt ein Profil-gespeichertes Loadout aus genau fünf unterschiedlichen freigeschalteten Turmtypen. Bauen auch während Waves, kontextuelle Turm-/Gebäudemenüs.
-- Dorf mit automatischem Einkommen; optional Haus, Schmiede oder Markt. Gold-/Wave-/Deckplanung in Header-Dropdowns, Leertaste zum Start und F für 2×.
-- Klare Sicht Radius 2, Nebel bis Gesamtradius 6 von jedem gesetzten Hex, danach unsichtbar. Sparsame ursprüngliche Hex-Ansicht; dynamische seedbasierte Sonderfelder.
-- Alte T-Kreuzung in Y-Kreuzung umbenannt, echte T-Kreuzung und Sechserkreuzung ergänzt. Sonderfelder haben feste Straßen/Rotation und werden automatisch durch passende Nachbarstraßen aktiviert; keine Handkarte überschreibt sie. Bossfelder immer sechs Öffnungen.
-- Sonderfeldrate 4,5 % geeigneter Koordinaten, davon 55 % Schatz, 30 % Shrine, 15 % Boss. Keine Sonderfelder innerhalb Radius 2 der Base.
-- Schatz +20 Gold. Verdeckte Shrine-Effekte: 30 % Kartenentfernung, 30 % zusätzliche Karte, 30 % Epic, 10 % Legendary. Epic jetzt Höhenkreuzung/Kampfstraße/Wachtkurve, Legendary Bastionskreuzung/Königsstraße/Kriegskreuzung.
-- Boss nach Straßenerschließung automatisch in nächster Wave auf eigenem Hex; fünf Basisschaden, +50 Gold bei Sieg plus Kartenbeute nach überlebter Wave (90 % Epic, 10 % Legendary). Vorschau berücksichtigt Bosse. Collect-Sounds vorhanden.
-- 87 automatisierte Tests und Syntaxprüfungen zuletzt bestanden. Manueller Spieltest/Hörprobe, Markt/Schmiede im Spiel und langfristiges Balancing offen.
-
-Für später: verschiedene Starthelden/Startfestungen mit eigenen Effekten, mehr Sonderfeld-/Bossloot, weitere Biome, Meta-Progression und zusätzliche Towerrollen. Finales Ziel bleibt stilisiertes **3D wie Dorfromantik**; aktuelle Umsetzung noch 2D, Kartendarstellung nun hinter SVG-Renderer-Schnittstelle. Weltursprung und Kameramodell inzwischen getrennt. Engine, 3D-Kameraadapter und vollständige UI-/Runtrennung offen.
+- Three.js-3D mit SVG-Fallback, Modelle für sieben Türme, fünf Gegner, drei Gebäude, Sonderfelder und Minen.
+- Hex-Deckbuilding, fünf Türme pro Run, Arsenal mit Balliste/Flammenturm und Stufe-4-Upgrades, drei Loadout-Presets und persistentes Browserprofil.
+- Gegner wählen schleifenfreie Wege und können sich durchlaufen. Wave 1 hat fünf Gegner; regelmäßige Bosse ab 15, dann 25, 35 usw. Erkundungsbosse erscheinen nach Anschluss in der nächsten Wave.
+- Event-Nachbarfelder sind verbunden. Gebäudebuffs werden bei Auswahl/Hover markiert, Diamantenprognose und optionale Hexgrenzen sind vorhanden.
+- R und Mausrad-Klick drehen Hexe; Q/E drehen die 3D-Kamera, G schaltet das Hex-Grid um.
+- Zuletzt 133 automatisierte Tests bestanden. Aktuelle Browsertests übernimmt der Nutzer.
+- Offen: Heroes/Startfestungen und Base-Ausbau, Run-Speicherung, weitere Inhalte und Langzeitbalancing. Profil-Speicherung ist bereits vorhanden.
 
 ## Historisches Konzeptprotokoll
 
@@ -677,15 +668,15 @@ Der User bevorzugt klar:
 
 Beispiel Archer:
 
-Archer  
-→ AoE-Pfad  
-oder  
+Archer
+→ AoE-Pfad
+oder
 → Single-Target-Pfad
 
 Eine mögliche vereinfachte Struktur für frühe Versionen:
 
-Basis-Tower  
-→ Branch A oder Branch B  
+Basis-Tower
+→ Branch A oder Branch B
 → finales Upgrade
 
 Langfristig sollen dadurch unterschiedliche Builds entstehen.

@@ -1,22 +1,24 @@
 # Hex Bastion – Projektgedächtnis
 
-Stand: 19.09.2026. Kompakte Übersicht über Ziele, Entscheidungen und spätere Ideen. Ausführlicher Verlauf: [Übergabeprotokoll](README_TowerDefense_Projekt.md). Technische Grenzen: [Architektur](towerdefense-v0.1/ARCHITECTURE.md). Änderungen: [App-README](towerdefense-v0.1/README.md).
+Stand: 20.09.2026, einschließlich der aktuellen lokalen Änderungen. Kompakte Übersicht über Ziele, Entscheidungen und spätere Ideen. Ausführlicher Verlauf: [Übergabeprotokoll](README_TowerDefense_Projekt.md). Technische Grenzen: [Architektur](towerdefense-v0.1/ARCHITECTURE.md). Änderungen: [App-README](towerdefense-v0.1/README.md).
 
 ## Festgelegte Richtung
+- Regelmäßige Bosswellen: erstmals Wave 15, dann alle zehn Waves (25, 35 …), Stärke wie zuvor fünf Waves früher. Wave 1 hat fünf Gegner. Q/E drehen die 3D-Kamera, G schaltet das gespeicherte Hex-Grid um. Turmreichweiten müssen auch über Nebel und unbebauten Hexen vollständig sichtbar bleiben.
+- Gebäude zeigen bei Auswahl und Hover ihren Wirkungsbereich farbig: Schmiede/Markt eigenes Hex plus direkte Nachbarn, Haus eigenes Hex. Künftige Gebäude sollen dieselbe datengetriebene Regel für Effekt und Hervorhebung verwenden. Optionales Hex-Grid in den Einstellungen, lokal gespeichert, für SVG und 3D.
 - Arbeitsweise: Keine eigenständigen Browsertests, außer ausdrücklich angefordert. Der Nutzer übernimmt die Prüfung im Browser; gezielte automatisierte Logiktests bleiben möglich.
 - Hex-Tower-Defense mit Straßenbau und Map-Deckbuilding.
-- Finale Darstellung: stilisiertes 3D wie Dorfromantik. Spiellogik und Daten rendererunabhängig halten; SVG-Kartendarstellung jetzt über Renderer-Schnittstelle; Weltursprung (Base 0,0) und Kameramodell getrennt; Run-/HUDtrennung und 3D-Kameraadapter fehlen noch. Engine noch nicht gewählt.
+- Darstellung: stilisiertes 3D mit Three.js, SVG als Alternative/Fallback. Weltursprung bei Base (0,0), gemeinsame Renderer-Schnittstelle; 3D-Kamera, Picking und Modelle sind umgesetzt. Vollständige Trennung von Runsteuerung und HUD bleibt offen.
 - Sparsame Hex-Ansicht. Clear Vision Radius 2; Fog bis Gesamtradius 6 von jedem gesetzten Hex; dahinter keine Sicht. Dynamische Sonderfelder bei Expansion.
 - Boss nach Straßenerschließung in nächster Wave, Spawn auf eigenem Hex. Wave-Start über Button, Leertaste und Auto-Start gleich.
-- Drehen per R mit kleinem Hoverhinweis direkt an der Hex-Vorschau; Eckbutton entfernt.
+- Hex drehen per R oder Mausrad-Klick (im Uhrzeigersinn), mit Hinweis an der Vorschau. Während der Platzierung hat Mausrad-Klick Vorrang vor der Kamerasteuerung.
 - Turm-Loadout-Grundlage umgesetzt: jeder Run bestätigt genau fünf unterschiedliche freigeschaltete Turmtypen; neue Profile besitzen Archer, Katapult, Kettenblitz, Freeze und Minenleger. Nur das gespeicherte Run-Loadout erscheint im Baumenü. Browserprofil und Runzustand bleiben getrennt.
 - Minenleger als fünfter Startturm umgesetzt: Er legt ohne Zielkontakt stapelbare Minen direkt auf Straßen; Gegner lösen sie beim Überqueren aus, nicht ausgelöste Minen verschwinden am Wave-Ende. Zweige: Sprengmeister/Erdbrecher und Minenfeld/Minenteppich.
 - Gegner wählen an jeder Gabelung pro Einheit zufällig unter allen schleifenfreien Wegen zur Base. Leben, Rüstung und Magieresistenz sind getrennte Trefferpunkt-Pools. Türme zeigen Schaden je Pool und besitzen eine konfigurierbare dreistufige Zielpriorität.
-- Diamantenabrechnung umgesetzt: `floor(Wave/2)`, +5 je regelmäßigem Zehnerboss, +3 je Erkundungsboss und +2 je erstmals erreichtem Zehner-Meilenstein. Game-over zeigt die Aufschlüsselung; Run-IDs verhindern doppelte Auszahlung. Profil führt Diamanten, Bestwave, Runs, Bosse und normale Kills.
-- Meta-Arsenal umgesetzt: Balliste kostet 20 Diamanten, Flammenturm 35. Beide haben zwei Upgradezweige und finale Stufen. Nach der Freischaltung erscheinen sie in der Runvorbereitung, während das Run-Loadout auf fünf Plätze begrenzt bleibt. Eigene 3D-Modelle fehlen noch; der Renderer nutzt Platzhalter.
+- Diamantenabrechnung umgesetzt: `floor(Wave/2)`, +5 je regelmäßigem Boss, +3 je Erkundungsboss und +2 je erstmals erreichtem Zehner-Meilenstein. Game-over zeigt die Aufschlüsselung; Run-IDs verhindern doppelte Auszahlung. Profil führt Diamanten, Bestwave, Runs, Bosse und normale Kills.
+- Meta-Arsenal umgesetzt: Balliste kostet 20 Diamanten, Flammenturm 35. Beide haben zwei Upgradezweige und finale Stufen. Nach der Freischaltung erscheinen sie in der Runvorbereitung, während das Run-Loadout auf fünf Plätze begrenzt bleibt. Eigene 3D-Modelle sind eingebunden; Platzhalter dienen nur als Fallback.
 - Etappe 3 abgeschlossen: drei persistente Loadout-Presets, Warnungen für fehlende Kampfrollen und lokale Statistiken je Turm. Jeder der sieben Türme besitzt eine zusätzliche vierte Stufe, die im Arsenal dauerhaft mit Diamanten freigeschaltet und anschließend pro Run mit Gold gekauft wird.
 - Turmverkauf: 100 % inklusive Upgrades in ursprünglicher aktueller Bauphase vor Wave; sonst 50 % tatsächlicher Gesamtinvestition, abgerundet, auch während Waves. Keine Verkäufe nach Game Over.
-- Modelle vorhanden: alle sieben Türme, fünf Gegner (Kiwi-Krieger „Vik“ als Standardgegner, Widmung an eine Freundin), drei Gebäude und die Straßenmine. Es fehlen nur die Turm-Upgrade-Varianten. Gegner halten Abstand (Spawnabstand nach Tempo, Bremsen vor dem Vordermann, Bosse ausgenommen). Grafikstufen `?low`/`?high`, automatische Absenkung bei niedriger Bildrate.
+- Modelle vorhanden: alle sieben Türme, fünf Gegner (Kiwi-Krieger „Vik“ als Standardgegner, Widmung an eine Freundin), drei Gebäude und die Straßenmine. Es fehlen nur die Turm-Upgrade-Varianten. Alle Gegner können einander durchlaufen und überholen; es gibt keine gegenseitige Abstandsbremsung. Grafikstufen `?low`/`?high`, automatische Absenkung bei niedriger Bildrate.
 - Bauen auch während Waves. Turm-Upgrades nur im angeklickten Turmmenü. Wave-/Gold-/Deckinfos als Dropdowns.
 
 ## Für später fest vorgemerkt
@@ -37,10 +39,12 @@ Stand: 19.09.2026. Kompakte Übersicht über Ziele, Entscheidungen und spätere 
 - Sonderfelder: 4,5 % geeigneter Koordinaten; darunter 55 % Schatz / 30 % Shrine / 15 % Boss. Keine Sonderfelder in Radius 2 um die Base; Wächterfelder zusätzlich nie innerhalb von vier Hexen.
 - Direkt benachbarte Sonderfelder erhalten immer beidseitige Straßenanschlüsse an ihrer gemeinsamen Kante. Die Generierung berücksichtigt auch noch nicht erkundete Nachbarn; feste Geometrien bleiben später unverändert. Bei Bedarf erhalten Schatz/Shrine eine Sechserkreuzung mit weiterhin einem Turmplatz.
 - Für später vorgemerkt: ein Elementturm, bei dem der Spieler selbst ein Element wie Feuer, Wasser oder Wind auswählt. Elemente sollen unterschiedliche Rollen und Matchups erhalten.
-- Bossloot: +50 Gold und nach überlebter Wave zusätzliche Kartenauswahl (90 % Epic, 10 % Legendary), alle Bosse nacheinander vor normalen Wave-Rewards. 87 Tests bestanden.
+- Bossloot: +50 Gold und nach überlebter Wave zusätzliche Kartenauswahl (90 % Epic, 10 % Legendary), alle Bosse nacheinander vor normalen Wave-Rewards.
 - Kartendarstellung in svg-renderer.js ausgelagert: render/reset/project/destroy, logische Aktionen an Controller, keine direkte Mutation des Spielzustands. Gemeinsame Slotpositionen in map.js.
-- Weltkoordinaten: Base (0,0), keine Bildschirmzentrierung in Spiellogik. camera.js: DOM-freies Kameramodell plus austauschbarer SVG-Adapter; Renderer besitzt Kamera. 87 Tests bestanden.
-- Prioritäten: Gameplay/Balance und manuelle Prüfung; Run-/HUDtrennung für 3D und spätere 3D-Kamera; Startprofile für Helden/Festungen entwerfen; weitere Karten/Bonusvarianten.
-- Visuelle Prüfung, Audio-Hörprobe, Markt/Schmiede im Spiel und langfristiges Balancing weiterhin offen. Provisorisches Card Removal jede sechste Wave bleibt zusätzlich zu Shrines.
+- Weltkoordinaten: Base (0,0), keine Bildschirmzentrierung in Spiellogik. camera.js: DOM-freies Kameramodell plus austauschbarer SVG-Adapter; Renderer besitzt Kamera.
+- Prioritäten: aktuelle Änderungen im Spiel durch den Nutzer prüfen, Gameplay/Balance, Startprofile und Base-Ausbau konkretisieren. Danach Run-Speicherung und weitere Karten/Bonusvarianten. Diese Reihenfolge ist ein Vorschlag; Details sind noch nicht beschlossen.
+- Visuelle Prüfung, Audio-Hörprobe, Gebäude-Wirkungsbereiche im Spiel und langfristiges Balancing sind nicht durch aktuelle Browsertests bestätigt. Provisorisches Card Removal jede sechste Wave bleibt zusätzlich zu Shrines.
+
+Zuletzt 133 automatisierte Tests bestanden (20.09.2026); für die jüngsten Änderungen keine Browsertests durchgeführt. Laufende Runs sind nicht persistent; Profil, Freischaltungen, Presets und Hex-Grid-Einstellung werden lokal gespeichert.
 
 Bei neuen Entscheidungen diesen Stand aktualisieren; offene Ideen nicht als implementierte Features behandeln.

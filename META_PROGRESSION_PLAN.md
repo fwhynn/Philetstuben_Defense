@@ -1,6 +1,8 @@
 # Hex Bastion – Meta-Progression und Turm-Loadouts
 
-Status: Designplan. Etappe 1 bis 3 sind umgesetzt. Das Meta-Arsenal enthält Balliste, Flammenturm und eine dauerhaft freischaltbare vierte Stufe für jeden vorhandenen Turm. Der komplexere Nekromant bleibt für eine spätere Erweiterung.
+Stand: 20.09.2026, einschließlich lokaler Änderungen. Status: Umsetzungsstand und Designplan. Etappe 1 bis 3 sind umgesetzt. Das Meta-Arsenal enthält Balliste, Flammenturm und eine dauerhaft freischaltbare vierte Stufe für jeden vorhandenen Turm. Der komplexere Nekromant bleibt für eine spätere Erweiterung.
+
+Aktueller Stand: Loadout, Diamanten, Arsenal, drei Presets und Turmstatistiken sind umgesetzt. Abschnitte mit „Vorschlag“ oder „Zielbild“ sind nicht implementierte Ideen; sie beschreiben keine aktuellen Voraussetzungen oder Menüs.
 
 ## 1. Ziel des Systems
 
@@ -25,13 +27,13 @@ Dadurch wird die Auswahl vor dem Run zu einer echten Build-Entscheidung: Ein uni
 2. **Katapult** – Linien- und Belagerungsschaden; stark auf langen Straßen.
 3. **Kettenblitz** – Gruppen- und Kreuzungsspezialist.
 4. **Freeze** – Verlangsamung und Killzone-Support.
-5. **Minenleger** – legt begrenzte Minen auf Straßen; stark auf langen, kontrollierten Wegen.
+5. **Minenleger** – legt stapelbare Minen ohne feste Mengenobergrenze auf Straßen; stark auf langen, kontrollierten Wegen.
 
 Das Standard-Loadout enthält alle fünf. Damit bleibt die heutige Auswahl erhalten und wird um die fehlende fünfte Rolle ergänzt. Der Minenleger eignet sich besser als der Nekromant für den Einstieg: Seine Funktion ist sofort lesbar und verstärkt den Kern des Spiels – das Bauen guter Wege.
 
-### Nicht freigeschaltet
+### Weitere Turmrollen – Umsetzung und Vorschläge
 
-Neue Profile sehen weitere Turm-Silhouetten und deren grobe Rolle, aber keine vollständigen Werte oder Upgradebäume. Vorgeschlagene erste Unlock-Türme:
+Aktuell zeigt das Arsenal Balliste und Flammenturm mit Beschreibung und Kaufpreis; beide sind kaufbar. Nekromant, Giftalchemist und Verstärkerturm sind Vorschläge, noch nicht implementiert:
 
 | Turm | Rolle | Stärke | bewusste Schwäche |
 |---|---|---|---|
@@ -41,7 +43,7 @@ Neue Profile sehen weitere Turm-Silhouetten und deren grobe Rolle, aber keine vo
 | Flammenturm | Flächenkontrolle | anhaltender Flächenschaden | kurze Reichweite, schwächer gegen Feuerresistenz |
 | Verstärkerturm | Support | verbessert benachbarte Türme | verursacht selbst keinen Schaden |
 
-Diese fünf erweitern den Kader in der ersten Meta-Ausbaustufe auf zehn Typen. Weitere Türme sollten erst folgen, wenn jeder vorhandene Typ eine erkennbare Rolle und zwei brauchbare Upgradezweige besitzt.
+Mit allen fünf Erweiterungen würde der Kader zehn Typen umfassen; aktuell sind es sieben. Weitere Türme sollten erst folgen, wenn jeder vorhandene Typ eine erkennbare Rolle und zwei brauchbare Upgradezweige besitzt.
 
 ## 3. Loadout-Regeln
 
@@ -49,7 +51,7 @@ Diese fünf erweitern den Kader in der ersten Meta-Ausbaustufe auf zehn Typen. W
 
 Der Ablauf wird um einen Vorbereitungsbildschirm ergänzt:
 
-1. Startfestung wählen, sobald dieses System freigeschaltet ist.
+1. Startfestung wählen: noch nicht implementierter späterer Schritt.
 2. Fünf Turmtypen aus allen freigeschalteten Türmen wählen.
 3. Optional ein gespeichertes Loadout-Preset laden.
 4. Zusammenfassung mit Rollenabdeckung, Seed und gewählter Festung prüfen.
@@ -60,7 +62,7 @@ Die fünf Plätze dürfen keine Duplikate enthalten. Ein Run kann nicht mit weni
 ### Bauphase
 
 - Das Baumenü zeigt ausschließlich die fünf mitgenommenen Turmtypen.
-- Reihenfolge und Tastenkürzel entsprechen der Loadout-Reihenfolge 1–5.
+- Reihenfolge und Zifferntasten folgen dem gewählten Loadout.
 - Gesperrte Türme tauchen während eines Runs nicht als störende deaktivierte Einträge auf.
 - Upgradezweige gehören fest zum Turmtyp und benötigen vorerst keine eigenen Loadoutplätze.
 - Shrines und Bossbeute dürfen keine nicht mitgenommenen Türme anbieten. Belohnungen dürfen aber zeitlich begrenzte Modifikationen für Loadouttürme enthalten.
@@ -83,32 +85,32 @@ Der Spieler darf riskante Zusammenstellungen trotzdem starten. Diese Hinweise er
 
 ## 4. Meta-Währung: Diamanten
 
-Diamanten entstehen ausschließlich am Runende und werden nie während eines Runs ausgegeben. Run-Gold und Diamanten bleiben getrennt.
+Diamanten werden bei Game Over gutgeschrieben. Das Arsenal kann auch während eines Runs geöffnet werden; Käufe gelten für kommende Runs. Run-Gold und Diamanten bleiben getrennt.
 
-### Vorgeschlagene Berechnung
+### Implementierte Berechnung
 
-`Diamanten = Wave-Belohnung + Boss-Belohnung + Erstmeilensteine + Herausforderungen`
+`Diamanten = Wave-Belohnung + Boss-Belohnung + Erstmeilensteine`
 
 - Wave-Belohnung: `floor(erreichte Wave / 2)`.
-- Jeder besiegte regelmäßige Zehnerwellen-Boss: `+5`.
+- Jeder besiegte regelmäßige Boss (Wave 15, 25, 35 …): `+5`.
 - Jeder besiegte Erkundungsboss: `+3`.
 - Persönlicher Rekord: `+2` je neuem Zehnerwellen-Meilenstein, nur einmal pro Profil.
-- Tägliche oder runbezogene Herausforderungen kommen erst später hinzu und sind auf etwa `0–5` begrenzt.
+- Herausforderungen sind noch nicht implementiert; vorgeschlagene spätere Zusatzbelohnung: etwa `0–5`.
 
-Beispiele ohne Herausforderungen:
+Beispiele ohne Herausforderungen; Zehner-Meilensteine in dieser Tabelle wurden bereits in früheren Runs erreicht und zählen daher nicht erneut:
 
 | Run | Rechnung | Diamanten |
 |---|---|---:|
 | Ende in Wave 6 | 3 | 3 |
-| Ende in Wave 10, Boss nicht besiegt | 5 | 5 |
-| Ende in Wave 14, Boss in Wave 10 besiegt | 7 + 5 | 12 |
-| Ende in Wave 23, zwei Zehnerbosse und ein Erkundungsboss besiegt | 11 + 10 + 3 | 24 |
+| Ende in Wave 10, kein regulärer Boss | 5 | 5 |
+| Ende in Wave 15, Boss in Wave 15 besiegt | 7 + 5 | 12 |
+| Ende in Wave 25, zwei reguläre Bosse und ein Erkundungsboss besiegt | 12 + 10 + 3 | 25 |
 
-Ein aufgegebener Run darf seine bereits verdienten Diamanten behalten. Ein Neustart vor Wave 2 gibt keine Diamanten, damit wiederholte Sofortabbrüche keinen Fortschritt erzeugen.
+Aktuell zahlt ein manueller Neustart keine Diamanten für den abgebrochenen Run aus. Game Over vor Wave 2 bringt keine reine Wave-Belohnung; Bossbelohnungen werden separat berechnet. Eine Abrechnung beim freiwilligen Abbruch wäre ein späteres Feature.
 
 ## 5. Freischaltungsstruktur
 
-Die Meta-Progression verwendet einen übersichtlichen Pfad aus Kategorien statt eines riesigen linearen Skillbaums.
+Aktuell gibt es das Arsenal mit zwei kaufbaren Türmen und sieben Stufe-4-Unlocks. Die folgenden zusätzlichen Kategorien und Pfade sind Vorschläge.
 
 ### Kategorie A – Arsenal
 
@@ -122,7 +124,7 @@ Vorgeschlagene Kosten:
 - vierter: 70,
 - fünfter: 90.
 
-Die Reihenfolge ist nicht vollständig frei: Nach dem Tutorial kann der Spieler aus zwei oder drei sichtbaren Türmen wählen. Anschließend öffnen sich angrenzende Rollen. So entsteht persönliche Entwicklung, ohne dass ein Anfänger von zehn unbekannten Türmen überfordert wird.
+Noch nicht implementierter Vorschlag für spätere Unlocks: Die Reihenfolge ist nicht vollständig frei: Nach dem Tutorial kann der Spieler aus zwei oder drei sichtbaren Türmen wählen. Anschließend öffnen sich angrenzende Rollen. So entsteht persönliche Entwicklung, ohne dass ein Anfänger von zehn unbekannten Türmen überfordert wird.
 
 ### Kategorie B – Kartografie
 
@@ -158,7 +160,7 @@ Startfestungen verändern Regeln und besitzen möglichst einen Vorteil plus eine
 
 Permanente globale Boni wie `+20 % Schaden`, `+50 Startgold` oder zusätzliche Base-HP werden zunächst nicht eingeführt. Sie machen alte Runs rückwirkend leichter und erschweren das Balancing. Kleine Komfort-Unlocks sind erlaubt, wenn sie keine Kampfkraft erhöhen, etwa weitere Presets oder detailliertere Prognosen.
 
-## 6. Freischaltungsrhythmus
+## 6. Freischaltungsrhythmus – unbestätigte Balanceziele
 
 Das gewünschte Tempo:
 
@@ -169,9 +171,9 @@ Das gewünschte Tempo:
 
 Der erste Turm-Unlock sollte sehr früh erfolgen. Vorher hat der Spieler exakt fünf verfügbare Türme und damit noch keine Auswahl; erst der sechste Turm aktiviert den eigentlichen Loadoutgedanken.
 
-## 7. Meilensteine und Herausforderungen
+## 7. Meilensteine und Herausforderungen – spätere Vorschläge
 
-Neben Diamanten erhält das Profil einmalige Meilensteine. Sie erklären Systeme und belohnen unterschiedliche Spielweisen:
+Aktuell geben neue Zehnerwellen-Rekorde +2 Diamanten; Arsenal und Presets sind nicht an diese Wave-Meilensteine gebunden. Folgendes sind zusätzliche, noch nicht implementierte Vorschläge: Sie erklären Systeme und belohnen unterschiedliche Spielweisen:
 
 - Wave 10 erreichen: Arsenal-Freischaltung und Auswahl des ersten neuen Turms.
 - Ersten Boss besiegen: Bestiarium und Bossstatistik.
@@ -182,7 +184,9 @@ Neben Diamanten erhält das Profil einmalige Meilensteine. Sie erklären Systeme
 
 Herausforderungen dürfen keine bestimmte Freischaltung dauerhaft blockieren. Sie geben Diamanten, Kosmetik oder Abkürzungen, während Kerninhalte immer regulär kaufbar bleiben.
 
-## 8. UI- und Spielerfluss
+## 8. UI- und Spielerfluss – späteres Zielbild
+
+Aktuell gibt es HUD-Dropdowns, Arsenal-, Loadout- und Game-over-Overlays. Türme werden an-/abgewählt; bei fünf belegten Plätzen muss zuerst einer abgewählt werden. Neue Unlocks erscheinen sofort in der offenen Auswahl. Drag-and-drop, Sammlung, Wunsch-Unlock und Einführung sind noch nicht umgesetzt.
 
 ### Hauptmenü
 
@@ -218,11 +222,11 @@ Ein Wunsch-Unlock kann markiert werden; das System zeigt lediglich den Fortschri
 - Spezialisierte Loadouts dürfen stärker sein, wenn Kartenlayout und Gegnerwellen zu ihnen passen.
 - Loadoutgröße fünf bleibt während der ersten vollständigen Version konstant. Zusätzliche Slots wären ein massiver Machtzuwachs und verwässern die Entscheidung.
 - Neue Inhalte dürfen den Rewardpool nur betreten, wenn sie im Profil aktiviert sind. Optional kann die Sammlung später einzelne freigeschaltete Karten deaktivieren, Türme jedoch nur über das Loadout.
-- Kosten und Turmwerte werden pro Runversion gespeichert, damit ein Balancepatch keinen laufenden Run beschädigt.
+- Geplant für Run-Speicherung: Versionen und Änderungen von Kosten/Turmwerten berücksichtigen. Aktuell existieren keine persistenten Runs.
 
 ## 10. Technisches Datenmodell
 
-Die Regeln sollen datengetrieben bleiben.
+Die Regeln bleiben datengetrieben. Das folgende Schema ist eine vereinfachte Skizze, nicht der vollständige aktuelle Speichervertrag; verbindlich sind profile.js und freshState() in game.js.
 
 ```js
 profile = {
@@ -252,9 +256,9 @@ Validierung beim Laden:
 - Duplikate entfernen,
 - fehlende Plätze mit Starttürmen auffüllen,
 - bei beschädigtem Profil ein sicheres Standardprofil herstellen,
-- Profil und laufenden Run getrennt speichern.
+- Profil und laufenden Run getrennt behandeln; persistentes Speichern des Runs ist noch offen.
 
-Für den Browser-Prototyp reicht zunächst `localStorage` mit exportierbarem JSON-Backup. Vor dem ersten öffentlichen Release sollte es Versionsmigrationen und einen sichtbaren „Profil zurücksetzen“-Dialog geben.
+Der Browser-Prototyp speichert das Profil in `localStorage`; exportierbares JSON-Backup ist noch nicht umgesetzt. Vor dem ersten öffentlichen Release sollte es Versionsmigrationen und einen sichtbaren „Profil zurücksetzen“-Dialog geben.
 
 ## 11. Umsetzung in Etappen
 
@@ -286,12 +290,13 @@ Abnahmekriterium: Gleicher abgeschlossener Run kann seine Meta-Belohnung exakt e
 - [x] Daten zu Nutzung, Kaufhäufigkeit und erreichter Wave lokal statistisch erfassen.
 - [x] Für jeden Turm eine vierte Stufe ergänzen, die dauerhaft mit Diamanten freigeschaltet und im Run mit Gold gekauft wird.
 
-Abnahmekriterium: Mindestens drei deutlich verschiedene Fünfer-Loadouts sind spielbar und haben erkennbare Stärken und Schwächen.
+Abnahmekriterium: Technisch lassen sich verschiedene Fünfer-Loadouts zusammenstellen. Ziel für die noch offene Balanceprüfung: mindestens drei deutlich verschiedene, brauchbare Zusammenstellungen.
 
 ### Etappe 4 – Breite Meta-Progression
 
 - neue Karten und Gebäude,
 - Startfestungen mit Vorteil und Nachteil,
+- Hero mit Schwerpunkt auf Ausbau einer selbstverteidigenden Base; ob alle Heroes Base-Ausbau erhalten, bleibt offen,
 - Meilensteine und optionale Herausforderungen,
 - Sammlung, Bestiarium und Runhistorie,
 - Export/Import des Profils.
@@ -338,7 +343,7 @@ Erste Zielwerte für Balanceprüfungen:
 
 - Fünf Plätze sind eine feste strategische Grenze, kein früh kaufbarer Meta-Bonus.
 - Der Spieler besitzt anfangs fünf Turmtypen und startet mit einem gültigen Standard-Loadout.
-- Der Minenleger ist der fünfte Startturm; der komplexere Nekromant ist ein früher Meta-Unlock.
+- Der Minenleger ist der fünfte Startturm; der komplexere Nekromant bleibt ein späterer Vorschlag.
 - Meta-Fortschritt schaltet neue Möglichkeiten und die optionale vierte Turmstufe frei. Diese Stufe ist kein kostenloser globaler Bonus, sondern muss in jedem Run mit Gold gebaut werden.
-- Loadout, Profil und laufender Run werden getrennt gespeichert.
+- Loadout und Profil werden lokal gespeichert; der getrennte Runzustand lebt bislang nur im Arbeitsspeicher.
 - Diamanten werden am Runende transparent berechnet und niemals mit Run-Gold vermischt.

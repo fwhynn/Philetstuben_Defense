@@ -1,8 +1,8 @@
 # Hex Bastion läuft schlecht? Schritt für Schritt prüfen
 
-Diese Anleitung hilft, wenn das Spiel im Browser ruckelt, der Rechner stark ausgelastet ist oder die Lüfter hochdrehen. Sie ist für ein starkes System gedacht (z. B. Ryzen 9 7950X3D mit Radeon RX 7900 XTX), bei dem das Spiel eigentlich **kein Problem** sein sollte. Der häufigste Grund ist dann, dass der Browser **nicht die richtige Grafikkarte** oder **gar keine Hardwarebeschleunigung** nutzt.
+Diese Anleitung hilft, wenn das Spiel im Browser ruckelt, der Rechner stark ausgelastet ist oder die Lüfter hochdrehen. Sie ist für ein starkes System gedacht (z. B. Ryzen 9 7950X3D mit Radeon RX 7900 XTX), bei dem das Spiel eigentlich **kein Problem** sein sollte. Mögliche Ursachen sind fehlende Hardwarebeschleunigung, die GPU-Auswahl oder hohe Last durch Szene und Spiellogik.
 
-Das Spiel selbst ist genügsam: rund 3 MB Modelle und wenige tausend Dreiecke. Läuft es trotzdem schlecht, liegt es meist an der Browser- oder Windows-Einstellung, nicht am PC.
+Stand: 20.09.2026. Modellzahl, Gegnerzahl und Kartengröße sind gewachsen; frühere pauschale Angaben zu Modellgröße und Dreiecken gelten nicht als aktuelle Messung. Diese Anleitung ist für manuelle Prüfungen durch den Nutzer gedacht.
 
 ---
 
@@ -18,8 +18,8 @@ Hänge diese Zusätze hinter die Adresse des Spiels (zum Beispiel `http://localh
 
 **So liest du das Ergebnis:**
 
-- **Mit `?low` flüssig:** Die Grafik war zu anspruchsvoll für die Einstellung des Browsers. Weiter mit Schritt 2, denn eigentlich sollte deine Grafikkarte das locker schaffen.
-- **Mit `?svg` flüssig, aber 3D nicht:** Das Problem liegt bei WebGL bzw. der Grafikkarte im Browser. Weiter mit Schritt 2.
+- **Mit `?low` flüssig:** Die reduzierte Grafiklast hilft. Weiter mit Schritt 2, um die Hardwarebeschleunigung zu prüfen.
+- **Mit `?svg` flüssig, aber 3D nicht:** Die Ursache lässt sich auf die 3D-Darstellung oder deren zusätzliche Last eingrenzen. Weiter mit Schritt 2.
 - **Auch `?svg` ruckelt:** Dann liegt es wahrscheinlich nicht an der Grafik. Weiter mit Schritt 5.
 
 Der Renderer schaltet bei dauerhaft niedriger Bildrate in einer Wave auch **selbst** auf „niedrig“ und merkt sich das. Wenn du wieder die hohe Stufe willst, öffne die Adresse einmal mit `?high`.
