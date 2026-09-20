@@ -151,7 +151,7 @@ function create(host0,commands){
   const enemyGeometry={small:new THREE.SphereGeometry(9,14,10),boss:new THREE.SphereGeometry(15,16,12)},barGeometry=new THREE.PlaneGeometry(1,1);
   const ghostMaterials=new Map();
   function ghostMaterial(material,legal){
-    const id=material.uuid+legal;if(!ghostMaterials.has(id)){const m=material.clone();m.transparent=true;m.opacity=.72;m.depthWrite=false;if(!legal&&m.color) m.color.lerp(new THREE.Color('#d05a4a'),.45);ghostMaterials.set(id,m);}
+    const id=material.uuid+legal;if(!ghostMaterials.has(id)){const m=material.clone();m.transparent=false;m.opacity=1;if(m.color){const g=m.color.r*.3+m.color.g*.59+m.color.b*.11;m.color.lerp(new THREE.Color(g,g,g),.5);}ghostMaterials.set(id,m);}
     return ghostMaterials.get(id);
   }
   function addParts(group,parts,ghost,legal){for(const part of parts||[]){const mesh=new THREE.Mesh(part.geometry,ghost?ghostMaterial(part.material,legal):part.material);mesh.castShadow=!ghost;mesh.receiveShadow=true;group.add(mesh);}}
@@ -191,8 +191,8 @@ function create(host0,commands){
         inner.position.set(-template2.propCenter.x,0,-template2.propCenter.z);addParts(inner,template2.props,false,true);outer.add(inner);model.add(outer);
       }
     }
-    if(spec.proceduralRoads&&!ghost){
-      const road=template.parts.find(p=>/road/.test(p.material.name||''))?.material||fallbackMaterial;
+    if(spec.proceduralRoads){
+      const roadBase=template.parts.find(p=>/road/.test(p.material.name||''))?.material||fallbackMaterial,road=ghost?ghostMaterial(roadBase,true):roadBase;
       for(const points of HexMap.roadGeometry(tile).legs.values()) holder.add(ribbon(points.map(p=>({x:p.x-c.x,y:p.y-c.y})),road));
     }
     return holder;
@@ -305,7 +305,7 @@ function create(host0,commands){
     const sig=targetList.map(t=>t.q+','+t.r+(t.legal?'+':'-')).join(';');if(sig===targetSig) return;targetSig=sig;clearGroup(layer.targets);pickDirty=true;
     for(const target of targetList){
       const c=axialToWorld(target.q,target.r),group=new THREE.Group();group.position.set(c.x,0,c.y);
-      const glow=new THREE.Mesh(flatHex,target.legal?mats.legal:mats.illegal);glow.renderOrder=1;group.add(glow);
+      const glow=new THREE.Mesh(flatHex,target.legal?mats.legal:mats.illegal);glow.renderOrder=1;glow.userData.glow=key(target.q,target.r);group.add(glow);
       const pick=new THREE.Mesh(hexPickGeometry,invisible);pick.userData.pick={kind:'target',q:target.q,r:target.r,legal:target.legal};group.add(pick);layer.targets.add(group);
     }
   }
@@ -321,6 +321,7 @@ function create(host0,commands){
         const c=axialToWorld(target.q,target.r),ring=new THREE.Mesh(outline,target.legal?mats.outlineLegal:mats.outlineIllegal);ring.position.set(c.x,0,c.y);layer.ghost.add(ring);
       }
     }
+    for(const g of layer.targets.children) for(const m of g.children) if(m.userData.glow) m.visible=!(show&&m.userData.glow===hovered);
     if(show){const c=axialToWorld(target.q,target.r),screen=project({x:c.x,y:c.y+HEX+8},0);if(screen){rotateHint.style.display='block';rotateHint.style.left=screen.x+'px';rotateHint.style.top=screen.y+'px';}}
     else rotateHint.style.display='none';
   }
