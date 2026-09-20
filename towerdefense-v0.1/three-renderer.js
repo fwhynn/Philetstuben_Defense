@@ -125,7 +125,7 @@ function create(host0,commands){
   const slotPick=new THREE.CylinderGeometry(16,16,10,10).translate(0,5,0),towerPick=new THREE.CylinderGeometry(17,17,48,8).translate(0,24,0),buildingPick=new THREE.BoxGeometry(32,40,32).translate(0,20,0);
   const ringGeometry=(outer,inner)=>{const shape=new THREE.Shape(),hole=new THREE.Path();for(let i=0;i<6;i++){const a=Math.PI/6+i*STEP;(i?shape.lineTo:shape.moveTo).call(shape,Math.cos(a)*outer,Math.sin(a)*outer);(i?hole.lineTo:hole.moveTo).call(hole,Math.cos(a)*inner,Math.sin(a)*inner);}shape.holes.push(hole);return new THREE.ShapeGeometry(shape).rotateX(-Math.PI/2).translate(0,2.5,0);};
   const outline=ringGeometry(HEX-3,HEX-7),circle=new THREE.CircleGeometry(1,64).rotateX(-Math.PI/2),circleRing=new THREE.RingGeometry(.985,1,64).rotateX(-Math.PI/2);
-  const torus=new THREE.TorusGeometry(1,.09,6,28).rotateX(Math.PI/2),hintGeometry=new THREE.ConeGeometry(5,11,6),beam=new THREE.CylinderGeometry(1,1,1,6);
+  const torus=new THREE.TorusGeometry(1,.09,6,28).rotateX(Math.PI/2),slotDiamondGeometry=new THREE.OctahedronGeometry(5),hintGeometry=new THREE.ConeGeometry(5,11,6),beam=new THREE.CylinderGeometry(1,1,1,6);
   const basic=(color,opacity=1)=>new THREE.MeshBasicMaterial({color,transparent:opacity<1,opacity,depthWrite:opacity>=1});
   const std=(color,extra={})=>new THREE.MeshStandardMaterial({color,roughness:.85,metalness:0,...extra});
   // ---- Effekt-Pools: alle Strahlen, Spitzen, Blitze und Funken laufen über wenige InstancedMeshes (kaum Draw-Calls) ----
@@ -305,13 +305,14 @@ function create(host0,commands){
       const id=key(tile.q,tile.r),sig=objectSig(tile);seen.add(id);
       const record=objectRecords.get(id);if(record?.sig===sig) continue;
       if(record) layer.objects.remove(record.group);
-      const group=new THREE.Group(),towers=[],picks=[],slots=slotPositions(tile);
+      const group=new THREE.Group(),towers=[],picks=[],slotHints=[],slots=slotPositions(tile);
+      if(tile.type==='base'){const pick=new THREE.Mesh(buildingPick,invisible);pick.scale.set(2,2,2);pick.userData.pick={kind:'base'};group.add(pick);picks.push(pick);}
       (tile.towers||[]).forEach((tower,i)=>{
         if(tower){const obj=towerObject(tile,i,tower);group.add(obj.holder);towers.push(obj);picks.push(obj.pick);}
-        else if(slots[i]){const pick=new THREE.Mesh(slotPick,invisible);pick.position.set(slots[i].x,0,slots[i].y);pick.userData.pick={kind:'slot',q:tile.q,r:tile.r,index:i};group.add(pick);picks.push(pick);}
+        else if(slots[i]){const glow=new THREE.Mesh(slotDiamondGeometry,mats.slot);glow.material.depthTest=false;glow.renderOrder=14;glow.position.set(slots[i].x,22,slots[i].y);group.add(glow);slotHints.push(glow);const pick=new THREE.Mesh(slotPick,invisible);pick.position.set(slots[i].x,0,slots[i].y);pick.userData.pick={kind:'slot',q:tile.q,r:tile.r,index:i};group.add(pick);picks.push(pick);}
       });
       for(let i=0;i<(tile.buildingSlots||0);i++){const b=buildingObject(tile,i,tile.buildings?.[i]);group.add(b.group);picks.push(b.pick);}
-      layer.objects.add(group);objectRecords.set(id,{sig,group,towers,picks});pickDirty=true;
+      layer.objects.add(group);objectRecords.set(id,{sig,group,towers,picks,slotHints});pickDirty=true;
     }
     for(const [id,record] of [...objectRecords]) if(!seen.has(id)){layer.objects.remove(record.group);objectRecords.delete(id);pickDirty=true;}
   }
@@ -344,12 +345,14 @@ function create(host0,commands){
 
   // ---- Auswahl, Reichweite, Upgrade-Hinweise ----
   function syncSelection(){
+    for(const record of objectRecords.values())for(const hint of record.slotHints||[])hint.visible=state.showSlotHints!==false&&['build','wave'].includes(state.phase)&&state.hp>0;
     const selected=state.selectedTower||state.hoverTower||(state.previewTower?state.selectedSlot:null);
     const tile=selected&&state.map.get(key(selected.q,selected.r)),tower=tile?.towers[selected.index],type=tower?.type||state.previewTower;
     if(tile&&type){
       const p=slotPositions(tile)[selected.index],def=HexData.towerDefinition(tower||{type,tileType:tile.type});
       for(const m of [rangeFill,rangeRing]){m.visible=true;m.position.set(p.x,.8,p.y);m.scale.setScalar(def.range);m.material.color.set(def.color);}
     }else rangeFill.visible=rangeRing.visible=false;
+    if(state.selectedBase&&!state.hoverTower){const weapon=HexHeroes.weapon(state);if(weapon)for(const mesh of [rangeFill,rangeRing]){mesh.visible=true;mesh.position.set(0,.8,0);mesh.scale.setScalar(weapon.range);mesh.material.color.set(weapon.color);}}
     const marked=state.selectedTower||state.selectedSlot,markedTile=marked&&state.map.get(key(marked.q,marked.r)),markedPos=markedTile&&slotPositions(markedTile)[marked.index];
     if(markedPos){selectRing.visible=true;selectRing.position.set(markedPos.x,3,markedPos.y);selectRing.scale.setScalar(state.selectedTower?24:18);}else selectRing.visible=false;
     const canHint=['build','wave'].includes(state.phase)&&state.hp>0;
@@ -509,6 +512,7 @@ function create(host0,commands){
     console.info('Hex Bastion: Grafik automatisch auf "niedrig" gestellt (?high in der Adresse stellt sie zurück).');
   }
   function loop(now){
+    for(const record of objectRecords.values())for(const diamond of record.slotHints||[])if(diamond.visible){diamond.rotation.y=now*.0006;diamond.position.y=22+Math.sin(now*.0022+diamond.position.x)*3;}
     raf=requestAnimationFrame(loop);
     // Bildrate begrenzen: 60/s während einer Wave, sonst 30/s. Schont vor allem 120/144-Hz-Bildschirme und Laptops.
     const running=!!state?.waveRunning,interval=running?1000/60:1000/30;
@@ -590,6 +594,7 @@ function create(host0,commands){
       else if(hit.kind==='target') commands.placeTile(hit.q,hit.r);
       else if(hit.kind==='slot') commands.selectSlot(hit.q,hit.r,hit.index);
       else if(hit.kind==='tower') commands.selectTower(hit.q,hit.r,hit.index);
+      else if(hit.kind==='base') commands.selectBase?.();
       else if(hit.kind==='building') commands.selectBuilding(hit.q,hit.r,hit.index);
     }),
     on('pointercancel',()=>{hoverBuildingKey=null;commands.hoverBuilding?.(null);drag=null;press=null;dom.style.cursor='';}),
@@ -601,7 +606,7 @@ function create(host0,commands){
   return {render,reset,project,rotateView,zoom:factor=>zoom(factor),resetView:()=>resetView(true),getView,
     destroy(){
       destroyed=true;cancelAnimationFrame(raf);resize.disconnect();for(const [name,fn,options] of listeners) dom.removeEventListener(name,fn,options);
-      clearOverlays();gridGeometry.dispose();buffGeometry.dispose();gridMaterial.dispose();buffMaterial.dispose();buffBorderMaterial.dispose();
+      clearOverlays();slotDiamondGeometry.dispose();gridGeometry.dispose();buffGeometry.dispose();gridMaterial.dispose();buffMaterial.dispose();buffBorderMaterial.dispose();
       gl.dispose();host.remove();wrap.classList.remove('is3d');if(hintText) hintText.textContent=oldHint;host0.style.display='';
     }};
 }

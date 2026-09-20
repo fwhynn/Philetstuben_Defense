@@ -71,10 +71,10 @@ test('connecting boss activates it without gold or an automatic enemy spawn',()=
 
 
 
-test('hidden shrine effects are seeded per coordinate and cover all four bonus kinds',()=>{
-  const {rules}=load(),landmarks=new Map(),counts={remove:0,card:0,epic:0,legendary:0};landmarks.seed=56789;
+test('hidden shrine effects are seeded per coordinate and cover all six bonus kinds',()=>{
+  const {rules}=load(),landmarks=new Map(),counts={remove:0,card:0,epic:0,legendary:0,repair:0,upgrade:0};landmarks.seed=56789;
   for(let q=0;q<100;q++) for(let r=0;r<100;r++){const id=q+','+r;landmarks.set(id,{q,r,type:'shrine'});const effect=rules.shrineEffect(landmarks,id);assert.equal(effect,rules.shrineEffect(landmarks,id));counts[effect]++;}
-  assert.ok(counts.remove>2500&&counts.remove<3500);assert.ok(counts.card>2500&&counts.card<3500);assert.ok(counts.epic>2500&&counts.epic<3500);assert.ok(counts.legendary>700&&counts.legendary<1300);
+  for(const type of ['remove','card','epic'])assert.ok(counts[type]>1700&&counts[type]<2300);assert.ok(counts.legendary>700&&counts.legendary<1300);for(const type of ['repair','upgrade'])assert.ok(counts[type]>1200&&counts[type]<1800);
 });
 
 

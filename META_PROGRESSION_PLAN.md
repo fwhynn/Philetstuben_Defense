@@ -2,7 +2,7 @@
 
 Stand: 20.09.2026, einschließlich lokaler Änderungen. Status: Umsetzungsstand und Designplan. Etappe 1 bis 3 sind umgesetzt. Das Meta-Arsenal enthält Balliste, Flammenturm und eine dauerhaft freischaltbare vierte Stufe für jeden vorhandenen Turm. Der komplexere Nekromant bleibt für eine spätere Erweiterung.
 
-Aktueller Stand: Loadout, Diamanten, Arsenal, drei Presets und Turmstatistiken sind umgesetzt. Abschnitte mit „Vorschlag“ oder „Zielbild“ sind nicht implementierte Ideen; sie beschreiben keine aktuellen Voraussetzungen oder Menüs.
+Aktueller Stand: Loadout, Diamanten, Arsenal, drei Presets, Turmstatistiken sowie drei frei wählbare Heroes und Base-Ausbau sind umgesetzt. Hero-/Base-Werte stehen in der App-README und heroes.js; Freischaltungsmeilensteine für Heroes sind weiterhin Zukunftsvorschläge. Abschnitte mit „Vorschlag“ oder „Zielbild“ sind nicht implementierte Ideen; sie beschreiben keine aktuellen Voraussetzungen oder Menüs.
 
 ## 1. Ziel des Systems
 
@@ -51,7 +51,7 @@ Mit allen fünf Erweiterungen würde der Kader zehn Typen umfassen; aktuell sind
 
 Der Ablauf wird um einen Vorbereitungsbildschirm ergänzt:
 
-1. Startfestung wählen: noch nicht implementierter späterer Schritt.
+1. Startfestung wählen: Standard, Festungsbauer oder Händler; alle drei derzeit frei verfügbar.
 2. Fünf Turmtypen aus allen freigeschalteten Türmen wählen.
 3. Optional ein gespeichertes Loadout-Preset laden.
 4. Zusammenfassung mit Rollenabdeckung, Seed und gewählter Festung prüfen.
@@ -292,11 +292,13 @@ Abnahmekriterium: Gleicher abgeschlossener Run kann seine Meta-Belohnung exakt e
 
 Abnahmekriterium: Technisch lassen sich verschiedene Fünfer-Loadouts zusammenstellen. Ziel für die noch offene Balanceprüfung: mindestens drei deutlich verschiedene, brauchbare Zusammenstellungen.
 
-### Etappe 4 – Breite Meta-Progression
+### Etappe 4 – Breite Meta-Progression (teilweise umgesetzt)
+
+Umgesetzt sind drei Startprofile/Base-Ausbau sowie ein erstes Run-Inhaltspaket: zwei Hexkarten, Heilquelle/Werksegen und alternative Bosssegen. Zusätzliche Meta-Kategorien, Sammlung, Runhistorie und Profil-Export/-Import bleiben offen.
 
 - neue Karten und Gebäude,
-- Startfestungen mit Vorteil und Nachteil,
-- Hero mit Schwerpunkt auf Ausbau einer selbstverteidigenden Base; ob alle Heroes Base-Ausbau erhalten, bleibt offen,
+- Erste drei Startfestungen mit Vorteil und Nachteil umgesetzt; weitere Profile später,
+- Base-Ausbau für alle Heroes umgesetzt; Festungsbauer mit günstigeren Upgrades und einer dritten Stufe,
 - Meilensteine und optionale Herausforderungen,
 - Sammlung, Bestiarium und Runhistorie,
 - Export/Import des Profils.

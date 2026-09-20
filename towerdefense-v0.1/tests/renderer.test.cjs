@@ -1,5 +1,12 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+test('free slot hints disappear when disabled or occupied',()=>{
+  const {renderer,svg,state}=setup();state.phase='build';state.hand=[];
+  const tile={q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[null]};state.map.set('1,0',tile);
+  const hints=()=>svg.children[2].children.filter(p=>p.attributes['data-slot-hint']);
+  renderer.render(state);assert.equal(hints().length,1);state.showSlotHints=false;renderer.render(state);assert.equal(hints().length,0);
+  state.showSlotHints=true;tile.towers[0]={type:'archer'};renderer.render(state);assert.equal(hints().length,0);
+});
 test('grid and building highlights toggle independently and building hover emits commands',()=>{
   const {renderer,svg,calls,state}=setup();
   state.map.set('1,0',{q:1,r:0,type:'village',rotation:0,roads:[0,2],slots:0,towers:[],buildingSlots:1,buildings:[{type:'forge'}]});

@@ -156,3 +156,13 @@ html,body{height:100%;overflow:hidden}
 .dropdownArrow{display:inline-block;transition:transform .15s ease}
 .statDetails[open]>summary .dropdownArrow{transform:rotate(180deg)}
 .statDetails[open]>summary{border-color:var(--accent)}
+
+.heroChoices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:16px 0}.heroChoices .loadoutChoice{display:flex;flex-direction:column;gap:8px;text-align:left}#baseDropdown .statPopup button{display:block;width:100%;margin:8px 0;text-align:left}@media(max-width:650px){.heroChoices{grid-template-columns:1fr}}
+
+/* Pop-ups stay inside the measured band between essential controls. */
+.towerPanel,.drawer,.hud .statPopup,.tutorialPanel{box-sizing:border-box;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+.tutorialPanel{position:fixed;left:16px;top:110px;width:min(310px,calc(100vw - 32px));padding:14px;border:1px solid #d7c079;border-radius:12px;background:#1d2922f5;z-index:8;color:var(--text)}
+.tutorialPanel p{font-size:14px;line-height:1.45}.tutorialPanel.hidden{display:none}
+
+.message.tutorialActive{opacity:1;animation:none;pointer-events:auto;overflow:auto}.message .tutorialPanel{position:static;width:auto;max-width:none;padding:0;border:0;background:transparent;box-shadow:none;text-align:center}.message .tutorialPanel p{margin:6px 0}.message .tutorialPanel button{padding:4px 10px;font-size:12px}.message .hidden{display:none}
+.slotDiamondFloat{animation:slotFloat 2.8s ease-in-out infinite}.slotDiamondTurn{transform-box:fill-box;transform-origin:center;animation:slotTurn 6s linear infinite}@keyframes slotFloat{50%{transform:translateY(-5px)}}@keyframes slotTurn{50%{transform:scaleX(.28)}100%{transform:scaleX(1)}}@media(prefers-reduced-motion:reduce){.slotDiamondFloat,.slotDiamondTurn{animation:none}}

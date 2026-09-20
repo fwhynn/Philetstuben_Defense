@@ -10,7 +10,7 @@ Ein Tower-Defense-Roguelite auf einer Hex-Karte, die du selbst baust. Du legst S
 
 **Map bauen → Türme setzen → Wave überleben → Deck erweitern.**
 
-- Du startest mit einer festen Base (20 HP, 70 Gold) und fünf Hex-Karten.
+- Du startest mit einer festen Base und fünf Hex-Karten; das Hero-Profil bestimmt HP und Gold (Standard: 20 HP, 70 Gold).
 - Jede Runde ziehst du drei Karten, legst genau eine an die bestehende Straße an und baust danach Türme und Gebäude.
 - Jedes offene Straßenende ist eine Front. Gegner wählen an Gabelungen unabhängig zwischen schleifenfreien Wegen zur Base, auch längeren Umwegen.
 - Alle zwei Waves darfst du dein Deck um eine von drei Karten erweitern.
@@ -61,7 +61,9 @@ Ohne WebGL fällt das Spiel automatisch auf die SVG-Ansicht zurück. Bricht die 
 
 ## Inhalte
 
-- **18 Hex-Karten** in fünf Raritäten, von der einfachen Geraden bis zur Kriegskreuzung mit Schadensbonus.
+- **Drei Startprofile:** Standardfestung, Festungsbauer und Händlerstadt. Alle erhalten Base-Ausbau für Mauern und eine automatische Verteidigungswaffe; der Festungsbauer besitzt günstigere Upgrades und eine dritte Stufe.
+
+- **20 Hex-Karten** in fünf Raritäten, von der einfachen Geraden bis zur Kriegskreuzung mit Schadensbonus.
 - **5 Starttürme** plus freischaltbare Balliste und Flammenturm, jeweils mit zwei Upgrade-Zweigen und einer Endstufe. Pro Run werden genau fünf ausgewählt.
 - **3 Gebäude** auf Dorf-Hexen: Haus (Gold), Schmiede (Schaden), Markt (Rabatt).
 - **Gegnertypen** mit gestaffeltem Schutz im Fantasy-Stil: Kobold-Schwarm (ungeschützt), grüner Kiwi-Krieger (normal, leichte Rüstung), Ork-Wächter (gepanzert), Goblin-Runenmeister (magiegeschützt) und der Obsidian-Wächter als Boss. Gegner können einander durchlaufen und überholen.
@@ -100,7 +102,7 @@ cd towerdefense-v0.1
 node --test tests/*.test.cjs
 ```
 
-Zuletzt 133 Tests bestanden (20.09.2026). Sie prüfen Spiellogik, Kampf (inklusive Durchlaufen und Überholen), Wellen, Profil und Meta-Progression, Deck, Exploration, Kamera, den SVG-Renderer und die Modellzuordnung. Die jüngsten Darstellungsänderungen sind nicht im Browser geprüft; diese Prüfung übernimmt der Nutzer.
+Zuletzt 149 Tests bestanden (20.09.2026). Sie prüfen Spiellogik, Kampf (inklusive Durchlaufen und Überholen), Wellen, Profil und Meta-Progression, Deck, Exploration, Kamera, den SVG-Renderer und die Modellzuordnung. Die jüngsten Darstellungsänderungen sind nicht im Browser geprüft; diese Prüfung übernimmt der Nutzer.
 
 ## Eigene Modelle
 
@@ -112,7 +114,7 @@ Vorhanden sind Tiles, Sonderfelder, alle sieben Türme, alle fünf Gegner, die d
 
 Fest vorgemerkt, noch nicht umgesetzt:
 
-- Verschiedene Starthelden und Startfestungen, darunter ein Spezialist für den Ausbau einer selbstverteidigenden Base
+- Weitere Heroes, Festungen und Base-Ausbaupfade; drei Startprofile und zwei Ausbaupfade sind bereits umgesetzt
 - Erweiterung des vorhandenen Meta-Arsenals um weitere Inhalte; Balliste, Flammenturm, Stufe-4-Upgrades und drei Presets sind umgesetzt
 - Weitere Biome, Karten, Türme (unter anderem Nekromant) und Bossbeute
 - Schwierigkeitsstufen und ein Hardcore-Modus

@@ -4,6 +4,30 @@ Die folgenden Einträge dokumentieren frühere Zwischenstände. Verbindlicher ak
 
 # Hex Bastion – V0.7-dev
 
+## V0.7 – Tutorial im Hinweisfeld und neue Run-Belohnungen
+
+- Festes `/20` hinter der dynamischen HP-Anzeige entfernt. Mauern zeigen nun beispielsweise `25/25` statt `25/25/20`.
+- Tutorial verwendet das mittige Hinweisfeld, bleibt dort während der Einführung sichtbar und ersetzt die normalen Hinweissätze. Freie Turmplätze zeigen schwebende, langsam rotierende Diamanten statt Ringen; weiterhin abschaltbar.
+- Versorgungsweg (Rare, ein Slot, +2 Einkommen) und Signalkreuzung (Epic, zwei Slots, +20 % Reichweite) ergänzt, mit bestehenden passenden Straßenmodellen.
+- Neue Shrine-Verteilung: je 20 % Entfernen/Karte/Epic, 10 % Legendary, je 15 % Heilquelle/Werksegen. Heilung bis fünf HP, kostenlose normale Turm-Upgrades oder 30 Gold als Ersatz bei voller HP/fehlenden Upgrades.
+- Bossbeute: statt einer Karte optional +5 maximale/aktuelle Base-HP oder +2 Einkommen je künftiger Wave, jeweils nur für diesen Run.
+- 149 automatisierte Tests bestanden; keine Browsertests durchgeführt.
+
+## V0.7 – Base-Kaufbedingungen, freie Menüflächen und Einstieg
+
+- Base-Ausbau jetzt auch während der Hex-Platzierung; Kaufprüfung und Oberfläche teilen sich dieselben Sperrgründe für Gold, Phase, Game Over und Maximalstufe.
+- Kontextmenüs, Drawer und HUD-Dropdowns bleiben zwischen den gemessenen festen Bedienelementen. Lange Menüs scrollen; Positionierung wird nach Größen- und UI-Änderungen angepasst.
+- Optionale goldene Markierungen freier Turmplätze in SVG und 3D, standardmäßig aktiv und lokal gespeichert.
+- Erststart-Tutorial mit echten Spielaktionen, Überspringen, gespeichertem Abschluss und Wiederholung über Einstellungen. Auto-Start wartet während der Einführung.
+- 143 automatisierte Tests bestanden, inklusive Kaufphasen, kompakter Menüflächen, Tutorialablauf und Slotmarkierungen. Keine Browsertests durchgeführt.
+
+## V0.7 – Heroes und selbstverteidigende Base
+
+- Gemeinsame Hero-/Festungsauswahl vor jedem Run: Standard, Festungsbauer und Händlerstadt, zunächst frei verfügbar. Bestätigte Auswahl bleibt im Profil, ein laufender Run bleibt davon unabhängig.
+- Base-Menü über die Karte und den HUD-Button: Mauern erhöhen aktuelle/maximale HP, eine automatische Waffe verteidigt die Base. Käufe mit Run-Gold, zwei Stufen für Standard/Händler; Festungsbauer erhält Rabatt und eine dritte Stufe.
+- Händler startet mit mehr Gold und verdient zusätzliches Wave-Einkommen, hat aber weniger HP und eine schwächere Base-Waffe. Werte und Kosten stehen in der App-README; sie sind noch nicht spielerisch balanciert.
+- Bestehende Profile erhalten Standard als Hero. Neustarts setzen Base-Upgrades zurück. 138 automatisierte Tests bestanden; keine Browsertests durchgeführt.
+
 ## V0.7 – Kamera-Hotkeys, Reichweite und späterer erster Boss
 
 - Q/E drehen die 3D-Kamera nach links/rechts, auch wiederholt beim Gedrückthalten. G schaltet das Hex-Grid samt gespeicherter Einstellung um; die Hotkeys stehen in den Einstellungen.
