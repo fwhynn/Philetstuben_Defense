@@ -36,5 +36,5 @@ if (version === previousVersion) {
 }
 
 git(['tag', '-a', tag, '-m', tag], { stdio: 'inherit' });
-git(['push', 'origin', tag], { stdio: 'inherit' });
+// git(['push', 'origin', tag], { stdio: 'inherit' });
 console.log(`Tagged ${tag}`);
