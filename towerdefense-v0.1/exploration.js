@@ -21,16 +21,34 @@ const HexExploration=(()=>{
     for(const [id,cell] of cells){
       if(landmarks.surveyed.has(id)) continue;landmarks.surveyed.add(id);
       const baseDistance=distance(cell,{q:0,r:0});if(baseDistance<3||map.has(id)||landmarks.has(id)) continue;
-      const roll=hash(landmarks.seed||0,cell.q,cell.r);
-      if(roll<.045){const kind=hash((landmarks.seed||0)^1234567,cell.q,cell.r),type=kind<.55?'treasure':kind<.85?'shrine':'boss';if(type==='boss'&&baseDistance<=4)continue;landmarks.set(id,{q:cell.q,r:cell.r,type,claimed:false,prefab:prefab(landmarks.seed||0,cell,type)});}
+      const type=eventType(landmarks.seed||0,cell);
+      if(type) landmarks.set(id,{q:cell.q,r:cell.r,type,claimed:false,prefab:prefab(landmarks.seed||0,cell,type)});
     }
     return cells;
   }
   function bossProfile(wave){const hp=240+wave*36;return {type:'boss',name:'Wächter',hp,armorHp:Math.round(hp*.25),magicHp:Math.round(hp*.2),speed:24,baseDamage:5,killGold:50};}
+  function eventType(seed,position){
+    const baseDistance=distance(position,{q:0,r:0});
+    if(baseDistance<3||hash(seed,position.q,position.r)>=.045) return null;
+    const kind=hash(seed^1234567,position.q,position.r),type=kind<.55?'treasure':kind<.85?'shrine':'boss';
+    return type==='boss'&&baseDistance<=4?null:type;
+  }
   function prefab(seed,position,type){
     const shapes=[['straight',[0,3]],['smallCurve',[0,1]],['bigCurve',[0,2]],['tee',[0,2,4]],['tJunction',[0,2,3]]];
     const rotation=Math.floor(hash(seed^97531,position.q,position.r)*6),shape=shapes[Math.floor(hash(seed^86420,position.q,position.r)*shapes.length)];
-    return {type:type==='boss'?'fullCross':shape[0],roads:type==='boss'?[0,1,2,3,4,5]:shape[1].map(d=>(d+rotation)%6),rotation:type==='boss'?0:rotation,slots:type==='boss'?0:1};
+    const make=(shape,rotation)=>({type:shape[0],roads:shape[1].map(d=>(d+rotation)%6),rotation,slots:type==='boss'?0:1});
+    if(type==='boss') return make(['fullCross',[0,1,2,3,4,5]],0);
+    // Inspect seeded neighbors even outside the surveyed region. Existing fields
+    // keep their geometry when exploration later reveals an adjacent event.
+    const required=[];
+    for(let d=0;d<6;d++) if(eventType(seed,HexMap.neighbor(position.q,position.r,d))) required.push(d);
+    const original=make(shape,rotation);
+    if(required.every(d=>original.roads.includes(d))) return original;
+    const candidates=[];
+    for(const candidate of shapes) for(let turn=0;turn<6;turn++){
+      const p=make(candidate,turn);if(required.every(d=>p.roads.includes(d))) candidates.push(p);
+    }
+    return candidates.length?candidates[Math.floor(hash(seed^86420,position.q,position.r)*candidates.length)]:make(['fullCross',[0,1,2,3,4,5]],0);
   }
   function attach(state){
     const result={gold:0,count:0,bosses:0};let changed=true;

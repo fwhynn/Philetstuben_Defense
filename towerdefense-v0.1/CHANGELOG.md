@@ -4,6 +4,12 @@ Die folgenden Einträge dokumentieren frühere Zwischenstände. Verbindlicher ak
 
 # Hex Bastion – V0.7-dev
 
+## V0.7 – Verbundene benachbarte Eventfelder
+
+- Benachbarte Sonderfelder erhalten passende Straßen auf beiden Seiten ihrer gemeinsamen Kante. Ihre Form berücksichtigt seedbasiert auch Nachbarn außerhalb des aktuell erkundeten Bereichs, ohne bereits erzeugte Felder nachträglich zu drehen.
+- Schatz und Shrine verwenden bevorzugt die bisherigen Formen; wenn diese nicht alle benachbarten Eventfelder verbinden können, kommt eine Sechserkreuzung mit einem Turmplatz zum Einsatz.
+- Regressionstest über 100 Seeds inklusive späterer Erkundung und unterschiedlicher Erkundungsreihenfolge. 123 automatisierte Tests bestanden; Browsertest übernimmt der Nutzer.
+
 ## V0.7 – Angriffseffekte (Schritt 1)
 
 - Archer und Balliste schießen sichtbare Pfeile und Bolzen im Bogenflug (Spitze, Federn, Schweif, Aufprallfunke). Das Katapult wirft einen Felsbrocken, der die Schusslinie entlang hüpft, mit Staub an den getroffenen Gegnern. Der Kettenblitz ist ein gezackter, flackernder Blitz mit Glühen und Funken an jedem Treffer.

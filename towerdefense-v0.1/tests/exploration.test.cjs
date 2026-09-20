@@ -1,6 +1,24 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 function load(){const context={};for(const file of ['random.js','map.js','exploration.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../'+file),'utf8'),context);vm.runInNewContext('globalThis.mapRules=HexMap;globalThis.rules=HexExploration;globalThis.random=HexRandom.create;',context);return context;}
+test('adjacent events connect on both sides, including across later exploration boundaries',()=>{
+  const {rules,random,mapRules:m}=load();let pairs=0,boundaryPairs=0;
+  for(let seed=0;seed<100;seed++){
+    const landmarks=rules.create(random('adjacent-'+seed)),old=new Map([...landmarks].map(([id,l])=>[id,JSON.stringify(l.prefab)]));
+    rules.expand(landmarks,new Map([['6,0',{q:6,r:0}],['-6,0',{q:-6,r:0}]]));
+    for(const [id,geometry] of old) assert.equal(JSON.stringify(landmarks.get(id).prefab),geometry);
+    for(const [id,l] of landmarks) for(let d=0;d<6;d++){
+      const n=m.neighbor(l.q,l.r,d),nid=m.key(n.q,n.r),other=landmarks.get(nid);if(!other)continue;
+      pairs++;if(old.has(id)!==old.has(nid))boundaryPairs++;
+      assert.ok(l.prefab.roads.includes(d),`seed ${seed}: ${id} must connect to ${nid}`);
+      assert.ok(other.prefab.roads.includes(m.OPP(d)));
+    }
+    const reverse=rules.create(random('adjacent-'+seed));
+    rules.expand(reverse,new Map([['-6,0',{q:-6,r:0}],['6,0',{q:6,r:0}]]));
+    for(const [id,l] of landmarks)assert.equal(JSON.stringify(reverse.get(id)),JSON.stringify(l));
+  }
+  assert.ok(pairs>0);assert.ok(boundaryPairs>0);
+});
 test('landmarks are distinct, seeded and outside the starting clear area',()=>{
   const {rules,random}=load(),first=rules.create(random('exploration')),second=rules.create(random('exploration'));
   assert.ok(first.size>0);assert.equal(JSON.stringify([...first]),JSON.stringify([...second]));

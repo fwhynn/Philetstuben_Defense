@@ -3,6 +3,7 @@
 Stand: 19.09.2026. Kompakte Übersicht über Ziele, Entscheidungen und spätere Ideen. Ausführlicher Verlauf: [Übergabeprotokoll](README_TowerDefense_Projekt.md). Technische Grenzen: [Architektur](towerdefense-v0.1/ARCHITECTURE.md). Änderungen: [App-README](towerdefense-v0.1/README.md).
 
 ## Festgelegte Richtung
+- Arbeitsweise: Keine eigenständigen Browsertests, außer ausdrücklich angefordert. Der Nutzer übernimmt die Prüfung im Browser; gezielte automatisierte Logiktests bleiben möglich.
 - Hex-Tower-Defense mit Straßenbau und Map-Deckbuilding.
 - Finale Darstellung: stilisiertes 3D wie Dorfromantik. Spiellogik und Daten rendererunabhängig halten; SVG-Kartendarstellung jetzt über Renderer-Schnittstelle; Weltursprung (Base 0,0) und Kameramodell getrennt; Run-/HUDtrennung und 3D-Kameraadapter fehlen noch. Engine noch nicht gewählt.
 - Sparsame Hex-Ansicht. Clear Vision Radius 2; Fog bis Gesamtradius 6 von jedem gesetzten Hex; dahinter keine Sicht. Dynamische Sonderfelder bei Expansion.
@@ -21,6 +22,7 @@ Stand: 19.09.2026. Kompakte Übersicht über Ziele, Entscheidungen und spätere 
 ## Für später fest vorgemerkt
 - Meta-Progression und Turm-Loadouts sind in [META_PROGRESSION_PLAN.md](META_PROGRESSION_PLAN.md) konkretisiert. Loadout, Diamanten, Arsenal, Minenleger sowie die ersten zwei freischaltbaren Türme sind umgesetzt. Keine fünf kostenlosen platzierten Türme. Meta-Unlocks sollen vor allem Optionen statt permanenter globaler Stärke geben.
 - Verschiedene Starthelden / Startfestungen mit eigenen Effekten und unterschiedlichen Spielstilen. Erneut vom Nutzer gewünscht. Noch nicht implementiert.
+- Ein Startheld soll besonders gut darin sein, die eigene Base zu verstärken und zu einer selbstverteidigenden Festung auszubauen. Offen bleibt, ob der Base-Ausbau grundsätzlich allen Helden zur Verfügung steht und dieser Held besondere Vorteile dabei erhält. Für später vorgemerkt, noch nicht implementiert.
 - Bisherige Ideen (keine finalen Werte): neutrale Standardfestung, Händlerstadt mit Goldbonus/Nachteil, Frostfestung mit Freeze-Bonus, Nekromanten-Zitadelle mit Bonus auf spätere Nekromantentürme.
 - Vor Umsetzung klären: Held und Festung ein gemeinsames Startprofil oder getrennte Auswahl; Startdeck, Ressourcen, passive Effekte und mögliche Nachteile datengetrieben definieren.
 - Mehr Shrine-Bonusvarianten, insbesondere besondere Upgrades. Effekt bleibt vor Erschließung verborgen.
@@ -33,6 +35,7 @@ Stand: 19.09.2026. Kompakte Übersicht über Ziele, Entscheidungen und spätere 
 - Kreuzungen: bisherige tee-Karte heißt Y-Kreuzung; neue echte T-Kreuzung und Sechserkreuzung im Rewardpool. Startdeck behält tee/Y.
 - Sonderfelder vorgefertigt: feste Straßen/Rotation, keine Handkarte darüber platzieren; passende Nachbarstraße aktiviert automatisch. Schatz/Shrine gerade/kurvig/Y/T mit 1 Slot, Boss immer sechs Öffnungen ohne Slots. Nachbaranschlüsse beim Bauen berücksichtigen, mehrere Shrines nacheinander.
 - Sonderfelder: 4,5 % geeigneter Koordinaten; darunter 55 % Schatz / 30 % Shrine / 15 % Boss. Keine Sonderfelder in Radius 2 um die Base; Wächterfelder zusätzlich nie innerhalb von vier Hexen.
+- Direkt benachbarte Sonderfelder erhalten immer beidseitige Straßenanschlüsse an ihrer gemeinsamen Kante. Die Generierung berücksichtigt auch noch nicht erkundete Nachbarn; feste Geometrien bleiben später unverändert. Bei Bedarf erhalten Schatz/Shrine eine Sechserkreuzung mit weiterhin einem Turmplatz.
 - Für später vorgemerkt: ein Elementturm, bei dem der Spieler selbst ein Element wie Feuer, Wasser oder Wind auswählt. Elemente sollen unterschiedliche Rollen und Matchups erhalten.
 - Bossloot: +50 Gold und nach überlebter Wave zusätzliche Kartenauswahl (90 % Epic, 10 % Legendary), alle Bosse nacheinander vor normalen Wave-Rewards. 87 Tests bestanden.
 - Kartendarstellung in svg-renderer.js ausgelagert: render/reset/project/destroy, logische Aktionen an Controller, keine direkte Mutation des Spielzustands. Gemeinsame Slotpositionen in map.js.
