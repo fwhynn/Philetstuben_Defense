@@ -9,89 +9,100 @@
 </head>
 <body>
   <div id="app">
-    <header class="topbar">
-      <div>
-        <h1>Hex Bastion <span>v0.7-dev</span></h1>
-        <p>Map bauen → Türme setzen → Wave überleben → Deck erweitern</p>
+    <!-- Vollbild-Spielfeld -->
+    <section class="boardWrap">
+      <svg id="board" viewBox="-545 -375 1100 760" aria-label="Hex-Karte"></svg>
+      <div class="mapControls">
+        <button id="zoomInBtn" class="secondary" aria-label="Map vergrößern">+</button>
+        <button id="zoomOutBtn" class="secondary" aria-label="Map verkleinern">−</button>
+        <button id="resetViewBtn" class="secondary">Zur Base</button>
+        <span>Mausrad: Zoom · rechte Maustaste ziehen: verschieben</span>
       </div>
-      <div class="stats">
-        <div>❤️ <strong id="hp">20</strong>/20</div>
-        <details class="statDetails"><summary aria-label="Goldplanung öffnen">🪙 <strong id="gold">70</strong> <span id="bonusIncome">(+0)</span> ▾</summary>
-          <div class="statPopup"><h2>Goldplanung</h2><p id="goldForecast" class="hint"></p><p id="towerBudget" class="hint"></p><h3>Goldquellen &amp; Run-Einnahmen</h3><p id="goldSources" class="hint"></p></div>
-        </details>
-        <details class="statDetails"><summary aria-label="Waveplanung öffnen">🌊 <strong id="wave">0</strong> ▾</summary>
-          <div class="statPopup"><h2>Waveplanung</h2><p id="waveForecast" class="hint"></p><p id="liveWaveInfo" class="hint"></p></div>
-        </details>
-        <details id="deckDropdown" class="statDetails"><summary aria-label="Deck und Kartenstapel öffnen">🃏 <strong id="deckCount">5</strong> ▾</summary><div class="statPopup"><h2>Deck &amp; Kartenstapel</h2><p class="hint">Die Ziehreihenfolge bleibt verborgen.</p><div id="deckOverview" class="deckOverview"></div></div></details>
-        <details class="statDetails"><summary aria-label="Profilfortschritt öffnen">◆ <strong id="profileDiamonds">0</strong> ▾</summary><div class="statPopup"><h2>Meta-Fortschritt</h2><p id="profileStats" class="hint"></p><p class="hint">Diamanten werden am Runende ausgezahlt und im Arsenal für neue Turmtypen verwendet.</p><button id="openArsenalBtn" class="secondary">Arsenal öffnen</button></div></details>
+      <div id="message" class="message">Wähle eine Hexkarte und lege sie an die offene Straße der Base.</div>
+      <section id="towerPanel" class="towerPanel hidden" aria-label="Ausgewählter Turm">
+        <div class="panelHead"><h2 id="towerPanelTitle">Turm</h2><button id="closeTowerPanel" class="secondary" aria-label="Turminfos schließen">×</button></div>
+        <p id="selectedTowerInfo" class="hint"></p>
+        <div id="towerUpgrades" class="towerUpgrades"></div>
+        <button id="sellTowerBtn" class="secondary" disabled>Bau rückgängig</button>
+      </section>
+      <section id="buildingPanel" class="towerPanel hidden" aria-label="Gebäudeslot">
+        <div class="panelHead"><h2 id="buildingPanelTitle">Gebäudeslot</h2><button id="closeBuildingPanel" class="secondary" aria-label="Gebäudeinfos schließen">×</button></div>
+        <p id="buildingPanelInfo" class="hint"></p><div id="buildingOptions" class="towerUpgrades"></div>
+      </section>
+    </section>
+
+    <!-- Oben links: Titel und Menü -->
+    <nav class="dockTL" aria-label="Menü">
+      <h1>Hex Bastion <span>v0.7-dev</span></h1>
+      <div class="dockButtons">
+        <button class="secondary drawerBtn" data-drawer="rulesDrawer">📜 Regeln</button>
+        <button class="secondary drawerBtn" data-drawer="settingsDrawer">⚙ Einstellungen</button>
+        <button id="pauseBtn" class="secondary pauseBtn">⏸ Pause (P)</button>
       </div>
+    </nav>
+
+    <!-- Oben rechts: Leben, Gold, Wave, Deck -->
+    <header class="hud">
+      <div class="hudStat">❤️ <strong id="hp">20</strong>/20</div>
+      <details class="statDetails"><summary aria-label="Goldplanung öffnen">🪙 <strong id="gold">70</strong> <span id="bonusIncome">(+0)</span> ▾</summary>
+        <div class="statPopup"><h2>Goldplanung</h2><p id="goldForecast" class="hint"></p><p id="towerBudget" class="hint"></p><h3>Goldquellen &amp; Run-Einnahmen</h3><p id="goldSources" class="hint"></p></div>
+      </details>
+      <details class="statDetails"><summary aria-label="Waveplanung öffnen">🌊 <strong id="wave">0</strong> ▾<div class="waveBarWrap"><i id="waveBar"></i></div></summary>
+        <div class="statPopup"><h2>Waveplanung</h2><p id="waveForecast" class="hint"></p><p id="liveWaveInfo" class="hint"></p></div>
+      </details>
+      <details id="deckDropdown" class="statDetails"><summary aria-label="Deck und Kartenstapel öffnen">🃏 <strong id="deckCount">5</strong> ▾</summary><div class="statPopup"><h2>Deck &amp; Kartenstapel</h2><p class="hint">Die Ziehreihenfolge bleibt verborgen.</p><div id="deckOverview" class="deckOverview"></div></div></details>
+      <details class="statDetails"><summary aria-label="Profilfortschritt öffnen">◆ <strong id="profileDiamonds">0</strong> ▾</summary><div class="statPopup"><h2>Meta-Fortschritt</h2><p id="profileStats" class="hint"></p><p class="hint">Diamanten werden am Runende ausgezahlt und im Arsenal für neue Turmtypen verwendet.</p><button id="openArsenalBtn" class="secondary">Arsenal öffnen</button></div></details>
     </header>
 
-    <main class="layout">
-      <section class="boardWrap">
-        <svg id="board" viewBox="-545 -375 1100 760" aria-label="Hex-Karte"></svg>
-        <div class="mapControls">
-          <button id="zoomInBtn" class="secondary" aria-label="Map vergrößern">+</button>
-          <button id="zoomOutBtn" class="secondary" aria-label="Map verkleinern">−</button>
-          <button id="resetViewBtn" class="secondary">Zur Base</button>
-          <span>Mausrad: Zoom · rechte Maustaste ziehen: verschieben</span>
-        </div>
-        <div id="message" class="message">Wähle eine Hexkarte und lege sie an die offene Straße der Base.</div>
-        <section id="towerPanel" class="towerPanel hidden" aria-label="Ausgewählter Turm">
-          <div class="panelHead"><h2 id="towerPanelTitle">Turm</h2><button id="closeTowerPanel" class="secondary" aria-label="Turminfos schließen">×</button></div>
-          <p id="selectedTowerInfo" class="hint"></p>
-          <div id="towerUpgrades" class="towerUpgrades"></div>
-          <button id="sellTowerBtn" class="secondary" disabled>Bau rückgängig</button>
-        </section>
-        <section id="buildingPanel" class="towerPanel hidden" aria-label="Gebäudeslot">
-          <div class="panelHead"><h2 id="buildingPanelTitle">Gebäudeslot</h2><button id="closeBuildingPanel" class="secondary" aria-label="Gebäudeinfos schließen">×</button></div>
-          <p id="buildingPanelInfo" class="hint"></p><div id="buildingOptions" class="towerUpgrades"></div>
-        </section>
-      </section>
+    <!-- Unten Mitte: die drei spielbaren Karten -->
+    <section class="handDock" aria-label="Handkarten">
+      <div class="handHead"><strong id="phaseLabel">Hex platzieren</strong><span class="hint">Karte wählen (1–3) · R dreht · Hex anklicken</span></div>
+      <div id="hand" class="hand"></div>
+    </section>
 
-      <aside class="sidepanel">
-        <section class="panel">
-          <div class="panelHead">
-            <h2>1. Hex wählen</h2>
-          </div>
-          <div id="hand" class="hand"></div>
-          <p class="hint">Ziehe 3, spiele 1. Danach wird die ganze Hand abgeworfen.</p>
-        </section>
+    <!-- Unten rechts: Wave starten -->
+    <div class="dockBR">
+      <label class="toggle"><input id="doubleSpeed" type="checkbox" /> 2× Tempo (F)</label>
+      <button id="startWaveBtn" class="primary" disabled>Wave starten (Leertaste)</button>
+    </div>
 
-        <section class="panel">
-          <h2>2. Bauphase</h2>
-          <div id="towerMenu" class="towerMenu"></div>
-          <p class="hint">↑ Upgrade bezahlbar · 2 Spezialisierung · 3 Zweigfinale · 4 freischaltbare Meta-Stufe. Turm anklicken für Werte und Upgrades.</p>
-          <p class="hint">Bauen auch während der Wave. Rückgabe in der aktuellen Bauphase: 100 %. Danach Verkauf: 50 % inklusive Upgrades.</p>
-        </section>
+    <!-- Unten links: Turm-Shop -->
+    <div class="dockBL">
+      <button class="secondary drawerBtn" data-drawer="towerDrawer">🏹 Türme bauen</button>
+    </div>
 
-        <section class="panel actions">
-          <strong id="phaseLabel">Hex platzieren</strong>
-          <label class="toggle"><input id="doubleSpeed" type="checkbox" /> 2× Spieltempo (F)</label>
-          <label class="toggle"><input id="autoStart" type="checkbox" /> Wave nach Platzierung automatisch starten</label>
-          <label class="toggle"><input id="soundEnabled" type="checkbox" checked /> Sounds aktiv</label>
-          <label class="toggle">Lautstärke <input id="soundVolume" type="range" min="0" max="100" value="35" aria-label="Sound-Lautstärke" /></label>
-          <button id="startWaveBtn" class="primary" disabled>Wave starten (Leertaste)</button>
-          <button id="newRunBtn" class="danger">Neuer Run</button>
-          <label class="toggle">Startwert für nächsten Run (Seed) <input id="runSeed" type="text" maxlength="100" placeholder="Leer = zufälliger Run" /></label>
-          <small class="hint">Derselbe Startwert wiederholt bei gleichen Entscheidungen die Karten und Belohnungen.</small>
-          <small class="hint">Aktueller Seed: <span id="activeSeed"></span></small>
-        </section>
+    <!-- Unterfelder -->
+    <aside id="towerDrawer" class="drawer hidden" aria-label="Türme">
+      <div class="panelHead"><h2>Türme</h2><button class="secondary drawerClose" aria-label="Schließen">×</button></div>
+      <div id="towerMenu" class="towerMenu"></div>
+      <p class="hint">↑ Upgrade bezahlbar · 2 Spezialisierung · 3 Zweigfinale · 4 freischaltbare Meta-Stufe. Turm anklicken für Werte und Upgrades.</p>
+      <p class="hint">Bauen auch während der Wave. Rückgabe in der aktuellen Bauphase: 100 %. Danach Verkauf: 50 % inklusive Upgrades.</p>
+    </aside>
 
-        <section class="panel rules">
-          <h2>Spielregeln</h2>
-          <ul>
-            <li>Base hat 20 HP.</li>
-            <li>Jedes offene Straßenende ist ein Spawnpunkt.</li>
-            <li>Alle 10 Waves erscheint ein Boss an einem zufälligen Eingang. Bosswellen werden vor dem Start angekündigt.</li>
-            <li>Jeder Gegner entscheidet an jeder Gabelung zufällig zwischen allen Wegen zur Base. Sackgassen und Schleifen werden ausgeschlossen.</li>
-            <li>Alle 2 Waves: 1 von 3 neuen Hexkarten ins Deck.</li>
-            <li>Sicht ab jedem gesetzten Hex: Radius 2 klar, bis Radius 6 Nebel, danach unsichtbar. ? = unbekanntes Sonderfeld. ◆ Schatz, ✦ Shrine, ☠ Boss. Feste Sonderfelder werden durch passende Nachbarstraßen angeschlossen.</li>
-          </ul>
-        </section>
-      </aside>
-    </main>
+    <aside id="rulesDrawer" class="drawer hidden rules" aria-label="Spielregeln">
+      <div class="panelHead"><h2>Spielregeln</h2><button class="secondary drawerClose" aria-label="Schließen">×</button></div>
+      <ul>
+        <li>Base hat 20 HP.</li>
+        <li>Jedes offene Straßenende ist ein Spawnpunkt.</li>
+        <li>Alle 10 Waves erscheint ein Boss an einem zufälligen Eingang. Bosswellen werden vor dem Start angekündigt.</li>
+        <li>Jeder Gegner entscheidet an jeder Gabelung zufällig zwischen allen Wegen zur Base. Sackgassen und Schleifen werden ausgeschlossen.</li>
+        <li>Alle 2 Waves: 1 von 3 neuen Hexkarten ins Deck.</li>
+        <li>Sicht ab jedem gesetzten Hex: Radius 2 klar, bis Radius 6 Nebel, danach unsichtbar. ? = unbekanntes Sonderfeld. ◆ Schatz, ✦ Shrine, ☠ Boss. Feste Sonderfelder werden durch passende Nachbarstraßen angeschlossen.</li>
+      </ul>
+    </aside>
+
+    <aside id="settingsDrawer" class="drawer hidden actions" aria-label="Einstellungen">
+      <div class="panelHead"><h2>Einstellungen</h2><button class="secondary drawerClose" aria-label="Schließen">×</button></div>
+      <label class="toggle"><input id="autoStart" type="checkbox" /> Wave nach Platzierung automatisch starten</label>
+      <label class="toggle"><input id="soundEnabled" type="checkbox" checked /> Sounds aktiv</label>
+      <label class="toggle">Lautstärke <input id="soundVolume" type="range" min="0" max="100" value="35" aria-label="Sound-Lautstärke" /></label>
+      <label class="toggle">Startwert für nächsten Run (Seed) <input id="runSeed" type="text" maxlength="100" placeholder="Leer = zufälliger Run" /></label>
+      <small class="hint">Derselbe Startwert wiederholt bei gleichen Entscheidungen die Karten und Belohnungen.</small>
+      <small class="hint">Aktueller Seed: <span id="activeSeed"></span></small>
+      <button id="newRunBtn" class="danger">Neuer Run</button>
+    </aside>
   </div>
+
 
   <div id="rewardOverlay" class="overlay hidden" role="dialog" aria-modal="true">
     <div class="rewardBox">
@@ -132,6 +143,14 @@
     </div>
   </div>
 
+  <script>
+    // Unterfelder (Türme, Regeln, Einstellungen): immer nur eines offen; Esc oder × schließt.
+    (()=>{try{if(!localStorage.getItem('hexRulesSeen')){localStorage.setItem('hexRulesSeen','1');setTimeout(()=>document.getElementById('rulesDrawer').classList.remove('hidden'),600);}}catch{}
+      const drawers=[...document.querySelectorAll('.drawer')],close=()=>drawers.forEach(d=>d.classList.add('hidden'));
+      document.querySelectorAll('.drawerBtn').forEach(b=>b.addEventListener('click',()=>{const d=document.getElementById(b.dataset.drawer),open=d.classList.contains('hidden');close();if(open) d.classList.remove('hidden');}));
+      document.querySelectorAll('.drawerClose').forEach(b=>b.addEventListener('click',close));
+      addEventListener('keydown',e=>{if(e.key==='Escape') close();});})();
+  </script>
   <script src="sound.js"></script>
   <script src="camera.js"></script>
   <script src="data.js"></script>

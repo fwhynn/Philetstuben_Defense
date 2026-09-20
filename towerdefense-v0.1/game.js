@@ -196,7 +196,7 @@
     if(!['build','wave'].includes(state.phase)||state.hp<=0) return;
     const tile=state.map.get(key(q,r)); if(!tile||tile.towers[index]) return;
     state.selectedTower=null;state.selectedBuilding=null;state.selectedSlot={q,r,index}; renderAll();
-    setMessage('Turret-Slot gewählt. Kaufe rechts einen Turm.');
+    setMessage('Turret-Slot gewählt. Kaufe links einen Turm.');document.getElementById('towerDrawer')?.classList.remove('hidden');document.getElementById('rulesDrawer')?.classList.add('hidden');document.getElementById('settingsDrawer')?.classList.add('hidden');
   }
 
   function buyTower(type){
@@ -441,6 +441,11 @@
     return '<svg class="miniPath" viewBox="0 0 60 60" aria-label="Aktuelle Ausrichtung"><polygon points="51.7,17.5 51.7,42.5 30,55 8.3,42.5 8.3,17.5 30,5"/>'+lines+'</svg>';
   }
 
+  function cardTip(id){const c=CARD_LIBRARY[id],n=(c.roads||[]).length;
+    return `${c.name} (${c.rarity})
+${c.desc}
+${n?n+' Straßenanschlüsse':'Keine Straße'} · ${c.slots||0} Turmplatz${(c.slots||0)===1?'':'e'}${c.buildingSlots?' · '+c.buildingSlots+' Gebäude':''}
+R dreht die Karte, dann Feld anklicken.`;}
   function cardElement(id,selectable=true,previewRotation=0){
     const c=CARD_LIBRARY[id];const el=document.createElement('button');el.className=`card rarity-${c.rarity.toLowerCase()}`;el.type='button';
     el.innerHTML=`<div class="rarity">${c.rarity}</div>${miniPathSvg(c,previewRotation)}<h3>${c.name}</h3><p>${c.desc}</p><div class="slots">🛡️ ${c.slots||0} Turret-Slot${(c.slots||0)!==1?'s':''}${c.buildingSlots?` · 🏠 ${c.buildingSlots} Gebäude`:''}</div>`;
@@ -452,7 +457,22 @@
     if(c.id==='smallCurve') return '⌝'; if(c.id==='bigCurve') return '◜'; if(c.id==='tee') return '┳'; if(c.id==='cross') return '╋'; if(c.id==='village') return '⌞🏠'; return '⬡';
   }
 
+
+  // ---- UX-Rückmeldung: Treffer an der Base, Goldgewinn, Wave-Fortschritt, Turm-Feld statt Shop bei gewähltem Turm ----
+  let lastHp=null,lastGold=null,lastRun=null;
+  function uxFeedback(){
+    if(lastRun!==state){lastRun=state;lastHp=state.hp;lastGold=state.gold;}
+    const app=document.getElementById('app');
+    if(state.hp<lastHp){app.classList.remove('hit');void app.offsetWidth;app.classList.add('hit');}
+    if(state.gold>lastGold){const f=document.createElement('div');f.className='goldFloat';f.textContent='+'+(state.gold-lastGold)+' 🪙';goldEl.parentElement?.appendChild(f);f.addEventListener?.('animationend',()=>f.remove());}
+    lastHp=state.hp;lastGold=state.gold;
+    const bar=document.getElementById('waveBar');
+    if(bar){const total=state.waveRunning?HexWaves.plan(state.wave,state.income).count:0,left=state.pendingSpawns+state.enemies.filter(e=>e.alive).length;bar.style.width=total?Math.max(0,Math.min(100,100-left/total*100))+'%':'0%';}
+    if(state.selectedTower||state.selectedBuilding) document.getElementById('towerDrawer')?.classList.add('hidden');
+    app.classList.toggle('canStart',state.phase==='build'&&!state.waveRunning&&state.hp>0);
+  }
   function renderUI(){
+    uxFeedback();
     hpEl.textContent=state.hp;goldEl.textContent=state.gold;waveEl.textContent=state.wave;deckCountEl.textContent=state.deck.length;
     document.getElementById('profileDiamonds').textContent=profile.diamonds;
     document.getElementById('profileStats').textContent=`${profile.records.runsPlayed} Runs · Bestmarke Wave ${profile.records.highestWave} · ${profile.records.bossesKilled} Bosse besiegt · ${profile.lifetime.normalKills} normale Gegner besiegt.`;
@@ -460,7 +480,7 @@
     renderBuildingPanel();
     document.getElementById('phaseLabel').textContent={place:'Hex platzieren',build:'Bauphase',wave:'Wave läuft',reward:'Kartenbelohnung',removal:'Deck ausdünnen',shrineReward:'Shrine-Belohnung',bossReward:'Boss-Beute',gameover:'Run beendet'}[state.phase];
     handEl.innerHTML='';
-    state.hand.forEach((id,i)=>{const el=cardElement(id,true,i===state.selectedCard?state.rotation:0);if(i===state.selectedCard)el.classList.add('selected');el.addEventListener('click',()=>{state.selectedCard=i;state.rotation=0;renderAll();});handEl.appendChild(el);});
+    state.hand.forEach((id,i)=>{const el=cardElement(id,true,i===state.selectedCard?state.rotation:0);el.title=cardTip(id);el.setAttribute?.("data-key",i+1);if(i===state.selectedCard)el.classList.add('selected');el.addEventListener('click',()=>{state.selectedCard=i;state.rotation=0;renderAll();});handEl.appendChild(el);});
     // Keep purchase buttons stable during animation so pointer clicks/focus survive.
     const menuKey=JSON.stringify([state.phase,state.selectedSlot,state.buildingVersion]);
     if(menuKey!==towerMenuKey){
@@ -470,7 +490,7 @@
       const effective=HexData.towerDefinition({type:id,tileType:selectedTile?.type,supportDamage:HexBuildings.effects(state.map,selectedTile).damage});
       const price=HexBuildings.cost(state,state.selectedSlot,t.cost);
       const b=document.createElement('button');b.className='towerBtn';
-      b.innerHTML=`<span class="towerOffer"><strong class="towerOfferName">${t.name}</strong><small class="towerOfferDescription">${t.desc}</small><small class="towerOfferStats">${towerStats(effective)}</small></span><strong class="towerOfferPrice">${price} 🪙</strong>`;
+      b.innerHTML=`<span class="towerOffer"><strong class="towerOfferName">${t.name}</strong><small class="towerOfferDescription">${t.desc}</small><small class="towerOfferStats">${towerStats(effective)}</small></span><strong class="towerOfferPrice">${price} 🪙<kbd>${towerMenu.children.length+1}</kbd></strong>`;
       b.disabled=!['build','wave'].includes(state.phase)||!state.selectedSlot||state.gold<price||state.hp<=0;
       b.addEventListener('pointerenter',()=>{state.previewTower=id;renderBoard();});
       b.addEventListener('pointerleave',()=>{state.previewTower=null;renderBoard();});
@@ -479,6 +499,7 @@
       b.addEventListener('click',()=>buyTower(id));towerMenu.appendChild(b);towerButtons.set(id,b);
     });
     }
+    for(const [id,b] of towerButtons) b.classList.toggle('unaffordable',state.gold<HexBuildings.cost(state,state.selectedSlot,TOWERS[id].cost));
     for(const [id,b] of towerButtons) b.disabled=!['build','wave'].includes(state.phase)||!state.selectedSlot||state.gold<HexBuildings.cost(state,state.selectedSlot,TOWERS[id].cost)||state.hp<=0;
     renderForecast();
     const info=document.getElementById('selectedTowerInfo'),sell=document.getElementById('sellTowerBtn');
@@ -589,7 +610,7 @@
     for(const [,button] of upgradeButtons) button.disabled=!['build','wave'].includes(state.phase)||state.gold<HexBuildings.cost(state,selected,button._baseCost)||state.hp<=0;
     positionTowerPanel();
   }
-  function setMessage(s){messageEl.textContent=s;}
+  function setMessage(s){messageEl.textContent=s;messageEl.classList.remove('show');void messageEl.offsetWidth;messageEl.classList.add('show');}
 
   function rotateSelected(){
     if(state.phase!=='place'||!state.hand.length) return;
@@ -688,11 +709,18 @@
     if(e.key.toLowerCase()==='f'&&!e.repeat&&e.target?.id==='doubleSpeed'){e.preventDefault();e.target.checked=!e.target.checked;return;}
     if(['INPUT','TEXTAREA','SELECT','BUTTON','SUMMARY'].includes(e.target?.tagName)||e.target?.isContentEditable) return;
     if(e.code==='Space'&&!e.repeat){e.preventDefault();startWave();}
+    if(/^[1-9]$/.test(e.key)){const n=Number(e.key)-1;
+      if(state.selectedSlot){const b=[...towerButtons.values()][n];if(b&&!b.disabled) b.click();}
+      else if(state.phase==='place'&&state.hand[n]){state.selectedCard=n;state.rotation=0;renderAll();}}
+    if(e.key.toLowerCase()==='p') togglePause();
     if(e.key.toLowerCase()==='r')rotateSelected();
     if(e.key.toLowerCase()==='f'&&!e.repeat){const toggle=document.getElementById('doubleSpeed');toggle.checked=!toggle.checked;}
   });
 
   let last=performance.now();
-  function frame(now){const dt=Math.min((now-last)/1000,.05);last=now;update(dt,now);requestAnimationFrame(frame);}  
+  let paused=false;
+  function togglePause(){paused=!paused;document.getElementById('app').classList.toggle('paused',paused);const b=document.getElementById('pauseBtn');if(b) b.textContent=paused?'▶ Weiter (P)':'⏸ Pause (P)';}
+  document.getElementById('pauseBtn')?.addEventListener('click',togglePause);
+  function frame(now){const dt=paused?0:Math.min((now-last)/1000,.05);last=now;update(dt,now);requestAnimationFrame(frame);}  
   newRun(); hasActiveRun=false; openLoadout(); requestAnimationFrame(frame);
 })();

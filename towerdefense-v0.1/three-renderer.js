@@ -328,7 +328,7 @@ function create(host0,commands){
 
   // ---- Auswahl, Reichweite, Upgrade-Hinweise ----
   function syncSelection(){
-    const selected=state.selectedTower||(state.previewTower?state.selectedSlot:null);
+    const selected=state.selectedTower||state.hoverTower||(state.previewTower?state.selectedSlot:null);
     const tile=selected&&state.map.get(key(selected.q,selected.r)),tower=tile?.towers[selected.index],type=tower?.type||state.previewTower;
     if(tile&&type){
       const p=slotPositions(tile)[selected.index],def=HexData.towerDefinition(tower||{type,tileType:tile.type});
@@ -527,11 +527,13 @@ function create(host0,commands){
   }
 
   // ---- Eingabe ----
-  let drag=null,press=null;
+  let drag=null,press=null,hoverTowerKey=null;
   function pick(event){setRay(event);const hit=ray.intersectObjects(pickables,false)[0];return hit?.object.userData.pick||null;}
   function updateHover(event){
     const found=pick(event),id=found?.kind==='target'?key(found.q,found.r):null;
     if(id!==hoverPick){if(hoverPick) commands.leavePlacement(hoverPick);if(id) commands.hoverPlacement(id);hoverPick=id;render(state,targetList);}
+    const tw=found?.kind==='tower'?{q:found.q,r:found.r,index:found.index}:null,twKey=tw?tw.q+','+tw.r+','+tw.index:null;   // Reichweite beim Überfahren eines Turms
+    if(twKey!==hoverTowerKey){hoverTowerKey=twKey;state.hoverTower=tw;render(state,targetList);}
     dom.style.cursor=found?(found.kind==='target'&&!found.legal?'not-allowed':'pointer'):'';
   }
   const capture=e=>{try{dom.setPointerCapture(e.pointerId);}catch{/* Zeiger nicht mehr aktiv */}};

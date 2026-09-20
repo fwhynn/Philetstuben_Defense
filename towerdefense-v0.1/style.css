@@ -90,3 +90,64 @@ button{border:0;border-radius:9px;padding:10px 12px;cursor:pointer;color:#fff}.p
 
 /* 3D-Ansicht: Karte bleibt beim Scrollen der Seitenleiste im Bild. */
 .boardWrap.is3d{align-self:start;position:sticky;top:12px;height:calc(100vh - 24px);min-height:560px}
+
+/* ===== Vollbild-Layout: Spielfeld füllt den Bildschirm, Bedienelemente schweben darüber ===== */
+html,body{height:100%;overflow:hidden}
+#app{position:fixed;inset:0}
+.boardWrap,.boardWrap.is3d{position:absolute;inset:0;top:0;height:auto;min-height:0;border:0;border-radius:0;align-self:auto}
+.mapControls{top:auto;bottom:16px;left:16px;max-width:none;flex-wrap:nowrap}
+.mapControls span{display:none}
+.message{left:50%;right:auto;top:76px;transform:translateX(-50%);max-width:min(520px,calc(100% - 32px));text-align:center}
+.towerPanel{left:auto;right:12px;top:76px;max-height:calc(100% - 300px)}
+.dockTL{position:absolute;left:16px;top:14px;z-index:6;display:flex;flex-direction:column;gap:8px}
+.dockTL h1{font-size:22px;text-shadow:0 2px 8px #000a}
+.dockButtons{display:flex;gap:6px}
+.drawerBtn{background:#162019e6;border:1px solid #3b5242;font-size:13px;padding:8px 12px}.drawerBtn:hover{background:#24342a}
+.hud{position:absolute;right:16px;top:14px;z-index:7;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.hud .hudStat,.hud .statDetails>summary{background:#162019e6;border:1px solid #3b5242;border-radius:10px;padding:9px 13px;min-width:78px;text-align:center;backdrop-filter:blur(4px)}
+.hud .statDetails{position:relative}
+.hud .statPopup{position:absolute;right:0;top:calc(100% + 8px);width:min(380px,90vw)}
+.handDock{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:6;width:min(640px,calc(100% - 520px));display:flex;flex-direction:column;gap:6px;align-items:center}
+.handHead{display:flex;gap:12px;align-items:baseline;background:#162019dd;border:1px solid #3b5242;border-radius:8px;padding:4px 12px}.handHead .hint{margin:0;font-size:11px}.handHead strong{color:var(--accent)}
+.handDock .hand{width:100%;gap:10px}
+.handDock .card{min-height:0;grid-template-rows:auto 46px auto auto auto;gap:3px;padding:7px 6px;box-shadow:0 6px 18px #000a}
+.handDock .card:hover,.handDock .card.selected{transform:translateY(-10px)}
+.handDock .card .miniPath{width:44px;height:44px}
+.handDock .card h3{font-size:14px;line-height:17px}
+.handDock .card p{font-size:10.5px;line-height:13px}
+.dockBR{position:absolute;right:16px;bottom:16px;z-index:6;display:flex;flex-direction:column;gap:8px;align-items:stretch;width:230px}
+.dockBR .toggle{background:#162019dd;border-radius:8px;padding:6px 10px;text-align:center}
+.dockBL{position:absolute;left:16px;bottom:64px;z-index:6}
+.drawer{position:absolute;top:96px;left:16px;bottom:240px;width:min(400px,calc(100% - 32px));z-index:8;overflow:auto;background:#1d2922f7;border:1px solid #4d684f;border-radius:14px;padding:14px;box-shadow:0 12px 32px #000a}
+.drawer.hidden{display:none}
+.drawer h2{font-size:17px;margin:0}
+@media(max-width:1000px){
+  .handDock{width:calc(100% - 24px);bottom:68px}.dockBR{flex-direction:row;width:auto;left:12px;right:12px;bottom:12px;justify-content:space-between}.dockBR .primary{width:auto}
+  .dockBL{bottom:auto;top:96px}.mapControls{bottom:auto;top:96px;left:auto;right:16px}.message{top:auto;bottom:250px;max-width:calc(100% - 24px)}
+  .handDock .card{grid-template-rows:auto 36px auto auto auto}.handDock .card p{display:none}
+}
+.hud .statPopup{z-index:20;text-align:left;padding:16px;background:#1d2922f7;border:1px solid #4d684f;border-radius:12px;box-shadow:0 12px 32px #000a;color:var(--text)}
+.hud .statPopup .hint{color:#d3dccf;font-size:13px}
+@media(max-width:700px){.hud .statPopup{position:fixed;left:5vw;right:auto;top:110px}}
+
+/* ===== UX-Feinschliff ===== */
+.towerPanel{left:16px;right:auto;top:96px;width:min(400px,calc(100% - 32px));max-height:calc(100% - 340px)}
+.message{opacity:0;pointer-events:none}.message.show{animation:msgFade 7s ease forwards}
+@keyframes msgFade{0%{opacity:0}5%,85%{opacity:1}100%{opacity:0}}
+.towerBtn.unaffordable .towerOfferPrice{color:#ff8a7a}.towerBtn.unaffordable{opacity:.55}
+.towerOfferPrice kbd{display:block;margin-top:6px;font:11px system-ui;color:#cfd8c9;background:#162019;border:1px solid #4d684f;border-radius:4px;padding:1px 6px;width:max-content;margin-left:auto}
+#app.canStart #startWaveBtn:not(:disabled){animation:pulseStart 1.4s ease-in-out infinite;background:#4f9a66}
+@keyframes pulseStart{50%{box-shadow:0 0 0 8px #6fd08a33,0 0 24px #6fd08a88}}
+#app.hit::after{content:"";position:fixed;inset:0;z-index:30;pointer-events:none;box-shadow:inset 0 0 120px 30px #d0362a;animation:hitFlash .7s ease-out forwards}
+@keyframes hitFlash{from{opacity:.9}to{opacity:0}}
+#app.hit #hp{color:#ff6b5b}
+.goldFloat{position:absolute;left:50%;top:100%;transform:translateX(-50%);color:var(--accent);font-weight:700;pointer-events:none;text-shadow:0 2px 6px #000;animation:floatUp 1.3s ease-out forwards}
+@keyframes floatUp{from{opacity:1;margin-top:0}to{opacity:0;margin-top:-34px}}
+.hud .statDetails>summary{position:relative}
+.waveBarWrap{height:8px;background:#0e1510;border-radius:4px;margin-top:10px;overflow:hidden}.waveBarWrap i{display:block;height:100%;width:0;background:linear-gradient(90deg,#6fa77b,#e2b857);transition:width .3s}
+#app.paused #board,#app.paused .boardWrap{filter:saturate(.5) brightness(.8)}
+#app.paused::before{content:"Pause";position:fixed;left:50%;top:40%;transform:translateX(-50%);z-index:25;font:700 40px Georgia,serif;color:#fff;text-shadow:0 4px 18px #000;pointer-events:none}
+.card{position:relative}
+.handDock .hand .card::before{content:attr(data-key);position:absolute;top:4px;left:6px;font:700 11px system-ui;color:#5a4a26;opacity:.8}
+.pauseBtn{background:#162019e6;border:1px solid #3b5242;font-size:13px;padding:8px 12px}.pauseBtn:hover{background:#24342a}
+.hud .waveBarWrap{margin-top:6px;width:100%}
