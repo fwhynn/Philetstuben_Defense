@@ -1,6 +1,6 @@
 # Hex Bastion – Meta-Progression und Turm-Loadouts
 
-Stand: 20.09.2026, einschließlich lokaler Änderungen. Status: Umsetzungsstand und Designplan. Etappe 1 bis 3 sind umgesetzt. Das Meta-Arsenal enthält Balliste, Flammenturm und eine dauerhaft freischaltbare vierte Stufe für jeden vorhandenen Turm. Der komplexere Nekromant bleibt für eine spätere Erweiterung.
+Stand: 20.09.2026, einschließlich lokaler Änderungen. Status: Umsetzungsstand und Designplan. Etappe 1 bis 3 sind umgesetzt. Das Meta-Arsenal enthält Balliste, Flammenturm und eine dauerhaft freischaltbare vierte Stufe für jeden vorhandenen Turm. Elementturm und Nekromantenturm sind ebenfalls umgesetzt.
 
 Aktueller Stand: Loadout, Diamanten, Arsenal, drei Presets, Turmstatistiken sowie drei frei wählbare Heroes und Base-Ausbau sind umgesetzt. Hero-/Base-Werte stehen in der App-README und heroes.js; Freischaltungsmeilensteine für Heroes sind weiterhin Zukunftsvorschläge. Abschnitte mit „Vorschlag“ oder „Zielbild“ sind nicht implementierte Ideen; sie beschreiben keine aktuellen Voraussetzungen oder Menüs.
 
@@ -33,7 +33,7 @@ Das Standard-Loadout enthält alle fünf. Damit bleibt die heutige Auswahl erhal
 
 ### Weitere Turmrollen – Umsetzung und Vorschläge
 
-Aktuell zeigt das Arsenal Balliste und Flammenturm mit Beschreibung und Kaufpreis; beide sind kaufbar. Nekromant, Giftalchemist und Verstärkerturm sind Vorschläge, noch nicht implementiert:
+Aktuell sind Balliste (20), Flammenturm (35), Elementturm (45) und Nekromantenturm (55 Diamanten) im Arsenal kaufbar. Giftalchemist und Verstärkerturm bleiben Vorschläge:
 
 | Turm | Rolle | Stärke | bewusste Schwäche |
 |---|---|---|---|
@@ -43,7 +43,7 @@ Aktuell zeigt das Arsenal Balliste und Flammenturm mit Beschreibung und Kaufprei
 | Flammenturm | Flächenkontrolle | anhaltender Flächenschaden | kurze Reichweite, schwächer gegen Feuerresistenz |
 | Verstärkerturm | Support | verbessert benachbarte Türme | verursacht selbst keinen Schaden |
 
-Mit allen fünf Erweiterungen würde der Kader zehn Typen umfassen; aktuell sind es sieben. Weitere Türme sollten erst folgen, wenn jeder vorhandene Typ eine erkennbare Rolle und zwei brauchbare Upgradezweige besitzt.
+Mit allen fünf Erweiterungen würde der Kader zehn Typen umfassen; aktuell sind es neun. Weitere Türme sollten erst folgen, wenn jeder vorhandene Typ eine erkennbare Rolle und zwei brauchbare Upgradezweige besitzt.
 
 ## 3. Loadout-Regeln
 
@@ -110,7 +110,7 @@ Aktuell zahlt ein manueller Neustart keine Diamanten für den abgebrochenen Run 
 
 ## 5. Freischaltungsstruktur
 
-Aktuell gibt es das Arsenal mit zwei kaufbaren Türmen und sieben Stufe-4-Unlocks. Die folgenden zusätzlichen Kategorien und Pfade sind Vorschläge.
+Aktuell gibt es das Arsenal mit vier kaufbaren Türmen und neun Stufe-4-Unlocks. Die folgenden zusätzlichen Kategorien und Pfade sind Vorschläge.
 
 ### Kategorie A – Arsenal
 
@@ -284,7 +284,7 @@ Abnahmekriterium: Gleicher abgeschlossener Run kann seine Meta-Belohnung exakt e
 
 ### Etappe 3 – Erste echte Auswahl (umgesetzt)
 
-- [x] Balliste und Flammenturm als erste zwei kaufbare Türme umsetzen; Nekromant bleibt für eine spätere Erweiterung.
+- [x] Balliste und Flammenturm als erste zwei kaufbare Türme umsetzen; Elementturm und Nekromant sind inzwischen ebenfalls umgesetzt.
 - [x] Arsenal-Seite und Kaufablauf ergänzen.
 - [x] Drei Loadout-Presets sowie Rollenwarnungen einführen.
 - [x] Daten zu Nutzung, Kaufhäufigkeit und erreichter Wave lokal statistisch erfassen.
@@ -309,7 +309,7 @@ Umgesetzt sind drei Startprofile/Base-Ausbau sowie ein erstes Run-Inhaltspaket: 
 - kosmetische Ziele,
 - weitere Turmrollen nur nach Balanceauswertung,
 - optional saisonale oder tägliche Seeds ohne exklusive Machtbelohnungen.
-- Elementturm als spätere Turmrolle: Der Spieler wählt selbst ein Element, beispielsweise Feuer, Wasser oder Wind; jedes Element erhält eine eigene taktische Funktion statt einer rein kosmetischen Variante.
+- [x] Elementturm: Feuer (Fläche), Wasser (Slow), Wind (Durchschlag) als feste Spezialisierung; Nekromant mit zeitlich begrenzten Geistern aus nahen Kills.
 
 ## 12. Test- und Balanceplan
 
@@ -345,7 +345,7 @@ Erste Zielwerte für Balanceprüfungen:
 
 - Fünf Plätze sind eine feste strategische Grenze, kein früh kaufbarer Meta-Bonus.
 - Der Spieler besitzt anfangs fünf Turmtypen und startet mit einem gültigen Standard-Loadout.
-- Der Minenleger ist der fünfte Startturm; der komplexere Nekromant bleibt ein späterer Vorschlag.
+- Der Minenleger ist der fünfte Startturm; der Nekromant ist eine zusätzliche Arsenal-Freischaltung.
 - Meta-Fortschritt schaltet neue Möglichkeiten und die optionale vierte Turmstufe frei. Diese Stufe ist kein kostenloser globaler Bonus, sondern muss in jedem Run mit Gold gebaut werden.
 - Loadout und Profil werden lokal gespeichert; der getrennte Runzustand lebt bislang nur im Arbeitsspeicher.
 - Diamanten werden am Runende transparent berechnet und niemals mit Run-Gold vermischt.

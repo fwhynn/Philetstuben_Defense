@@ -265,12 +265,12 @@ test('fourth tower stage is blocked by meta progression and costs run gold after
   a.state.ultimateUnlocks.push('ultimate:archer');upgradeSelectedTower('ultimate:archer');assert.equal(tile.towers[0].level,4);assert.equal(a.state.gold,before-data.ULTIMATES.archer.cost);assert.equal(tile.towers[0].ultimate,'archer');assert.ok(data.towerDefinition(tile.towers[0]).damage>data.towerDefinition({...tile.towers[0],ultimate:null}).damage);
 });
 
-test('every tower offers two branches and each branch exactly one final upgrade',()=>{
+test('towers offer two branches (three elements) and each branch exactly one final upgrade',()=>{
   const context={};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../data.js'),'utf8')+';globalThis.data=HexData;',context);
   const data=context.data;
   for(const type of Object.keys(data.TOWERS)){
     assert.ok(data.ULTIMATES[type]);assert.ok(data.ULTIMATES[type].cost>0);
-    const initial=data.availableUpgrades({type});assert.equal(initial.length,2);
+    const initial=data.availableUpgrades({type});assert.equal(initial.length,type==='element'?3:2);
     for(const [branch] of initial){
       assert.ok(data.BRANCH_VISUALS[branch]);const next=data.availableUpgrades({type,branch});assert.equal(next.length,1);
       const finalUpgrade=next[0][0],def=data.towerDefinition({type,branch,finalUpgrade});assert.ok(def.range>0);

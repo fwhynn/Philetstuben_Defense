@@ -110,7 +110,7 @@ html,body{height:100%;overflow:hidden}
 .hud .statPopup{position:absolute;right:0;top:calc(100% + 8px);width:min(380px,90vw)}
 .handDock{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:6;width:min(640px,calc(100% - 520px));display:flex;flex-direction:column;gap:6px;align-items:center}
 .handHead{display:flex;gap:12px;align-items:baseline;background:#162019dd;border:1px solid #3b5242;border-radius:8px;padding:4px 12px}.handHead .hint{margin:0;font-size:11px}.handHead strong{color:var(--accent)}
-.handDock .hand{width:100%;gap:10px}
+.handDock .hand{width:100%;gap:10px;margin-top:12px}
 .handDock .card{min-height:0;grid-template-rows:auto 46px auto auto auto;gap:3px;padding:7px 6px;box-shadow:0 6px 18px #000a}
 .handDock .card:hover,.handDock .card.selected{transform:translateY(-10px)}
 .handDock .card .miniPath{width:44px;height:44px}
@@ -121,6 +121,7 @@ html,body{height:100%;overflow:hidden}
 .dockBL{position:absolute;left:16px;bottom:64px;z-index:6}
 .drawer{position:absolute;top:96px;left:16px;bottom:240px;width:min(400px,calc(100% - 32px));z-index:8;overflow:auto;background:#1d2922f7;border:1px solid #4d684f;border-radius:14px;padding:14px;box-shadow:0 12px 32px #000a}
 .drawer.hidden{display:none}
+.drawer>.panelHead,.towerPanel>.panelHead{position:sticky;top:-14px;z-index:2;background:#1d2922;margin:-14px -14px 12px;padding:14px;border-bottom:1px solid #4d684f}
 .drawer h2{font-size:17px;margin:0}
 @media(max-width:1000px){
   .handDock{width:calc(100% - 24px);bottom:68px}.dockBR{flex-direction:row;width:auto;left:12px;right:12px;bottom:12px;justify-content:space-between}.dockBR .primary{width:auto}
@@ -166,3 +167,8 @@ html,body{height:100%;overflow:hidden}
 
 .message.tutorialActive{opacity:1;animation:none;pointer-events:auto;overflow:auto}.message .tutorialPanel{position:static;width:auto;max-width:none;padding:0;border:0;background:transparent;box-shadow:none;text-align:center}.message .tutorialPanel p{margin:6px 0}.message .tutorialPanel button{padding:4px 10px;font-size:12px}.message .hidden{display:none}
 .slotDiamondFloat{animation:slotFloat 2.8s ease-in-out infinite}.slotDiamondTurn{transform-box:fill-box;transform-origin:center;animation:slotTurn 6s linear infinite}@keyframes slotFloat{50%{transform:translateY(-5px)}}@keyframes slotTurn{50%{transform:scaleX(.28)}100%{transform:scaleX(1)}}@media(prefers-reduced-motion:reduce){.slotDiamondFloat,.slotDiamondTurn{animation:none}}
+
+.handDock:has(.openingHand){width:min(900px,calc(100% - 520px))}
+@media(max-width:1100px){.handDock:has(.openingHand){width:calc(100% - 24px)}}
+.handDock .openingHand{display:flex;overflow-x:auto;padding:12px 2px 4px;margin-top:0;align-items:stretch}
+.handDock .openingHand .card{flex:1 0 150px;min-width:0}

@@ -29,10 +29,22 @@ const HexData=(()=>{
     freeze: {name:'Freeze',cost:30,range:145,damage:0,cooldown:1,color:'#a4eef5',aura:true,slow:.5,role:'Support',desc:'Aura: halbiert das Tempo aller Gegner in Reichweite.'},
     mine: {name:'Minenleger',cost:35,range:150,damage:24,cooldown:1.4,color:'#e6a75f',damageMultipliers:{hp:1.1,armor:1.4,magic:.65},mine:true,splash:45,role:'Wegkontrolle',desc:'Legt dauerhaft stapelbare Sprengminen auf Straßen.'},
     ballista: {name:'Balliste',cost:55,range:235,damage:46,cooldown:1.9,color:'#d9c08b',damageMultipliers:{hp:1.45,armor:1.15,magic:.7},bossMultiplier:1.3,role:'Bosskiller',desc:'Extrem weitreichender Einzelschuss gegen Eliten und Bosse.'},
-    flame: {name:'Flammenturm',cost:50,range:115,damage:14,cooldown:.7,splash:48,color:'#ff754b',damageMultipliers:{hp:1.35,armor:.55,magic:.8},role:'Flächenkontrolle',desc:'Kurze Reichweite, aber dauerhafter Schaden gegen dichte Gruppen.'}
+    flame: {name:'Flammenturm',cost:50,range:115,damage:14,cooldown:.7,splash:48,color:'#ff754b',damageMultipliers:{hp:1.35,armor:.55,magic:.8},role:'Flächenkontrolle',desc:'Kurze Reichweite, aber dauerhafter Schaden gegen dichte Gruppen.'},
+    element:{name:'Elementturm',cost:50,range:155,damage:15,cooldown:1,color:'#b8a0ff',damageMultipliers:{hp:1,armor:.8,magic:1.3},role:'Elementwahl',desc:'Arkaner Angriff. Spezialisierung wählen: Feuer (Fläche), Wasser (Slow) oder Wind (Durchschlag).'},
+    necromancer:{name:'Nekromantenturm',cost:60,range:150,damage:10,cooldown:1.2,color:'#a6edb4',damageMultipliers:{hp:1,armor:.7,magic:1.4},soulLimit:3,soulDuration:6,soulDamage:8,role:'Beschwörung',desc:'Tote Gegner in Reichweite werden zu bis zu 3 Geistern: 6 s Lebensdauer, ein Angriff pro Sekunde. Jeder Tod liefert nur eine Seele.'},
   };
 
   const UPGRADES={
+    elementFire:{tower:'element',name:'Feuerkern',cost:40,damage:20,splash:48,color:'#ff8654',desc:'Feuer trifft Gruppen im Umkreis von 48.'},
+    elementWater:{tower:'element',name:'Wasserkern',cost:40,damage:16,hitSlow:.65,slowDuration:2,color:'#69d8ff',desc:'Treffer verlangsamen 2 Sekunden lang um 35 %. Stärkster Slow zählt; Bossresistenz bleibt.'},
+    elementWind:{tower:'element',name:'Windkern',cost:40,damage:18,range:210,pierce:true,pierceTargets:3,color:'#dbefae',desc:'Wind durchschlägt bis zu 3 Gegner auf einer Linie.'},
+    elementVolcano:{tower:'element',requires:'elementFire',name:'Vulkanherz',cost:70,damage:34,splash:65,desc:'Stärkeres Feuer mit größerer Fläche.'},
+    elementTide:{tower:'element',requires:'elementWater',name:'Gezeitenherz',cost:70,damage:26,hitSlow:.5,slowDuration:3,desc:'Halbiert das Tempo getroffener Gegner für 3 Sekunden.'},
+    elementTempest:{tower:'element',requires:'elementWind',name:'Orkanherz',cost:70,damage:30,range:250,pierceTargets:5,desc:'Durchschlägt bis zu 5 Gegner mit großer Reichweite.'},
+    soulChoir:{tower:'necromancer',name:'Seelenchor',cost:50,soulLimit:5,desc:'Bis zu 5 Geister gleichzeitig.'},
+    soulKeeper:{tower:'necromancer',name:'Seelenhüter',cost:50,soulDamage:15,soulDuration:9,desc:'Stärkere Geister bleiben 9 Sekunden.'},
+    soulLegion:{tower:'necromancer',requires:'soulChoir',name:'Geisterlegion',cost:80,soulLimit:8,soulDamage:11,desc:'Bis zu 8 Geister mit verstärkten Angriffen.'},
+    soulLord:{tower:'necromancer',requires:'soulKeeper',name:'Lichfürst',cost:80,soulDamage:24,soulDuration:12,damage:20,desc:'Mächtige Geister bleiben 12 Sekunden.'},
     marksman:{tower:'archer',name:'Scharfschütze',cost:35,damage:22,cooldown:.85,range:190,desc:'Mehr Einzelzielschaden und Reichweite.'},
     volley:{tower:'archer',name:'Salven',cost:35,damage:7,cooldown:.65,splash:55,desc:'Treffer schädigen Gegner im Umkreis von 55.'},
     siege:{tower:'catapult',name:'Belagerung',cost:45,damage:36,cooldown:1.8,range:230,desc:'Schwere Steine mit mehr Schaden und Reichweite.'},
@@ -63,6 +75,8 @@ const HexData=(()=>{
     firestorm:{tower:'flame',requires:'wildfire',name:'Feuersturm',cost:75,damage:20,cooldown:.25,range:115,splash:52,desc:'Finales Flammenmeer mit kurzer Reichweite und extremer Angriffsdichte.'}
   };
   const ULTIMATES={
+    element:{name:'Urkraft',cost:120,damageFactor:1.3,rangeFactor:1.1,desc:'Verstärkt das gewählte Element: +30 % Schaden und +10 % Reichweite.'},
+    necromancer:{name:'Seelenkrone',cost:130,damageFactor:1.3,desc:'Verstärkt Turm und Geister um 30 % Schaden.'},
     archer:{name:'Großmeister',cost:100,damageFactor:1.3,rangeFactor:1.1,desc:'Vollendete Bogentechnik: mehr Schaden und Reichweite für beide Spezialisierungen.'},
     catapult:{name:'Titanenwerk',cost:110,damageFactor:1.35,rangeFactor:1.08,desc:'Verstärkt jede Katapult-Spezialisierung mit schwereren Geschossen.'},
     chain:{name:'Arkankern',cost:110,damageFactor:1.3,chainBonus:2,jumpBonus:15,desc:'Zusätzliche Blitzenergie, zwei weitere Ziele und größere Sprungweite.'},
@@ -72,12 +86,14 @@ const HexData=(()=>{
     flame:{name:'Phönixkern',cost:120,damageFactor:1.3,splashBonus:15,desc:'Verstärkt Schaden und Fläche beider Flammenspezialisierungen.'}
   };
   const BRANCH_VISUALS={marksman:{icon:'◎',color:'#f5d06e'},volley:{icon:'≋',color:'#96d47c'},siege:{icon:'◆',color:'#e99a5c'},barrage:{icon:'⋮',color:'#ffdca1'},storm:{icon:'ϟ',color:'#93a5ff'},overload:{icon:'✦',color:'#e2a1ff'},deepFrost:{icon:'❄',color:'#70d5ff'},frostField:{icon:'❆',color:'#c0f6ea'},demolition:{icon:'✹',color:'#ff9b55'},minefield:{icon:'••',color:'#d9bc72'},harpoon:{icon:'➶',color:'#e7d39e'},repeater:{icon:'»',color:'#d4b979'},inferno:{icon:'☀',color:'#ff7448'},wildfire:{icon:'≋',color:'#ff9b55'}};
+  Object.assign(BRANCH_VISUALS,{elementFire:{icon:'♨',color:'#ff8654'},elementWater:{icon:'≈',color:'#69d8ff'},elementWind:{icon:'≋',color:'#dbefae'},soulChoir:{icon:'☽',color:'#a6edb4'},soulKeeper:{icon:'☠',color:'#c8a3ee'}});
   function towerDefinition(tower,definitions=TOWERS){
     const def={...definitions[tower.type],...(tower.branch?UPGRADES[tower.branch]:{}),...(tower.finalUpgrade?UPGRADES[tower.finalUpgrade]:{})},terrain=CARD_LIBRARY[tower.tileType];
     const ultimate=tower.ultimate&&ULTIMATES[tower.type];if(ultimate){def.name=ultimate.name;def.damage=(def.damage||0)*(ultimate.damageFactor||1);def.range=(def.range||0)*(ultimate.rangeFactor||1);def.cooldown=(def.cooldown||1)*(ultimate.cooldownFactor||1);if(def.slow)def.slow*=ultimate.slowFactor||1;if(def.splash)def.splash+=ultimate.splashBonus||0;if(def.chain)def.chain+=ultimate.chainBonus||0;if(def.jumpRange)def.jumpRange+=ultimate.jumpBonus||0;if(def.bossMultiplier)def.bossMultiplier*=ultimate.bossFactor||1;}
     def.range=Math.round(def.range*(terrain?.towerRange||1));
     def.damage=def.damage*(tower.type==='archer'?(terrain?.archerDamage||1):1)*(terrain?.towerDamage||1)*(tower.supportDamage||1);
     def.damage=Number(def.damage.toFixed(2));
+    if(def.soulDamage)def.soulDamage*= (terrain?.towerDamage||1)*(tower.supportDamage||1)*(ultimate?.damageFactor||1);
     return def;
   }
   function availableUpgrades(tower){return Object.entries(UPGRADES).filter(([,upgrade])=>upgrade.tower===tower.type&&!tower.finalUpgrade&&(tower.branch?upgrade.requires===tower.branch:!upgrade.requires));}

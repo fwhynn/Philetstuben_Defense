@@ -97,6 +97,16 @@ const HexMap=(()=>{
     }
     return null;
   }
+  function randomBaseExits(random){
+    const first=Math.floor(random()*6),other=Math.floor(random()*5);
+    return [first,other>=first?other+1:other].sort((a,b)=>a-b);
+  }
+  function canPlaceOpening(map,q,r,card,rot,remaining,exits){
+    const targets=exits.map(d=>neighbor(0,0,d)).filter(n=>!map.has(key(n.q,n.r)));
+    if(!targets.some(n=>n.q===q&&n.r===r)||!canPlace(map,q,r,card,rot))return false;
+    const next=new Map(map);next.set(key(q,r),{q,r,type:card.id,roads:rotatedRoads(card,rot)});
+    return targets.filter(n=>n.q!==q||n.r!==r).every(n=>remaining.some(candidate=>Array.from({length:6},(_,rotation)=>rotation).some(rotation=>canPlace(next,n.q,n.r,candidate,rotation))));
+  }
   function buildGraph(map){
     const graph=new Map();
     for(const tile of map.values()) graph.set(key(tile.q,tile.r),[]);
@@ -181,7 +191,7 @@ const HexMap=(()=>{
     }
     return {graph,geometry,distances};
   }
-  return {SQRT3,HEX,OPP,key,axialToWorld,hexPoints,edgePoint,neighbor,rotatedRoads,canPlace,rescue,buildGraph,pathToBase,roadGeometry,routeGraph,length,slotOffsets,slotPositions,buildingPosition,axialToPixel:axialToWorld};
+  return {SQRT3,HEX,OPP,key,axialToWorld,hexPoints,edgePoint,neighbor,rotatedRoads,canPlace,canPlaceOpening,randomBaseExits,rescue,buildGraph,pathToBase,roadGeometry,routeGraph,length,slotOffsets,slotPositions,buildingPosition,axialToPixel:axialToWorld};
 })();
 
 

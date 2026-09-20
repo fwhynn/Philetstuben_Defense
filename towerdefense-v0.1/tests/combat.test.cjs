@@ -124,3 +124,34 @@ test('enemies on crossing paths do not stop each other at junctions',()=>{
   const b=Object.assign(enemy(0,-5),{speed:20,points:[{x:0,y:-5},{x:0,y:100}]});
   state.enemies=[a,b];step(state,[],towers,1,1000);assert.equal(a.x,5);assert.equal(b.y,15);
 });
+
+
+test('element fire splashes, wind pierces and water slow expires with boss resistance',()=>{
+  for(const [branch,count] of [['elementFire',2],['elementWind',3]]){
+    const {state,step,towers}=setup();const enemies=[enemy(20),enemy(40),enemy(100)];state.enemies=enemies;
+    step(state,[{tw:{type:'element',branch,lastShot:0},pos:{x:0,y:0}}],towers,0,2000);
+    assert.equal(enemies.filter(e=>e.hp<100).length,count);
+  }
+  const {state,step,towers}=setup(),e=enemy(20);e.speed=10;e.minSpeedFactor=.8;state.enemies=[e];
+  step(state,[{tw:{type:'element',branch:'elementWater',lastShot:0},pos:{x:0,y:0}}],towers,0,2000);
+  step(state,[],towers,1,2500);assert.equal(e.slowFactor,.8);assert.equal(e.x,28);
+  step(state,[],towers,1,4100);assert.equal(e.slowFactor,1);assert.equal(e.x,38);
+});
+
+test('necromancers share each death once, cap souls, attack and expire them without extra loot',()=>{
+  const {state,step,towers}=setup(),near={type:'necromancer',lastShot:0},far={type:'necromancer',lastShot:0};
+  const refs=[{tw:near,pos:{x:0,y:0}},{tw:far,pos:{x:10,y:0}}];
+  state.enemies=[enemy(1,0,1),enemy(2,0,1)];step(state,refs,towers,0,2000);
+  assert.equal(near.souls.length+far.souls.length,2);assert.equal(state.waveKills,2);
+  const e=enemy(20,0,1000);state.enemies=[e];near.lastShot=far.lastShot=3000;
+  step(state,refs,towers,0,3000);assert.equal(e.hp,984);assert.equal(state.waveKills,2);
+  near.lastShot=far.lastShot=9000;step(state,refs,towers,0,9000);
+  assert.equal(near.souls.length+far.souls.length,0);assert.equal(e.hp,984);
+  near.souls=Array.from({length:3},()=>({until:20000,lastShot:10000}));near.lastShot=0;
+  state.enemies=[enemy(1,0,1)];step(state,[refs[0]],towers,0,10000);assert.equal(near.souls.length,3);
+});
+
+test('escaped enemies do not provide souls',()=>{
+  const {state,step,towers}=setup(),tw={type:'necromancer',lastShot:0},e=enemy(0);e.index=1;state.enemies=[e];
+  step(state,[{tw,pos:{x:0,y:0}}],towers,0,2000);assert.equal(tw.souls.length,0);assert.equal(state.waveKills,0);
+});

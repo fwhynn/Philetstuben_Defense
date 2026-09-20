@@ -48,7 +48,7 @@ function makeTemplate(name,scene,kind){
   const slotNodes=[],padNodes=[];scene.traverse(n=>{if(isSlot(n)) slotNodes.push(n);else if(isPad(n)) padNodes.push(n);});
   const skip=n=>isSlot(n)||isPad(n);
   template.parts=bake(scene,skip);
-  if(name==='tile_rescue') template.noRoad=bake(scene,n=>skip(n)||n.name==='road');
+  if(name==='tile_rescue'||name==='tile_base') template.noRoad=bake(scene,n=>skip(n)||n.name==='road');
   template.slots=slotNodes.sort((a,b)=>a.name.localeCompare(b.name)).map(n=>({pos:worldPosition(n),parts:bake(n)}));
   template.pad=padNodes[0]?{pos:worldPosition(padNodes[0]),parts:bake(padNodes[0])}:null;
   if(kind==='landmarks'&&name!=='landmark_boss'){                    // Deko separat, damit sie auf jede Straßenform passt
@@ -208,7 +208,7 @@ function create(host0,commands){
       }
     }
     if(spec.proceduralRoads){
-      const roadBase=template.parts.find(p=>/road/.test(p.material.name||''))?.material||fallbackMaterial,road=ghost?ghostMaterial(roadBase,true):roadBase;
+      const roadBase=template.parts.find(p=>p.material.name==='road')?.material||fallbackMaterial,road=ghost?ghostMaterial(roadBase,true):roadBase;
       for(const points of HexMap.roadGeometry(tile).legs.values()) holder.add(ribbon(points.map(p=>({x:p.x-c.x,y:p.y-c.y})),road));
     }
     return holder;
@@ -216,6 +216,8 @@ function create(host0,commands){
   function ribbon(points,material,width=18){
     const positions=[],indices=[];
     points.forEach((p,i)=>{const a=points[Math.max(0,i-1)],b=points[Math.min(points.length-1,i+1)],dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1,nx=-dy/len*width/2,ny=dx/len*width/2;positions.push(p.x+nx,1,p.y+ny,p.x-nx,1,p.y-ny);if(i) indices.push(2*i-2,2*i-1,2*i,2*i-1,2*i+1,2*i);});
+    // Von oben sichtbare Vorderseite: Die X/Z-Ebene benötigt die umgekehrte Wicklung.
+    for(let i=0;i<indices.length;i+=3) [indices[i+1],indices[i+2]]=[indices[i+2],indices[i+1]];
     const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setIndex(indices);geometry.computeVertexNormals();
     const mesh=new THREE.Mesh(geometry,material);mesh.receiveShadow=true;return mesh;
   }
@@ -276,6 +278,11 @@ function create(host0,commands){
       addParts(model,template.parts);
       if(template.turret){obj.turret=new THREE.Group();obj.turret.position.copy(template.turret.pos);obj.turretBase=obj.turret.position.clone();addParts(obj.turret,template.turret.parts);model.add(obj.turret);}
       if(template.aura){obj.auraModel=new THREE.Group();obj.auraModel.position.copy(template.aura.pos);addParts(obj.auraModel,template.aura.parts);model.add(obj.auraModel);}
+    }else if(tower.type==='element'||tower.type==='necromancer'){
+      const plinth=new THREE.Mesh(new THREE.CylinderGeometry(10,15,24,6).translate(0,12,0),std(tower.type==='element'?'#646383':'#4d5a51'));plinth.castShadow=true;holder.add(plinth);
+      const core=new THREE.Mesh(tower.type==='element'?new THREE.OctahedronGeometry(11):new THREE.SphereGeometry(8,8,6),std(def.color,{emissive:def.color,emissiveIntensity:.35}));core.position.y=36;holder.add(core);
+      if(tower.type==='necromancer')for(const x of [-12,12]){const spire=new THREE.Mesh(new THREE.ConeGeometry(4,27,5),std('#c4c8b1'));spire.position.set(x,29,0);holder.add(spire);}
+      else{const ring=new THREE.Mesh(torus,basic(def.color));ring.scale.setScalar(16);ring.position.y=27;holder.add(ring);}
     }else{const mesh=new THREE.Mesh(new THREE.CylinderGeometry(12,14,40,8).translate(0,20,0),std(def.color));mesh.castShadow=true;holder.add(mesh);}
     const visual=HexData.BRANCH_VISUALS[tower.branch];
     if(visual){const ring=new THREE.Mesh(torus,basic(visual.color));ring.scale.setScalar(20);ring.position.y=2;holder.add(ring);
@@ -416,6 +423,7 @@ function create(host0,commands){
     for(const pool of Object.values(fx)) pool.begin();
     const live=new Set();
     for(const p of state.projectiles){
+      if(p.kind==='spirit'){fx.flash.ball(p.x,32,p.y,p.r,p.color,.7);fx.solid.ball(p.x,32,p.y,2,p.color,1);continue;}
       if(p.kind==='blast'){                                            // Explosionsring wie bisher
         for(let i=0;i<12;i++){const a=i*Math.PI/6,b=(i+1)*Math.PI/6;fx.solid.segment(p.x+Math.cos(a)*p.r,34,p.y+Math.sin(a)*p.r,p.x+Math.cos(b)*p.r,34,p.y+Math.sin(b)*p.r,1.6,p.color||'#ffffff');}
         continue;
@@ -438,6 +446,11 @@ function create(host0,commands){
         }
         if(t<.5){const k=1-t/.5;p.pts.slice(1).forEach(pt=>fx.flash.ball(pt.x,DST_H,pt.y,2+3.5*k,p.color||'#93a5ff',k*.8));}   // Funken an jedem getroffenen Gegner
         if(!done.hit){done.hit=true;(p.hits||[]).forEach(popEnemy);}
+      }else if(p.tower==='element'||p.tower==='necromancer'){
+        const f=clamp01(t/.8),x=lerp(src.x,dst.x,f),z=lerp(src.y,dst.y,f),y=lerp(SRC_H,DST_H,f);
+        fx.flash.ball(x,y,z,5,p.color,.7);fx.solid.ball(x,y,z,2,p.color,1);
+        fx.glow.segment(src.x,SRC_H,src.y,x,y,z,1.5,p.color,(1-t)*.5);
+        if(f===1&&!done.hit){done.hit=true;(p.hits||[]).forEach(popEnemy);}
       }else if(p.tower==='catapult'){                                   // Felsbrocken rollt und hüpft die Schusslinie entlang
         const f=clamp01(t/.9),x=lerp(src.x,dst.x,f),y=lerp(src.y,dst.y,f),hop=Math.abs(Math.sin(f*Math.PI*5))*9*(1-f*.4)+5;
         if(f<1){fx.rocks.ball(x,hop,y,5.5,'#9a8f7e');if(high) fx.glow.segment(lerp(src.x,x,.75),hop,lerp(src.y,y,.75),x,hop,y,2,'#d8c9a3',.25);

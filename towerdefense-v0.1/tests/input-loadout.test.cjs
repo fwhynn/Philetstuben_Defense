@@ -56,3 +56,20 @@ test('arsenal unlocks refresh an open loadout and both new towers can be taken i
   assert.equal(a.state.map.get('1,0').towers[1].type,'flame');
   const reloaded=load({initialProfile:saved});assert.deepEqual(Array.from(reloaded.a.state.towerLoadout),saved.activeLoadout);
 });
+
+
+test('element and necromancer unlock, enter a five-slot loadout and build with upgrade choices',()=>{
+  const {a,elements,storage,selectSlot,buyTower,data}=load({initialProfile:{diamonds:100}});
+  elements.get('newRunBtn').listeners.click();elements.get('openArsenalBtn').listeners.click();
+  for(const index of [2,3])elements.get('arsenalChoices').children[index].children[0].listeners.click();
+  elements.get('closeArsenalBtn').listeners.click();const choices=()=>elements.get('loadoutChoices').children;
+  choices()[0].listeners.click();choices()[5].listeners.click();choices()[1].listeners.click();choices()[6].listeners.click();
+  elements.get('confirmLoadoutBtn').listeners.click();assert.equal(a.state.towerLoadout.length,5);
+  assert.ok(a.state.towerLoadout.includes('element'));assert.ok(a.state.towerLoadout.includes('necromancer'));
+  assert.equal(JSON.parse(storage.get('hex-bastion-profile-v1')).diamonds,0);
+  a.state.phase='build';a.state.gold=1000;a.state.map.set('1,0',{q:1,r:0,type:'cross',roads:[0,1,3,4],slots:2,towers:[null,null]});
+  selectSlot(1,0,0);buyTower('element');selectSlot(1,0,1);buyTower('necromancer');
+  const [element,necro]=a.state.map.get('1,0').towers;
+  assert.equal(data.availableUpgrades(element).length,3);assert.equal(data.availableUpgrades(necro).length,2);
+  necro.souls=[{until:10000,lastShot:0}];a.endWave();assert.equal(necro.souls.length,0);
+});

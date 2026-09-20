@@ -186,7 +186,7 @@ function create(svg,commands){
       commands.selectTower(tile.q,tile.r,index);
     });
     const base=document.createElementNS(NS,'circle');base.setAttribute('cx',p.x);base.setAttribute('cy',p.y);base.setAttribute('r',14);base.setAttribute('fill','#202821');base.setAttribute('stroke',def.color);base.setAttribute('stroke-width',3);g.appendChild(base);
-    const visual=HexData.BRANCH_VISUALS[tw.branch],icon=visual?.icon||(tw.type==='archer'?'A':tw.type==='catapult'?'K':tw.type==='freeze'?'❄':tw.type==='mine'?'✹':tw.type==='ballista'?'➶':tw.type==='flame'?'♨':'⚡');
+    const visual=HexData.BRANCH_VISUALS[tw.branch],icon=visual?.icon||(tw.type==='element'?'◆':tw.type==='necromancer'?'☠':tw.type==='archer'?'A':tw.type==='catapult'?'K':tw.type==='freeze'?'❄':tw.type==='mine'?'✹':tw.type==='ballista'?'➶':tw.type==='flame'?'♨':'⚡');
     if(visual){base.setAttribute('stroke',visual.color);const ring=document.createElementNS(NS,'circle');ring.setAttribute('cx',p.x);ring.setAttribute('cy',p.y);ring.setAttribute('r',tw.ultimate?19:17);ring.setAttribute('fill','none');ring.setAttribute('stroke',tw.ultimate?'#8de8ff':tw.finalUpgrade?'#ffe39a':visual.color);ring.setAttribute('stroke-width',tw.ultimate?3:1.5);g.appendChild(ring);}
     const tx=text(p.x,p.y+5,icon,14,visual?.color||def.color,'800');g.appendChild(tx);
     if(tw.branch){const badge=document.createElementNS(NS,'circle');badge.setAttribute('cx',p.x+11);badge.setAttribute('cy',p.y+12);badge.setAttribute('r',6);badge.setAttribute('fill','#172019');badge.setAttribute('stroke',visual.color);g.appendChild(badge);g.appendChild(text(p.x+11,p.y+15,String(tw.level),8,'#fff','700'));}
@@ -203,7 +203,8 @@ function create(svg,commands){
   function drawMine(mine){const g=document.createElementNS(NS,'g'),outer=document.createElementNS(NS,'circle');outer.setAttribute('cx',mine.x);outer.setAttribute('cy',mine.y);outer.setAttribute('r',7);outer.setAttribute('fill','#3a3023');outer.setAttribute('stroke',mine.color||'#e6a75f');outer.setAttribute('stroke-width',2);g.appendChild(outer);g.appendChild(text(mine.x,mine.y+3,'✹',8,'#ffe0a3','700'));scene.appendChild(g);}
 
   function drawProjectile(p){
-    if(p.kind==='blast'){
+    if(p.kind==='spirit'){const c=document.createElementNS(NS,'circle');c.setAttribute('cx',p.x);c.setAttribute('cy',p.y);c.setAttribute('r',p.r);c.setAttribute('fill',p.color);c.setAttribute('fill-opacity','.75');scene.appendChild(c);
+    }else if(p.kind==='blast'){
       const c=document.createElementNS(NS,'circle');c.setAttribute('cx',p.x);c.setAttribute('cy',p.y);c.setAttribute('r',p.r);c.setAttribute('fill',p.color);c.setAttribute('fill-opacity','.18');c.setAttribute('stroke',p.color);c.setAttribute('stroke-width','3');scene.appendChild(c);
     }else if(p.kind==='chain'){
       for(let i=0;i<p.pts.length-1;i++){const l=line(p.pts[i].x,p.pts[i].y,p.pts[i+1].x,p.pts[i+1].y,p.color,3);scene.appendChild(l);}

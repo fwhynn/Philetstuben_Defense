@@ -20,13 +20,13 @@
       </div>
       <div id="message" class="message"><span id="messageText">Wähle eine Hexkarte und lege sie an die offene Straße der Base.</span><section id="tutorialPanel" class="tutorialPanel hidden" aria-label="Mini-Tutorial"><strong id="tutorialTitle"></strong><p id="tutorialText" aria-live="polite"></p><button id="skipTutorialBtn" class="secondary">Tutorial überspringen</button></section></div>
       <section id="towerPanel" class="towerPanel hidden" aria-label="Ausgewählter Turm">
-        <div class="panelHead"><h2 id="towerPanelTitle">Turm</h2><button id="closeTowerPanel" class="secondary" aria-label="Turminfos schließen">×</button></div>
+        <div class="panelHead"><h2 id="towerPanelTitle">Turm</h2><button id="closeTowerPanel" class="secondary" aria-label="Turminfos schließen" title="Schließen (Escape)"><small>Esc</small> ×</button></div>
         <p id="selectedTowerInfo" class="hint"></p>
         <div id="towerUpgrades" class="towerUpgrades"></div>
         <button id="sellTowerBtn" class="secondary" disabled>Bau rückgängig</button>
       </section>
       <section id="buildingPanel" class="towerPanel hidden" aria-label="Gebäudeslot">
-        <div class="panelHead"><h2 id="buildingPanelTitle">Gebäudeslot</h2><button id="closeBuildingPanel" class="secondary" aria-label="Gebäudeinfos schließen">×</button></div>
+        <div class="panelHead"><h2 id="buildingPanelTitle">Gebäudeslot</h2><button id="closeBuildingPanel" class="secondary" aria-label="Gebäudeinfos schließen" title="Schließen (Escape)"><small>Esc</small> ×</button></div>
         <p id="buildingPanelInfo" class="hint"></p><div id="buildingOptions" class="towerUpgrades"></div>
       </section>
     </section>
@@ -57,7 +57,7 @@
 
     <!-- Unten Mitte: die drei spielbaren Karten -->
     <section class="handDock" aria-label="Handkarten">
-      <div class="handHead"><strong id="phaseLabel">Hex platzieren</strong><span class="hint">Karte wählen (1–3) · R dreht · Hex anklicken</span></div>
+      <div class="handHead"><strong id="phaseLabel">Hex platzieren</strong><span id="handHint" class="hint">Karte wählen (1–3) · R dreht · Hex anklicken</span></div>
       <div id="hand" class="hand"></div>
     </section>
 
@@ -74,14 +74,14 @@
 
     <!-- Unterfelder -->
     <aside id="towerDrawer" class="drawer hidden" aria-label="Türme">
-      <div class="panelHead"><h2>Türme</h2><button class="secondary drawerClose" aria-label="Schließen">×</button></div>
+      <div class="panelHead"><h2>Türme</h2><button class="secondary drawerClose" aria-label="Schließen" title="Schließen (Escape)"><small>Esc</small> ×</button></div>
       <div id="towerMenu" class="towerMenu"></div>
       <p class="hint">↑ Upgrade bezahlbar · 2 Spezialisierung · 3 Zweigfinale · 4 freischaltbare Meta-Stufe. Turm anklicken für Werte und Upgrades.</p>
       <p class="hint">Bauen auch während der Wave. Rückgabe in der aktuellen Bauphase: 100 %. Danach Verkauf: 50 % inklusive Upgrades.</p>
     </aside>
 
     <aside id="rulesDrawer" class="drawer hidden rules" aria-label="Spielregeln">
-      <div class="panelHead"><h2>Spielregeln</h2><button class="secondary drawerClose" aria-label="Schließen">×</button></div>
+      <div class="panelHead"><h2>Spielregeln</h2><button class="secondary drawerClose" aria-label="Schließen" title="Schließen (Escape)"><small>Esc</small> ×</button></div>
       <ul>
         <li>Die Startfestung bestimmt HP und Gold; die Base lässt sich ausbauen.</li>
         <li>Jedes offene Straßenende ist ein Spawnpunkt.</li>
@@ -93,7 +93,8 @@
     </aside>
 
     <aside id="settingsDrawer" class="drawer hidden actions" aria-label="Einstellungen">
-      <div class="panelHead"><h2>Einstellungen</h2><button class="secondary drawerClose" aria-label="Schließen">×</button></div>
+      <div class="panelHead"><h2>Einstellungen</h2><button class="secondary drawerClose" aria-label="Schließen" title="Schließen (Escape)"><small>Esc</small> ×</button></div>
+      <p class="hint">Escape schließt offene Menüs und Infofenster.</p>
       <label class="toggle"><input id="slotHints" type="checkbox" checked /> Freie Turmplätze hervorheben</label>
       <button id="restartTutorialBtn" class="secondary">Mini-Tutorial starten</button>
       <label class="toggle"><input id="hexGrid" type="checkbox" /> Hex-Grid anzeigen (G)</label>
@@ -132,6 +133,7 @@
     <div class="loadoutBox">
       <p class="eyebrow">RUNVORBEREITUNG</p>
       <h2 id="loadoutTitle">Wähle deine Festung und fünf Türme</h2>
+      <div id="difficultyChoices" class="heroChoices" aria-label="Schwierigkeitsstufe"></div>
       <div id="heroChoices" class="heroChoices" aria-label="Startfestung"></div>
       <p>Nur diese fünf Turmtypen stehen im nächsten Run zur Verfügung. Sie werden weiterhin mit Gold gebaut.</p>
       <div class="loadoutSummary"><strong id="loadoutCount">5/5 gewählt</strong><span id="diamondCount">◆ 0 Diamanten</span></div>

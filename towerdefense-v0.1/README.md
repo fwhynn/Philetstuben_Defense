@@ -1,5 +1,17 @@
 # Hex Bastion – V0.7-dev
 
+## Schwierigkeit „Zwei Fronten“
+
+In der Runvorbereitung lässt sich Stufe 2 wählen. Die Base erhält zwei verschiedene, zufällige Ausgänge; gleicher Seed ergibt dieselben Ausgänge. Gegenüberliegende, benachbarte und versetzte Kombinationen sind möglich. Du beginnst mit fünf Handkarten und legst zwei davon nacheinander: eine direkt an jeden Ausgang. Erst danach kannst du Türme bauen und Wave 1 starten. Die erste Platzierung wird nur zugelassen, wenn der zweite Ausgang mit der restlichen Hand noch bebaubar bleibt. Alle fünf Karten gehen anschließend regulär auf den Ablagestapel. Ab dem nächsten Zug gelten wieder drei Handkarten und eine Platzierung. Startgold, Wave-Gegnerzahl und Diamantenformel bleiben gleich. Auswahl und Wiederholungsbutton behalten die Schwierigkeit.
+
+## Neue Türme und Bedienung (20.09.2026)
+
+- Elementturm: 45 Diamanten zum Freischalten, 50 Gold zum Bauen. Erste Spezialisierung (40 Gold) wählt dauerhaft Feuer mit Flächenschaden, Wasser mit Treffer-Slow oder Wind mit durchschlagenden Angriffen. Jede Wahl hat einen finalen Ausbau (70 Gold). Urkraft: 35 Diamanten zum Freischalten, 120 Gold im Run.
+- Nekromantenturm: 55 Diamanten / 60 Gold. Nahe getötete Gegner liefern jeweils genau einem Nekromanten eine Seele. Bis zu drei Geister bleiben sechs Sekunden und greifen einmal pro Sekunde an. Seelenchor/Geisterlegion erhöhen die Anzahl, Seelenhüter/Lichfürst Dauer und Schaden. Seelenkrone: 40 Diamanten / 130 Gold. Geister blockieren keine Einheiten und verschwinden beim Verkauf ihres Turms oder am Wave-Ende.
+- Beide Türme nutzen normale Loadout-, Zielprioritäts-, Terrain-, Schmiede- und Upgrade-Regeln. 3D-Darstellung wird prozedural erzeugt, SVG besitzt eigene Symbole; keine zusätzlichen GLB-Dateien erforderlich. Balancewerte sind erste Spieltestwerte.
+- Escape schließt offene Menüs und Infofenster; Hinweis am Schließen-Button und in Einstellungen. Die Kopfzeile bleibt beim Scrollen sichtbar. Mehr Abstand zwischen Handkarten und Phasenanzeige.
+
+
 Stand: 20.09.2026, einschließlich lokaler Änderungen. Spielbarer Browser-Prototyp eines Hex-Tower-Defense-Deckbuilders. Diese Datei beschreibt den aktuell implementierten Stand. Frühere Zwischenstände stehen im [Entwicklungsverlauf](CHANGELOG.md), spätere Ziele im [Projektgedächtnis](../BRAIN.md). Das ausführliche [Übergabeprotokoll](../README_TowerDefense_Projekt.md) enthält die Konzepthistorie.
 
 ## Starten und Bedienung
