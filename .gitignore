@@ -1,5 +1,6 @@
 node_modules/
 .claude/
+.local/
 *.log
 towerdefense-v0.1/assets/index.json
 .deploy-webhook-secret
