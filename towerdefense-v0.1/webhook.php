@@ -128,7 +128,7 @@ function extractTagName(string $event, array $payload): ?string
         return null;
     }
 
-    $ref = (string)($payload['ref'] ?? '');
+    $ref = (string) ($payload['ref'] ?? '');
     if (!str_starts_with($ref, 'refs/tags/')) {
         return null;
     }
