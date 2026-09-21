@@ -51,7 +51,8 @@ const HexMap=(()=>{
   };
   // Unrotierte Turmplatz-Offsets einer Hexart. Unbekannte Arten fallen auf die alte Standardlage zurück.
   function slotOffsets(type,count){
-    const layout=SLOT_LAYOUTS[type];if(layout) return layout.slice(0,count).map(([x,y])=>({x,y}));
+    const custom=typeof HexData!=='undefined'&&HexData.CARD_LIBRARY[type]?.slotLayout;
+    const layout=custom||SLOT_LAYOUTS[(typeof HexData!=='undefined'&&HexData.CARD_LIBRARY[type]?.model)||type];if(layout) return layout.slice(0,count).map(([x,y])=>({x,y}));
     if(count===1) return [{x:0,y:-21}];
     if(count===2) return [{x:-18,y:-20},{x:18,y:18}];
     return [];
@@ -137,7 +138,7 @@ const HexMap=(()=>{
   const LONGROAD_CENTERLINE=[[46.8,0],[45,0.2],[43.3,0.4],[41.5,0.5],[39.7,0.8],[37.4,1.3],[34.5,2.4],[31.3,3.8],[28,5.1],[24.6,5.8],[20.3,5.8],[15.4,4.8],[10.3,3.2],[5.1,1.5],[0,0],[-5.1,-1.5],[-10.3,-3.2],[-15.4,-4.8],[-20.3,-5.8],[-24.6,-5.8],[-28,-5.1],[-31.3,-3.8],[-34.5,-2.4],[-37.4,-1.3],[-39.7,-0.8],[-41.5,-0.5],[-43.3,-0.4],[-45,-0.2],[-46.8,0]];
   const MODEL_ROADS={bigCurve:{roads:[0,2],line:CURVE_CENTERLINE},village:{roads:[0,2],line:CURVE_CENTERLINE},grove:{roads:[0,2],line:CURVE_CENTERLINE},watchtower:{roads:[0,2],line:CURVE_CENTERLINE},longRoad:{roads:[0,3],line:LONGROAD_CENTERLINE}};
   function modelRoadLegs(center,type,roads){
-    const model=MODEL_ROADS[type];if(!model||roads.length!==2) return null;
+    const model=MODEL_ROADS[(typeof HexData!=='undefined'&&HexData.CARD_LIBRARY[type]?.model)||type];if(!model||roads.length!==2) return null;
     const want=[...roads].sort().join();let rot=-1;
     for(let r=0;r<6;r++) if(model.roads.map(d=>(d+r)%6).sort().join()===want){rot=r;break;}
     if(rot<0) return null;
@@ -150,21 +151,22 @@ const HexMap=(()=>{
     return {hub:line[mid],legs};
   }
   function roadGeometry(tile){
+    const type=(typeof HexData!=='undefined'&&HexData.CARD_LIBRARY[tile.type]?.model)||tile.type;
     const center=axialToWorld(tile.q,tile.r),roads=tile.roads||[];
     const modeled=modelRoadLegs(center,tile.type,roads);if(modeled) return modeled;
     let hub={...center};
-    if(roads.length===2&&['smallCurve'].includes(tile.type)){
+    if(roads.length===2&&['smallCurve'].includes(type)){
       const edges=roads.map(d=>edgePoint(center.x,center.y,d,1));
-      const bias=tile.type==='smallCurve'?.5:-.45;
+      const bias=type==='smallCurve'?.5:-.45;
       hub={x:center.x+((edges[0].x+edges[1].x)/2-center.x)*bias,y:center.y+((edges[0].y+edges[1].y)/2-center.y)*bias};
     }
     const legs=new Map();
     for(const d of roads){
       const edge=edgePoint(center.x,center.y,d,1),points=[hub];
-      if(tile.type==='longRoad'){
+      if(type==='longRoad'){
         const dx=edge.x-hub.x,dy=edge.y-hub.y,length=Math.hypot(dx,dy);
         for(const [t,offset] of [[.28,14],[.6,-14]]) points.push({x:hub.x+dx*t-dy/length*offset,y:hub.y+dy*t+dx/length*offset});
-      }else if(roads.length===2&&['smallCurve'].includes(tile.type)){
+      }else if(roads.length===2&&['smallCurve'].includes(type)){
         const control={x:(hub.x+edge.x)/2+(center.x-hub.x)*.5,y:(hub.y+edge.y)/2+(center.y-hub.y)*.5};
         for(let i=1;i<12;i++){const t=i/12,u=1-t;points.push({x:u*u*hub.x+2*u*t*control.x+t*t*edge.x,y:u*u*hub.y+2*u*t*control.y+t*t*edge.y});}
       }

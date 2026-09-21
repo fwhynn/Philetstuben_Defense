@@ -4,7 +4,7 @@ function load(){const context={};for(const file of ['data.js','map.js','model-ma
 test('every card type has a model and its road edges match the shape table',()=>{
   const {data,models}=load();
   for(const [id,card] of Object.entries(data.CARD_LIBRARY)){
-    const m=models.modelFor({type:id,rotation:0,roads:card.roads});assert.equal(m.name,({supplyRoad:'straight',signalCross:'cross'})[id]||id);assert.equal(m.rotation,0);
+    const m=models.modelFor({type:id,rotation:0,roads:card.roads});assert.equal(m.name,(card.procedural?'straight':card.model)||({supplyRoad:'straight',signalCross:'cross'})[id]||id);assert.equal(m.rotation,0);
   }
 });
 test('tiles keep their stored rotation and base uses the base model',()=>{

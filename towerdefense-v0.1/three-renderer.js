@@ -7,7 +7,7 @@ import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 const S=54,STEP=Math.PI/3,TILT=55*Math.PI/180,PITCH_MIN=12*Math.PI/180,PITCH_MAX=88*Math.PI/180,DIST_MIN=220,DIST_MAX=3400,DIST_START=950,SKY='#a9cbd8';
 const PREFIX={tiles:'tile',landmarks:'landmark',towers:'tower',enemies:'enemy',buildings:'building',effects:'mine'};
 const LIMBS=['leg_l','leg_r','arm_l','arm_r'];
-const LANDMARK_LABEL={shrine:'Shrine · Bonus unbekannt',boss:'Wächter · inaktiv',treasure:'Schatz +20 · ungesammelt'};
+const LANDMARK_LABEL={shrine:'Shrine · Bonus unbekannt',boss:'Wächter · inaktiv',treasure:'Schatz +20 Gold · ungesammelt'};
 const STATUS_LABEL={ready:'☠ bereit',fighting:'☠ Kampf',defeated:'☠ besiegt',escaped:'☠ entkommen'};
 const ENEMY_COLOR={boss:'#934f9e',armored:'#78818c',warded:'#477da4',swarm:'#b87832',normal:'#8d3c34'};
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -48,7 +48,7 @@ function makeTemplate(name,scene,kind){
   const slotNodes=[],padNodes=[];scene.traverse(n=>{if(isSlot(n)) slotNodes.push(n);else if(isPad(n)) padNodes.push(n);});
   const skip=n=>isSlot(n)||isPad(n);
   template.parts=bake(scene,skip);
-  if(name==='tile_rescue'||name==='tile_base') template.noRoad=bake(scene,n=>skip(n)||n.name==='road');
+  if(name==='tile_rescue'||name==='tile_base'||name==='tile_straight') template.noRoad=bake(scene,n=>skip(n)||n.name==='road');
   template.slots=slotNodes.sort((a,b)=>a.name.localeCompare(b.name)).map(n=>({pos:worldPosition(n),parts:bake(n)}));
   template.pad=padNodes[0]?{pos:worldPosition(padNodes[0]),parts:bake(padNodes[0])}:null;
   if(kind==='landmarks'&&name!=='landmark_boss'){                    // Deko separat, damit sie auf jede Straßenform passt
@@ -106,6 +106,7 @@ function create(host0,commands){
     const after=event&&groundPoint(event);if(before&&after){cam.x+=before.x-after.x;cam.z+=before.z-after.z;applyCamera();}
     commands.viewChanged?.();
   }
+  function panView(x,y){const forward=new THREE.Vector3();camera.getWorldDirection(forward);forward.y=0;forward.normalize();const right=new THREE.Vector3().crossVectors(forward,camera.up).normalize(),speed=cam.dist*.65;cam.x+=(right.x*x-forward.x*y)*speed;cam.z+=(right.z*x-forward.z*y)*speed;applyCamera();commands.viewChanged?.();}
   function rotateView(direction){cam.yaw+=direction*Math.PI/18;applyCamera();commands.viewChanged?.();}
   function resetView(notify=true){cam.x=0;cam.z=0;cam.dist=DIST_START;cam.yaw=0;cam.pitch=TILT;applyCamera();if(notify) commands.viewChanged?.();}
   function getView(){return {x:cam.x,y:cam.z,w:cam.dist,h:cam.dist,yaw:cam.yaw,pitch:cam.pitch};}
@@ -148,7 +149,7 @@ function create(host0,commands){
     flash:makePool(new THREE.SphereGeometry(1,10,8),220,additive()),
     rocks:makePool(new THREE.IcosahedronGeometry(1,0),48,new THREE.MeshStandardMaterial({color:'#ffffff',roughness:.95,metalness:0}))};
   const mats={empty:std('#ffffff',{transparent:true,opacity:.6}),legal:basic('#7fcf6a',.25),illegal:basic('#c0594c',.16),outlineLegal:basic('#a9dc93'),outlineIllegal:basic('#ba6b60'),
-    hint:basic('#ffe39a'),slot:basic('#f4d36d',.9),select:basic('#f4d36d',.9),bar:basic('#321a18'),hp:basic('#78b95f'),armor:basic('#df8b3a'),magic:basic('#69aee8')};
+    hint:basic('#ffffff'),buildingSlot:basic('#59e0d2',.9),slot:basic('#ffffff',1),select:basic('#f4d36d',.9),bar:basic('#321a18'),hp:basic('#78b95f'),armor:basic('#df8b3a'),magic:basic('#69aee8')};
   const enemyGeometry={small:new THREE.SphereGeometry(9,14,10),boss:new THREE.SphereGeometry(15,16,12)},barGeometry=new THREE.PlaneGeometry(1,1);
   const ghostMaterials=new Map(),biomeMaterials=new Map();
   function ghostMaterial(material,legal){
@@ -335,7 +336,7 @@ function create(host0,commands){
         if(tower){const obj=towerObject(tile,i,tower);group.add(obj.holder);towers.push(obj);picks.push(obj.pick);}
         else if(slots[i]){const glow=new THREE.Mesh(slotDiamondGeometry,mats.slot);glow.material.depthTest=false;glow.renderOrder=14;glow.position.set(slots[i].x,22,slots[i].y);group.add(glow);slotHints.push(glow);const pick=new THREE.Mesh(slotPick,invisible);pick.position.set(slots[i].x,0,slots[i].y);pick.userData.pick={kind:'slot',q:tile.q,r:tile.r,index:i};group.add(pick);picks.push(pick);}
       });
-      for(let i=0;i<(tile.buildingSlots||0);i++){const b=buildingObject(tile,i,tile.buildings?.[i]);group.add(b.group);picks.push(b.pick);}
+      for(let i=0;i<(tile.buildingSlots||0);i++){const b=buildingObject(tile,i,tile.buildings?.[i]);group.add(b.group);picks.push(b.pick);if(!tile.buildings?.[i]){const p=buildingPosition(tile),gem=new THREE.Mesh(slotDiamondGeometry,mats.buildingSlot);gem.material.depthTest=false;gem.renderOrder=14;gem.position.set(p.x,22,p.y);group.add(gem);slotHints.push(gem);}}
       layer.objects.add(group);objectRecords.set(id,{sig,group,towers,picks,slotHints});pickDirty=true;
     }
     for(const [id,record] of [...objectRecords]) if(!seen.has(id)){layer.objects.remove(record.group);objectRecords.delete(id);pickDirty=true;}
@@ -380,7 +381,7 @@ function create(host0,commands){
     const marked=state.selectedTower||state.selectedSlot,markedTile=marked&&state.map.get(key(marked.q,marked.r)),markedPos=markedTile&&slotPositions(markedTile)[marked.index];
     if(markedPos){selectRing.visible=true;selectRing.position.set(markedPos.x,3,markedPos.y);selectRing.scale.setScalar(state.selectedTower?24:18);}else selectRing.visible=false;
     const canHint=['build','wave'].includes(state.phase)&&state.hp>0;
-    for(const record of objectRecords.values()) for(const obj of record.towers) obj.hint.visible=canHint&&HexData.availableUpgrades(obj.tower).some(([,u])=>state.gold>=HexBuildings.cost(state,obj.tile,u.cost));
+    for(const record of objectRecords.values()) for(const obj of record.towers) obj.hint.visible=!state.showUpgradeStatus&&canHint&&HexData.availableUpgrades(obj.tower).some(([,u])=>state.gold>=HexBuildings.cost(state,obj.tile,u.cost));
   }
 
   // ---- Gegner und Geschosse ----
@@ -498,16 +499,21 @@ function create(host0,commands){
   function label(id,x,z,text,cls='',lift=0){
     usedLabels.add(id);let entry=labels.get(id);
     if(!entry){const el=document.createElement('div');el.style.cssText='position:absolute;transform:translate(-50%,-50%);color:#fff4c3;text-shadow:0 1px 3px #000,0 0 2px #000;font:700 11px Inter,system-ui,sans-serif;white-space:nowrap;pointer-events:none';labelLayer.appendChild(el);entry={el,pos:new THREE.Vector3()};labels.set(id,entry);}
-    if(entry.text!==text||entry.cls!==cls){entry.text=text;entry.cls=cls;entry.el.textContent=text;entry.el.style.fontSize=cls==='big'?'26px':'11px';entry.el.style.color=cls==='big'?'#e6ecf2':'#fff4c3';}
-    entry.pos.set(x,lift+6,z);
+    if(entry.text!==text||entry.cls!==cls){entry.text=text;entry.cls=cls;entry.el.textContent=text;entry.el.style.fontSize=cls==='big'?'26px':'11px';entry.el.style.color=id.startsWith('upgrade:')?'#14532d':cls==='big'?'#e6ecf2':'#fff4c3';if(id.startsWith('upgrade:')){entry.el.style.textShadow='none';entry.el.innerHTML='<svg width="28" height="32" viewBox="0 0 28 32" aria-label="Turm ausbaubar"><polygon points="14,2 26,14 19,14 19,30 9,30 9,14 2,14" fill="#ffffff" stroke="#172019" stroke-width="2" stroke-linejoin="round"/></svg>';}}
+    entry.pos.set(x,lift+6,z);return entry;
   }
   function syncLabels(){
     for(const e of state.enemies)if(e.alive&&e.caravan)label('caravan:'+e.id,e.x,e.y,'◆ Kasse +15 / −10','',55);
     for(const tile of state.map.values()){
       const c=axialToWorld(tile.q,tile.r),terrain=CARD_LIBRARY[tile.type],id=key(tile.q,tile.r);
+      if(state.showUpgradeStatus)(tile.towers||[]).forEach((tower,i)=>{if(tower&&HexData.upgradeStatus(state,tower)){const p=slotPositions(tile)[i];label('upgrade:'+id+':'+i,p.x,p.y,HexData.upgradeStatus(state,tower),'big',72);}});
       if(tile.income) label(`inc:${id}`,c.x,c.y+44,'+'+tile.income+' Gold');
-      const biome=HexBiomes.forTile(state,tile);if(biome!=='grass')label('biome:'+id,c.x,c.y-32,HexBiomes.definitions[biome].name);
-      const bonus=terrain?.towerRange?'+'+Math.round((terrain.towerRange-1)*100)+' % Reichweite':terrain?.towerDamage?'+'+Math.round((terrain.towerDamage-1)*100)+' % Schaden':terrain?.archerDamage?'+25 % Archer':null;
+      const biome=HexBiomes.forTile(state,tile);if(biome!=='grass'){
+        const entry=label('biome:'+id,c.x,c.y-32,HexBiomes.definitions[biome].name+' ⓘ');entry.biome=biome;
+        entry.el.title=HexBiomes.definitions[biome].description;entry.el.style.pointerEvents='auto';entry.el.style.cursor='help';entry.el.style.padding='10px 6px';entry.el.tabIndex=0;entry.el.setAttribute('role','button');
+        if(!entry.interactive){entry.interactive=true;entry.el.addEventListener('click',e=>{e.stopPropagation();commands.inspectBiome?.(entry.biome);});entry.el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();commands.inspectBiome?.(entry.biome);}});}
+      }
+      const bonus=terrain?.towerBonus?'+25 % '+HexData.TOWERS[terrain.requiredTower].name+(terrain.towerBonus.range?' Reichweite':' Schaden'):terrain?.towerRange?'+'+Math.round((terrain.towerRange-1)*100)+' % Reichweite':terrain?.towerDamage?'+'+Math.round((terrain.towerDamage-1)*100)+' % Schaden':terrain?.archerDamage?'+25 % Archer':null;
       if(bonus) label(`bon:${id}`,c.x,c.y+35,bonus);
     }
     for(const landmark of state.landmarks?.values()||[]) if(landmark.status){const c=axialToWorld(landmark.q,landmark.r);label(`st:${key(landmark.q,landmark.r)}`,c.x,c.y+35,STATUS_LABEL[landmark.status]);}
@@ -635,7 +641,7 @@ function create(host0,commands){
   const resize=new ResizeObserver(()=>{const w=Math.max(1,host.clientWidth),h=Math.max(1,host.clientHeight);gl.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();if(state) commands.viewChanged?.();});
   resize.observe(host);applyCamera();raf=requestAnimationFrame(loop);
 
-  return {render,reset,project,rotateView,zoom:factor=>zoom(factor),resetView:()=>resetView(true),getView,
+  return {render,reset,project,rotateView,panView,zoom:factor=>zoom(factor),resetView:()=>resetView(true),getView,
     destroy(){
       destroyed=true;cancelAnimationFrame(raf);resize.disconnect();for(const [name,fn,options] of listeners) dom.removeEventListener(name,fn,options);
       windPool.mesh.geometry.dispose();windPool.mesh.material.dispose();windPool.mesh.dispose();mistPool.mesh.geometry.dispose();mistPool.mesh.material.dispose();mistPool.mesh.dispose();

@@ -1,5 +1,23 @@
 const HexData=(()=>{
   const CARD_LIBRARY = {
+    mirrorJunction:{"id":"mirrorJunction","name":"Spiegel-Abzweig","rarity":"Uncommon","roads":[0,3,4],"slots":2,"procedural":true,"slotLayout":[[-30,-24],[-4,-24]],"desc":"Gespiegelte T-Kreuzung: Durchgang mit Abzweig auf der anderen Seite."},
+    fanJunction:{"id":"fanJunction","name":"Fächerkreuzung","rarity":"Uncommon","roads":[0,1,2],"slots":2,"procedural":true,"slotLayout":[[-22,25],[16,25]],"desc":"Drei Straßenenden auf einer Seite. Zwei Turmplätze im Rücken."},
+    sideCross:{"id":"sideCross","name":"Seitenkreuzung","rarity":"Rare","roads":[0,1,2,3],"slots":2,"procedural":true,"slotLayout":[[-22,25],[16,25]],"desc":"Vier aufeinanderfolgende Straßenenden für neue Anschlüsse."},
+    sentryBend:{"id":"sentryBend","name":"Späherbogen","rarity":"Epic","model":"smallCurve","roads":[0,1],"slots":1,"towerRange":1.3,"desc":"Kleine Kurve: +30 % Turmreichweite auf diesem Hex."},
+    battleFork:{"id":"battleFork","name":"Veteranengabel","rarity":"Epic","model":"tee","roads":[0,2,4],"slots":2,"towerDamage":1.2,"desc":"Y-Kreuzung mit 2 Turmplätzen und +20 % Turmschaden."},
+    goldRoad:{"id":"goldRoad","name":"Goldroute","rarity":"Epic","model":"straight","roads":[0,3],"slots":1,"income":4,"desc":"Gerade mit einem Turmplatz und +4 Gold je Wave."},
+    warBend:{"id":"warBend","name":"Drachenbogen","rarity":"Legendary","model":"smallCurve","roads":[0,1],"slots":1,"towerDamage":1.4,"towerRange":1.2,"desc":"Kleine Kurve: +40 % Turmschaden und +20 % Reichweite."},
+    crownCross:{"id":"crownCross","name":"Kronenkreuzung","rarity":"Legendary","model":"fullCross","roads":[0,1,2,3,4,5],"slots":2,"towerDamage":1.2,"towerRange":1.2,"desc":"Sechs Anschlüsse, 2 Turmplätze, +20 % Schaden und Reichweite."},
+    royalBend:{"id":"royalBend","name":"Königsbogen","rarity":"Legendary","model":"village","roads":[0,2],"slots":1,"buildingSlots":1,"income":5,"towerRange":1.2,"desc":"Große Kurve: +5 Gold je Wave, Gebäudeslot und +20 % Turmreichweite."},
+    siegeRoad:{"id":"siegeRoad","name":"Belagerungsgerade","rarity":"Rare","model":"straight","roads":[0,3],"slots":1,"requiredTower":"catapult","towerBonus":{"type":"catapult","damage":1.25},"desc":"+25 % Schaden für Katapult auf diesem Hex."},
+    lightningFork:{"id":"lightningFork","name":"Blitzgabel","rarity":"Rare","model":"tee","roads":[0,2,4],"slots":2,"requiredTower":"chain","towerBonus":{"type":"chain","damage":1.25},"desc":"+25 % Schaden für Kettenblitz auf diesem Hex."},
+    frostBend:{"id":"frostBend","name":"Frostbogen","rarity":"Rare","model":"smallCurve","roads":[0,1],"slots":1,"requiredTower":"freeze","towerBonus":{"type":"freeze","range":1.25},"desc":"+25 % Reichweite für Freeze auf diesem Hex."},
+    mineRoad:{"id":"mineRoad","name":"Minenstraße","rarity":"Rare","model":"longRoad","roads":[0,3],"slots":2,"requiredTower":"mine","towerBonus":{"type":"mine","damage":1.25},"desc":"+25 % Schaden für Minenleger auf diesem Hex."},
+    ballistaRoad:{"id":"ballistaRoad","name":"Schützenlinie","rarity":"Rare","model":"straight","roads":[0,3],"slots":1,"requiredTower":"ballista","towerBonus":{"type":"ballista","damage":1.25},"desc":"+25 % Schaden für Balliste auf diesem Hex."},
+    emberBend:{"id":"emberBend","name":"Glutknick","rarity":"Rare","model":"smallCurve","roads":[0,1],"slots":1,"requiredTower":"flame","towerBonus":{"type":"flame","damage":1.25},"desc":"+25 % Schaden für Flammenturm auf diesem Hex."},
+    elementCross:{"id":"elementCross","name":"Elementkreuzung","rarity":"Rare","model":"cross","roads":[0,1,3,4],"slots":2,"requiredTower":"element","towerBonus":{"type":"element","damage":1.25},"desc":"+25 % Schaden für Elementturm auf diesem Hex."},
+    soulFork:{"id":"soulFork","name":"Seelenabzweig","rarity":"Rare","model":"tJunction","roads":[0,2,3],"slots":2,"requiredTower":"necromancer","towerBonus":{"type":"necromancer","damage":1.25},"desc":"+25 % Schaden für Nekromantenturm auf diesem Hex. Gilt auch für Geister."},
+
     supplyRoad:{id:'supplyRoad',name:'Versorgungsweg',rarity:'Rare',roads:[0,3],slots:1,income:2,desc:'+2 Gold je Wave, ein Turmplatz an einer geraden Straße.'},
     signalCross:{id:'signalCross',name:'Signalkreuzung',rarity:'Epic',roads:[0,1,3,4],slots:2,towerRange:1.2,desc:'+20 % Reichweite, zwei Turmplätze und vier Straßenenden.'},
     straight: {id:'straight',name:'Gerade',rarity:'Common',roads:[0,3],slots:1,desc:'Zuverlässiger Weg.'},
@@ -13,7 +31,7 @@ const HexData=(()=>{
     empty: {id:'empty',name:'Weites Land',rarity:'Uncommon',roads:[0,3],slots:2,desc:'Einfaches Feld mit 2 Turret-Slots.'},
     longRoad: {id:'longRoad',name:'Lange Straße',rarity:'Uncommon',roads:[0,3],slots:2,desc:'Gewundener Weg: Gegner bleiben länger im Hex.'},
     highGround: {id:'highGround',name:'Höhenkreuzung',rarity:'Epic',roads:[0,2,4],slots:1,towerRange:1.25,desc:'+25 % Tower-Reichweite. Nur 1 Slot und drei Straßenenden.'},
-    grove: {id:'grove',name:'Waldkurve',rarity:'Uncommon',roads:[0,2],slots:1,archerDamage:1.25,desc:'+25 % Archer-Schaden auf diesem Hex. Nur 1 Slot.'},
+    grove: {requiredTower:'archer',id:'grove',name:'Waldkurve',rarity:'Rare',roads:[0,2],slots:1,archerDamage:1.25,desc:'+25 % Archer-Schaden auf diesem Hex. Nur 1 Slot.'},
     treasury: {id:'treasury',name:'Handelsstraße',rarity:'Rare',roads:[0,3],slots:0,income:4,desc:'+4 Gold je Wave. Keine Turret-Slots.'},
     citadel: {id:'citadel',name:'Bastionskreuzung',rarity:'Legendary',roads:[0,2,4],slots:2,towerRange:1.4,income:2,desc:'+40 % Tower-Reichweite, 2 Turret-Slots und +2 Gold je Wave.'},
     battlefield: {id:'battlefield',name:'Kampfstraße',rarity:'Epic',roads:[0,3],slots:1,towerDamage:1.2,desc:'+20 % Schaden für alle Schadentürme auf diesem Hex.'},
@@ -87,14 +105,17 @@ const HexData=(()=>{
   };
   const BRANCH_VISUALS={marksman:{icon:'◎',color:'#f5d06e'},volley:{icon:'≋',color:'#96d47c'},siege:{icon:'◆',color:'#e99a5c'},barrage:{icon:'⋮',color:'#ffdca1'},storm:{icon:'ϟ',color:'#93a5ff'},overload:{icon:'✦',color:'#e2a1ff'},deepFrost:{icon:'❄',color:'#70d5ff'},frostField:{icon:'❆',color:'#c0f6ea'},demolition:{icon:'✹',color:'#ff9b55'},minefield:{icon:'••',color:'#d9bc72'},harpoon:{icon:'➶',color:'#e7d39e'},repeater:{icon:'»',color:'#d4b979'},inferno:{icon:'☀',color:'#ff7448'},wildfire:{icon:'≋',color:'#ff9b55'}};
   Object.assign(BRANCH_VISUALS,{elementFire:{icon:'♨',color:'#ff8654'},elementWater:{icon:'≈',color:'#69d8ff'},elementWind:{icon:'≋',color:'#dbefae'},soulChoir:{icon:'☽',color:'#a6edb4'},soulKeeper:{icon:'☠',color:'#c8a3ee'}});
+  function upgradeStatus(state,tower){if(tower.ultimate)return '';if(availableUpgrades(tower).length)return '↑';return state.ultimateUnlocks?.includes('ultimate:'+tower.type)?'↑':'';}
+  function ultimateDefinition(tower){const def=ULTIMATES[tower.type];if(tower.type!=='element')return def;return {...def,name:({elementFire:'Weltenbrand',elementWater:'Ozeanherz',elementWind:'Himmelssturm'})[tower.branch]||def.name};}
   function towerDefinition(tower,definitions=TOWERS){
     const def={...definitions[tower.type],...(tower.branch?UPGRADES[tower.branch]:{}),...(tower.finalUpgrade?UPGRADES[tower.finalUpgrade]:{})},terrain=CARD_LIBRARY[tower.tileType];
-    const ultimate=tower.ultimate&&ULTIMATES[tower.type];if(ultimate){def.name=ultimate.name;def.damage=(def.damage||0)*(ultimate.damageFactor||1);def.range=(def.range||0)*(ultimate.rangeFactor||1);def.cooldown=(def.cooldown||1)*(ultimate.cooldownFactor||1);if(def.slow)def.slow*=ultimate.slowFactor||1;if(def.splash)def.splash+=ultimate.splashBonus||0;if(def.chain)def.chain+=ultimate.chainBonus||0;if(def.jumpRange)def.jumpRange+=ultimate.jumpBonus||0;if(def.bossMultiplier)def.bossMultiplier*=ultimate.bossFactor||1;}
+    const ultimate=tower.ultimate&&ultimateDefinition(tower);if(ultimate){def.name=ultimate.name;def.damage=(def.damage||0)*(ultimate.damageFactor||1);def.range=(def.range||0)*(ultimate.rangeFactor||1);def.cooldown=(def.cooldown||1)*(ultimate.cooldownFactor||1);if(def.slow)def.slow*=ultimate.slowFactor||1;if(def.splash)def.splash+=ultimate.splashBonus||0;if(def.chain)def.chain+=ultimate.chainBonus||0;if(def.jumpRange)def.jumpRange+=ultimate.jumpBonus||0;if(def.bossMultiplier)def.bossMultiplier*=ultimate.bossFactor||1;}
     if(typeof HexBiomes!=='undefined')HexBiomes.apply(def,tower);
-    def.range=Math.round(def.range*(terrain?.towerRange||1)*(tower.rangeFactor||1));
-    def.damage=def.damage*(tower.type==='archer'?(terrain?.archerDamage||1):1)*(terrain?.towerDamage||1)*(tower.supportDamage||1);
+    const bonus=terrain?.towerBonus?.type===tower.type?terrain.towerBonus:{};
+    def.range=Math.round(def.range*(bonus.range||1)*(terrain?.towerRange||1)*(tower.rangeFactor||1));
+    def.damage=def.damage*(bonus.damage||1)*(tower.type==='archer'?(terrain?.archerDamage||1):1)*(terrain?.towerDamage||1)*(tower.supportDamage||1);
     def.damage=Number(def.damage.toFixed(2));
-    if(def.soulDamage)def.soulDamage*= (terrain?.towerDamage||1)*(tower.supportDamage||1)*(ultimate?.damageFactor||1);
+    if(def.soulDamage)def.soulDamage*= (bonus.damage||1)* (terrain?.towerDamage||1)*(tower.supportDamage||1)*(ultimate?.damageFactor||1);
     return def;
   }
   function availableUpgrades(tower){return Object.entries(UPGRADES).filter(([,upgrade])=>upgrade.tower===tower.type&&!tower.finalUpgrade&&(tower.branch?upgrade.requires===tower.branch:!upgrade.requires));}
@@ -103,5 +124,5 @@ const HexData=(()=>{
     const full=state.phase==='build'&&!state.waveRunning&&tower.builtOnWave===state.wave;
     return {amount:full?tower.paid:Math.floor(tower.paid*.5),percent:full?100:50};
   }
-  return {CARD_LIBRARY,TOWERS,UPGRADES,ULTIMATES,BRANCH_VISUALS,towerDefinition,availableUpgrades,towerRefund};
+  return {upgradeStatus,ultimateDefinition,CARD_LIBRARY,TOWERS,UPGRADES,ULTIMATES,BRANCH_VISUALS,towerDefinition,availableUpgrades,towerRefund};
 })();

@@ -1,5 +1,7 @@
 # Autohex TD – V0.7-dev
 
+Tempo: gespeicherter Regler von 1× bis 8×; F schaltet 1× → 2× → … → 8× → 1×. Hintergrundtimer führt Waves auch ohne Bildschirmausgabe fort; gedrosselte Zeit wird schrittweise nachgeholt. Vollständig eingefrorene Tabs rechnen erst beim Aufwachen weiter. P pausiert weiterhin ausdrücklich. Freie Turmplätze sind weiß, Gebäudeplätze türkis markiert.
+
 ## Regionale Biome
 
 Die Base und Radius 2 bleiben Grasland. Ab Radius 3 liegen drei zusammenhängende, leicht geschwungene Regionen, deren Ausrichtung vom Run-Seed abhängt. Beim Erkunden werden Bauplätze und Sonderfelder passend eingefärbt; Nebelfelder verraten ihr Biom nicht. Gelegte Hexe tragen den Biomnamen. Details stehen in den Einstellungen.
@@ -22,7 +24,7 @@ In der Runvorbereitung lässt sich Stufe 2 wählen. Die Base erhält zwei versch
 
 ## Neue Türme und Bedienung (20.09.2026)
 
-- Elementturm: 45 Diamanten zum Freischalten, 50 Gold zum Bauen. Erste Spezialisierung (40 Gold) wählt dauerhaft Feuer mit Flächenschaden, Wasser mit Treffer-Slow oder Wind mit durchschlagenden Angriffen. Jede Wahl hat einen finalen Ausbau (70 Gold). Urkraft: 35 Diamanten zum Freischalten, 120 Gold im Run.
+- Elementturm: 45 Diamanten zum Freischalten, 50 Gold zum Bauen. Erste Spezialisierung (40 Gold) wählt dauerhaft Feuer mit Flächenschaden, Wasser mit Treffer-Slow oder Wind mit durchschlagenden Angriffen. Jede Wahl hat einen finalen Ausbau (70 Gold). Element-Ultimate: 35 Diamanten zum Freischalten, 120 Gold im Run; Name je Zweig Weltenbrand (Feuer), Ozeanherz (Wasser), Himmelssturm (Wind).
 - Nekromantenturm: 55 Diamanten / 60 Gold. Nahe getötete Gegner liefern jeweils genau einem Nekromanten eine Seele. Bis zu drei Geister bleiben sechs Sekunden und greifen einmal pro Sekunde an. Seelenchor/Geisterlegion erhöhen die Anzahl, Seelenhüter/Lichfürst Dauer und Schaden. Seelenkrone: 40 Diamanten / 130 Gold. Geister blockieren keine Einheiten und verschwinden beim Verkauf ihres Turms oder am Wave-Ende.
 - Beide Türme nutzen normale Loadout-, Zielprioritäts-, Terrain-, Schmiede- und Upgrade-Regeln. 3D-Darstellung wird prozedural erzeugt, SVG besitzt eigene Symbole; keine zusätzlichen GLB-Dateien erforderlich. Balancewerte sind erste Spieltestwerte.
 - Escape schließt offene Menüs und Infofenster; Hinweis am Schließen-Button und in Einstellungen. Die Kopfzeile bleibt beim Scrollen sichtbar. Mehr Abstand zwischen Handkarten und Phasenanzeige.
@@ -39,7 +41,7 @@ Stand: 20.09.2026, einschließlich lokaler Änderungen. Spielbarer Browser-Proto
 | Karte auswählen / Hex platzieren | Karte anklicken, dann freie Position anklicken |
 | Hex drehen | R oder Mausrad-Klick (im Uhrzeigersinn); Hinweis an der Vorschau |
 | Wave starten | Leertaste oder Wave-Button |
-| Doppeltes Spieltempo | F oder 2×-Toggle |
+| Spieltempo 1× bis 8× | Regler; F erhöht um eine Stufe, nach 8× wieder 1× |
 | Kamera zoomen | Mausrad oder +/− |
 | Karte verschieben | 3D: linke Maustaste ziehen (SVG: rechte oder mittlere) |
 | Ansicht drehen und kippen | Nur 3D: rechte oder mittlere Maustaste ziehen; Q/E drehen links/rechts. Mausrad-Klick dreht während der Platzierung das Hex |
@@ -102,6 +104,15 @@ Das Deck enthält ausschließlich Maphex-Karten. Gezogene Belohnungen werden ers
 
 | Hex | Rarität | Turmplätze | Effekt |
 |---|---|---:|---|
+| Spiegel-Abzweig | Uncommon | 2 | Gespiegelte T-Kreuzung: Durchgang mit Abzweig auf der anderen Seite. |
+| Fächerkreuzung | Uncommon | 2 | Drei Straßenenden auf einer Seite. Zwei Turmplätze im Rücken. |
+| Seitenkreuzung | Rare | 2 | Vier aufeinanderfolgende Straßenenden für neue Anschlüsse. |
+| Späherbogen | Epic | 1 | Kleine Kurve: +30 % Turmreichweite auf diesem Hex. |
+| Veteranengabel | Epic | 2 | Y-Kreuzung mit 2 Turmplätzen und +20 % Turmschaden. |
+| Goldroute | Epic | 1 | Gerade mit einem Turmplatz und +4 Gold je Wave. |
+| Drachenbogen | Legendary | 1 | Kleine Kurve: +40 % Turmschaden und +20 % Reichweite. |
+| Kronenkreuzung | Legendary | 2 | Sechs Anschlüsse, 2 Turmplätze, +20 % Schaden und Reichweite. |
+| Königsbogen | Legendary | 1 | Große Kurve: +5 Gold je Wave, Gebäudeslot und +20 % Turmreichweite. |
 | Versorgungsweg | Rare | 1 | Gerade Straße, +2 Gold je überlebter Wave |
 | Signalkreuzung | Epic | 2 | Vier Straßenenden, +20 % Turmreichweite |
 | Gerade | Common | 1 | Gerade Straße |
@@ -112,7 +123,15 @@ Das Deck enthält ausschließlich Maphex-Karten. Gezogene Belohnungen werden ers
 | Sechserkreuzung | Rare | 2 | Öffnungen in alle sechs Richtungen |
 | Weites Land | Uncommon | 2 | Gerade Straße mit zwei Plätzen |
 | Lange Straße | Uncommon | 2 | Gewundene Straße mit tatsächlich längerem Laufweg |
-| Waldkurve | Uncommon | 1 | +25 % Archer-Schaden auf diesem Hex |
+| Belagerungsgerade | Rare | 1 | +25 % Schaden für Katapult auf diesem Hex. |
+| Blitzgabel | Rare | 2 | +25 % Schaden für Kettenblitz auf diesem Hex. |
+| Frostbogen | Rare | 1 | +25 % Reichweite für Freeze auf diesem Hex. |
+| Minenstraße | Rare | 2 | +25 % Schaden für Minenleger auf diesem Hex. |
+| Schützenlinie | Rare | 1 | +25 % Schaden für Balliste auf diesem Hex. |
+| Glutknick | Rare | 1 | +25 % Schaden für Flammenturm auf diesem Hex. |
+| Elementkreuzung | Rare | 2 | +25 % Schaden für Elementturm auf diesem Hex. |
+| Seelenabzweig | Rare | 2 | +25 % Schaden für Nekromantenturm auf diesem Hex. Gilt auch für Geister. |
+| Waldkurve | Rare | 1 | +25 % Archer-Schaden auf diesem Hex |
 | Kreuzung | Rare | 2 | Vier Straßenenden |
 | Dorfstraße | Rare | 1 | Automatisch +2 Gold/Wave und ein Gebäudeslot |
 | Handelsstraße | Rare | 0 | +4 Gold/Wave |
@@ -122,6 +141,8 @@ Das Deck enthält ausschließlich Maphex-Karten. Gezogene Belohnungen werden ers
 | Bastionskreuzung | Legendary | 2 | Drei Straßenenden, +40 % Tower-Reichweite, +2 Gold/Wave |
 | Königsstraße | Legendary | 1 | Gerade Straße, +5 Gold/Wave und ein Gebäudeslot |
 | Kriegskreuzung | Legendary | 2 | Vier Straßenenden, +30 % Tower-Schaden |
+
+Turmspezifische Karten (einschließlich Waldkurve) erscheinen nur für Türme im gültigen Run-Loadout: regulär freigeschaltet, in Herausforderungen gegebenenfalls temporär verliehen. Der Filter gilt für normale, Wächter- und Shrine-Kartenbelohnungen. Freeze erhält +25 % Reichweite, die übrigen Turmkarten +25 % Schaden; Seelenabzweig verstärkt auch Geister.
 
 Reichweitenboni gelten auch für Auren und ausgebaute Türme. Karten sind gleich breit und haben gemeinsame Zeilen für Rarität, Hexbild, Titel, Beschreibung und Slots. Raritätsfarben: Common grau, Uncommon grün, Rare blau, Epic lila, Legendary orange.
 
@@ -157,7 +178,7 @@ Jeder Turm hat zwei alternative Spezialisierungen und anschließend eine zum gew
 
 Das Turmmenü zeigt aktuelle Werte und Änderungen durch Upgrades. Symbole, Farben, Ringe und Stufenanzeigen machen den Ausbau sichtbar. Ein kleiner überlappender Pfeil zeigt bezahlbare Upgrades an.
 
-Turmrückgabe erstattet 100 % der tatsächlich investierten Kosten inklusive Upgrades, solange der Turm in der aktuellen Bauphase gebaut wurde und die Wave noch nicht begonnen hat. Danach und in anderen laufenden Spielphasen ist Verkauf für 50 % der Gesamtinvestition möglich, einschließlich finaler Upgrades. Ungerade Rückzahlungen werden abgerundet; Rabatte zählen anhand tatsächlich bezahlter Preise. Das Turmmenü nennt Quote und Goldbetrag. Nach Game Over kein Verkauf. Gebäude sind dauerhaft und haben noch keine Upgrades oder Verkäufe.
+Turmrückgabe erstattet 100 % der tatsächlich investierten Kosten inklusive Upgrades, solange der Turm in der aktuellen Bauphase gebaut wurde und die Wave noch nicht begonnen hat. Danach und in anderen laufenden Spielphasen ist Verkauf für 50 % der Gesamtinvestition möglich, einschließlich finaler Upgrades. Ungerade Rückzahlungen werden abgerundet; Rabatte zählen anhand tatsächlich bezahlter Preise. Das Turmmenü nennt Quote und Goldbetrag. Nach Game Over kein Verkauf. Gebäude verwenden dieselbe Verkaufsregel einschließlich bezahlter Ausbaukosten und lassen sich auf Stufe 3 ausbauen.
 
 ## Turm-Loadout
 
@@ -266,3 +287,33 @@ Für später vorgemerkt, noch nicht implementiert:
 - Turm-Upgrade-Modelle und weitere visuelle Effekte.
 
 Prioritäten und offene Entscheidungen werden in [BRAIN.md](../BRAIN.md) gepflegt.
+
+Biom-Erklärungen: Auf der Map zeigt Hover auf den Biomnamen die Effekte; Klick, Tippen oder Enter öffnet die schließbare Info. Zusätzlich gibt es „Biom-Effekte“ im Turmfenster. Keine dauerhaft eingeblendete Effektliste.
+
+Gebäude verkaufen: Im Gebäudefenster wie bei Türmen 100 % Erstattung in derselben Bauphase vor der Wave, anschließend 50 % (abgerundet). Einkommen, Schmiede-Buffs und Marktrabatte werden unmittelbar entfernt bzw. aus verbleibenden Gebäuden neu berechnet. Gebäude-Upgrades sind umgesetzt: Haus → +5/+8 Gold pro Wave (40/65 Gold); Schmiede → +25/+30 % Schaden (45/70 Gold); Markt → 20/25 % Rabatt (45/70 Gold). Radius bleibt unverändert; Schaden und Rabatte stapeln nicht, der stärkste Effekt zählt.
+
+Meta-Gebäudeausbau: Fernschmiede und Handelsnetz kosten jeweils einmalig 40 Diamanten im Arsenal. Ab dem nächsten Standard-Run ist nach Stufe 3 für 90 Gold ein zusätzliches gelegtes Hex frei auswählbar (auch außerhalb des Radius). Die Auswahl im Gebäudemenü ist änderbar, wird hervorgehoben und ersetzt das bisherige Zusatzziel. Spezialausbauten sind im festen Karawanenmodus gesperrt. Patrizierhaus: +16 Gold/Wave statt +8, 40 Diamanten Freischaltung und 120 Gold nach Stufe 3 im Run; keine gegenseitige Haus-Verdopplung.
+
+Shrine-Schaltflächen sind kontextabhängig: Heilquelle und Werksegen zeigen nur ihre effektiven Belohnungen; keine Kartenentfernung oder Deck-/Map-Inspektion. Bei Kartenwahl bleiben Deck/Map sowie „Belohnung überspringen“ verfügbar; ausschließlich beim Entfernen steht „Keine Karte entfernen“.
+
+- Arsenal-Zugang ausschließlich im Hauptmenü; dezente Hervorhebung, wenn eine noch gesperrte, tatsächlich kaufbare Turm-, Ultimate- oder Gebäude-Freischaltung bezahlbar ist.
+- Turmwerte als kompakte Symbolgruppen in Bau-, Upgrade-, Loadout- und Arsenalansichten, mit Tooltip/Screenreader-Beschriftung und aufklappbarer Touch-Legende im Baumenü. Sekunden je Angriff: kleiner bedeutet schneller.
+- Q/E: zeitbasierte kontinuierliche Kameradrehung beim Halten (60 Grad/s), unabhängig von Tastenwiederholung und Spieltempo; Sanfte Beschleunigung und kurzes Abbremsen beim Loslassen; Fokusverlust oder Tabwechsel stoppen sofort.
+
+- WASD verschiebt die Kamera kontinuierlich relativ zur Blickrichtung (diagonal gleiche Geschwindigkeit). Q/E dreht weiterhin; Einstellungen enthalten eine aufklappbare Hotkey-Liste.
+- U oder Einstellung zeigt unabhängig vom Gold den Turm-Ausbauzustand: nur ↑ weiter ausbaubar. Maximale Türme und im Run nicht freigeschaltete Meta-Stufen bleiben unmarkiert.
+- Turmbaumenü nutzt automatische Kartenhöhen und flexible Symbolzeilen. Freie Turmplätze sind weiß, Gebäudeplätze weiterhin türkis.
+- Nach Niederlage oder Challenge-Ende direkter Hauptmenü-Button; Loadout-Abbruch führt ins Hauptmenü, beendete Runs werden nicht mehr als fortsetzbar angeboten.
+- Minen: während Waves unabhängig zufällig entlang aller Straßenanteile innerhalb der Reichweite, nach Straßenlänge gewichtet und exakt auf den Reichweitenkreis begrenzt. Eigener Seed-Zufallsstrom, keine Abstandsprüfung und keine Rücksicht auf vorhandene Minen. Jede Mine zündet ausschließlich durch einen Gegner im eigenen Auslöseradius. Keine Kettenreaktionen durch Minen oder Explosionen. Mehrere Minen können durch denselben Gegner ausgelöst werden. Grundintervall 1,4 s Spielzeit; Upgrades verändern es. Auslösung bis Abstand 14; Wave-Ende räumt Minen ab.
+
+- Arsenal als mit Maus/Touch verschiebbare Forschungsmap: neun Turmbäume mit allen Zweigen, Endstufen und Meta-Ausbau sowie drei Gebäudebäume. Kleine SVG-Symbole, sichtbare Verbindungen, Besitzstatus und klare Unterscheidung Diamanten-Freischaltung/Run-Gold. Kein neuer Diamantenpreis für bisherige Gold-Upgrades.
+- Freischaltungen zurücksetzen: zweiter Klick bestätigt, investierte Diamanten werden erstattet, Turm-/Meta-Freischaltungen entfernt, Loadout/Presets auf Starttürme zurückgesetzt. Rekorde, Einnahmen und unbenutzte Diamanten bleiben. Bereits laufende Runs behalten ihren Snapshot. Neue Käufe speichern den Preis; alte Profile nutzen mangels Kaufhistorie die bisherigen Katalogpreise.
+- Weiß für freie Turmplatz-Diamanten und Upgrade-Pfeile; Gebäude bleiben türkis. U blendet ausschließlich aktuell im Run ausbaubare Türme unabhängig vom Gold ein.
+
+- U-Markierungen: breite gefüllte weiße Pfeile mit dunkler Kontur in 3D und SVG. Freie Turmplatz-Diamanten und bezahlbare Upgrade-Hinweise ebenfalls weiß, Gebäudeplätze weiterhin türkis.
+
+- Arsenal fast bildschirmfüllend (8 px Außenrand), ohne Scrollleisten: Drag verschiebt, Mausrad zoomt um den Mauszeiger, Touch unterstützt Zwei-Finger-Zoom. Plus/Minus und Gesamtübersicht stehen separat bereit. Transform-basierte Kamera statt Scrollposition, beim Öffnen 73 % Zoom am Anfang der Map.
+
+- Arsenal: zwölf Forschungsbäume in zwei Reihen mit je sechs Bäumen. Kompakte obere Werkzeugleiste statt separater Titel-/Erklärungs-/Fußbereiche; Hilfe aufklappbar, Status nur bei Meldungen als Overlay. Jeder Einstieg startet bei 73 %, Gesamtübersicht bleibt manuell verfügbar.
+
+- Arsenal-Bäume passen ihre Breite an die vorhandenen Zweige an (Katapult zwei, Element drei); keine Streckung auf die Breite anderer Bäume. Zoom verwendet Layout-Zoom statt transform:scale, damit Text bei jeder Zoomstufe neu gerastert wird. 73-%-Start, Mausanker und Drag bleiben erhalten.

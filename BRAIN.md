@@ -3,6 +3,8 @@
 Stand: 20.09.2026, einschließlich der aktuellen lokalen Änderungen. Kompakte Übersicht über Ziele, Entscheidungen und spätere Ideen. Ausführlicher Verlauf: [Übergabeprotokoll](README_TowerDefense_Projekt.md). Technische Grenzen: [Architektur](towerdefense-v0.1/ARCHITECTURE.md). Änderungen: [App-README](towerdefense-v0.1/README.md).
 
 ## Festgelegte Richtung
+- Mobile-App als geplantes Ziel: neue Features touchbedienbar gestalten, ausreichend große Bedienelemente, responsive Layouts und keine zwingenden Hover-/Tastaturaktionen. Spiellogik und Zeitsteuerung möglichst unabhängig von DOM/Renderer halten; Browser-/App-Lebenszyklus ausdrücklich berücksichtigen.
+- Tempo-Regler 1× bis 8×, gespeichert; F erhöht um eine Stufe und springt nach 8× auf 1×. Simulation in kleinen Schritten, zusätzlicher Hintergrundtimer, verzögerte Zeit wird nachgeholt; vollständiges Einfrieren durch Browser/OS bleibt eine Plattformgrenze. Manuelle Pause bleibt bestehen. Freie Turmplätze weiß, Gebäudeplätze türkis; gemeinsamer Schalter. Schatzbeschriftung nennt +20 Gold.
 - Hauptmenü ohne Scrollen: Spielen öffnet Moduswahl (Standard mit Schwierigkeit/Loadout oder tägliche Herausforderung). Karawanenbeschreibung und Spielregeln liegen auf separaten Ansichten. Biome deutlich sandgelb/rot eingefärbt; erkundetes Sturmhochland besitzt begrenzte Wind-/Nebeleffekte (reduzierte Bewegung berücksichtigt).
 - Biome sollen zusammenhängende Regionen derselben Map sein, die beim Bauen/Erkunden sichtbar werden (etwa Wüste, Eis und Lava). Kein einzelnes Biom für einen ganzen Run; Regionale Effekte sind umgesetzt: Dünenmeer, Sturmhochland und Aschelande liegen ab Radius 3 in seedabhängigen zusammenhängenden Regionen um das Grasland. Standard und Zwei Fronten nutzen die Biome; Karawane behält nur ihre eigene Sandsturmregel. Farben in 3D/SVG, Biomnamen auf gelegten Tiles, Regeln in Einstellungen und effektive Werte in Turmmenüs.
 - „Die letzte Karawane“ bleibt dauerhaft als tägliche Herausforderung im Hauptmenü. Tageswechsel 00:00 UTC, fester Tages-Seed, Standardfestung, zwei Ausgänge, Deck aus 2× Gerade/Lange Straße/Handelsstraße/Dorfstraße; Loadout Archer/Balliste/Katapult/Minenleger/Freeze temporär verliehen, keine Ultimates. Sandsturm als Modusregel: −15 % Gegnergeschwindigkeit und Turmreichweite. Jeder zehnte normale Gegner trägt +15 Gold extra beim Kill / −10 Gold beim Durchbruch (Minimum 0). Ziel Wave 20; Sieg einmal pro Tages-Seed +10 Diamanten, lokale Tagesbestmarke getrennt von normalen Runs.
@@ -55,6 +57,34 @@ Stand: 20.09.2026, einschließlich der aktuellen lokalen Änderungen. Kompakte �
 - Prioritäten: aktuelle Änderungen im Spiel durch den Nutzer prüfen, Gameplay/Balance, Hero-/Base-Balancing anhand der ersten Spieltests. Danach Run-Speicherung und weitere Karten/Bonusvarianten. Diese Reihenfolge ist ein Vorschlag; Details sind noch nicht beschlossen.
 - Visuelle Prüfung, Audio-Hörprobe, Gebäude-Wirkungsbereiche im Spiel und langfristiges Balancing sind nicht durch aktuelle Browsertests bestätigt. Provisorisches Card Removal jede sechste Wave bleibt zusätzlich zu Shrines.
 
-Zuletzt 165 automatisierte Tests bestanden (20.09.2026); für die jüngsten Änderungen keine Browsertests durchgeführt. Laufende Runs sind nicht persistent; Profil, Freischaltungen, Presets und Hex-Grid-Einstellung werden lokal gespeichert.
+Zuletzt 167 automatisierte Tests bestanden (20.09.2026); für die jüngsten Änderungen keine Browsertests durchgeführt. Laufende Runs sind nicht persistent; Profil, Freischaltungen, Presets und Hex-Grid-Einstellung werden lokal gespeichert.
 
 Bei neuen Entscheidungen diesen Stand aktualisieren; offene Ideen nicht als implementierte Features behandeln.
+
+- Turmspezifische Tiles: je Turm eines, Waldkurve (jetzt Rare) plus acht weitere Rare-Karten auf unterschiedlichen Standardgeometrien. Belohnungen filtern nach validiertem Run-Loadout (einschließlich temporär verliehener Challenge-Türme). Gebäudeverkauf entspricht Turmerstattung (100 % dieselbe Bauphase, danach 50 %), entfernt Einkommen und Supporteffekte. Gebäude-Upgrades bis Stufe 3 umgesetzt: Haus +3/+5/+8 Einkommen, Schmiede +20/+25/+30 % Schaden, Markt 15/20/25 % Rabatt. Fernschmiede/Handelsnetz je 40 Diamanten permanent; ab nächstem Standard-Run Stufe 4 für 90 Gold und ein frei wählbares Zusatzhex. Karawane ohne Meta-Gebäudeausbau. Patrizierhaus umgesetzt: +16 Einkommen, 40 Diamanten Freischaltung und 120 Gold nach Stufe 3.
+- Biomnamen bieten Hover-Hinweis und klick-/touch-/tastaturbedienbare Info; zusätzliche Schaltfläche im Turmmenü.
+
+- Neue Straßenkarten: Spiegel-Abzweig, Fächerkreuzung (Uncommon), Seitenkreuzung (Rare), prozedurale Straßen in 3D/SVG mit passenden Laufwegen. Neue Epic: Späherbogen, Veteranengabel, Goldroute. Neue Legendary: Drachenbogen, Kronenkreuzung, Königsbogen.
+- Shrine-Bedienung: Heilquelle/Werksegen ohne Entfernen-/Deck-/Map-Schaltflächen; Kartenbelohnungen mit Inspektion und korrekt benanntem Überspringen, Entfernen nur beim Removal-Effekt.
+
+- Arsenal-Zugang ausschließlich im Hauptmenü; dezente Hervorhebung, wenn eine noch gesperrte, tatsächlich kaufbare Turm-, Ultimate- oder Gebäude-Freischaltung bezahlbar ist.
+- Turmwerte als kompakte Symbolgruppen in Bau-, Upgrade-, Loadout- und Arsenalansichten, mit Tooltip/Screenreader-Beschriftung und aufklappbarer Touch-Legende im Baumenü. Sekunden je Angriff: kleiner bedeutet schneller.
+- Q/E: zeitbasierte kontinuierliche Kameradrehung beim Halten (60 Grad/s), unabhängig von Tastenwiederholung und Spieltempo; Sanfte Beschleunigung und kurzes Abbremsen beim Loslassen; Fokusverlust oder Tabwechsel stoppen sofort.
+
+- WASD verschiebt die Kamera kontinuierlich relativ zur Blickrichtung (diagonal gleiche Geschwindigkeit). Q/E dreht weiterhin; Einstellungen enthalten eine aufklappbare Hotkey-Liste.
+- U oder Einstellung zeigt unabhängig vom Gold den Turm-Ausbauzustand: nur ↑ weiter ausbaubar. Maximale Türme und im Run nicht freigeschaltete Meta-Stufen bleiben unmarkiert.
+- Turmbaumenü nutzt automatische Kartenhöhen und flexible Symbolzeilen. Freie Turmplätze sind weiß, Gebäudeplätze weiterhin türkis.
+- Nach Niederlage oder Challenge-Ende direkter Hauptmenü-Button; Loadout-Abbruch führt ins Hauptmenü, beendete Runs werden nicht mehr als fortsetzbar angeboten.
+- Minen: während Waves unabhängig zufällig entlang aller Straßenanteile innerhalb der Reichweite, nach Straßenlänge gewichtet und exakt auf den Reichweitenkreis begrenzt. Eigener Seed-Zufallsstrom, keine Abstandsprüfung und keine Rücksicht auf vorhandene Minen. Jede Mine zündet ausschließlich durch einen Gegner im eigenen Auslöseradius. Keine Kettenreaktionen durch Minen oder Explosionen. Mehrere Minen können durch denselben Gegner ausgelöst werden. Grundintervall 1,4 s Spielzeit; Upgrades verändern es. Auslösung bis Abstand 14; Wave-Ende räumt Minen ab.
+
+- Arsenal als mit Maus/Touch verschiebbare Forschungsmap: neun Turmbäume mit allen Zweigen, Endstufen und Meta-Ausbau sowie drei Gebäudebäume. Kleine SVG-Symbole, sichtbare Verbindungen, Besitzstatus und klare Unterscheidung Diamanten-Freischaltung/Run-Gold. Kein neuer Diamantenpreis für bisherige Gold-Upgrades.
+- Freischaltungen zurücksetzen: zweiter Klick bestätigt, investierte Diamanten werden erstattet, Turm-/Meta-Freischaltungen entfernt, Loadout/Presets auf Starttürme zurückgesetzt. Rekorde, Einnahmen und unbenutzte Diamanten bleiben. Bereits laufende Runs behalten ihren Snapshot. Neue Käufe speichern den Preis; alte Profile nutzen mangels Kaufhistorie die bisherigen Katalogpreise.
+- Weiß für freie Turmplatz-Diamanten und Upgrade-Pfeile; Gebäude bleiben türkis. U blendet ausschließlich aktuell im Run ausbaubare Türme unabhängig vom Gold ein.
+
+- U-Markierungen: breite gefüllte weiße Pfeile mit dunkler Kontur in 3D und SVG. Freie Turmplatz-Diamanten und bezahlbare Upgrade-Hinweise ebenfalls weiß, Gebäudeplätze weiterhin türkis.
+
+- Arsenal fast bildschirmfüllend (8 px Außenrand), ohne Scrollleisten: Drag verschiebt, Mausrad zoomt um den Mauszeiger, Touch unterstützt Zwei-Finger-Zoom. Plus/Minus und Gesamtübersicht stehen separat bereit. Transform-basierte Kamera statt Scrollposition, beim Öffnen 73 % Zoom am Anfang der Map.
+
+- Arsenal: zwölf Forschungsbäume in zwei Reihen mit je sechs Bäumen. Kompakte obere Werkzeugleiste statt separater Titel-/Erklärungs-/Fußbereiche; Hilfe aufklappbar, Status nur bei Meldungen als Overlay. Jeder Einstieg startet bei 73 %, Gesamtübersicht bleibt manuell verfügbar.
+
+- Arsenal-Bäume passen ihre Breite an die vorhandenen Zweige an (Katapult zwei, Element drei); keine Streckung auf die Breite anderer Bäume. Zoom verwendet Layout-Zoom statt transform:scale, damit Text bei jeder Zoomstufe neu gerastert wird. 73-%-Start, Mausanker und Drag bleiben erhalten.

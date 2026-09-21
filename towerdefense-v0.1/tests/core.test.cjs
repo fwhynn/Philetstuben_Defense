@@ -302,8 +302,8 @@ test('placement cannot close the last base-connected entrance but may form a loo
 test('double speed advances simulation and spawn timing twice as fast',()=>{
   const {a,elements}=load();a.state.phase='wave';a.state.waveRunning=true;a.state.pendingSpawns=1;
   let calls=0;a.state.spawnQueue=[{due:200,callback(){calls++;}}];
-  elements.get('doubleSpeed').checked=false;a.update(.1,100);assert.equal(a.state.elapsedMs,100);assert.equal(calls,0);
-  elements.get('doubleSpeed').checked=true;a.update(.05,150);assert.equal(a.state.elapsedMs,200);assert.equal(calls,1);
+  elements.get('doubleSpeed').value='1';elements.get('doubleSpeed').listeners.input();a.update(.1,100);assert.equal(a.state.elapsedMs,100);assert.equal(calls,0);
+  elements.get('doubleSpeed').value='2';elements.get('doubleSpeed').listeners.input();a.update(.05,150);assert.equal(a.state.elapsedMs,200);assert.equal(calls,1);
 });
 
 test('market discounts are charged and refunded at the actual purchase price',()=>{

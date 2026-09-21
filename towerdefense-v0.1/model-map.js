@@ -18,7 +18,8 @@ const HexModelMap=(()=>{
   }
   /** Modell + Drehschritte (60° gegen den Uhrzeigersinn) für ein gelegtes Tile. */
   function modelFor(tile){
-    const alias={supplyRoad:'straight',signalCross:'cross'}[tile.type];if(alias)return {name:alias,rotation:tile.rotation||0};
+    if(HexData.CARD_LIBRARY[tile.type]?.procedural)return {name:'straight',rotation:tile.rotation||0,proceduralRoads:true};
+    const alias=HexData.CARD_LIBRARY[tile.type]?.model||{supplyRoad:'straight',signalCross:'cross'}[tile.type];if(alias)return {name:alias,rotation:tile.rotation||0};
     if(tile.type==='base') return {name:'base',rotation:0,...(tile.roads?.length===2?{proceduralRoads:true}:{})};
     if(TILE_MODELS.includes(tile.type)) return {name:tile.type,rotation:tile.rotation||0};
     // Rettungshex und unbekannte Typen: Straßenform bestimmt das Modell.

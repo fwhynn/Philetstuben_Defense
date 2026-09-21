@@ -40,7 +40,7 @@ function create(svg,commands){
         }
       }
       const label=text(c.x,c.y+5,visibility==='clear'?(landmark.type==='shrine'?'✦':landmark.type==='boss'?'☠':'◆'):'?',24,'#b7bfba','700');label.style.pointerEvents='none';scene.appendChild(label);
-      if(visibility==='clear'){const note=text(c.x,c.y+27,landmark.type==='shrine'?'Shrine · Bonus unbekannt':landmark.type==='boss'?'Wächter · inaktiv':'Schatz +20 · ungesammelt',8,'#b7bfba');note.style.pointerEvents='none';scene.appendChild(note);}
+      if(visibility==='clear'){const note=text(c.x,c.y+27,landmark.type==='shrine'?'Shrine · Bonus unbekannt':landmark.type==='boss'?'Wächter · inaktiv':'Schatz +20 Gold · ungesammelt',8,'#b7bfba');note.style.pointerEvents='none';scene.appendChild(note);}
     }
 
     // Global passes keep all roads below every tower, regardless of tile age.
@@ -123,8 +123,10 @@ function create(svg,commands){
   function drawUpgradeHints(){
     if(!['build','wave'].includes(state.phase)||state.hp<=0) return;
     for(const tile of state.map.values()) (tile.towers||[]).forEach((tower,index)=>{
-      if(!tower||!HexData.availableUpgrades(tower).some(([,upgrade])=>state.gold>=HexBuildings.cost(state,tile,upgrade.cost))) return;
-      const p=slotPositions(tile)[index],hint=text(p.x+12,p.y-8,'↑',13,'#ffe39a','800');hint.setAttribute('stroke','#172019');hint.setAttribute('stroke-width',1.5);hint.setAttribute('paint-order','stroke');hint.style.pointerEvents='none';scene.appendChild(hint);
+      if(!tower||(state.showUpgradeStatus&&!HexData.upgradeStatus(state,tower))||(!state.showUpgradeStatus&&!HexData.availableUpgrades(tower).some(([,upgrade])=>state.gold>=HexBuildings.cost(state,tile,upgrade.cost)))) return;
+      const p=slotPositions(tile)[index];let hint;
+      if(state.showUpgradeStatus){hint=document.createElementNS(NS,'polygon');hint.setAttribute('points','14,2 26,14 19,14 19,30 9,30 9,14 2,14');hint.setAttribute('transform','translate('+(p.x-14)+','+(p.y-43)+')');hint.setAttribute('fill','#ffffff');hint.setAttribute('stroke-linejoin','round');hint.setAttribute('aria-label','Turm ausbaubar');}
+      else hint=text(p.x+12,p.y-8,'↑',13,'#ffffff','800');hint.setAttribute('stroke','#172019');hint.setAttribute('stroke-width',1.5);hint.setAttribute('paint-order','stroke');hint.style.pointerEvents='none';scene.appendChild(hint);
     });
   }
   function drawSelectedRange(){
@@ -142,7 +144,7 @@ function create(svg,commands){
 
   function drawTile(tile,layer){
     const c=axialToWorld(tile.q,tile.r);
-    if(layer==='terrain'){const biome=HexBiomes.forTile(state,tile);if(biome!=='grass'){drawPoly(c.x,c.y,HEX-2,HexBiomes.definitions[biome].color,'#2e4334',1);scene.appendChild(text(c.x,c.y-32,HexBiomes.definitions[biome].name,8,'#fff4c3'));return;}drawPoly(c.x,c.y,HEX-2,({base:'#657264',highGround:'#8d8472',grove:'#3f754e',treasury:'#998454',battlefield:'#7b6556',watchtower:'#667c81',citadel:'#8d8058',royalVillage:'#977b52',warCross:'#855f58'})[tile.type]||'#688653','#2e4334',1);return;}
+    if(layer==='terrain'){const biome=HexBiomes.forTile(state,tile);if(biome!=='grass'){drawPoly(c.x,c.y,HEX-2,HexBiomes.definitions[biome].color,'#2e4334',1);const tag=text(c.x,c.y-32,HexBiomes.definitions[biome].name+' ⓘ',8,'#fff4c3'),hint=document.createElementNS(NS,'title');hint.textContent=HexBiomes.definitions[biome].description;tag.appendChild(hint);tag.style.pointerEvents='auto';tag.style.cursor='help';tag.setAttribute('role','button');tag.setAttribute('tabindex','0');tag.addEventListener('click',e=>{e.stopPropagation();commands.inspectBiome?.(biome);});tag.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();commands.inspectBiome?.(biome);}});scene.appendChild(tag);return;}drawPoly(c.x,c.y,HEX-2,({base:'#657264',highGround:'#8d8472',grove:'#3f754e',treasury:'#998454',battlefield:'#7b6556',watchtower:'#667c81',citadel:'#8d8058',royalVillage:'#977b52',warCross:'#855f58'})[tile.type]||'#688653','#2e4334',1);return;}
     if(layer==='roads'){
       const geometry=HexMap.roadGeometry(tile);
       for(const points of geometry.legs.values()) roadPolyline(points,'#d0aa6d',18);
@@ -160,7 +162,7 @@ function create(svg,commands){
       const txt=text(c.x,c.y+5,'BASE',13,'#282723','700');g.appendChild(txt);scene.appendChild(g);
     }
     if(tile.income){const t=text(c.x,c.y+44,'+'+tile.income+' Gold',10,'#fff4c3','700');t.style.pointerEvents='none';scene.appendChild(t);}
-    const terrain=CARD_LIBRARY[tile.type],bonus=terrain?.towerRange?'+'+Math.round((terrain.towerRange-1)*100)+' % Reichweite':terrain?.towerDamage?'+'+Math.round((terrain.towerDamage-1)*100)+' % Schaden':terrain?.archerDamage?'+25 % Archer':null;
+    const terrain=CARD_LIBRARY[tile.type],bonus=terrain?.towerBonus?'+25 % '+HexData.TOWERS[terrain.requiredTower].name+(terrain.towerBonus.range?' Reichweite':' Schaden'):terrain?.towerRange?'+'+Math.round((terrain.towerRange-1)*100)+' % Reichweite':terrain?.towerDamage?'+'+Math.round((terrain.towerDamage-1)*100)+' % Schaden':terrain?.archerDamage?'+25 % Archer':null;
     if(bonus){const label=text(c.x,c.y+35,bonus,9,'#fff4c3','700');label.style.pointerEvents='none';scene.appendChild(label);}
     const slots=slotPositions(tile);
     for(let i=0;i<(tile.buildingSlots||0);i++){
@@ -169,13 +171,14 @@ function create(svg,commands){
       slot.addEventListener('pointerenter',()=>commands.hoverBuilding?.({q:tile.q,r:tile.r,index:i}));
       slot.addEventListener('pointerleave',()=>commands.hoverBuilding?.(null));
       slot.addEventListener('click',e=>{e.stopPropagation();commands.selectBuilding(tile.q,tile.r,i);});scene.appendChild(slot);
+      if(!building&&state.showSlotHints!==false&&['build','wave'].includes(state.phase)){const gem=document.createElementNS(NS,'polygon');gem.setAttribute('points',`${p.x},${p.y-29} ${p.x+6},${p.y-20} ${p.x},${p.y-11} ${p.x-6},${p.y-20}`);gem.setAttribute('fill','#59e0d2');gem.setAttribute('stroke','#d3fff8');gem.setAttribute('class','buildingDiamond');gem.style.pointerEvents='none';scene.appendChild(gem);}
       const label=text(p.x,p.y+4,building?HexBuildings.definitions[building.type].icon:'⌂',11,'#fff4c3','700');label.style.pointerEvents='none';scene.appendChild(label);
     }
     slots.forEach((p,i)=>{
       const tw=tile.towers[i];
       if(tw){drawTower(p,tw,tile,i);} else {
         const selected=state.selectedSlot&&state.selectedSlot.q===tile.q&&state.selectedSlot.r===tile.r&&state.selectedSlot.index===i;
-        if(state.showSlotHints!==false&&['build','wave'].includes(state.phase)){const marker=document.createElementNS(NS,'g');marker.setAttribute('transform',`translate(${p.x},${p.y-20})`);marker.setAttribute('data-slot-hint','true');marker.style.pointerEvents='none';const floating=document.createElementNS(NS,'g');floating.setAttribute('class','slotDiamondFloat');const gem=document.createElementNS(NS,'polygon');gem.setAttribute('points','0,-7 5,0 0,7 -5,0');gem.setAttribute('fill','#ffe39a');gem.setAttribute('stroke','#fff6ce');gem.setAttribute('class','slotDiamondTurn');floating.appendChild(gem);marker.appendChild(floating);scene.appendChild(marker);}
+        if(state.showSlotHints!==false&&['build','wave'].includes(state.phase)){const marker=document.createElementNS(NS,'g');marker.setAttribute('transform',`translate(${p.x},${p.y-20})`);marker.setAttribute('data-slot-hint','true');marker.style.pointerEvents='none';const floating=document.createElementNS(NS,'g');floating.setAttribute('class','slotDiamondFloat');const gem=document.createElementNS(NS,'polygon');gem.setAttribute('points','0,-7 5,0 0,7 -5,0');gem.setAttribute('fill','#ffffff');gem.setAttribute('stroke','#251130');gem.setAttribute('class','slotDiamondTurn');floating.appendChild(gem);marker.appendChild(floating);scene.appendChild(marker);}
         const circ=document.createElementNS(NS,'circle');circ.setAttribute('cx',p.x);circ.setAttribute('cy',p.y);circ.setAttribute('r',12);circ.setAttribute('fill',selected?'#f4d36d':'#314d39');circ.setAttribute('stroke','#f1ddb1');circ.setAttribute('stroke-width',2);circ.style.cursor='pointer';circ.addEventListener('click',()=>commands.selectSlot(tile.q,tile.r,i));scene.appendChild(circ);
         const plus=text(p.x,p.y+4,'+',14,'#fff','700');plus.style.pointerEvents='none';scene.appendChild(plus);
       }
@@ -223,7 +226,7 @@ function create(svg,commands){
   function project(position){return camera.project(position);}
   function clearSelection(){commands.clearSelection();}
   svg.addEventListener('click',clearSelection);
-  return {render,reset,project,zoom:camera.zoom,resetView:camera.reset,getView:camera.getView,destroy(){camera.destroy();svg.removeEventListener('click',clearSelection);for(const layer of [fogLayer,worldLayer,objectLayer,hintLayer]) layer.remove();}};
+  return {render,reset,project,panView:camera.panView,zoom:camera.zoom,resetView:camera.reset,getView:camera.getView,destroy(){camera.destroy();svg.removeEventListener('click',clearSelection);for(const layer of [fogLayer,worldLayer,objectLayer,hintLayer]) layer.remove();}};
 }
 return {create};
 })();

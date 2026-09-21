@@ -5,7 +5,7 @@ function setup(){
   const context={};
   for(const file of ['data.js','waves.js','combat.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../'+file),'utf8'),context);
   vm.runInNewContext('globalThis.step=HexCombat.step;globalThis.towers=HexData.TOWERS;',context);
-  const state={hp:20,gold:0,goldEarned:{kills:0},waveKills:0,enemies:[],projectiles:[]};
+  const state={mineRandom:()=>0,hp:20,gold:0,goldEarned:{kills:0},waveKills:0,enemies:[],projectiles:[]};
   return {state,step:context.step,towers:context.towers};
 }
 function enemy(x,y=0,hp=100){return {x,y,hp,alive:true,index:0,t:0,speed:0,points:[{x,y},{x:x+500,y}]};}
@@ -163,4 +163,20 @@ test('caravan carriers pay once on kill and lose gold without going negative on 
   step(state,[],towers,0,3000);assert.equal(state.gold,18);
   const escape=enemy(0);escape.index=1;escape.goldLoss=10;state.gold=4;state.enemies=[escape];step(state,[],towers,0,4000);
   assert.equal(state.gold,0);assert.equal(state.hp,19);assert.equal(state.waveKills,1);
+});
+
+test('random mines are uniform along road length, clipped to range and independent of segmentation',()=>{
+  const c={HexMap:{roadGeometry:tile=>({legs:new Map([[0,tile.points]])})}};
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../combat.js'),'utf8').replace('return {step,durability','return {randomMinePoint,step,durability')+';globalThis.pick=HexCombat.randomMinePoint;',c);
+  for(const roll of [0,.1,.3,.9,.999]){const pick=points=>c.pick({mineRandom:()=>roll,map:new Map([['0,0',{points}]])},{pos:{x:0,y:0}},80);const a=pick([{x:-120,y:0},{x:120,y:0}]),b=pick(Array.from({length:121},(_,i)=>({x:-120+i*2,y:0})));assert.ok(Math.abs(a.x-b.x)<1e-8);assert.ok(Math.abs(a.x)<=80);assert.ok(Math.abs(a.x-(-80+160*roll))<1e-8);}
+});
+test('stacked mines all detonate together even if the first explosion kills the triggering enemy',()=>{
+ const {state,step,towers}=setup();state.enemies=[enemy(20,0,1)];state.mines=[1,2,3].map(id=>({id,x:20,y:0,damage:100,splash:45}));step(state,[],towers,0,2000);assert.equal(state.mines.length,0);assert.equal(state.projectiles.filter(p=>p.kind==='blast').length,3);assert.equal(state.waveKills,1);
+});
+
+test('touching mines do not chain detonate from another mine explosion',()=>{
+  const {state,step,towers}=setup();state.enemies=[enemy(0,0,1)];
+  // Mine 2 touches mine 1 and lies inside its blast, but the enemy is outside its own trigger radius.
+  state.mines=[{id:1,x:10,y:0,damage:100,splash:45},{id:2,x:20,y:0,damage:100,splash:45},{id:3,x:30,y:0,damage:100,splash:45}];
+  step(state,[],towers,0,2000);assert.deepEqual(Array.from(state.mines,m=>m.id),[2,3]);assert.equal(state.projectiles.filter(p=>p.kind==='blast').length,1);
 });

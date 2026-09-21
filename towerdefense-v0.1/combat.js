@@ -17,16 +17,25 @@ const HexCombat=(()=>{
     for(const [field,kind] of [['armorHp','armor'],['magicHp','magic'],['hp','hp']]){if(budget<=0||pool(e,field)<=0)continue;const multiplier=def.damageMultipliers?.[kind]??1,amount=Math.min(pool(e,field),budget*multiplier);e[field]=pool(e,field)-amount;budget-=amount/multiplier;}
     if(durability(e)<=1e-8&&e.alive){e.hp=e.armorHp=e.magicHp=0;e.alive=false;(state.soulDeaths??=[]).push({x:e.x,y:e.y});const gold=e.killGold??HexWaves.economy.kill;state.gold+=gold;if(e.type==='boss'){state.goldEarned.boss=(state.goldEarned.boss||0)+gold;const landmark=state.landmarks?.get(e.landmarkId);if(landmark)landmark.status='defeated';(state.bossRewards??=[]).push(e.landmarkId);if(state.earnedMeta){if(String(e.landmarkId).startsWith('wave:'))state.earnedMeta.periodicBosses++;else state.earnedMeta.explorationBosses++;}emit('collect');}else{state.goldEarned.kills+=gold;state.waveKills++;if(state.earnedMeta)state.earnedMeta.normalKills++;emit('kill');}}
   }
-  function mineCandidates(state,ref,range){
-    if(ref.roadPoints)return ref.roadPoints.filter(p=>Math.hypot(p.x-ref.pos.x,p.y-ref.pos.y)<=range);if(typeof HexMap==='undefined'||!state.map)return [];
-    const unique=new Map();for(const tile of state.map.values())for(const points of HexMap.roadGeometry(tile).legs.values())for(let i=0;i<points.length-1;i++){const a=points[i],b=points[i+1],length=Math.hypot(b.x-a.x,b.y-a.y),steps=Math.max(1,Math.ceil(length/24));for(let j=0;j<steps;j++){const t=(j+.5)/steps,p={x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t};if(Math.hypot(p.x-ref.pos.x,p.y-ref.pos.y)<=range)unique.set(`${Math.round(p.x)},${Math.round(p.y)}`,p);}}return [...unique.values()];
+  function randomMinePoint(state,ref,range){
+    const random=state.mineRandom??=(typeof HexRandom!=='undefined'?HexRandom.create((state.seed||'run')+'|mines'):Math.random);
+    if(ref.roadPoints){const points=ref.roadPoints.filter(p=>Math.hypot(p.x-ref.pos.x,p.y-ref.pos.y)<=range);return points.length?points[Math.floor(random()*points.length)]:null;}
+    if(typeof HexMap==='undefined'||!state.map)return null;const segments=[];let total=0;
+    for(const tile of state.map.values())for(const points of HexMap.roadGeometry(tile).legs.values())for(let i=1;i<points.length;i++){
+      const a=points[i-1],b=points[i],dx=b.x-a.x,dy=b.y-a.y,A=dx*dx+dy*dy;if(!A)continue;
+      const ox=a.x-ref.pos.x,oy=a.y-ref.pos.y,B=2*(ox*dx+oy*dy),C=ox*ox+oy*oy-range*range,D=B*B-4*A*C;if(D<0)continue;
+      const lo=Math.max(0,(-B-Math.sqrt(D))/(2*A)),hi=Math.min(1,(-B+Math.sqrt(D))/(2*A));if(hi<=lo)continue;
+      const length=(hi-lo)*Math.sqrt(A);segments.push({a,dx,dy,lo,hi,length});total+=length;
+    }
+    if(!total)return null;let roll=random()*total;for(const s of segments){if(roll<s.length)return {x:s.a.x+s.dx*(s.lo+(s.hi-s.lo)*roll/s.length),y:s.a.y+s.dy*(s.lo+(s.hi-s.lo)*roll/s.length)};roll-=s.length;}return null;
   }
   function layMine(state,ref,def,time){
     state.mines??=[];const owner=ref.tw.mineId??=`mine-tower-${state.nextMineTowerId=(state.nextMineTowerId||0)+1}`;if(time-ref.tw.lastShot<def.cooldown*1000)return;
-    const candidates=mineCandidates(state,ref,def.range);if(!candidates.length)return;const index=(ref.tw.mineCursor||0)%candidates.length,p=candidates[index];ref.tw.mineCursor=index+1;ref.tw.lastShot=time;state.mines.push({id:state.nextMineId=(state.nextMineId||0)+1,owner,x:p.x,y:p.y,damage:def.damage,splash:def.splash,color:def.color,damageMultipliers:def.damageMultipliers});
+    const p=randomMinePoint(state,ref,def.range);if(!p)return;ref.tw.lastShot=time;state.mines.push({id:state.nextMineId=(state.nextMineId||0)+1,owner,x:p.x,y:p.y,damage:def.damage,splash:def.splash,color:def.color,damageMultipliers:def.damageMultipliers});
   }
   function triggerMines(state,emit){
-    state.mines??=[];const remaining=[];for(const mine of state.mines){const trigger=state.enemies.find(e=>e.alive&&durability(e)>0&&Math.hypot(e.x-mine.x,e.y-mine.y)<=14);if(!trigger){remaining.push(mine);continue;}const def={damageMultipliers:mine.damageMultipliers};state.enemies.filter(e=>e.alive&&Math.hypot(e.x-mine.x,e.y-mine.y)<=mine.splash).forEach(e=>damageEnemy(e,mine.damage,def,state,emit));state.projectiles.push({kind:'blast',x:mine.x,y:mine.y,r:mine.splash,ttl:.22,color:mine.color});emit('mine');}state.mines=remaining;
+    // Only enemies trigger mines. Explosions never trigger neighbouring mines.
+    state.mines??=[];const triggered=new Set(state.mines.filter(mine=>state.enemies.some(e=>e.alive&&durability(e)>0&&Math.hypot(e.x-mine.x,e.y-mine.y)<=14))),remaining=[];for(const mine of state.mines){const trigger=triggered.has(mine);if(!trigger){remaining.push(mine);continue;}const def={damageMultipliers:mine.damageMultipliers};state.enemies.filter(e=>e.alive&&Math.hypot(e.x-mine.x,e.y-mine.y)<=mine.splash).forEach(e=>damageEnemy(e,mine.damage,def,state,emit));state.projectiles.push({kind:'blast',x:mine.x,y:mine.y,r:mine.splash,ttl:.22,color:mine.color});emit('mine');}state.mines=remaining;
   }
   // Nur für die Darstellung: Kennung, Turmtyp, Trefferpositionen und Lebensdauer eines Geschosses. Der Schaden wird sofort beim Schuss verrechnet.
   const nextProjectileId=state=>state.nextProjectileId=(state.nextProjectileId||0)+1;

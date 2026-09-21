@@ -63,3 +63,13 @@ test('settled runs aggregate local tower usage statistics',()=>{
   const {profile,definitions}=setup();const data=profile.load(definitions),first=profile.settleRun(data,{runId:'stats-1',wave:12,towers:{archer:{builds:3,upgrades:4},mine:{builds:1,upgrades:2}}},definitions).profile;
   const second=profile.settleRun(first,{runId:'stats-2',wave:8,towers:{archer:{builds:1,upgrades:1}}},definitions).profile;assert.deepEqual({...second.lifetime.towers.archer},{builds:4,upgrades:5,runsUsed:2,highestWave:12});assert.equal(second.lifetime.towers.mine.runsUsed,1);
 });
+
+test('building special unlocks persist and reject duplicates or insufficient diamonds',()=>{
+  const {profile,definitions}=setup();let p=profile.defaults();assert.equal(profile.unlockBuilding(p,'forge',definitions),null);p.diamonds=100;p=profile.unlockBuilding(p,'forge',definitions);assert.equal(p.diamonds,60);assert.ok(profile.load(definitions).unlocks.includes('building:forge'));assert.equal(profile.unlockBuilding(p,'forge',definitions),null);p=profile.unlockBuilding(p,'market',definitions);assert.equal(p.diamonds,20);assert.equal(profile.unlockBuilding(p,'unknown',definitions),null);
+});
+
+test('reset refunds purchased meta once, repairs loadouts and preserves records and earnings',()=>{
+  const {profile,definitions}=setup();let p=profile.defaults();p.diamonds=200;p.records.highestWave=25;p.lifetime.diamondsEarned=200;
+  p=profile.unlockTower(p,'ballista',definitions);p=profile.unlockUltimate(p,'archer',definitions);p=profile.unlockBuilding(p,'house',definitions);assert.equal(p.diamonds,120);assert.equal(profile.resetValue(p),80);
+  p.activeLoadout=['ballista','archer','catapult','chain','freeze'];const result=profile.resetUnlocks(p,definitions);assert.equal(result.refund,80);assert.equal(result.profile.diamonds,200);assert.equal(result.profile.records.highestWave,25);assert.equal(result.profile.lifetime.diamondsEarned,200);assert.ok(!result.profile.unlockedTowers.includes('ballista'));assert.deepEqual(Array.from(result.profile.activeLoadout),Array.from(profile.START_TOWERS));assert.equal(profile.resetUnlocks(result.profile,definitions).refund,0);
+});

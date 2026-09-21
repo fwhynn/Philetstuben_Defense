@@ -27,7 +27,7 @@ const HexSvgCamera=(()=>{
     for(const name of ['pointerup','pointercancel','lostpointercapture']) listen(name,stop);
     function project(position){const matrix=board.getScreenCTM?.();if(!matrix||!board.createSVGPoint) return null;const point=board.createSVGPoint();point.x=position.x;point.y=position.y;const screen=point.matrixTransform(matrix),wrap=board.parentElement.getBoundingClientRect();return {x:screen.x-wrap.left,y:screen.y-wrap.top,width:wrap.width,height:wrap.height};}
     apply(false);
-    return {zoom,project,getView:model.getView,reset(notify=true){stop();model.reset();apply(notify);},destroy(){stop();for(const [name,callback,options] of listeners) board.removeEventListener(name,callback,options);}};
+    return {zoom,project,panView(x,y){const view=model.getView();model.pan(x*view.w*.65,y*view.h*.65);apply();},getView:model.getView,reset(notify=true){stop();model.reset();apply(notify);},destroy(){stop();for(const [name,callback,options] of listeners) board.removeEventListener(name,callback,options);}};
   }
   return {create};
 })();

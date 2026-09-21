@@ -1,5 +1,7 @@
 const HexDeck=(()=>{
   const rarityWeights={Common:55,Uncommon:30,Rare:12,Epic:3,Legendary:1};
+  // The run loadout is validated against profile unlocks (or explicitly granted by its challenge).
+  function forLoadout(library,loadout=[]){return Object.fromEntries(Object.entries(library).filter(([,card])=>!card.requiredTower||loadout.includes(card.requiredTower)));}
   function rewards(library,random,count=3){
     const remaining=Object.keys(library).filter(id=>!library[id].rescue),picks=[];
     while(picks.length<count&&remaining.length){
@@ -18,5 +20,5 @@ const HexDeck=(()=>{
     const pile=[state.discard,state.drawPile,state.hand].find(cards=>cards.includes(id));if(!pile) return false;
     pile.splice(pile.indexOf(id),1);state.deck.splice(deckIndex,1);return true;
   }
-  return {rarityWeights,rewards,remove};
+  return {rarityWeights,rewards,remove,forLoadout};
 })();
