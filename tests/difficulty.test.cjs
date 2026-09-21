@@ -11,7 +11,7 @@ function options(a){
 function place(a,option){a.state.selectedCard=option.index;a.state.rotation=option.rotation;a.placeTile(option.q,option.r);}
 
 test('all random exit pairs allow two mandatory opening placements without losing deck copies',()=>{
-  const {a,elements}=load({initialProfile:{difficulty:'dual'}}),pairs=new Set();
+  const {a,elements}=load({initialProfile:{difficulty:'dual',milestones:['standard35']}}),pairs=new Set();
   for(let seed=0;seed<100;seed++){
     elements.get('runSeed').value='dual-'+seed;a.newRun();
     const exits=Array.from(a.state.baseExits);assert.equal(new Set(exits).size,2);pairs.add(exits.join(','));
@@ -29,7 +29,7 @@ test('all random exit pairs allow two mandatory opening placements without losin
 });
 
 test('difficulty persists from preparation, retry retains it, and a seed repeats exits',()=>{
-  const {a,elements,storage}=load();elements.get('newRunBtn').listeners.click();
+  const {a,elements,storage}=load({initialProfile:{milestones:['standard35']}});elements.get('newRunBtn').listeners.click();
   elements.get('difficultyChoices').children[1].listeners.click();elements.get('runSeed').value='same';
   elements.get('confirmLoadoutBtn').listeners.click();
   assert.equal(a.state.difficulty,'dual');assert.equal(JSON.parse(storage.get('hex-bastion-profile-v1')).difficulty,'dual');

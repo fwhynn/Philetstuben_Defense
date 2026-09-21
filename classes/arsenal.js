@@ -41,5 +41,5 @@ const HexArsenal=(()=>{
     function start(){pointers.clear();x=8;y=8;scale=.73;apply();}
     apply();return {zoom,fit,start};
   }
-  return {render,enableDrag};
+  return {render,enableDrag,icon};
 })();

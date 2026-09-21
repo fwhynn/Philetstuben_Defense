@@ -18,7 +18,7 @@ const HexProfile=(()=>{
     for(const id of unlocked) if(active.length<5&&!active.includes(id)) active.push(id);
     active=active.slice(0,5);
     const presets=Array.from({length:3},(_,i)=>{const item=source.loadoutPresets?.[i],ids=validIds(item?.towers||item,definitions).filter(id=>unlocked.includes(id));return {name:String(item?.name||`Preset ${i+1}`).slice(0,30),towers:ids.length===5?ids:[...active]};});
-    return {...base,...source,version:1,difficulty:source.difficulty==='dual'?'dual':'normal',activeHero:['standard','builder','merchant'].includes(source.activeHero)?source.activeHero:'standard',diamonds:Math.max(0,Number(source.diamonds)||0),unlockedTowers:unlocked,activeLoadout:active,
+    return {...base,...source,version:1,difficulty:source.difficulty==='dual'&&source.milestones?.includes('standard35')?'dual':'normal',activeHero:['standard','builder','merchant'].includes(source.activeHero)?source.activeHero:'standard',diamonds:Math.max(0,Number(source.diamonds)||0),unlockedTowers:unlocked,activeLoadout:active,
       loadoutPresets:presets,unlocks:[...new Set(Array.isArray(source.unlocks)?source.unlocks:[])],milestones:Array.isArray(source.milestones)?source.milestones:[],settledRuns:Array.isArray(source.settledRuns)?source.settledRuns.slice(-100):[],
       records:{...base.records,...(source.records||{})},lifetime:{...base.lifetime,...(source.lifetime||{}),towers:{...(source.lifetime?.towers||{})}}};
   }
@@ -66,5 +66,31 @@ const HexProfile=(()=>{
     results[day]={best:Math.max(Number(old.best)||0,wave),won:!!old.won||won};
     return {profile:save({...clean,dailyResults:results,diamonds:clean.diamonds+reward,lifetime:{...clean.lifetime,diamondsEarned:clean.lifetime.diamondsEarned+reward}},definitions),reward};
   }
-  return {resetValue,resetUnlocks,affordableUnlocks,BUILDING_UNLOCKS,unlockBuilding,STORAGE_KEY,START_TOWERS,TOWER_UNLOCKS,ULTIMATE_UNLOCKS,defaults,normalize,load,save,setLoadout,savePreset,runReward,settleRun,settleDaily,unlockTower,unlockUltimate};
+  function exportFile(profile,definitions){return JSON.stringify({format:'autohex-profile',version:1,exportedAt:new Date().toISOString(),profile:normalize(profile,definitions)},null,2);}
+  function readFile(text,definitions){
+    if(typeof text!=='string'||text.length>2000000)throw new Error('Datei zu groß (maximal 2 MB).');
+    let file;try{file=JSON.parse(text,(key,value)=>{if(['__proto__','prototype','constructor'].includes(key))throw new Error();return value;});}catch{throw new Error('Keine gültige Spielstanddatei.');}
+    if(file?.format!=='autohex-profile'||file.version!==1||file.profile?.version!==1)throw new Error('Unbekanntes oder neueres Spielstandformat.');
+    const p=file.profile;
+    if(!Number.isSafeInteger(p.diamonds)||p.diamonds<0||!Array.isArray(p.unlockedTowers)||!Array.isArray(p.activeLoadout)||!Array.isArray(p.unlocks)||!p.records||!p.lifetime)throw new Error('Der Spielstand ist unvollständig oder beschädigt.');
+    function check(value,depth=0){if(depth>30)throw new Error('Spielstand zu stark verschachtelt.');if(typeof value==='number'&&(!Number.isFinite(value)||value<0||value>Number.MAX_SAFE_INTEGER))throw new Error('Ungültiger Zahlenwert im Spielstand.');if(value&&typeof value==='object')for(const child of Object.values(value))check(child,depth+1);}
+    check(p);
+    const invalid=()=>{throw new Error('Ungültige Profildaten.');},object=v=>v&&typeof v==='object'&&!Array.isArray(v),numbers=v=>{if(!object(v)||Object.values(v).some(n=>!Number.isSafeInteger(n)||n<0))invalid();};
+    for(const key of ['unlockedTowers','activeLoadout','unlocks','settledRuns'])if(p[key]!==undefined&&(!Array.isArray(p[key])||p[key].some(id=>typeof id!=='string')))invalid();
+    numbers(p.records);for(const key of ['highestWave','bossesKilled','runsPlayed'])if(!Number.isSafeInteger(p.records[key]))invalid();
+    for(const key of ['normalKills','diamondsEarned'])if(!Number.isSafeInteger(p.lifetime[key]))invalid();
+    if(!object(p.lifetime.towers))invalid();for(const entry of Object.values(p.lifetime.towers))numbers(entry);
+    if(p.unlockCosts!==undefined)numbers(p.unlockCosts);
+    if(p.loadoutPresets!==undefined&&(!Array.isArray(p.loadoutPresets)||p.loadoutPresets.some(v=>!object(v)||typeof v.name!=='string'||!Array.isArray(v.towers)||v.towers.some(id=>typeof id!=='string'))))invalid();
+    if(p.dailyResults!==undefined){if(!object(p.dailyResults))invalid();for(const [day,result] of Object.entries(p.dailyResults))if(!/^\d{4}-\d{2}-\d{2}$/.test(day)||!object(result)||!Number.isSafeInteger(result.best)||result.best<0||typeof result.won!=='boolean')invalid();}
+    const allowed=['version','activeHero','difficulty','diamonds','unlockedTowers','activeLoadout','loadoutPresets','unlocks','milestones','settledRuns','records','lifetime','unlockCosts','dailyResults'];
+    return normalize(Object.fromEntries(allowed.filter(key=>p[key]!==undefined).map(key=>[key,p[key]])),definitions);
+  }
+  function importFile(text,definitions){
+    const next=readFile(text,definitions),previous=localStorage.getItem(STORAGE_KEY);
+    // Fail visibly before replacing the profile if storage or the backup is unavailable.
+    if(previous!==null)localStorage.setItem(STORAGE_KEY+'-before-import',previous);
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(next));return next;
+  }
+  return {exportFile,readFile,importFile,resetValue,resetUnlocks,affordableUnlocks,BUILDING_UNLOCKS,unlockBuilding,STORAGE_KEY,START_TOWERS,TOWER_UNLOCKS,ULTIMATE_UNLOCKS,defaults,normalize,load,save,setLoadout,savePreset,runReward,settleRun,settleDaily,unlockTower,unlockUltimate};
 })();

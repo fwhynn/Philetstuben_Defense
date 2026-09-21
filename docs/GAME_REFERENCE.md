@@ -189,6 +189,8 @@ Am Runende werden Diamanten ausgezahlt: `floor(erreichte Wave / 2)`, zusätzlich
 
 Im Arsenal können die Balliste für 20 Diamanten und der Flammenturm für 35 Diamanten dauerhaft freigeschaltet werden. Zusätzlich besitzt jeder Turm ein eigenes Stufe-4-Upgrade für 20 Diamanten bei Starttürmen beziehungsweise 30 Diamanten bei den zusätzlichen Türmen. Drei Loadout-Presets, Rollenwarnungen und lokale Statistiken zu Käufen, Upgrades, Nutzung und bester Wave schließen Etappe 3 ab. Freigeschaltete Türme erscheinen in der Runvorbereitung, erhöhen aber nicht die fünf Loadoutplätze.
 
+Im Hauptmenü kann der Spielstand als JSON herunter- oder hochgeladen werden. Enthalten sind Diamanten, Freischaltungen, Kaufpreise, Loadouts und Profilstatistiken; kein laufender Run und keine Geräteeinstellungen. Ein Import zeigt zuerst eine Vorschau, ersetzt dann nach Bestätigung das Profil und sichert den bisherigen lokalen Stand unter `hex-bastion-profile-v1-before-import`. Während eines aktiven Runs bleibt der Import gesperrt.
+
 ## Dorfgebäude
 
 Das automatische Dorfeinkommen benötigt keinen Ausbau. Im angeklickten Gebäudeslot kann genau ein Gebäude gebaut werden:
@@ -267,7 +269,7 @@ Vanilla HTML/CSS/JavaScript ohne Build-Schritt. Three.js übernimmt standardmä�
 
 ## Prüfung und offene Arbeit
 
-Zuletzt **149 automatisierte Tests bestanden**. Tests ab diesem Appordner:
+Zuletzt **249 automatisierte Tests bestanden**. Tests ab diesem Appordner:
 
 ```powershell
 node --test tests/*.test.cjs
@@ -281,7 +283,7 @@ Für später vorgemerkt, noch nicht implementiert:
 
 - Weitere Heroes/Startfestungen über Standard, Festungsbauer und Händler hinaus.
 - Weitere Karten und Lootvarianten sowie zusätzliche Shrine-Boni wie besondere Upgrades.
-- Weitere Biome, Ausbau der vorhandenen Meta-Progression, zusätzliche Towerrollen, Run-Speicherung und Profil-Export/-Import.
+- Weitere Biome, Ausbau der vorhandenen Meta-Progression, zusätzliche Towerrollen und Run-Speicherung.
 - Zusätzliche Base-Ausbaupfade und sichtbare Modelle der Ausbaustufen.
 - Turm-Upgrade-Modelle und weitere visuelle Effekte.
 
@@ -316,3 +318,15 @@ Shrine-Schaltflächen sind kontextabhängig: Heilquelle und Werksegen zeigen nur
 - Arsenal: zwölf Forschungsbäume in zwei Reihen mit je sechs Bäumen. Kompakte obere Werkzeugleiste statt separater Titel-/Erklärungs-/Fußbereiche; Hilfe aufklappbar, Status nur bei Meldungen als Overlay. Jeder Einstieg startet bei 73 %, Gesamtübersicht bleibt manuell verfügbar.
 
 - Arsenal-Bäume passen ihre Breite an die vorhandenen Zweige an (Katapult zwei, Element drei); keine Streckung auf die Breite anderer Bäume. Zoom verwendet Layout-Zoom statt transform:scale, damit Text bei jeder Zoomstufe neu gerastert wird. 73-%-Start, Mausanker und Drag bleiben erhalten.
+
+- Duo-Grundlage: gemeinsame DOM-freie Session-Steuerung für Wächter-/Wave-/Shrine-Belohnungen, Kartenentfernung, Vorbereitung und Erfolgsmeldungen. Checkpoints halten auch unbestätigte Erfolgsmeldungen fest. Lokaler Duo-Prototyp siehe folgenden Abschnitt; noch kein Online-Duo.
+
+## Lokaler Duo-Prototyp
+
+Bei laufendem lokalen Server `duo-prototype.html` öffnen (standardmäßig `http://localhost:8080/duo-prototype.html`). Beide Seiten werden an einem Gerät gesteuert: je ein Hex legen, Verteidigung bauen und beide bereit melden. Zwei getrennte Maps, Goldkonten und Decks teilen sich 40 HP. Abschlussbelohnungen gibt es erst nach beiden Kämpfen.
+
+Karten drehen, Türme/Gebäude bauen und verbessern, Belohnungen wählen sowie 1×/2× sind verfügbar. „Checkpoint merken“ sichert beide Seiten nur im geöffneten Tab; kein dauerhafter Spielstand. Kein Zugriff auf Solo-Diamanten. Freien Slot anklicken und als Partner-Portal reservieren; eigenen Turm anklicken und als Verstärkung wählen. Nach sauberem Abschluss hilft eine Kopie nach 1,5 Spielsekunden beim Partner. Unterstützungs-Schaden wird dem Sender zugerechnet. Noch ohne Online-Verbindung, Lieferungen, Verkäufe oder Base-Ausbau. Der lokale Duo-Prototyp zeigt jeweils eine große Map mit Umschalter und Partnerstatus; beide Kämpfe laufen beim Wechsel weiter. Visuelle Prüfung durch den Nutzer.
+
+## Kampagne und Bosswellen
+
+Wave 35 in Stufe 1 abschließen schaltet Stufe 2 · Zwei Fronten frei. Der Victory-Screen bietet Hauptmenü oder Endless mit derselben Map. Der Run wird erst beim Beenden abgerechnet. Wave 15: Eisenkoloss mit starker Rüstung; Wave 25: schneller Sturmjäger; Wave 35: magiegeschützte Seelenmatriarchin mit maximal sechs beschworenen Dienern ohne Goldbeute. Danach wiederholt sich die Bossrotation mit steigender Stärke.

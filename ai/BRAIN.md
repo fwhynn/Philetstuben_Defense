@@ -1,8 +1,10 @@
 # Autohex TD – Projektgedächtnis
 
-Stand: 20.09.2026, einschließlich der aktuellen lokalen Änderungen. Kompakte Übersicht über Ziele, Entscheidungen und spätere Ideen. Ausführlicher Verlauf: [Übergabeprotokoll](../docs/README_TowerDefense_Projekt.md). Technische Grenzen: [Architektur](../docs/ARCHITECTURE.md). Änderungen: [Spielreferenz](../docs/GAME_REFERENCE.md).
+Stand: 21.09.2026, einschließlich der aktuellen lokalen Änderungen. Kompakte Übersicht über Ziele, Entscheidungen und spätere Ideen. Ausführlicher Verlauf: [Übergabeprotokoll](../docs/README_TowerDefense_Projekt.md). Technische Grenzen: [Architektur](../docs/ARCHITECTURE.md). Änderungen: [Spielreferenz](../docs/GAME_REFERENCE.md).
 
 ## Festgelegte Richtung
+
+- Multiplayer-Richtung (21.09.2026): Duo „Zwillingsfestungen“ mit zwei eigenen Maps, gemeinsamem Leben, Portal-Verstärkung und Partner-Lieferungen ist zur Umsetzung gewählt. Ausführlicher Spiel-, Lobby-, Hosting- und Etappenplan: [Multiplayer-Plan](../docs/MULTIPLAYER_PLAN.md). Noch nicht implementiert; gemeinsame Map mit wechselndem Kartenlegen ist verworfen.
 
 - Mobile-App als geplantes Ziel: neue Features touchbedienbar gestalten, ausreichend große Bedienelemente, responsive Layouts und keine zwingenden Hover-/Tastaturaktionen. Spiellogik und Zeitsteuerung möglichst unabhängig von DOM/Renderer halten; Browser-/App-Lebenszyklus ausdrücklich berücksichtigen.
 - Tempo-Regler 1× bis 8×, gespeichert; F erhöht um eine Stufe und springt nach 8× auf 1×. Simulation in kleinen Schritten, zusätzlicher Hintergrundtimer, verzögerte Zeit wird nachgeholt; vollständiges Einfrieren durch Browser/OS bleibt eine Plattformgrenze. Manuelle Pause bleibt bestehen. Freie Turmplätze weiß, Gebäudeplätze türkis; gemeinsamer Schalter. Schatzbeschriftung nennt +20 Gold.
@@ -36,6 +38,7 @@ Stand: 20.09.2026, einschließlich der aktuellen lokalen Änderungen. Kompakte �
 
 ## Für später fest vorgemerkt
 
+- Gegner-Balancing (21.09.2026, vorgemerkt, noch nicht umgesetzt): deutlich mehr Gegnertypen. Elementare Immunitäten gegen Feuer, Wasser, Blitz und weitere passende Turm-Schadensarten; beim Tod Aufteilung in zwei oder vier schwächere Gegner bzw. Herabstufung; Heiler; Spezialgegner, die gezielt den kürzesten oder schnellsten Weg zur Base wählen. Konkrete Regeln und Schutz vor unfairen Loadout-Kombinationen siehe [Gegner-Balancing-Plan](../docs/ENEMY_BALANCING_PLAN.md).
 - Meta-Progression und Turm-Loadouts sind in [../docs/META_PROGRESSION_PLAN.md](../docs/META_PROGRESSION_PLAN.md) konkretisiert. Loadout, Diamanten, Arsenal, Minenleger sowie die ersten zwei freischaltbaren Türme sind umgesetzt. Keine fünf kostenlosen platzierten Türme. Meta-Unlocks sollen vor allem Optionen statt permanenter globaler Stärke geben.
 - Weitere Startprofile über die drei implementierten Heroes hinaus.
 - Weitere Base-Ausbaupfade können später folgen; Mauern und automatische Waffe sind umgesetzt.
@@ -44,6 +47,7 @@ Stand: 20.09.2026, einschließlich der aktuellen lokalen Änderungen. Kompakte �
 - Weitere Shrine-Bonusvarianten über Heilquelle und Werksegen hinaus. Effekt bleibt vor Erschließung verborgen.
 - Weitere Karten und Bosslootvarianten. Erster Ausbau auf drei Karten je hoher Rarität und zusätzliche Boss-Kartenbeute umgesetzt.
 - Weitere Biome, spätere Meta-Progression und zusätzliche Towerrollen: Details im Übergabeprotokoll.
+- 1 gegen 1: gegeneinander spielen und die Plättchen für die jeweils andere Person auswählen. Vom Nutzer vorgemerkt, noch nicht umgesetzt; Auswahl-/Platzierungsregeln und Siegbedingungen später festlegen. Kein Teil des Duo-MVP.
 
 ## Aktueller Stand / nächste Arbeit
 
@@ -57,6 +61,7 @@ Stand: 20.09.2026, einschließlich der aktuellen lokalen Änderungen. Kompakte �
 - Bossloot: +50 Gold und nach überlebter Wave genau eine Wahl aus Karten (90 % Epic, 10 % Legendary als Pool) oder Run-Segen (+5 aktuelle/maximale HP bzw. +2 Einkommen je künftiger Wave). Alle Bosse nacheinander vor normalen Wave-Rewards.
 - Kartendarstellung in svg-renderer.js ausgelagert: render/reset/project/destroy, logische Aktionen an Controller, keine direkte Mutation des Spielzustands. Gemeinsame Slotpositionen in map.js.
 - Weltkoordinaten: Base (0,0), keine Bildschirmzentrierung in Spiellogik. camera.js: DOM-freies Kameramodell plus austauschbarer SVG-Adapter; Renderer besitzt Kamera.
+- Profil mitnehmen umgesetzt: Hauptmenü -> Spielstand · Download / Upload. Versionierte JSON-Datei mit Diamanten, Freischaltungen, Kaufpreisen, Loadouts, Rekorden und Abrechnungs-IDs. Import nach Vorschau/Bestätigung ersetzt das Profil, sichert vorher den gespeicherten Stand lokal und ist während aktiver Runs gesperrt. Ungültige Dateien/Speicherfehler werden angezeigt. Laufende Runs und Geräteeinstellungen sind nicht enthalten. Online-Profilverwaltung für Multiplayer bleibt offen.
 - Prioritäten: aktuelle Änderungen im Spiel durch den Nutzer prüfen, Gameplay/Balance, Hero-/Base-Balancing anhand der ersten Spieltests. Danach Run-Speicherung und weitere Karten/Bonusvarianten. Diese Reihenfolge ist ein Vorschlag; Details sind noch nicht beschlossen.
 - Visuelle Prüfung, Audio-Hörprobe, Gebäude-Wirkungsbereiche im Spiel und langfristiges Balancing sind nicht durch aktuelle Browsertests bestätigt. Provisorisches Card Removal jede sechste Wave bleibt zusätzlich zu Shrines.
 

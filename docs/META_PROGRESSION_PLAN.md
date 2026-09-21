@@ -349,3 +349,16 @@ Erste Zielwerte für Balanceprüfungen:
 - Meta-Fortschritt schaltet neue Möglichkeiten und die optionale vierte Turmstufe frei. Diese Stufe ist kein kostenloser globaler Bonus, sondern muss in jedem Run mit Gold gebaut werden.
 - Loadout und Profil werden lokal gespeichert; der getrennte Runzustand lebt bislang nur im Arbeitsspeicher.
 - Diamanten werden am Runende transparent berechnet und niemals mit Run-Gold vermischt.
+
+## 14. Für später: gegnerbezogene Freischaltbedingungen
+
+Vom Nutzer vorgemerkt, noch nicht umgesetzt: Bestimmte Meta-Upgrades sollen erst nach einer erforderlichen Anzahl besiegter Gegner eines bestimmten Typs oder mit bestimmten Eigenschaften verfügbar werden. Beispiel: Ein Feuer-Upgrade setzt 100 besiegte feuerresistente Monster voraus. Die Zahl 100 und das konkrete Upgrade sind Beispiele, keine festgelegten Balancewerte.
+
+- Bedingungen als Daten je Upgrade hinterlegen (Gegnerart/Eigenschaft, benötigte Anzahl). Fortschritt über Runs hinweg im Profil speichern und beim Profil-Export/-Import mitnehmen.
+- Im Arsenal transparent anzeigen, zum Beispiel „Feuerresistente Gegner: 37 / 100“, und erklären, welche Gegner zählen. Der Nutzer muss diese Information auch per Antippen erreichen können.
+- Noch entscheiden: Bedingung schaltet das Upgrade unmittelbar frei oder öffnet erst den Kauf mit Diamanten. Bereits erworbene Upgrades bei Einführung nicht nachträglich entziehen.
+- Gegnerkategorien anhand ihrer tatsächlichen Resistenz/Tags zählen, nicht anhand des verwendeten Turms oder nur des Biomnamens. Keine automatisch unterstellte Pflicht, resistente Gegner mit dem benachteiligten Element zu besiegen.
+- Ereignisse eindeutig zählen: keine doppelten Kills durch Wiederaufnahme oder erneute Ergebnisabrechnung. Regeln für geteilte, beschworene und wiederbelebte Gegner vor Einführung festlegen, damit keine unbeabsichtigten Farm-Schleifen entstehen.
+- Duo-Zurechnung ausdrücklich definieren (persönliche Kills, Teamfortschritt oder beide). Späteres Online-Profil serverseitig fortschreiben. Aktuelle Killstatistiken reichen noch nicht für eine zuverlässige rückwirkende Zuordnung nach Resistenztypen.
+
+Diese Idee gehört zur späteren Meta-Progression; keine neuen Kaufbedingungen im aktuellen Arsenal aktiviert.

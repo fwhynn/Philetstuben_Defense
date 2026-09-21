@@ -63,7 +63,11 @@ const HexMap=(()=>{
     return slotOffsets(tile.type,tile.slots||0).map(p=>({x:c.x+p.x*Math.cos(angle)-p.y*Math.sin(angle),y:c.y+p.x*Math.sin(angle)+p.y*Math.cos(angle)}));
   }
 
-  function buildingPosition(tile){const c=axialToWorld(tile.q,tile.r),angle=-(tile.rotation||0)*Math.PI/3;return {x:c.x-30*Math.sin(angle),y:c.y+30*Math.cos(angle)};}
+  function buildingPosition(tile,index=0){
+    const c=axialToWorld(tile.q,tile.r),angle=-(tile.rotation||0)*Math.PI/3;
+    const [x,y]=(typeof HexData!=='undefined'&&HexData.CARD_LIBRARY[tile.type]?.buildingLayout?.[index])||[0,30];
+    return {x:c.x+x*Math.cos(angle)-y*Math.sin(angle),y:c.y+x*Math.sin(angle)+y*Math.cos(angle)};
+  }
   function canPlace(map,q,r,card,rot,landmarks){
     if(map.has(key(q,r))) return false;
     const roads=rotatedRoads(card,rot);
@@ -75,18 +79,40 @@ const HexMap=(()=>{
       const thisRoad=roads.includes(d);
       const neighborRoad=(nt.roads||[]).includes(OPP(d));
       if(thisRoad!==neighborRoad) return false;
-      if(thisRoad&&neighborRoad&&existing) connects=true;
+      if(existing&&((thisRoad&&neighborRoad)||(!roads.length&&card.buildingSlots))) connects=true;
     }
     if(!connects) return false;
     // Validate the resulting reachable network, without mutating the actual map.
     const candidate=new Map(map);candidate.set(key(q,r),{q,r,roads,type:card.id});
-    const graph=buildGraph(candidate),queue=[key(0,0)],visited=new Set(queue);
-    for(let i=0;i<queue.length;i++){
-      const tile=candidate.get(queue[i]);if(!tile) continue;
-      if(tile.type!=='base'&&queue[i]!==key(0,0)&&tile.roads.some(d=>{const n=neighbor(tile.q,tile.r,d);return !candidate.has(key(n.q,n.r))&&Array.from({length:6},(_,side)=>neighbor(n.q,n.r,side)).some(next=>!candidate.has(key(next.q,next.r)));})) return true;
-      for(const next of graph.get(queue[i])||[]) if(!visited.has(next)){visited.add(next);queue.push(next);}
-    }
+    return hasExteriorFront(candidate,landmarks);
+  }
+  function exterior(map,landmarks){
+    const blocked=new Set(map.keys());for(const [id,l] of landmarks||[])if(!l.claimed&&l.prefab)blocked.add(id);
+    const cells=[...map.values(),...[...(landmarks?.values()||[])].filter(l=>!l.claimed&&l.prefab)];
+    const minQ=Math.min(0,...cells.map(t=>t.q))-2,maxQ=Math.max(0,...cells.map(t=>t.q))+2,minR=Math.min(0,...cells.map(t=>t.r))-2,maxR=Math.max(0,...cells.map(t=>t.r))+2;
+    const queue=[{q:minQ,r:minR}],seen=new Set([key(minQ,minR)]);
+    for(let i=0;i<queue.length;i++)for(let d=0;d<6;d++){const n=neighbor(queue[i].q,queue[i].r,d),id=key(n.q,n.r);if(n.q<minQ||n.q>maxQ||n.r<minR||n.r>maxR||blocked.has(id)||seen.has(id))continue;seen.add(id);queue.push(n);}
+    return seen;
+  }
+  function reachable(map){const graph=buildGraph(map),queue=['0,0'],seen=new Set(queue);for(let i=0;i<queue.length;i++)for(const id of graph.get(queue[i])||[])if(!seen.has(id)){seen.add(id);queue.push(id);}return seen;}
+  function hasExteriorFront(map,landmarks){
+    const network=new Map(map);for(const [id,l] of landmarks||[])if(!network.has(id)&&!l.claimed&&l.prefab)network.set(id,{...l.prefab,q:l.q,r:l.r});
+    const outside=exterior(map,landmarks),connected=reachable(network);
+    for(const tile of network.values())if(tile.type!=='base'&&connected.has(key(tile.q,tile.r)))for(const d of tile.roads||[]){const n=neighbor(tile.q,tile.r,d);if(!map.has(key(n.q,n.r))&&outside.has(key(n.q,n.r)))return true;}
     return false;
+  }
+  function tunnelPlan(map,landmarks){
+    if(hasExteriorFront(map,landmarks))return null;
+    const connected=reachable(map),sources=[...map.values()].filter(t=>t.type!=='base'&&connected.has(key(t.q,t.r))&&(t.roads||[]).some(d=>{const n=neighbor(t.q,t.r,d);return !map.has(key(n.q,n.r));}));
+    if(!sources.length)return null;
+    const outside=exterior(map,landmarks),options=[];
+    for(const id of outside){const [q,r]=id.split(',').map(Number);if(Array.from({length:6},(_,d)=>neighbor(q,r,d)).some(n=>map.has(key(n.q,n.r))||landmarks?.get(key(n.q,n.r))?.prefab))continue;
+      for(const source of sources){const distance=Math.max(Math.abs(q-source.q),Math.abs(r-source.r),Math.abs(q+r-source.q-source.r));options.push({q,r,source:key(source.q,source.r),distance});}}
+    options.sort((a,b)=>a.distance-b.distance||a.q-b.q||a.r-b.r||a.source.localeCompare(b.source));
+    const chosen=options[0];if(!chosen)return null;
+    const distance=(a,b)=>Math.max(Math.abs(a.q-b.q),Math.abs(a.r-b.r),Math.abs(a.q+a.r-b.q-b.r));
+    chosen.dir=Array.from({length:6},(_,d)=>({d,score:Math.min(...[...map.values()].map(t=>distance(neighbor(chosen.q,chosen.r,d),t)))})).sort((a,b)=>b.score-a.score||a.d-b.d)[0].d;
+    return chosen;
   }
   function rescue(map,landmarks){
     for(const tile of map.values()) for(const direction of tile.roads||[]){
@@ -117,6 +143,7 @@ const HexMap=(()=>{
         if(nt && (nt.roads||[]).includes(OPP(d))) graph.get(key(tile.q,tile.r)).push(key(n.q,n.r));
       }
     }
+    for(const tile of map.values())for(const target of tile.tunnels||[])if(map.has(target))graph.get(key(tile.q,tile.r)).push(target);
     return graph;
   }
 
@@ -184,6 +211,7 @@ const HexMap=(()=>{
       const points=[...geometry.get(id).legs.get(d),...other.legs.get(OPP(d)).slice().reverse().slice(1)];
       graph.get(id).push({next,cost:length(points),points});
     }
+    for(const [id,tile] of map)for(const next of tile.tunnels||[])if(geometry.has(next))graph.get(id).push({next,cost:0,points:[geometry.get(id).hub,{...geometry.get(next).hub,tunnel:true}]});
     const distances=new Map([[key(0,0),0]]),visited=new Set();
     while(true){
       let current=null,best=Infinity;
@@ -193,7 +221,7 @@ const HexMap=(()=>{
     }
     return {graph,geometry,distances};
   }
-  return {SQRT3,HEX,OPP,key,axialToWorld,hexPoints,edgePoint,neighbor,rotatedRoads,canPlace,canPlaceOpening,randomBaseExits,rescue,buildGraph,pathToBase,roadGeometry,routeGraph,length,slotOffsets,slotPositions,buildingPosition,axialToPixel:axialToWorld};
+  return {exterior,hasExteriorFront,tunnelPlan,SQRT3,HEX,OPP,key,axialToWorld,hexPoints,edgePoint,neighbor,rotatedRoads,canPlace,canPlaceOpening,randomBaseExits,rescue,buildGraph,pathToBase,roadGeometry,routeGraph,length,slotOffsets,slotPositions,buildingPosition,axialToPixel:axialToWorld};
 })();
 
 
