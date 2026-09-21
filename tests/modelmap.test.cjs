@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
-function load(){const context={};for(const file of ['data.js','map.js','model-map.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../'+file),'utf8'),context);vm.runInNewContext('globalThis.data=HexData;globalThis.map=HexMap;globalThis.models=HexModelMap;',context);return context;}
+function load(){const context={};for(const file of ['data.js','map.js','model-map.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../classes',file),'utf8'),context);vm.runInNewContext('globalThis.data=HexData;globalThis.map=HexMap;globalThis.models=HexModelMap;',context);return context;}
 test('every card type has a model and its road edges match the shape table',()=>{
   const {data,models}=load();
   for(const [id,card] of Object.entries(data.CARD_LIBRARY)){

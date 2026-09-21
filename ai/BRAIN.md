@@ -1,6 +1,6 @@
 # Autohex TD – Projektgedächtnis
 
-Stand: 20.09.2026, einschließlich der aktuellen lokalen Änderungen. Kompakte Übersicht über Ziele, Entscheidungen und spätere Ideen. Ausführlicher Verlauf: [Übergabeprotokoll](README_TowerDefense_Projekt.md). Technische Grenzen: [Architektur](towerdefense-v0.1/ARCHITECTURE.md). Änderungen: [App-README](towerdefense-v0.1/README.md).
+Stand: 20.09.2026, einschließlich der aktuellen lokalen Änderungen. Kompakte Übersicht über Ziele, Entscheidungen und spätere Ideen. Ausführlicher Verlauf: [Übergabeprotokoll](../docs/README_TowerDefense_Projekt.md). Technische Grenzen: [Architektur](../docs/ARCHITECTURE.md). Änderungen: [Spielreferenz](../docs/GAME_REFERENCE.md).
 
 ## Festgelegte Richtung
 - Mobile-App als geplantes Ziel: neue Features touchbedienbar gestalten, ausreichend große Bedienelemente, responsive Layouts und keine zwingenden Hover-/Tastaturaktionen. Spiellogik und Zeitsteuerung möglichst unabhängig von DOM/Renderer halten; Browser-/App-Lebenszyklus ausdrücklich berücksichtigen.
@@ -34,7 +34,7 @@ Stand: 20.09.2026, einschließlich der aktuellen lokalen Änderungen. Kompakte �
 - Bauen auch während Waves. Turm-Upgrades nur im angeklickten Turmmenü. Wave-/Gold-/Deckinfos als Dropdowns.
 
 ## Für später fest vorgemerkt
-- Meta-Progression und Turm-Loadouts sind in [META_PROGRESSION_PLAN.md](META_PROGRESSION_PLAN.md) konkretisiert. Loadout, Diamanten, Arsenal, Minenleger sowie die ersten zwei freischaltbaren Türme sind umgesetzt. Keine fünf kostenlosen platzierten Türme. Meta-Unlocks sollen vor allem Optionen statt permanenter globaler Stärke geben.
+- Meta-Progression und Turm-Loadouts sind in [../docs/META_PROGRESSION_PLAN.md](../docs/META_PROGRESSION_PLAN.md) konkretisiert. Loadout, Diamanten, Arsenal, Minenleger sowie die ersten zwei freischaltbaren Türme sind umgesetzt. Keine fünf kostenlosen platzierten Türme. Meta-Unlocks sollen vor allem Optionen statt permanenter globaler Stärke geben.
 - Weitere Startprofile über die drei implementierten Heroes hinaus.
 - Weitere Base-Ausbaupfade können später folgen; Mauern und automatische Waffe sind umgesetzt.
 - Bisherige Ideen (keine finalen Werte): neutrale Standardfestung, Händlerstadt mit Goldbonus/Nachteil, Frostfestung mit Freeze-Bonus, Nekromanten-Zitadelle mit Bonus auf spätere Nekromantentürme.

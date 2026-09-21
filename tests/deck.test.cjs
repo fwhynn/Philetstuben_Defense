@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
-function load(){const context={};for(const file of ['random.js','data.js','deck.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../'+file),'utf8'),context);vm.runInNewContext('globalThis.deck=HexDeck;globalThis.cards=HexData.CARD_LIBRARY;globalThis.random=HexRandom.create;',context);return context;}
+function load(){const context={};for(const file of ['random.js','data.js','deck.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../classes',file),'utf8'),context);vm.runInNewContext('globalThis.deck=HexDeck;globalThis.cards=HexData.CARD_LIBRARY;globalThis.random=HexRandom.create;',context);return context;}
 test('weighted rewards are unique and reproducible with the same seed',()=>{
   const {deck,cards,random}=load(),first=random('deck-test'),second=random('deck-test');
   for(let i=0;i<100;i++){const picks=deck.rewards(cards,first);assert.equal(picks.length,3);assert.equal(new Set(picks).size,3);assert.equal(JSON.stringify(picks),JSON.stringify(deck.rewards(cards,second)));}

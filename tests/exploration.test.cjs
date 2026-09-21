@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
-function load(){const context={};for(const file of ['random.js','map.js','exploration.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../'+file),'utf8'),context);vm.runInNewContext('globalThis.mapRules=HexMap;globalThis.rules=HexExploration;globalThis.random=HexRandom.create;',context);return context;}
+function load(){const context={};for(const file of ['random.js','map.js','exploration.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../classes',file),'utf8'),context);vm.runInNewContext('globalThis.mapRules=HexMap;globalThis.rules=HexExploration;globalThis.random=HexRandom.create;',context);return context;}
 test('adjacent events connect on both sides, including across later exploration boundaries',()=>{
   const {rules,random,mapRules:m}=load();let pairs=0,boundaryPairs=0;
   for(let seed=0;seed<100;seed++){

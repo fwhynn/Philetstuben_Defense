@@ -1,7 +1,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const {load}=require('./helpers/game.cjs');
-function rules(){const c={};for(const f of ['data.js','deck.js','buildings.js'])vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../'+f),'utf8'),c);return vm.runInNewContext('({data:HexData,deck:HexDeck,buildings:HexBuildings})',c);}
+function rules(){const c={};for(const f of ['data.js','deck.js','buildings.js'])vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../classes',f),'utf8'),c);return vm.runInNewContext('({data:HexData,deck:HexDeck,buildings:HexBuildings})',c);}
 test('every tower has exactly one exclusive tile; only validated run loadout tiles enter rewards',()=>{
   const {data,deck}=rules();for(const type of Object.keys(data.TOWERS)){
     const cards=Object.values(data.CARD_LIBRARY).filter(c=>c.requiredTower===type);assert.equal(cards.length,1,type);

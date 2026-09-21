@@ -1,7 +1,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const {load}=require('./helpers/game.cjs');
-function layout(){const context={};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../ui-layout.js'),'utf8')+';globalThis.rules=HexUiLayout;',context);return context.rules;}
+function layout(){const context={};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../classes/ui-layout.js'),'utf8')+';globalThis.rules=HexUiLayout;',context);return context.rules;}
 test('oversized popups stay clear of controls across desktop and compact layouts',()=>{
   const rules=layout();for(const [width,height] of [[1440,900],[1000,620],[700,560],[390,700]]){
     const controls=[{top:14,bottom:90,width:width-32,height:76},{top:height-210,bottom:height-12,width:300,height:198},{top:height-95,bottom:height-16,width:230,height:79},{top:110,bottom:145,width:160,height:35}];

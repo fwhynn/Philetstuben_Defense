@@ -22,7 +22,7 @@ test('grid and building highlights toggle independently and building hover emits
 function setup(){
   function element(){return {attributes:{},style:{},children:[],listeners:{},textContent:'',set innerHTML(value){this.children=[];},setAttribute(name,value){this.attributes[name]=value;},appendChild(child){this.children.push(child);child.parent=this;},addEventListener(name,fn){this.listeners[name]=fn;},removeEventListener(name,fn){if(this.listeners[name]===fn) delete this.listeners[name];},remove(){this.parent.children=this.parent.children.filter(child=>child!==this);}};}
   const context={document:{createElementNS:element}};
-  for(const file of ['biomes.js','data.js','map.js','buildings.js','exploration.js','camera.js','svg-renderer.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../'+file),'utf8'),context);
+  for(const file of ['biomes.js','data.js','map.js','buildings.js','exploration.js','camera.js','svg-renderer.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../classes',file),'utf8'),context);
   vm.runInNewContext('globalThis.adapter=HexSvgRenderer;',context);
   const svg=element(),calls=[],commands={};for(const name of ['placeTile','selectSlot','selectTower','selectBuilding','clearSelection','hoverPlacement','leavePlacement','hoverBuilding']) commands[name]=(...args)=>calls.push([name,...args]);
   const renderer=context.adapter.create(svg,commands),state={map:new Map([['0,0',{q:0,r:0,type:'base',roads:[0],slots:0,towers:[],income:0}]]),landmarks:new Map(),phase:'place',waveRunning:false,hand:['straight'],selectedCard:0,rotation:0,hoveredPlacement:null,selectedSlot:null,selectedTower:null,selectedBuilding:null,previewTower:null,hp:20,gold:70,enemies:[],projectiles:[]};

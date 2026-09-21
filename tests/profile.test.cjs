@@ -11,7 +11,7 @@ test('live diamond forecast equals settlement without writing the profile',()=>{
 function setup(value){
   const storage=new Map();if(value!==undefined)storage.set('hex-bastion-profile-v1',value);
   const context={localStorage:{getItem:key=>storage.get(key)||null,setItem:(key,item)=>storage.set(key,String(item))}};
-  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../profile.js'),'utf8')+';globalThis.profile=HexProfile;',context);
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../classes/profile.js'),'utf8')+';globalThis.profile=HexProfile;',context);
   const definitions={archer:{},catapult:{},chain:{},freeze:{},mine:{},necro:{},ballista:{},flame:{}};
   return {profile:context.profile,definitions,storage};
 }

@@ -24,7 +24,6 @@ Türme sind nicht im Deck. Das Deck besteht nur aus Karten für die Karte selbst
 Voraussetzung: [Node.js](https://nodejs.org) (getestet mit v22).
 
 ```bash
-cd towerdefense-v0.1
 npm install
 npm start
 ```
@@ -70,35 +69,28 @@ Ohne WebGL fällt das Spiel automatisch auf die SVG-Ansicht zurück. Bricht die 
 - **Exploration** mit Sichtradius, Nebel und seedbasierten Sonderfeldern. Der Startwert (Seed) wiederholt einen Run.
 - **Sounds** werden lokal mit WebAudio erzeugt.
 
-Die vollständigen, mit dem Code abgeglichenen Regeln, Werte und Tabellen stehen in [towerdefense-v0.1/README.md](towerdefense-v0.1/README.md).
+Die vollständigen, mit dem Code abgeglichenen Regeln, Werte und Tabellen stehen in [docs/GAME_REFERENCE.md](docs/GAME_REFERENCE.md).
 
 ## Projektstruktur
 
 ```
-towerdefense-v0.1/
+Philetstuben_Defense/
 ├── index.html, style.css     Oberfläche
-├── game.js                   Runsteuerung, Aktionen, HUD
-├── data.js, waves.js         Karten, Türme, Upgrades, Wave- und Economy-Werte
-├── map.js, exploration.js    Hexgeometrie, Straßen, Wege, Sicht und Sonderfelder
-├── combat.js, deck.js,       Kampf, Deck und Gebäude (ohne DOM)
-│   buildings.js, random.js
-├── svg-renderer.js           SVG-Darstellung
-├── three-renderer.js         3D-Darstellung (Three.js)
-├── model-map.js              Zuordnung Spielzustand → 3D-Modell
-├── camera.js, sound.js       Kamera und Audio
+├── classes/                  Spiellogik, Renderer, Kamera, Audio, API
 ├── assets/                   glTF-Modelle: tiles/, towers/, landmarks/, enemies/,
 │                             buildings/, effects/
+├── docs/                     Architektur, Regeln, Specs, Changelog, Projektprotokolle
+├── ai/                       Projektgedächtnis und KI-Arbeitsnotizen
 ├── viewer.html               Modell-Galerie
 ├── serve.cjs                 Lokaler Entwicklungsserver
 └── tests/                    Automatisierte Tests
 ```
 
-Spiellogik und Daten sind bewusst von der Darstellung getrennt. SVG- und 3D-Renderer benutzen dieselbe Schnittstelle, die Logik blieb beim Wechsel unverändert. Details: [ARCHITECTURE.md](towerdefense-v0.1/ARCHITECTURE.md).
+Spiellogik und Daten sind bewusst von der Darstellung getrennt. SVG- und 3D-Renderer benutzen dieselbe Schnittstelle, die Logik blieb beim Wechsel unverändert. Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Tests
 
 ```bash
-cd towerdefense-v0.1
 node --test tests/*.test.cjs
 ```
 
@@ -106,7 +98,7 @@ Zuletzt 149 Tests bestanden (20.09.2026). Sie prüfen Spiellogik, Kampf (inklusi
 
 ## Eigene Modelle
 
-Alle 3D-Modelle sind von Hand gebaut. Maße, Ursprung, Kantennummerierung, Turmplätze und benannte Objekte (`turret`, `arm`, `aura`) beschreibt [ASSET_SPEC.md](towerdefense-v0.1/ASSET_SPEC.md). Die Vorgaben für Minenleger, Balliste, Flammenturm, die fünf Gegner und die Gebäude stehen in [ASSET_SPEC_v2.md](towerdefense-v0.1/ASSET_SPEC_v2.md). Neue Modelle als `.glb` in den passenden Ordner unter `assets/` legen.
+Alle 3D-Modelle sind von Hand gebaut. Maße, Ursprung, Kantennummerierung, Turmplätze und benannte Objekte (`turret`, `arm`, `aura`) beschreibt [docs/ASSET_SPEC.md](docs/ASSET_SPEC.md). Die Vorgaben für Minenleger, Balliste, Flammenturm, die fünf Gegner und die Gebäude stehen in [docs/ASSET_SPEC_v2.md](docs/ASSET_SPEC_v2.md). Neue Modelle als `.glb` in den passenden Ordner unter `assets/` legen.
 
 Vorhanden sind Tiles, Sonderfelder, alle sieben Türme, alle fünf Gegner, die drei Gebäude und die Straßenmine. Noch fehlend: die Upgrade-Varianten der Türme. Fehlende Modelle ersetzt das Spiel durch einfache Platzhalter.
 
@@ -120,7 +112,7 @@ Fest vorgemerkt, noch nicht umgesetzt:
 - Weitere Schwierigkeitsstufen und ein Hardcore-Modus; Stufe 2 mit zwei zufälligen Base-Ausgängen und zwei Startplatzierungen ist umgesetzt
 - Laufende Runs speichern/laden sowie Profil exportieren/importieren
 
-Die Ideen und Entscheidungen dazu stehen in [BRAIN.md](BRAIN.md), die ausführliche Konzeptgeschichte im [Übergabeprotokoll](README_TowerDefense_Projekt.md).
+Die Ideen und Entscheidungen dazu stehen in [ai/BRAIN.md](ai/BRAIN.md), die ausführliche Konzeptgeschichte im [Übergabeprotokoll](docs/README_TowerDefense_Projekt.md).
 
 ## Technik
 
@@ -128,11 +120,11 @@ Vanilla JavaScript ohne Build-Schritt, [Three.js](https://threejs.org) für die 
 
 ## Deployment
 
-Unter [towerdefense-v0.1/webhook.php](towerdefense-v0.1/webhook.php) liegt ein GitHub-Webhook-Endpunkt für Tag-Deployments.
+Unter [webhook.php](webhook.php) liegt ein GitHub-Webhook-Endpunkt für Tag-Deployments.
 
 - Der Endpunkt verarbeitet nur `push` auf `refs/tags/*`. Branch-Pushes, Tag-Deletes, `create` und Releases werden ignoriert.
 - Deployments laufen nur, wenn GitHub den Auslöser als `Autophil317` sendet (Groß-/Kleinschreibung wird ignoriert).
-- Das Deployment holt die Tags von `origin`, checkt den ausgelösten Tag per `git checkout --force --detach <tag>` aus, führt in `towerdefense-v0.1/` ein `npm ci --omit=dev` aus und schreibt `assets/index.json` für nginx. `npm start` bleibt nur der lokale Entwicklungsserver.
+- Das Deployment holt die Tags von `origin`, checkt den ausgelösten Tag per `git checkout --force --detach <tag>` aus, führt im Repo-Root ein `npm ci --omit=dev` aus und schreibt `assets/index.json` für nginx. `npm start` bleibt nur der lokale Entwicklungsserver.
 - Das Secret kommt entweder aus der Umgebungsvariable `AUTOHEXTD_WEBHOOK_SECRET` oder aus der Datei `.deploy-webhook-secret` im Repo-Root `Philetstuben_Defense/`.
 - Der Webhook bricht absichtlich ab, wenn das Checkout lokale getrackte Änderungen hat oder wenn der PHP-User keine Schreibrechte auf Repo und App-Verzeichnis besitzt.
 

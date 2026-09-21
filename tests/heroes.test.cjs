@@ -1,7 +1,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const {load}=require('./helpers/game.cjs');
-function rules(){const c={};for(const file of ['heroes.js','data.js','waves.js','combat.js'])vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../'+file),'utf8'),c);return vm.runInNewContext('({heroes:HexHeroes,combat:HexCombat,data:HexData})',c);}
+function rules(){const c={};for(const file of ['heroes.js','data.js','waves.js','combat.js'])vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../classes',file),'utf8'),c);return vm.runInNewContext('({heroes:HexHeroes,combat:HexCombat,data:HexData})',c);}
 test('heroes initialize independent runs and invalid profiles fall back to standard',()=>{
   const {heroes}=rules();for(const [id,hp,gold,income] of [['standard',20,70,0],['builder',20,55,0],['merchant',15,90,2]]){
     const state={};heroes.initialize(state,id);assert.equal(state.hp,hp);assert.equal(state.maxHp,hp);assert.equal(state.gold,gold);assert.equal(state.income,income);assert.equal(heroes.weapon(state),null);

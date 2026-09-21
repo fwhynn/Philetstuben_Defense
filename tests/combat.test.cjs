@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 function setup(){
   const context={};
-  for(const file of ['data.js','waves.js','combat.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../'+file),'utf8'),context);
+  for(const file of ['data.js','waves.js','combat.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../classes',file),'utf8'),context);
   vm.runInNewContext('globalThis.step=HexCombat.step;globalThis.towers=HexData.TOWERS;',context);
   const state={mineRandom:()=>0,hp:20,gold:0,goldEarned:{kills:0},waveKills:0,enemies:[],projectiles:[]};
   return {state,step:context.step,towers:context.towers};
@@ -167,7 +167,7 @@ test('caravan carriers pay once on kill and lose gold without going negative on 
 
 test('random mines are uniform along road length, clipped to range and independent of segmentation',()=>{
   const c={HexMap:{roadGeometry:tile=>({legs:new Map([[0,tile.points]])})}};
-  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../combat.js'),'utf8').replace('return {step,durability','return {randomMinePoint,step,durability')+';globalThis.pick=HexCombat.randomMinePoint;',c);
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../classes/combat.js'),'utf8').replace('return {step,durability','return {randomMinePoint,step,durability')+';globalThis.pick=HexCombat.randomMinePoint;',c);
   for(const roll of [0,.1,.3,.9,.999]){const pick=points=>c.pick({mineRandom:()=>roll,map:new Map([['0,0',{points}]])},{pos:{x:0,y:0}},80);const a=pick([{x:-120,y:0},{x:120,y:0}]),b=pick(Array.from({length:121},(_,i)=>({x:-120+i*2,y:0})));assert.ok(Math.abs(a.x-b.x)<1e-8);assert.ok(Math.abs(a.x)<=80);assert.ok(Math.abs(a.x-(-80+160*roll))<1e-8);}
 });
 test('stacked mines all detonate together even if the first explosion kills the triggering enemy',()=>{

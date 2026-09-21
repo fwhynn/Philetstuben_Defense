@@ -2,14 +2,14 @@ const {test}=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 
 test('procedural rescue roads face upwards on every possible edge combination',()=>{
-  const source=fs.readFileSync(path.join(__dirname,'../three-renderer.js'),'utf8');
+  const source=fs.readFileSync(path.join(__dirname,'../classes/three-renderer.js'),'utf8');
   // Exercise the actual mesh builder without WebGL or a browser.
   const context={THREE:{
     BufferGeometry:class{setAttribute(name,value){this[name]=value;}setIndex(value){this.indices=value;}computeVertexNormals(){}},
     Float32BufferAttribute:class{constructor(values){this.array=values;}},
     Mesh:class{constructor(geometry){this.geometry=geometry;}}
   }};
-  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../map.js'),'utf8'),context);
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../classes/map.js'),'utf8'),context);
   vm.runInNewContext(source.slice(source.indexOf('  function ribbon('),source.indexOf('  function tileSpec('))+';globalThis.build=ribbon;globalThis.map=HexMap;',context);
   for(let mask=1;mask<64;mask++){
     const roads=Array.from({length:6},(_,i)=>i).filter(i=>mask&(1<<i));

@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
-function load(){const context={};for(const file of ['map.js','camera.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../'+file),'utf8'),context);vm.runInNewContext('globalThis.map=HexMap;globalThis.camera=HexCamera;globalThis.svgCamera=HexSvgCamera;',context);return context;}
+function load(){const context={};for(const file of ['map.js','camera.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../classes',file),'utf8'),context);vm.runInNewContext('globalThis.map=HexMap;globalThis.camera=HexCamera;globalThis.svgCamera=HexSvgCamera;',context);return context;}
 test('world origin is independent of camera and routes use world positions',()=>{
   const {map,camera}=load(),origin=map.axialToWorld(0,0);assert.equal(origin.x,0);assert.equal(origin.y,0);
   const tiles=new Map([['0,0',{q:0,r:0,type:'base',roads:[0]}],['1,0',{q:1,r:0,type:'straight',roads:[0,3]}]]),routes=map.routeGraph(tiles),before=JSON.stringify([...routes.geometry]);

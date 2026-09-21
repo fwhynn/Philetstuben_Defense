@@ -134,7 +134,7 @@ test('same run seed reproduces the hand, draw pile and card rewards after restar
 });
 
 test('seeded random generator reproduces a long sequence in the interval [0,1)',()=>{
-  const context={};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../random.js'),'utf8')+';globalThis.create=HexRandom.create;',context);
+  const context={};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../classes/random.js'),'utf8')+';globalThis.create=HexRandom.create;',context);
   const first=context.create('seed'),second=context.create('seed'),other=context.create('other');
   let different=false;
   for(let i=0;i<1000;i++){
@@ -188,7 +188,7 @@ test('every run has exactly five tower choices and rejects towers outside its lo
 });
 
 test('forecast uses the same wave and gold rules as actual spawning and completion',()=>{
-  const context={};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../waves.js'),'utf8')+';globalThis.plan=HexWaves.plan;',context);
+  const context={};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../classes/waves.js'),'utf8')+';globalThis.plan=HexWaves.plan;',context);
   const first=context.plan(1,4);assert.equal(first.count,5);assert.equal(first.hp,35);assert.equal(first.killGold,15);assert.equal(first.maxGold,29);
   const late=context.plan(100,0);assert.equal(late.count,205);assert.equal(late.maxGold,625);
   const {a,elements}=load();a.state.income=4;a.state.wave=1;a.state.phase='wave';a.state.waveRunning=true;a.state.pendingSpawns=0;
@@ -208,7 +208,7 @@ test('real road branches include longer valid detours without allowing loops',()
 });
 
 test('all road geometries meet exact edges and the long road really increases travel distance',()=>{
-  const context={};for(const file of ['map.js','data.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../'+file),'utf8'),context);
+  const context={};for(const file of ['map.js','data.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../classes',file),'utf8'),context);
   vm.runInNewContext('globalThis.map=HexMap;globalThis.cards=HexData.CARD_LIBRARY;',context);
   const m=context.map,c=m.axialToPixel(0,0);
   for(const card of Object.values(context.cards)) for(let rotation=0;rotation<6;rotation++){
@@ -220,7 +220,7 @@ test('all road geometries meet exact edges and the long road really increases tr
 });
 
 test('wave profiles are predictable and introduce swarm and armor gradually',()=>{
-  const context={};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../waves.js'),'utf8')+';globalThis.plan=HexWaves.plan;',context);
+  const context={};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../classes/waves.js'),'utf8')+';globalThis.plan=HexWaves.plan;',context);
   assert.ok(context.plan(1).enemies.every(e=>e.type==='normal'));
   assert.ok(context.plan(3).enemies.some(e=>e.type==='swarm'));assert.ok(!context.plan(3).enemies.some(e=>e.armor));
   const fourth=context.plan(4);assert.equal(fourth.enemies.length,fourth.count);assert.ok(fourth.enemies.some(e=>e.armorHp>0));assert.equal(fourth.maxGold,fourth.count*3+10);
@@ -266,7 +266,7 @@ test('fourth tower stage is blocked by meta progression and costs run gold after
 });
 
 test('towers offer two branches (three elements) and each branch exactly one final upgrade',()=>{
-  const context={};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../data.js'),'utf8')+';globalThis.data=HexData;',context);
+  const context={};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../classes/data.js'),'utf8')+';globalThis.data=HexData;',context);
   const data=context.data;
   for(const type of Object.keys(data.TOWERS)){
     assert.ok(data.ULTIMATES[type]);assert.ok(data.ULTIMATES[type].cost>0);
@@ -393,7 +393,7 @@ test('selling a fully upgraded older tower refunds half of all investment',()=>{
   sellSelectedTower();assert.equal(a.state.gold,140);assert.equal(tile.towers[0],null);a.state.selectedTower={q:1,r:0,index:0};sellSelectedTower();assert.equal(a.state.gold,140);
 });
 test('sale uses discounted investment, rounds down and stays available in other live phases',()=>{
-  const context={};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../data.js'),'utf8')+';globalThis.refund=HexData.towerRefund;',context);
+  const context={};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../classes/data.js'),'utf8')+';globalThis.refund=HexData.towerRefund;',context);
   const tower={paid:103,builtOnWave:0};for(const phase of ['place','wave','reward','removal','shrineReward','bossReward']) assert.equal(context.refund({hp:20,phase,wave:0,waveRunning:phase==='wave'},tower).amount,51);
   assert.equal(context.refund({hp:20,phase:'build',wave:0,waveRunning:false},tower).amount,103);assert.equal(context.refund({hp:0,phase:'gameover',wave:0},tower),null);
 });
@@ -410,7 +410,7 @@ test('prefab chain connections process multiple shrines before auto-starting the
 
 
 test('curve tiles route enemies along the road of the 3D model, in every rotation',()=>{
-  const context={};for(const file of ['map.js','data.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../'+file),'utf8'),context);
+  const context={};for(const file of ['map.js','data.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../classes',file),'utf8'),context);
   vm.runInNewContext('globalThis.map=HexMap;globalThis.cards=HexData.CARD_LIBRARY;',context);
   const m=context.map,c=m.axialToPixel(0,0);
   // Die Mittellinie der Kurve läuft durch (5,-10) relativ zur Hexmitte (Rotation 0), nicht durch die Hexmitte oder die andere Seite.
