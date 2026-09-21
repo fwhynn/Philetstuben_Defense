@@ -8,28 +8,28 @@ Vanilla JavaScript, HTML und CSS ohne Build-Schritt. Node.js betreibt den lokale
 
 ## Verantwortlichkeiten
 
-| Datei | Aufgabe |
-|---|---|
-| data.js | Karten, sieben Türme, Upgradezweige, Stufe 4 und Wertberechnung |
-| map.js | Axiale Hexkoordinaten, Platzierung, gemeinsame Straßen- und Slotgeometrie, Routengraph |
-| random.js | Seedbasierte Zufallsströme mit versioniertem Snapshot/Restore |
-| run-runtime.js | DOM-freie Run-Factory, Spawn-Aufträge, Wege und laufende Kampf-Simulation; vom Solo-Controller verwendet |
-| waves.js | Gegnerzusammensetzung, reguläre Bosswellen, Wave- und Goldwerte |
-| combat.js | Bewegung, Zielprioritäten, Schaden, Slow, Minen und Kampfereignisse ohne DOM |
-| rewards.js | Heilung/Vorräte, kostenlose Loadout-Turmupgrades und alternative Boss-Runsegen |
-| deck.js | Ziehen und Ablegen |
-| buildings.js | Gebäude, Kosten, Buffs und Wirkungsbereich für Hervorhebungen |
-| exploration.js | Sichtregion, seedbasierte Eventfelder, Anschluss und Erkundungsboss-/Shrine-Regeln |
-| ui-layout.js | DOM-freie Berechnung freier Menüflächen zwischen festen Bedienelementen |
-| tutorial.js | Aktionsbasierte Tutorialschritte; Speicherung und Oberfläche im Controller |
-| heroes.js | Drei Startprofile, Initialisierung des Runs, Base-Upgrades und Waffenwerte ohne DOM |
-| profile.js | Browserprofil, Freischaltungen, Loadouts/Presets, Statistiken und Diamantenabrechnung/-prognose |
-| game.js | Runsteuerung, Aktionen, Eingaben und HUD; noch nicht vollständig voneinander getrennt |
-| svg-renderer.js | SVG-Karte, Vorschauen, Klickflächen, Reichweiten und Hex-Markierungen |
-| three-renderer.js | Three.js-Szene, GLB-Modelle, Kamera, Raycast-Picking, Animationen, Qualität und Overlays |
-| model-map.js | Rendererunabhängige Modellzuordnung und Rotation |
-| camera.js | DOM-freies Pan-/Zoommodell und SVG-Eingabe-/Projektionsadapter |
-| sound.js | Lokal erzeugte WebAudio-Effekte |
+| Datei             | Aufgabe                                                                                                  |
+| ----------------- | -------------------------------------------------------------------------------------------------------- |
+| data.js           | Karten, sieben Türme, Upgradezweige, Stufe 4 und Wertberechnung                                          |
+| map.js            | Axiale Hexkoordinaten, Platzierung, gemeinsame Straßen- und Slotgeometrie, Routengraph                   |
+| random.js         | Seedbasierte Zufallsströme mit versioniertem Snapshot/Restore                                            |
+| run-runtime.js    | DOM-freie Run-Factory, Spawn-Aufträge, Wege und laufende Kampf-Simulation; vom Solo-Controller verwendet |
+| waves.js          | Gegnerzusammensetzung, reguläre Bosswellen, Wave- und Goldwerte                                          |
+| combat.js         | Bewegung, Zielprioritäten, Schaden, Slow, Minen und Kampfereignisse ohne DOM                             |
+| rewards.js        | Heilung/Vorräte, kostenlose Loadout-Turmupgrades und alternative Boss-Runsegen                           |
+| deck.js           | Ziehen und Ablegen                                                                                       |
+| buildings.js      | Gebäude, Kosten, Buffs und Wirkungsbereich für Hervorhebungen                                            |
+| exploration.js    | Sichtregion, seedbasierte Eventfelder, Anschluss und Erkundungsboss-/Shrine-Regeln                       |
+| ui-layout.js      | DOM-freie Berechnung freier Menüflächen zwischen festen Bedienelementen                                  |
+| tutorial.js       | Aktionsbasierte Tutorialschritte; Speicherung und Oberfläche im Controller                               |
+| heroes.js         | Drei Startprofile, Initialisierung des Runs, Base-Upgrades und Waffenwerte ohne DOM                      |
+| profile.js        | Browserprofil, Freischaltungen, Loadouts/Presets, Statistiken und Diamantenabrechnung/-prognose          |
+| game.js           | Runsteuerung, Aktionen, Eingaben und HUD; noch nicht vollständig voneinander getrennt                    |
+| svg-renderer.js   | SVG-Karte, Vorschauen, Klickflächen, Reichweiten und Hex-Markierungen                                    |
+| three-renderer.js | Three.js-Szene, GLB-Modelle, Kamera, Raycast-Picking, Animationen, Qualität und Overlays                 |
+| model-map.js      | Rendererunabhängige Modellzuordnung und Rotation                                                         |
+| camera.js         | DOM-freies Pan-/Zoommodell und SVG-Eingabe-/Projektionsadapter                                           |
+| sound.js          | Lokal erzeugte WebAudio-Effekte                                                                          |
 
 ## Weltgeometrie und Routing
 
@@ -64,7 +64,6 @@ Zuletzt 249 automatisierte Tests bestanden (21.09.2026). Sie prüfen Regeln, Con
 ## Offene technische Arbeit
 
 Für den gewählten Duo-Modus gilt der [Multiplayer-Umsetzungsplan vom 21.09.2026](MULTIPLAYER_PLAN.md). Die darin beschriebene Online-Architektur ist ein Zielbild, noch kein vorhandener Server: zuerst Runsteuerung/Simulation vom DOM trennen und versioniert speichern, dann zwei Maps lokal verbinden, danach Netzwerk, Lobby und Wiederaufnahme.
-
 
 - Runsteuerung und HUD weiter trennen.
 - Laufende Runs versioniert speichern und laden, einschließlich Zufallszustand und ausstehender Entscheidungen.
