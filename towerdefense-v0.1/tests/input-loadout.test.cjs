@@ -178,3 +178,15 @@ test('quick icons reflect affordable free slots, local discounts and live gold c
   tile.towers[0]={type:'archer',level:1};a.renderAll();assert.equal(button.disabled,true);assert.match(button.title,/Kein freier/);
   tile.towers[0]=null;tile.buildings=[];a.renderAll();assert.equal(button.disabled,true);a.state.gold=25;a.renderAll();assert.equal(button.disabled,false);
 });
+
+test('drag draws visible free-slot targets and dropping on their projected centers builds there',()=>{
+  const box={left:37,top:53,width:1000,height:700};let pan=0;
+  const {a,elements,documentListeners,slotPositions}=load({boardBox:box,project:p=>({x:p.x+300+pan,y:p.y+250,width:box.width,height:box.height})});
+  a.state.phase='build';a.state.gold=200;a.state.showSlotHints=false;
+  const tile={q:1,r:0,type:'cross',roads:[0,1,3,4],slots:2,towers:[null,{type:'archer',level:1}]};a.state.map.set('1,0',tile);a.renderAll();
+  const button=elements.get('quickLoadout').children[0];button.listeners.pointerdown({button:0,pointerId:9,clientX:10,clientY:100,preventDefault(){},stopPropagation(){}});
+  const shade=elements.get('towerDragShade');assert.equal(shade.classList.contains('hidden'),false);assert.match(shade.innerHTML,/class="dragBuildTarget" data-slot="1,0,0"/);assert.doesNotMatch(shade.innerHTML,/data-slot="1,0,1"/);assert.equal(shade.style.left,'37px');
+  pan=80;a.rendererCommands.viewChanged();const point=slotPositions(tile)[0],x=point.x+300+pan,y=point.y+250;assert.ok(shade.innerHTML.includes('left:'+x+'px;top:'+y+'px'));
+  documentListeners.pointermove({pointerId:9,clientX:box.left+x,clientY:box.top+y});assert.equal(a.state.dragSlot.index,0);assert.match(shade.innerHTML,/dragBuildTarget active/);
+  documentListeners.pointerup({pointerId:9,clientX:box.left+x,clientY:box.top+y});assert.equal(tile.towers[0].type,'archer');assert.equal(a.state.gold,175);assert.equal(shade.classList.contains('hidden'),true);
+});

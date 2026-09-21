@@ -103,3 +103,5 @@ Bei neuen Entscheidungen diesen Stand aktualisieren; offene Ideen nicht als impl
 - Biomnamen nicht mehr auf jedem Hex: rechte Icon-Leiste für auf gelegten Tiles entdeckte Biome. Hover/Fokus zeigt Effekte und hebt zugehörige gelegte Tiles hervor; Klick/Tippen fixiert oder löst die Anzeige. Neuer Run setzt Entdeckungen und Fixierung zurück.
 
 - Schnellbau-Icons sperren/ergrauen bei fehlendem Gold oder fehlenden freien Turmplätzen. Günstigster Preis eines freien Platzes berücksichtigt Marktrabatte (Anzeige „ab“). Drag-Zielkreise und Trefferprüfung verwenden gemeinsam projizierte Bodenmittelpunkte und 20 px Radius; bei Überlappung zählt der nächste Mittelpunkt, außerhalb des Boards kein Treffer.
+
+- Drag-Bauplätze als eigenständige HTML-Zielmarker über der Map (Plus für bezahlbar, Kreuz für zu teuer), getrennt von der SVG-Abdunklung. Sichtbarkeit unabhängig von Slot-Hinweisen; Kameraänderungen aktualisieren die Zielpositionen sofort. Regressionstest deckt Anzeige, belegte Plätze, Board-Versatz, Kameraverschiebung und erfolgreichen Drop ab.

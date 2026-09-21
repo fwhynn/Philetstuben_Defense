@@ -7,7 +7,7 @@
     selectBase(){state.selectedBase=true;state.selectedTower=null;state.selectedSlot=null;state.selectedBuilding=null;document.getElementById('baseDropdown').open=true;renderAll();},
     hoverBuilding(slot){state.hoverBuilding=slot;renderBoard();},
     rotatePlacement(){return rotateSelected(-1);},
-    viewChanged:positionTowerPanel,
+    viewChanged(){positionTowerPanel();if(state?.dragTower)renderDragShade();},
     hoverPlacement(id){state.hoveredPlacement=id;},
     leavePlacement(id){if(state.hoveredPlacement===id) state.hoveredPlacement=null;},
     selectBuilding(q,r,index){closeBasePanel();state.selectedBuilding={q,r,index};state.selectedSlot=null;state.selectedTower=null;renderAll();},
@@ -790,10 +790,18 @@ R dreht die Karte, dann Feld anklicken.`;}
   function renderDragShade(){
     const shade=document.getElementById('towerDragShade');shade.classList.toggle('hidden',!state.dragTower);if(!state.dragTower)return;
     const slots=screenSlots(),box=document.querySelector?.('.boardWrap')?.getBoundingClientRect();if(!box)return;
-    shade.style.left=box.left+'px';shade.style.top=box.top+'px';shade.style.width=box.width+'px';shade.style.height=box.height+'px';shade.setAttribute('viewBox','0 0 '+box.width+' '+box.height);
-    const circles=slots.map(s=>'<circle cx="'+s.x+'" cy="'+s.y+'" r="'+HexUiLayout.dropRadius+'" fill="black"/>').join('');
-    shade.innerHTML='<defs><mask id="freeSlotMask"><rect width="100%" height="100%" fill="white"/>'+circles+'</mask></defs><rect width="100%" height="100%" fill="#202b30" fill-opacity=".42" mask="url(#freeSlotMask)"/>'+slots.map(s=>{const active=state.dragSlot&&s.q===state.dragSlot.q&&s.r===state.dragSlot.r&&s.index===state.dragSlot.index,price=HexBuildings.cost(state,s,TOWERS[state.dragTower].cost);return '<circle cx="'+s.x+'" cy="'+s.y+'" r="'+HexUiLayout.dropRadius+'" fill="none" stroke="'+(state.gold<price?'#ed997a':active?'#9df3bd':'#ffffff')+'" stroke-width="'+(active?4:2)+'"/>';}).join('');
+    shade.style.left=box.left+'px';shade.style.top=box.top+'px';shade.style.width=box.width+'px';shade.style.height=box.height+'px';
+    // Keep the targets as HTML overlays: their visibility does not depend on SVG masks,
+    // GPU depth, optional slot hints or the terrain render pass.
+    const radius=HexUiLayout.dropRadius;
+    const circles=slots.map(s=>'<circle cx="'+s.x+'" cy="'+s.y+'" r="'+radius+'" fill="black"/>').join('');
+    const mask='<svg class="dragMapVeil" viewBox="0 0 '+box.width+' '+box.height+'" preserveAspectRatio="none"><defs><mask id="freeSlotMask" maskUnits="userSpaceOnUse" x="0" y="0" width="'+box.width+'" height="'+box.height+'"><rect width="100%" height="100%" fill="white"/>'+circles+'</mask></defs><rect width="100%" height="100%" fill="#202b30" fill-opacity=".42" mask="url(#freeSlotMask)"/></svg>';
+    shade.innerHTML=mask+slots.map(s=>{
+      const active=state.dragSlot&&s.q===state.dragSlot.q&&s.r===state.dragSlot.r&&s.index===state.dragSlot.index,price=HexBuildings.cost(state,s,TOWERS[state.dragTower].cost),affordable=state.gold>=price;
+      return '<span class="dragBuildTarget'+(active?' active':'')+(affordable?'':' unaffordable')+'" data-slot="'+s.q+','+s.r+','+s.index+'" style="left:'+s.x+'px;top:'+s.y+'px;width:'+radius*2+'px;height:'+radius*2+'px"><span>'+(affordable?'+':'×')+'</span></span>';
+    }).join('');
   }
+
   function showBiomeHighlight(id){state.highlightBiome=id;renderBoard();}
   function renderQuickControls(){
     if(state.dragTower&&!canQuickBuild())cancelQuickTower();
