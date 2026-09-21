@@ -15,7 +15,6 @@ const releaseServerOnly = args.includes('--server');
 const releaseClientOnly = args.includes('--client');
 const positionalArgs = args.filter(arg => !arg.startsWith('--'));
 const unknownFlags = args.filter(arg => arg.startsWith('--') && !['--all', '--server', '--client'].includes(arg));
-const bumpInput = 'minor';
 const packageJsonGitPath = path.relative(repo, packageJsonPath);
 const packageLockGitPath = path.relative(repo, packageLockPath);
 
@@ -27,7 +26,7 @@ if (releaseServerOnly && releaseClientOnly) {
 const releaseMode = releaseServerOnly ? 'server' : 'client';
 
 if (positionalArgs.length || unknownFlags.length) {
-  console.error('This script always creates a minor release. Use `npm run tag`, `npm run tag -- --all`, or `npm run tag -- --server`.');
+  console.error('This script always increments the version with digit carry. Use `npm run tag`, `npm run tag -- --all`, or `npm run tag -- --server`.');
   process.exit(1);
 }
 
@@ -73,9 +72,25 @@ function parseSemver(tag) {
   };
 }
 
-function bumpMinorTag(tag) {
-  const parsed = parseSemver(tag || 'v0.0.0') || { major: 0, minor: 0, patch: 0 };
-  return `v${parsed.major}.${parsed.minor + 1}.0`;
+function bumpDigitCarryVersion(version) {
+  const parsed = parseSemver(version || '0.0.0') || { major: 0, minor: 0, patch: 0 };
+  let { major, minor, patch } = parsed;
+
+  patch += 1;
+  if (patch >= 10) {
+    patch = 0;
+    minor += 1;
+  }
+  if (minor >= 10) {
+    minor = 0;
+    major += 1;
+  }
+
+  return `${major}.${minor}.${patch}`;
+}
+
+function bumpDigitCarryTag(tag) {
+  return `v${bumpDigitCarryVersion(tag || '0.0.0')}`;
 }
 
 function isGitRepo(cwd) {
@@ -184,7 +199,8 @@ async function main() {
 
   if (releaseMode === 'client') {
     const previousVersion = readVersion();
-    npm(['version', bumpInput, '--no-git-tag-version'], { stdio: 'inherit' });
+    const nextVersion = bumpDigitCarryVersion(previousVersion);
+    npm(['version', nextVersion, '--no-git-tag-version'], { stdio: 'inherit' });
 
     const version = readVersion();
     const tag = `v${version}`;
@@ -219,7 +235,7 @@ async function main() {
     return;
   }
 
-  const apiTag = bumpMinorTag(latestTag(apiRepo));
+  const apiTag = bumpDigitCarryTag(latestTag(apiRepo));
   if (tagExists(apiRepo, apiTag)) {
     console.error(`Tag ${apiTag} already exists in the API repo.`);
     process.exit(1);
