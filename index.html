@@ -70,7 +70,8 @@
         <div class="hudStat">❤️ <strong id="hp">20/20</strong></div>
         <details class="statDetails">
           <summary aria-label="Goldplanung öffnen">🪙 <strong id="gold">70</strong> <span id="bonusIncome">(+0)</span>
-            <span class="dropdownArrow" aria-hidden="true">▾</span></summary>
+            <span class="dropdownArrow" aria-hidden="true">▾</span>
+          </summary>
           <div class="statPopup">
             <h2>Goldplanung</h2>
             <p id="goldForecast" class="hint"></p>
@@ -455,6 +456,19 @@
           .then(response => response.ok ? response.json() : null)
           .then(pkg => applyVersion(pkg && pkg.version))
           .catch(() => { });
+      })();
+    </script>
+    <script src="classes/api.js"></script>
+    <script>
+      (() => {
+        if (!globalThis.HexApi || typeof globalThis.HexApi.getUserById !== 'function') return;
+        globalThis.HexApi.getUserById(0)
+          .then((payload) => {
+            console.info('Autohex TD API test user loaded:', payload);
+          })
+          .catch((error) => {
+            console.warn('Autohex TD API test user request failed:', error);
+          });
       })();
     </script>
     <script src="classes/sound.js"></script>
