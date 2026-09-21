@@ -3,7 +3,8 @@ const HexWaves=(()=>{
   function bossProfile(wave){
     if(wave<15||(wave-15)%10!==0) return null;
     const hp=Math.round(1200*Math.pow((wave-5)/10,1.8));
-    return {type:'boss',name:'Belagerungswächter',hp,armorHp:Math.round(hp*.25),magicHp:Math.round(hp*.2),speed:28,minSpeedFactor:.6,baseDamage:5,killGold:50};
+    const variants=[{bossKind:'iron',name:'Eisenkoloss',description:'Schwerer Belagerer: viel Rüstung, langsam, 7 Base-Schaden.',armor:.6,magic:.1,speed:23,baseDamage:7},{bossKind:'hunter',name:'Sturmjäger',description:'Schneller Boss: widersteht Verlangsamung, wenig Rüstung.',armor:.1,magic:.2,speed:48,minSpeedFactor:.8},{bossKind:'summoner',name:'Seelenmatriarchin',description:'Hohe Magieresistenz. Ruft alle 6 Sekunden einen Diener, maximal sechs; Diener geben kein Gold.',armor:.15,magic:.7,speed:26,summonInterval:6000,summonLimit:6}];
+    const v=variants[((wave-15)/10)%3];return {type:'boss',hp,minSpeedFactor:.6,baseDamage:5,killGold:50,...v,armorHp:Math.round(hp*v.armor),magicHp:Math.round(hp*v.magic)};
   }
   function plan(wave,income=0,caravan=false){
     // Keep the opening approachable; growing routes/defenses need compounding pressure.

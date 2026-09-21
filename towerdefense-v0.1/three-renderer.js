@@ -48,7 +48,7 @@ function makeTemplate(name,scene,kind){
   const slotNodes=[],padNodes=[];scene.traverse(n=>{if(isSlot(n)) slotNodes.push(n);else if(isPad(n)) padNodes.push(n);});
   const skip=n=>isSlot(n)||isPad(n);
   template.parts=bake(scene,skip);
-  if(name==='tile_rescue'||name==='tile_base'||name==='tile_straight') template.noRoad=bake(scene,n=>skip(n)||n.name==='road');
+  if(name==='tile_rescue'||name==='tile_base'||name==='tile_straight') template.noRoad=bake(scene,n=>skip(n)||n.name==='road'||n.name==='road_verge');
   template.slots=slotNodes.sort((a,b)=>a.name.localeCompare(b.name)).map(n=>({pos:worldPosition(n),parts:bake(n)}));
   template.pad=padNodes[0]?{pos:worldPosition(padNodes[0]),parts:bake(padNodes[0])}:null;
   if(kind==='landmarks'&&name!=='landmark_boss'){                    // Deko separat, damit sie auf jede Straßenform passt
@@ -129,6 +129,7 @@ function create(host0,commands){
   const torus=new THREE.TorusGeometry(1,.09,6,28).rotateX(Math.PI/2),slotDiamondGeometry=new THREE.OctahedronGeometry(5),hintGeometry=new THREE.ConeGeometry(5,11,6),beam=new THREE.CylinderGeometry(1,1,1,6);
   const basic=(color,opacity=1)=>new THREE.MeshBasicMaterial({color,transparent:opacity<1,opacity,depthWrite:opacity>=1});
   const std=(color,extra={})=>new THREE.MeshStandardMaterial({color,roughness:.85,metalness:0,...extra});
+  const buildingPadGeometry=new THREE.CylinderGeometry(12,14,2,6),buildingPadMaterial=std('#526957');
   // ---- Effekt-Pools: alle Strahlen, Spitzen, Blitze und Funken laufen über wenige InstancedMeshes (kaum Draw-Calls) ----
   const additive=()=>new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,depthWrite:false,blending:THREE.AdditiveBlending});
   function makePool(geometry,max,material){
@@ -220,7 +221,8 @@ function create(host0,commands){
       const slot=template.slots[i]||template.slots[0];if(!slot) return;
       const group=new THREE.Group();group.position.set(offset.x/S,slot.pos.y,offset.y/S);addParts(group,slot.parts,ghost,legal);model.add(group);
     });
-    if(buildingSlots&&template.pad){const group=new THREE.Group();group.position.copy(template.pad.pos);addParts(group,template.pad.parts,ghost,legal);model.add(group);}
+    if(HexData.CARD_LIBRARY[tile.type]?.buildingLayout){for(let i=0;i<buildingSlots;i++){const p=buildingPosition(tile,i),pad=new THREE.Mesh(buildingPadGeometry,ghost?ghostMaterial(buildingPadMaterial,legal):buildingPadMaterial);pad.position.set(p.x-c.x,1,p.y-c.y);holder.add(pad);}}
+    else if(buildingSlots&&template.pad){const group=new THREE.Group();group.position.copy(template.pad.pos);addParts(group,template.pad.parts,ghost,legal);model.add(group);}
     if(prop){
       const template2=modelTemplate(prop.name,'landmark');
       if(template2?.props){                            // Hauptobjekt auf Radius .55 in Richtung prop.angle, Kisten behalten ihre Lage relativ dazu (Modell: Hauptobjekt liegt im Süden, +Z)
@@ -318,7 +320,7 @@ function create(host0,commands){
     return obj;
   }
   function buildingObject(tile,index,building){
-    const p=buildingPosition(tile),group=new THREE.Group(),type=building?.type;group.position.set(p.x,0,p.y);
+    const p=buildingPosition(tile,index),group=new THREE.Group(),type=building?.type;group.position.set(p.x,0,p.y);
     const model=building&&templates.get('building_'+type);
     if(model){const g=new THREE.Group();g.scale.setScalar(S);addParts(g,model.parts);group.add(g);}
     else if(building){
@@ -343,7 +345,7 @@ function create(host0,commands){
         if(tower){const obj=towerObject(tile,i,tower);group.add(obj.holder);towers.push(obj);picks.push(obj.pick);}
         else if(slots[i]){const glow=new THREE.Mesh(slotDiamondGeometry,mats.slot);glow.material.depthTest=false;glow.material.depthWrite=false;glow.material.transparent=true;glow.renderOrder=50;glow.position.set(slots[i].x,22,slots[i].y);group.add(glow);slotHints.push(glow);const pick=new THREE.Mesh(slotPick,invisible);pick.position.set(slots[i].x,0,slots[i].y);pick.userData.pick={kind:'slot',q:tile.q,r:tile.r,index:i};group.add(pick);picks.push(pick);}
       });
-      for(let i=0;i<(tile.buildingSlots||0);i++){const b=buildingObject(tile,i,tile.buildings?.[i]);group.add(b.group);picks.push(b.pick);if(!tile.buildings?.[i]){const p=buildingPosition(tile),gem=new THREE.Mesh(slotDiamondGeometry,mats.buildingSlot);gem.material.depthTest=false;gem.material.depthWrite=false;gem.material.transparent=true;gem.renderOrder=50;gem.position.set(p.x,22,p.y);group.add(gem);slotHints.push(gem);}}
+      for(let i=0;i<(tile.buildingSlots||0);i++){const b=buildingObject(tile,i,tile.buildings?.[i]);group.add(b.group);picks.push(b.pick);if(!tile.buildings?.[i]){const p=buildingPosition(tile,i),gem=new THREE.Mesh(slotDiamondGeometry,mats.buildingSlot);gem.material.depthTest=false;gem.material.depthWrite=false;gem.material.transparent=true;gem.renderOrder=50;gem.position.set(p.x,22,p.y);group.add(gem);slotHints.push(gem);}}
       layer.objects.add(group);objectRecords.set(id,{sig,group,towers,picks,slotHints});pickDirty=true;
     }
     for(const [id,record] of [...objectRecords]) if(!seen.has(id)){layer.objects.remove(record.group);objectRecords.delete(id);pickDirty=true;}
@@ -359,7 +361,7 @@ function create(host0,commands){
     }
   }
   function syncGhost(){
-    const hovered=state.hoveredPlacement,target=targetList.find(t=>key(t.q,t.r)===hovered),card=CARD_LIBRARY[state.hand?.[state.selectedCard]];
+    const hovered=state.hoveredPlacement,target=targetList.find(t=>key(t.q,t.r)===hovered),card=state.hand?.[state.selectedCard]==='rescue'?state.rescueCard:CARD_LIBRARY[state.hand?.[state.selectedCard]];
     const show=target&&card&&state.phase==='place'&&!state.waveRunning;
     const sig=show?[target.q,target.r,card.id,state.rotation,target.legal].join('|'):'';
     if(sig!==ghostSig){
@@ -394,7 +396,7 @@ function create(host0,commands){
       ring.visible=true;ring.position.set(p.x,3,p.y);ring.scale.setScalar(kind==='Tower'?24:18);
     });
     const canHint=['build','wave'].includes(state.phase)&&state.hp>0;
-    for(const record of objectRecords.values()) for(const obj of record.towers) obj.hint.visible=!state.showUpgradeStatus&&canHint&&HexData.availableUpgrades(obj.tower).some(([,u])=>state.gold>=HexBuildings.cost(state,obj.tile,u.cost));
+    for(const record of objectRecords.values()) for(const obj of record.towers) obj.hint.visible=!state.showUpgradeStatus&&canHint&&HexData.runUpgrades(state,obj.tower).some(([,u])=>state.gold>=HexBuildings.cost(state,obj.tile,u.cost));
   }
 
   // ---- Gegner und Geschosse ----
@@ -516,10 +518,14 @@ function create(host0,commands){
     entry.pos.set(x,lift+6,z);return entry;
   }
   function syncLabels(){
+    for(const e of state.enemies)if(e.alive&&e.bossKind)label('boss-name:'+e.id,e.x,e.y,e.name+' · '+({iron:'Rüstung',hunter:'Tempo',summoner:'MR · Beschwörung'})[e.bossKind],'',85);
+    if(state.tunnelOffer&&state.tunnelConfirmed){const p=state.tunnelOffer,[q,r]=p.source.split(',').map(Number);for(const [name,t] of [['Eingang',{q,r}],['Ausgang',p]]){const c=axialToWorld(t.q,t.r);label('tunnel-preview:'+name,c.x,c.y,'Tunnel '+name+' · Vorschau','',30);}}
+
     for(const e of state.enemies)if(e.alive&&e.caravan)label('caravan:'+e.id,e.x,e.y,'◆ Kasse +15 / −10','',55);
     for(const tile of state.map.values()){
       const c=axialToWorld(tile.q,tile.r),terrain=CARD_LIBRARY[tile.type],id=key(tile.q,tile.r);
       if(state.showUpgradeStatus)(tile.towers||[]).forEach((tower,i)=>{if(tower&&HexData.upgradeStatus(state,tower)){const p=slotPositions(tile)[i];label('upgrade:'+id+':'+i,p.x,p.y,HexData.upgradeStatus(state,tower),'big',72);}});
+      if(tile.tunnelLabel)label('tunnel:'+id,c.x,c.y,tile.tunnelLabel+' ⇄','',24);
       if(tile.income) label(`inc:${id}`,c.x,c.y+44,'+'+tile.income+' Gold');
       const bonus=terrain?.towerBonus?'+25 % '+HexData.TOWERS[terrain.requiredTower].name+(terrain.towerBonus.range?' Reichweite':' Schaden'):terrain?.towerRange?'+'+Math.round((terrain.towerRange-1)*100)+' % Reichweite':terrain?.towerDamage?'+'+Math.round((terrain.towerDamage-1)*100)+' % Schaden':terrain?.archerDamage?'+25 % Archer':null;
       if(bonus) label(`bon:${id}`,c.x,c.y+35,bonus);
@@ -660,7 +666,7 @@ function create(host0,commands){
     destroy(){
       destroyed=true;cancelAnimationFrame(raf);resize.disconnect();for(const [name,fn,options] of listeners) dom.removeEventListener(name,fn,options);
       windPool.mesh.geometry.dispose();windPool.mesh.material.dispose();windPool.mesh.dispose();mistPool.mesh.geometry.dispose();mistPool.mesh.material.dispose();mistPool.mesh.dispose();
-      clearOverlays();slotDiamondGeometry.dispose();gridGeometry.dispose();buffGeometry.dispose();gridMaterial.dispose();buffMaterial.dispose();buffBorderMaterial.dispose();
+      clearOverlays();buildingPadGeometry.dispose();buildingPadMaterial.dispose();slotDiamondGeometry.dispose();gridGeometry.dispose();buffGeometry.dispose();gridMaterial.dispose();buffMaterial.dispose();buffBorderMaterial.dispose();
       for(const material of biomeMaterials.values())material.dispose();biomeMaterials.clear();
       gl.dispose();host.remove();wrap.classList.remove('is3d');if(hintText) hintText.textContent=oldHint;host0.style.display='';
     }};

@@ -28,5 +28,47 @@ const HexRewards=(()=>{
     return true;
   }
   function supplies(state){state.gold+=30;state.goldEarned.shrine=(state.goldEarned.shrine||0)+30;}
-  return {upgradeChoices,upgrade,blessing};
+  function offer(state,kind,random){
+    const phase={normal:'reward',boss:'bossReward',shrine:'shrineReward',removal:'removal'}[kind];
+    if(!phase||state.phase!==phase)throw new Error('Invalid reward phase');
+    const context=kind==='boss'?state.bossRewards[0]:kind==='shrine'||kind==='removal'&&state.removalSource==='shrine'?state.pendingShrine:String(state.wave);
+    const old=state.rewardOffer;
+    if(old&&old.kind===kind&&old.context===context&&old.wave===state.wave)return old;
+    let choices=[],skippable=kind!=='normal';
+    if(kind==='removal')choices=[...new Set(state.deck)].map(cardId=>({kind:'remove',cardId}));
+    else {
+      const effect=kind==='shrine'?HexExploration.shrineEffect(state.landmarks,state.pendingShrine):null;
+      if(effect==='repair'||effect==='upgrade'){
+        skippable=false;
+        choices=effect==='upgrade'?upgradeChoices(state).map(choice=>({kind:'upgrade',choice})):[];
+        if(!choices.length)choices=[{kind:'blessing',blessing:effect==='repair'?'repair':'supplies'}];
+      }else{
+        const rarity=kind==='boss'?HexExploration.bossRewardRarity(state.seed,context):({epic:'Epic',legendary:'Legendary'})[effect];
+        const library=rarity?Object.fromEntries(Object.entries(HexData.CARD_LIBRARY).filter(([,card])=>card.rarity===rarity)):HexData.CARD_LIBRARY;
+        const rng=kind==='boss'?HexRandom.create(state.seed+'|bossloot|'+context):kind==='shrine'?HexRandom.create(state.seed+'|shrine|'+context):random;
+        choices=HexDeck.rewards(HexDeck.forLoadout(library,state.towerLoadout),rng).map(cardId=>({kind:'card',cardId}));
+        if(kind==='boss')choices.push({kind:'blessing',blessing:'bastion'},{kind:'blessing',blessing:'income'});
+      }
+    }
+    state.nextRewardOfferId=(state.nextRewardOfferId||0)+1;
+    return state.rewardOffer={id:state.runId+':reward:'+state.nextRewardOfferId,kind,phase,context,wave:state.wave,skippable,choices};
+  }
+  function choose(state,offerId,index){
+    const offer=state.rewardOffer;
+    if(!offer||offer.id!==offerId||offer.phase!==state.phase||offer.wave!==state.wave||state.hp<=0)return false;
+    if(offer.kind==='boss'&&offer.context!==state.bossRewards[0])return false;
+    if((offer.kind==='shrine'||offer.kind==='removal'&&state.removalSource==='shrine')&&offer.context!==state.pendingShrine)return false;
+    if(index===null){if(!offer.skippable)return false;}
+    else{
+      if(!Number.isInteger(index)||index<0||index>=offer.choices.length)return false;
+      const choice=offer.choices[index];
+      if(choice.kind==='card'){state.deck.push(choice.cardId);state.discard.push(choice.cardId);}
+      else if(choice.kind==='remove'){if(!HexDeck.remove(state,choice.cardId))return false;}
+      else if(choice.kind==='upgrade'){if(!upgrade(state,choice.choice))return false;}
+      else if(choice.kind==='blessing'){if(!blessing(state,choice.blessing))return false;}
+      else return false;
+    }
+    state.rewardOffer=null;return true;
+  }
+  return {offer,choose,upgradeChoices,upgrade,blessing};
 })();

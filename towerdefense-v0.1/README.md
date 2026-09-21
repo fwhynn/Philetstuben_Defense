@@ -283,7 +283,7 @@ Für später vorgemerkt, noch nicht implementiert:
 
 - Weitere Heroes/Startfestungen über Standard, Festungsbauer und Händler hinaus.
 - Weitere Karten und Lootvarianten sowie zusätzliche Shrine-Boni wie besondere Upgrades.
-- Weitere Biome, Ausbau der vorhandenen Meta-Progression, zusätzliche Towerrollen, Run-Speicherung und Profil-Export/-Import.
+- Weitere Biome, Ausbau der vorhandenen Meta-Progression, zusätzliche Towerrollen, Run-Speicherung.
 - Zusätzliche Base-Ausbaupfade und sichtbare Modelle der Ausbaustufen.
 - Turm-Upgrade-Modelle und weitere visuelle Effekte.
 
@@ -335,3 +335,32 @@ Prozedurale Straßen (Spiegel-Abzweig, Fächer-/Seitenkreuzung, Sackgasse und Re
 - Schnellbau-Icons sperren/ergrauen bei fehlendem Gold oder fehlenden freien Turmplätzen. Günstigster Preis eines freien Platzes berücksichtigt Marktrabatte (Anzeige „ab“). Drag-Zielkreise und Trefferprüfung verwenden gemeinsam projizierte Bodenmittelpunkte und 20 px Radius; bei Überlappung zählt der nächste Mittelpunkt, außerhalb des Boards kein Treffer.
 
 - Drag-Bauplätze als eigenständige HTML-Zielmarker über der Map (Plus für bezahlbar, Kreuz für zu teuer), getrennt von der SVG-Abdunklung. Sichtbarkeit unabhängig von Slot-Hinweisen; Kameraänderungen aktualisieren die Zielpositionen sofort. Regressionstest deckt Anzeige, belegte Plätze, Board-Versatz, Kameraverschiebung und erfolgreichen Drop ab.
+
+- Upgrade-Hinweise nutzen in SVG und 3D dieselbe Run-Upgrade-Liste inklusive freigeschalteter Arsenal-Stufe 4. Gold-Hinweis berücksichtigt lokalen Marktrabatt; U bleibt goldunabhängig. Gesperrte und bereits gekaufte Endstufen erzeugen keinen Hinweis.
+
+- Straßenlose Gebäude-Hexe im Belohnungspool: Baugrund (Uncommon, 1 Gebäudeslot), Bauviertel (Rare, 2), Baubezirk (Epic, 3). Sie schließen seitlich an bestehende Hexe an und dürfen keine offene Straße blockieren. Keine Turmplätze; jeder Gebäudeslot ist separat bebaubar.
+- Weitere Gegner mit Elementimmunitäten, Aufteilung beim Tod, Heilung und gezielter Wegwahl sind für später geplant: [Gegner-Balancing](../ENEMY_BALANCING_PLAN.md). Noch nicht implementiert.
+
+- Hauptmenü: Spielstand als JSON herunterladen oder hochladen. Enthalten sind Diamanten, Freischaltungen, Kaufpreise, Loadouts und Profilstatistiken; kein laufender Run und keine Geräteeinstellungen. Import nach Vorschau und Bestätigung ersetzt das Profil, statt Diamanten zu addieren. Vorherige lokale Daten werden unter `hex-bastion-profile-v1-before-import` gesichert. Import während eines aktiven Runs gesperrt.
+- Wächter behalten die Resistenz ihres Herkunftsbioms: Aschelande 50 % Feuer; Sturmhochland 50 % Blitz/Wind; Dünenmeer halbiert Verlangsamung; Grasland neutral. Effekte in der Biom-Info.
+- Duo-Grundlage begonnen: `run-runtime.js` verwaltet Spawn-Aufträge als reine Daten; `random.js` bietet versionierte Zufallszustände. Noch kein spielbarer Multiplayer.
+
+- Kartenwahl bei Wave-, Wächter- und Shrine-Belohnungen zeigt „N× bereits im Deck“. Gezählt wird das gesamte Run-Deck. Duo-Grundlage erweitert: speicherbare offene Angebote ohne Neuwürfeln und gemeinsame Kauf-/Upgrade-Aktionen. Noch kein spielbarer Multiplayer.
+
+- Linksklick aufs freie Feld schließt das Türme-Menü. Letzte erweiterbare Straßenfront wird gegen Einschließen geschützt; kostenlose bestätigbare Rettungstunnel helfen bei bereits blockierten Runs. Markierte Portale verbinden die Straßen unmittelbar, ohne Bauplätze oder Deckkarte.
+
+- Beim Hover/Fokus auf Schmiede oder Markt im Gebäudebaumenü wird deren künftiger Wirkungsbereich hervorgehoben. Verkäufe von Türmen/Gebäuden fragen mit Erstattungsbetrag nach; Escape bricht ab.
+
+- Duo-Grundlage: gemeinsame DOM-freie Session-Steuerung für Wächter-/Wave-/Shrine-Belohnungen, Kartenentfernung, Vorbereitung und Erfolgsmeldungen. Checkpoints halten auch unbestätigte Erfolgsmeldungen fest. Lokaler Duo-Prototyp siehe folgenden Abschnitt; noch kein Online-Duo.
+
+## Lokaler Duo-Prototyp
+
+Bei laufendem lokalen Server `duo-prototype.html` öffnen (standardmäßig `http://localhost:8080/duo-prototype.html`). Beide Seiten werden an einem Gerät gesteuert: je ein Hex legen, Verteidigung bauen und beide bereit melden. Zwei getrennte Maps, Goldkonten und Decks teilen sich 40 HP. Abschlussbelohnungen gibt es erst nach beiden Kämpfen.
+
+Karten drehen, Türme/Gebäude bauen und verbessern, Belohnungen wählen sowie 1×/2× sind verfügbar. „Checkpoint merken“ sichert beide Seiten nur im geöffneten Tab; kein dauerhafter Spielstand. Kein Zugriff auf Solo-Diamanten. Freien Slot anklicken und als Partner-Portal reservieren; eigenen Turm anklicken und als Verstärkung wählen. Nach sauberem Abschluss hilft eine Kopie nach 1,5 Spielsekunden beim Partner. Unterstützungs-Schaden wird dem Sender zugerechnet. Noch ohne Online-Verbindung, Lieferungen, Verkäufe oder Base-Ausbau. 246 automatisierte Tests bestanden; visuelle Prüfung durch den Nutzer.
+
+## Kampagne und Bosswellen
+
+Wave 35 in Stufe 1 abschließen schaltet Stufe 2 · Zwei Fronten frei. Der Victory-Screen bietet Hauptmenü oder Endless mit derselben Map. Der Run wird erst beim Beenden abgerechnet. Wave 15: Eisenkoloss mit starker Rüstung; Wave 25: schneller Sturmjäger; Wave 35: magiegeschützte Seelenmatriarchin mit maximal sechs beschworenen Dienern ohne Goldbeute. Danach wiederholt sich die Bossrotation mit steigender Stärke.
+
+Der lokale Duo-Prototyp zeigt jeweils eine große Map mit Umschalter und Partnerstatus. Beide Kämpfe laufen beim Wechsel weiter. 249 automatisierte Tests bestanden; keine Browsertests.

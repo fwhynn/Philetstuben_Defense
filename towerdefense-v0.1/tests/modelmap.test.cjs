@@ -44,3 +44,13 @@ test('tower slots never overlap the road, stay inside the hex and keep their dis
     });
   }
 });
+
+test('roadless building cards have escalating rarity and independently positioned slots',()=>{
+  const {data,map,models}=load();
+  for(const [id,rarity,count] of [['buildingPlot','Uncommon',1],['buildingQuarter','Rare',2],['buildingDistrict','Epic',3]]){
+    const card=data.CARD_LIBRARY[id];assert.equal(card.rarity,rarity);assert.equal(card.buildingSlots,count);assert.equal(card.slots,0);assert.equal(card.roads.length,0);
+    for(let rotation=0;rotation<6;rotation++){const tile={q:0,r:0,type:id,rotation,roads:[],slots:0,buildingSlots:count},positions=Array.from({length:count},(_,i)=>map.buildingPosition(tile,i));assert.equal(new Set(positions.map(p=>p.x+','+p.y)).size,count);assert.equal(map.roadGeometry(tile).legs.size,0);assert.equal(models.modelFor(tile).proceduralRoads,true);
+      positions.forEach((p,i)=>{assert.ok(Math.hypot(p.x,p.y)<32);for(let j=0;j<i;j++)assert.ok(Math.hypot(p.x-positions[j].x,p.y-positions[j].y)>40);});
+    }
+  }
+});

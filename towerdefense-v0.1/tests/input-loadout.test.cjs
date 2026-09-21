@@ -72,7 +72,7 @@ test('element and necromancer unlock, enter a five-slot loadout and build with u
   selectSlot(1,0,0);buyTower('element');selectSlot(1,0,1);buyTower('necromancer');
   const [element,necro]=a.state.map.get('1,0').towers;
   assert.equal(data.availableUpgrades(element).length,3);assert.equal(data.availableUpgrades(necro).length,2);
-  necro.souls=[{until:10000,lastShot:0}];a.endWave();assert.equal(necro.souls.length,0);
+  necro.souls=[{until:10000,lastShot:0}];a.state.wave=1;a.endWave();assert.equal(necro.souls.length,0);
 });
 
 test('camera acceleration is frame independent and focus loss stops its inertia',()=>{

@@ -58,10 +58,10 @@ test('turret slots rotate with the tile and return after a full turn',()=>{
   }
 });
 
-test('new run cancels timers and even stale callbacks cannot mutate it',()=>{
+test('new run cancels timers and discards declarative spawn jobs',()=>{
   const {a,timers}=load();a.state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:0,towers:[]});a.state.phase='build';a.startWave();
-  const old=a.state.spawnQueue.map(spawn=>spawn.callback);assert.equal(old.length,5);
-  a.newRun();assert.equal(timers.size,0);old.forEach(fn=>fn());
+  const old=JSON.parse(JSON.stringify(a.state.spawnQueue));assert.equal(old.length,5);assert.equal(old[0].source.q,1);
+  a.newRun();assert.equal(timers.size,0);assert.equal(a.state.spawnQueue.length,0);
   assert.equal(a.state.enemies.length,0);assert.equal(a.state.wave,0);assert.equal(a.state.phase,'place');
 });
 
@@ -301,9 +301,9 @@ test('placement cannot close the last base-connected entrance but may form a loo
 
 test('double speed advances simulation and spawn timing twice as fast',()=>{
   const {a,elements}=load();a.state.phase='wave';a.state.waveRunning=true;a.state.pendingSpawns=1;
-  let calls=0;a.state.spawnQueue=[{due:200,callback(){calls++;}}];
-  elements.get('doubleSpeed').value='1';elements.get('doubleSpeed').listeners.input();a.update(.1,100);assert.equal(a.state.elapsedMs,100);assert.equal(calls,0);
-  elements.get('doubleSpeed').value='2';elements.get('doubleSpeed').listeners.input();a.update(.05,150);assert.equal(a.state.elapsedMs,200);assert.equal(calls,1);
+  a.state.wave=1;a.state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:0,towers:[]});a.state.spawnQueue=[{due:200,index:0,source:{q:1,r:0,dir:0}}];
+  elements.get('doubleSpeed').value='1';elements.get('doubleSpeed').listeners.input();a.update(.1,100);assert.equal(a.state.elapsedMs,100);assert.equal(a.state.enemies.length,0);
+  elements.get('doubleSpeed').value='2';elements.get('doubleSpeed').listeners.input();a.update(.05,150);assert.equal(a.state.elapsedMs,200);assert.equal(a.state.enemies.length,1);
 });
 
 test('market discounts are charged and refunded at the actual purchase price',()=>{
@@ -432,4 +432,24 @@ test('Epic dead end remains drawable but cannot close the final reachable entran
   // A disconnected opening must not permit sealing the base's only route.
   a.state.map.delete('2,0');a.state.map.get('1,0').roads=[0,3];a.state.map.set('10,0',{q:10,r:0,type:'straight',roads:[0,3],slots:0,towers:[]});assert.equal(a.canPlace(2,0,card,3),false);
   a.state.deck=['deadEnd','straight','straight','straight','straight'];a.state.drawPile=['straight','straight','straight','straight','deadEnd'];a.state.discard=[];a.state.hand=[];a.drawHand();assert.ok(a.state.hand.includes('deadEnd'));
+});
+
+test('affordable upgrade markers include unlocked Arsenal tiers and use the local market price',()=>{
+  const {a,data,elements}=load();a.state.phase='build';a.state.showUpgradeStatus=false;
+  const tower={type:'archer',level:3,branch:'marksman',finalUpgrade:'eagleEye'},tile={q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[tower],buildings:[{type:'market'}]};a.state.map.set('1,0',tile);
+  const hints=()=>elements.get('board').children[3].children.filter(e=>e.textContent==='↑');a.state.gold=1000;a.renderAll();assert.equal(hints().length,0);
+  a.state.ultimateUnlocks=['ultimate:archer'];const cost=Math.ceil(data.ULTIMATES.archer.cost*.85);a.state.gold=cost-1;a.renderAll();assert.equal(hints().length,0);a.state.gold=cost;a.renderAll();assert.equal(hints().length,1);
+  tower.ultimate='archer';a.renderAll();assert.equal(hints().length,0);
+  for(const type of Object.keys(data.ULTIMATES)){const t={type,finalUpgrade:'finished'};a.state.ultimateUnlocks=['ultimate:'+type];assert.equal(data.runUpgrades(a.state,t)[0][1].cost,data.ULTIMATES[type].cost);assert.equal(data.runUpgrades({...a.state,ultimateUnlocks:[]},t).length,0);assert.equal(data.runUpgrades(a.state,{...t,ultimate:type}).length,0);}
+});
+
+test('roadless building tiles place at non-road edges and each building slot can be purchased separately',()=>{
+  const {a,elements}=load();a.state.map.clear();a.state.map.set('0,0',{q:0,r:0,type:'base',roads:[0],slots:0,towers:[]});const card=a.CARD_LIBRARY.buildingDistrict;
+  assert.equal(a.canPlace(0,-1,card,0),false); // Cannot replace the required initial road extension.
+  a.state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[null]});
+  assert.equal(a.canPlace(2,0,card,0),false);assert.equal(a.canPlace(9,9,card,0),false);assert.equal(a.canPlace(1,-1,card,0),true);
+  a.state.phase='place';a.state.hand=['buildingDistrict'];a.state.selectedCard=0;a.state.rotation=0;a.state.gold=100;a.renderAll();a.placeTile(1,-1);
+  const tile=a.state.map.get('1,-1');assert.equal(tile.buildingSlots,3);assert.equal(tile.roads.length,0);assert.equal(tile.buildings.length,3);assert.equal(a.state.phase,'build');
+  for(let index=0;index<3;index++){a.rendererCommands.selectBuilding(1,-1,index);elements.get('buildingOptions').children[0].listeners.click();assert.equal(tile.buildings[index].type,'house');}
+  assert.equal(a.state.gold,10);assert.equal(a.state.income,9);a.startWave();assert.equal(a.state.waveRunning,true);
 });

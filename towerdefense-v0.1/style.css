@@ -255,3 +255,11 @@ html,body{height:100%;overflow:hidden}
 .quickTower:disabled{filter:grayscale(1);opacity:.42;cursor:not-allowed;border-color:#63706a;box-shadow:none}.quickTower.unaffordable small{color:#f0aaa0}
 
 .towerDragShade{display:block;overflow:hidden;isolation:isolate}.dragMapVeil{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.dragBuildTarget{position:absolute;z-index:1;display:grid;place-items:center;box-sizing:border-box;transform:translate(-50%,-50%);border:2px solid #fff;border-radius:50%;background:#effff136;box-shadow:0 0 0 2px #14251ce6,0 0 12px #ffffff80;color:#fff;font:bold 24px/1 system-ui;text-shadow:0 1px 4px #000;pointer-events:none}.dragBuildTarget.active{border-color:#9df3bd;background:#347858b3;box-shadow:0 0 0 3px #173d29,0 0 18px #9df3bd}.dragBuildTarget.unaffordable{border-color:#ed997a;color:#ed997a;background:#633a3299}
+
+#saveOverlay{z-index:45}#saveOverlay button{margin:6px;min-height:44px}#uploadSaveInput{max-width:100%}#menuSaveBtn{font-size:12px;padding:7px 12px}
+
+#menuSaveBtn{min-height:44px}
+
+.card .deckCopyCount{margin:8px 0 0;font-size:12px;font-weight:700;color:#403921}
+
+#saleConfirmOverlay{z-index:60}#saleConfirmOverlay button{min-height:44px;margin:6px}

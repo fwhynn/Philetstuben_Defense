@@ -112,6 +112,9 @@ Vorhanden sind Tiles, Sonderfelder, alle sieben Türme, alle fünf Gegner, die d
 
 ## Roadmap
 
+Multiplayer-Plan vom 21.09.2026: [Duo „Zwillingsfestungen“ – Spielregeln, Lobby/Einladung, Hosting und Umsetzungsetappen](MULTIPLAYER_PLAN.md). Zur Umsetzung gewählt, noch nicht implementiert. Zusätzlich vorgemerkt: 1 gegen 1 mit gegnerischer Plättchenwahl.
+
+
 Fest vorgemerkt, noch nicht umgesetzt:
 
 - Weitere Heroes, Festungen und Base-Ausbaupfade; drei Startprofile und zwei Ausbaupfade sind bereits umgesetzt

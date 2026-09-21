@@ -4,7 +4,7 @@ const {load}=require('./helpers/game.cjs');
 test('opening wave has five enemies and boss strength is shifted five waves later',()=>{
   const {waves}=load();assert.equal(waves.plan(1).count,5);assert.equal(waves.plan(2).count,9);
   assert.equal(waves.bossProfile(10),null);
-  const first=waves.bossProfile(15);assert.equal(first.hp,1200);assert.equal(first.armorHp,300);assert.equal(first.magicHp,240);
+  const first=waves.bossProfile(15);assert.equal(first.hp,1200);assert.equal(first.armorHp,720);assert.equal(first.magicHp,120);
   for(const wave of [15,25,35,45])assert.equal(waves.bossProfile(wave).hp,Math.round(1200*Math.pow((wave-5)/10,1.8)));
 });
 function prepare(wave,seed='boss-test'){

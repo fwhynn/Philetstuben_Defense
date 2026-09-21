@@ -1,5 +1,9 @@
 const HexData=(()=>{
   const CARD_LIBRARY = {
+    rescueTunnel:{id:'rescueTunnel',name:'Rettungstunnel',rarity:'Common',roads:[0],slots:0,rescue:true,procedural:true,desc:'Kostenloser Tunnelausgang ohne Bauplätze.'},
+    buildingPlot:{id:'buildingPlot',name:'Baugrund',rarity:'Uncommon',roads:[],slots:0,buildingSlots:1,buildingLayout:[[0,0]],procedural:true,desc:'Straßenloses Hex mit 1 Gebäudeslot. Seitlich anbauen; offene Straßen bleiben frei.'},
+    buildingQuarter:{id:'buildingQuarter',name:'Bauviertel',rarity:'Rare',roads:[],slots:0,buildingSlots:2,buildingLayout:[[-22,0],[22,0]],procedural:true,desc:'Straßenloses Hex mit 2 Gebäudeslots. Seitlich anbauen; offene Straßen bleiben frei.'},
+    buildingDistrict:{id:'buildingDistrict',name:'Baubezirk',rarity:'Epic',roads:[],slots:0,buildingSlots:3,buildingLayout:[[-23,-14],[23,-14],[0,25]],procedural:true,desc:'Straßenloses Hex mit 3 Gebäudeslots. Seitlich anbauen; offene Straßen bleiben frei.'},
     deadEnd:{id:'deadEnd',name:'Bastionssackgasse',rarity:'Epic',roads:[0],slots:2,procedural:true,slotLayout:[[-14,-24],[-14,24]],desc:'Schließt einen Weg mit zwei Turmplätzen ab. Darf niemals das letzte offene Straßenende schließen.'},
     mirrorJunction:{"id":"mirrorJunction","name":"Spiegel-Abzweig","rarity":"Uncommon","roads":[0,3,4],"slots":2,"procedural":true,"slotLayout":[[-30,-24],[-4,-24]],"desc":"Gespiegelte T-Kreuzung: Durchgang mit Abzweig auf der anderen Seite."},
     fanJunction:{"id":"fanJunction","name":"Fächerkreuzung","rarity":"Uncommon","roads":[0,1,2],"slots":2,"procedural":true,"slotLayout":[[-22,25],[16,25]],"desc":"Drei Straßenenden auf einer Seite. Zwei Turmplätze im Rücken."},
@@ -107,11 +111,17 @@ const HexData=(()=>{
   const BRANCH_VISUALS={marksman:{icon:'◎',color:'#f5d06e'},volley:{icon:'≋',color:'#96d47c'},siege:{icon:'◆',color:'#e99a5c'},barrage:{icon:'⋮',color:'#ffdca1'},storm:{icon:'ϟ',color:'#93a5ff'},overload:{icon:'✦',color:'#e2a1ff'},deepFrost:{icon:'❄',color:'#70d5ff'},frostField:{icon:'❆',color:'#c0f6ea'},demolition:{icon:'✹',color:'#ff9b55'},minefield:{icon:'••',color:'#d9bc72'},harpoon:{icon:'➶',color:'#e7d39e'},repeater:{icon:'»',color:'#d4b979'},inferno:{icon:'☀',color:'#ff7448'},wildfire:{icon:'≋',color:'#ff9b55'}};
   Object.assign(BRANCH_VISUALS,{elementFire:{icon:'♨',color:'#ff8654'},elementWater:{icon:'≈',color:'#69d8ff'},elementWind:{icon:'≋',color:'#dbefae'},soulChoir:{icon:'☽',color:'#a6edb4'},soulKeeper:{icon:'☠',color:'#c8a3ee'}});
   function recordTowerStat(state,tower,field,amount){
-    if(!tower)return;if(tower===state.baseWeapon){if(field==='damage')state.baseDamage=(state.baseDamage||0)+amount;return;}
+    if(!tower)return;if(tower.guestOwner!==undefined){if(field==='damage'){state.duoSupport??={};const totals=state.duoSupport[tower.guestOwner]??={};totals[tower.type]=(totals[tower.type]||0)+amount;}return;}if(tower===state.baseWeapon){if(field==='damage')state.baseDamage=(state.baseDamage||0)+amount;return;}
     state.runTowerStats??={};const usage=state.runTowerStats[tower.type]??={builds:0,upgrades:0};usage[field]=(usage[field]||0)+amount;
     const detail=state.runTowerDetails?.[tower.statId];if(detail)detail[field]=(detail[field]||0)+amount;
   }
-  function upgradeStatus(state,tower){if(tower.ultimate)return '';if(availableUpgrades(tower).length)return '↑';return state.ultimateUnlocks?.includes('ultimate:'+tower.type)?'↑':'';}
+  function runUpgrades(state,tower){
+    if(!tower||tower.guestOwner!==undefined||tower.ultimate)return [];
+    if(!tower.finalUpgrade)return availableUpgrades(tower);
+    const id='ultimate:'+tower.type;
+    return state.ultimateUnlocks?.includes(id)&&ULTIMATES[tower.type]?[[id,ultimateDefinition(tower)]]:[];
+  }
+  function upgradeStatus(state,tower){return runUpgrades(state,tower).length?'↑':'';}
   function ultimateDefinition(tower){const def=ULTIMATES[tower.type];if(tower.type!=='element')return def;return {...def,name:({elementFire:'Weltenbrand',elementWater:'Ozeanherz',elementWind:'Himmelssturm'})[tower.branch]||def.name};}
   function towerDefinition(tower,definitions=TOWERS){
     const def={...definitions[tower.type],...(tower.branch?UPGRADES[tower.branch]:{}),...(tower.finalUpgrade?UPGRADES[tower.finalUpgrade]:{})},terrain=CARD_LIBRARY[tower.tileType];
@@ -122,13 +132,14 @@ const HexData=(()=>{
     def.damage=def.damage*(bonus.damage||1)*(tower.type==='archer'?(terrain?.archerDamage||1):1)*(terrain?.towerDamage||1)*(tower.supportDamage||1);
     def.damage=Number(def.damage.toFixed(2));
     if(def.soulDamage)def.soulDamage*= (bonus.damage||1)* (terrain?.towerDamage||1)*(tower.supportDamage||1)*(ultimate?.damageFactor||1);
+    def.damageType=({elementFire:'fire',elementWater:'water',elementWind:'wind'})[tower.branch]||({flame:'fire',chain:'lightning',necromancer:'spirit',element:'arcane'})[tower.type]||'physical';
     return def;
   }
   function availableUpgrades(tower){return Object.entries(UPGRADES).filter(([,upgrade])=>upgrade.tower===tower.type&&!tower.finalUpgrade&&(tower.branch?upgrade.requires===tower.branch:!upgrade.requires));}
   function towerRefund(state,tower){
-    if(!tower||state.hp<=0||state.phase==='gameover') return null;
+    if(!tower||tower.guestOwner!==undefined||state.hp<=0||state.phase==='gameover') return null;
     const full=state.phase==='build'&&!state.waveRunning&&tower.builtOnWave===state.wave;
     return {amount:full?tower.paid:Math.floor(tower.paid*.5),percent:full?100:50};
   }
-  return {recordTowerStat,upgradeStatus,ultimateDefinition,CARD_LIBRARY,TOWERS,UPGRADES,ULTIMATES,BRANCH_VISUALS,towerDefinition,availableUpgrades,towerRefund};
+  return {recordTowerStat,runUpgrades,upgradeStatus,ultimateDefinition,CARD_LIBRARY,TOWERS,UPGRADES,ULTIMATES,BRANCH_VISUALS,towerDefinition,availableUpgrades,towerRefund};
 })();

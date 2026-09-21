@@ -27,6 +27,7 @@ function create(svg,commands){
       }
       scene=worldLayer;
     }
+    if(state.tunnelOffer&&state.tunnelConfirmed){const p=state.tunnelOffer,[q,r]=p.source.split(',').map(Number);for(const [name,t] of [['Eingang',{q,r}],['Ausgang',p]]){const c=axialToWorld(t.q,t.r),label=text(c.x,c.y-20,'Tunnel '+name+' · Vorschau',12,'#8ff3ff','700');label.style.pointerEvents='none';hintLayer.appendChild(label);}}
     // Landmarks are independent of placed tiles; they reveal through map expansion.
     for(const landmark of state.landmarks?.values()||[]){
       if(landmark.claimed) continue;const visibility=HexExploration.visibility(state.map,landmark);if(visibility==='hidden') continue;
@@ -49,7 +50,7 @@ function create(svg,commands){
     for(const landmark of state.landmarks.values()) if(landmark.status){const c=axialToWorld(landmark.q,landmark.r),label=text(c.x,c.y+35,{ready:'☠ bereit',fighting:'☠ Kampf',defeated:'☠ besiegt',escaped:'☠ entkommen'}[landmark.status],9,'#e8b7b0','700');label.style.pointerEvents='none';scene.appendChild(label);}
 
     if(state.phase==='place'&&!state.waveRunning&&state.hand.length){
-      const id=state.hand[state.selectedCard],card=CARD_LIBRARY[id];
+      const id=state.hand[state.selectedCard],card=id==='rescue'?state.rescueCard:CARD_LIBRARY[id];
       for(const s of placementTargets){
         const legal=s.legal; const c=axialToWorld(s.q,s.r);
         const placementKey=key(s.q,s.r);
@@ -65,7 +66,7 @@ function create(svg,commands){
           slot.setAttribute('fill','#314d39');slot.setAttribute('stroke','#f1ddb1');slot.setAttribute('stroke-width',2);
           preview.appendChild(slot);preview.appendChild(text(p.x,p.y+4,'+',14,'#fff','700'));
         }
-        if(card.buildingSlots){const p=buildingPosition({q:s.q,r:s.r,rotation:state.rotation}),slot=document.createElementNS(NS,'rect');slot.setAttribute('x',p.x-9);slot.setAttribute('y',p.y-9);slot.setAttribute('width',18);slot.setAttribute('height',18);slot.setAttribute('rx',3);slot.setAttribute('fill','#344c3b');slot.setAttribute('stroke','#f0d795');preview.appendChild(slot);preview.appendChild(text(p.x,p.y+4,'⌂',11,'#fff4c3','700'));}
+        for(let i=0;i<(card.buildingSlots||0);i++){const p=buildingPosition({q:s.q,r:s.r,type:card.id,rotation:state.rotation},i),slot=document.createElementNS(NS,'rect');slot.setAttribute('x',p.x-9);slot.setAttribute('y',p.y-9);slot.setAttribute('width',18);slot.setAttribute('height',18);slot.setAttribute('rx',3);slot.setAttribute('fill','#344c3b');slot.setAttribute('stroke','#f0d795');preview.appendChild(slot);preview.appendChild(text(p.x,p.y+4,'⌂',11,'#fff4c3','700'));}
         const rotateHint=document.createElementNS(NS,'rect');rotateHint.setAttribute('x',c.x-32);rotateHint.setAttribute('y',c.y+HEX+2);rotateHint.setAttribute('width',64);rotateHint.setAttribute('height',20);rotateHint.setAttribute('rx',6);rotateHint.setAttribute('fill','#17271e');rotateHint.setAttribute('stroke','#718a6c');rotateHint.setAttribute('fill-opacity','.95');preview.appendChild(rotateHint);
         preview.appendChild(text(c.x,c.y+HEX+16,'R / Mausrad-Klick · Drehen',10,'#eee1c2','600'));
         scene.appendChild(preview);
@@ -82,7 +83,7 @@ function create(svg,commands){
     }
 
     drawFreezeAuras();drawSelectedRange();
-    hintLayer.innerHTML='';scene=hintLayer;drawUpgradeHints();drawTileOverlays();drawSelectionRings();scene=worldLayer;
+    hintLayer.innerHTML='';scene=hintLayer;if(state.buildingTarget)for(const tile of state.map.values()){const c=axialToWorld(tile.q,tile.r),hit=drawPoly(c.x,c.y,HEX-3,'rgba(110,220,200,.25)','#8ff3df',1);hit.style.pointerEvents='all';hit.style.cursor='pointer';hit.addEventListener('click',e=>{e.stopPropagation();commands.placeTile(tile.q,tile.r);});}drawUpgradeHints();drawTileOverlays();drawSelectionRings();if(state.duoPortal){const slot=state.duoPortal,tile=state.map.get(key(slot.q,slot.r)),p=tile&&slotPositions(tile)[slot.index];if(p){const ring=document.createElementNS(NS,'circle');for(const [name,value] of Object.entries({cx:p.x,cy:p.y,r:21,fill:'none',stroke:'#7b36fa','stroke-width':4}))ring.setAttribute(name,value);scene.appendChild(ring);scene.appendChild(text(p.x,p.y-27,'Partner-Portal',10,'#30125e','700'));}}scene=worldLayer;
     for(const mine of state.mines||[]) drawMine(mine);
     for(const e of state.enemies) drawEnemy(e);
     for(const p of state.projectiles) drawProjectile(p);
@@ -129,7 +130,7 @@ function create(svg,commands){
   function drawUpgradeHints(){
     if(!['build','wave'].includes(state.phase)||state.hp<=0) return;
     for(const tile of state.map.values()) (tile.towers||[]).forEach((tower,index)=>{
-      if(!tower||(state.showUpgradeStatus&&!HexData.upgradeStatus(state,tower))||(!state.showUpgradeStatus&&!HexData.availableUpgrades(tower).some(([,upgrade])=>state.gold>=HexBuildings.cost(state,tile,upgrade.cost)))) return;
+      if(!tower||(state.showUpgradeStatus&&!HexData.upgradeStatus(state,tower))||(!state.showUpgradeStatus&&!HexData.runUpgrades(state,tower).some(([,upgrade])=>state.gold>=HexBuildings.cost(state,tile,upgrade.cost)))) return;
       const p=slotPositions(tile)[index];let hint;
       if(state.showUpgradeStatus){hint=document.createElementNS(NS,'polygon');hint.setAttribute('points','14,2 26,14 19,14 19,30 9,30 9,14 2,14');hint.setAttribute('transform','translate('+(p.x-14)+','+(p.y-43)+')');hint.setAttribute('fill','#ffffff');hint.setAttribute('stroke-linejoin','round');hint.setAttribute('aria-label','Turm ausbaubar');}
       else hint=text(p.x+12,p.y-8,'↑',13,'#ffffff','800');hint.setAttribute('stroke','#172019');hint.setAttribute('stroke-width',1.5);hint.setAttribute('paint-order','stroke');hint.style.pointerEvents='none';scene.appendChild(hint);
@@ -168,12 +169,13 @@ function create(svg,commands){
       g.style.cursor='pointer';g.addEventListener('click',e=>{e.stopPropagation();commands.selectBase?.();});
       const txt=text(c.x,c.y+5,'BASE',13,'#282723','700');g.appendChild(txt);scene.appendChild(g);
     }
+    if(tile.tunnelLabel){const t=text(c.x,c.y-16,tile.tunnelLabel+' ⇄',12,'#8ff3ff','700');t.style.pointerEvents='none';scene.appendChild(t);}
     if(tile.income){const t=text(c.x,c.y+44,'+'+tile.income+' Gold',10,'#fff4c3','700');t.style.pointerEvents='none';scene.appendChild(t);}
     const terrain=CARD_LIBRARY[tile.type],bonus=terrain?.towerBonus?'+25 % '+HexData.TOWERS[terrain.requiredTower].name+(terrain.towerBonus.range?' Reichweite':' Schaden'):terrain?.towerRange?'+'+Math.round((terrain.towerRange-1)*100)+' % Reichweite':terrain?.towerDamage?'+'+Math.round((terrain.towerDamage-1)*100)+' % Schaden':terrain?.archerDamage?'+25 % Archer':null;
     if(bonus){const label=text(c.x,c.y+35,bonus,9,'#fff4c3','700');label.style.pointerEvents='none';scene.appendChild(label);}
     const slots=slotPositions(tile);
     for(let i=0;i<(tile.buildingSlots||0);i++){
-      const p=buildingPosition(tile),building=tile.buildings?.[i],slot=document.createElementNS(NS,'rect');
+      const p=buildingPosition(tile,i),building=tile.buildings?.[i],slot=document.createElementNS(NS,'rect');
       slot.setAttribute('x',p.x-9);slot.setAttribute('y',p.y-9);slot.setAttribute('width',18);slot.setAttribute('height',18);slot.setAttribute('rx',3);slot.setAttribute('fill',building?'#bc914d':'#344c3b');slot.setAttribute('stroke','#f0d795');slot.style.cursor='pointer';
       slot.addEventListener('pointerenter',()=>commands.hoverBuilding?.({q:tile.q,r:tile.r,index:i}));
       slot.addEventListener('pointerleave',()=>commands.hoverBuilding?.(null));
@@ -210,7 +212,8 @@ function create(svg,commands){
   function drawEnemy(e){
     if(e.caravan)scene.appendChild(text(e.x,e.y-34,'◆ Kasse',10,'#ffe08a','700'));
     const g=document.createElementNS(NS,'g');
-    const c=document.createElementNS(NS,'circle');c.setAttribute('cx',e.x);c.setAttribute('cy',e.y);c.setAttribute('r',e.type==='boss'?15:9);c.setAttribute('fill',e.slowFactor<1?'#79cdd9':e.type==='boss'?'#934f9e':e.type==='armored'?'#78818c':e.type==='swarm'?'#b87832':'#8d3c34');c.setAttribute('stroke','#26120f');c.setAttribute('stroke-width',2);g.appendChild(c);
+    if(e.bossKind)g.appendChild(text(e.x,e.y-37,e.name,10,'#f8f1d8','700'));
+    const c=document.createElementNS(NS,'circle');c.setAttribute('cx',e.x);c.setAttribute('cy',e.y);c.setAttribute('r',e.type==='boss'?15:9);c.setAttribute('fill',e.slowFactor<1?'#79cdd9':e.type==='boss'?({iron:'#bd7935',hunter:'#39b8cf',summoner:'#984ee3'}[e.bossKind]||'#934f9e'):e.type==='armored'?'#78818c':e.type==='swarm'?'#b87832':'#8d3c34');c.setAttribute('stroke','#26120f');c.setAttribute('stroke-width',2);g.appendChild(c);
     const w=24,h=3,pools=[['hp','maxHp','#78b95f'],['armorHp','maxArmorHp','#df8b3a'],['magicHp','maxMagicHp','#69aee8']].filter(([,max])=>e[max]>0);
     pools.forEach(([field,max,color],i)=>{const y=e.y-17-i*4,bg=document.createElementNS(NS,'rect');bg.setAttribute('x',e.x-w/2);bg.setAttribute('y',y);bg.setAttribute('width',w);bg.setAttribute('height',h);bg.setAttribute('fill','#321a18');g.appendChild(bg);const bar=document.createElementNS(NS,'rect');bar.setAttribute('x',e.x-w/2);bar.setAttribute('y',y);bar.setAttribute('width',w*Math.max(0,(e[field]||0)/e[max]));bar.setAttribute('height',h);bar.setAttribute('fill',color);g.appendChild(bar);});scene.appendChild(g);
   }
@@ -231,7 +234,7 @@ function create(svg,commands){
 
   function reset(){objectKey='';fogRun=null;fogSize=-1;camera.reset(false);}
   function project(position){return camera.project(position);}
-  function clearSelection(){commands.clearSelection();}
+  function clearSelection(e){if(!e||e.button===undefined||e.button===0)commands.clearSelection();}
   svg.addEventListener('click',clearSelection);
   return {render,reset,project,panView:camera.panView,zoom:camera.zoom,resetView:camera.reset,getView:camera.getView,destroy(){camera.destroy();svg.removeEventListener('click',clearSelection);for(const layer of [fogLayer,worldLayer,objectLayer,hintLayer]) layer.remove();}};
 }

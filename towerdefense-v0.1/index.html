@@ -19,7 +19,7 @@
         <button id="resetViewBtn" class="secondary">Zur Base</button>
         <span>Mausrad: Zoom · rechte Maustaste ziehen: verschieben</span>
       </div>
-      <div id="message" class="message"><span id="messageText">Wähle eine Hexkarte und lege sie an die offene Straße der Base.</span><section id="tutorialPanel" class="tutorialPanel hidden" aria-label="Mini-Tutorial"><strong id="tutorialTitle"></strong><p id="tutorialText" aria-live="polite"></p><button id="skipTutorialBtn" class="secondary">Tutorial überspringen</button></section></div>
+      <div id="message" class="message"><span id="messageText">Wähle eine Hexkarte und lege sie an die offene Straße der Base.</span><button id="tunnelRescueBtn" class="secondary hidden">Rettungstunnel ansehen</button><section id="tutorialPanel" class="tutorialPanel hidden" aria-label="Mini-Tutorial"><strong id="tutorialTitle"></strong><p id="tutorialText" aria-live="polite"></p><button id="skipTutorialBtn" class="secondary">Tutorial überspringen</button></section></div>
       <section id="towerPanel" class="towerPanel hidden" aria-label="Ausgewählter Turm">
         <div class="panelHead"><h2 id="towerPanelTitle">Turm</h2><button id="closeTowerPanel" class="secondary" aria-label="Turminfos schließen" title="Schließen (Escape)"><small>Esc</small> ×</button></div>
         <button id="towerBiomeInfo" class="secondary">Biom-Effekte ⓘ</button><p id="selectedTowerInfo" class="hint"></p>
@@ -92,6 +92,7 @@
       <ul>
         <li>Die Startfestung bestimmt HP und Gold; die Base lässt sich ausbauen.</li>
         <li>Jedes offene Straßenende ist ein Spawnpunkt.</li>
+        <li>Stufe 1 abschließen: Wave 35 überleben, dadurch Stufe 2 · Zwei Fronten freischalten. Nach Wave 35: Run beenden oder mit gleicher Map im Endless-Modus weiterspielen.</li>
         <li>Ab Wave 15 erscheint alle 10 Waves ein Boss an einem zufälligen Eingang. Bosswellen werden vor dem Start angekündigt.</li>
         <li>Jeder Gegner entscheidet an jeder Gabelung zufällig zwischen allen Wegen zur Base. Sackgassen und Schleifen werden ausgeschlossen.</li>
         <li>Alle 2 Waves: 1 von 3 neuen Hexkarten ins Deck.</li>
@@ -141,16 +142,27 @@
       <div class="menuButtons">
         <button id="menuContinueBtn" class="primary hidden">Weiterspielen</button>
         <button id="menuPlayBtn" class="primary">Neuer Run</button>
-        <button id="menuLoadoutBtn" class="secondary">🛡 Loadout &amp; Festung</button>
         <button id="menuArsenalBtn" class="secondary">◆ Arsenal</button>
         <button id="menuRulesBtn" class="secondary">📜 Spielregeln</button>
       </div>
 
+      <button id="menuSaveBtn" class="secondary">Spielstand · Download / Upload</button>
       <div class="menuSound"><label class="toggle"><input id="menuSound" type="checkbox" checked /> Sounds aktiv</label></div>
       <small class="menuVersion" data-app-version></small>
     </div>
   </div>
 
+  <div id="saleConfirmOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="saleConfirmTitle"><div class="modeBox"><h2 id="saleConfirmTitle">Möchtest du wirklich verkaufen?</h2><p id="saleConfirmText"></p><button id="cancelSaleBtn" class="secondary">Abbrechen · Esc</button><button id="confirmSaleBtn" class="primary">Ja, verkaufen</button></div></div>
+  <div id="saveOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="saveTitle"><div class="modeBox">
+    <h2 id="saveTitle">Spielstand mitnehmen</h2>
+    <p>Diamanten, Freischaltungen, Loadouts und Profilstatistiken als Datei sichern. Laufende Runs und Geräteeinstellungen sind nicht enthalten.</p>
+    <button id="downloadSaveBtn" class="primary">Spielstand herunterladen</button>
+    <p><label for="uploadSaveInput">Spielstand hochladen (JSON, maximal 2 MB)</label></p>
+    <input id="uploadSaveInput" type="file" accept=".json,application/json" />
+    <p id="saveStatus" role="status" aria-live="polite"></p>
+    <button id="confirmImportBtn" class="primary hidden">Vorhandenes Profil ersetzen</button>
+    <button id="closeSaveBtn" class="secondary">Zurück · Esc</button>
+  </div></div>
   <div id="playModeOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="playModeTitle">
     <div class="modeBox"><h2 id="playModeTitle">Wie möchtest du spielen?</h2>
       <div id="playModeChoices" class="modeChoices">
@@ -198,6 +210,7 @@
     </div>
   </div>
 
+  <div id="campaignVictory" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="campaignVictoryTitle"><div class="gameOverBox"><p class="eyebrow">FESTUNG VERTEIDIGT</p><h2 id="campaignVictoryTitle">Wave 35 geschafft!</h2><p id="campaignVictoryText"></p><p>Deine Map und Türme bleiben im Endless-Modus erhalten. Diamanten werden beim Beenden des Runs abgerechnet.</p><div class="loadoutActions"><button id="victoryMenuBtn">Run abschließen · Hauptmenü</button><button id="endlessBtn">Im Endless-Modus weiterspielen</button></div></div></div>
   <div id="gameOverOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle">
     <div class="gameOverBox">
       <p class="eyebrow">RUN BEENDET</p><h2 id="gameOverTitle">Die Bastion ist gefallen</h2>
@@ -278,13 +291,19 @@
   <script src="profile.js"></script>
   <script src="map.js"></script>
   <script src="random.js"></script>
+  <script src="run-runtime.js"></script>
+  <script src="run-snapshot.js"></script>
   <script src="waves.js"></script>
   <script src="combat.js"></script>
   <script src="rewards.js"></script>
   <script src="deck.js"></script>
   <script src="buildings.js"></script>
+  <script src="tower-commands.js"></script>
   <script src="arsenal.js"></script>
   <script src="exploration.js"></script>
+  <script src="placement-commands.js"></script>
+  <script src="run-flow.js"></script>
+  <script src="run-session.js"></script>
   <script src="svg-renderer.js"></script>
   <script src="model-map.js"></script>
   <script type="module">

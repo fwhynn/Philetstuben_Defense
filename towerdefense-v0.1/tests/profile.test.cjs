@@ -73,3 +73,21 @@ test('reset refunds purchased meta once, repairs loadouts and preserves records 
   p=profile.unlockTower(p,'ballista',definitions);p=profile.unlockUltimate(p,'archer',definitions);p=profile.unlockBuilding(p,'house',definitions);assert.equal(p.diamonds,120);assert.equal(profile.resetValue(p),80);
   p.activeLoadout=['ballista','archer','catapult','chain','freeze'];const result=profile.resetUnlocks(p,definitions);assert.equal(result.refund,80);assert.equal(result.profile.diamonds,200);assert.equal(result.profile.records.highestWave,25);assert.equal(result.profile.lifetime.diamondsEarned,200);assert.ok(!result.profile.unlockedTowers.includes('ballista'));assert.deepEqual(Array.from(result.profile.activeLoadout),Array.from(profile.START_TOWERS));assert.equal(profile.resetUnlocks(result.profile,definitions).refund,0);
 });
+
+test('profile file transfers diamonds, unlock costs, presets and settlement receipts without merging',()=>{
+ const {profile:p,definitions:d,storage}=setup();let source=p.defaults();source.diamonds=321;source.unlockCosts={'tower:flame':35};source.unlockedTowers.push('flame');source.unlocks=['tower:flame'];source.settledRuns=['paid-run'];source.loadoutPresets[0].name='<b>Mein Deck</b>';source.dailyResults={'2026-09-21':{best:20,won:true}};
+ const file=p.exportFile(source,d),before=p.save({...p.defaults(),diamonds:7},d),old=storage.get(p.STORAGE_KEY);
+ const preview=p.readFile(file,d);assert.equal(preview.diamonds,321);assert.equal(storage.get(p.STORAGE_KEY),old);
+ const result=p.importFile(file,d);assert.equal(result.diamonds,321);assert.equal(result.unlockCosts['tower:flame'],35);assert.equal(result.loadoutPresets[0].name,source.loadoutPresets[0].name);assert.equal(result.dailyResults['2026-09-21'].won,true);assert.equal(storage.get(p.STORAGE_KEY+'-before-import'),old);
+ assert.equal(p.settleRun(result,{runId:'paid-run',wave:10},d).reward.duplicate,true);
+});
+test('invalid profile files never overwrite the previous profile',()=>{
+ const {profile:p,definitions:d,storage}=setup();p.save({...p.defaults(),diamonds:55},d);const before=storage.get(p.STORAGE_KEY),good=JSON.parse(p.exportFile(p.defaults(),d));
+ const bad=[{}, {...good,version:99}, {...good,profile:{...good.profile,diamonds:-1}}, {...good,profile:{...good.profile,records:{highestWave:'oops'}}}, {...good,profile:{...good.profile,loadoutPresets:[{name:'x',towers:null}]}}];
+ for(const file of bad){assert.throws(()=>p.importFile(JSON.stringify(file),d));assert.equal(storage.get(p.STORAGE_KEY),before);}
+ assert.throws(()=>p.readFile('{"__proto__":{}}',d));assert.throws(()=>p.readFile('x'.repeat(2000001),d));
+});
+test('profile import reports storage failures and keeps previous data when backup fails',()=>{
+ const {profile:p,definitions:d}=setup();const context={localStorage:{getItem:()=>'{"diamonds":9}',setItem(){throw new Error('storage full');}}};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../profile.js'),'utf8')+';globalThis.p=HexProfile;',context);
+ assert.throws(()=>context.p.importFile(p.exportFile(p.defaults(),d),d),/storage full/);
+});

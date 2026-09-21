@@ -3,6 +3,7 @@
 Stand: 20.09.2026, einschließlich der aktuellen lokalen Änderungen. Kompakte Übersicht über Ziele, Entscheidungen und spätere Ideen. Ausführlicher Verlauf: [Übergabeprotokoll](README_TowerDefense_Projekt.md). Technische Grenzen: [Architektur](towerdefense-v0.1/ARCHITECTURE.md). Änderungen: [App-README](towerdefense-v0.1/README.md).
 
 ## Festgelegte Richtung
+- Multiplayer-Richtung (21.09.2026): Duo „Zwillingsfestungen“ mit zwei eigenen Maps, gemeinsamem Leben, Portal-Verstärkung und Partner-Lieferungen ist zur Umsetzung gewählt. Ausführlicher Spiel-, Lobby-, Hosting- und Etappenplan: [MULTIPLAYER_PLAN.md](MULTIPLAYER_PLAN.md). Noch nicht implementiert; gemeinsame Map mit wechselndem Kartenlegen ist verworfen.
 - Mobile-App als geplantes Ziel: neue Features touchbedienbar gestalten, ausreichend große Bedienelemente, responsive Layouts und keine zwingenden Hover-/Tastaturaktionen. Spiellogik und Zeitsteuerung möglichst unabhängig von DOM/Renderer halten; Browser-/App-Lebenszyklus ausdrücklich berücksichtigen.
 - Tempo-Regler 1× bis 8×, gespeichert; F erhöht um eine Stufe und springt nach 8× auf 1×. Simulation in kleinen Schritten, zusätzlicher Hintergrundtimer, verzögerte Zeit wird nachgeholt; vollständiges Einfrieren durch Browser/OS bleibt eine Plattformgrenze. Manuelle Pause bleibt bestehen. Freie Turmplätze weiß, Gebäudeplätze türkis; gemeinsamer Schalter. Schatzbeschriftung nennt +20 Gold.
 - Hauptmenü ohne Scrollen: Spielen öffnet Moduswahl (Standard mit Schwierigkeit/Loadout oder tägliche Herausforderung). Karawanenbeschreibung und Spielregeln liegen auf separaten Ansichten. Biome deutlich sandgelb/rot eingefärbt; erkundetes Sturmhochland besitzt begrenzte Wind-/Nebeleffekte (reduzierte Bewegung berücksichtigt).
@@ -34,6 +35,10 @@ Stand: 20.09.2026, einschließlich der aktuellen lokalen Änderungen. Kompakte �
 - Bauen auch während Waves. Turm-Upgrades nur im angeklickten Turmmenü. Wave-/Gold-/Deckinfos als Dropdowns.
 
 ## Für später fest vorgemerkt
+- Gegner-Balancing (21.09.2026, vorgemerkt, noch nicht umgesetzt): deutlich mehr Gegnertypen. Elementare Immunitäten gegen Feuer, Wasser, Blitz und weitere passende Turm-Schadensarten; beim Tod Aufteilung in zwei oder vier schwächere Gegner bzw. Herabstufung; Heiler; Spezialgegner, die gezielt den kürzesten oder schnellsten Weg zur Base wählen. Konkrete Regeln und Schutz vor unfairen Loadout-Kombinationen siehe [Gegner-Balancing-Plan](ENEMY_BALANCING_PLAN.md).
+- Profil mitnehmen umgesetzt: Hauptmenü → Spielstand · Download / Upload. Versionierte JSON-Datei mit Diamanten, Freischaltungen, Kaufpreisen, Loadouts, Rekorden und Abrechnungs-IDs. Import nach Vorschau/Bestätigung ersetzt das Profil, sichert vorher den gespeicherten Stand lokal und ist während aktiver Runs gesperrt. Ungültige Dateien/Speicherfehler werden angezeigt. Laufende Runs und Geräteeinstellungen sind nicht enthalten. Online-Profilverwaltung für Multiplayer bleibt offen.
+
+- 1 gegen 1: gegeneinander spielen und die Plättchen für die jeweils andere Person auswählen. Vom Nutzer vorgemerkt, noch nicht umgesetzt; Auswahl-/Platzierungsregeln und Siegbedingungen später festlegen. Kein Teil des Duo-MVP.
 - Meta-Progression und Turm-Loadouts sind in [META_PROGRESSION_PLAN.md](META_PROGRESSION_PLAN.md) konkretisiert. Loadout, Diamanten, Arsenal, Minenleger sowie die ersten zwei freischaltbaren Türme sind umgesetzt. Keine fünf kostenlosen platzierten Türme. Meta-Unlocks sollen vor allem Optionen statt permanenter globaler Stärke geben.
 - Weitere Startprofile über die drei implementierten Heroes hinaus.
 - Weitere Base-Ausbaupfade können später folgen; Mauern und automatische Waffe sind umgesetzt.
@@ -54,10 +59,10 @@ Stand: 20.09.2026, einschließlich der aktuellen lokalen Änderungen. Kompakte �
 - Bossloot: +50 Gold und nach überlebter Wave genau eine Wahl aus Karten (90 % Epic, 10 % Legendary als Pool) oder Run-Segen (+5 aktuelle/maximale HP bzw. +2 Einkommen je künftiger Wave). Alle Bosse nacheinander vor normalen Wave-Rewards.
 - Kartendarstellung in svg-renderer.js ausgelagert: render/reset/project/destroy, logische Aktionen an Controller, keine direkte Mutation des Spielzustands. Gemeinsame Slotpositionen in map.js.
 - Weltkoordinaten: Base (0,0), keine Bildschirmzentrierung in Spiellogik. camera.js: DOM-freies Kameramodell plus austauschbarer SVG-Adapter; Renderer besitzt Kamera.
-- Prioritäten: aktuelle Änderungen im Spiel durch den Nutzer prüfen, Gameplay/Balance, Hero-/Base-Balancing anhand der ersten Spieltests. Danach Run-Speicherung und weitere Karten/Bonusvarianten. Diese Reihenfolge ist ein Vorschlag; Details sind noch nicht beschlossen.
+- Nächste größere Entwicklung (21.09.2026): Duo gemäß [Multiplayer-Plan](MULTIPLAYER_PLAN.md). Zuerst DOM-freie, speicherbare Run-Instanz und lokaler Zwei-Map-Prototyp; danach autoritativer Server, Lobby/Einladung und Wiederaufnahme. Aktuelle Gameplay-Fixes bleiben separat möglich; Browserabnahme durch den Nutzer.
 - Visuelle Prüfung, Audio-Hörprobe, Gebäude-Wirkungsbereiche im Spiel und langfristiges Balancing sind nicht durch aktuelle Browsertests bestätigt. Provisorisches Card Removal jede sechste Wave bleibt zusätzlich zu Shrines.
 
-Zuletzt 167 automatisierte Tests bestanden (20.09.2026); für die jüngsten Änderungen keine Browsertests durchgeführt. Laufende Runs sind nicht persistent; Profil, Freischaltungen, Presets und Hex-Grid-Einstellung werden lokal gespeichert.
+Zuletzt 246 automatisierte Tests bestanden (21.09.2026); für die jüngsten Änderungen keine Browsertests durchgeführt. Laufende Runs sind nicht persistent; Profil, Freischaltungen, Presets und Hex-Grid-Einstellung werden lokal gespeichert.
 
 Bei neuen Entscheidungen diesen Stand aktualisieren; offene Ideen nicht als implementierte Features behandeln.
 
@@ -105,3 +110,39 @@ Bei neuen Entscheidungen diesen Stand aktualisieren; offene Ideen nicht als impl
 - Schnellbau-Icons sperren/ergrauen bei fehlendem Gold oder fehlenden freien Turmplätzen. Günstigster Preis eines freien Platzes berücksichtigt Marktrabatte (Anzeige „ab“). Drag-Zielkreise und Trefferprüfung verwenden gemeinsam projizierte Bodenmittelpunkte und 20 px Radius; bei Überlappung zählt der nächste Mittelpunkt, außerhalb des Boards kein Treffer.
 
 - Drag-Bauplätze als eigenständige HTML-Zielmarker über der Map (Plus für bezahlbar, Kreuz für zu teuer), getrennt von der SVG-Abdunklung. Sichtbarkeit unabhängig von Slot-Hinweisen; Kameraänderungen aktualisieren die Zielpositionen sofort. Regressionstest deckt Anzeige, belegte Plätze, Board-Versatz, Kameraverschiebung und erfolgreichen Drop ab.
+
+- Upgrade-Hinweise nutzen in SVG und 3D dieselbe Run-Upgrade-Liste inklusive freigeschalteter Arsenal-Stufe 4. Gold-Hinweis berücksichtigt lokalen Marktrabatt; U bleibt goldunabhängig. Gesperrte und bereits gekaufte Endstufen erzeugen keinen Hinweis.
+
+- Straßenlose Gebäude-Hexe umgesetzt: Baugrund (Uncommon, 1 Gebäudeslot), Bauviertel (Rare, 2), Baubezirk (Epic, 3). Regulärer Belohnungspool; seitlich an bestehende Map anschließen, keine offene Straße zustellen. Keine Turmplätze oder automatischen Einkommen. Gebäudeslots haben eigene Positionen und sind einzeln bebaubar.
+
+- Wächterresistenzen nach Herkunftsbiom umgesetzt: Aschelande 50 % Feuer, Sturmhochland 50 % Blitz/Wind, Dünenmeer halbierte Verlangsamung, Grasland neutral. Gilt auch für regelmäßige Bosse anhand des Spawn-Hex. Hinweise in Biom-Infos.
+- Gegner-Balancing zusätzlich vorgemerkt: Beschwörer und Wiederbeleber, separat oder kombiniert; Grenzen gegen unendliche Ketten/Belohnungen vor Umsetzung festlegen.
+- Duo-Entwicklung begonnen: DOM-freie deklarative Spawn-Warteschlange im Solo integriert und versionierbarer/wiederherstellbarer Zufallszustand. Vollständige Run-Extraktion, lokales Duo und Online-Lobby bleiben offen; Details im Multiplayer-Plan.
+
+- Duo Etappe 1 fortgesetzt: Run-Erzeugung und laufende Kampf-Simulation aus game.js in DOM-freies run-runtime.js ausgelagert, vom Solo verwendet. Node-Einstieg headless-core.cjs lädt dieselben Regeln ohne Browser-Stubs. Interne JSON-Checkpoints mit Maps, Sets, Erkundungsmetadaten, Sonderzahlen und Zufallsströmen; Solo-Adapter zum Wiederherstellen. Aktuell nur Wave und abgeschlossene Bauphase; offene Angebote und Platzierung werden noch nicht unterstützt. Vollständige Commands/Belohnungsphasen bleiben als nächster Schritt offen. Kein öffentlicher Run-Speicherbutton oder spielbarer Duo-Modus hinzugefügt.
+
+- Kartenbelohnungen zeigen direkt die Zahl gleicher Karten im gesamten Run-Deck (auch Wächter und Shrine).
+- Duo: persistente Belohnungsangebote mit rungebundenen IDs, validierte einmalige Auswahl und Snapshot-Wiederaufnahme ohne Neuwürfeln; normale Karten, Wächtersegen, Shrine-Upgrades/Heilung sowie Kartenentfernung. Turmkauf/Mehrfachbau und Upgrade in gemeinsamen DOM-freien Commands. Platzierung, Wave-Grenzen und vollständige Übergänge bleiben offen.
+- Eingeschlossene Straßen: lokale Anschlussprüfung erkennt größere geschlossene Leerflächen nicht. Vorschlag zur Prävention sowie Rettungstunnel/Brücken in [MAP_EXPANSION_PLAN.md](MAP_EXPANSION_PLAN.md). Noch nicht implementiert.
+
+- Einschluss-Schutz und kostenlose Rettungstunnel umgesetzt: letzte Front muss Außenraum erreichen; bereits eingeschlossene Runs erhalten beim Ziehen eine Vorschau/Bestätigung für einen Tunnel. Sofortiger Portalwechsel, nummerierte Enden, keine Bauplätze am Ausgang, keine Karte im Deck. Brücken und zeitlicher Transit bleiben offen.
+- Türme-Menü schließt bei linkem Feldklick außerhalb von Bauplätzen; Platzwahl öffnet es weiterhin gezielt.
+- Duo: Hex-Platzierung als DOM-freie Commands, runlokales Rettungshex und Platzierungs-Checkpoints. Nächster Schritt sind Kartenziehen und Wave-Übergänge.
+
+- Gebäude-Bauangebote zeigen den Wirkungsbereich bereits bei Hover oder Tastaturfokus: Schmiede/Markt mit denselben Regeln wie nach dem Kauf. Vorschau verändert keine Effekte oder Kosten.
+- Verkauf von Türmen und Gebäuden im UI erfordert Bestätigung mit Erstattungsbetrag; Abbrechen/Escape, Zielprüfung und erneute Bestätigung bei geändertem Betrag.
+- Duo: run-flow.js übernimmt Ziehen/Redraw/Rettungsangebote, Wave-Start und einmalige Abschlussabrechnung. Vollständige Belohnungs-/Erfolgsabfolge noch im Controller; als nächstes gemeinsame Session-Steuerung vor lokalem Zwei-Map-Prototyp.
+
+- Spätere Meta-Progression: Upgrades an Gegner-Killbedingungen knüpfen, beispielsweise 100 feuerresistente Gegner für ein Feuer-Upgrade. Beispielwerte und Kauf mit/ohne Diamanten noch offen; eigener Abschnitt in META_PROGRESSION_PLAN.md. Noch nicht implementiert.
+- Duo: run-session.js übernimmt Belohnungsketten, Shrine-Abfolge, Vorbereitung und Erfolgsmeldungen. Aktive Erfolgsmeldungen bleiben in Checkpoints erhalten. Nächster Schritt: lokaler Zwei-Map-Prototyp mit Team-HP und gemeinsamer Wave-Barriere.
+
+- Duo lokal spielbar als separate duo-prototype.html: zwei unabhängige Maps/Decks/Goldkonten, 40 Team-HP, beide bereit vor Wave-Start; früh fertige Seite wartet ohne Abschlussbelohnung. Gemeinsamer Abschluss und Teamtod, Commands mit Wave-/Duplikatprüfung und JSON-Checkpoint beider Maps inklusive Wartephase. Checkpoint nur im Tab, kein Profilzugriff. Noch keine Verstärkung, Lieferungen oder Online-Lobby; nächster Schritt Portal-Verstärkung. 241 automatisierte Tests bestanden, keine Browsertests.
+
+- Markt/Schmiede: Zusatz-Hex per Button am Gebäude aktivieren und direkt auf ein erkundetes Hex klicken/tippen. Zielmap wird hervorgehoben; Escape bricht ab. Neue Ballisten priorisieren Bosse vor Base-Nähe und Leben. Doppelten Loadout-/Festungsbutton im Hauptmenü entfernt, Auswahl über Spielen bleibt.
+- Duo: reservierter Portalplatz, Verstärkungswahl, Wellenstart-Kopie und Gastturm nach 1,5 Spielsekunden bei sauberem Abschluss umgesetzt. Empfänger erhält Killgold, Sender separate Schadensstatistik (auch Minen). Gäste/Restminen am Teamende entfernt; Checkpoint erhält laufende Ankunft. Noch lokal, kein Online-Modus. 246 Tests bestanden, keine Browsertests.
+
+- Kampagnenabschluss umgesetzt: Stufe 1 (Standard, ein Ausgang) muss Wave 35 überleben, bevor Stufe 2 (Zwei Fronten) gewählt werden kann. Profil-Meilenstein `standard35` bleibt bei Arsenal-Reset erhalten und reist im Profiltransfer mit. Alte reine Wave-Rekorde werden nicht als Standard-Abschluss interpretiert. Sieg nach Wave 35 auch in Stufe 2; Hauptmenü rechnet den Run einmal ab, Endless behält Run/Map/Belohnungen und rechnet erst beim späteren Ende ab. Karawane und lokaler Duo-Prototyp behalten ihre bisherigen Ziele.
+- Periodische Bossrotation: Wave 15 Eisenkoloss (60 % Rüstungspool, langsam, 7 Base-Schaden), Wave 25 Sturmjäger (Tempo 48, maximal 20 % Slow), Wave 35 Seelenmatriarchin (70 % MR-Pool, alle 6 Sekunden ein Diener, höchstens sechs). Diener starten am aktuellen Wegpunkt, geben kein Gold und müssen für den Waveabschluss verschwunden sein. Nach Wave 35 wiederholt sich die Rotation mit steigenden HP. Pool-Prozente sind zusätzliche HP-Pools, keine Schadensresistenzen; Herkunftsbiom-Resistenzen gelten weiterhin.
+- Duo-Prototyp: eine große Map statt permanentem Split-Screen; per Spielerbuttons umschalten, Partnerphase/Bereitschaft/unterwegs befindliche Hilfe anzeigen. Beide Simulationen laufen unabhängig von der Ansicht weiter; Kameras bleiben erhalten. Noch lokal am selben Gerät, kein Netzwerk/keine Lobby.
+
+249 Tests bestanden, keine Browsertests.

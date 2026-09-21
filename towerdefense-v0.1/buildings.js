@@ -6,7 +6,7 @@ const HexBuildings=(()=>{
   function applies(source,target,building){const def=definition(building);if(!def)return false;const dq=source.q-target.q,dr=source.r-target.r;return Math.max(Math.abs(dq),Math.abs(dr),Math.abs(dq+dr))<=def.radius||(building.special&&building.target===target.q+','+target.r);}
   function nextUpgrade(state,building){if(!building)return null;const level=building.level||1;if(level<3)return upgrades[building.type][level-1];if(!building.special&&state.buildingUnlocks?.includes('building:'+building.type))return specials[building.type];return null;}
   function upgrade(state,slot){const tile=slot&&state.map.get(slot.q+','+slot.r),b=tile?.buildings?.[slot.index],next=nextUpgrade(state,b);if(!next||state.hp<=0||!['build','wave'].includes(state.phase)||state.gold<next.cost)return false;const before=definition(b);if((b.level||1)<3)b.level=(b.level||1)+1;else b.special=true;b.paid+=next.cost;state.gold-=next.cost;state.income+=(definition(b).income||0)-(before.income||0);state.buildingVersion=(state.buildingVersion||0)+1;refresh(state);return true;}
-  function setTarget(state,slot,target){const source=slot&&state.map.get(slot.q+','+slot.r),b=source?.buildings?.[slot.index],tile=state.map.get(target);if(!b?.special||!tile||state.hp<=0||!['build','wave'].includes(state.phase))return false;b.target=target;state.buildingVersion=(state.buildingVersion||0)+1;refresh(state);return true;}
+  function setTarget(state,slot,target){const source=slot&&state.map.get(slot.q+','+slot.r),b=source?.buildings?.[slot.index],tile=state.map.get(target);if(!b?.special||b.type==='house'||!tile||state.hp<=0||!['build','wave'].includes(state.phase))return false;b.target=target;state.buildingVersion=(state.buildingVersion||0)+1;refresh(state);return true;}
   function effects(map,target){
     let damage=1,discount=1;if(!target) return {damage,discount};
     for(const tile of map.values()){
@@ -17,7 +17,9 @@ const HexBuildings=(()=>{
     return {damage,discount};
   }
   function highlight(state){
-    const slot=state.hoverBuilding||state.selectedBuilding,source=slot&&state.map.get(slot.q+','+slot.r),building=source?.buildings?.[slot.index],def=definition(building);
+    if(state.buildingTarget){const slot=state.buildingTarget,b=state.map.get(slot.q+','+slot.r)?.buildings?.[slot.index];if(b?.special&&b.type!=='house')return {tiles:[...state.map.values()],color:definitions[b.type].color};}
+    const preview=state.previewBuilding,selected=state.selectedBuilding,validPreview=preview&&selected&&preview.q===selected.q&&preview.r===selected.r&&preview.index===selected.index&&!state.map.get(preview.q+','+preview.r)?.buildings?.[preview.index];
+    const slot=validPreview?preview:state.hoverBuilding||selected,source=slot&&state.map.get(slot.q+','+slot.r),building=validPreview?{type:preview.type,level:1}:source?.buildings?.[slot.index],def=definition(building);
     if(!def)return {tiles:[],color:null};
     const tiles=[...state.map.values()].filter(tile=>applies(source,tile,building));
     return {tiles,color:def.color};

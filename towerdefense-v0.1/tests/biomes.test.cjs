@@ -30,3 +30,18 @@ test('desert movement slow is local and ends when an enemy leaves the biome',()=
   Object.assign(e,{x:0,y:0,index:0,t:0,points:[{x:0,y:0},{x:100,y:0}]});
   combat.step(state,[],data.TOWERS,.1,200);assert.equal(e.x,1);
 });
+
+test('guardian resistance follows its origin and halves only the matching element including ultimate upgrades',()=>{
+ const {biomes:b,data:d,combat:c}=load();
+ for(const [biome,type,branch,finalUpgrade] of [['ash','flame',null,null],['ash','element','elementFire','elementVolcano'],['storm','chain',null,null],['storm','element','elementWind','elementTempest']]){
+  const damage=(resistant)=>{const e={type:'boss',alive:true,hp:1000,x:20,y:0,index:0,t:0,speed:0,points:[{x:20,y:0},{x:500,y:0}],resistances:resistant?biome==='ash'?{fire:.5}:{lightning:.5,wind:.5}:{}};
+   const state={hp:20,gold:0,goldEarned:{kills:0},waveKills:0,enemies:[e],projectiles:[]};c.step(state,[{tw:{type,branch,finalUpgrade,ultimate:type,lastShot:-Infinity},pos:{x:0,y:0}}],d.TOWERS,0,2000);return 1000-e.hp;};
+  assert.ok(damage(false)>0);assert.ok(Math.abs(damage(true)-damage(false)*.5)<1e-8);
+ }
+ for(let q=-6;q<=6;q++)for(let r=-6;r<=6;r++){const g=b.guardian({biomeSeed:'world'},{q,r});assert.equal(g.originBiome,b.at('world',q,r));assert.equal(g.resistances.fire||0,g.originBiome==='ash'?.5:0);assert.equal(g.slowResistance,g.originBiome==='desert'?.5:0);}
+ assert.equal(d.towerDefinition({type:'element',branch:'elementWater'}).damageType,'water');
+});
+test('desert guardian halves the combined terrain and tower slow, not its base speed',()=>{
+ const {combat:c,data:d}=load();const e={type:'boss',alive:true,hp:1000,x:0,y:0,index:0,t:0,speed:20,slowResistance:.5,points:[{x:0,y:0},{x:500,y:0}]},state={hp:20,gold:0,goldEarned:{kills:0},waveKills:0,enemies:[e],projectiles:[]};
+ c.step(state,[{tw:{type:'freeze'},pos:{x:0,y:0}}],d.TOWERS,1,1000);assert.equal(e.x,15);c.step(state,[],d.TOWERS,1,2000);assert.equal(e.x,35);
+});

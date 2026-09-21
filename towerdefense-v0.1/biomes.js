@@ -2,9 +2,9 @@
 const HexBiomes=(()=>{
   const definitions={
     grass:{name:'Grasland',color:'#688653',description:'Keine Biommodifikatoren.'},
-    desert:{name:'Dünenmeer',color:'#e2bd69',description:'Gegner hier 15 % langsamer; Türme hier −15 % Reichweite.'},
-    storm:{name:'Sturmhochland',color:'#7e8da9',description:'Kettenblitz +25 % Sprungweite; Wind +1 Durchschlagziel; Archer/Balliste −15 % Angriffsrate.'},
-    ash:{name:'Aschelande',color:'#bd6047',description:'Feuer +20 % Schaden; Freeze −15 % Reichweite; Wasser-Slow hält 25 % kürzer.'}
+    desert:{name:'Dünenmeer',color:'#e2bd69',description:'Gegner hier 15 % langsamer; Türme hier −15 % Reichweite. Wächter aus diesem Biom: Verlangsamungen wirken nur halb so stark.'},
+    storm:{name:'Sturmhochland',color:'#7e8da9',description:'Kettenblitz +25 % Sprungweite; Wind +1 Durchschlagziel; Archer/Balliste −15 % Angriffsrate. Wächter: 50 % weniger Blitz- und Windschaden.'},
+    ash:{name:'Aschelande',color:'#bd6047',description:'Feuer +20 % Schaden; Freeze −15 % Reichweite; Wasser-Slow hält 25 % kürzer. Wächter: 50 % weniger Feuerschaden.'}
   };
   function at(seed,q,r){
     if(seed==null||Math.max(Math.abs(q),Math.abs(r),Math.abs(q+r))<=2)return 'grass';
@@ -36,5 +36,6 @@ const HexBiomes=(()=>{
     }
     return def;
   }
-  return {definitions,at,forTile,atWorld,apply};
+  function guardian(state,tile){const originBiome=forTile(state,tile);return {originBiome,resistances:originBiome==='ash'?{fire:.5}:originBiome==='storm'?{lightning:.5,wind:.5}:{},slowResistance:originBiome==='desert'?.5:0};}
+  return {guardian,definitions,at,forTile,atWorld,apply};
 })();
