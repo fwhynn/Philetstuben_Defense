@@ -107,6 +107,7 @@ Das Deck enthält ausschließlich Maphex-Karten. Gezogene Belohnungen werden ers
 | Spiegel-Abzweig | Uncommon | 2 | Gespiegelte T-Kreuzung: Durchgang mit Abzweig auf der anderen Seite. |
 | Fächerkreuzung | Uncommon | 2 | Drei Straßenenden auf einer Seite. Zwei Turmplätze im Rücken. |
 | Seitenkreuzung | Rare | 2 | Vier aufeinanderfolgende Straßenenden für neue Anschlüsse. |
+| Bastionssackgasse | Epic | 2 | Ein Straßenanschluss; darf das letzte mit der Base verbundene offene Ende nicht schließen. Bleibt unabhängig davon im Ziehpool. |
 | Späherbogen | Epic | 1 | Kleine Kurve: +30 % Turmreichweite auf diesem Hex. |
 | Veteranengabel | Epic | 2 | Y-Kreuzung mit 2 Turmplätzen und +20 % Turmschaden. |
 | Goldroute | Epic | 1 | Gerade mit einem Turmplatz und +4 Gold je Wave. |
@@ -317,3 +318,18 @@ Shrine-Schaltflächen sind kontextabhängig: Heilquelle und Werksegen zeigen nur
 - Arsenal: zwölf Forschungsbäume in zwei Reihen mit je sechs Bäumen. Kompakte obere Werkzeugleiste statt separater Titel-/Erklärungs-/Fußbereiche; Hilfe aufklappbar, Status nur bei Meldungen als Overlay. Jeder Einstieg startet bei 73 %, Gesamtübersicht bleibt manuell verfügbar.
 
 - Arsenal-Bäume passen ihre Breite an die vorhandenen Zweige an (Katapult zwei, Element drei); keine Streckung auf die Breite anderer Bäume. Zoom verwendet Layout-Zoom statt transform:scale, damit Text bei jeder Zoomstufe neu gerastert wird. 73-%-Start, Mausanker und Drag bleiben erhalten.
+
+Prozedurale Straßen (Spiegel-Abzweig, Fächer-/Seitenkreuzung, Sackgasse und Rettungshex) erhalten einen 22 Einheiten breiten Straßenrand unter der 18 Einheiten breiten Fahrbahn. Freie Bauplatz-Diamanten werden als transparente Overlay-Marker ohne Tiefentest und ohne Schreiben in den Tiefenpuffer nach den Map-Flächen gezeichnet.
+
+- Run-Ende (Niederlage und Karawanensieg): Map anschauen blendet das Ergebnis aus; Kamera bleibt bedienbar, Button/Escape zurück ohne neue Abrechnung oder Simulationsstart.
+- Run-Statistik je Turmtyp und aufklappbar je gebautem Turm: tatsächlich abgezogener Leben-/Rüstung-/Magieresistenz-Schaden ohne Overkill, Baukosten, Upgrade-Kosten, Bruttoinvestition, Erstattungen und Schaden/Brutto-Gold. Rabatte zählen tatsächlich bezahlt, kostenlose Shrine-Upgrades nicht als Ausgabe. Verkauf löscht Historie nicht; Minenschaden behält Turmzuordnung nach Verkauf, Geisterschaden zählt zum Nekromanten. Base-Schaden separat, Freeze als Support ohne irreführende Schadenseffizienz. Daten beginnen pro Run neu.
+- Feuerkern profitiert bereits ab Element-Feuerzweig von Aschelande +20 % Schaden; gilt ebenfalls für Vulkanherz und Weltenbrand.
+
+- Mehrfachauswahl: Strg/Cmd + Klick markiert/entfernt mehrere freie Turmplätze oder mehrere vorhandene Türme; normaler Klick ersetzt die Auswahl. Touch-Alternative: Mehrfachauswahl-Schalter im Turmbaumenü. Markierte Plätze erhalten weiße Ringe. Bauangebote zeigen Stückzahl und Gesamtpreis inklusive individueller Marktrabatte; Kauf erfolgt vollständig oder gar nicht.
+- Bei mehreren Türmen werden Angriffsfokus-Prioritäten gemeinsam bearbeitet; gemischte Einstellungen werden angezeigt. Minenleger/Support ohne Angriffsfokus bleiben unverändert. Verkauf und Upgrades erfordern eine Einzelauswahl.
+- Nebel, freie Nachbarfelder und noch nicht angeschlossene Sonderfelder werden in 3D separat hinter der erkundeten Map gerendert; sie können Baumarker und Map-Objekte nicht mehr verdecken.
+
+- Ingame links: fünf dauerhafte Loadout-Icons. Pointer-Drag auf einen freien Turmplatz baut genau einen Turm zum lokalen Preis; alternativ Icon anklicken/antippen und Bauplatz wählen. Beim Ziehen grauer Map-Schleier mit ausgesparten, hervorgehobenen freien Slots. Escape, ungültiges Ablegen, Pointer-Abbruch und Fokusverlust brechen ab; keine Kosten bei ungültigem/zu teurem Bau. Touch über Pointer Events, Icons wiederverwenden die Arsenal-Symbole.
+- Biomnamen nicht mehr auf jedem Hex: rechte Icon-Leiste für auf gelegten Tiles entdeckte Biome. Hover/Fokus zeigt Effekte und hebt zugehörige gelegte Tiles hervor; Klick/Tippen fixiert oder löst die Anzeige. Neuer Run setzt Entdeckungen und Fixierung zurück.
+
+- Schnellbau-Icons sperren/ergrauen bei fehlendem Gold oder fehlenden freien Turmplätzen. Günstigster Preis eines freien Platzes berücksichtigt Marktrabatte (Anzeige „ab“). Drag-Zielkreise und Trefferprüfung verwenden gemeinsam projizierte Bodenmittelpunkte und 20 px Radius; bei Überlappung zählt der nächste Mittelpunkt, außerhalb des Boards kein Treffer.

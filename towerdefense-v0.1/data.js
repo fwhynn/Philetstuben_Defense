@@ -1,5 +1,6 @@
 const HexData=(()=>{
   const CARD_LIBRARY = {
+    deadEnd:{id:'deadEnd',name:'Bastionssackgasse',rarity:'Epic',roads:[0],slots:2,procedural:true,slotLayout:[[-14,-24],[-14,24]],desc:'Schließt einen Weg mit zwei Turmplätzen ab. Darf niemals das letzte offene Straßenende schließen.'},
     mirrorJunction:{"id":"mirrorJunction","name":"Spiegel-Abzweig","rarity":"Uncommon","roads":[0,3,4],"slots":2,"procedural":true,"slotLayout":[[-30,-24],[-4,-24]],"desc":"Gespiegelte T-Kreuzung: Durchgang mit Abzweig auf der anderen Seite."},
     fanJunction:{"id":"fanJunction","name":"Fächerkreuzung","rarity":"Uncommon","roads":[0,1,2],"slots":2,"procedural":true,"slotLayout":[[-22,25],[16,25]],"desc":"Drei Straßenenden auf einer Seite. Zwei Turmplätze im Rücken."},
     sideCross:{"id":"sideCross","name":"Seitenkreuzung","rarity":"Rare","roads":[0,1,2,3],"slots":2,"procedural":true,"slotLayout":[[-22,25],[16,25]],"desc":"Vier aufeinanderfolgende Straßenenden für neue Anschlüsse."},
@@ -105,6 +106,11 @@ const HexData=(()=>{
   };
   const BRANCH_VISUALS={marksman:{icon:'◎',color:'#f5d06e'},volley:{icon:'≋',color:'#96d47c'},siege:{icon:'◆',color:'#e99a5c'},barrage:{icon:'⋮',color:'#ffdca1'},storm:{icon:'ϟ',color:'#93a5ff'},overload:{icon:'✦',color:'#e2a1ff'},deepFrost:{icon:'❄',color:'#70d5ff'},frostField:{icon:'❆',color:'#c0f6ea'},demolition:{icon:'✹',color:'#ff9b55'},minefield:{icon:'••',color:'#d9bc72'},harpoon:{icon:'➶',color:'#e7d39e'},repeater:{icon:'»',color:'#d4b979'},inferno:{icon:'☀',color:'#ff7448'},wildfire:{icon:'≋',color:'#ff9b55'}};
   Object.assign(BRANCH_VISUALS,{elementFire:{icon:'♨',color:'#ff8654'},elementWater:{icon:'≈',color:'#69d8ff'},elementWind:{icon:'≋',color:'#dbefae'},soulChoir:{icon:'☽',color:'#a6edb4'},soulKeeper:{icon:'☠',color:'#c8a3ee'}});
+  function recordTowerStat(state,tower,field,amount){
+    if(!tower)return;if(tower===state.baseWeapon){if(field==='damage')state.baseDamage=(state.baseDamage||0)+amount;return;}
+    state.runTowerStats??={};const usage=state.runTowerStats[tower.type]??={builds:0,upgrades:0};usage[field]=(usage[field]||0)+amount;
+    const detail=state.runTowerDetails?.[tower.statId];if(detail)detail[field]=(detail[field]||0)+amount;
+  }
   function upgradeStatus(state,tower){if(tower.ultimate)return '';if(availableUpgrades(tower).length)return '↑';return state.ultimateUnlocks?.includes('ultimate:'+tower.type)?'↑':'';}
   function ultimateDefinition(tower){const def=ULTIMATES[tower.type];if(tower.type!=='element')return def;return {...def,name:({elementFire:'Weltenbrand',elementWater:'Ozeanherz',elementWind:'Himmelssturm'})[tower.branch]||def.name};}
   function towerDefinition(tower,definitions=TOWERS){
@@ -124,5 +130,5 @@ const HexData=(()=>{
     const full=state.phase==='build'&&!state.waveRunning&&tower.builtOnWave===state.wave;
     return {amount:full?tower.paid:Math.floor(tower.paid*.5),percent:full?100:50};
   }
-  return {upgradeStatus,ultimateDefinition,CARD_LIBRARY,TOWERS,UPGRADES,ULTIMATES,BRANCH_VISUALS,towerDefinition,availableUpgrades,towerRefund};
+  return {recordTowerStat,upgradeStatus,ultimateDefinition,CARD_LIBRARY,TOWERS,UPGRADES,ULTIMATES,BRANCH_VISUALS,towerDefinition,availableUpgrades,towerRefund};
 })();

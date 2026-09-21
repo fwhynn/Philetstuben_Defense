@@ -180,3 +180,17 @@ test('touching mines do not chain detonate from another mine explosion',()=>{
   state.mines=[{id:1,x:10,y:0,damage:100,splash:45},{id:2,x:20,y:0,damage:100,splash:45},{id:3,x:30,y:0,damage:100,splash:45}];
   step(state,[],towers,0,2000);assert.deepEqual(Array.from(state.mines,m=>m.id),[2,3]);assert.equal(state.projectiles.filter(p=>p.kind==='blast').length,1);
 });
+
+test('run damage statistics count actual shield and health loss without overkill, per tower',()=>{
+  const {state,step,towers}=setup(),tw={type:'archer',statId:1,lastShot:0};state.runTowerDetails={1:{type:'archer',damage:0}};
+  const target=enemy(20,0,3);target.armorHp=10;target.magicHp=5;state.enemies=[target];
+  step(state,[{tw,pos:{x:0,y:0}}],{...towers,archer:{...towers.archer,damage:100,damageMultipliers:{hp:1,armor:1,magic:1}}},0,2000);
+  assert.equal(state.runTowerStats.archer.damage,18);assert.equal(state.runTowerDetails[1].damage,18);
+});
+test('mine damage survives tower sale and base damage does not inflate archer statistics',()=>{
+  const {state,step,towers}=setup();state.runTowerDetails={3:{type:'mine',damage:0,sold:true}};state.enemies=[enemy(20,0,5)];state.mines=[{id:1,x:20,y:0,damage:100,splash:45,source:{type:'mine',statId:3}}];step(state,[],towers,0,2000);assert.equal(state.runTowerStats.mine.damage,5);assert.equal(state.runTowerDetails[3].damage,5);
+  const base={type:'archer',lastShot:0};state.baseWeapon=base;state.enemies=[enemy(20,0,2)];step(state,[{tw:base,pos:{x:0,y:0}}],towers,0,3000);assert.equal(state.baseDamage,2);assert.equal(state.runTowerStats.archer,undefined);
+});
+test('necromancer statistics include spirit damage',()=>{
+  const {state,step,towers}=setup(),tw={type:'necromancer',statId:4,lastShot:2000,souls:[{until:10000,lastShot:0}]};state.runTowerDetails={4:{type:'necromancer',damage:0}};state.enemies=[enemy(20,0,100)];step(state,[{tw,pos:{x:0,y:0}}],towers,0,2000);assert.equal(state.runTowerStats.necromancer.damage,8);assert.equal(state.runTowerDetails[4].damage,8);
+});

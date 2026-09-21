@@ -13,5 +13,12 @@ const HexUiLayout=(()=>{
     width=Math.min(width,Math.max(0,area.right-area.left));height=Math.min(height,Math.max(0,area.bottom-area.top));
     return {x:Math.max(area.left,Math.min(x,area.right-width)),y:Math.max(area.top,Math.min(y,area.bottom-height)),width,height};
   }
-  return {safeArea,fit};
+  const dropRadius=20;
+  function pickScreenSlot(slots,x,y,width,height){
+    if(x<0||y<0||x>width||y>height)return null;
+    let best=null,distance=Infinity;
+    for(const slot of slots){const d=Math.hypot(slot.x-x,slot.y-y);if(d<=dropRadius&&d<distance){best=slot;distance=d;}}
+    return best?{q:best.q,r:best.r,index:best.index}:null;
+  }
+  return {safeArea,fit,dropRadius,pickScreenSlot};
 })();

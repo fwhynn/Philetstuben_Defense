@@ -162,6 +162,10 @@ function create(host0,commands){
   // ---- Szene ----
   const layer={tiles:new THREE.Group(),landmarks:new THREE.Group(),empty:new THREE.Group(),objects:new THREE.Group(),targets:new THREE.Group(),dynamic:new THREE.Group(),ghost:new THREE.Group(),overlays:new THREE.Group()};
   Object.values(layer).forEach(g=>scene.add(g));
+  // Future tiles form a separate background pass; they never occlude the explored map or its markers.
+  const backgroundScene=new THREE.Scene();backgroundScene.background=scene.background;backgroundScene.fog=scene.fog;scene.background=null;
+  const backgroundSun=new THREE.DirectionalLight('#fff1d0',2.5);backgroundScene.add(new THREE.HemisphereLight('#dff0ff','#6b7a4c',1.15),backgroundSun,backgroundSun.target,layer.empty,layer.landmarks);
+  gl.autoClear=false;
   let state,targetList=[],hoverPick=null;
   const tileRecords=new Map(),landmarkRecords=new Map(),objectRecords=new Map(),labels=new Map(),usedLabels=new Set();
   let emptySig='',targetSig='',ghostSig='',pickables=[],pickDirty=true,runToken=null;
@@ -193,7 +197,7 @@ function create(host0,commands){
   let overlaySig='';
   function clearOverlays(){for(const mesh of [...layer.overlays.children]){layer.overlays.remove(mesh);mesh.dispose();}overlaySig='';}
   function syncTileOverlays(){
-    const highlight=HexBuildings.highlight(state),cells=state.showHexGrid?HexExploration.gridCells(state.map,state.landmarks):[];
+    const highlight=state.highlightBiome?{color:HexBiomes.definitions[state.highlightBiome].color,tiles:[...state.map.values()].filter(t=>HexBiomes.forTile(state,t)===state.highlightBiome)}:HexBuildings.highlight(state),cells=state.showHexGrid?HexExploration.gridCells(state.map,state.landmarks):[];
     const sig=JSON.stringify([cells.map(t=>key(t.q,t.r)),highlight.color,highlight.tiles.map(t=>key(t.q,t.r))]);if(sig===overlaySig)return;
     clearOverlays();overlaySig=sig;
     const add=(tiles,geometry,material,order)=>{if(!tiles.length)return;const mesh=new THREE.InstancedMesh(geometry,material,tiles.length),matrix=new THREE.Matrix4();tiles.forEach((tile,i)=>{const p=axialToWorld(tile.q,tile.r);matrix.makeTranslation(p.x,3,p.y);mesh.setMatrixAt(i,matrix);});mesh.instanceMatrix.needsUpdate=true;mesh.renderOrder=order;layer.overlays.add(mesh);};
@@ -227,13 +231,16 @@ function create(host0,commands){
     }
     if(spec.proceduralRoads){
       const roadBase=template.parts.find(p=>p.material.name==='road')?.material||fallbackMaterial,road=ghost?ghostMaterial(roadBase,true):roadBase;
-      for(const points of HexMap.roadGeometry(tile).legs.values()) holder.add(ribbon(points.map(p=>({x:p.x-c.x,y:p.y-c.y})),road));
+      const vergeBase=template.parts.find(p=>p.material.name==='road_verge')?.material||roadBase,verge=ghost?ghostMaterial(vergeBase,true):vergeBase;
+      const paths=[...HexMap.roadGeometry(tile).legs.values()].map(points=>points.map(p=>({x:p.x-c.x,y:p.y-c.y})));
+      for(const points of paths)holder.add(ribbon(points,verge,22,.85));
+      for(const points of paths)holder.add(ribbon(points,road,18,1));
     }
     return holder;
   }
-  function ribbon(points,material,width=18){
+  function ribbon(points,material,width=18,height=1){
     const positions=[],indices=[];
-    points.forEach((p,i)=>{const a=points[Math.max(0,i-1)],b=points[Math.min(points.length-1,i+1)],dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1,nx=-dy/len*width/2,ny=dx/len*width/2;positions.push(p.x+nx,1,p.y+ny,p.x-nx,1,p.y-ny);if(i) indices.push(2*i-2,2*i-1,2*i,2*i-1,2*i+1,2*i);});
+    points.forEach((p,i)=>{const a=points[Math.max(0,i-1)],b=points[Math.min(points.length-1,i+1)],dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1,nx=-dy/len*width/2,ny=dx/len*width/2;positions.push(p.x+nx,height,p.y+ny,p.x-nx,height,p.y-ny);if(i) indices.push(2*i-2,2*i-1,2*i,2*i-1,2*i+1,2*i);});
     // Von oben sichtbare Vorderseite: Die X/Z-Ebene benötigt die umgekehrte Wicklung.
     for(let i=0;i<indices.length;i+=3) [indices[i+1],indices[i+2]]=[indices[i+2],indices[i+1]];
     const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setIndex(indices);geometry.computeVertexNormals();
@@ -334,9 +341,9 @@ function create(host0,commands){
       if(tile.type==='base'){const pick=new THREE.Mesh(buildingPick,invisible);pick.scale.set(2,2,2);pick.userData.pick={kind:'base'};group.add(pick);picks.push(pick);}
       (tile.towers||[]).forEach((tower,i)=>{
         if(tower){const obj=towerObject(tile,i,tower);group.add(obj.holder);towers.push(obj);picks.push(obj.pick);}
-        else if(slots[i]){const glow=new THREE.Mesh(slotDiamondGeometry,mats.slot);glow.material.depthTest=false;glow.renderOrder=14;glow.position.set(slots[i].x,22,slots[i].y);group.add(glow);slotHints.push(glow);const pick=new THREE.Mesh(slotPick,invisible);pick.position.set(slots[i].x,0,slots[i].y);pick.userData.pick={kind:'slot',q:tile.q,r:tile.r,index:i};group.add(pick);picks.push(pick);}
+        else if(slots[i]){const glow=new THREE.Mesh(slotDiamondGeometry,mats.slot);glow.material.depthTest=false;glow.material.depthWrite=false;glow.material.transparent=true;glow.renderOrder=50;glow.position.set(slots[i].x,22,slots[i].y);group.add(glow);slotHints.push(glow);const pick=new THREE.Mesh(slotPick,invisible);pick.position.set(slots[i].x,0,slots[i].y);pick.userData.pick={kind:'slot',q:tile.q,r:tile.r,index:i};group.add(pick);picks.push(pick);}
       });
-      for(let i=0;i<(tile.buildingSlots||0);i++){const b=buildingObject(tile,i,tile.buildings?.[i]);group.add(b.group);picks.push(b.pick);if(!tile.buildings?.[i]){const p=buildingPosition(tile),gem=new THREE.Mesh(slotDiamondGeometry,mats.buildingSlot);gem.material.depthTest=false;gem.renderOrder=14;gem.position.set(p.x,22,p.y);group.add(gem);slotHints.push(gem);}}
+      for(let i=0;i<(tile.buildingSlots||0);i++){const b=buildingObject(tile,i,tile.buildings?.[i]);group.add(b.group);picks.push(b.pick);if(!tile.buildings?.[i]){const p=buildingPosition(tile),gem=new THREE.Mesh(slotDiamondGeometry,mats.buildingSlot);gem.material.depthTest=false;gem.material.depthWrite=false;gem.material.transparent=true;gem.renderOrder=50;gem.position.set(p.x,22,p.y);group.add(gem);slotHints.push(gem);}}
       layer.objects.add(group);objectRecords.set(id,{sig,group,towers,picks,slotHints});pickDirty=true;
     }
     for(const [id,record] of [...objectRecords]) if(!seen.has(id)){layer.objects.remove(record.group);objectRecords.delete(id);pickDirty=true;}
@@ -369,17 +376,23 @@ function create(host0,commands){
   }
 
   // ---- Auswahl, Reichweite, Upgrade-Hinweise ----
+  const selectionRings=[];
   function syncSelection(){
     for(const record of objectRecords.values())for(const hint of record.slotHints||[])hint.visible=state.showSlotHints!==false&&['build','wave'].includes(state.phase)&&state.hp>0;
-    const selected=state.selectedTower||state.hoverTower||(state.previewTower?state.selectedSlot:null);
-    const tile=selected&&state.map.get(key(selected.q,selected.r)),tower=tile?.towers[selected.index],type=tower?.type||state.previewTower;
+    const selected=state.dragTower?state.dragSlot:state.selectedTower||state.hoverTower||(state.previewTower?state.selectedSlot:null);
+    const tile=selected&&state.map.get(key(selected.q,selected.r)),tower=tile?.towers[selected.index],type=state.dragTower||tower?.type||state.previewTower;
     if(tile&&type){
       const p=slotPositions(tile)[selected.index],def=HexData.towerDefinition(tower||{type,biome:HexBiomes.forTile(state,tile),rangeFactor:state.challengeDay?.85:1,tileType:tile.type});
       for(const m of [rangeFill,rangeRing]){m.visible=true;m.position.set(p.x,.8,p.y);m.scale.setScalar(def.range);m.material.color.set(def.color);}
     }else rangeFill.visible=rangeRing.visible=false;
     if(state.selectedBase&&!state.hoverTower){const weapon=HexHeroes.weapon(state);if(weapon)for(const mesh of [rangeFill,rangeRing]){mesh.visible=true;mesh.position.set(0,.8,0);mesh.scale.setScalar(weapon.range);mesh.material.color.set(weapon.color);}}
-    const marked=state.selectedTower||state.selectedSlot,markedTile=marked&&state.map.get(key(marked.q,marked.r)),markedPos=markedTile&&slotPositions(markedTile)[marked.index];
-    if(markedPos){selectRing.visible=true;selectRing.position.set(markedPos.x,3,markedPos.y);selectRing.scale.setScalar(state.selectedTower?24:18);}else selectRing.visible=false;
+    selectRing.visible=false;
+    const kind=state.selectedTower?'Tower':'Slot',primary=state['selected'+kind],saved=state['selected'+kind+'s'],marked=primary?(saved?.includes(primary)?saved:[primary]):[];
+    selectionRings.forEach(r=>r.visible=false);
+    marked.forEach((slot,i)=>{const tile=state.map.get(key(slot.q,slot.r)),p=tile&&slotPositions(tile)[slot.index];if(!p)return;
+      let ring=selectionRings[i];if(!ring){ring=new THREE.Mesh(torus,mats.select);ring.material.depthTest=false;ring.material.depthWrite=false;ring.material.transparent=true;ring.renderOrder=60;selectionRings.push(ring);layer.dynamic.add(ring);}
+      ring.visible=true;ring.position.set(p.x,3,p.y);ring.scale.setScalar(kind==='Tower'?24:18);
+    });
     const canHint=['build','wave'].includes(state.phase)&&state.hp>0;
     for(const record of objectRecords.values()) for(const obj of record.towers) obj.hint.visible=!state.showUpgradeStatus&&canHint&&HexData.availableUpgrades(obj.tower).some(([,u])=>state.gold>=HexBuildings.cost(state,obj.tile,u.cost));
   }
@@ -508,11 +521,6 @@ function create(host0,commands){
       const c=axialToWorld(tile.q,tile.r),terrain=CARD_LIBRARY[tile.type],id=key(tile.q,tile.r);
       if(state.showUpgradeStatus)(tile.towers||[]).forEach((tower,i)=>{if(tower&&HexData.upgradeStatus(state,tower)){const p=slotPositions(tile)[i];label('upgrade:'+id+':'+i,p.x,p.y,HexData.upgradeStatus(state,tower),'big',72);}});
       if(tile.income) label(`inc:${id}`,c.x,c.y+44,'+'+tile.income+' Gold');
-      const biome=HexBiomes.forTile(state,tile);if(biome!=='grass'){
-        const entry=label('biome:'+id,c.x,c.y-32,HexBiomes.definitions[biome].name+' ⓘ');entry.biome=biome;
-        entry.el.title=HexBiomes.definitions[biome].description;entry.el.style.pointerEvents='auto';entry.el.style.cursor='help';entry.el.style.padding='10px 6px';entry.el.tabIndex=0;entry.el.setAttribute('role','button');
-        if(!entry.interactive){entry.interactive=true;entry.el.addEventListener('click',e=>{e.stopPropagation();commands.inspectBiome?.(entry.biome);});entry.el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();commands.inspectBiome?.(entry.biome);}});}
-      }
       const bonus=terrain?.towerBonus?'+25 % '+HexData.TOWERS[terrain.requiredTower].name+(terrain.towerBonus.range?' Reichweite':' Schaden'):terrain?.towerRange?'+'+Math.round((terrain.towerRange-1)*100)+' % Reichweite':terrain?.towerDamage?'+'+Math.round((terrain.towerDamage-1)*100)+' % Schaden':terrain?.archerDamage?'+25 % Archer':null;
       if(bonus) label(`bon:${id}`,c.x,c.y+35,bonus);
     }
@@ -581,7 +589,8 @@ function create(host0,commands){
         for(const limb of obj.limbs) limb.g.rotation.z=limb.name==='leg_l'?swing:limb.name==='leg_r'?-swing:limb.name==='arm_l'?-swing*.8:swing*.8;
       }
     }
-    animateBiomeWind(now);placeLabels();gl.render(scene,camera);
+    animateBiomeWind(now);placeLabels();backgroundSun.position.copy(sun.position);backgroundSun.target.position.copy(sun.target.position);
+    gl.clear();gl.render(backgroundScene,camera);gl.clearDepth();gl.render(scene,camera);
   }
 
   // ---- Eingabe ----
@@ -630,8 +639,8 @@ function create(host0,commands){
       const hit=pick(e);
       if(!hit) commands.clearSelection();
       else if(hit.kind==='target') commands.placeTile(hit.q,hit.r);
-      else if(hit.kind==='slot') commands.selectSlot(hit.q,hit.r,hit.index);
-      else if(hit.kind==='tower') commands.selectTower(hit.q,hit.r,hit.index);
+      else if(hit.kind==='slot') commands.selectSlot(hit.q,hit.r,hit.index,e.ctrlKey||e.metaKey);
+      else if(hit.kind==='tower') commands.selectTower(hit.q,hit.r,hit.index,e.ctrlKey||e.metaKey);
       else if(hit.kind==='base') commands.selectBase?.();
       else if(hit.kind==='building') commands.selectBuilding(hit.q,hit.r,hit.index);
     }),
@@ -641,7 +650,13 @@ function create(host0,commands){
   const resize=new ResizeObserver(()=>{const w=Math.max(1,host.clientWidth),h=Math.max(1,host.clientHeight);gl.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();if(state) commands.viewChanged?.();});
   resize.observe(host);applyCamera();raf=requestAnimationFrame(loop);
 
-  return {render,reset,project,rotateView,panView,zoom:factor=>zoom(factor),resetView:()=>resetView(true),getView,
+  return {render,reset,project,pickSlot(event){
+    // Use exactly the same projected ground centers and screen radius as the drag overlay.
+    // The old elevated raycast cylinders drifted relative to those circles at oblique camera angles.
+    const box=wrap.getBoundingClientRect(),slots=[];
+    for(const tile of state.map.values())slotPositions(tile).forEach((position,index)=>{if(tile.towers[index])return;const screen=project(position,2);if(screen)slots.push({q:tile.q,r:tile.r,index,...screen});});
+    return HexUiLayout.pickScreenSlot(slots,event.clientX-box.left,event.clientY-box.top,box.width,box.height);
+  },rotateView,panView,zoom:factor=>zoom(factor),resetView:()=>resetView(true),getView,
     destroy(){
       destroyed=true;cancelAnimationFrame(raf);resize.disconnect();for(const [name,fn,options] of listeners) dom.removeEventListener(name,fn,options);
       windPool.mesh.geometry.dispose();windPool.mesh.material.dispose();windPool.mesh.dispose();mistPool.mesh.geometry.dispose();mistPool.mesh.material.dispose();mistPool.mesh.dispose();

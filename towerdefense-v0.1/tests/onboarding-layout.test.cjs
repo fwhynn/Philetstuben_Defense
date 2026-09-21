@@ -33,3 +33,13 @@ test('tutorial skip/restart and slot visibility settings persist without resetti
   elements.get('restartTutorialBtn').listeners.click();assert.equal(a.state,run);assert.match(elements.get('tutorialTitle').textContent,/1\/5/);
   elements.get('slotHints').checked=false;elements.get('slotHints').listeners.change();assert.equal(a.state.showSlotHints,false);assert.equal(storage.get('slotHints'),'false');a.newRun();assert.equal(a.state.showSlotHints,false);
 });
+
+test('drag hit areas match displayed screen circles and choose the nearest slot at all zooms',()=>{
+  const rules=layout();
+  for(const scale of [.2,.73,1,2,4]){
+    const slots=[{q:1,r:0,index:0,x:150*scale,y:100*scale},{q:1,r:0,index:1,x:200*scale,y:100*scale}];
+    const first=slots[0],last=slots[1];assert.equal(rules.pickScreenSlot(slots,first.x,first.y,1200,800).index,0);assert.equal(rules.pickScreenSlot(slots,last.x,last.y,1200,800).index,1);
+    assert.equal(rules.pickScreenSlot([first],first.x,first.y+rules.dropRadius,1200,800).index,0);assert.equal(rules.pickScreenSlot([first],first.x,first.y+rules.dropRadius+.1,1200,800),null);
+  }
+  assert.equal(rules.pickScreenSlot([{q:0,r:0,index:0,x:0,y:0}],-1,0,1200,800),null);assert.equal(rules.pickScreenSlot([],100,100,1200,800),null);
+});

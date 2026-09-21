@@ -113,3 +113,68 @@ test('research map pans without scrolling, zooms around the pointer and fits the
   let prevented=false;handlers.wheel({deltaY:100,deltaMode:0,clientX:200,clientY:150,preventDefault(){prevented=true;}});assert.ok(prevented);const scale=Number(content.style.zoom),x=parseFloat(content.style.left)*scale,y=parseFloat(content.style.top)*scale;assert.ok(scale<.73);assert.ok(Math.abs((200-x)/scale-230/.73)<1e-8);assert.ok(Math.abs((150-y)/scale-160/.73)<1e-8);assert.equal(view.scrollTop,0);
   camera.fit();assert.equal(Number(content.style.zoom),.47333333333333333);camera.start();assert.equal(Number(content.style.zoom),.73);assert.ok(Math.abs(parseFloat(content.style.left)*.73-8)<1e-8);
 });
+
+test('run results show paid tower costs, refunds and a reversible map view without settling twice',()=>{
+  const {a,elements,storage,selectSlot,buyTower,upgradeSelectedTower,sellSelectedTower}=load();a.state.phase='build';a.state.gold=200;a.state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[null]});selectSlot(1,0,0);buyTower('archer');a.state.selectedTower={q:1,r:0,index:0};upgradeSelectedTower('marksman');const usage=a.state.runTowerStats.archer;assert.equal(usage.buildGold,25);assert.equal(usage.upgradeGold,35);sellSelectedTower();assert.equal(usage.refundGold,60);assert.equal(a.state.runTowerDetails[1].sold,true);
+  a.state.hp=0;a.state.waveRunning=true;a.state.pendingSpawns=1;a.update(.01,1);assert.match(elements.get('runStatistics').innerHTML,/Schaden\/🪙/);assert.match(elements.get('runStatistics').innerHTML,/verkauft/);const saved=storage.get('hex-bastion-profile-v1');elements.get('gameOverMapBtn').listeners.click();assert.equal(a.state.inspectEndMap,true);elements.get('backToRunResultBtn').listeners.click();assert.equal(a.state.inspectEndMap,false);assert.equal(storage.get('hex-bastion-profile-v1'),saved);assert.equal(a.state.phase,'gameover');
+});
+test('daily victory also exposes statistics and map inspection',()=>{
+  const {a,elements}=load();a.newRun(undefined,undefined,undefined,'2026-09-21');a.state.wave=20;a.endWave();assert.equal(a.state.challengeWon,true);assert.match(elements.get('runStatistics').innerHTML,/Turmstatistik/);elements.get('gameOverMapBtn').listeners.click();assert.equal(a.state.inspectEndMap,true);
+});
+
+test('multi-build sums local discounts and buys exactly the marked slots atomically',()=>{
+  const {a,elements,selectSlot,buyTower}=load();a.state.phase='build';a.state.gold=46;
+  const first={q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[null],buildings:[{type:'market'}]},second={q:4,r:0,type:'cross',roads:[0,1,3,4],slots:2,towers:[null,null]};
+  a.state.map.set('1,0',first);a.state.map.set('4,0',second);
+  selectSlot(1,0,0);selectSlot(4,0,1,true);
+  const offer=elements.get('towerMenu').children[0];assert.match(offer.innerHTML,/47 🪙/);assert.match(offer.innerHTML,/2 × Türme/);assert.equal(offer.disabled,true);
+  buyTower('archer');assert.equal(first.towers[0],null);assert.equal(second.towers[1],null);assert.equal(a.state.gold,46);
+  a.state.gold=47;buyTower('archer');assert.equal(first.towers[0].paid,22);assert.equal(second.towers[1].paid,25);assert.equal(second.towers[0],null);assert.equal(a.state.gold,0);assert.equal(a.state.runTowerStats.archer.builds,2);assert.equal(a.state.runTowerStats.archer.buildGold,47);assert.equal(Object.keys(a.state.runTowerDetails).length,2);
+});
+test('control click toggles slots, normal click replaces selection, touch toggle also adds slots',()=>{
+  const {a,elements,selectSlot}=load();a.state.phase='build';a.state.map.set('1,0',{q:1,r:0,type:'cross',roads:[0,1,3,4],slots:2,towers:[null,null]});
+  selectSlot(1,0,0);selectSlot(1,0,1,true);assert.equal(a.state.selectedSlots.length,2);selectSlot(1,0,0,true);assert.equal(a.state.selectedSlots.length,1);assert.equal(a.state.selectedSlot.index,1);selectSlot(1,0,1,true);assert.equal(a.state.selectedSlot,null);
+  selectSlot(1,0,0);selectSlot(1,0,1);assert.equal(a.state.selectedSlots.length,1);elements.get('multiTowerSelection').checked=true;selectSlot(1,0,0);assert.equal(a.state.selectedSlots.length,2);a.rendererCommands.clearSelection();assert.equal(a.state.selectedSlot,null);selectSlot(1,0,1,true);assert.equal(a.state.selectedSlots.length,1);
+});
+test('multi-build never partially buys when a selected slot becomes occupied',()=>{
+  const {a,selectSlot,buyTower}=load();a.state.phase='build';a.state.gold=100;const tile={q:1,r:0,type:'cross',roads:[0,1,3,4],slots:2,towers:[null,null]};a.state.map.set('1,0',tile);selectSlot(1,0,0);selectSlot(1,0,1,true);tile.towers[1]={type:'archer'};buyTower('archer');assert.equal(tile.towers[0],null);assert.equal(a.state.gold,100);
+});
+test('multi tower focus edits all eligible turrets, preserves unique priorities, ignores support and blocks single sale',()=>{
+  const {a,elements,selectSlot,buyTower,sellSelectedTower}=load();a.state.phase='build';a.state.gold=500;
+  const tile={q:1,r:0,type:'cross',roads:[0,1,3,4],slots:2,towers:[null,null]},support={q:2,r:0,type:'straight',roads:[0,3],slots:1,towers:[null]};a.state.map.set('1,0',tile);a.state.map.set('2,0',support);
+  selectSlot(1,0,0);selectSlot(1,0,1,true);buyTower('archer');selectSlot(2,0,0);buyTower('freeze');tile.towers[1].targetPriority=['boss','mostArmor','closestBase'];
+  a.rendererCommands.selectTower(1,0,0);a.rendererCommands.selectTower(1,0,1,true);a.rendererCommands.selectTower(2,0,0,true);
+  const section=elements.get('towerUpgrades').children[0],select=section.children[0].children[0];assert.equal(select.children[0].textContent,'Unterschiedliche Einstellungen');select.value='boss';select.listeners.change();
+  for(const tower of tile.towers){assert.equal(tower.targetPriority[0],'boss');assert.equal(new Set(tower.targetPriority).size,3);}assert.equal(support.towers[0].targetPriority[0],'closestBase');assert.equal(elements.get('sellTowerBtn').disabled,true);sellSelectedTower();assert.ok(support.towers[0]);
+  a.rendererCommands.selectTower(2,0,0,true);assert.equal(a.state.selectedTowers.length,2);a.rendererCommands.selectTower(1,0,0);assert.equal(a.state.selectedTowers.length,1);
+});
+
+test('loadout rail drags exactly one tower onto the drop slot with its market price',()=>{
+  const {a,elements,documentListeners}=load({pickSlot:()=>({q:1,r:0,index:1})});a.state.phase='build';a.state.gold=22;
+  const tile={q:1,r:0,type:'cross',roads:[0,1,3,4],slots:2,towers:[null,null],buildings:[{type:'market'}]};a.state.map.set('1,0',tile);a.renderAll();
+  const rail=elements.get('quickLoadout');assert.equal(rail.children.length,5);const button=rail.children[0];button.listeners.pointerdown({button:0,pointerId:7,clientX:10,clientY:100,preventDefault(){},stopPropagation(){}});assert.equal(a.state.dragTower,'archer');
+  documentListeners.pointermove({pointerId:7,clientX:300,clientY:200});assert.equal(a.state.dragSlot.index,1);documentListeners.pointerup({pointerId:7,clientX:300,clientY:200});assert.equal(tile.towers[0],null);assert.equal(tile.towers[1].type,'archer');assert.equal(a.state.gold,0);assert.equal(a.state.runTowerStats.archer.buildGold,22);assert.equal(a.state.dragTower,null);
+});
+test('quick build supports keyboard/tap, cancels outside and does not charge invalid or unaffordable drops',()=>{
+  let hit=null;const {a,elements,documentListeners,selectSlot}=load({pickSlot:()=>hit});a.state.phase='build';a.state.gold=24;const tile={q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[null]};a.state.map.set('1,0',tile);a.renderAll();let button=elements.get('quickLoadout').children[0];
+  button.listeners.click({detail:0});assert.ok(!a.state.dragTower);assert.equal(button.disabled,true);assert.equal(tile.towers[0],null);assert.equal(a.state.gold,24);
+  a.state.gold=25;button.listeners.click({detail:0});selectSlot(1,0,0);assert.equal(tile.towers[0].type,'archer');assert.equal(a.state.gold,0);
+  tile.towers[0]=null;a.state.gold=25;a.renderAll();
+  button.listeners.pointerdown({button:0,pointerId:1,clientX:0,clientY:0,preventDefault(){},stopPropagation(){}});documentListeners.pointermove({pointerId:1,clientX:100,clientY:100});documentListeners.pointerup({pointerId:1,clientX:100,clientY:100});assert.equal(a.state.dragTower,null);assert.equal(a.state.gold,25);
+  button.listeners.click({detail:0});documentListeners.pointercancel();assert.equal(a.state.dragTower,null);button.listeners.click({detail:0});a.state.phase='reward';a.renderAll();assert.equal(a.state.dragTower,null);assert.equal(button.disabled,true);
+});
+test('biome rail discovers regions only from placed tiles and highlights them by hover or pinned click',()=>{
+  const {a,elements}=load();a.state.biomeSeed='biome-rail';a.renderAll();assert.equal(elements.get('biomeRail').children.length,1);
+  for(let q=-8;q<=8;q+=4)for(let r=-8;r<=8;r+=4){if(!q&&!r)continue;a.state.map.set(q+','+r,{q,r,type:'straight',roads:[0,3],slots:1,towers:[null]});}a.renderAll();const rail=elements.get('biomeRail');assert.equal(rail.children.length,4);
+  const desert=rail.children[1];assert.match(desert.innerHTML,/Dünenmeer/);assert.match(desert.innerHTML,/15 %/);desert.listeners.pointerenter();assert.equal(a.state.highlightBiome,'desert');const overlays=elements.get('board').children[3];assert.ok(overlays.children.some(e=>e.attributes['data-overlay']==='building'));
+  desert.listeners.pointerleave();assert.equal(a.state.highlightBiome,null);desert.listeners.click();desert.listeners.pointerleave();assert.equal(a.state.highlightBiome,'desert');desert.listeners.click();assert.equal(a.state.highlightBiome,null);
+  a.newRun();assert.equal(elements.get('biomeRail').children.length,1);assert.equal(a.state.highlightBiome,undefined);
+});
+
+test('quick icons reflect affordable free slots, local discounts and live gold changes',()=>{
+  const {a,elements}=load();a.state.phase='build';a.state.gold=21;const tile={q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[null],buildings:[{type:'market'}]};a.state.map.set('1,0',tile);a.renderAll();const button=elements.get('quickLoadout').children[0];
+  assert.equal(button.disabled,true);assert.equal(button.classList.contains('unaffordable'),true);assert.match(button.title,/22 Gold/);button.listeners.click({detail:0});assert.ok(!a.state.dragTower);
+  a.state.gold=22;a.renderAll();assert.equal(button.disabled,false);assert.equal(button.classList.contains('unaffordable'),false);assert.match(button.innerHTML,/ab 22/);
+  tile.towers[0]={type:'archer',level:1};a.renderAll();assert.equal(button.disabled,true);assert.match(button.title,/Kein freier/);
+  tile.towers[0]=null;tile.buildings=[];a.renderAll();assert.equal(button.disabled,true);a.state.gold=25;a.renderAll();assert.equal(button.disabled,false);
+});

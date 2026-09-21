@@ -13,7 +13,7 @@ test('all rotations agree with neighbor direction and reciprocal road connection
     const n=a.neighbor(0,0,d),c=a.axialToPixel(0,0),p=a.axialToPixel(n.q,n.r),edge=a.edgePoint(c.x,c.y,d);
     assert.ok(Math.abs((p.x-c.x)*(edge.y-c.y)-(p.y-c.y)*(edge.x-c.x))<1e-8);
     for(const card of Object.values(a.CARD_LIBRARY)) for(let rot=0;rot<6;rot++){
-      assert.equal(a.canPlace(n.q,n.r,card,rot),a.rotatedRoads(card,rot).includes((d+3)%6));
+      assert.equal(a.canPlace(n.q,n.r,card,rot),card.roads.length>1&&a.rotatedRoads(card,rot).includes((d+3)%6));
     }
   }
 });
@@ -171,7 +171,7 @@ test('wave animation keeps slot click targets and gold changes keep purchase but
   const slot=objects.children.findLast(e=>e.attributes.r===12);
   const before=objects.children.length;a.update(0,100);
   assert.equal(objects.children.length,before);assert.ok(objects.children.includes(slot));
-  slot.listeners.click();
+  slot.listeners.click({stopPropagation(){}});
   const button=elements.get('towerMenu').children[0];
   a.state.gold+=3;a.update(0,200);
   assert.equal(elements.get('towerMenu').children[0],button);
@@ -420,4 +420,16 @@ test('curve tiles route enemies along the road of the 3D model, in every rotatio
     const nearest=Math.min(...legs.flat().map(p=>Math.hypot(p.x-expected.x,p.y-expected.y)));
     assert.ok(nearest<1,`${type} rot ${rotation}: path misses the model road (${nearest.toFixed(1)})`);
   }
+});
+
+test('Epic dead end remains drawable but cannot close the final reachable entrance',()=>{
+  const {a}=load(),card=a.CARD_LIBRARY.deadEnd;assert.equal(card.rarity,'Epic');
+  a.state.map.clear();a.state.landmarks.clear();a.state.map.set('0,0',{q:0,r:0,type:'base',roads:[0],slots:0,towers:[]});
+  a.state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[null]});
+  assert.equal(a.canPlace(2,0,card,3),false);
+  a.state.map.get('1,0').roads.push(1);assert.equal(a.canPlace(2,0,card,3),true);
+  a.state.hand=['deadEnd'];a.state.selectedCard=0;a.state.rotation=3;a.state.phase='place';a.placeTile(2,0);assert.equal(a.state.map.get('2,0').type,'deadEnd');assert.equal(a.state.map.get('2,0').slots,2);
+  // A disconnected opening must not permit sealing the base's only route.
+  a.state.map.delete('2,0');a.state.map.get('1,0').roads=[0,3];a.state.map.set('10,0',{q:10,r:0,type:'straight',roads:[0,3],slots:0,towers:[]});assert.equal(a.canPlace(2,0,card,3),false);
+  a.state.deck=['deadEnd','straight','straight','straight','straight'];a.state.drawPile=['straight','straight','straight','straight','deadEnd'];a.state.discard=[];a.state.hand=[];a.drawHand();assert.ok(a.state.hand.includes('deadEnd'));
 });

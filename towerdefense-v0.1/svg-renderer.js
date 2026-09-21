@@ -82,7 +82,7 @@ function create(svg,commands){
     }
 
     drawFreezeAuras();drawSelectedRange();
-    hintLayer.innerHTML='';scene=hintLayer;drawUpgradeHints();drawTileOverlays();scene=worldLayer;
+    hintLayer.innerHTML='';scene=hintLayer;drawUpgradeHints();drawTileOverlays();drawSelectionRings();scene=worldLayer;
     for(const mine of state.mines||[]) drawMine(mine);
     for(const e of state.enemies) drawEnemy(e);
     for(const p of state.projectiles) drawProjectile(p);
@@ -94,11 +94,17 @@ function create(svg,commands){
     }
   }
 
+  function drawSelectionRings(){
+    const kind=state.selectedTower?'Tower':'Slot',primary=state['selected'+kind],saved=state['selected'+kind+'s'];
+    for(const slot of primary?(saved?.includes(primary)?saved:[primary]):[]){const tile=state.map.get(key(slot.q,slot.r)),p=tile&&slotPositions(tile)[slot.index];if(!p)continue;
+      const ring=document.createElementNS(NS,'circle');for(const [name,value] of Object.entries({cx:p.x,cy:p.y,r:kind==='Tower'?23:18,fill:'none',stroke:'#ffffff','stroke-width':3}))ring.setAttribute(name,value);scene.appendChild(ring);
+    }
+  }
   function drawTileOverlays(){
     if(state.showHexGrid)for(const tile of HexExploration.gridCells(state.map,state.landmarks)){
       const c=axialToWorld(tile.q,tile.r),p=drawPoly(c.x,c.y,HEX-1,'none','#d4e7d2',.8);p.setAttribute('stroke-width',1.5);p.setAttribute('data-overlay','grid');
     }
-    const highlight=HexBuildings.highlight(state);
+    const highlight=state.highlightBiome?{color:HexBiomes.definitions[state.highlightBiome].color,tiles:[...state.map.values()].filter(t=>HexBiomes.forTile(state,t)===state.highlightBiome)}:HexBuildings.highlight(state);
     for(const tile of highlight.tiles){const c=axialToWorld(tile.q,tile.r),p=drawPoly(c.x,c.y,HEX-3,highlight.color,highlight.color,1);p.setAttribute('fill-opacity',.18);p.setAttribute('stroke-width',3);p.setAttribute('data-overlay','building');}
   }
   function roadPolyline(points,color,width,parent=scene,dashed=false){
@@ -131,9 +137,9 @@ function create(svg,commands){
   }
   function drawSelectedRange(){
     if(state.selectedBase){const weapon=HexHeroes.weapon(state);if(weapon){const circle=document.createElementNS(NS,'circle');circle.setAttribute('cx',0);circle.setAttribute('cy',0);circle.setAttribute('r',weapon.range);circle.setAttribute('fill',weapon.color);circle.setAttribute('fill-opacity','.13');circle.setAttribute('stroke',weapon.color);circle.style.pointerEvents='none';scene.appendChild(circle);}return;}
-    const selected=state.selectedTower||(state.previewTower?state.selectedSlot:null);if(!selected) return;
+    const selected=state.dragTower?state.dragSlot:state.selectedTower||(state.previewTower?state.selectedSlot:null);if(!selected) return;
     const tile=state.map.get(key(selected.q,selected.r)),tw=tile?.towers[selected.index];
-    const type=tw?.type||state.previewTower;if(!tile||!type) return;
+    const type=state.dragTower||tw?.type||state.previewTower;if(!tile||!type) return;
     const p=slotPositions(tile)[selected.index],def=HexData.towerDefinition(tw||{type,biome:HexBiomes.forTile(state,tile),rangeFactor:state.challengeDay?.85:1,tileType:tile.type});
     const circle=document.createElementNS(NS,'circle');
     circle.setAttribute('cx',p.x);circle.setAttribute('cy',p.y);circle.setAttribute('r',def.range);
@@ -144,9 +150,10 @@ function create(svg,commands){
 
   function drawTile(tile,layer){
     const c=axialToWorld(tile.q,tile.r);
-    if(layer==='terrain'){const biome=HexBiomes.forTile(state,tile);if(biome!=='grass'){drawPoly(c.x,c.y,HEX-2,HexBiomes.definitions[biome].color,'#2e4334',1);const tag=text(c.x,c.y-32,HexBiomes.definitions[biome].name+' ⓘ',8,'#fff4c3'),hint=document.createElementNS(NS,'title');hint.textContent=HexBiomes.definitions[biome].description;tag.appendChild(hint);tag.style.pointerEvents='auto';tag.style.cursor='help';tag.setAttribute('role','button');tag.setAttribute('tabindex','0');tag.addEventListener('click',e=>{e.stopPropagation();commands.inspectBiome?.(biome);});tag.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();commands.inspectBiome?.(biome);}});scene.appendChild(tag);return;}drawPoly(c.x,c.y,HEX-2,({base:'#657264',highGround:'#8d8472',grove:'#3f754e',treasury:'#998454',battlefield:'#7b6556',watchtower:'#667c81',citadel:'#8d8058',royalVillage:'#977b52',warCross:'#855f58'})[tile.type]||'#688653','#2e4334',1);return;}
+    if(layer==='terrain'){const biome=HexBiomes.forTile(state,tile);if(biome!=='grass'){drawPoly(c.x,c.y,HEX-2,HexBiomes.definitions[biome].color,'#2e4334',1);return;}drawPoly(c.x,c.y,HEX-2,({base:'#657264',highGround:'#8d8472',grove:'#3f754e',treasury:'#998454',battlefield:'#7b6556',watchtower:'#667c81',citadel:'#8d8058',royalVillage:'#977b52',warCross:'#855f58'})[tile.type]||'#688653','#2e4334',1);return;}
     if(layer==='roads'){
       const geometry=HexMap.roadGeometry(tile);
+      if(CARD_LIBRARY[tile.type]?.procedural)for(const points of geometry.legs.values())roadPolyline(points,'#a8884b',22);
       for(const points of geometry.legs.values()) roadPolyline(points,'#d0aa6d',18);
       for(const points of geometry.legs.values()) roadPolyline(points,'#ead19a',3,scene,true);
       return;
@@ -179,7 +186,7 @@ function create(svg,commands){
       if(tw){drawTower(p,tw,tile,i);} else {
         const selected=state.selectedSlot&&state.selectedSlot.q===tile.q&&state.selectedSlot.r===tile.r&&state.selectedSlot.index===i;
         if(state.showSlotHints!==false&&['build','wave'].includes(state.phase)){const marker=document.createElementNS(NS,'g');marker.setAttribute('transform',`translate(${p.x},${p.y-20})`);marker.setAttribute('data-slot-hint','true');marker.style.pointerEvents='none';const floating=document.createElementNS(NS,'g');floating.setAttribute('class','slotDiamondFloat');const gem=document.createElementNS(NS,'polygon');gem.setAttribute('points','0,-7 5,0 0,7 -5,0');gem.setAttribute('fill','#ffffff');gem.setAttribute('stroke','#251130');gem.setAttribute('class','slotDiamondTurn');floating.appendChild(gem);marker.appendChild(floating);scene.appendChild(marker);}
-        const circ=document.createElementNS(NS,'circle');circ.setAttribute('cx',p.x);circ.setAttribute('cy',p.y);circ.setAttribute('r',12);circ.setAttribute('fill',selected?'#f4d36d':'#314d39');circ.setAttribute('stroke','#f1ddb1');circ.setAttribute('stroke-width',2);circ.style.cursor='pointer';circ.addEventListener('click',()=>commands.selectSlot(tile.q,tile.r,i));scene.appendChild(circ);
+        const circ=document.createElementNS(NS,'circle');circ.setAttribute('cx',p.x);circ.setAttribute('cy',p.y);circ.setAttribute('r',12);circ.setAttribute('fill',selected?'#f4d36d':'#314d39');circ.setAttribute('stroke','#f1ddb1');circ.setAttribute('stroke-width',2);circ.style.cursor='pointer';circ.addEventListener('click',e=>{e.stopPropagation();commands.selectSlot(tile.q,tile.r,i,e.ctrlKey||e.metaKey);});scene.appendChild(circ);
         const plus=text(p.x,p.y+4,'+',14,'#fff','700');plus.style.pointerEvents='none';scene.appendChild(plus);
       }
     });
@@ -190,7 +197,7 @@ function create(svg,commands){
     g.style.cursor='pointer';
     g.addEventListener('click',e=>{
       e.stopPropagation();
-      commands.selectTower(tile.q,tile.r,index);
+      commands.selectTower(tile.q,tile.r,index,e.ctrlKey||e.metaKey);
     });
     const base=document.createElementNS(NS,'circle');base.setAttribute('cx',p.x);base.setAttribute('cy',p.y);base.setAttribute('r',14);base.setAttribute('fill','#202821');base.setAttribute('stroke',def.color);base.setAttribute('stroke-width',3);g.appendChild(base);
     const visual=HexData.BRANCH_VISUALS[tw.branch],icon=visual?.icon||(tw.type==='element'?'◆':tw.type==='necromancer'?'☠':tw.type==='archer'?'A':tw.type==='catapult'?'K':tw.type==='freeze'?'❄':tw.type==='mine'?'✹':tw.type==='ballista'?'➶':tw.type==='flame'?'♨':'⚡');
