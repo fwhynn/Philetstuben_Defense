@@ -1,6 +1,6 @@
 # Autohex TD – Projektgedächtnis
 
-Stand: 20.09.2026, einschließlich der aktuellen lokalen Änderungen. Kompakte Übersicht über Ziele, Entscheidungen und spätere Ideen. Ausführlicher Verlauf: [Übergabeprotokoll](../docs/README_TowerDefense_Projekt.md). Technische Grenzen: [Architektur](../docs/ARCHITECTURE.md). Änderungen: [Spielreferenz](../docs/GAME_REFERENCE.md).
+Stand: 20.09.2026, einschließlich der aktuellen lokalen Änderungen. Kompakte Übersicht über Ziele, Entscheidungen und spätere Ideen. Ausführlicher Verlauf: [Übergabeprotokoll](README_TowerDefense_Projekt.md). Technische Grenzen: [Architektur](ARCHITECTURE.md). Änderungen: [Spielreferenz](GAME_REFERENCE.md).
 
 ## Festgelegte Richtung
 
@@ -36,7 +36,7 @@ Stand: 20.09.2026, einschließlich der aktuellen lokalen Änderungen. Kompakte �
 
 ## Für später fest vorgemerkt
 
-- Meta-Progression und Turm-Loadouts sind in [../docs/META_PROGRESSION_PLAN.md](../docs/META_PROGRESSION_PLAN.md) konkretisiert. Loadout, Diamanten, Arsenal, Minenleger sowie die ersten zwei freischaltbaren Türme sind umgesetzt. Keine fünf kostenlosen platzierten Türme. Meta-Unlocks sollen vor allem Optionen statt permanenter globaler Stärke geben.
+- Meta-Progression und Turm-Loadouts sind in [META_PROGRESSION_PLAN.md](META_PROGRESSION_PLAN.md) konkretisiert. Loadout, Diamanten, Arsenal, Minenleger sowie die ersten zwei freischaltbaren Türme sind umgesetzt. Keine fünf kostenlosen platzierten Türme. Meta-Unlocks sollen vor allem Optionen statt permanenter globaler Stärke geben.
 - Weitere Startprofile über die drei implementierten Heroes hinaus.
 - Weitere Base-Ausbaupfade können später folgen; Mauern und automatische Waffe sind umgesetzt.
 - Bisherige Ideen (keine finalen Werte): neutrale Standardfestung, Händlerstadt mit Goldbonus/Nachteil, Frostfestung mit Freeze-Bonus, Nekromanten-Zitadelle mit Bonus auf spätere Nekromantentürme.

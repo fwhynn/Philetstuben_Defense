@@ -32,31 +32,31 @@ Danach `http://localhost:8080` im Browser öffnen. Die 3D-Modelle (`.glb`) lasse
 
 Auf der bereitgestellten Subdomain gilt dasselbe: unter HTTP(S) startet die 3D-Version automatisch, solange `node_modules/three` im Projekt vorhanden ist. Über das Einstellungsmenü im Spiel kannst du zwischen `Automatisch`, `3D Low Poly`, `3D Hoch` und `SVG` umschalten.
 
-| Aufruf | Ergebnis |
-|---|---|
-| `http://localhost:8080` | 3D-Ansicht (Three.js) |
-| `http://localhost:8080/?svg` | Ursprüngliche SVG-Ansicht |
+| Aufruf                                 | Ergebnis                                                                                |
+| -------------------------------------- | --------------------------------------------------------------------------------------- |
+| `http://localhost:8080`                | 3D-Ansicht (Three.js)                                                                   |
+| `http://localhost:8080/?svg`           | Ursprüngliche SVG-Ansicht                                                               |
 | `http://localhost:8080/?low` / `?high` | Grafikstufe erzwingen (niedrig: weniger Pixel, kleinere Schatten, keine Kantenglättung) |
-| `http://localhost:8080/viewer.html` | Galerie aller 3D-Modelle |
-| `index.html` per Doppelklick | SVG-Ansicht ohne Server |
+| `http://localhost:8080/viewer.html`    | Galerie aller 3D-Modelle                                                                |
+| `index.html` per Doppelklick           | SVG-Ansicht ohne Server                                                                 |
 
 Ohne WebGL fällt das Spiel automatisch auf die SVG-Ansicht zurück. Bricht die Bildrate in einer Wave dauerhaft ein, stellt der Renderer die Grafik selbst auf „niedrig“. Läuft das Spiel auf einem starken Rechner trotzdem schlecht, hilft [PERFORMANCE_TROUBLESHOOTING.md](PERFORMANCE_TROUBLESHOOTING.md).
 
 ## Bedienung
 
-| Aktion | Bedienung |
-|---|---|
-| Karte wählen, Hex legen | Karte anklicken, dann freies Feld anklicken |
-| Hex drehen | `R` oder Mausrad-Klick (im Uhrzeigersinn) |
-| Wave starten | `Leertaste` oder Button |
-| Doppeltes Tempo | `F` |
-| Kamera zoomen | Mausrad oder `+` / `−` |
-| Karte verschieben | Linke Maustaste ziehen (3D) |
+| Aktion                    | Bedienung                                                                                                                 |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Karte wählen, Hex legen   | Karte anklicken, dann freies Feld anklicken                                                                               |
+| Hex drehen                | `R` oder Mausrad-Klick (im Uhrzeigersinn)                                                                                 |
+| Wave starten              | `Leertaste` oder Button                                                                                                   |
+| Doppeltes Tempo           | `F`                                                                                                                       |
+| Kamera zoomen             | Mausrad oder `+` / `−`                                                                                                    |
+| Karte verschieben         | Linke Maustaste ziehen (3D)                                                                                               |
 | Ansicht drehen und kippen | Rechte oder mittlere Maustaste ziehen (3D); Q/E drehen links/rechts. Während der Platzierung dreht Mausrad-Klick das Hex. |
-| Hex-Grid umschalten | G oder Einstellungen |
-| Turm kaufen | Freien Turmplatz anklicken, dann Turm wählen |
-| Werte, Upgrades, Verkauf | Gesetzten Turm anklicken |
-| Gebäude bauen | Gebäudeplatz auf einem Dorf-Hex anklicken |
+| Hex-Grid umschalten       | G oder Einstellungen                                                                                                      |
+| Turm kaufen               | Freien Turmplatz anklicken, dann Turm wählen                                                                              |
+| Werte, Upgrades, Verkauf  | Gesetzten Turm anklicken                                                                                                  |
+| Gebäude bauen             | Gebäudeplatz auf einem Dorf-Hex anklicken                                                                                 |
 
 ## Inhalte
 

@@ -29,27 +29,26 @@ In der Runvorbereitung lässt sich Stufe 2 wählen. Die Base erhält zwei versch
 - Beide Türme nutzen normale Loadout-, Zielprioritäts-, Terrain-, Schmiede- und Upgrade-Regeln. 3D-Darstellung wird prozedural erzeugt, SVG besitzt eigene Symbole; keine zusätzlichen GLB-Dateien erforderlich. Balancewerte sind erste Spieltestwerte.
 - Escape schließt offene Menüs und Infofenster; Hinweis am Schließen-Button und in Einstellungen. Die Kopfzeile bleibt beim Scrollen sichtbar. Mehr Abstand zwischen Handkarten und Phasenanzeige.
 
-
 Stand: 20.09.2026, einschließlich lokaler Änderungen. Spielbarer Browser-Prototyp eines Hex-Tower-Defense-Deckbuilders. Diese Datei beschreibt den aktuell implementierten Stand. Frühere Zwischenstände stehen im [Entwicklungsverlauf](CHANGELOG.md), spätere Ziele im [Projektgedächtnis](../ai/BRAIN.md). Das ausführliche [Übergabeprotokoll](README_TowerDefense_Projekt.md) enthält die Konzepthistorie.
 
 ## Starten und Bedienung
 
 **3D-Ansicht:** einmalig `npm install`, dann `npm start` und `http://localhost:8080` öffnen (Modell-Galerie: `/viewer.html`). Ein lokaler Server ist nötig, weil der Browser `.glb`-Dateien nicht per Doppelklick lädt. Per Doppelklick auf `index.html` oder mit `?svg` läuft weiterhin die SVG-Ansicht. Modellvorgaben: [ASSET_SPEC.md](ASSET_SPEC.md). Für die Logiktests wird Node.js benötigt.
 
-| Aktion | Bedienung |
-|---|---|
-| Karte auswählen / Hex platzieren | Karte anklicken, dann freie Position anklicken |
-| Hex drehen | R oder Mausrad-Klick (im Uhrzeigersinn); Hinweis an der Vorschau |
-| Wave starten | Leertaste oder Wave-Button |
-| Spieltempo 1× bis 8× | Regler; F erhöht um eine Stufe, nach 8× wieder 1× |
-| Kamera zoomen | Mausrad oder +/− |
-| Karte verschieben | 3D: linke Maustaste ziehen (SVG: rechte oder mittlere) |
-| Ansicht drehen und kippen | Nur 3D: rechte oder mittlere Maustaste ziehen; Q/E drehen links/rechts. Mausrad-Klick dreht während der Platzierung das Hex |
-| Kamera zurücksetzen | Zur Base |
-| Turm kaufen | Freien Turmplatz anklicken, dann Turmangebot wählen |
-| Turmwerte / Upgrades | Gesetzten Turm anklicken |
-| Gebäudeinformationen / Ausbau | Gebäudeslot auf Dorfhex anklicken |
-| Wave-, Gold- und Deckplanung | Jeweiligen Wert oben im Header aufklappen |
+| Aktion                           | Bedienung                                                                                                                   |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Karte auswählen / Hex platzieren | Karte anklicken, dann freie Position anklicken                                                                              |
+| Hex drehen                       | R oder Mausrad-Klick (im Uhrzeigersinn); Hinweis an der Vorschau                                                            |
+| Wave starten                     | Leertaste oder Wave-Button                                                                                                  |
+| Spieltempo 1× bis 8×             | Regler; F erhöht um eine Stufe, nach 8× wieder 1×                                                                           |
+| Kamera zoomen                    | Mausrad oder +/−                                                                                                            |
+| Karte verschieben                | 3D: linke Maustaste ziehen (SVG: rechte oder mittlere)                                                                      |
+| Ansicht drehen und kippen        | Nur 3D: rechte oder mittlere Maustaste ziehen; Q/E drehen links/rechts. Mausrad-Klick dreht während der Platzierung das Hex |
+| Kamera zurücksetzen              | Zur Base                                                                                                                    |
+| Turm kaufen                      | Freien Turmplatz anklicken, dann Turmangebot wählen                                                                         |
+| Turmwerte / Upgrades             | Gesetzten Turm anklicken                                                                                                    |
+| Gebäudeinformationen / Ausbau    | Gebäudeslot auf Dorfhex anklicken                                                                                           |
+| Wave-, Gold- und Deckplanung     | Jeweiligen Wert oben im Header aufklappen                                                                                   |
 
 Optionaler Auto-Start startet eine Wave nach dem Placement beziehungsweise nach Abschluss einer Shrine-Auswahl. Sounds lassen sich ausschalten; Lautstärke ist einstellbar. Die Effekte werden lokal mit WebAudio erzeugt.
 
@@ -82,19 +81,19 @@ Freie Turmplätze sind während Bau- und Wavephase mit schwebenden, langsam roti
 
 Vor dem Run wird neben den fünf Türmen ein gemeinsames Hero-/Festungsprofil gewählt. Alle drei sind frei verfügbar; die bestätigte Auswahl wird im Browserprofil gespeichert. Der laufende Run behält seinen Hero. Erneuter Run mit gleichem Loadout übernimmt auch den Hero, setzt jedoch alle Base-Upgrades zurück.
 
-| Profil | HP | Startgold | Besonderheit |
-|---|---:|---:|---|
-| Standardfestung | 20 | 70 | Zwei Stufen je Ausbaupfad |
-| Festungsbauer | 20 | 55 | 25 % günstigere Base-Upgrades (Kosten aufgerundet), dritte Stufe |
-| Händlerstadt | 15 | 90 | +2 Gold je überlebter Wave, Base-Waffe −25 % Schaden |
+| Profil          |  HP | Startgold | Besonderheit                                                     |
+| --------------- | --: | --------: | ---------------------------------------------------------------- |
+| Standardfestung |  20 |        70 | Zwei Stufen je Ausbaupfad                                        |
+| Festungsbauer   |  20 |        55 | 25 % günstigere Base-Upgrades (Kosten aufgerundet), dritte Stufe |
+| Händlerstadt    |  15 |        90 | +2 Gold je überlebter Wave, Base-Waffe −25 % Schaden             |
 
 Klick auf die Base oder den Base-Button im HUD öffnet das Ausbaumenü. Käufe sind während Hex-Platzierung, Bau- und Wavephase möglich und kosten Run-Gold. Die HP-Anzeige nennt aktuelle und maximale HP. Eine gekaufte Waffe zeigt bei geöffnetem Base-Menü ihre Reichweite.
 
-| Stufe | Mauern: Kosten / zusätzliche HP | Waffe: Kosten / Schaden / Reichweite / Intervall |
-|---|---|---|
-| 1 | 35 Gold / +5 | 45 Gold / 12 / 150 / 1 s |
-| 2 | 60 Gold / +5 | 80 Gold / 24 / 165 / 0,9 s |
-| 3 (nur Festungsbauer) | 90 Gold / +10 | 120 Gold / 38 / 180 / 0,8 s |
+| Stufe                 | Mauern: Kosten / zusätzliche HP | Waffe: Kosten / Schaden / Reichweite / Intervall |
+| --------------------- | ------------------------------- | ------------------------------------------------ |
+| 1                     | 35 Gold / +5                    | 45 Gold / 12 / 150 / 1 s                         |
+| 2                     | 60 Gold / +5                    | 80 Gold / 24 / 165 / 0,9 s                       |
+| 3 (nur Festungsbauer) | 90 Gold / +10                   | 120 Gold / 38 / 180 / 0,8 s                      |
 
 Tabellenwerte vor Hero-Modifikatoren. Mauern erhöhen maximale und aktuelle HP um den genannten Betrag; bestehender Schaden wird nicht vollständig repariert. Waffenstufen ersetzen die vorherigen Waffenwerte. Die automatische Base-Waffe verursacht Einzelzielschaden gegen Leben, Rüstung und Magieresistenz und nutzt die normale Kill-/Bossabrechnung. Sie belegt keinen Turmplatz im Loadout und erhält keine Turm-Upgrades oder Schmiede-/Marktboni. Eigene Modelle für Ausbauzustände sind noch nicht vorhanden; die Waffe nutzt sichtbare Pfeileffekte.
 
@@ -102,45 +101,45 @@ Tabellenwerte vor Hero-Modifikatoren. Mauern erhöhen maximale und aktuelle HP u
 
 Das Deck enthält ausschließlich Maphex-Karten. Gezogene Belohnungen werden erst nach Auswahl ins Deck und den Ablagestapel aufgenommen. Kartenentfernung löscht genau eine Kopie; bereits platzierte Hexe und Türme bleiben bestehen. Der Deck-Dropdown zeigt Gesamtdeck, Nachzieh- und Ablagestapel, aber keine zukünftige Ziehreihenfolge.
 
-| Hex | Rarität | Turmplätze | Effekt |
-|---|---|---:|---|
-| Spiegel-Abzweig | Uncommon | 2 | Gespiegelte T-Kreuzung: Durchgang mit Abzweig auf der anderen Seite. |
-| Fächerkreuzung | Uncommon | 2 | Drei Straßenenden auf einer Seite. Zwei Turmplätze im Rücken. |
-| Seitenkreuzung | Rare | 2 | Vier aufeinanderfolgende Straßenenden für neue Anschlüsse. |
-| Späherbogen | Epic | 1 | Kleine Kurve: +30 % Turmreichweite auf diesem Hex. |
-| Veteranengabel | Epic | 2 | Y-Kreuzung mit 2 Turmplätzen und +20 % Turmschaden. |
-| Goldroute | Epic | 1 | Gerade mit einem Turmplatz und +4 Gold je Wave. |
-| Drachenbogen | Legendary | 1 | Kleine Kurve: +40 % Turmschaden und +20 % Reichweite. |
-| Kronenkreuzung | Legendary | 2 | Sechs Anschlüsse, 2 Turmplätze, +20 % Schaden und Reichweite. |
-| Königsbogen | Legendary | 1 | Große Kurve: +5 Gold je Wave, Gebäudeslot und +20 % Turmreichweite. |
-| Versorgungsweg | Rare | 1 | Gerade Straße, +2 Gold je überlebter Wave |
-| Signalkreuzung | Epic | 2 | Vier Straßenenden, +20 % Turmreichweite |
-| Gerade | Common | 1 | Gerade Straße |
-| Kleine Kurve | Common | 1 | Enge 60°-Kurve |
-| Große Kurve | Common | 1 | Weite Kurve |
-| Y-Kreuzung | Uncommon | 2 | Drei gleichmäßig verteilte Straßenarme |
-| T-Kreuzung | Uncommon | 2 | Links-rechts-Durchgang mit seitlichem Abzweig |
-| Sechserkreuzung | Rare | 2 | Öffnungen in alle sechs Richtungen |
-| Weites Land | Uncommon | 2 | Gerade Straße mit zwei Plätzen |
-| Lange Straße | Uncommon | 2 | Gewundene Straße mit tatsächlich längerem Laufweg |
-| Belagerungsgerade | Rare | 1 | +25 % Schaden für Katapult auf diesem Hex. |
-| Blitzgabel | Rare | 2 | +25 % Schaden für Kettenblitz auf diesem Hex. |
-| Frostbogen | Rare | 1 | +25 % Reichweite für Freeze auf diesem Hex. |
-| Minenstraße | Rare | 2 | +25 % Schaden für Minenleger auf diesem Hex. |
-| Schützenlinie | Rare | 1 | +25 % Schaden für Balliste auf diesem Hex. |
-| Glutknick | Rare | 1 | +25 % Schaden für Flammenturm auf diesem Hex. |
-| Elementkreuzung | Rare | 2 | +25 % Schaden für Elementturm auf diesem Hex. |
-| Seelenabzweig | Rare | 2 | +25 % Schaden für Nekromantenturm auf diesem Hex. Gilt auch für Geister. |
-| Waldkurve | Rare | 1 | +25 % Archer-Schaden auf diesem Hex |
-| Kreuzung | Rare | 2 | Vier Straßenenden |
-| Dorfstraße | Rare | 1 | Automatisch +2 Gold/Wave und ein Gebäudeslot |
-| Handelsstraße | Rare | 0 | +4 Gold/Wave |
-| Höhenkreuzung | Epic | 1 | Drei Straßenenden, +25 % Tower-Reichweite |
-| Kampfstraße | Epic | 1 | Gerade Straße, +20 % Schaden für Schadentürme |
-| Wachtkurve | Epic | 2 | Kurve, +15 % Tower-Reichweite |
-| Bastionskreuzung | Legendary | 2 | Drei Straßenenden, +40 % Tower-Reichweite, +2 Gold/Wave |
-| Königsstraße | Legendary | 1 | Gerade Straße, +5 Gold/Wave und ein Gebäudeslot |
-| Kriegskreuzung | Legendary | 2 | Vier Straßenenden, +30 % Tower-Schaden |
+| Hex               | Rarität   | Turmplätze | Effekt                                                                   |
+| ----------------- | --------- | ---------: | ------------------------------------------------------------------------ |
+| Spiegel-Abzweig   | Uncommon  |          2 | Gespiegelte T-Kreuzung: Durchgang mit Abzweig auf der anderen Seite.     |
+| Fächerkreuzung    | Uncommon  |          2 | Drei Straßenenden auf einer Seite. Zwei Turmplätze im Rücken.            |
+| Seitenkreuzung    | Rare      |          2 | Vier aufeinanderfolgende Straßenenden für neue Anschlüsse.               |
+| Späherbogen       | Epic      |          1 | Kleine Kurve: +30 % Turmreichweite auf diesem Hex.                       |
+| Veteranengabel    | Epic      |          2 | Y-Kreuzung mit 2 Turmplätzen und +20 % Turmschaden.                      |
+| Goldroute         | Epic      |          1 | Gerade mit einem Turmplatz und +4 Gold je Wave.                          |
+| Drachenbogen      | Legendary |          1 | Kleine Kurve: +40 % Turmschaden und +20 % Reichweite.                    |
+| Kronenkreuzung    | Legendary |          2 | Sechs Anschlüsse, 2 Turmplätze, +20 % Schaden und Reichweite.            |
+| Königsbogen       | Legendary |          1 | Große Kurve: +5 Gold je Wave, Gebäudeslot und +20 % Turmreichweite.      |
+| Versorgungsweg    | Rare      |          1 | Gerade Straße, +2 Gold je überlebter Wave                                |
+| Signalkreuzung    | Epic      |          2 | Vier Straßenenden, +20 % Turmreichweite                                  |
+| Gerade            | Common    |          1 | Gerade Straße                                                            |
+| Kleine Kurve      | Common    |          1 | Enge 60°-Kurve                                                           |
+| Große Kurve       | Common    |          1 | Weite Kurve                                                              |
+| Y-Kreuzung        | Uncommon  |          2 | Drei gleichmäßig verteilte Straßenarme                                   |
+| T-Kreuzung        | Uncommon  |          2 | Links-rechts-Durchgang mit seitlichem Abzweig                            |
+| Sechserkreuzung   | Rare      |          2 | Öffnungen in alle sechs Richtungen                                       |
+| Weites Land       | Uncommon  |          2 | Gerade Straße mit zwei Plätzen                                           |
+| Lange Straße      | Uncommon  |          2 | Gewundene Straße mit tatsächlich längerem Laufweg                        |
+| Belagerungsgerade | Rare      |          1 | +25 % Schaden für Katapult auf diesem Hex.                               |
+| Blitzgabel        | Rare      |          2 | +25 % Schaden für Kettenblitz auf diesem Hex.                            |
+| Frostbogen        | Rare      |          1 | +25 % Reichweite für Freeze auf diesem Hex.                              |
+| Minenstraße       | Rare      |          2 | +25 % Schaden für Minenleger auf diesem Hex.                             |
+| Schützenlinie     | Rare      |          1 | +25 % Schaden für Balliste auf diesem Hex.                               |
+| Glutknick         | Rare      |          1 | +25 % Schaden für Flammenturm auf diesem Hex.                            |
+| Elementkreuzung   | Rare      |          2 | +25 % Schaden für Elementturm auf diesem Hex.                            |
+| Seelenabzweig     | Rare      |          2 | +25 % Schaden für Nekromantenturm auf diesem Hex. Gilt auch für Geister. |
+| Waldkurve         | Rare      |          1 | +25 % Archer-Schaden auf diesem Hex                                      |
+| Kreuzung          | Rare      |          2 | Vier Straßenenden                                                        |
+| Dorfstraße        | Rare      |          1 | Automatisch +2 Gold/Wave und ein Gebäudeslot                             |
+| Handelsstraße     | Rare      |          0 | +4 Gold/Wave                                                             |
+| Höhenkreuzung     | Epic      |          1 | Drei Straßenenden, +25 % Tower-Reichweite                                |
+| Kampfstraße       | Epic      |          1 | Gerade Straße, +20 % Schaden für Schadentürme                            |
+| Wachtkurve        | Epic      |          2 | Kurve, +15 % Tower-Reichweite                                            |
+| Bastionskreuzung  | Legendary |          2 | Drei Straßenenden, +40 % Tower-Reichweite, +2 Gold/Wave                  |
+| Königsstraße      | Legendary |          1 | Gerade Straße, +5 Gold/Wave und ein Gebäudeslot                          |
+| Kriegskreuzung    | Legendary |          2 | Vier Straßenenden, +30 % Tower-Schaden                                   |
 
 Turmspezifische Karten (einschließlich Waldkurve) erscheinen nur für Türme im gültigen Run-Loadout: regulär freigeschaltet, in Herausforderungen gegebenenfalls temporär verliehen. Der Filter gilt für normale, Wächter- und Shrine-Kartenbelohnungen. Freeze erhält +25 % Reichweite, die übrigen Turmkarten +25 % Schaden; Seelenabzweig verstärkt auch Geister.
 
@@ -152,28 +151,28 @@ Normale Kartenrewards nutzen Raritätsgewichte 55 / 30 / 12 / 3 / 1. Das sind Ge
 
 Listenwerte vor Terrain-, Gebäude- und Upgradeboni:
 
-| Turm | Preis | Schaden | Reichweite | Schussintervall / Wirkung |
-|---|---:|---:|---:|---|
-| Archer | 25 | 9 | 150 | 0,55 s; Einzelziel |
-| Katapult | 40 | 18 | 190 | 1,35 s; geradlinig durch maximal drei Gegner (auch mit Upgrades) |
-| Kettenblitz | 45 | 8 | 135 | 0,9 s; bis drei Ziele, Sprungabstand 75 |
-| Freeze | 30 | 0 | 145 | Permanente Aura: Gegner bewegen sich mit 50 % Tempo |
-| Minenleger | 35 | 24 | 150 | Legt während einer Wave stapelbare Wegminen; nicht ausgelöste Minen verschwinden am Wave-Ende |
-| Balliste | 55 | 46 | 235 | 1,9 s; freischaltbarer Elite-/Bosskiller |
-| Flammenturm | 50 | 14 | 115 | 0,7 s; freischaltbarer Flächenschaden im Radius 48 |
+| Turm        | Preis | Schaden | Reichweite | Schussintervall / Wirkung                                                                     |
+| ----------- | ----: | ------: | ---------: | --------------------------------------------------------------------------------------------- |
+| Archer      |    25 |       9 |        150 | 0,55 s; Einzelziel                                                                            |
+| Katapult    |    40 |      18 |        190 | 1,35 s; geradlinig durch maximal drei Gegner (auch mit Upgrades)                              |
+| Kettenblitz |    45 |       8 |        135 | 0,9 s; bis drei Ziele, Sprungabstand 75                                                       |
+| Freeze      |    30 |       0 |        145 | Permanente Aura: Gegner bewegen sich mit 50 % Tempo                                           |
+| Minenleger  |    35 |      24 |        150 | Legt während einer Wave stapelbare Wegminen; nicht ausgelöste Minen verschwinden am Wave-Ende |
+| Balliste    |    55 |      46 |        235 | 1,9 s; freischaltbarer Elite-/Bosskiller                                                      |
+| Flammenturm |    50 |      14 |        115 | 0,7 s; freischaltbarer Flächenschaden im Radius 48                                            |
 
 Freeze schießt nicht. Seine Aura bleibt leicht sichtbar; mehrere Freeze-Auren stapeln sich nicht, die stärkste Verlangsamung wirkt. Angeclickte Türme zeigen einen halbtransparenten Reichweitenkreis. Nach dem Platzieren öffnet sich kein Upgradefenster automatisch.
 
 Jeder Turm hat zwei alternative Spezialisierungen und anschließend eine zum gewählten Zweig passende finale Stufe. Darüber liegt eine vierte, turmweite Meta-Stufe: Sie muss einmal im Arsenal mit Diamanten freigeschaltet und danach in jedem Run mit Gold gekauft werden.
 
-| Turm | Zweig A | Zweig B |
-|---|---|---|
-| Archer | Scharfschütze: Schaden/Reichweite | Salven: Flächenschaden |
-| Katapult | Belagerung: schwere Treffer/Reichweite | Steinhagel: schneller schießen |
-| Kettenblitz | Sturmnetz: mehr Ziele/Sprungweite | Überladung: stärkere Treffer |
-| Freeze | Tiefenfrost: stärkerer Slow | Frostfeld: größere Aura |
-| Minenleger | Sprengmeister: schwere Großminen | Minenfeld: schnelle Gruppenminen |
-| Balliste | Harpunenbolzen: maximale Einzeltreffer | Repetierwerk: höhere Feuerrate |
+| Turm        | Zweig A                                  | Zweig B                               |
+| ----------- | ---------------------------------------- | ------------------------------------- |
+| Archer      | Scharfschütze: Schaden/Reichweite        | Salven: Flächenschaden                |
+| Katapult    | Belagerung: schwere Treffer/Reichweite   | Steinhagel: schneller schießen        |
+| Kettenblitz | Sturmnetz: mehr Ziele/Sprungweite        | Überladung: stärkere Treffer          |
+| Freeze      | Tiefenfrost: stärkerer Slow              | Frostfeld: größere Aura               |
+| Minenleger  | Sprengmeister: schwere Großminen         | Minenfeld: schnelle Gruppenminen      |
+| Balliste    | Harpunenbolzen: maximale Einzeltreffer   | Repetierwerk: höhere Feuerrate        |
 | Flammenturm | Inferno: großer, schwerer Flächenschaden | Lauffeuer: schnelle kleine Feuerstöße |
 
 Das Turmmenü zeigt aktuelle Werte und Änderungen durch Upgrades. Symbole, Farben, Ringe und Stufenanzeigen machen den Ausbau sichtbar. Ein kleiner überlappender Pfeil zeigt bezahlbare Upgrades an.
@@ -194,11 +193,11 @@ Im Arsenal können die Balliste für 20 Diamanten und der Flammenturm für 35 Di
 
 Das automatische Dorfeinkommen benötigt keinen Ausbau. Im angeklickten Gebäudeslot kann genau ein Gebäude gebaut werden:
 
-| Gebäude | Preis | Effekt |
-|---|---:|---|
-| Haus | 30 | Zusätzlich +3 Gold/Wave; Dorf und Haus zusammen +5 |
-| Schmiede | 40 | +20 % Tower-Schaden auf eigenem und direkt benachbarten Hexen |
-| Markt | 35 | 15 % Rabatt auf Towerbau und Tower-Upgrades auf eigenem und direkt benachbarten Hexen |
+| Gebäude  | Preis | Effekt                                                                                |
+| -------- | ----: | ------------------------------------------------------------------------------------- |
+| Haus     |    30 | Zusätzlich +3 Gold/Wave; Dorf und Haus zusammen +5                                    |
+| Schmiede |    40 | +20 % Tower-Schaden auf eigenem und direkt benachbarten Hexen                         |
+| Markt    |    35 | 15 % Rabatt auf Towerbau und Tower-Upgrades auf eigenem und direkt benachbarten Hexen |
 
 Gleiche Supporteffekte stapeln sich nicht. Rabatte werden auf volle Goldstücke aufgerundet und gelten nicht für Gebäude. Schmieden wirken auch auf bestehende und ausgebaute Türme, nicht auf die schadensfreie Freeze-Aura.
 
@@ -222,12 +221,12 @@ Von jedem gesetzten Hex aus: **Radius 2 klare Sicht**, **bis Gesamtradius 6 Fog 
 
 Neue erkundete Koordinaten erzeugen seedbasiert weitere Sonderfelder. Bereits erkundete Felder werden nicht neu gewürfelt. Innerhalb Radius 2 der Base entstehen keine Sonderfelder.
 
-| Typ | Anteil unter Sonderfeldern | Chance je geeignetem Feld |
-|---|---:|---:|
-| Schatz | 55 % | 2,475 % |
-| Shrine | 30 % | 1,35 % |
-| Boss | 15 % | 0,675 % |
-| Insgesamt | 100 % | 4,5 % |
+| Typ       | Anteil unter Sonderfeldern | Chance je geeignetem Feld |
+| --------- | -------------------------: | ------------------------: |
+| Schatz    |                       55 % |                   2,475 % |
+| Shrine    |                       30 % |                    1,35 % |
+| Boss      |                       15 % |                   0,675 % |
+| Insgesamt |                      100 % |                     4,5 % |
 
 Keine garantierte Anzahl oder feste Startliste. Wächterfelder entstehen nie innerhalb von vier Hexen um die Base; der früheste mögliche Abstand ist fünf. Im Nebel erscheinen Sonderfelder als `?`, bei klarer Sicht als graues Symbol mit ungesammeltem beziehungsweise inaktivem Status. Sonderfelder sind **vorgefertigte Hexe mit fester Straßengeometrie und Rotation**. Schatz und Shrine verwenden Gerade, Kleine/Große Kurve, Y- oder T-Kreuzung, bei Bedarf eine Sechserkreuzung; Bossfelder haben immer alle sechs Öffnungen. Direkt benachbarte Eventfelder erhalten beidseitig passende Straßenanschlüsse. Die Generierung berücksichtigt auch noch nicht erkundete Nachbarn und verändert bestehende Formen später nicht. Im Nebel ist die Geometrie verborgen, bei klarer Sicht werden graue Straßen und mögliche Slots angezeigt. Diese Felder dürfen nicht mit einer Handkarte überschrieben oder gedreht werden. Eine passende Straße vom gebauten Nachbarhex schließt das Feld automatisch ans Netz an und aktiviert es; eine vorbeiführende Straße reicht nicht. Sonderfelder geben nur ihren Sonderbonus, Schatz und Shrine haben einen Turmplatz, Bossfelder keinen.
 
@@ -235,14 +234,14 @@ Keine garantierte Anzahl oder feste Startliste. Wächterfelder entstehen nie inn
 
 Schätze geben einmalig +20 Gold. Shrines verbergen ihren konkreten Effekt bis zur Erschließung:
 
-| Shrine-Effekt | Wahrscheinlichkeit |
-|---|---:|
-| Eine Kartenkopie entfernen, Mindestdeckgröße fünf | 20 % |
-| Eine zusätzliche Karte aus bis zu drei Angeboten wählen | 20 % |
-| Eine Epic-Karte erhalten | 20 % |
-| Eine Legendary-Karte erhalten | 10 % |
-| Heilquelle: bis zu +5 HP, bei voller Gesundheit +30 Gold | 15 % |
-| Werksegen: kostenloses Turm-Upgrade, sonst +30 Gold | 15 % |
+| Shrine-Effekt                                            | Wahrscheinlichkeit |
+| -------------------------------------------------------- | -----------------: |
+| Eine Kartenkopie entfernen, Mindestdeckgröße fünf        |               20 % |
+| Eine zusätzliche Karte aus bis zu drei Angeboten wählen  |               20 % |
+| Eine Epic-Karte erhalten                                 |               20 % |
+| Eine Legendary-Karte erhalten                            |               10 % |
+| Heilquelle: bis zu +5 HP, bei voller Gesundheit +30 Gold |               15 % |
+| Werksegen: kostenloses Turm-Upgrade, sonst +30 Gold      |               15 % |
 
 Der Epic-Pool enthält Höhenkreuzung, Kampfstraße, Wachtkurve und Signalkreuzung; der Legendary-Pool Bastionskreuzung, Königsstraße und Kriegskreuzung. Raritätsspezifische Shrine-Rewards bieten bis zu drei Karten zur Auswahl. Der Werksegen bietet normale Upgradezweige bzw. deren finale Stufen für bereits gebaute Loadout-Türme; keine gesperrten Stufe-4-Upgrades. Gratis-Upgrades erhöhen den Verkaufswert nicht. Das Fenster nennt direkt „Shrine erschlossen“ und den Effekt. Auswahl oder Überspringen verbraucht den Shrine. Danach Bauphase ohne erneutes Handziehen; Auto-Start wartet auf die Entscheidung. Schatz und Shrine haben einen Collect-Sound.
 
