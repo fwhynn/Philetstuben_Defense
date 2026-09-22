@@ -4,7 +4,7 @@ Stand: 20.09.2026 · **V0.7-dev**, einschließlich lokaler Änderungen
 
 ## Aktueller Spielstand
 
-Die aktuelle Regelbeschreibung steht in [GAME_REFERENCE.md](GAME_REFERENCE.md), die Architektur in [ARCHITECTURE.md](ARCHITECTURE.md), Entscheidungen und offene Ideen in [BRAIN.md](BRAIN.md). Der [Meta-Plan](META_PROGRESSION_PLAN.md) trennt Umsetzung und spätere Vorschläge.
+Die aktuelle Regelbeschreibung steht in [GAME_REFERENCE.md](GAME_REFERENCE.md), die Architektur in [ARCHITECTURE.md](ARCHITECTURE.md), Entscheidungen und offene Ideen in [../ai/BRAIN.md](../ai/BRAIN.md). Der [Meta-Plan](META_PROGRESSION_PLAN.md) trennt Umsetzung und spätere Vorschläge.
 
 - Three.js-3D mit SVG-Fallback, Modelle für sieben Türme, fünf Gegner, drei Gebäude, Sonderfelder und Minen.
 - Hex-Deckbuilding, fünf Türme pro Run, Arsenal mit Balliste/Flammenturm und Stufe-4-Upgrades, drei Loadout-Presets und persistentes Browserprofil.
