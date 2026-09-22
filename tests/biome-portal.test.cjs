@@ -97,14 +97,15 @@ test('first coloured unplaced neighbor triggers biome introduction, dismissal la
 test('biome visibility includes colored neighbors but not distant landmark silhouettes',()=>{
   const c=loadCore(),{state:s}=c.runtime.create({seed:'visible',runId:'test',loadout});
   assert.ok(c.biomes.visibleTiles(s).every(t=>c.biomes.forTile(s,t)==='grass'));
-  s.map.set('3,0',{q:3,r:0,type:'straight',roads:[0,3]});
-  const next=c.biomes.visibleTiles(s).find(t=>t.q===4&&t.r===0);assert.ok(next);assert.notEqual(c.biomes.forTile(s,next),'grass');
-  s.biomeIntro=c.biomes.forTile(s,next);assert.ok(c.biomes.highlight(s).tiles.some(t=>t.q===4&&t.r===0));
+  let next;for(let q=-7;q<=7&&!next;q++)for(let r=-7;r<=7&&!next;r++)if(c.biomes.at(s.biomeSeed,q,r)!=='grass')next={q,r};assert.ok(next);
+  s.map.set((next.q-1)+','+next.r,{q:next.q-1,r:next.r,type:'straight',roads:[0,3]});
+  assert.ok(c.biomes.visibleTiles(s).some(t=>t.q===next.q&&t.r===next.r));
+  s.biomeIntro=c.biomes.forTile(s,next);assert.ok(c.biomes.highlight(s).tiles.some(t=>t.q===next.q&&t.r===next.r));
   assert.ok(!c.biomes.visibleTiles(s).some(t=>t.q===8&&t.r===0));
 });
 
-test('non-grass biomes start at distance four in every direction',()=>{
- const c=loadCore();for(let q=-4;q<=4;q++)for(let r=-4;r<=4;r++){const distance=Math.max(Math.abs(q),Math.abs(r),Math.abs(q+r));if(distance<=3)assert.equal(c.biomes.at('rings',q,r),'grass');if(distance===4)assert.notEqual(c.biomes.at('rings',q,r),'grass');}
+test('non-grass biomes never start before distance four',()=>{
+ const c=loadCore();for(let q=-4;q<=4;q++)for(let r=-4;r<=4;r++){const distance=Math.max(Math.abs(q),Math.abs(r),Math.abs(q+r));if(distance<=3)assert.equal(c.biomes.at('rings',q,r),'grass');}
 });
 test('a placed biome triggers the hint even during the tutorial and reward phase',()=>{
  const {a,elements}=load({initialStorage:{'tutorial-v1':'','biome-intro-v1':'done'}});elements.get('mainMenu').classList.add('hidden');a.state.biomeSeed='intro';a.state.phase='reward';a.state.map.set('4,0',{q:4,r:0,type:'straight',roads:[0,3],slots:0,towers:[]});a.renderAll();assert.ok(a.state.biomeIntro);assert.equal(elements.get('biomeIntro').classList.contains('hidden'),false);
@@ -113,6 +114,7 @@ test('a placed biome triggers the hint even during the tutorial and reward phase
 test('first hint marks every simultaneously discovered biome and shows hover effects inside itself',()=>{
  const {a,elements}=load(),c=loadCore();elements.get('mainMenu').classList.add('hidden');a.state.biomeSeed='all-regions';a.state.landmarks=new Map();
  for(let q=-3;q<=3;q++)for(let r=-3;r<=3;r++)if(Math.max(Math.abs(q),Math.abs(r),Math.abs(q+r))===3)a.state.map.set(q+','+r,{q,r,type:'straight',roads:[0,3],slots:0,towers:[]});
+ for(const biome of ['ash','desert','storm']){let found=false;for(let q=-9;q<=9&&!found;q++)for(let r=-9;r<=9&&!found;r++)if(c.biomes.at(a.state.biomeSeed,q,r)===biome){a.state.map.set(q+','+r,{q,r,type:'straight',roads:[0,3],slots:0,towers:[]});found=true;}}
  a.renderAll();assert.deepEqual(Array.from(a.state.biomeIntro).sort(),['ash','desert','storm']);
  const buttons=elements.get('biomeRail').children;assert.equal(buttons.filter(b=>b.classList.contains('biomeIntroTarget')).length,3);
  assert.equal(elements.get('biomeIntroTitle').textContent,'Neue Biome entdeckt');

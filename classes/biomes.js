@@ -6,7 +6,7 @@ const HexBiomes=(()=>{
     storm:{name:'Sturmhochland',color:'#7e8da9',description:'Kettenblitz +25 % Sprungweite; Wind +1 Durchschlagziel; Archer/Balliste −15 % Angriffsrate. Wächter: 50 % weniger Blitz- und Windschaden.'},
     ash:{name:'Aschelande',color:'#bd6047',description:'Feuer +20 % Schaden; Freeze −15 % Reichweite; Wasser-Slow hält 25 % kürzer. Wächter: 50 % weniger Feuerschaden.'}
   };
-  function at(seed,q,r){
+  function legacyAt(seed,q,r){
     if(seed==null||Math.max(Math.abs(q),Math.abs(r),Math.abs(q+r))<=3)return 'grass';
     let hash=2166136261;for(const c of String(seed))hash=Math.imul(hash^c.charCodeAt(0),16777619)>>>0;
     const angle=Math.atan2(r*1.5,Math.sqrt(3)*(q+r/2)),rotation=hash/4294967296*Math.PI*2;
@@ -14,7 +14,32 @@ const HexBiomes=(()=>{
     const sector=Math.floor(((angle+rotation+bend)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)/(Math.PI*2/3));
     return ['desert','storm','ash'][sector];
   }
-  const forTile=(state,tile)=>state.remoteView?(tile.biome||'grass'):at(state.challengeDay?null:state.biomeSeed,tile.q,tile.r);
+  // Variable 3–5-cell bands, bent sideways by at most one cell. Four-color
+  // parity prevents adjacent regions joining into an unbounded same-biome strip.
+  const worlds=new Map();
+  function hash(value){let h=2166136261;for(const c of String(value))h=Math.imul(h^c.charCodeAt(0),16777619)>>>0;h^=h>>>16;h=Math.imul(h,0x7feb352d);h^=h>>>15;return h>>>0;}
+  function world(seed){if(worlds.has(seed))return worlds.get(seed);const colors=['grass','desert','storm','ash'];for(let i=3;i>0;i--){const j=hash(seed+'|color|'+i)%(i+1);[colors[i],colors[j]]=[colors[j],colors[i]];}const result={colors,turn:hash(seed+'|turn')%6,cells:new Map(),bands:new Map()};if(worlds.size>=4)worlds.delete(worlds.keys().next().value);worlds.set(seed,result);return result;}
+  function band(w,seed,axis,n){const group=Math.floor(n/12),key=axis+group;let widths=w.bands.get(key);if(!widths){widths=[3,4,5];for(let i=2;i>0;i--){const j=hash(seed+'|'+key+'|'+i)%(i+1);[widths[i],widths[j]]=[widths[j],widths[i]];}if(w.bands.size>=512)w.bands.clear();w.bands.set(key,widths);}let offset=n-group*12,index=0;while(offset>=widths[index])offset-=widths[index++];return group*3+index;}
+  function rawAt(w,seed,q,r){
+    if(Math.max(Math.abs(q),Math.abs(r),Math.abs(q+r))<=3)return 'grass';
+    let x=q,y=r;for(let i=0;i<w.turn;i++)[x,y]=[-y,x+y];
+    const knot=Math.floor(y/4),fraction=(y-knot*4)/4,left=hash(seed+'|bend|'+knot)%3-1,right=hash(seed+'|bend|'+(knot+1))%3-1;
+    const bend=Math.round(left+(right-left)*fraction);
+    const a=band(w,seed,'q',x-bend),b=band(w,seed,'r',y),parity=n=>((n%2)+2)%2;
+    return w.colors[parity(a)+2*parity(b)];
+  }
+  function at(seed,q,r){
+    if(seed==null)return 'grass';
+    const w=world(String(seed)),key=q+','+r;if(w.cells.has(key))return w.cells.get(key);
+    let result=rawAt(w,seed,q,r);const cells=[[q,r]],seen=new Set([key]);
+    // Clipping at the safe start must not leave tiny non-grass islands.
+    if(result!=='grass'&&Math.max(Math.abs(q),Math.abs(r),Math.abs(q+r))<=10){
+      for(let i=0;i<cells.length;i++)for(const [dq,dr] of [[1,0],[0,1],[-1,1],[-1,0],[0,-1],[1,-1]]){const [x,y]=cells[i],nq=x+dq,nr=y+dr,id=nq+','+nr;if(!seen.has(id)&&rawAt(w,seed,nq,nr)===result){seen.add(id);cells.push([nq,nr]);}}
+      if(cells.length<9)result='grass';
+    }
+    if(w.cells.size>=8192)w.cells.clear();for(const [x,y] of cells)w.cells.set(x+','+y,result);return result;
+  }
+  const forTile=(state,tile)=>state.remoteView?(tile.biome||'grass'):(state.biomeLayoutVersion===1?legacyAt:at)(state.challengeDay?null:state.biomeSeed,tile.q,tile.r);
   function visibleTiles(state){
     const cells=new Map(state.map);if(state.remoteView)return [...cells.values()];
     for(const tile of state.map.values())for(let d=0;d<6;d++){const n=HexMap.neighbor(tile.q,tile.r,d),id=HexMap.key(n.q,n.r);if(!cells.has(id)&&(!state.landmarks?.has(id)||state.landmarks.get(id).claimed))cells.set(id,n);}

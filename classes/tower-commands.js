@@ -19,8 +19,8 @@ const HexTowerCommands=(()=>{
   function upgrade(state,selected,branch){
     if(!['place','build','wave'].includes(state.phase)||state.hp<=0||!validSlot(selected))return false;
     const tower=state.map.get(key(selected.q,selected.r))?.towers?.[selected.index];if(!tower||tower.guestOwner!==undefined)return false;
-    const ultimateId='ultimate:'+tower.type,isUltimate=branch===ultimateId,upgrade=isUltimate?HexData.ULTIMATES[tower.type]:HexData.UPGRADES[branch];
-    const allowed=isUltimate?tower.finalUpgrade&&!tower.ultimate&&state.ultimateUnlocks.includes(ultimateId):HexData.availableUpgrades(tower).some(([id])=>id===branch),price=upgrade?HexBuildings.cost(state,selected,upgrade.cost):Infinity;
+    const ultimateId='ultimate:'+tower.type,isUltimate=branch===ultimateId,upgrade=isUltimate?HexData.ultimateDefinition(tower):HexData.UPGRADES[branch];
+    const allowed=isUltimate?tower.finalUpgrade&&!tower.ultimate&&HexData.ultimateAvailable(state,tower):HexData.availableUpgrades(tower).some(([id])=>id===branch),price=upgrade?HexBuildings.cost(state,selected,upgrade.cost):Infinity;
     if(!allowed||state.gold<price)return false;
     if(isUltimate){tower.ultimate=tower.type;tower.level=4;}else if(upgrade.requires){tower.finalUpgrade=branch;tower.level=3;}else{tower.branch=branch;tower.level=2;}
     tower.paid+=price;state.gold-=price;HexData.recordTowerStat(state,tower,'upgradeGold',price);

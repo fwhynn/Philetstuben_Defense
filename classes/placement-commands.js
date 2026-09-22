@@ -3,6 +3,7 @@ const HexPlacementCommands=(()=>{
   const card=(state,id)=>id==='rescue'?state.rescueCard:HexData.CARD_LIBRARY[id];
   function canPlace(state,q,r,definition,rotation){
     if(!definition||!Number.isInteger(q)||!Number.isInteger(r)||!Number.isInteger(rotation)||rotation<0||rotation>5)return false;
+    if(definition.rescue&&state.difficulty==='dual')definition={...definition,minExits:2};
     if(state.openingRemaining){const remaining=[...state.hand],index=remaining.indexOf(definition.id);if(index>=0)remaining.splice(index,1);return HexMap.canPlaceOpening(state.map,q,r,definition,rotation,remaining.map(id=>card(state,id)),state.baseExits);}
     if(state.landmarks.get(HexMap.key(q,r))?.prefab)return false;
     return HexMap.canPlace(state.map,q,r,definition,rotation,state.landmarks);

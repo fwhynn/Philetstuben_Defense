@@ -2,7 +2,7 @@
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),{performance}=require('node:perf_hooks'),{createHash}=require('node:crypto');
 function load(){
   const context=vm.createContext({});
-  const source=fs.readFileSync(path.join(__dirname,'../classes/buildings.js'),'utf8').replace('function definition(building){','function definition(building){calls++;');
+  const source=fs.readFileSync(path.join(__dirname,'../classes/buildings.js'),'utf8').replace('function definition(building,state){','function definition(building,state){calls++;');
   vm.runInContext('let calls=0;'+source,context);
   return vm.runInContext('({buildings:HexBuildings,get calls(){return calls;}})',context);
 }

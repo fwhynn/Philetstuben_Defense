@@ -1049,3 +1049,54 @@ Bauplatz gewählt · Strg + Klick: weitere Plätze markieren oder abwählen.|bui
 HexTranslations.add(`
 Deck ausdünnen (optional)|Thin deck (optional)
 `);
+HexTranslations.add(`
+Rettungsstraße mit zwei offenen Ausgängen. Keine Turmplätze.|Rescue road with two open exits. No tower slots.
+`);
+
+HexTranslations.add(`
+Pfeilhagel|Arrow Hail
+25 % kürzere Nachladezeit und +25 Explosionsradius.|25% shorter reload time and +25 blast radius.
+Meisterschütze|Master Marksman
++50 % Schaden und +20 % Reichweite.|+50% damage and +20% range.
+Belagerungstitan|Siege Titan
++60 % Schaden und +15 % Reichweite.|+60% damage and +15% range.
+Steinlawine|Rock Avalanche
+35 % kürzere Nachladezeit.|35% shorter reload time.
+Gewitterfront|Storm Front
+Vier zusätzliche Kettenziele und +30 Sprungweite.|Four extra chain targets and +30 jump range.
+Donnerschlag|Thunder Strike
++70 % Schaden pro Treffer.|+70% damage per hit.
+Ewiges Eis|Eternal Ice
+40 % geringere Bewegungsgeschwindigkeit innerhalb der Aura.|40% lower movement speed within the aura.
+Polarweite|Polar Expanse
++35 % Aura-Reichweite.|+35% aura range.
+Weltenbrecher|World Breaker
++50 % Schaden und +30 Explosionsradius.|+50% damage and +30 blast radius.
+Minenmeer|Sea of Mines
+40 % kürzere Nachladezeit.|40% shorter reload time.
+Drachentod|Dragon's Bane
++30 % Schaden und zusätzlich +50 % Bossschaden.|+30% damage and an additional +50% boss damage.
+Bolzenorkan|Bolt Hurricane
+Sonnenkern|Solar Core
++50 % Schaden und +25 Explosionsradius.|+50% damage and +25 blast radius.
+Feuerwalze|Rolling Fire
+35 % kürzere Nachladezeit und +10 Explosionsradius.|35% shorter reload time and +10 blast radius.
++30 % Feuerschaden und +30 Explosionsradius.|+30% fire damage and +30 blast radius.
++30 % Wasserschaden, stärkere Verlangsamung und +2 Sekunden Dauer.|+30% water damage, stronger slowing and +2 seconds duration.
++30 % Windschaden, +20 % Reichweite und drei zusätzliche Durchschlagsziele.|+30% wind damage, +20% range and three extra pierced targets.
+Seelenheer|Soul Army
+Vier zusätzliche Geister gleichzeitig.|Four additional simultaneous spirits.
+Seelenherrscher|Soul Sovereign
++50 % Turm- und Geisterschaden und +6 Sekunden Geisterdauer.|+50% tower and spirit damage and +6 seconds spirit lifetime.
++16 Gold je Welle und +2 Gold für jedes weitere Patrizierhaus im Run.|+16 gold per wave and +2 gold for every other Patrician House in the run.
+Für nächsten Run aktivieren|Activate for next run
+Aktiv für nächsten Run|Active for next run
+Freigeschaltet · inaktiv|Unlocked · inactive
+Meta-Freischaltung · nur ein Pfad je Turmtyp aktiv|Meta unlock · only one active path per tower type
+im Arsenal freischalten und für den nächsten Run aktivieren.|unlock in the Arsenal and activate for the next run.
+`);
+
+HexTranslations.add(`
+Vorlagenname|Preset name
+Name speichern|Save name
+`);

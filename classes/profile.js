@@ -3,11 +3,16 @@ const HexProfile=(()=>{
   const START_TOWERS=['archer','catapult','chain','freeze','mine'];
   const TOWER_UNLOCKS={ballista:{cost:20},flame:{cost:35},element:{cost:45},necromancer:{cost:55}};
   const ULTIMATE_UNLOCKS={element:{cost:35},necromancer:{cost:40},archer:{cost:20},catapult:{cost:20},chain:{cost:20},freeze:{cost:20},mine:{cost:20},ballista:{cost:30},flame:{cost:30}};
+  const ULTIMATE_BRANCHES={"archer":["volley","marksman"],"catapult":["siege","barrage"],"chain":["storm","overload"],"freeze":["deepFrost","frostField"],"mine":["demolition","minefield"],"ballista":["harpoon","repeater"],"flame":["inferno","wildfire"],"element":["elementFire","elementWater","elementWind"],"necromancer":["soulChoir","soulKeeper"]};
+  function ownsUltimate(profile,type,branch){return profile.unlocks.includes('ultimate:'+type)||profile.unlocks.includes('ultimate:'+type+':'+branch);}
+  function activeUltimate(profile,type){const owned=(ULTIMATE_BRANCHES[type]||[]).filter(branch=>ownsUltimate(profile,type,branch));return owned.includes(profile.activeUltimates?.[type])?profile.activeUltimates[type]:owned[0];}
+  function runUnlocks(profile){return [...profile.unlocks.filter(id=>!id.startsWith('ultimate:')),...Object.keys(ULTIMATE_BRANCHES).flatMap(type=>{const branch=activeUltimate(profile,type);return branch?['ultimate:'+type+':'+branch]:[];})];}
+  function activateUltimate(profile,id,definitions){const [type,branch]=id.split(':');if(!ULTIMATE_BRANCHES[type]?.includes(branch)||!ownsUltimate(profile,type,branch))return null;return save({...profile,activeUltimates:{...profile.activeUltimates,[type]:branch}},definitions);}
   const BUILDING_UNLOCKS={house:{cost:40},forge:{cost:40},market:{cost:40}};
   function unlockBuilding(profile,id,definitions){const clean=normalize(profile,definitions),offer=BUILDING_UNLOCKS[id],key='building:'+id;if(!offer||clean.unlocks.includes(key)||clean.diamonds<offer.cost)return null;return save({...clean,diamonds:clean.diamonds-offer.cost,unlockCosts:{...clean.unlockCosts,[key]:offer.cost},unlocks:[...clean.unlocks,key]},definitions);}
-  function affordableUnlocks(profile){return Object.entries(TOWER_UNLOCKS).filter(([id,o])=>!profile.unlockedTowers.includes(id)&&profile.diamonds>=o.cost).length+Object.entries(ULTIMATE_UNLOCKS).filter(([id,o])=>profile.unlockedTowers.includes(id)&&!profile.unlocks.includes('ultimate:'+id)&&profile.diamonds>=o.cost).length+Object.entries(BUILDING_UNLOCKS).filter(([id,o])=>!profile.unlocks.includes('building:'+id)&&profile.diamonds>=o.cost).length;}
-  function resetValue(profile){let amount=0;for(const [kind,offers] of [['tower',TOWER_UNLOCKS],['ultimate',ULTIMATE_UNLOCKS],['building',BUILDING_UNLOCKS]])for(const [id,offer] of Object.entries(offers)){const key=kind+':'+id,owned=kind==='tower'?profile.unlockedTowers.includes(id):profile.unlocks.includes(key);if(owned){const paid=profile.unlockCosts?.[key];amount+=Number.isFinite(paid)&&paid>=0?paid:offer.cost;}}return amount;}
-  function resetUnlocks(profile,definitions){const clean=normalize(profile,definitions),refund=resetValue(clean);return {refund,profile:save({...clean,diamonds:clean.diamonds+refund,unlockedTowers:[...START_TOWERS],activeLoadout:[...START_TOWERS],loadoutPresets:defaults().loadoutPresets,unlocks:clean.unlocks.filter(id=>!['tower:','ultimate:','building:'].some(prefix=>id.startsWith(prefix))),unlockCosts:{}},definitions)};}
+  function affordableUnlocks(profile){return Object.entries(TOWER_UNLOCKS).filter(([id,o])=>!profile.unlockedTowers.includes(id)&&profile.diamonds>=o.cost).length+Object.entries(ULTIMATE_UNLOCKS).reduce((sum,[id,o])=>sum+(profile.unlockedTowers.includes(id)&&profile.diamonds>=o.cost?ULTIMATE_BRANCHES[id].filter(branch=>!ownsUltimate(profile,id,branch)).length:0),0)+Object.entries(BUILDING_UNLOCKS).filter(([id,o])=>!profile.unlocks.includes('building:'+id)&&profile.diamonds>=o.cost).length;}
+  function resetValue(profile){let amount=0;for(const [kind,offers] of [['tower',TOWER_UNLOCKS],['ultimate',ULTIMATE_UNLOCKS],['building',BUILDING_UNLOCKS]])for(const [id,offer] of Object.entries(offers)){const key=kind+':'+id,owned=kind==='tower'?profile.unlockedTowers.includes(id):profile.unlocks.includes(key);if(owned){const paid=profile.unlockCosts?.[key];amount+=Number.isFinite(paid)&&paid>=0?paid:offer.cost;}}for(const key of profile.unlocks){const [kind,type,branch]=key.split(':');if(kind==='ultimate'&&ULTIMATE_BRANCHES[type]?.includes(branch))amount+=profile.unlockCosts?.[key]??ULTIMATE_UNLOCKS[type].cost;}return amount;}
+  function resetUnlocks(profile,definitions){const clean=normalize(profile,definitions),refund=resetValue(clean);return {refund,profile:save({...clean,diamonds:clean.diamonds+refund,unlockedTowers:[...START_TOWERS],activeLoadout:[...START_TOWERS],loadoutPresets:defaults().loadoutPresets,unlocks:clean.unlocks.filter(id=>!['tower:','ultimate:','building:'].some(prefix=>id.startsWith(prefix))),unlockCosts:{},activeUltimates:{}},definitions)};}
   function heroUnlocked(profile,id){return id==='standard'||id==='builder'&&profile.milestones?.includes('standard35')||id==='merchant'&&profile.milestones?.includes('dual35')||false;}
   function defaults(){const loadout=[...START_TOWERS];return {version:1,activeHero:'standard',diamonds:0,unlockedTowers:loadout,activeLoadout:[...loadout],loadoutPresets:Array.from({length:3},(_,i)=>({name:`Preset ${i+1}`,towers:[...loadout]})),unlocks:[],milestones:[],settledRuns:[],records:{highestWave:0,bossesKilled:0,runsPlayed:0},lifetime:{normalKills:0,diamondsEarned:0,towers:{}}};}
   function validIds(ids,definitions){return [...new Set(Array.isArray(ids)?ids:[])].filter(id=>definitions[id]);}
@@ -34,6 +39,11 @@ const HexProfile=(()=>{
     const selected=validIds(ids,definitions);
     if(selected.length!==5||selected.some(id=>!profile.unlockedTowers.includes(id))) return null;
     return save({...profile,activeLoadout:selected},definitions);
+  }
+  function renamePreset(profile,index,name,definitions){
+    const clean=normalize(profile,definitions);if(!Number.isInteger(index)||index<0||index>=3||typeof name!=='string')return null;
+    name=name.trim().replace(/\s+/g,' ').slice(0,30);if(!name)return null;
+    return save({...clean,loadoutPresets:clean.loadoutPresets.map((preset,i)=>i===index?{...preset,name}:preset)},definitions);
   }
   function savePreset(profile,index,ids,definitions){
     const clean=normalize(profile,definitions),selected=validIds(ids,definitions);if(index<0||index>2||selected.length!==5||selected.some(id=>!clean.unlockedTowers.includes(id)))return null;
@@ -67,7 +77,7 @@ const HexProfile=(()=>{
     if(!offer||!definitions[id]||clean.unlockedTowers.includes(id)||clean.diamonds<offer.cost)return null;
     return save({...clean,diamonds:clean.diamonds-offer.cost,unlockCosts:{...clean.unlockCosts,['tower:'+id]:offer.cost},unlockedTowers:[...clean.unlockedTowers,id],unlocks:[...clean.unlocks,'tower:'+id]},definitions);
   }
-  function unlockUltimate(profile,id,definitions){const offer=ULTIMATE_UNLOCKS[id],clean=normalize(profile,definitions),key='ultimate:'+id;if(!offer||!clean.unlockedTowers.includes(id)||clean.unlocks.includes(key)||clean.diamonds<offer.cost)return null;return save({...clean,diamonds:clean.diamonds-offer.cost,unlockCosts:{...clean.unlockCosts,[key]:offer.cost},unlocks:[...clean.unlocks,key]},definitions);}
+  function unlockUltimate(profile,id,definitions){const [type,branch]=id.split(':'),offer=ULTIMATE_UNLOCKS[type],clean=normalize(profile,definitions),key='ultimate:'+id;if(!offer||branch&&!ULTIMATE_BRANCHES[type]?.includes(branch)||!clean.unlockedTowers.includes(type)||(branch?ownsUltimate(clean,type,branch):clean.unlocks.includes(key))||clean.diamonds<offer.cost)return null;return save({...clean,diamonds:clean.diamonds-offer.cost,unlockCosts:{...clean.unlockCosts,[key]:offer.cost},unlocks:[...clean.unlocks,key],activeUltimates:{...clean.activeUltimates,...(!activeUltimate(clean,type)&&branch?{[type]:branch}:{})}},definitions);}
   function settleDaily(profile,day,wave,definitions){
     const clean=normalize(profile,definitions),results={...(clean.dailyResults||{})},old=results[day]||{},won=wave>=20,reward=won&&!old.won?10:0;
     results[day]={best:Math.max(Number(old.best)||0,wave),won:!!old.won||won};
@@ -87,10 +97,11 @@ const HexProfile=(()=>{
     numbers(p.records);for(const key of ['highestWave','bossesKilled','runsPlayed'])if(!Number.isSafeInteger(p.records[key]))invalid();
     for(const key of ['normalKills','diamondsEarned'])if(!Number.isSafeInteger(p.lifetime[key]))invalid();
     if(!object(p.lifetime.towers))invalid();for(const entry of Object.values(p.lifetime.towers))numbers(entry);
+    if(p.activeUltimates!==undefined&&(!object(p.activeUltimates)||Object.entries(p.activeUltimates).some(([type,branch])=>!ULTIMATE_BRANCHES[type]?.includes(branch))))invalid();
     if(p.unlockCosts!==undefined)numbers(p.unlockCosts);
     if(p.loadoutPresets!==undefined&&(!Array.isArray(p.loadoutPresets)||p.loadoutPresets.some(v=>!object(v)||typeof v.name!=='string'||!Array.isArray(v.towers)||v.towers.some(id=>typeof id!=='string'))))invalid();
     if(p.dailyResults!==undefined){if(!object(p.dailyResults))invalid();for(const [day,result] of Object.entries(p.dailyResults))if(!/^\d{4}-\d{2}-\d{2}$/.test(day)||!object(result)||!Number.isSafeInteger(result.best)||result.best<0||typeof result.won!=='boolean')invalid();}
-    const allowed=['version','activeHero','difficulty','diamonds','unlockedTowers','activeLoadout','loadoutPresets','unlocks','milestones','settledRuns','records','lifetime','unlockCosts','dailyResults','duoSettledRuns'];
+    const allowed=['version','activeHero','difficulty','diamonds','unlockedTowers','activeLoadout','loadoutPresets','unlocks','milestones','settledRuns','records','lifetime','unlockCosts','dailyResults','duoSettledRuns','activeUltimates'];
     return normalize(Object.fromEntries(allowed.filter(key=>p[key]!==undefined).map(key=>[key,p[key]])),definitions);
   }
   function importFile(text,definitions){
@@ -99,5 +110,5 @@ const HexProfile=(()=>{
     if(previous!==null)localStorage.setItem(STORAGE_KEY+'-before-import',previous);
     localStorage.setItem(STORAGE_KEY,JSON.stringify(next));return next;
   }
-  return {settleDuo,heroUnlocked,exportFile,readFile,importFile,resetValue,resetUnlocks,affordableUnlocks,BUILDING_UNLOCKS,unlockBuilding,STORAGE_KEY,START_TOWERS,TOWER_UNLOCKS,ULTIMATE_UNLOCKS,defaults,normalize,load,save,setLoadout,savePreset,runReward,settleRun,settleDaily,unlockTower,unlockUltimate};
+  return {ULTIMATE_BRANCHES,ownsUltimate,activeUltimate,runUnlocks,activateUltimate,settleDuo,heroUnlocked,exportFile,readFile,importFile,resetValue,resetUnlocks,affordableUnlocks,BUILDING_UNLOCKS,unlockBuilding,STORAGE_KEY,START_TOWERS,TOWER_UNLOCKS,ULTIMATE_UNLOCKS,defaults,normalize,load,save,setLoadout,renamePreset,savePreset,runReward,settleRun,settleDaily,unlockTower,unlockUltimate};
 })();

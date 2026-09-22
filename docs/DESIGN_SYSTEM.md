@@ -125,3 +125,7 @@ Gesperrte Optionen der Durchlaufvorbereitung zeigen ihre Freischaltbedingung dau
 Turm- und Gebäudemenüs werden am linken Rand des freien Bildschirmbereichs positioniert; auf schmalen Bildschirmen bleiben sie unten links innerhalb dieses Bereichs. Dies ersetzt die frühere rechte Randposition.
 
 Hauptmenü-Dialoge (Spielmodus, Spielregeln, Spielstand, Arsenal und Durchlaufvorbereitung) bleiben bei Außenklicks offen. Sie werden über ihre ausdrücklichen Zurück-/Schließen-Schaltflächen geschlossen. Die Außenklick-Regel für Ingame-Dialoge bleibt bestehen. Die Durchlaufvorbereitung hat keinen Statusbalken mit Diamanten und Auswahlzähler mehr; Hinweise auf eine unvollständige Turmauswahl bleiben erhalten.
+
+### Arsenal: Icon und Titel
+
+Forschungszweige sind 230 px breit. Jede Forschungskarte besitzt eine gemeinsame Flex-Kopfzeile mit einem festen 44-px-Icon und 10 px Abstand zum Titel. Lange Titel dürfen innerhalb ihrer Textspalte umbrechen, jedoch nicht unter das Icon rutschen. Besitz und aktive Auswahl haben unterschiedliche Statusbeschriftungen; Aktivieren verbraucht keine Diamanten und gilt ab dem nächsten Run.

@@ -84,6 +84,7 @@ const HexMap=(()=>{
     if(!connects) return false;
     // Validate the resulting reachable network, without mutating the actual map.
     const candidate=new Map(map);candidate.set(key(q,r),{q,r,roads,type:card.id});
+    if(card.rescue&&card.minExits===2){const outside=exterior(candidate,landmarks);if(roads.filter(d=>{const n=neighbor(q,r,d);return outside.has(key(n.q,n.r));}).length<2)return false;}
     return hasExteriorFront(candidate,landmarks);
   }
   function exterior(map,landmarks){
@@ -101,8 +102,8 @@ const HexMap=(()=>{
     for(const tile of network.values())if(tile.type!=='base'&&connected.has(key(tile.q,tile.r)))for(const d of tile.roads||[]){const n=neighbor(tile.q,tile.r,d);if(!map.has(key(n.q,n.r))&&outside.has(key(n.q,n.r)))return true;}
     return false;
   }
-  function tunnelPlan(map,landmarks){
-    if(hasExteriorFront(map,landmarks))return null;
+  function tunnelPlan(map,landmarks,allowExterior=false){
+    if(!allowExterior&&hasExteriorFront(map,landmarks))return null;
     const connected=reachable(map),sources=[...map.values()].filter(t=>t.type!=='base'&&connected.has(key(t.q,t.r))&&(t.roads||[]).some(d=>{const n=neighbor(t.q,t.r,d);return !map.has(key(n.q,n.r));}));
     if(!sources.length)return null;
     const outside=exterior(map,landmarks),options=[];
@@ -114,13 +115,14 @@ const HexMap=(()=>{
     chosen.dir=Array.from({length:6},(_,d)=>({d,score:Math.min(...[...map.values()].map(t=>distance(neighbor(chosen.q,chosen.r,d),t)))})).sort((a,b)=>b.score-a.score||a.d-b.d)[0].d;
     return chosen;
   }
-  function rescue(map,landmarks){
+  function rescue(map,landmarks,minExits=1){
     for(const tile of map.values()) for(const direction of tile.roads||[]){
       const target=neighbor(tile.q,tile.r,direction);if(map.has(key(target.q,target.r))) continue;
       if(landmarks?.get(key(target.q,target.r))?.prefab) continue;
       const roads=[],free=[];
       for(let d=0;d<6;d++){const n=neighbor(target.q,target.r,d),fixed=landmarks?.get(key(n.q,n.r)),other=map.get(key(n.q,n.r))||(!fixed?.claimed?fixed?.prefab:null);if(!other) free.push(d);else if((other.roads||[]).includes(OPP(d))) roads.push(d);}
-      for(const exit of free){const card={id:'rescue',name:'Rettungshex',rarity:'Common',roads:[...roads,exit],slots:0,rescue:true,desc:'Nur bei blockiertem Deck. Passende Anschlüsse, keine Turmplätze.'};if(canPlace(map,target.q,target.r,card,0,landmarks)) return card;}
+      const exits=minExits===2?free.flatMap((a,i)=>free.slice(i+1).map(b=>[a,b])):free.map(d=>[d]);
+      for(const outgoing of exits){const card={id:'rescue',name:'Rettungshex',rarity:'Common',roads:[...roads,...outgoing],slots:0,rescue:true,minExits,desc:minExits===2?'Rettungsstraße mit zwei offenen Ausgängen. Keine Turmplätze.':'Nur bei blockiertem Deck. Passende Anschlüsse, keine Turmplätze.'};if(canPlace(map,target.q,target.r,card,0,landmarks)) return card;}
     }
     return null;
   }

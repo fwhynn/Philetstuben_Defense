@@ -336,7 +336,7 @@
 
   function buildRescueTunnel(){
     if(!state.tunnelOffer||state.phase!=='build'||state.waveRunning||state.hp<=0)return;
-    const plan=HexMap.tunnelPlan(state.map,state.landmarks);if(!plan)return;
+    const plan=HexMap.tunnelPlan(state.map,state.landmarks,state.difficulty==='dual');if(!plan)return;
     if(!state.tunnelConfirmed){state.tunnelConfirmed=true;setMessage('Rettungstunnel von Hex '+plan.source+' nach '+plan.q+','+plan.r+'. Kostenlos, keine Gebäude werden entfernt.');renderAll();return;}
     HexRunRuntime.rescueTunnel(state);renderAll();setMessage('Rettungstunnel geöffnet. Erweitere die neue Straße in der nächsten Runde.');
   }
@@ -607,7 +607,7 @@ R dreht die Karte, dann Feld anklicken.`;}
     if(!tile){panel.classList.add('hidden');buildingPanelKey='';return;}
     panel.classList.remove('hidden');const building=tile.buildings?.[selected.index];
     document.getElementById('buildingPanelTitle').textContent=building?HexBuildings.definitions[building.type].name+' · Stufe '+(building.special?4:building.level||1):(tile.type==='deadEnd'?'Gegnerportal-Platz':'Gebäudeslot');
-    document.getElementById('buildingPanelInfo').textContent=`${CARD_LIBRARY[tile.type]?.name||'Hex'}: automatisch +${tile.income||0} Gold je überlebter Wave. ${building?HexBuildings.definition(building).desc:tile.type==='deadEnd'?HexBuildings.definitions.portal.desc:'Optional einen Gebäudetyp bauen. Haus: zusätzliches Einkommen, Schmiede: Tower-Schaden, Markt: Tower-Rabatte. Ein Gebäude pro Slot.'}`;
+    document.getElementById('buildingPanelInfo').textContent=`${CARD_LIBRARY[tile.type]?.name||'Hex'}: automatisch +${tile.income||0} Gold je überlebter Wave. ${building?HexBuildings.definition(building,state).desc:tile.type==='deadEnd'?HexBuildings.definitions.portal.desc:'Optional einen Gebäudetyp bauen. Haus: zusätzliches Einkommen, Schmiede: Tower-Schaden, Markt: Tower-Rabatte. Ein Gebäude pro Slot.'}`;
     const panelKey=JSON.stringify([selected,building,state.map.size,state.buildingVersion]);
     const buildingChanged=buildingPanelKey!==panelKey;
     if(buildingChanged){
@@ -650,8 +650,8 @@ R dreht die Karte, dann Feld anklicken.`;}
       if(group){const hint=document.createElement('p');hint.className='hint';hint.textContent='Änderungen gelten für '+targetable.length+' Türme mit Angriffsfokus. Unterschiedliche bisherige Einstellungen werden durch die Auswahl je Zeile angepasst. Support und Minenleger bleiben unverändert. Upgrades und Verkauf: einzelnen Turm auswählen.';content.appendChild(hint);}
       else if(tower.ultimate){const hint=document.createElement('p');hint.className='hint';hint.textContent='Meta-Stufe 4 erreicht.';content.appendChild(hint);}
       else if(tower.finalUpgrade){
-        const id='ultimate:'+tower.type,upgrade=HexData.ultimateDefinition(tower),unlocked=state.ultimateUnlocks.includes(id);
-        if(!unlocked){const hint=document.createElement('p');hint.className='ultimateLocked';hint.textContent=`🔒 ${upgrade.name}: im Arsenal mit Diamanten freischalten.`;content.appendChild(hint);}
+        const id='ultimate:'+tower.type,upgrade=HexData.ultimateDefinition(tower),unlocked=HexData.ultimateAvailable(state,tower);
+        if(!unlocked){const hint=document.createElement('p');hint.className='ultimateLocked';hint.textContent=`🔒 ${upgrade.name}: im Arsenal freischalten und für den nächsten Run aktivieren.`;content.appendChild(hint);}
         else{const current=HexData.towerDefinition(tower),next=HexData.towerDefinition({...tower,ultimate:tower.type}),button=document.createElement('button'),price=HexBuildings.cost(state,selected,upgrade.cost);button.className='upgradeOption ultimateOption';button.innerHTML=`<strong>◆ ${upgrade.name} · ${price} Gold</strong><small>${upgrade.desc}</small><small>${towerStatsMarkup(current)}</small><small>Danach: ${towerStatsMarkup(next)}</small>`;bindUpgradePreview(button,tower,next);button.addEventListener('click',()=>upgradeSelectedTower(id));button._baseCost=upgrade.cost;content.appendChild(button);upgradeButtons.set(id,button);}
       } else for(const [branch,upgrade] of HexData.availableUpgrades(tower)){
         const current=HexData.towerDefinition(tower),next=HexData.towerDefinition({...tower,...(upgrade.requires?{finalUpgrade:branch}:{branch})}),button=document.createElement('button');
@@ -775,7 +775,7 @@ R dreht die Karte, dann Feld anklicken.`;}
     if(!HexProfile.heroUnlocked(profile,heroId))heroId='standard';
     if(challengeDay){difficulty='dual';heroId='standard';}
     const chosen=[...new Set(loadout)].filter(id=>TOWERS[id]&&profile.unlockedTowers.includes(id));
-    const run=HexRunRuntime.create({seed,runId:HexRandom.freshSeed(),loadout:chosen.length===5?chosen:profile.activeLoadout,unlocks:profile.unlocks,heroId,difficulty,challengeDay});
+    const run=HexRunRuntime.create({seed,runId:HexRandom.freshSeed(),loadout:chosen.length===5?chosen:profile.activeLoadout,unlocks:HexProfile.runUnlocks(profile),heroId,difficulty,challengeDay});
     state=run.state;random=run.random;if(!tutorialSeen&&state.towerLoadout.includes('archer'))state.towerLoadout=['archer',...state.towerLoadout.filter(id=>id!=='archer')];Object.assign(state,{selectedCard:null,rotation:0,showHexGrid,showSlotHints,selectedSlots:[],selectedTowers:[]});
     document.getElementById('baseDropdown').open=false;
     document.getElementById('activeSeed').textContent=seed;document.getElementById('dailyRunStatus').textContent=challengeDay?'Die letzte Karawane · '+challengeDay+' · Ziel: Wave 20 · Sandsturm −15 % Tempo/Reichweite':'';
@@ -826,7 +826,12 @@ R dreht die Karte, dann Feld anklicken.`;}
     const choices=document.getElementById('heroChoices');choices.innerHTML='';
     for(const [id,hero] of Object.entries(HexHeroes.definitions)){const unlocked=HexProfile.heroUnlocked(profile,id);const button=document.createElement('button');button.type='button';button.className='loadoutChoice'+(id===pendingHero?' selected':'');button.setAttribute('aria-pressed',String(id===pendingHero));button.title=hero.desc;button.innerHTML='<strong>'+hero.name+'</strong><small>'+hero.desc+'</small>';button.disabled=!unlocked;if(!unlocked){button.title+=(id==='builder'?' Standard: Welle 35 besiegen.':' Zwei Fronten: Welle 35 besiegen.');button.innerHTML+='<small class="unlockRequirement">🔒 '+(id==='builder'?'Stufe 1: Welle 35 besiegen.':'Stufe 2 · Zwei Fronten: Welle 35 besiegen.')+'</small>';}button.addEventListener('click',()=>{if(!unlocked)return;pendingHero=id;renderLoadout();});choices.appendChild(button);}
 
-    const presets=document.getElementById('loadoutPresets');presets.innerHTML='';if(profile.unlockedTowers.length<=5){const locked=document.createElement('p');locked.className='presetLocked';locked.textContent='🔒 Drei Presetplätze werden mit dem ersten zusätzlichen Turm freigeschaltet.';presets.appendChild(locked);}else profile.loadoutPresets.forEach((preset,index)=>{const card=document.createElement('article');card.className='presetCard';const presetTitle=document.createElement('strong'),presetInfo=document.createElement('small');presetTitle.textContent=preset.name;presetInfo.textContent=preset.towers.map(id=>TOWERS[id]?.name||id).join(' · ');card.appendChild(presetTitle);card.appendChild(presetInfo);const load=document.createElement('button'),save=document.createElement('button');load.className='secondary';load.textContent='Laden';load.addEventListener('click',()=>{pendingLoadout=[...preset.towers];renderLoadout();});save.className='secondary';save.textContent='Aktuell speichern';save.disabled=pendingLoadout.length!==5;save.addEventListener('click',()=>{const next=HexProfile.savePreset(profile,index,pendingLoadout,TOWERS);if(next){profile=next;renderLoadout();}});card.appendChild(load);card.appendChild(save);presets.appendChild(card);});
+    const presets=document.getElementById('loadoutPresets');presets.innerHTML='';if(profile.unlockedTowers.length<=5){const locked=document.createElement('p');locked.className='presetLocked';locked.textContent='🔒 Drei Presetplätze werden mit dem ersten zusätzlichen Turm freigeschaltet.';presets.appendChild(locked);}else profile.loadoutPresets.forEach((preset,index)=>{const card=document.createElement('article');card.className='presetCard';const presetTitle=document.createElement('strong'),presetInfo=document.createElement('small');presetTitle.textContent=preset.name;presetTitle.setAttribute('data-no-translate','');
+      const name=document.createElement('input');name.type='text';name.value=preset.name;name.maxLength=30;name.className='presetName';name.setAttribute('aria-label','Vorlagenname');name.setAttribute('data-no-translate','');
+      const rename=document.createElement('button');rename.className='secondary';rename.textContent='Name speichern';
+      const commitName=()=>{const next=HexProfile.renamePreset(profile,index,name.value,TOWERS);if(next){profile=next;presetTitle.textContent=profile.loadoutPresets[index].name;name.value=profile.loadoutPresets[index].name;}};
+      rename.addEventListener('click',commitName);name.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();event.stopPropagation();commitName();}});
+      presetInfo.textContent=preset.towers.map(id=>TOWERS[id]?.name||id).join(' · ');card.appendChild(presetTitle);card.appendChild(presetInfo);card.appendChild(name);card.appendChild(rename);const load=document.createElement('button'),save=document.createElement('button');load.className='secondary';load.textContent='Laden';load.addEventListener('click',()=>{pendingLoadout=[...preset.towers];renderLoadout();});save.className='secondary';save.textContent='Aktuell speichern';save.disabled=pendingLoadout.length!==5;save.addEventListener('click',()=>{const next=HexProfile.savePreset(profile,index,pendingLoadout,TOWERS);if(next){profile=next;renderLoadout();}});card.appendChild(load);card.appendChild(save);presets.appendChild(card);});
     loadoutChoices.innerHTML='';
     for(const id of profile.unlockedTowers){
       const tower=TOWERS[id];if(!tower) continue;
@@ -893,7 +898,7 @@ R dreht die Karte, dann Feld anklicken.`;}
   let resetArsenalPending=false;
   function renderArsenal(message=''){
     document.getElementById('arsenalDiamonds').textContent=profile.diamonds;
-    HexArsenal.render(document.getElementById('arsenalChoices'),profile,(kind,id)=>{const method={tower:HexProfile.unlockTower,ultimate:HexProfile.unlockUltimate,building:HexProfile.unlockBuilding}[kind],next=method(profile,id,TOWERS);if(!next)return;profile=next;resetArsenalPending=false;renderLoadout();renderArsenal('Freigeschaltet. Ab dem nächsten Run verfügbar.');renderUI();});
+    HexArsenal.render(document.getElementById('arsenalChoices'),profile,(kind,id)=>{const method={activateUltimate:HexProfile.activateUltimate,tower:HexProfile.unlockTower,ultimate:HexProfile.unlockUltimate,building:HexProfile.unlockBuilding}[kind],next=method(profile,id,TOWERS);if(!next)return;profile=next;resetArsenalPending=false;renderLoadout();renderArsenal('Freigeschaltet. Ab dem nächsten Run verfügbar.');renderUI();});
     const refund=HexProfile.resetValue(profile),button=document.getElementById('resetDiamondsBtn');button.disabled=refund===0;button.textContent=resetArsenalPending?'Bestätigen: alle Freischaltungen zurücksetzen · +'+refund+' ◆':'Reset · +'+refund+' ◆';
     document.getElementById('arsenalMessage').textContent=message||'';
   }

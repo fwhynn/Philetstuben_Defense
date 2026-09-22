@@ -34,9 +34,9 @@ const HexRunFlow=(()=>{
     const playable=(state.map.size<=1||HexMap.hasExteriorFront(state.map,state.landmarks))&&ensurePlayableHand();
     
     if(!playable){
-      const rescue=HexMap.rescue(state.map,state.landmarks);
+      const rescue=HexMap.rescue(state.map,state.landmarks,state.difficulty==='dual'?2:1);
       if(rescue){state.discard.push(...state.hand);state.rescueCard=rescue;state.hand=['rescue'];result='rescue';}
-      else {state.phase='build';state.tunnelOffer=HexMap.tunnelPlan(state.map,state.landmarks);result=state.tunnelOffer?'tunnel':'blocked';}
+      else {state.phase='build';state.tunnelOffer=HexMap.tunnelPlan(state.map,state.landmarks,state.difficulty==='dual');result=state.tunnelOffer?'tunnel':'blocked';}
     }
     return result;
   }

@@ -4,7 +4,7 @@ const HexArsenal=(()=>{
   function icon(type,color){return `<svg class="researchIcon" viewBox="0 0 48 48" aria-hidden="true"><path d="M10 42h28l-3-8H13zM16 34V18h16v16" fill="${color||'#a7bda4'}" stroke="#14261c" stroke-width="2"/><circle cx="24" cy="15" r="13" fill="#14261c" stroke="${color||'#a7bda4'}"/><text x="24" y="21" text-anchor="middle" font-size="20" fill="${color||'#a7bda4'}">${icons[type]}</text></svg>`;}
   function render(host,profile,onUnlock){
     host.innerHTML='';
-    function node(parent,type,title,description,status,action){const article=document.createElement('article');article.className='researchNode '+(status.startsWith('✓')?'owned':'');article.innerHTML=icon(type,HexData.TOWERS[type]?.color)+`<strong>${title}</strong><p>${description}</p><small>${status}</small>`;if(action){const button=document.createElement('button');button.className='secondary';button.textContent='◆ '+action.cost+' freischalten';button.setAttribute('data-unlock',action.kind+':'+type);button.disabled=action.blocked||profile.diamonds<action.cost;button.addEventListener('click',()=>onUnlock(action.kind,type));article.appendChild(button);}parent.appendChild(article);return article;}
+    function node(parent,type,title,description,status,action){const article=document.createElement('article');article.className='researchNode '+(status.startsWith('✓')?'owned':'');article.innerHTML=`<div class="researchHeader">${icon(type,HexData.TOWERS[type]?.color)}<strong>${title}</strong></div><p>${description}</p><small>${status}</small>`;if(action){const button=document.createElement('button');button.className='secondary';button.textContent=action.kind==='activateUltimate'?'Für nächsten Run aktivieren':'◆ '+action.cost+' freischalten';button.setAttribute('data-unlock',action.kind+':'+(action.id||type));button.disabled=action.blocked||profile.diamonds<(action.cost||0);button.addEventListener('click',()=>onUnlock(action.kind,action.id||type));article.appendChild(button);}parent.appendChild(article);return article;}
     for(const [type,tower] of Object.entries(HexData.TOWERS)){
       const tree=document.createElement('section');tree.className='researchTree';tree.id='research-'+type;tree.setAttribute('aria-label',tower.name+' Forschungsbaum');
       const owned=profile.unlockedTowers.includes(type),offer=HexProfile.TOWER_UNLOCKS[type];
@@ -14,8 +14,8 @@ const HexArsenal=(()=>{
         const lane=document.createElement('div');lane.className='researchLane';
         node(lane,type,branch.name,branch.desc,owned?'✓ Im Run: '+branch.cost+' Gold':'Benötigt Turmfreischaltung');
         const final=HexData.availableUpgrades({type,branch:id})[0]?.[1];if(final)node(lane,type,final.name,final.desc,'Im Run: '+final.cost+' Gold nach '+branch.name);
-        const ultimate=HexData.ultimateDefinition({type,branch:id}),unlocked=profile.unlocks.includes('ultimate:'+type);
-        node(lane,type,ultimate.name,ultimate.desc+' Im Run: '+ultimate.cost+' Gold nach Stufe 3.',unlocked?'✓ Dauerhaft freigeschaltet':'Meta-Freischaltung'+(type==='element'?' für alle drei Elemente':''),unlocked?null:{kind:'ultimate',cost:HexProfile.ULTIMATE_UNLOCKS[type].cost,blocked:!owned});
+        const ultimate=HexData.ultimateDefinition({type,branch:id}),unlocked=HexProfile.ownsUltimate(profile,type,id),active=HexProfile.activeUltimate(profile,type)===id;
+        node(lane,type,ultimate.name,ultimate.desc+' Im Run: '+ultimate.cost+' Gold nach Stufe 3.',unlocked?(active?'✓ Aktiv für nächsten Run':'✓ Freigeschaltet · inaktiv'):'Meta-Freischaltung · nur ein Pfad je Turmtyp aktiv',unlocked?(active?null:{kind:'activateUltimate',id:type+':'+id}):{kind:'ultimate',id:type+':'+id,cost:HexProfile.ULTIMATE_UNLOCKS[type].cost,blocked:!owned});
         branches.appendChild(lane);
       }tree.appendChild(branches);host.appendChild(tree);
     }

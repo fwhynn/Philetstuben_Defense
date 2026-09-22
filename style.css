@@ -477,3 +477,11 @@ body:has(#biomeIntro:not(.hidden)) .biomeTooltip{display:none!important}
 @media(max-width:700px){#rotateHexBtn{min-width:88px;margin:2px 0}.hotkeyTip{top:calc(var(--play-top,60px) + 8px)}}
 #loadoutOverlay .heroChoices .unlockRequirement{display:block;font-size:12px;line-height:1.35;color:#f0d59c;white-space:normal;overflow-wrap:anywhere}
 #loadoutOverlay .heroChoices .loadoutChoice:disabled{opacity:1;background:#243128;border-color:#596254}
+
+/* Arsenal headings keep their icon beside the full title. */
+.researchLane{width:230px}
+.researchHeader{display:flex;align-items:center;gap:10px;min-height:48px}
+.researchHeader .researchIcon{float:none;flex:0 0 44px;margin:0}
+.researchHeader strong{min-width:0;overflow-wrap:break-word}
+
+.presetName{min-width:0;width:100%;box-sizing:border-box;background:#14261c;color:#f3ead2;border:1px solid #688653;border-radius:6px;padding:8px;font:inherit}.presetCard strong{overflow-wrap:anywhere}

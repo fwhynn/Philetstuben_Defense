@@ -91,3 +91,10 @@ test('profile import reports storage failures and keeps previous data when backu
   const { profile: p, definitions: d } = setup(); const context = { localStorage: { getItem: () => '{"diamonds":9}', setItem() { throw new Error('storage full'); } } }; vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../classes/profile.js'), 'utf8') + ';globalThis.p=HexProfile;', context);
   assert.throws(() => context.p.importFile(p.exportFile(p.defaults(), d), d), /storage full/);
 });
+
+test('preset names persist through saving loadouts and export/import without changing towers',()=>{
+ const {profile:p,definitions:d}=setup();const old=p.defaults(),named=p.renamePreset(old,1,'  Meine   Bossjäger  ',d);
+ assert.equal(named.loadoutPresets[1].name,'Meine Bossjäger');assert.equal(old.loadoutPresets[1].name,'Preset 2');assert.deepEqual(Array.from(named.loadoutPresets[1].towers),Array.from(old.loadoutPresets[1].towers));
+ const saved=p.savePreset(named,1,[...named.activeLoadout].reverse(),d),imported=p.readFile(p.exportFile(saved,d),d);assert.equal(imported.loadoutPresets[1].name,'Meine Bossjäger');
+ assert.equal(p.renamePreset(named,1,'   ',d),null);assert.equal(p.renamePreset(named,-1,'Name',d),null);assert.equal(p.renamePreset(named,3,'Name',d),null);assert.equal(p.renamePreset(named,0,'x'.repeat(50),d).loadoutPresets[0].name.length,30);
+});

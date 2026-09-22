@@ -374,3 +374,15 @@ Zuerst stabile Gegner-/Boss-IDs und profilweite Zähler einführen, dann version
 Status: unverbindliche Ideensammlung, weder beschlossen noch umgesetzt. Handkarten könnten gegen Gold neu gezogen werden. Offen ist, ob dies nur für die Starthand oder in jeder Bauphase möglich sein soll; ebenso Umfang (ganze Hand/einzelne Karten), Preis und mögliche steigende Kosten.
 
 Mögliche Meta-Progression: ein kostenloser Reroll pro Run oder ein kostenloser Reroll alle fünf Runden. Ebenfalls offen: Ansparen/Limit, Startzeitpunkt und genaue Freischaltkosten. Erst nach Spieltests entscheiden; Rettungsmechaniken dürfen keine kostenpflichtigen Rerolls voraussetzen. Bei einer Umsetzung Deck-/Ablageregeln, deterministischen Zufall, Speicherung und serverseitige Duo-Prüfung berücksichtigen.
+
+## Umgesetzt: exklusive aktive Endstufen im Arsenal
+
+Jeder Turmpfad besitzt eine eigene spezialisierte Diamanten-Endstufe; der Elementturm entsprechend drei. Jeder Pfad kostet die bisherigen Diamantenkosten des Turmtyps separat. Besitz und Aktivierung sind getrennt: beliebig viele Pfade freischalten, pro Turmtyp genau einen für den nächsten Run aktivieren. Die Auswahl wird mit dem Profil exportiert/importiert und beim Runstart fest übernommen. Ein Wechsel im Arsenal verändert keinen laufenden Run. Die täglichen Herausforderungen behalten ihre bisherigen festen Regeln ohne Meta-Endstufen.
+
+Bestehende generische Freischaltungen (`ultimate:typ`) bleiben als Besitz aller bisherigen Pfade erhalten. Ohne ausdrückliche Auswahl ist der erste Pfad aktiv. Der Rückerstattungswert alter Käufe bleibt unverändert. Neue Käufe verwenden `ultimate:typ:pfad`; `activeUltimates` speichert die Auswahl. Run-Freischaltungen enthalten nur den aktiven Pfad. Alte interne Run-Zwischenstände bleiben kompatibel.
+
+Spezialisierungen: Bogenschütze Fläche/Schussfolge oder Präzision/Reichweite; Katapult schwere Belagerung oder Feuerrate; Blitz zusätzliche Kettenziele oder Trefferschaden; Frost stärkere Verlangsamung oder größere Aura; Minen Explosionskraft oder Legerate; Balliste Bossschaden oder Feuerrate; Feuer große Explosionen oder schnelle Salven; Elemente Brandfläche, Wasserverlangsamung oder Winddurchschlag; Nekromant mehr Geister oder stärkere und länger bestehende Geister. Konkrete Werte stehen in `HexData.SPECIALIZATIONS` und sind erste Balancing-Werte.
+
+Patrizierhäuser liefern jeweils 16 + 2 × (Anzahl anderer Patrizierhäuser) Gold pro Welle. Normale Häuser bis Stufe 3 zählen nicht als vollständig ausgebaut. Zwei Patrizierhäuser liefern insgesamt 36, drei insgesamt 60 Gold. Verkauf entfernt auch den Bonus bei allen verbleibenden Patrizierhäusern. Zwischenstände speichern den bereits berücksichtigten Gesamtbonus, damit Wiederherstellung ihn nicht doppelt addiert.
+
+Vorlagen lassen sich direkt in der Durchlaufvorbereitung benennen (1–30 Zeichen, Enter oder „Name speichern“). Namen sind Nutzertext und werden nicht übersetzt. Speichern einer Turmauswahl erhält den Namen; der Spielstandexport nimmt ihn mit.

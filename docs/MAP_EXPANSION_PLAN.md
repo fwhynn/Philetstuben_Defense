@@ -45,3 +45,9 @@ Status: umgesetzt. Die frühere Handprüfung akzeptierte jede legal platzierbare
 Regel: Mindestens eine Handkarte muss eine von der Basis erreichbare Straße sinnvoll fortsetzen und eine äußere Straßenfront erhalten. Leere Gebäudefelder und reine Sackgassen zählen nicht als Rettung, bleiben aber normale optionale Handkarten. Existiert eine passende Straßenkarte im Deck, wird bei Bedarf eine Handposition aus Nachzieh-/Ablagestapel damit ersetzt (kein Duplikat, keine Deckvergrößerung). Existiert keine passende Straßenkarte, greift das kostenlose Rettungshex; bei räumlichem Einschluss der Rettungstunnel. Das ist unabhängig vom optionalen, noch unentschiedenen Gold-Reroll.
 
 Abnahme: viele Baugrundkarten, genau eine passende Straßenkarte, keine passende Straßenkarte, normales Startdeck, Zwei-Fronten-Start, Sackgassenportal, deterministische Duo-Ziehungen und Erhalt aller Karten in Hand/Nachzieh-/Ablagestapel.
+
+## Begrenzte Biomgebiete (Layout 2)
+
+Neue Runs verwenden deterministische, pro Seed unterschiedlich gedrehte und gebogene Regionen. Grundflächen variieren zwischen 3×3 und 5×5 Hexen; seitlich versetzte Grenzen ergeben langgezogene und gebogene Formen mit bis zu etwa sieben Hexen Ausdehnung entlang der Generierungsachsen. Vier-Farben-Zuordnung verhindert das Verschmelzen benachbarter Gebiete gleicher Art. Auch Grasland kommt außerhalb der Basis erneut vor. Nichtgrüne zusammenhängende Gebiete umfassen 9–25 Hexe; am sicheren Start abgeschnittene Restgebiete unter neun Hexen werden Grasland. Der zusammenhängende Grasland-Startbereich ist daher eine bewusste Ausnahme zur Gebietsgröße.
+
+Koordinatenabfragen verändern weder den Belohnungszufall noch die Verteilung durch die Entdeckungsreihenfolge. Begrenzte Caches vermeiden wiederholte Generierung. Alte Run-Zwischenstände behalten über Layout-Version 1 ihre ursprünglichen Sektoren. Tägliche Herausforderungen und fremde Duo-Karten behalten ihre bestehenden Biomregeln.

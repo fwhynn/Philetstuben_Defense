@@ -26,7 +26,7 @@ const HexRunRuntime=(()=>{
     if(typeof seed!=='string'||!seed||typeof runId!=='string'||!runId)throw new Error('Seed and run ID required');
     if(!Array.isArray(loadout)||loadout.length!==5||new Set(loadout).size!==5||loadout.some(id=>!Object.hasOwn(HexData.TOWERS,id)))throw new Error('Invalid run loadout');
     if(challengeDay){difficulty='dual';heroId='standard';}
-    const state={hp:20,gold:HexWaves.economy.startGold,wave:0,goldEarned:{kills:0,completion:0,income:0},waveKills:0,map:new Map(),deck:['straight','straight','smallCurve','bigCurve','tee'],drawPile:[],discard:[],hand:[],phase:'place',enemies:[],mines:[],projectiles:[],waveRunning:false,bossRewards:[],towerLoadout:[...loadout],buildingUnlocks:unlocks.filter(id=>id.startsWith('building:')),ultimateUnlocks:unlocks.filter(id=>id.startsWith('ultimate:')),runTowerStats:{},runTowerDetails:{},nextTowerStatId:0,runId,earnedMeta:{normalKills:0,periodicBosses:0,explorationBosses:0},metaSettled:false,income:0,nextEnemyId:1,pendingSpawns:0,elapsedMs:0,spawnQueue:[],seed,challengeDay,biomeSeed:challengeDay?null:seed};
+    const state={hp:20,gold:HexWaves.economy.startGold,wave:0,goldEarned:{kills:0,completion:0,income:0},waveKills:0,map:new Map(),deck:['straight','straight','smallCurve','bigCurve','tee'],drawPile:[],discard:[],hand:[],phase:'place',enemies:[],mines:[],projectiles:[],waveRunning:false,bossRewards:[],towerLoadout:[...loadout],buildingUnlocks:unlocks.filter(id=>id.startsWith('building:')),ultimateUnlocks:unlocks.filter(id=>id.startsWith('ultimate:')),runTowerStats:{},runTowerDetails:{},nextTowerStatId:0,runId,earnedMeta:{normalKills:0,periodicBosses:0,explorationBosses:0},metaSettled:false,income:0,nextEnemyId:1,pendingSpawns:0,elapsedMs:0,spawnQueue:[],seed,challengeDay,biomeLayoutVersion:2,biomeSeed:challengeDay?null:seed};
     if(challengeDay){state.deck=['straight','straight','longRoad','treasury','village'];state.ultimateUnlocks=[];state.buildingUnlocks=[];state.towerLoadout=['archer','ballista','catapult','mine','freeze'];}
     state.difficulty=difficulty==='dual'?'dual':'normal';state.openingRemaining=state.difficulty==='dual'?2:0;
     state.baseExits=state.difficulty==='dual'?HexMap.randomBaseExits(HexRandom.create(seed+'|base-exits')):[0];HexHeroes.initialize(state,heroId);delete state.selectedBase;
@@ -108,10 +108,10 @@ const HexRunRuntime=(()=>{
   }
   function rescueTunnel(state){
     if(state.phase!=='build'||state.waveRunning||state.hp<=0)return false;
-    const plan=HexMap.tunnelPlan(state.map,state.landmarks);if(!plan)return false;
+    const plan=HexMap.tunnelPlan(state.map,state.landmarks,state.difficulty==='dual'&&!!state.tunnelOffer);if(!plan)return false;
     const id=key(plan.q,plan.r),source=state.map.get(plan.source),number=state.nextTunnelId=(state.nextTunnelId||0)+1;
     source.tunnels??=[];source.tunnels.push(id);source.tunnelLabel='Tunnel '+number;
-    state.map.set(id,{q:plan.q,r:plan.r,type:'rescueTunnel',roads:[plan.dir],rotation:plan.dir,slots:0,towers:[],buildingSlots:0,buildings:[],income:0,tunnels:[plan.source],tunnelLabel:'Tunnel '+number});
+    state.map.set(id,{q:plan.q,r:plan.r,type:'rescueTunnel',roads:state.difficulty==='dual'?[plan.dir,(plan.dir+1)%6]:[plan.dir],rotation:plan.dir,slots:0,towers:[],buildingSlots:0,buildings:[],income:0,tunnels:[plan.source],tunnelLabel:'Tunnel '+number});
     state.vision=HexExploration.expand(state.landmarks,state.map);state.tunnelOffer=null;state.tunnelConfirmed=false;return true;
   }
   return {rescueTunnel,VERSION,create,schedule,drain,spawnSources,nextSourcePoints,spawnEnemy,advance};

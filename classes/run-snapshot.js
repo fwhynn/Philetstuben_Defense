@@ -50,6 +50,7 @@ const HexRunSnapshot=(()=>{
     if(snapshot?.format!=='autohex-run'||snapshot.version!==VERSION||snapshot.rules!==RULES)throw new Error('Incompatible run checkpoint');
     const state=decode(snapshot.state),random=HexRandom.restore(snapshot.random);
     if(!(state.map instanceof Map)||!(state.landmarks instanceof Map)||!supported(state)||!Array.isArray(state.spawnQueue)||state.pendingSpawns!==state.spawnQueue.length)throw new Error('Invalid run checkpoint');
+    state.biomeLayoutVersion??=1;
     return {state,random};
   }
   return {capture,restore,VERSION,RULES};
