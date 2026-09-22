@@ -68,8 +68,8 @@ const HexData=(()=>{
     soulKeeper:{tower:'necromancer',name:'Seelenhüter',cost:50,soulDamage:15,soulDuration:9,desc:'Stärkere Geister bleiben 9 Sekunden.'},
     soulLegion:{tower:'necromancer',requires:'soulChoir',name:'Geisterlegion',cost:80,soulLimit:8,soulDamage:11,desc:'Bis zu 8 Geister mit verstärkten Angriffen.'},
     soulLord:{tower:'necromancer',requires:'soulKeeper',name:'Lichfürst',cost:80,soulDamage:24,soulDuration:12,damage:20,desc:'Mächtige Geister bleiben 12 Sekunden.'},
+    volley:{tower:'archer',name:'Salve',cost:35,damage:7,cooldown:.65,splash:55,desc:'Treffer schädigen Gegner im Umkreis von 55.'},
     marksman:{tower:'archer',name:'Scharfschütze',cost:35,damage:22,cooldown:.85,range:190,desc:'Mehr Einzelzielschaden und Reichweite.'},
-    volley:{tower:'archer',name:'Salven',cost:35,damage:7,cooldown:.65,splash:55,desc:'Treffer schädigen Gegner im Umkreis von 55.'},
     siege:{tower:'catapult',name:'Belagerung',cost:45,damage:36,cooldown:1.8,range:230,desc:'Schwere Steine mit mehr Schaden und Reichweite.'},
     barrage:{tower:'catapult',name:'Steinhagel',cost:45,damage:13,cooldown:.65,range:190,desc:'Schnelle durchschlagende Steine für gerade Killzones.'},
     storm:{tower:'chain',name:'Sturmnetz',cost:45,damage:7,chain:5,jumpRange:95,desc:'Bis zu fünf Ziele und weitere Sprünge.'},
@@ -138,8 +138,17 @@ const HexData=(()=>{
   function availableUpgrades(tower){return Object.entries(UPGRADES).filter(([,upgrade])=>upgrade.tower===tower.type&&!tower.finalUpgrade&&(tower.branch?upgrade.requires===tower.branch:!upgrade.requires));}
   function towerRefund(state,tower){
     if(!tower||tower.guestOwner!==undefined||state.hp<=0||state.phase==='gameover') return null;
-    const full=state.phase==='build'&&!state.waveRunning&&tower.builtOnWave===state.wave;
+    const full=['place','build'].includes(state.phase)&&!state.waveRunning&&tower.builtOnWave===state.wave;
     return {amount:full?tower.paid:Math.floor(tower.paid*.5),percent:full?100:50};
   }
-  return {recordTowerStat,runUpgrades,upgradeStatus,ultimateDefinition,CARD_LIBRARY,TOWERS,UPGRADES,ULTIMATES,BRANCH_VISUALS,towerDefinition,availableUpgrades,towerRefund};
+  function tileBonusLabel(terrain){
+    if(!terrain)return null;
+    const parts=[];
+    if(terrain.towerBonus)parts.push('+25 % '+TOWERS[terrain.requiredTower].name+(terrain.towerBonus.range?' Reichweite':' Schaden'));
+    if(terrain.towerDamage)parts.push('+'+Math.round((terrain.towerDamage-1)*100)+' % Schaden');
+    if(terrain.towerRange)parts.push('+'+Math.round((terrain.towerRange-1)*100)+' % Reichweite');
+    if(terrain.archerDamage)parts.push('+25 % Archer');
+    return parts.join(' · ')||null;
+  }
+  return {tileBonusLabel,recordTowerStat,runUpgrades,upgradeStatus,ultimateDefinition,CARD_LIBRARY,TOWERS,UPGRADES,ULTIMATES,BRANCH_VISUALS,towerDefinition,availableUpgrades,towerRefund};
 })();

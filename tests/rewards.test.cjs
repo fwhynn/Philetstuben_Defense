@@ -18,8 +18,8 @@ test('full-health and no-upgrade shrines grant supplies instead of an unusable r
 test('workshop shrine upgrades a built loadout tower without increasing its sale value',()=>{
   const {a,elements}=shrine('upgrade',true);a.placeTile(2,0);const buttons=elements.get('rewardChoices').children;assert.equal(buttons.length,2);
   const tower=a.state.map.get('1,0').towers[0],gold=a.state.gold;buttons[0].listeners.click();
-  assert.equal(tower.level,2);assert.equal(tower.branch,'marksman');assert.equal(tower.paid,25);assert.equal(a.state.gold,gold);
-  buttons[1].listeners.click();assert.equal(tower.branch,'marksman');assert.equal(a.state.phase,'build');
+  assert.equal(tower.level,2);assert.equal(tower.branch,'volley');assert.equal(tower.paid,25);assert.equal(a.state.gold,gold);
+  buttons[1].listeners.click();assert.equal(tower.branch,'volley');assert.equal(a.state.phase,'build');
 });
 test('boss blessings replace the card choice, cannot be repeated, and reset next run',()=>{
   for(const [title,kind] of [['Bastionssegen','hp'],['Handelspakt','income']]){

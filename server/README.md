@@ -68,3 +68,15 @@ Im interaktiven Launcher: `maintenance on`, `maintenance off`, `status`. Beim St
 Wartung sperrt neue Räume und Beitritte, pausiert beide Maps samt Wiederbeitritts-/Lobbyfristen und sichert sofort atomar. Statusabfragen, Sitzungsübernahme und bewusstes Verlassen bleiben möglich. Bereits bestätigte Aktionen sind weiterhin idempotent. Beide Clients und die Lobby zeigen einen Wartungshinweis.
 
 Update-Ablauf: Wartung einschalten und Speicherbestätigung abwarten; mit Strg+C beenden; private Checkpoint-Datei sichern; kompatiblen Release bereitstellen; mit DUO_MAINTENANCE=1 starten; Status und Speicherung prüfen; Wartung bewusst beenden. Inkompatible Spiel-/Snapshotversionen bleiben ein Startfehler und überschreiben keine Datei. Für Rollback passenden alten Release und Checkpoint aufbewahren. Keine automatische Migration und keine Produktionsabnahme. Die Wartungseinstellung wird beim Start ausdrücklich gewählt und nicht dauerhaft im Spielcheckpoint gespeichert.
+
+## Partner-Lieferungen
+
+Nach jeder fünften gemeinsamen Welle folgen auf die persönlichen Belohnungen zwei kostenlose Partner-Geschenke: je 20 Gold oder eine von zwei für den Empfänger passenden Karten. Vor beiden Zustellungen wird keine nächste Hand gezogen. Der Befehl delivery akzeptiert ausschließlich offerId und index (0–2); Angebots-IDs kommen aus der eigenen Serveransicht. Kein clientseitiger Goldbetrag, Kartentyp oder Empfänger.
+
+Duo-Checkpoints verwenden jetzt Version 3. Die explizite Migration von Version 2 übernimmt laufende Partien ohne rückwirkende Geschenke. Teilzustellungen und letzte Bestätigungen werden gemeinsam gesichert; erneutes Senden nach Neustart zahlt nicht doppelt aus. Nur diese Migration ist erlaubt; andere Versionskonflikte bleiben Startfehler. Vor Updates weiter Checkpoint sichern, Wartung verwenden und für Rollbacks den passenden alten Stand behalten.
+
+## Online-MVP: Abschluss und Betriebsübergabe (22.09.2026)
+
+Gemeinsames Ergebnis bei Niederlage/Welle 35, Turm- und Unterstützungsstatistik, beidseitiger Neustart und dauerhaft gespeicherte Ergebnisbelege sind umgesetzt. Das lokale Profil verbucht jeden Beleg einmal; Export/Import erhält diese Kennungen. HTTPS-/Container-Vorlage, privater Public-Build, Healthcheck, schreibfreier Online-Prüfbefehl und validierte Backup-Kopie sind vorbereitet.
+
+Verbindlicher aktueller Stand, Profilmodell, Betriebsbefehle und verbleibende Aufgaben: [Online-MVP-Übergabe](../docs/ONLINE_MVP_HANDOFF.md). Frühere „noch offen“-Listen oben sind Fortschrittsprotokolle. Live-Installation, TLS und Prüfung auf echten Browsern/Geräten sind noch offen. Die Domain ist bekannt; Hosting/Deployment-Zugang noch nicht. Keine öffentliche Freigabe behauptet.

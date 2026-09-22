@@ -57,3 +57,13 @@ test('rotate hint belongs to the hover-only placement preview', () => {
 test('U marks upgradeable houses, forges and markets without requiring gold and hides completed buildings',()=>{
  const {renderer,svg,state}=setup();Object.assign(state,{phase:'build',gold:0,hp:20,hand:[],showUpgradeStatus:true,buildingUnlocks:['building:forge']});const buildings=[{type:'house',level:1},{type:'forge',level:3},{type:'market',level:3,special:true}];buildings.forEach((b,i)=>state.map.set((i+1)+',0',{q:i+1,r:0,type:'village',roads:[0,2],slots:0,towers:[],buildingSlots:1,buildings:[b]}));const arrows=()=>svg.children[3].children.filter(n=>n.attributes['aria-label']==='Gebäude ausbaubar');renderer.render(state);assert.equal(arrows().length,2);buildings[1].special=true;renderer.render(state);assert.equal(arrows().length,1);state.showUpgradeStatus=false;renderer.render(state);assert.equal(arrows().length,0);
 });
+
+test('ordinary building hints require affordable unlocked upgrades and disappear at maximum level',()=>{
+ const {renderer,svg,state}=setup();Object.assign(state,{phase:'build',gold:45,hp:20,hand:[],showUpgradeStatus:false,buildingUnlocks:[]});const buildings=[{type:'house',level:1},{type:'forge',level:1},{type:'market',level:1}];buildings.forEach((b,i)=>state.map.set((i+1)+',0',{q:i+1,r:0,type:'village',roads:[0,2],slots:0,towers:[],buildingSlots:1,buildings:[b]}));const count=()=>{renderer.render(state);return svg.children[3].children.filter(n=>n.attributes['aria-label']==='Gebäude ausbaubar').length;};assert.equal(count(),3);state.gold=39;assert.equal(count(),0);state.gold=1000;buildings.forEach(b=>b.level=3);assert.equal(count(),0);state.buildingUnlocks=['building:forge'];assert.equal(count(),1);buildings[1].special=true;assert.equal(count(),0);
+});
+
+test('range preview keeps current and prospective circles with different opacity',()=>{
+ const {renderer,svg,state}=setup(),tower={type:'archer'};state.phase='build';state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[tower]});state.selectedTower={q:1,r:0,index:0};
+ for(const range of [190,100]){state.previewUpgrade={tower,definition:{range,color:'#fff'}};renderer.render(state);const nodes=svg.children.flatMap(n=>n.children),preview=nodes.find(n=>n.attributes['data-upgrade-range']==='preview'),current=nodes.find(n=>n.attributes.r===150&&n.attributes['stroke-opacity']==='.85');assert.ok(current);assert.equal(preview.attributes.r,range);assert.ok(Number(current.attributes['fill-opacity'])>Number(preview.attributes['fill-opacity']));}
+ state.previewUpgrade=null;renderer.render(state);assert.equal(svg.children.flatMap(n=>n.children).some(n=>n.attributes['data-upgrade-range']==='preview'),false);
+});

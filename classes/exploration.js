@@ -1,6 +1,7 @@
 const HexExploration=(()=>{
-  const clearRadius=2,fogRadius=6,treasureGold=20;
+  const clearRadius=2,fogRadius=6;
   const distance=(a,b)=>Math.max(Math.abs(a.q-b.q),Math.abs(a.r-b.r),Math.abs(a.q+a.r-b.q-b.r));
+  function treasureReward(position){return 5*distance({q:0,r:0},position);}
   function create(random){
     const landmarks=new Map();
     landmarks.seed=Math.floor(random()*4294967296);landmarks.surveyed=new Set();
@@ -67,7 +68,7 @@ const HexExploration=(()=>{
     const roll=hash((landmarks.seed||0)^987654321,landmark.q,landmark.r);
     return roll<.2?'remove':roll<.4?'card':roll<.6?'epic':roll<.7?'legendary':roll<.85?'repair':'upgrade';
   }
-  function bossRewardRarity(seed,id){const landmark=id.startsWith('wave:')?[-Number(id.slice(5)),0]:id.split(',').map(Number);let value=0;for(const char of String(seed)) value=Math.imul(value,31)+char.charCodeAt(0)|0;return hash(value^246813579,landmark[0],landmark[1])<.1?'Legendary':'Epic';}
+  function bossRewardRarity(seed,id){if(id.startsWith('duo:')){const parts=id.split(':');seed=String(seed)+'|guardian-board|'+parts[1];id=parts.slice(2).join(':');}const landmark=id.startsWith('wave:')?[-Number(id.slice(5)),0]:id.split(',').map(Number);let value=0;for(const char of String(seed)) value=Math.imul(value,31)+char.charCodeAt(0)|0;return hash(value^246813579,landmark[0],landmark[1])<.1?'Legendary':'Epic';}
   function visibility(map,position){
     let nearest=Infinity;for(const tile of map.values()) nearest=Math.min(nearest,distance(tile,position));
     return nearest<=clearRadius?'clear':nearest<=fogRadius?'fog':'hidden';
@@ -85,8 +86,8 @@ const HexExploration=(()=>{
     if(!(tile.roads||[]).some(d=>{const n=HexMap.neighbor(q,r,d),other=state.map.get(HexMap.key(n.q,n.r));return other&&(other.roads||[]).includes(HexMap.OPP(d));})) return 0;
     landmark.claimed=true;
     if(landmark.type==='shrine'){if(state.pendingShrine)(state.shrineQueue??=[]).push(id);else state.pendingShrine=id;return 0;}
-    if(landmark.type==='boss'){landmark.status='ready';return 0;}
-    state.gold+=treasureGold;state.goldEarned.treasure=(state.goldEarned.treasure||0)+treasureGold;return treasureGold;
+    if(landmark.type==='boss'){landmark.status=state.duoMode?'pending':'ready';if(state.duoMode)landmark.consent=[false,false];return 0;}
+    const amount=treasureReward(landmark);state.gold+=amount;state.goldEarned.treasure=(state.goldEarned.treasure||0)+amount;return amount;
   }
-  return {clearRadius,fogRadius,treasureGold,distance,create,region,expand,visibility,claim,bossProfile,shrineEffect,bossRewardRarity,prefab,attach,gridCells};
+  return {clearRadius,fogRadius,treasureReward,distance,create,region,expand,visibility,claim,bossProfile,shrineEffect,bossRewardRarity,prefab,attach,gridCells};
 })();

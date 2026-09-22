@@ -18,7 +18,7 @@ test('parallel identical commands, invalid JSON, oversized packets and reconnect
 test('malformed action corpus cannot crash or mutate the room',()=>{
  let now=0;const room=createRoom({loadouts:[loadout,loadout],now:()=>now}),seat=room.connect(0);room.connect(1);
  const corpus=[null,true,[],{},'bad',0,{q:NaN,r:Infinity,index:-1},{slots:[null]},{slot:{q:1,r:0,index:999999}},{type:'__proto__',slots:[{q:1,r:0,index:0}]},{type:'constructor',slots:[{q:1,r:0,index:0}]}];
- for(const action of ['tower','upgrade','building','buildingUpgrade','place','portal','reinforcement','reward','ready','unknown'])for(const payload of corpus){now+=1000;const before=room.view(seat.token),packet=command(room,seat,action,payload);let result;assert.doesNotThrow(()=>result=room.receive(seat.token,packet));assert.equal(result.ok,false);const after=room.view(seat.token);assert.deepEqual(after.boards,before.boards);assert.equal(after.hp,before.hp);}
+ for(const action of ['tower','upgrade','building','buildingUpgrade','place','portal','reinforcement','reward','delivery','ready','unknown'])for(const payload of corpus){now+=1000;const before=room.view(seat.token),packet=command(room,seat,action,payload);let result;assert.doesNotThrow(()=>result=room.receive(seat.token,packet));assert.equal(result.ok,false);const after=room.view(seat.token);assert.deepEqual(after.boards,before.boards);assert.equal(after.hp,before.hp);}
 });
 test('independent lobby sessions and expired invitation retries never cross rooms',()=>{
  let now=0;const rooms=createLobbies({now:()=>now}),request={requestId:randomUUID()},a=rooms.create(request),b=rooms.create({requestId:randomUUID()});rooms.join({requestId:randomUUID(),code:a.code});const av=rooms.view(a.token),bv=rooms.view(b.token);assert.notEqual(av.epoch,bv.epoch);
@@ -35,6 +35,7 @@ test('automated players complete multiple waves across seeded matches without by
    if(v.phase==='combat'){for(let i=0;i<400;i++){for(const seat of seats)room.touch(seat.token);room.tick();now+=50;ticks++;}continue;}
    for(const seat of seats){v=room.view(seat.token);const b=v.boards[seat.player];if(v.ready[seat.player])continue;
     if(b.celebration){send(seat,'acknowledge',{});continue;}
+    if(b.phase==='duoDelivery'&&v.boards.every(board=>board.phase==='duoDelivery')&&v.delivery?.offers[seat.player]?.index===null){send(seat,'delivery',{offerId:v.delivery.offers[seat.player].id,index:0});continue;}
     if(b.rewardOffer){send(seat,'reward',{offerId:b.rewardOffer.id,index:b.rewardOffer.skippable?null:0});continue;}
     if(b.phase==='place'){const candidates=[];b.placements.forEach((rotations,index)=>rotations.forEach((cells,rotation)=>cells.filter(p=>p.legal).forEach(p=>candidates.push({q:p.q,r:p.r,index,rotation}))));candidates.sort((a,b)=>Math.hypot(b.q,b.r)-Math.hypot(a.q,a.r));assert.ok(candidates.length);send(seat,'place',candidates[0]);continue;}
     if(b.phase==='build'){for(const tile of b.map)for(let index=0;index<tile.slots;index++){if(!tile.towers[index]&&room.view(seat.token).boards[seat.player].gold>=25)send(seat,'tower',{type:'archer',slots:[{q:tile.q,r:tile.r,index}]});}send(seat,'ready',{value:true});completed=Math.max(completed,v.wave);}

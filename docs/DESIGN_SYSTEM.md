@@ -103,3 +103,25 @@ Bei Schmiede/Markt ist der aktuelle Wirkbereich kräftig, vorhandene Versorgung 
 Schritt 2 markiert die vollständigen sechs projizierten Hexkanten. Schritt 4 öffnet das Baumenü nach Slotwahl und markiert zusätzlich Bauknopf und Schnellbauleiste; kein erneuter Kreis auf dem bereits gewählten Platz. Schritt 5 umfasst in 3D die tatsächlichen Modellgrenzen des ganzen Turms (ohne Reichweiten-/Upgradehilfen). Nach erfolgreichem Tutorial-Upgrade schließen die Turmfenster. Überspringen steht oberhalb von „Erste Schritte“. Markierungen nehmen keine Eingaben an und werden bei jeder Kameraänderung sofort neu projiziert. Ein Klick, dessen Pointer-Geste bereits behandelt wurde, darf ein beim Loslassen geöffnetes Menü nicht wieder schließen; Tastatur-/synthetische Außenklicks bleiben unterstützt.
 
 Tutorial Schritt 4: Schnellbau-/Drag-and-Drop-Leiste nicht mehr hervorheben. Im geöffneten Turmbaumenü wird gezielt der Bogenschütze mit einer goldenen Kontur markiert. Schritt 5 markiert dessen Upgrade-Schaltflächen zusätzlich zum Turm. Alle Turmbauangebote verwenden dieselben SVG-Icons wie Arsenal und Schnellbau; schmale Layouts reservieren eine eigene Icon-Spalte.
+
+### Biom-Informationen und Außenklick
+
+Auch angeheftete Biom-Informationen schließen bei einem linken Klick außerhalb des Panels und der Biomleiste. Dies gilt als Standard für künftige Dialoge und Popovers. Der erste Entdeckungshinweis bleibt als ausdrücklich gewünschte Ausnahme bis zur Bestätigung sichtbar. Biomflächen werden immer in ihrer eigenen Biomfarbe hervorgehoben, auch bei mehreren gleichzeitigen Entdeckungen oder zusätzlichem Hover.
+## Bedienregeln: Touch, Dialogfokus und Vorbereitung
+
+- Hex-Drehung hat einen sichtbaren, mindestens 44 px hohen Touch-Button bei den Handkarten. Erst nach expliziter Kartenwahl aktiv; R und Mausrad-Klick bleiben gleichwertig.
+- Dialoge fokussieren beim Öffnen den Dialog oder eine neutrale Überschrift, niemals automatisch eine Aktion. Tab/Shift+Tab bleiben verfügbar. Nur das Tutorial darf eine konkrete Aktion gezielt hervorheben.
+- Gebäudemenüs sind am rechten Rand des verfügbaren Bildschirmbereichs angedockt, auf schmalen Displays unten im verfügbaren Bereich. Sie folgen nicht dem angeklickten Gebäude und bleiben außerhalb reservierter HUD-/Handkartenflächen.
+- Vorbereitung hat keine feste Reihenfolge: Türme und Gebäude können bereits vor dem Hexlegen gebaut/verbessert werden. Wellenstart bleibt bis zum Platzieren gesperrt und erklärt die Voraussetzung direkt am Button.
+- Escape schließt zuerst aktive Menüs/Auswahlen. Ohne offenes Menü öffnet es im laufenden Spiel die Einstellungen. Kein zweiter globaler Escape-Handler darf diese wieder schließen.
+- Der Hinweis erscheint nach abgeschlossener Welle 11, nach Belohnung und Abschlussmeldung, in der Vorbereitung vor Welle 12. Er zeigt den Weg Einstellungen → Tastenbelegung, einschließlich des kompakten Menüknopfs. Er bleibt bis zum Öffnen der Tastenbelegung oder zum Klick auf „Verstanden“ bestehen, auch in späteren Wellen. Außenklicks und Escape bestätigen ihn nicht. In geöffneten Einstellungen wird er direkt oberhalb der Tastenbelegung eingeblendet.
+### Auswahl über Wellenübergänge erhalten
+
+Turm- und Gebäudemenüs verwenden dieselbe feste Randposition. Wellenende ist kein Abbruchsignal für Bauplatz-/Turmauswahl, Mehrfachauswahl, Zusatzhex-Zielwahl oder einen gewählten Schnellbau-Turm. Belohnungsdialoge unterbrechen die Bedienbarkeit, löschen aber die dahinterliegende Auswahl nicht. Ihre Bestätigung darf nicht als Außenklick auf Bau- oder Turmmenüs behandelt werden. DOM-Elemente für unveränderte Bau-/Upgrade-Angebote bei einem reinen Phasenwechsel erhalten, damit Fokus und laufende Zeigereingaben nicht verloren gehen.
+
+Gesperrte Optionen der Durchlaufvorbereitung zeigen ihre Freischaltbedingung dauerhaft als lesbaren Text. Diese Texte dürfen durch kompakte Layouts nicht ausgeblendet werden; ein Hover-Titel allein genügt insbesondere auf Touch-Geräten nicht.
+### Hauptmenü-Ausnahme und linke Kontextmenüs
+
+Turm- und Gebäudemenüs werden am linken Rand des freien Bildschirmbereichs positioniert; auf schmalen Bildschirmen bleiben sie unten links innerhalb dieses Bereichs. Dies ersetzt die frühere rechte Randposition.
+
+Hauptmenü-Dialoge (Spielmodus, Spielregeln, Spielstand, Arsenal und Durchlaufvorbereitung) bleiben bei Außenklicks offen. Sie werden über ihre ausdrücklichen Zurück-/Schließen-Schaltflächen geschlossen. Die Außenklick-Regel für Ingame-Dialoge bleibt bestehen. Die Durchlaufvorbereitung hat keinen Statusbalken mit Diamanten und Auswahlzähler mehr; Hinweise auf eine unvollständige Turmauswahl bleiben erhalten.

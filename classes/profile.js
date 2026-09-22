@@ -19,7 +19,7 @@ const HexProfile=(()=>{
     for(const id of unlocked) if(active.length<5&&!active.includes(id)) active.push(id);
     active=active.slice(0,5);
     const presets=Array.from({length:3},(_,i)=>{const item=source.loadoutPresets?.[i],ids=validIds(item?.towers||item,definitions).filter(id=>unlocked.includes(id));return {name:String(item?.name||`Preset ${i+1}`).slice(0,30),towers:ids.length===5?ids:[...active]};});
-    return {...base,...source,version:1,difficulty:source.difficulty==='dual'&&source.milestones?.includes('standard35')?'dual':'normal',activeHero:heroUnlocked(source,source.activeHero)?source.activeHero:'standard',diamonds:Math.max(0,Number(source.diamonds)||0),unlockedTowers:unlocked,activeLoadout:active,
+    return {...base,...source,duoSettledRuns:Array.isArray(source.duoSettledRuns)?source.duoSettledRuns.filter(id=>typeof id==='string'&&/^[a-f0-9]{64}$/.test(id)):[],version:1,difficulty:source.difficulty==='dual'&&source.milestones?.includes('standard35')?'dual':'normal',activeHero:heroUnlocked(source,source.activeHero)?source.activeHero:'standard',diamonds:Math.max(0,Number(source.diamonds)||0),unlockedTowers:unlocked,activeLoadout:active,
       loadoutPresets:presets,unlocks:[...new Set(Array.isArray(source.unlocks)?source.unlocks:[])],milestones:Array.isArray(source.milestones)?source.milestones:[],settledRuns:Array.isArray(source.settledRuns)?source.settledRuns.slice(-100):[],
       records:{...base.records,...(source.records||{})},lifetime:{...base.lifetime,...(source.lifetime||{}),towers:{...(source.lifetime?.towers||{})}}};
   }
@@ -45,6 +45,12 @@ const HexProfile=(()=>{
     let milestoneDiamonds=0;for(let mark=10;mark<=wave;mark+=10)if(mark>oldBest)milestoneDiamonds+=2;
     const total=waveDiamonds+bossDiamonds+milestoneDiamonds;
     return {wave:waveDiamonds,bosses:bossDiamonds,milestones:milestoneDiamonds,total};
+  }
+  function settleDuo(profile,receipt,definitions){
+    const clean=normalize(profile,definitions);
+    if(!receipt||!/^[a-f0-9]{64}$/.test(receipt.id)||!Number.isSafeInteger(receipt.diamonds)||receipt.diamonds<0||receipt.diamonds>100000)throw Error('Ungültige Duo-Abrechnung');
+    if(clean.duoSettledRuns.includes(receipt.id))return clean;
+    const next=normalize({...clean,diamonds:clean.diamonds+receipt.diamonds,duoSettledRuns:[...clean.duoSettledRuns,receipt.id],lifetime:{...clean.lifetime,diamondsEarned:clean.lifetime.diamondsEarned+receipt.diamonds}},definitions);localStorage.setItem(STORAGE_KEY,JSON.stringify(next));return next;
   }
   function settleRun(profile,summary,definitions){
     const clean=normalize(profile,definitions),runId=String(summary.runId||'');
@@ -77,14 +83,14 @@ const HexProfile=(()=>{
     function check(value,depth=0){if(depth>30)throw new Error('Spielstand zu stark verschachtelt.');if(typeof value==='number'&&(!Number.isFinite(value)||value<0||value>Number.MAX_SAFE_INTEGER))throw new Error('Ungültiger Zahlenwert im Spielstand.');if(value&&typeof value==='object')for(const child of Object.values(value))check(child,depth+1);}
     check(p);
     const invalid=()=>{throw new Error('Ungültige Profildaten.');},object=v=>v&&typeof v==='object'&&!Array.isArray(v),numbers=v=>{if(!object(v)||Object.values(v).some(n=>!Number.isSafeInteger(n)||n<0))invalid();};
-    for(const key of ['unlockedTowers','activeLoadout','unlocks','settledRuns'])if(p[key]!==undefined&&(!Array.isArray(p[key])||p[key].some(id=>typeof id!=='string')))invalid();
+    for(const key of ['unlockedTowers','activeLoadout','unlocks','settledRuns','duoSettledRuns'])if(p[key]!==undefined&&(!Array.isArray(p[key])||p[key].some(id=>typeof id!=='string')))invalid();
     numbers(p.records);for(const key of ['highestWave','bossesKilled','runsPlayed'])if(!Number.isSafeInteger(p.records[key]))invalid();
     for(const key of ['normalKills','diamondsEarned'])if(!Number.isSafeInteger(p.lifetime[key]))invalid();
     if(!object(p.lifetime.towers))invalid();for(const entry of Object.values(p.lifetime.towers))numbers(entry);
     if(p.unlockCosts!==undefined)numbers(p.unlockCosts);
     if(p.loadoutPresets!==undefined&&(!Array.isArray(p.loadoutPresets)||p.loadoutPresets.some(v=>!object(v)||typeof v.name!=='string'||!Array.isArray(v.towers)||v.towers.some(id=>typeof id!=='string'))))invalid();
     if(p.dailyResults!==undefined){if(!object(p.dailyResults))invalid();for(const [day,result] of Object.entries(p.dailyResults))if(!/^\d{4}-\d{2}-\d{2}$/.test(day)||!object(result)||!Number.isSafeInteger(result.best)||result.best<0||typeof result.won!=='boolean')invalid();}
-    const allowed=['version','activeHero','difficulty','diamonds','unlockedTowers','activeLoadout','loadoutPresets','unlocks','milestones','settledRuns','records','lifetime','unlockCosts','dailyResults'];
+    const allowed=['version','activeHero','difficulty','diamonds','unlockedTowers','activeLoadout','loadoutPresets','unlocks','milestones','settledRuns','records','lifetime','unlockCosts','dailyResults','duoSettledRuns'];
     return normalize(Object.fromEntries(allowed.filter(key=>p[key]!==undefined).map(key=>[key,p[key]])),definitions);
   }
   function importFile(text,definitions){
@@ -93,5 +99,5 @@ const HexProfile=(()=>{
     if(previous!==null)localStorage.setItem(STORAGE_KEY+'-before-import',previous);
     localStorage.setItem(STORAGE_KEY,JSON.stringify(next));return next;
   }
-  return {heroUnlocked,exportFile,readFile,importFile,resetValue,resetUnlocks,affordableUnlocks,BUILDING_UNLOCKS,unlockBuilding,STORAGE_KEY,START_TOWERS,TOWER_UNLOCKS,ULTIMATE_UNLOCKS,defaults,normalize,load,save,setLoadout,savePreset,runReward,settleRun,settleDaily,unlockTower,unlockUltimate};
+  return {settleDuo,heroUnlocked,exportFile,readFile,importFile,resetValue,resetUnlocks,affordableUnlocks,BUILDING_UNLOCKS,unlockBuilding,STORAGE_KEY,START_TOWERS,TOWER_UNLOCKS,ULTIMATE_UNLOCKS,defaults,normalize,load,save,setLoadout,savePreset,runReward,settleRun,settleDaily,unlockTower,unlockUltimate};
 })();

@@ -20,7 +20,7 @@ test('base buying is consistent during placement, building and waves and explain
 test('first-run tutorial follows real actions, suppresses auto-start and persists completion', () => {
   const { a, elements, documentListeners, selectSlot, buyTower, upgradeSelectedTower, storage, timers } = load({ initialStorage: { 'tutorial-v1': 'new' } });
   assert.match(elements.get('tutorialTitle').textContent, /1\/7/);
-  documentListeners.keydown({ key: 'r' }); assert.match(elements.get('tutorialTitle').textContent, /2\/7/);
+  a.state.selectedCard=0;documentListeners.keydown({ key: 'r' }); assert.match(elements.get('tutorialTitle').textContent, /2\/7/);
   a.state.hand = ['straight']; a.state.selectedCard = 0; a.state.rotation = 0; elements.get('autoStart').checked = true; a.placeTile(1, 0);
   assert.match(elements.get('tutorialTitle').textContent, /3\/7/); assert.equal(timers.size, 0); assert.equal(a.state.waveRunning, false);
   selectSlot(1, 0, 0); assert.match(elements.get('tutorialTitle').textContent, /4\/7/);
@@ -57,8 +57,8 @@ test('life and wave tutorial steps position the spotlight using current target b
  elements.get('tutorialNextBtn').listeners.click();assert.equal(elements.get('tutorialSpotlight').style.top,'696px');a.startWave();a.renderAll();assert.equal(elements.get('tutorialSpotlight').classList.contains('hidden'),true);
 });
 
-test('save transfer stays over the main menu and closes on backdrop click',()=>{
- const {elements}=load();elements.get('openMainMenuBtn').listeners.click();const menu=elements.get('mainMenu'),save=elements.get('saveOverlay');elements.get('menuSaveBtn').listeners.click();assert.equal(menu.classList.contains('hidden'),false);assert.equal(save.classList.contains('hidden'),false);save.listeners.click({target:save});assert.equal(save.classList.contains('hidden'),true);assert.equal(menu.classList.contains('hidden'),false);
+test('save transfer stays open on backdrop click and closes through its back button',()=>{
+ const {elements}=load();elements.get('openMainMenuBtn').listeners.click();const menu=elements.get('mainMenu'),save=elements.get('saveOverlay');elements.get('menuSaveBtn').listeners.click();assert.equal(menu.classList.contains('hidden'),false);assert.equal(save.classList.contains('hidden'),false);save.listeners.click?.({target:save});assert.equal(save.classList.contains('hidden'),false);elements.get('closeSaveBtn').listeners.click();assert.equal(save.classList.contains('hidden'),true);assert.equal(menu.classList.contains('hidden'),false);
 });
 
 test('short landscape menus can use the free rectangle beside the hand instead of a collapsed band',()=>{
@@ -87,6 +87,17 @@ test('camera changes immediately reproject tutorial targets without waiting for 
 test('tutorial highlights only Archer in build menu, then its upgrades, and clears highlighting after upgrade',()=>{
  const {a,elements,selectSlot,buyTower,upgradeSelectedTower}=load({initialStorage:{'tutorial-v1':'new'}});a.state.phase='build';a.state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[null]});selectSlot(1,0,0);
  const offers=elements.get('towerMenu').children;assert.ok(offers.every(b=>b.innerHTML.includes('towerBuildIcon')&&b.innerHTML.includes('<svg')));assert.equal(offers.filter(b=>b.classList.contains('tutorialChoice')).length,1);assert.ok(offers[0].classList.contains('tutorialChoice'));
- buyTower('archer');a.rendererCommands.selectTower(1,0,0);const upgrades=elements.get('towerUpgrades').children.filter(b=>b.listeners.click);assert.ok(upgrades.length);assert.ok(upgrades.every(b=>b.classList.contains('tutorialChoice')));assert.equal(elements.get('towerMenu').children.some(b=>b.classList.contains('tutorialChoice')),false);
- upgradeSelectedTower('marksman');assert.equal(elements.get('towerPanel').classList.contains('hidden'),true);
+ buyTower('archer');a.rendererCommands.selectTower(1,0,0);const upgrades=elements.get('towerUpgrades').children.filter(b=>b.listeners.click);assert.ok(upgrades.length);assert.equal(upgrades.filter(b=>b.classList.contains('tutorialChoice')).length,1);assert.match(upgrades.find(b=>b.classList.contains('tutorialChoice')).innerHTML,/Salve/);assert.match(elements.get('tutorialText').textContent,/Salve/);assert.equal(elements.get('towerMenu').children.some(b=>b.classList.contains('tutorialChoice')),false);
+ upgradeSelectedTower('volley');assert.equal(elements.get('towerPanel').classList.contains('hidden'),true);
+});
+
+test('alternative tutorial tower explains upgrades and can continue without gold',()=>{
+ const {a,elements,selectSlot,buyTower}=load({initialStorage:{'tutorial-v1':'new'}});a.state.phase='build';a.state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[null]});selectSlot(1,0,0);buyTower('catapult');a.state.gold=0;a.renderAll();
+ assert.match(elements.get('tutorialText').textContent,/kein Bogenschütze/);assert.equal(elements.get('towerDrawer').classList.contains('hidden'),true);assert.equal(elements.get('tutorialNextBtn').classList.contains('hidden'),false);
+ elements.get('tutorialNextBtn').listeners.click();assert.match(elements.get('tutorialText').textContent,/Herzen/);elements.get('tutorialNextBtn').listeners.click();assert.match(elements.get('tutorialText').textContent,/Leertaste/);
+});
+
+test('tutorial puts Archer first while ordinary runs preserve chosen loadout order',()=>{
+ const order=['chain','freeze','mine','catapult','archer'];const tutorial=load({initialStorage:{'tutorial-v1':'new'}});tutorial.a.newRun(order);assert.deepEqual(Array.from(tutorial.a.state.towerLoadout),['archer','chain','freeze','mine','catapult']);assert.deepEqual(order,['chain','freeze','mine','catapult','archer']);
+ const normal=load();normal.a.newRun(order);assert.deepEqual(Array.from(normal.a.state.towerLoadout),order);
 });

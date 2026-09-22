@@ -8,6 +8,7 @@
  }
  const dismiss=event=>{
    if(event.button!==undefined&&event.button!==0)return;
+   if(event.target.closest?.('#rewardOverlay,#celebration,#campaignVictory'))return;
    for(const panel of panels)if(panel.open&&!panel.contains(event.target))panel.open=false;
    for(const panel of document.querySelectorAll('details[open]'))if(panel.open&&!panel.contains(event.target))panel.open=false;
    for(const drawer of document.querySelectorAll('.drawer:not(.hidden)')){

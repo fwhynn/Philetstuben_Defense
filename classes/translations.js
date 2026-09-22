@@ -984,3 +984,68 @@ Endlosmodus|Endless mode
 HexTranslations.add(`
 Nach Welle 20 kannst du im Endlosmodus weiterspielen. Die Tagesbelohnung gibt es nur einmal pro Tag.|After wave 20, you can continue in endless mode. The daily reward is available only once per day.
 `);
+
+HexTranslations.add(`
+Strg + F: FPS-Anzeige ein/aus|Ctrl + F: toggle FPS counter
+`);
+
+HexTranslations.add(`
+Partner-Lieferung|Partner delivery
+Partner-Lieferung · Wähle ein kostenloses Geschenk für deinen Partner. Karten gehen in dessen Deck und Ablagestapel, bevor die nächste Hand gezogen wird.|Partner delivery · Choose a free gift for your partner. Cards enter their deck and discard pile before the next hand is drawn.
+Dein Partner wählt noch seine Wellenbelohnung.|Your partner is still choosing their wave reward.
+Gold für deinen Partner|gold for your partner
+Karte verschenken|Gift card
+Geschenk zugestellt. Warte auf die Lieferung deines Partners.|Gift delivered. Waiting for your partner's delivery.
+`);
+
+HexTranslations.add(`
+Schatz +|Treasure +
+Gold · ungesammelt|gold · uncollected
+Das ist zwar kein Bogenschütze – aber viel Glück und viel Spaß damit! Klicke deinen Turm an, um seine Verbesserungen anzusehen. Falls dein Gold nicht reicht, kannst du hier trotzdem weitergehen.|That's not an Archer — but good luck and have fun! Click your tower to see its upgrades. If you don't have enough gold, you can still continue here.
+`);
+
+HexTranslations.add(`
+Salve|Volley
+Klicke deinen Bogenschützen an und wähle Salve für 35 Gold. Der Flächenschaden hilft dir, alle Gegner der ersten Welle abzuwehren.|Click your Archer and choose Volley for 35 gold. Its area damage helps you defeat every enemy in the first wave.
+`);
+
+HexTranslations.add(`
+Partner-Lieferung · Wähle ein kostenloses Geschenk für deinen Partner. Karten kommen oben auf dessen Nachziehstapel und werden als Nächstes gezogen.|Partner delivery · Choose a free gift for your partner. Cards go on top of their draw pile and are drawn next.
+`);
+
+HexTranslations.add(`
+Nachziehstapel: Die nächste Karte steht links oben.|Draw pile: the next card is at the top left.
+Wächter auf Karte|Guardian on board
+Zustimmung|Approval
+Wächter verschieben|Postpone guardian
+Wächter für nächste Welle freigeben|Approve guardian for the next wave
+`);
+
+HexTranslations.add(`
+Wächterbeute · Wähle deine eigene Belohnung.|Guardian loot · Choose your own reward.
+`);
+HexTranslations.add(`
+↻ Drehen|↻ Rotate
+Ausgewählte Hexkarte drehen|Rotate selected hex card
+Zuerst Hex legen|Place a hex first
+Lege zuerst dein Hex, bevor du die nächste Welle startest.|Place your hex before starting the next wave.
+Praktische Tastenbelegung|Useful keyboard shortcuts
+Mit Hotkeys geht vieles schneller. Öffne die Einstellungen mit Escape und dort die Tastenbelegung.|Shortcuts make many actions faster. Press Escape to open Settings, then open Keyboard shortcuts.
+Einstellungen öffnen|Open Settings
+Escape öffnet die Einstellungen oder schließt offene Menüs und Infofenster.|Escape opens Settings or closes open menus and information panels.
+Einstellungen öffnen / Fenster schließen|Open Settings / close window
+Duo · Freunde-Beta|Duo · Friends beta
+Zwei Festungen, ein Team. Private Lobby mit Einladungscode.|Two fortresses, one team. Private lobby with an invite code.
+Noch nicht verfügbar · Coming Soon|Not available yet · Coming Soon
+Karte wählen (1–3) · Drehen: Knopf oder R · Hex antippen|Select a card (1–3) · Rotate: button or R · Tap a hex
+`);
+HexTranslations.add(`
+Stufe 1: Welle 35 besiegen.|Stage 1: defeat wave 35.
+Stufe 2 · Zwei Fronten: Welle 35 besiegen.|Stage 2 · Two Fronts: defeat wave 35.
+`);
+HexTranslations.add(`
+Bauplatz gewählt · Strg + Klick: weitere Plätze markieren oder abwählen.|build slot selected · Ctrl + click: select or deselect more slots.
+`);
+HexTranslations.add(`
+Deck ausdünnen (optional)|Thin deck (optional)
+`);

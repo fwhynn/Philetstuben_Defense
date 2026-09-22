@@ -27,7 +27,7 @@ test('grid setting persists and diamond HUD forecasts only unpaid run rewards', 
 });
 
 test('middle click rotates clockwise, R remains available, and building phase does not rotate', () => {
-  const { a, elements, documentListeners } = load(); let prevented = 0;
+  const { a, elements, documentListeners } = load(); a.state.selectedCard=0; let prevented = 0;
   const middle = () => elements.get('board').listeners.pointerdown({ button: 1, preventDefault() { prevented++; } });
   assert.equal(a.state.rotation, 0); middle(); assert.equal(a.state.rotation, 5); assert.equal(prevented, 1);
   documentListeners.keydown({ key: 'r' }); assert.equal(a.state.rotation, 0);
@@ -161,7 +161,7 @@ test('quick build supports keyboard/tap, cancels outside and does not charge inv
   a.state.gold = 25; button.listeners.click({ detail: 0 }); selectSlot(1, 0, 0); assert.equal(tile.towers[0].type, 'archer'); assert.equal(a.state.gold, 0);
   tile.towers[0] = null; a.state.gold = 25; a.renderAll();
   button.listeners.pointerdown({ button: 0, pointerId: 1, clientX: 0, clientY: 0, preventDefault() { }, stopPropagation() { } }); documentListeners.pointermove({ pointerId: 1, clientX: 100, clientY: 100 }); documentListeners.pointerup({ pointerId: 1, clientX: 100, clientY: 100 }); assert.equal(a.state.dragTower, null); assert.equal(a.state.gold, 25);
-  button.listeners.click({ detail: 0 }); documentListeners.pointercancel(); assert.equal(a.state.dragTower, null); button.listeners.click({ detail: 0 }); a.state.phase = 'reward'; a.renderAll(); assert.equal(a.state.dragTower, null); assert.equal(button.disabled, true);
+  button.listeners.click({ detail: 0 }); documentListeners.pointercancel(); assert.equal(a.state.dragTower, null); button.listeners.click({ detail: 0 }); a.state.phase = 'reward'; a.renderAll(); assert.equal(a.state.dragTower, 'archer'); assert.equal(button.disabled, true);
 });
 test('biome rail discovers visible regions and highlights them by hover or pinned click', () => {
   const { a, elements } = load(); a.state.biomeSeed = 'biome-rail'; a.renderAll(); assert.equal(elements.get('biomeRail').children.length, 1);

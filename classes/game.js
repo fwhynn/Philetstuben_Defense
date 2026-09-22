@@ -89,7 +89,7 @@
 
   function shuffle(arr){return HexRunFlow.shuffle(arr,random);}
   function drawHand(){
-    const result=HexRunFlow.drawHand(state,random);state.selectedCard=0;state.rotation=0;
+    const result=HexRunFlow.drawHand(state,random);state.selectedCard=null;state.rotation=0;
     if(result==='rescue')setMessage('Deck blockiert: Lege das kostenlose Rettungshex. Es hat keine Turmplätze und kommt nicht ins Deck.');
     if(result==='tunnel')setMessage('Straße eingeschlossen. Ein kostenloser Rettungstunnel öffnet eine neue Front.');
     if(result==='blocked')setMessage('Keine Erweiterung möglich. Du kannst bauen und die nächste Wave starten.');
@@ -132,7 +132,7 @@
     }
     const result=HexRunSession.place(state,random,{q,r,index:state.selectedCard,rotation:state.rotation});if(!result)return;
     const {connected,treasure}=result;sound.play('place');state.hoveredPlacement=null;
-    if(result.opening){state.selectedCard=0;state.rotation=0;setMessage('Erster Ausgang erweitert. Lege jetzt eine Karte direkt an den zweiten Base-Ausgang.');renderAll();return;}
+    if(result.opening){state.selectedCard=null;state.rotation=0;setMessage('Erster Ausgang erweitert. Lege jetzt eine Karte direkt an den zweiten Base-Ausgang.');renderAll();return;}
     state.selectedSlot=null;state.selectedBuilding=null;tutorialEvent('place');
     if(treasure||connected.gold||state.pendingShrine) sound.play('collect');
     setMessage(treasure||connected.gold?`Schatz erschlossen: +${treasure+connected.gold} Gold. Baue jetzt Türme oder starte die Wave.`:'Hex gelegt. Baue jetzt Türme oder starte die Wave.');
@@ -155,10 +155,10 @@
   function selectSlot(q,r,index,multiple=false){
     if(state.dragTower){dropQuickTower(state.dragTower,{q,r,index});return;}
     closeBasePanel();
-    if(!['build','wave'].includes(state.phase)||state.hp<=0) return;
+    if(!['place','build','wave'].includes(state.phase)||state.hp<=0) return;
     const tile=state.map.get(key(q,r)); if(!tile||!Number.isInteger(index)||index<0||index>=tile.slots||tile.towers[index]) return;
     state.selectedTower=null;state.selectedBuilding=null;chooseMany('Slot',{q,r,index},multiple);tutorialEvent('slot');
-    setMessage(selections('Slot').length+' Bauplätze gewählt · Strg + Klick: weitere Plätze markieren oder abwählen.');document.getElementById('towerDrawer')?.classList.remove('hidden');document.getElementById('rulesDrawer')?.classList.add('hidden');document.getElementById('settingsDrawer')?.classList.add('hidden');renderAll();
+    setMessage(selections('Slot').length+(selections('Slot').length===1?' Bauplatz':' Bauplätze')+' gewählt · Strg + Klick: weitere Plätze markieren oder abwählen.');document.getElementById('towerDrawer')?.classList.remove('hidden');document.getElementById('rulesDrawer')?.classList.add('hidden');document.getElementById('settingsDrawer')?.classList.add('hidden');renderAll();
   }
 
   function buyTower(type){
@@ -166,7 +166,7 @@
     if(!result.ok){if(result.reason==='gold')setMessage('Nicht genug Gold.');return;}
     if(tutorial.active&&tutorial.step===3)document.getElementById('towerDrawer').classList.add('hidden');
     state.selectedSlots=[];state.selectedSlot=null;state.previewTower=null;state.selectedTower=null;
-    sound.play('build');tutorialEvent('buy');
+    sound.play('build');tutorialEvent('buy',type);
     renderAll();
   }
 
@@ -176,10 +176,11 @@
     const refund=HexData.towerRefund(state,tower);if(!refund) return;
     HexData.recordTowerStat(state,tower,'refundGold',refund.amount);if(state.runTowerDetails[tower.statId])state.runTowerDetails[tower.statId].sold=true;
     state.gold+=refund.amount;tile.towers[selected.index]=null;
-    state.selectedTower=null;state.selectedSlot=['build','wave'].includes(state.phase)?{...selected}:null;
+    state.selectedTower=null;state.selectedSlot=['place','build','wave'].includes(state.phase)?{...selected}:null;
     sound.play('build');setMessage(`Turm zurückgegeben: +${refund.amount} Gold (${refund.percent} % der gesamten Investition inklusive Upgrades).`);renderAll();
   }
   function upgradeSelectedTower(branch){
+    state.previewUpgrade=null;
     if(selections('Tower').length!==1||!HexTowerCommands.upgrade(state,state.selectedTower,branch))return;
     const tutorialUpgrade=tutorial.active&&tutorial.step===4;
     sound.play('build');tutorialEvent('upgrade');if(tutorialUpgrade){state.selectedTower=null;state.selectedTowers=[];state.selectedSlot=null;state.selectedSlots=[];state.previewTower=null;document.getElementById('towerDrawer').classList.add('hidden');}renderAll();
@@ -190,24 +191,32 @@
 
   const SPAWN_SPACING=20;   // Weltmaß zwischen zwei nacheinander gespawnten Gegnern
   function startWave(){
+    if(state.phase==='place'){setMessage('Lege zuerst dein Hex, bevor du die nächste Welle startest.');return;}
     const result=HexRunFlow.start(state,random);if(!result)return;
     last=performance.now();clockDebt=0;tutorialEvent('wave');state.selectedSlot=null;state.previewTower=null;sound.play('wave');startWaveBtn.disabled=true;
     setMessage('Wave '+state.wave+' läuft – '+result.fronts+' offene Fronten.'+(result.waveBoss?' Bosswelle!':'')+(result.bosses?' '+result.bosses+' Wächter gestartet.':''));renderUI();
   }
   function renderSessionPhase(){
     if(state.phase==='victory'){showCampaignVictory();return;}
-    state.selectedCard=0;state.rotation=0;
+    state.selectedCard=null;state.rotation=0;
     if(state.phase==='bossReward')showBossReward();else if(state.phase==='reward')showRewards();else if(state.phase==='shrineReward')showShrine();else if(state.phase==='removal')showRemoval(state.removalSource);
     else {rewardOverlay.classList.add('hidden');if(state.drawResult==='rescue')setMessage('Deck blockiert: Lege das kostenlose Rettungshex.');if(state.drawResult==='tunnel')setMessage('Straße eingeschlossen. Ein kostenloser Rettungstunnel öffnet eine neue Front.');showPendingCelebration();}
     renderAll();
     if(state.phase==='build'&&!state.celebrationActive&&autoStart.checked&&!tutorial.active)schedule(()=>startWave(),250);
   }
+  let rewardInputOffer=null,rewardInputAfter=0,rewardPointerReady=false;
+  function openRewardSelection(){
+    if(rewardInputOffer!==state.rewardOffer?.id){rewardInputOffer=state.rewardOffer?.id;rewardInputAfter=performance.now()+350;rewardPointerReady=false;}
+    rewardOverlay.classList.remove('hidden');
+  }
+  rewardOverlay.addEventListener('pointerdown',event=>{rewardPointerReady=performance.now()>=rewardInputAfter;if(!rewardPointerReady){event.preventDefault();event.stopImmediatePropagation();}},true);
+  rewardOverlay.addEventListener('click',event=>{if(performance.now()<rewardInputAfter||event.detail>0&&!rewardPointerReady){event.preventDefault();event.stopImmediatePropagation();}},true);
   function takeReward(id,index){if(!HexRunSession.choose(state,random,id,index))return false;renderSessionPhase();return true;}
   function endWave(){
     const best=state.challengeDay?(profile.dailyResults?.[state.challengeDay]?.best||0):profile.records.highestWave||0;
     const result=HexRunSession.finish(state,random,best);if(!result)return;
     if(result.campaignVictory){showCampaignVictory();return;}
-    if(result.victory){showCampaignVictory();return;}sound.play('complete');state.selectedSlot=null;renderSessionPhase();
+    if(result.victory){showCampaignVictory();return;}sound.play('complete');renderSessionPhase();
   }
   function finishBossReward(){if(state.phase==='bossReward')takeReward(state.rewardOffer?.id,null);}
   function finishRemoval(){if(['removal','shrineReward'].includes(state.phase))takeReward(state.rewardOffer?.id,null);}
@@ -237,7 +246,7 @@
     document.getElementById('celebration').classList.remove('hidden');sound.play('complete');
     document.getElementById('celebrationContinue').focus?.();
   }
-  function closeCelebration(){HexRunSession.acknowledge(state);document.getElementById('celebration').classList.add('hidden');startWaveBtn.focus?.();}
+  function closeCelebration(){HexRunSession.acknowledge(state);document.getElementById('celebration').classList.add('hidden');renderHotkeyTip();startWaveBtn.focus?.();}
 
   function showBossReward(){
     inspectReward('selection');
@@ -251,7 +260,7 @@
       takeReward(offer.id,offer.choices.findIndex(c=>c.kind==='card'&&c.cardId===cardId));
     });rewardChoices.appendChild(card);}
     for(const [kind,title,description] of [['bastion','Bastionssegen','+5 maximale und aktuelle Base-HP für diesen Run.'],['income','Handelspakt','+2 Gold nach jeder künftig überlebten Wave in diesem Run.']])rewardAction(title,description,()=>{if(state.phase!=='bossReward'||state.bossRewards[0]!==id)return;takeReward(offer.id,offer.choices.findIndex(c=>c.blessing===kind));});
-    rewardOverlay.classList.remove('hidden');
+    openRewardSelection();
   }
 
   function showRewards(){
@@ -269,7 +278,7 @@
         if(state.phase==='place') setMessage(`${CARD_LIBRARY[id].name} wurde deinem Deck hinzugefügt.`);
       }); rewardChoices.appendChild(el);
     });
-    rewardOverlay.classList.remove('hidden');
+    openRewardSelection();
   }
   function showShrine(){
     inspectReward('selection');
@@ -284,7 +293,7 @@
       const choices=offer.choices.filter(c=>c.kind==='upgrade').map(c=>c.choice);
       if(choices.length)for(const choice of choices)rewardAction(TOWERS[choice.type].name+' → '+choice.name,'Hex '+choice.q+','+choice.r+' · Platz '+(choice.index+1)+' · kostenlos; Verkaufswert bleibt unverändert.',()=>take(offer.choices.findIndex(c=>c.choice===choice)));
       else rewardAction(effect==='repair'&&state.hp<state.maxHp?'Bis zu +5 HP':'Vorräte · +30 Gold','Einmaliger Shrine-Segen.',()=>take(0));
-      document.getElementById('skipRemovalBtn').classList.add('hidden');document.getElementById('rewardInspectActions').classList.add('hidden');rewardOverlay.classList.remove('hidden');return;
+      document.getElementById('skipRemovalBtn').classList.add('hidden');document.getElementById('rewardInspectActions').classList.add('hidden');openRewardSelection();return;
     }
     state.removalSource='shrine';state.phase='shrineReward';rewardChoices.innerHTML='';
     document.getElementById('rewardTitle').textContent='Shrine erschlossen · Effekt: '+(effect==='legendary'?'Legendary-Karte erhalten':effect==='epic'?'Epic-Karte erhalten':'Zusätzliche Karte wählen');
@@ -297,14 +306,14 @@
         if(!takeReward(offer.id,picks.indexOf(id)))return;setMessage(`${CARD_LIBRARY[id].name} durch den Shrine zum Deck hinzugefügt.`);
       });rewardChoices.appendChild(card);
     }
-    rewardOverlay.classList.remove('hidden');
+    openRewardSelection();
   }
   function showRemoval(source='reward'){
     inspectReward('selection');
     state.removalSource=source;
     state.phase='removal';rewardChoices.innerHTML='';
     document.getElementById('skipRemovalBtn').textContent='Keine Karte entfernen';
-    document.getElementById('rewardTitle').textContent=source==='shrine'?'Shrine erschlossen · Effekt: Karte entfernen':'Deck ausdünnen';
+    document.getElementById('rewardTitle').textContent='Deck ausdünnen (optional)';
     document.getElementById('rewardDescription').textContent='Optional: Entferne eine Kartenkopie aus deinem Deck. Mindestens 5 Karten bleiben erhalten. Bereits gelegte Hexe bleiben bestehen.'+(source==='shrine'?' Dieser Shrine ist einmalig; Überspringen verbraucht ihn ebenfalls.':'');
     document.getElementById('skipRemovalBtn').classList.remove('hidden');
     const offer=HexRewards.offer(state,'removal',random);
@@ -314,7 +323,7 @@
       const card=cardElement(id,false),info=document.createElement('p');info.textContent=`${count} im Deck · 1 Kopie entfernen`;card.appendChild(info);card.disabled=state.deck.length<=5;
       card.addEventListener('click',()=>{if(state.phase!=='removal'||!takeReward(offer.id,offer.choices.findIndex(c=>c.cardId===id))) return;if(['place','build'].includes(state.phase)) setMessage(`${CARD_LIBRARY[id].name}: Eine Kopie aus dem Deck entfernt.`);});rewardChoices.appendChild(card);
     }
-    rewardOverlay.classList.remove('hidden');
+    openRewardSelection();
   }
 
   function update(dt,time,paint=true){
@@ -333,7 +342,8 @@
   }
   document.getElementById('tunnelRescueBtn').addEventListener('click',buildRescueTunnel);
   function renderBoard(){
-    if(state.buildingTarget&&(state.hp<=0||!['build','wave'].includes(state.phase)))state.buildingTarget=null;
+    if(state.previewUpgrade){const selected=state.selectedTower,tower=selected&&state.map.get(key(selected.q,selected.r))?.towers[selected.index];if(tower!==state.previewUpgrade.tower)state.previewUpgrade=null;}
+    if(state.buildingTarget&&(state.hp<=0||state.phase==='gameover'))state.buildingTarget=null;
     const card=HexPlacementCommands.card(state,state.hand[state.selectedCard]);
     const targets=state.phase==='place'&&!state.waveRunning&&card?placementTargets(card).filter(target=>!state.landmarks.get(key(target.q,target.r))?.prefab).map(target=>({...target,legal:canPlace(target.q,target.r,card,state.rotation)})):[];
     if(state.buildingTarget){targets.splice(0,targets.length,...[...state.map.values()].map(t=>({q:t.q,r:t.r,legal:HexBuildings.canTarget(state,state.buildingTarget,key(t.q,t.r))})));}
@@ -375,12 +385,33 @@ R dreht die Karte, dann Feld anklicken.`;}
     if(state.selectedTower||state.selectedBuilding) document.getElementById('towerDrawer')?.classList.add('hidden');
     app.classList.toggle('canStart',state.phase==='build'&&!state.waveRunning&&state.hp>0);
   }
+  function renderHotkeyTip(){
+    const tip=document.getElementById('hotkeyTip'),help=document.getElementById('hotkeyHelp'),settings=document.getElementById('settingsDrawer');
+    if(state.lastCompletedWave>=11&&!state.waveRunning&&!state.celebrationActive&&['place','build'].includes(state.phase))state.hotkeyHintStarted=true;
+    const active=!!state.hotkeyHintStarted&&!state.hotkeyHintDone&&!['gameover','victory'].includes(state.phase)&&!tutorial.active&&hasActiveRun&&mainMenu.classList.contains('hidden');
+    if(active&&help.open&&!settings.classList.contains('hidden'))state.hotkeyHintDone=true;
+    const shown=active&&!state.hotkeyHintDone;
+    tip.classList.toggle('hidden',!shown);
+    document.getElementById('settingsOpenBtn').classList.toggle('hotkeyGuide',shown&&settings.classList.contains('hidden'));
+    document.getElementById('hotkeyHelpSummary').classList.toggle('hotkeyGuide',shown&&!settings.classList.contains('hidden'));
+    document.querySelector?.('[data-compact="menu"]')?.classList.toggle('hotkeyGuide',shown&&settings.classList.contains('hidden'));
+    const inSettings=!settings.classList.contains('hidden');
+    tip.classList.toggle('settingsVisible',inSettings);
+    if(tip.parentElement){if(inSettings&&tip.parentElement!==help.parentElement)help.before(tip);else if(!inSettings&&tip.parentElement!==app)app.appendChild(tip);}
+  }
+  function openHotkeySettings(){
+    document.querySelectorAll?.('.drawer').forEach(panel=>panel.classList.add('hidden'));
+    document.getElementById('settingsDrawer').classList.remove('hidden');renderHotkeyTip();layoutMenus();
+  }
   function renderUI(){
+    renderHotkeyTip();
+    document.getElementById('rotateHexBtn').classList.toggle('hidden',state.phase!=='place');
+    document.getElementById('rotateHexBtn').disabled=state.phase!=='place'||!state.hand[state.selectedCard];
     const tunnelButton=document.getElementById('tunnelRescueBtn');tunnelButton.classList.toggle('hidden',!state.tunnelOffer||state.phase!=='build'||state.waveRunning);tunnelButton.textContent=state.tunnelConfirmed?'Tunnel kostenlos bauen':'Rettungstunnel ansehen';
     renderQuickControls();
     uxFeedback();
     renderBasePanel();renderTutorial();
-    hpEl.textContent=`${state.hp}/${state.maxHp}`;goldEl.textContent=state.gold;waveEl.textContent=state.wave;deckCountEl.textContent=state.deck.length;
+    hpEl.textContent=`${state.hp}/${state.maxHp}`;goldEl.textContent=state.gold;waveEl.textContent=state.waveRunning||['victory','gameover'].includes(state.phase)?state.wave:state.wave+1;deckCountEl.textContent=state.deck.length;
     updateArsenalHint();
     document.getElementById('upgradeStatus').checked=!!state.showUpgradeStatus;
     document.getElementById('profileDiamonds').textContent=profile.diamonds;
@@ -388,8 +419,8 @@ R dreht die Karte, dann Feld anklicken.`;}
     document.getElementById('profileStats').textContent=`${profile.records.runsPlayed} Runs · Bestmarke Wave ${profile.records.highestWave} · ${profile.records.bossesKilled} Bosse besiegt · ${profile.lifetime.normalKills} normale Gegner besiegt.`;
     document.getElementById('bonusIncome').textContent=`(+${state.income})`;
     renderBuildingPanel();
-    handEl.classList.toggle('openingHand',state.hand.length>3);document.getElementById('handHint').textContent=state.openingRemaining?`Noch ${state.openingRemaining} Base-Ausgang erweitern · Karten 1–${state.hand.length} · R dreht`:'Karte wählen (1–3) · R dreht · Hex anklicken';
-    document.getElementById('phaseLabel').textContent={place:'Hex platzieren',build:'Bauphase',wave:'Wave läuft',reward:'Kartenbelohnung',removal:'Deck ausdünnen',shrineReward:'Shrine-Belohnung',bossReward:'Boss-Beute',gameover:'Run beendet'}[state.phase];
+    handEl.classList.toggle('openingHand',state.hand.length>3);document.getElementById('handHint').textContent=state.openingRemaining?`Noch ${state.openingRemaining} Base-Ausgang erweitern · Karten 1–${state.hand.length} · R dreht`:'Karte wählen (1–3) · Drehen: Knopf oder R · Hex antippen';
+    document.getElementById('phaseLabel').textContent={place:'Hex platzieren',build:'Bauphase',wave:'Wave läuft',reward:'Kartenbelohnung',removal:'Deck ausdünnen (optional)',shrineReward:'Shrine-Belohnung',bossReward:'Boss-Beute',gameover:'Run beendet'}[state.phase];
     const handKey=JSON.stringify([state.hand,state.selectedCard,state.rotation,state.rescueCard,uiLanguageRevision]);
     if(handKey!==handRenderKey){
     handRenderKey=handKey;handEl.innerHTML='';
@@ -398,7 +429,7 @@ R dreht die Karte, dann Feld anklicken.`;}
     // Keep purchase buttons stable during animation so pointer clicks/focus survive.
     const buildDiscounts=selections('Slot').map(slot=>HexBuildings.effects(state.map,slot).discount);
     const buildPrices=new Map(state.towerLoadout.filter(id=>TOWERS[id]).map(id=>[id,buildDiscounts.length?buildDiscounts.reduce((sum,discount)=>sum+Math.ceil(TOWERS[id].cost*discount),0):TOWERS[id].cost]));
-    const menuKey=JSON.stringify([state.phase,selections('Slot'),state.buildingVersion]);
+    const menuKey=JSON.stringify([state.towerLoadout,selections('Slot'),state.buildingVersion]);
     if(menuKey!==towerMenuKey){
     towerMenuKey=menuKey;towerMenu.innerHTML='';towerButtons.clear();
     state.towerLoadout.map(id=>[id,TOWERS[id]]).filter(([,tower])=>tower).forEach(([id,t])=>{
@@ -407,7 +438,7 @@ R dreht die Karte, dann Feld anklicken.`;}
       const price=buildPrices.get(id);
       const b=document.createElement('button');b.className='towerBtn';b.title=t.desc+'\n'+towerStats(effective)+(selections('Slot').length>1?'\nGesamtpreis für alle markierten Plätze inklusive lokaler Rabatte. Werte zeigen den zuletzt gewählten Platz.':'');
       b.innerHTML=`<span class="towerBuildIcon" aria-hidden="true">${HexArsenal.icon(id,t.color)}</span><span class="towerOffer"><strong class="towerOfferName">${t.name}</strong><small class="towerOfferDescription">${towerBuildRole(id)}</small><small class="towerOfferStats">${towerStatsMarkup(effective)}</small></span><strong class="towerOfferPrice">${price} 🪙${selections('Slot').length>1?'<small>'+selections('Slot').length+' × Türme</small>':''}<kbd>${towerMenu.children.length+1}</kbd></strong>`;
-      b.disabled=!['build','wave'].includes(state.phase)||!state.selectedSlot||state.gold<price||state.hp<=0;
+      b.disabled=!['place','build','wave'].includes(state.phase)||!state.selectedSlot||state.gold<price||state.hp<=0;
       b.addEventListener('pointerenter',()=>{state.previewTower=id;renderBoard();});
       b.addEventListener('pointerleave',()=>{state.previewTower=null;renderBoard();});
       b.addEventListener('focus',()=>{state.previewTower=id;renderBoard();});
@@ -416,7 +447,7 @@ R dreht die Karte, dann Feld anklicken.`;}
     });
     }
     for(const [id,b] of towerButtons) b.classList.toggle('unaffordable',state.gold<buildPrices.get(id));
-    for(const [id,b] of towerButtons) b.disabled=!['build','wave'].includes(state.phase)||!state.selectedSlot||state.gold<buildPrices.get(id)||state.hp<=0;
+    for(const [id,b] of towerButtons) b.disabled=!['place','build','wave'].includes(state.phase)||!state.selectedSlot||state.gold<buildPrices.get(id)||state.hp<=0;
     renderForecast();
     const info=document.getElementById('selectedTowerInfo'),sell=document.getElementById('sellTowerBtn');
     const selected=state.selectedTower,tower=selected?state.map.get(key(selected.q,selected.r))?.towers[selected.index]:null;
@@ -426,8 +457,14 @@ R dreht die Karte, dann Feld anklicken.`;}
     const refund=HexData.towerRefund(state,tower);sell.disabled=!refund||selections('Tower').length>1;
     sell.textContent=selections('Tower').length>1?'Zum Verkaufen einen einzelnen Turm wählen':refund?`${refund.percent===100?'Bau rückgängig':'Verkaufen'} · ${refund.percent} % (+${refund.amount} Gold)`:'Turm verkaufen';
     startWaveBtn.disabled=state.phase!=='build'||state.waveRunning||state.hp<=0;
-    startWaveBtn.textContent=!state.waveRunning&&HexWaves.bossProfile(state.wave+1)?`Bosswelle ${state.wave+1} starten (Leertaste)`:'Wave starten (Leertaste)';
+    startWaveBtn.title=state.phase==='place'?'Lege zuerst dein Hex, bevor du die nächste Welle startest.':'';
+    startWaveBtn.textContent=state.phase==='place'?'Zuerst Hex legen':!state.waveRunning&&HexWaves.bossProfile(state.wave+1)?`Bosswelle ${state.wave+1} starten (Leertaste)`:'Wave starten (Leertaste)';
     if(document.getElementById('deckDropdown').open) renderDeckOverview();renderSaleState();layoutMenus();
+  }
+  function bindUpgradePreview(button,tower,next){
+    const show=()=>{state.previewUpgrade={tower,definition:next};renderBoard();};
+    const clear=()=>{state.previewUpgrade=null;renderBoard();};
+    button.addEventListener('pointerenter',show);button.addEventListener('pointerleave',clear);button.addEventListener('focus',show);button.addEventListener('blur',clear);
   }
   function renderDeckOverview(target='deckOverview'){
     const deckKey=JSON.stringify([state.deck,state.drawPile,state.discard,uiLanguageRevision]);
@@ -440,10 +477,12 @@ R dreht die Karte, dann Feld anklicken.`;}
       const counts=new Map();ids.forEach(id=>counts.set(id,(counts.get(id)||0)+1));
       const list=document.createElement('ul');
       if(!ids.length){const item=document.createElement('li');item.textContent='Leer';list.appendChild(item);}
-      for(const [id,count] of counts){
+      list.className='deckHexGrid';
+      const entries=name==='Nachziehstapel'?[...ids].reverse().map(id=>[id,1]):counts;
+      for(const [id,count] of entries){
         const item=document.createElement('li'),badge=document.createElement('span'),card=CARD_LIBRARY[id];
-        item.textContent=`${count} × ${card.name} `;
-        badge.className=`rarityBadge rarity-${card.rarity.toLowerCase()}`;badge.textContent=card.rarity;
+        item.className='deckHexCard';item.setAttribute('tabindex','0');item.setAttribute('aria-label',count+' × '+card.name+' · '+card.rarity+': '+card.desc);item.title=card.name+' · '+card.rarity+' · '+card.desc;item.innerHTML=miniPathSvg(card)+'<small>'+card.name+'</small>';
+        badge.className='deckHexCount';badge.textContent='×'+count;badge.style.backgroundColor=({Common:'#939d9e',Uncommon:'#45a77a',Rare:'#639cdb',Epic:'#b181dc',Legendary:'#e4bc57'})[card.rarity];item.style.borderColor=badge.style.backgroundColor;
         item.appendChild(badge);list.appendChild(item);
       }
       section.appendChild(list);content.appendChild(section);
@@ -492,14 +531,14 @@ R dreht die Karte, dann Feld anklicken.`;}
     return `${values} · ${def.mine?'legt alle '+def.cooldown.toFixed(2)+' s eine stapelbare Mine':def.cooldown.toFixed(2)+' s je Angriff'} · Reichweite ${def.range}${def.soulLimit?` · bis zu ${def.soulLimit} Geister: ${Math.round(def.soulDamage)} Schaden/s, ${def.soulDuration} s`:''}${def.hitSlow?` · ${Math.round((1-def.hitSlow)*100)} % Slow für ${def.slowDuration} s`:''}${def.splash?` · Explosion ${def.splash}`:''}${def.chain?` · ${def.chain} Ziele · Sprungdistanz ${def.jumpRange}`:''}`;
   }
   function finishTutorial(){tutorial.active=false;tutorialSeen=true;try{localStorage.setItem('tutorial-v1','done');}catch{}}
-  function tutorialEvent(event){if(HexTutorial.advance(tutorial,event))finishTutorial();}
+  function tutorialEvent(event,type){if(HexTutorial.advance(tutorial,event,type))finishTutorial();}
   function renderTutorial(){
     const active=tutorial.active&&!['gameover','victory'].includes(state.phase);
     messageEl.classList.toggle('tutorialActive',active);document.getElementById('messageText').classList.toggle('hidden',active);
     document.getElementById('tutorialPanel').classList.toggle('hidden',!active);
     document.getElementById('tutorialTitle').textContent='Erste Schritte · '+(tutorial.step+1)+'/'+HexTutorial.steps.length;
-    document.getElementById('tutorialText').textContent=state.openingRemaining?'Erweitere beide Base-Ausgänge: Wähle eine Handkarte, drehe sie mit R oder Mausrad-Klick und lege sie direkt an einen noch freien Ausgang.':HexTutorial.steps[tutorial.step]||'';
-    document.getElementById('tutorialNextBtn').classList.toggle('hidden',!active||tutorial.step!==5);
+    document.getElementById('tutorialText').textContent=state.openingRemaining?'Erweitere beide Base-Ausgänge: Wähle eine Handkarte, drehe sie mit R oder Mausrad-Klick und lege sie direkt an einen noch freien Ausgang.':HexTutorial.message(tutorial);
+    document.getElementById('tutorialNextBtn').classList.toggle('hidden',!active||!(tutorial.step===5||tutorial.step===4&&tutorial.alternativeTower));
     if(!active)document.getElementById('tutorialFeedback').classList.add('hidden');
     positionTutorialSpotlight();
   }
@@ -514,7 +553,7 @@ R dreht die Karte, dann Feld anklicken.`;}
     const layer=document.getElementById('tutorialTargets'),active=tutorial.active&&!['gameover','victory'].includes(state.phase);
     for(const [id,button] of towerButtons)button.classList.toggle('tutorialChoice',active&&tutorial.step===3&&id==='archer');
     const selected=state.selectedTower,selectedTower=selected&&state.map.get(key(selected.q,selected.r))?.towers[selected.index];
-    for(const button of upgradeButtons.values())button.classList.toggle('tutorialChoice',active&&tutorial.step===4&&selectedTower?.type==='archer');
+    for(const [id,button] of upgradeButtons)button.classList.toggle('tutorialChoice',active&&tutorial.step===4&&selectedTower?.type==='archer'&&id==='volley');
     layer.classList.toggle('hidden',!active||tutorial.step>=5);if(!active)return;
     if(tutorial.step===5&&globalThis.HexCompact?.small()&&document.documentElement.dataset.compact!=='stats')globalThis.HexCompact.open('stats');
     if(tutorial.step>=5||!document.querySelector)return;
@@ -530,7 +569,7 @@ R dreht die Karte, dann Feld anklicken.`;}
     layer.innerHTML='<svg xmlns="http://www.w3.org/2000/svg"><defs><mask id="tutorialFocusMask"><rect width="100%" height="100%" fill="white"/><g fill="black">'+shapes+'</g></mask></defs><rect width="100%" height="100%" fill="#0c1411" opacity=".42" mask="url(#tutorialFocusMask)"/><g fill="none" stroke="#ffe198" stroke-width="3">'+shapes+'</g></svg>';
   }
   function menuArea(includeTutorial=true){
-    if(!document.querySelectorAll)return null;
+    if(!document.querySelectorAll||!document.documentElement)return null;
     const width=document.documentElement.clientWidth,height=document.documentElement.clientHeight;
     const controls=[...document.querySelectorAll('.compactToolbar,.dockTL,.hud,.dockBR,.dockBL,.mapControls,.handDock')].map(el=>el.getBoundingClientRect());
     const area=height<560?HexUiLayout.freeArea(width,height,controls):HexUiLayout.safeArea(width,height,controls);
@@ -555,14 +594,13 @@ R dreht die Karte, dann Feld anklicken.`;}
     measureChrome();positionTutorialSpotlight();const raw=menuArea(false);if(!raw)return;
     messageEl.style.position='fixed';messageEl.style.left=((raw.left+raw.right)/2)+'px';messageEl.style.top=raw.top+'px';messageEl.style.bottom='auto';messageEl.style.maxHeight=(tutorial.active?Math.max(120,Math.min(280,document.documentElement.clientHeight-180)):Math.max(0,Math.min(240,(raw.bottom-raw.top)*.65)))+'px';if(document.documentElement.style?.setProperty)document.documentElement.style.setProperty('--tutorial-bottom',messageEl.getBoundingClientRect().bottom+'px');
     const area=menuArea();for(const panel of document.querySelectorAll('.towerPanel:not(.hidden),.drawer:not(.hidden)'))fitMenu(panel,area);
+    if(state.selectedTower||state.selectedBuilding)positionTowerPanel();
     for(const panel of document.querySelectorAll('.statDetails[open]>.statPopup')){const anchor=panel.parentElement.getBoundingClientRect();fitMenu(panel,raw,anchor.right-(panel.offsetWidth||380),anchor.bottom+12);}
   }
   function positionTowerPanel(){
-    const selected=state.selectedTower||state.selectedBuilding;if(!selected)return;
-    const tile=state.map.get(key(selected.q,selected.r));if(!tile)return;
-    const position=state.selectedTower?slotPositions(tile)[selected.index]:buildingPosition(tile,selected.index),screen=renderer.project(position),area=menuArea();if(!screen||!area)return;
-    const origin=document.querySelector('.boardWrap').getBoundingClientRect();
-    fitMenu(document.getElementById(state.selectedTower?'towerPanel':'buildingPanel'),area,origin.left+screen.x+20,origin.top+screen.y-30);
+    if(!state.selectedTower&&!state.selectedBuilding)return;
+    const panel=document.getElementById(state.selectedTower?'towerPanel':'buildingPanel'),area=menuArea();
+    if(area){const narrow=document.documentElement.clientWidth<=700;fitMenu(panel,area,area.left,narrow?area.bottom-panel.getBoundingClientRect().height:area.top);}
   }
   function renderBuildingPanel(){
     const panel=document.getElementById('buildingPanel'),selected=state.selectedBuilding,tile=selected?state.map.get(key(selected.q,selected.r)):null;
@@ -570,10 +608,10 @@ R dreht die Karte, dann Feld anklicken.`;}
     panel.classList.remove('hidden');const building=tile.buildings?.[selected.index];
     document.getElementById('buildingPanelTitle').textContent=building?HexBuildings.definitions[building.type].name+' · Stufe '+(building.special?4:building.level||1):(tile.type==='deadEnd'?'Gegnerportal-Platz':'Gebäudeslot');
     document.getElementById('buildingPanelInfo').textContent=`${CARD_LIBRARY[tile.type]?.name||'Hex'}: automatisch +${tile.income||0} Gold je überlebter Wave. ${building?HexBuildings.definition(building).desc:tile.type==='deadEnd'?HexBuildings.definitions.portal.desc:'Optional einen Gebäudetyp bauen. Haus: zusätzliches Einkommen, Schmiede: Tower-Schaden, Markt: Tower-Rabatte. Ein Gebäude pro Slot.'}`;
-    const panelKey=JSON.stringify([selected,building,state.phase,state.map.size,state.buildingVersion]);
+    const panelKey=JSON.stringify([selected,building,state.map.size,state.buildingVersion]);
     const buildingChanged=buildingPanelKey!==panelKey;
     if(buildingChanged){
-      buildingPanelKey=panelKey;buildingButtons.clear();const content=document.getElementById('buildingOptions');content.innerHTML='';
+      buildingPanelKey=panelKey;panel._targetButton=null;buildingButtons.clear();const content=document.getElementById('buildingOptions');content.innerHTML='';
       if(!building) for(const [type,definition] of Object.entries(HexBuildings.definitions).filter(([type])=>HexBuildings.allowedTypes(tile).includes(type))){
         const button=document.createElement('button');button.className='upgradeOption';button.title='Kräftig: aktueller Wirkbereich. Blass: Versorgung durch andere Gebäude desselben Typs.';button.innerHTML=`<strong>${definition.name} · ${definition.cost} Gold</strong><small>${definition.desc}</small>`;
         const preview=()=>{state.previewBuilding={...selected,type};renderBoard();},clear=()=>{state.previewBuilding=null;renderBoard();};
@@ -582,11 +620,12 @@ R dreht die Karte, dann Feld anklicken.`;}
       }
     }
     if(building&&buildingChanged){const content=document.getElementById('buildingOptions');content.innerHTML='';const next=HexBuildings.nextUpgrade(state,building);
-      if(next){const button=document.createElement('button');button.className='upgradeOption';button._cost=next.cost;buildingButtons.set('upgrade',button);const after=HexBuildings.definition({...building,level:(building.level||1)+1});button.textContent=(next.name||'Ausbauen')+' · '+next.cost+' Gold · '+(next.desc||after.desc);button.disabled=state.gold<next.cost||state.hp<=0||!['build','wave'].includes(state.phase);button.addEventListener('click',()=>{if(HexBuildings.upgrade(state,state.selectedBuilding))renderAll();});content.appendChild(button);}
+      if(next){const button=document.createElement('button');button.className='upgradeOption';button._cost=next.cost;buildingButtons.set('upgrade',button);const after=HexBuildings.definition({...building,level:(building.level||1)+1});button.textContent=(next.name||'Ausbauen')+' · '+next.cost+' Gold · '+(next.desc||after.desc);button.disabled=state.gold<next.cost||state.hp<=0||!['place','build','wave'].includes(state.phase);button.addEventListener('click',()=>{if(HexBuildings.upgrade(state,state.selectedBuilding))renderAll();});content.appendChild(button);}
       else if((building.level||1)===3&&!building.special&&HexBuildings.specials[building.type]){const hint=document.createElement('p');hint.textContent='Spezialausbau im Arsenal für 40 Diamanten freischalten. Ab dem nächsten Run verfügbar.';content.appendChild(hint);}
-      if(building.special&&building.type!=='house'){const choose=document.createElement('button');choose.textContent=state.buildingTarget?'Hex auf der Map anklicken · Abbrechen':(building.target?'Zusatz-Hex ändern':'Zusatz-Hex auf der Map auswählen');choose.title=building.target?'Aktuelles Zusatzhex: '+building.target+' · kräftig markiert':'Zusatzhex auswählen';choose.addEventListener('pointerenter',()=>renderBoard());choose.addEventListener('focus',()=>renderBoard());choose.disabled=state.hp<=0||!['build','wave'].includes(state.phase);choose.addEventListener('click',()=>{state.buildingTarget=state.buildingTarget?null:{...state.selectedBuilding};state.selectedBuilding=null;setMessage('Zusatzwirkung: ein erkundetes Hex anklicken · Escape: abbrechen');renderAll();});content.appendChild(choose);}
+      if(building.special&&building.type!=='house'){const choose=document.createElement('button');panel._targetButton=choose;choose.textContent=state.buildingTarget?'Hex auf der Map anklicken · Abbrechen':(building.target?'Zusatz-Hex ändern':'Zusatz-Hex auf der Map auswählen');choose.title=building.target?'Aktuelles Zusatzhex: '+building.target+' · kräftig markiert':'Zusatzhex auswählen';choose.addEventListener('pointerenter',()=>renderBoard());choose.addEventListener('focus',()=>renderBoard());choose.disabled=state.hp<=0||!['place','build','wave'].includes(state.phase);choose.addEventListener('click',()=>{state.buildingTarget=state.buildingTarget?null:{...state.selectedBuilding};state.selectedBuilding=null;setMessage('Zusatzwirkung: ein erkundetes Hex anklicken · Escape: abbrechen');renderAll();});content.appendChild(choose);}
     }
-    for(const [type,button] of buildingButtons) button.disabled=(type==='portal'&&state.phase!=='build')||!['build','wave'].includes(state.phase)||state.hp<=0||state.gold<(button._cost||HexBuildings.definitions[type].cost);
+    if(panel._targetButton)panel._targetButton.disabled=state.hp<=0||!['place','build','wave'].includes(state.phase);
+    for(const [type,button] of buildingButtons) button.disabled=(type==='portal'&&state.phase!=='build')||!['place','build','wave'].includes(state.phase)||state.hp<=0||state.gold<(button._cost||HexBuildings.definitions[type].cost);
     const sell=document.getElementById('sellBuildingBtn'),refund=HexBuildings.refund(state,building);sell.disabled=!refund;sell.textContent=refund?`Verkaufen · ${refund.percent} % (+${refund.amount} Gold)`:'Gebäude verkaufen';
     positionTowerPanel();
   }
@@ -596,7 +635,7 @@ R dreht die Karte, dann Feld anklicken.`;}
     panel.classList.remove('hidden');document.getElementById('towerPanelTitle').textContent=`${HexData.towerDefinition(tower).name} · Stufe ${tower.level}`;
     const selectedTowers=selections('Tower').map(s=>state.map.get(key(s.q,s.r))?.towers[s.index]).filter(Boolean),group=selectedTowers.length>1;
     if(group){document.getElementById('towerPanelTitle').textContent=selectedTowers.length+' Türme ausgewählt';document.getElementById('selectedTowerInfo').textContent='Angriffsfokus gemeinsam einstellen · Strg + Klick: Auswahl ändern';}
-    const panelKey=JSON.stringify([selections('Tower'),tower.branch,tower.finalUpgrade,tower.ultimate,tower.supportDamage,state.buildingVersion,state.phase]);
+    const panelKey=JSON.stringify([selections('Tower'),tower.branch,tower.finalUpgrade,tower.ultimate,tower.supportDamage,state.buildingVersion]);
     if(towerPanelKey!==panelKey){
       towerPanelKey=panelKey;upgradeButtons.clear();const content=document.getElementById('towerUpgrades');content.innerHTML='';
       const definition=HexData.towerDefinition(tower);
@@ -613,28 +652,28 @@ R dreht die Karte, dann Feld anklicken.`;}
       else if(tower.finalUpgrade){
         const id='ultimate:'+tower.type,upgrade=HexData.ultimateDefinition(tower),unlocked=state.ultimateUnlocks.includes(id);
         if(!unlocked){const hint=document.createElement('p');hint.className='ultimateLocked';hint.textContent=`🔒 ${upgrade.name}: im Arsenal mit Diamanten freischalten.`;content.appendChild(hint);}
-        else{const current=HexData.towerDefinition(tower),next=HexData.towerDefinition({...tower,ultimate:tower.type}),button=document.createElement('button'),price=HexBuildings.cost(state,selected,upgrade.cost);button.className='upgradeOption ultimateOption';button.innerHTML=`<strong>◆ ${upgrade.name} · ${price} Gold</strong><small>${upgrade.desc}</small><small>${towerStatsMarkup(current)}</small><small>Danach: ${towerStatsMarkup(next)}</small>`;button.addEventListener('click',()=>upgradeSelectedTower(id));button._baseCost=upgrade.cost;content.appendChild(button);upgradeButtons.set(id,button);}
+        else{const current=HexData.towerDefinition(tower),next=HexData.towerDefinition({...tower,ultimate:tower.type}),button=document.createElement('button'),price=HexBuildings.cost(state,selected,upgrade.cost);button.className='upgradeOption ultimateOption';button.innerHTML=`<strong>◆ ${upgrade.name} · ${price} Gold</strong><small>${upgrade.desc}</small><small>${towerStatsMarkup(current)}</small><small>Danach: ${towerStatsMarkup(next)}</small>`;bindUpgradePreview(button,tower,next);button.addEventListener('click',()=>upgradeSelectedTower(id));button._baseCost=upgrade.cost;content.appendChild(button);upgradeButtons.set(id,button);}
       } else for(const [branch,upgrade] of HexData.availableUpgrades(tower)){
         const current=HexData.towerDefinition(tower),next=HexData.towerDefinition({...tower,...(upgrade.requires?{finalUpgrade:branch}:{branch})}),button=document.createElement('button');
         button.className='upgradeOption';
         const price=HexBuildings.cost(state,selected,upgrade.cost);
         button.innerHTML=`<strong>${upgrade.name} · ${price} Gold</strong><small>${upgrade.desc}</small><small>${towerStatsMarkup(current)}</small><small>Danach: ${towerStatsMarkup(next)}</small>`;
         if(current.aura) button.innerHTML=`<strong>${upgrade.name} · ${price} Gold</strong><small>${upgrade.desc}</small><small>Slow ${Math.round((1-current.slow)*100)} → ${Math.round((1-next.slow)*100)} % · Radius ${current.range} → ${next.range}</small>`;
-        button.addEventListener('click',()=>upgradeSelectedTower(branch));button._baseCost=upgrade.cost;content.appendChild(button);upgradeButtons.set(branch,button);
+        bindUpgradePreview(button,tower,next);button.addEventListener('click',()=>upgradeSelectedTower(branch));button._baseCost=upgrade.cost;content.appendChild(button);upgradeButtons.set(branch,button);
       }
     }
-    for(const [,button] of upgradeButtons) button.disabled=!['build','wave'].includes(state.phase)||state.gold<HexBuildings.cost(state,selected,button._baseCost)||state.hp<=0;
+    for(const [,button] of upgradeButtons) button.disabled=!['place','build','wave'].includes(state.phase)||state.gold<HexBuildings.cost(state,selected,button._baseCost)||state.hp<=0;
     positionTowerPanel();
   }
   function setMessage(s,notice=false){const feedback=document.getElementById('tutorialFeedback');feedback.textContent=notice?s:'';feedback.classList.toggle('hidden',!notice||!tutorial.active);document.getElementById('messageText').textContent=s;messageEl.classList.remove('show');void messageEl.offsetWidth;messageEl.classList.add('show');}
 
   function rotateSelected(direction=1){
-    if(state.phase!=='place'||!state.hand.length) return false;
+    if(state.phase!=='place'||!state.hand[state.selectedCard]) return false;
     state.rotation=(state.rotation+direction+6)%6;tutorialEvent('rotate'); renderAll();return true;
   }
 
   const quickButtons=new Map(),biomeButtons=new Map();let quickKey='',biomeKey='',quickPointer=null,pinnedBiome=null;
-  function canQuickBuild(){return ['build','wave'].includes(state.phase)&&state.hp>0;}
+  function canQuickBuild(){return ['place','build','wave'].includes(state.phase)&&state.hp>0;}
   function quickBuildOffer(type,discount=HexBuildings.freeSlotDiscount(state.map)){
     const price=Math.ceil(TOWERS[type].cost*discount);
     return {price,available:Number.isFinite(price),affordable:state.gold>=price};
@@ -688,16 +727,16 @@ R dreht die Karte, dann Feld anklicken.`;}
   function renderBiomeIntroDetails(){
     const ids=HexBiomes.introIds(state),active=state.highlightBiome||pinnedBiome;
     document.getElementById('biomeIntroTitle').textContent=ids.length>1?'Neue Biome entdeckt':'Neues Biom entdeckt';
-    const detail=document.getElementById('biomeIntroDetail');detail.textContent=active?HexBiomes.definitions[active].name+': '+HexBiomes.definitions[active].description:ids.map(id=>HexBiomes.definitions[id].name).join(' · ');
+    const detail=document.getElementById('biomeIntroDetail');detail.textContent=active?HexBiomes.definitions[active].name+': '+HexBiomes.definitions[active].description:ids.map(id=>HexBiomes.definitions[id].name+':\n'+HexBiomes.definitions[id].description).join('\n\n');
   }
   function showBiomeHighlight(id){state.highlightBiome=id;renderBiomeIntroDetails();renderBoard();}
   function renderQuickControls(){
-    if(state.dragTower&&!canQuickBuild())cancelQuickTower();
+    if(state.dragTower&&(state.hp<=0||state.phase==='gameover'))cancelQuickTower();
     const rail=document.getElementById('quickLoadout'),next=state.towerLoadout.join('|');
     if(quickKey!==next){quickKey=next;rail.innerHTML='';quickButtons.clear();for(const type of state.towerLoadout){
       const def=TOWERS[type],button=document.createElement('button');button.className='quickTower';button.setAttribute('aria-label',def.name+' bauen');button.title=def.name+' · Ziehen oder anklicken, dann Bauplatz wählen';button.innerHTML=HexArsenal.icon(type,def.color)+'<small>'+def.cost+' 🪙</small>';
       button.addEventListener('pointerdown',e=>{if(e.button!==0)return;e.preventDefault();e.stopPropagation();if(!armQuickTower(type))return;quickPointer={id:e.pointerId,type,x:e.clientX,y:e.clientY,moved:false};button.setPointerCapture?.(e.pointerId);});
-      button.addEventListener('click',e=>{if(e.detail===0)armQuickTower(type);});button.addEventListener('lostpointercapture',()=>{if(quickPointer){cancelQuickTower();renderAll();}});rail.appendChild(button);quickButtons.set(type,button);
+      button.addEventListener('click',e=>{if(e.detail===0)armQuickTower(type);});button.addEventListener('lostpointercapture',()=>{if(quickPointer){if(canQuickBuild()||state.hp<=0)cancelQuickTower();else{quickPointer=null;document.getElementById('towerDragGhost').classList.add('hidden');}renderAll();}});rail.appendChild(button);quickButtons.set(type,button);
     }}
     const quickDiscount=HexBuildings.freeSlotDiscount(state.map);
     for(const [type,button] of quickButtons){const offer=quickBuildOffer(type,quickDiscount);button.disabled=!canQuickBuild()||!offer.affordable;button.classList.toggle('unaffordable',offer.available&&!offer.affordable);button.classList.toggle('active',state.dragTower===type);button.setAttribute('aria-pressed',String(state.dragTower===type));
@@ -712,12 +751,13 @@ R dreht die Karte, dann Feld anklicken.`;}
       button.addEventListener('pointerenter',()=>showBiomeHighlight(id));button.addEventListener('pointerleave',()=>showBiomeHighlight(pinnedBiome));button.addEventListener('focus',()=>showBiomeHighlight(id));button.addEventListener('blur',()=>showBiomeHighlight(pinnedBiome));button.addEventListener('click',()=>{pinnedBiome=pinnedBiome===id?null:id;showBiomeHighlight(pinnedBiome);renderQuickControls();});biomes.appendChild(button);biomeButtons.set(id,button);
     }}for(const [id,button] of biomeButtons){button.classList.toggle('biomeIntroTarget',HexBiomes.introIds(state).includes(id));button.classList.toggle('active',pinnedBiome===id);button.setAttribute('aria-pressed',String(pinnedBiome===id));}
   }
-  document.addEventListener('pointerdown',e=>{if(e.button!==0)return;dismissTransientPanels(e);if(!state?.dragTower||quickPointer)return;if(e.target?.closest?.('.loadoutRail'))return;if(!quickSlotAt(e)){cancelQuickTower();renderAll();}},true);
+  document.addEventListener('pointerdown',e=>{if(e.button!==0)return;dismissTransientPanels(e);if(!state?.dragTower||quickPointer||e.target?.closest?.('#rewardOverlay,#celebration,#campaignVictory'))return;if(e.target?.closest?.('.loadoutRail'))return;if(!quickSlotAt(e)){cancelQuickTower();renderAll();}},true);
   document.addEventListener('pointermove',e=>{if(!quickPointer||e.pointerId!==quickPointer.id)return;quickPointer.moved ||= Math.hypot(e.clientX-quickPointer.x,e.clientY-quickPointer.y)>5;state.dragSlot=quickSlotAt(e);const ghost=document.getElementById('towerDragGhost');ghost.classList.remove('hidden');ghost.style.left=(e.clientX+18)+'px';ghost.style.top=(e.clientY-22)+'px';const price=HexBuildings.cost(state,state.dragSlot,TOWERS[quickPointer.type].cost);ghost.innerHTML=HexArsenal.icon(quickPointer.type,TOWERS[quickPointer.type].color)+'<small>'+price+' 🪙</small>';renderBoard();});
-  document.addEventListener('pointerup',e=>{if(!quickPointer||e.pointerId!==quickPointer.id)return;const drag=quickPointer,slot=quickSlotAt(e);quickPointer=null;document.getElementById('towerDragGhost').classList.add('hidden');if(slot)dropQuickTower(drag.type,slot);else if(drag.moved){cancelQuickTower();renderAll();}});
-  document.addEventListener('pointercancel',()=>{cancelQuickTower();renderAll();});
+  document.addEventListener('pointerup',e=>{if(!quickPointer||e.pointerId!==quickPointer.id)return;if(!canQuickBuild()){quickPointer=null;document.getElementById('towerDragGhost').classList.add('hidden');return;}const drag=quickPointer,slot=quickSlotAt(e);quickPointer=null;document.getElementById('towerDragGhost').classList.add('hidden');if(slot)dropQuickTower(drag.type,slot);else if(drag.moved){cancelQuickTower();renderAll();}});
+  document.addEventListener('pointercancel',()=>{if(state.dragTower&&!canQuickBuild()&&state.hp>0&&state.phase!=='gameover'){quickPointer=null;document.getElementById('towerDragGhost').classList.add('hidden');}else cancelQuickTower();renderAll();});
   globalThis.addEventListener?.('blur',()=>{cancelQuickTower();renderAll();});
 
+  document.addEventListener('click',event=>{if(event.button===0)dismissBiomeInfoOutside(event);},true);
   function inspectBiome(id){const def=HexBiomes.definitions[id];if(!def)return;document.getElementById('biomeInfoTitle').textContent=def.name;document.getElementById('biomeInfoText').textContent=def.description;document.getElementById('biomeInfoPanel').classList.remove('hidden');}
   function newRun(loadout=profile.activeLoadout,heroId=profile.activeHero,difficulty=profile.difficulty||'normal',challengeDay=null){
     closeSale();document.getElementById('biomeInfoPanel').classList.add('hidden');
@@ -736,7 +776,7 @@ R dreht die Karte, dann Feld anklicken.`;}
     if(challengeDay){difficulty='dual';heroId='standard';}
     const chosen=[...new Set(loadout)].filter(id=>TOWERS[id]&&profile.unlockedTowers.includes(id));
     const run=HexRunRuntime.create({seed,runId:HexRandom.freshSeed(),loadout:chosen.length===5?chosen:profile.activeLoadout,unlocks:profile.unlocks,heroId,difficulty,challengeDay});
-    state=run.state;random=run.random;Object.assign(state,{selectedCard:0,rotation:0,showHexGrid,showSlotHints,selectedSlots:[],selectedTowers:[]});
+    state=run.state;random=run.random;if(!tutorialSeen&&state.towerLoadout.includes('archer'))state.towerLoadout=['archer',...state.towerLoadout.filter(id=>id!=='archer')];Object.assign(state,{selectedCard:null,rotation:0,showHexGrid,showSlotHints,selectedSlots:[],selectedTowers:[]});
     document.getElementById('baseDropdown').open=false;
     document.getElementById('activeSeed').textContent=seed;document.getElementById('dailyRunStatus').textContent=challengeDay?'Die letzte Karawane · '+challengeDay+' · Ziel: Wave 20 · Sandsturm −15 % Tempo/Reichweite':'';
     state.drawPile=shuffle(state.deck);drawHand();tutorial=tutorialSeen?{active:false,step:0}:HexTutorial.begin(state);hasActiveRun=true;setMessage(state.openingRemaining?'Zwei Fronten: Wähle zwei der fünf Handkarten und erweitere beide Base-Ausgänge.':'Wähle eine Hexkarte und lege sie an die offene Straße der Base.');renderAll();
@@ -747,7 +787,7 @@ R dreht die Karte, dann Feld anklicken.`;}
     const restored=HexRunSnapshot.restore(checkpoint);closeSale();
     cancelQuickTower();clearRunTimers();resetCameraKeys();inspectReward('selection');
     state=restored.state;random=restored.random;
-    Object.assign(state,{selectedCard:0,rotation:0,selectedSlots:[],selectedTowers:[],showHexGrid,showSlotHints});
+    Object.assign(state,{selectedCard:null,rotation:0,selectedSlots:[],selectedTowers:[],showHexGrid,showSlotHints});
     handRenderKey=forecastRenderKey='';deckRenderKeys.clear();uiWavePlans.clear();
     towerMenuKey='';towerPanelKey='';buildingPanelKey='';pinnedBiome=null;hasActiveRun=true;
     last=performance.now();clockDebt=0;renderer.reset();
@@ -781,10 +821,10 @@ R dreht die Karte, dann Feld anklicken.`;}
   function renderLoadout(){
     if(pendingDifficulty==='dual'&&!profile.milestones.includes('standard35'))pendingDifficulty='normal';
     const difficulties=document.getElementById('difficultyChoices');difficulties.innerHTML='';
-    for(const [id,name,desc] of [['normal','Stufe 1 · Standard','Ein Base-Ausgang. Lege eine von drei Handkarten.'],['dual','Stufe 2 · Zwei Fronten','Zwei zufällige Base-Ausgänge. Starte mit fünf Handkarten und erweitere beide Ausgänge vor Wave 1.']]){const button=document.createElement('button');button.className='loadoutChoice'+(id===pendingDifficulty?' selected':'');button.setAttribute('aria-pressed',String(id===pendingDifficulty));button.title=desc;button.innerHTML='<strong>'+name+'</strong><small>'+desc+'</small>';button.disabled=id==='dual'&&!profile.milestones.includes('standard35');if(button.disabled)button.innerHTML+='<small>🔒 Schließe Wave 35 in Stufe 1 ab.</small>';button.addEventListener('click',()=>{if(button.disabled)return;pendingDifficulty=id;renderLoadout();});difficulties.appendChild(button);}
+    for(const [id,name,desc] of [['normal','Stufe 1 · Standard','Ein Base-Ausgang. Lege eine von drei Handkarten.'],['dual','Stufe 2 · Zwei Fronten','Zwei zufällige Base-Ausgänge. Starte mit fünf Handkarten und erweitere beide Ausgänge vor Wave 1.']]){const button=document.createElement('button');button.className='loadoutChoice'+(id===pendingDifficulty?' selected':'');button.setAttribute('aria-pressed',String(id===pendingDifficulty));button.title=desc;button.innerHTML='<strong>'+name+'</strong><small>'+desc+'</small>';button.disabled=id==='dual'&&!profile.milestones.includes('standard35');if(button.disabled)button.innerHTML+='<small class="unlockRequirement">🔒 Stufe 1: Welle 35 besiegen.</small>';button.addEventListener('click',()=>{if(button.disabled)return;pendingDifficulty=id;renderLoadout();});difficulties.appendChild(button);}
 
     const choices=document.getElementById('heroChoices');choices.innerHTML='';
-    for(const [id,hero] of Object.entries(HexHeroes.definitions)){const unlocked=HexProfile.heroUnlocked(profile,id);const button=document.createElement('button');button.type='button';button.className='loadoutChoice'+(id===pendingHero?' selected':'');button.setAttribute('aria-pressed',String(id===pendingHero));button.title=hero.desc;button.innerHTML='<strong>'+hero.name+'</strong><small>'+hero.desc+'</small>';button.disabled=!unlocked;if(!unlocked){button.title+=(id==='builder'?' Standard: Welle 35 besiegen.':' Zwei Fronten: Welle 35 besiegen.');button.innerHTML+='<small>🔒 '+(id==='builder'?'Standard: Welle 35 besiegen.':'Zwei Fronten: Welle 35 besiegen.')+'</small>';}button.addEventListener('click',()=>{if(!unlocked)return;pendingHero=id;renderLoadout();});choices.appendChild(button);}
+    for(const [id,hero] of Object.entries(HexHeroes.definitions)){const unlocked=HexProfile.heroUnlocked(profile,id);const button=document.createElement('button');button.type='button';button.className='loadoutChoice'+(id===pendingHero?' selected':'');button.setAttribute('aria-pressed',String(id===pendingHero));button.title=hero.desc;button.innerHTML='<strong>'+hero.name+'</strong><small>'+hero.desc+'</small>';button.disabled=!unlocked;if(!unlocked){button.title+=(id==='builder'?' Standard: Welle 35 besiegen.':' Zwei Fronten: Welle 35 besiegen.');button.innerHTML+='<small class="unlockRequirement">🔒 '+(id==='builder'?'Stufe 1: Welle 35 besiegen.':'Stufe 2 · Zwei Fronten: Welle 35 besiegen.')+'</small>';}button.addEventListener('click',()=>{if(!unlocked)return;pendingHero=id;renderLoadout();});choices.appendChild(button);}
 
     const presets=document.getElementById('loadoutPresets');presets.innerHTML='';if(profile.unlockedTowers.length<=5){const locked=document.createElement('p');locked.className='presetLocked';locked.textContent='🔒 Drei Presetplätze werden mit dem ersten zusätzlichen Turm freigeschaltet.';presets.appendChild(locked);}else profile.loadoutPresets.forEach((preset,index)=>{const card=document.createElement('article');card.className='presetCard';const presetTitle=document.createElement('strong'),presetInfo=document.createElement('small');presetTitle.textContent=preset.name;presetInfo.textContent=preset.towers.map(id=>TOWERS[id]?.name||id).join(' · ');card.appendChild(presetTitle);card.appendChild(presetInfo);const load=document.createElement('button'),save=document.createElement('button');load.className='secondary';load.textContent='Laden';load.addEventListener('click',()=>{pendingLoadout=[...preset.towers];renderLoadout();});save.className='secondary';save.textContent='Aktuell speichern';save.disabled=pendingLoadout.length!==5;save.addEventListener('click',()=>{const next=HexProfile.savePreset(profile,index,pendingLoadout,TOWERS);if(next){profile=next;renderLoadout();}});card.appendChild(load);card.appendChild(save);presets.appendChild(card);});
     loadoutChoices.innerHTML='';
@@ -795,8 +835,6 @@ R dreht die Karte, dann Feld anklicken.`;}
       button.title=tower.name+' · '+towerRole(id)+' · '+tower.desc+' · '+tower.cost+' Gold';const info=()=>{document.getElementById('preparationInfo').textContent=tower.name+' · '+towerRole(id)+' · '+tower.cost+' Gold';document.getElementById('preparationInfo').title=button.title;};button.addEventListener('mouseenter',info);button.addEventListener('focus',info);
       button.addEventListener('click',()=>{if(selected)pendingLoadout=pendingLoadout.filter(value=>value!==id);else if(pendingLoadout.length<5)pendingLoadout.push(id);else{document.getElementById('loadoutWarning').textContent='Alle fünf Plätze sind belegt. Wähle zuerst einen markierten Turm ab, um diesen Turm mitzunehmen.';return;}renderLoadout();info();});loadoutChoices.appendChild(button);
     }
-    document.getElementById('loadoutCount').textContent=`${pendingLoadout.length}/5 gewählt`;
-    document.getElementById('diamondCount').textContent=`◆ ${profile.diamonds} Diamanten`;
     const warnings=loadoutWarnings(pendingLoadout);document.getElementById('loadoutWarning').title=warnings.join(' ');document.getElementById('loadoutWarning').textContent=pendingLoadout.length===5?'5/5 Türme gewählt.':'Wähle genau fünf Türme.';
     document.getElementById('confirmLoadoutBtn').disabled=pendingLoadout.length!==5;document.getElementById('confirmLoadoutBtn').textContent=loadoutEdit?'Loadout speichern':'Run starten';
     document.getElementById('cancelLoadoutBtn').textContent='Zurück';document.getElementById('cancelLoadoutBtn').title=hasActiveRun&&!loadoutEdit?'Zurück zum Run':'Zurück zum Hauptmenü';
@@ -870,7 +908,7 @@ R dreht die Karte, dann Feld anklicken.`;}
   document.getElementById('upgradeStatus').addEventListener('change',e=>toggleUpgradeStatus(e.target.checked));
   const slotToggle=document.getElementById('slotHints');slotToggle.checked=showSlotHints;slotToggle.addEventListener('change',()=>{showSlotHints=slotToggle.checked;state.showSlotHints=showSlotHints;try{localStorage.setItem('slotHints',String(showSlotHints));}catch{}renderBoard();});
   document.getElementById('skipTutorialBtn').addEventListener('click',()=>{finishTutorial();renderAll();});
-  document.getElementById('tutorialNextBtn').addEventListener('click',()=>{tutorialEvent('health');renderAll();});
+  document.getElementById('tutorialNextBtn').addEventListener('click',()=>{tutorialEvent(tutorial.step===4?'skipUpgrade':'health');renderAll();});
   document.getElementById('restartTutorialBtn').addEventListener('click',()=>{tutorial=HexTutorial.begin(state);document.getElementById('settingsDrawer').classList.add('hidden');renderAll();});
   const gridToggle=document.getElementById('hexGrid');gridToggle.checked=showHexGrid;
   function setHexGrid(enabled){showHexGrid=enabled;gridToggle.checked=enabled;state.showHexGrid=enabled;try{localStorage.setItem('hexGrid',String(enabled));}catch{}renderBoard();}
@@ -879,6 +917,11 @@ R dreht die Karte, dann Feld anklicken.`;}
   for(const [kind,id] of [['walls','baseWallsBtn'],['weapon','baseWeaponBtn']])document.getElementById(id).addEventListener('click',()=>{if(HexHeroes.buy(state,kind)){sound.play('build');renderAll();}});
   if(typeof ResizeObserver!=='undefined'){const observer=new ResizeObserver(()=>requestAnimationFrame(layoutMenus));for(const node of document.querySelectorAll('.gameHeader,.dockBR,.handDock,.mapControls,.dockBL'))observer.observe(node);}
   globalThis.addEventListener?.('hexlanguagechange',()=>{uiLanguageRevision++;if(state){renderRunStatistics();renderUI();}});globalThis.addEventListener?.('resize',layoutMenus);document.addEventListener('toggle',layoutMenus,true);document.addEventListener('click',()=>requestAnimationFrame(layoutMenus));
+  document.getElementById('hotkeyTipOpen').addEventListener('click',openHotkeySettings);
+  document.getElementById('hotkeyTipClose').addEventListener('click',()=>{state.hotkeyHintDone=true;renderHotkeyTip();});
+  document.getElementById('hotkeyHelp').addEventListener('toggle',renderHotkeyTip);
+  document.addEventListener('click',()=>renderHotkeyTip());
+  document.getElementById('rotateHexBtn').addEventListener('click',()=>rotateSelected());
   startWaveBtn.addEventListener('click',startWave);
   // ---- Hauptmenü ----
   const mainMenu=document.getElementById('mainMenu'),menuRules=document.getElementById('menuRules');
@@ -917,14 +960,22 @@ R dreht die Karte, dann Feld anklicken.`;}
   document.getElementById('closeArsenalBtn').addEventListener('click',closeArsenal);
   document.getElementById('closeBiomeInfo').addEventListener('click',()=>document.getElementById('biomeInfoPanel').classList.add('hidden'));
   document.getElementById('towerBiomeInfo').addEventListener('click',()=>{const slot=state.selectedTower,tile=slot&&state.map.get(key(slot.q,slot.r));if(tile)inspectBiome(HexBiomes.forTile(state,tile));});
+  function dismissBiomeInfoOutside(event){
+    if(!state||!event.target?.closest||event.target.closest('#biomeInfoPanel,#towerBiomeInfo,.biomeRail'))return false;
+    document.getElementById('biomeInfoPanel').classList.add('hidden');
+    const changed=!!(pinnedBiome||state.highlightBiome);pinnedBiome=null;state.highlightBiome=null;
+    if(document.activeElement?.closest?.('.biomeRail'))document.activeElement.blur?.();
+    if(changed){for(const button of biomeButtons.values()){button.classList.remove('active');button.setAttribute('aria-pressed','false');}renderBiomeIntroDetails();renderBoard();}
+    return changed;
+  }
   function dismissTransientPanels(event){
-    const target=event.target;if(!target?.closest||!state)return;
+    const target=event.target;if(!target?.closest||!state||target.closest('#rewardOverlay,#celebration,#campaignVictory'))return;
     let changed=false;
     if(saleRequest&&!target.closest('#'+(saleRequest.kind==='tower'?'sellTowerBtn':'sellBuildingBtn'))){closeSale();changed=true;}
     if(!target.closest('.towerPanel,.drawer,.loadoutRail')){
       if(state.selectedTower||state.selectedBuilding||state.selectedSlot){state.selectedTower=null;state.selectedBuilding=null;state.selectedSlot=null;state.previewTower=null;state.previewBuilding=null;changed=true;}
     }
-    if(!target.closest('#biomeInfoPanel,#towerBiomeInfo,.biomeRail'))document.getElementById('biomeInfoPanel').classList.add('hidden');
+    if(dismissBiomeInfoOutside(event))changed=true;
     if(changed)renderAll();
   }
   let saleRequest=null;
@@ -956,9 +1007,10 @@ R dreht die Karte, dann Feld anklicken.`;}
   document.getElementById('zoomInBtn').addEventListener('click',()=>renderer.zoom(.8));
   document.getElementById('zoomOutBtn').addEventListener('click',()=>renderer.zoom(1.25));
   document.getElementById('resetViewBtn').addEventListener('click',()=>renderer.resetView());
-  for(const [id,close] of [['saveOverlay',closeSave],['arsenalOverlay',closeArsenal],['playModeOverlay',()=>document.getElementById('playModeBackBtn').click()],['menuRulesOverlay',()=>document.getElementById('menuRulesBackBtn').click()],['loadoutOverlay',()=>document.getElementById('cancelLoadoutBtn').click()],['rewardOverlay',()=>inspectReward('map')],['gameOverOverlay',()=>inspectEndMap(true)],['campaignVictory',()=>inspectCampaign(true)],['celebration',closeCelebration]]){const overlay=document.getElementById(id);overlay.addEventListener('click',e=>{if(e.target===overlay)close();});}
+  for(const [id,close] of [['rewardOverlay',()=>inspectReward('map')],['gameOverOverlay',()=>inspectEndMap(true)],['campaignVictory',()=>inspectCampaign(true)],['celebration',closeCelebration]]){const overlay=document.getElementById(id);overlay.addEventListener('click',e=>{if(e.target===overlay)close();});}
   document.getElementById('deckDropdown').addEventListener('toggle',()=>{if(document.getElementById('deckDropdown').open) renderDeckOverview();});
   document.addEventListener('keydown',e=>{
+    if(e.ctrlKey&&!e.altKey&&!e.metaKey&&e.key.toLowerCase()==='f'){e.preventDefault();if(!e.repeat)toggleFps();return;}
     if(state.phase==='victory'){if(e.key==='Escape'){e.preventDefault?.();inspectCampaign(!document.getElementById('campaignVictory').classList.contains('inspectCampaign'));}return;}
     if(e.key==='Escape'&&state.buildingTarget){state.buildingTarget=null;e.preventDefault?.();setMessage('Hex-Auswahl abgebrochen.');renderAll();return;}
     if(saleRequest&&e.key==='Escape'){e.preventDefault?.();closeSale();renderAll();return;}
@@ -968,15 +1020,19 @@ R dreht die Karte, dann Feld anklicken.`;}
     if(e.key==='Escape'&&!arsenalOverlay.classList.contains('hidden')){e.preventDefault?.();closeArsenal();return;}
     if(state.celebrationActive){if(e.key==='Escape'){closeCelebration();e.preventDefault?.();}else if(e.code==='Space')e.preventDefault?.();return;}
     if(e.key==='Escape'){
+      e.preventDefault?.();if(e.repeat)return;
+      const hadPanel=state.selectedTower||state.selectedBuilding||state.selectedSlot||document.querySelector?.('.drawer:not(.hidden),.statDetails[open],#biomeInfoPanel:not(.hidden)');
       document.getElementById('biomeInfoPanel').classList.add('hidden');
       if(rewardView!=='selection'){inspectReward('selection');return;}
       document.querySelectorAll('.drawer').forEach(panel=>panel.classList.add('hidden'));
       document.querySelectorAll('.statDetails').forEach(panel=>{panel.open=false;});
       cancelQuickTower();state.highlightBiome=null;pinnedBiome=null;
       state.selectedTower=null;state.selectedBuilding=null;state.selectedSlot=null;state.selectedBase=false;state.previewTower=null;
-      renderAll();return;
+      if(!hadPanel&&hasActiveRun&&mainMenu.classList.contains('hidden'))document.getElementById('settingsDrawer').classList.remove('hidden');
+      renderHotkeyTip();renderAll();return;
     }
     if(e.key.toLowerCase()==='f'&&!e.repeat&&e.target?.id==='doubleSpeed'){e.preventDefault();changeSpeed(gameSpeed%8+1);return;}
+    if(e.key.toLowerCase()==='r'&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.target?.isContentEditable&&!['INPUT','TEXTAREA','SELECT'].includes(e.target?.tagName)&&state.phase==='place'){e.preventDefault?.();rotateSelected();return;}
     if(['INPUT','TEXTAREA','SELECT','BUTTON','SUMMARY'].includes(e.target?.tagName)||e.target?.isContentEditable) return;
     if(e.ctrlKey||e.metaKey||e.altKey)return;
     if(e.key.toLowerCase()==='u'&&!e.repeat){e.preventDefault();toggleUpgradeStatus();}
@@ -1015,8 +1071,19 @@ R dreht die Karte, dann Feld anklicken.`;}
     if(!state.waveRunning)clockDebt=0;
     if(!document.hidden){renderBoard();renderUI();}
   }
-  function frame(now){advanceCamera(now);advanceClock(now);requestAnimationFrame(frame);}
+  let fpsVisible=false,fpsStart=null,fpsFrames=0,animationFrames=0;
+  const fpsEl=document.getElementById('fpsCounter');
+  function toggleFps(){fpsVisible=!fpsVisible;fpsStart=null;fpsEl.classList.toggle('hidden',!fpsVisible);fpsEl.textContent='FPS: —';}
+  function updateFps(now){
+    if(!fpsVisible)return;
+    if(document.hidden){fpsStart=null;fpsEl.textContent='FPS: —';return;}
+    const count=renderer.getRenderedFrameCount?.()??animationFrames;
+    if(fpsStart===null){fpsStart=now;fpsFrames=count;return;}
+    const elapsed=now-fpsStart;
+    if(elapsed>=500){fpsEl.textContent='FPS: '+Math.round((count-fpsFrames)*1000/elapsed);fpsStart=now;fpsFrames=count;}
+  }
+  function frame(now){animationFrames++;advanceCamera(now);advanceClock(now);updateFps(now);requestAnimationFrame(frame);}
   globalThis.setInterval?.(()=>{if(document.hidden)advanceClock(performance.now());},250);
-  document.addEventListener('visibilitychange',()=>{cancelQuickTower();resetCameraKeys();advanceClock(performance.now());});
+  document.addEventListener('visibilitychange',()=>{fpsStart=null;if(fpsVisible)fpsEl.textContent='FPS: —';cancelQuickTower();resetCameraKeys();advanceClock(performance.now());});
   newRun(); hasActiveRun=false; openMainMenu(); requestAnimationFrame(frame);
 })();

@@ -123,3 +123,18 @@ test('first hint marks every simultaneously discovered biome and shows hover eff
  desert.listeners.pointerleave();assert.ok(elements.get('biomeIntroDetail').textContent.includes('Aschelande'));
  elements.get('biomeIntroClose').listeners.click();assert.equal(a.state.biomeIntro,null);assert.equal(buttons.filter(b=>b.classList.contains('biomeIntroTarget')).length,0);
 });
+
+test('discovery and hover keep the individual colour of every highlighted biome',()=>{
+ const c=loadCore(),s={remoteView:true,map:new Map(),biomeIntro:['desert','ash','storm'],highlightBiome:'grass'};
+ for(const [i,biome] of ['grass','desert','ash','storm'].entries())s.map.set(i+',0',{q:i,r:0,biome});const h=c.biomes.highlight(s);assert.equal(h.tiles.length,4);for(const tile of h.tiles)assert.equal(h.tileColors[tile.q+','+tile.r],c.biomes.definitions[tile.biome].color);
+});
+test('outside click closes pinned biome information without dismissing discovery',()=>{
+ const {a,elements,documentListeners}=load();elements.get('mainMenu').classList.add('hidden');a.state.biomeSeed='intro';a.state.map.set('4,0',{q:4,r:0,type:'straight',roads:[0,3],slots:0,towers:[]});a.renderAll();const button=elements.get('biomeRail').children[0];button.listeners.click();assert.equal(button.classList.contains('active'),true);
+ documentListeners.pointerdown({button:0,target:{closest:()=>null}});assert.equal(button.classList.contains('active'),false);assert.equal(a.state.highlightBiome,null);assert.ok(a.state.biomeIntro);assert.equal(elements.get('biomeIntro').classList.contains('hidden'),false);
+});
+
+test('ordinary click outside closes biome tooltip and information panel; inside clicks keep it open',()=>{
+ const {a,elements,documentListeners}=load();a.renderAll();const button=elements.get('biomeRail').children[0];button.listeners.click();assert.equal(button.classList.contains('active'),true);
+ documentListeners.click({button:0,target:{closest:()=>button}});assert.equal(button.classList.contains('active'),true);
+ elements.get('biomeInfoPanel').classList.remove('hidden');documentListeners.click({button:0,target:{closest:()=>null}});assert.equal(button.classList.contains('active'),false);assert.equal(a.state.highlightBiome,null);assert.equal(elements.get('biomeInfoPanel').classList.contains('hidden'),true);
+});

@@ -10,6 +10,8 @@ const word=v=>typeof v==='string'&&/^[a-zA-Z0-9:_-]{1,120}$/.test(v);
 const slot=v=>exact(v,['q','r','index'])&&integer(v.q,-1000,1000)&&integer(v.r,-1000,1000)&&integer(v.index,0,31);
 function payloadValid(action,p){
   switch(action){
+    case 'guardian':return exact(p,['board','id','value'])&&integer(p.board,0,1)&&typeof p.id==='string'&&/^-?\d{1,4},-?\d{1,4}$/.test(p.id)&&typeof p.value==='boolean';
+    case 'rematch':
     case 'ready':return exact(p,['value'])&&typeof p.value==='boolean';
     case 'place':return exact(p,['q','r','index','rotation'])&&integer(p.q,-1000,1000)&&integer(p.r,-1000,1000)&&integer(p.index,0,4)&&integer(p.rotation,0,5);
     case 'tower':return exact(p,['type','slots'])&&word(p.type)&&Array.isArray(p.slots)&&p.slots.length>0&&p.slots.length<=32&&p.slots.every(slot);
@@ -17,6 +19,7 @@ function payloadValid(action,p){
     case 'building':return exact(p,['slot','type'])&&slot(p.slot)&&['house','forge','market','portal'].includes(p.type);
     case 'buildingUpgrade':return exact(p,['slot'])&&slot(p.slot);
     case 'portal':case 'reinforcement':return exact(p,['slot'])&&(p.slot===null||slot(p.slot));
+    case 'delivery':return exact(p,['offerId','index'])&&typeof p.offerId==='string'&&p.offerId.length<=200&&integer(p.index,0,2);
     case 'reward':return exact(p,['offerId','index'])&&typeof p.offerId==='string'&&p.offerId.length<=200&&(p.index===null||integer(p.index,0,1000));
     case 'acknowledge':case 'tunnel':return exact(p,[]);
     default:return false;
@@ -72,7 +75,7 @@ function createRoom({seed=crypto.randomUUID(),loadouts,now=()=>Date.now(),discon
     const presence=connection();
     if(presence.paused)result={ok:false,reason:ended?'match-ended':presence.maintenance?'maintenance':presence.expired?'reconnect-expired':'disconnected'};
     else if(packet.wave!==match.wave||packet.phase!==match.boards[player].state.phase)result={ok:false,reason:'stale'};
-    else {let payload=packet.payload;if(packet.action==='reward'){const offer=match.boards[player].state.rewardOffer;payload={...payload,offerId:offer&&offerId(offer.id)===payload.offerId?offer.id:''};}const ok=core.duo.command(match,player,{id:epoch+':'+player+':'+packet.sequence,wave:packet.wave,action:packet.action,payload});if(ok)revision++;result={ok,reason:ok?null:'illegal'};}
+    else {let payload=packet.payload;if(packet.action==='reward'||packet.action==='delivery'){const offer=packet.action==='delivery'?match.delivery?.offers[player]:match.boards[player].state.rewardOffer;payload={...payload,offerId:offer&&offerId(offer.id)===payload.offerId?offer.id:''};}const ok=core.duo.command(match,player,{id:epoch+':'+player+':'+packet.sequence,wave:packet.wave,action:packet.action,payload});if(ok)revision++;result={ok,reason:ok?null:'illegal'};}
     result={...result,sequence:packet.sequence,next:++session.next,revision};session.last={fingerprint,result};return {...result};
   }
   const placementCache=new WeakMap();
@@ -81,15 +84,16 @@ function createRoom({seed=crypto.randomUUID(),loadouts,now=()=>Date.now(),discon
     const boards=match.boards.map(({state:s},index)=>({
       player:index,phase:s.phase,gold:s.gold,income:s.income,wave:s.wave,elapsedMs:s.elapsedMs,
       map:[...s.map.values()].map(t=>({...pick(t,['q','r','type','rotation','roads','slots','buildingSlots','buildings','income','tunnels','tunnelLabel']),biome:core.biomes.forTile(s,t),towers:(t.towers||[]).map(tower=>tower?pick(tower,['type','level','branch','finalUpgrade','ultimate','guestOwner','targetPriority','biome','tileType','rangeFactor','supportDamage']):null)})),
-      landmarks:[...s.landmarks.values()].flatMap(l=>{const visibility=core.exploration.visibility(s.map,l);return visibility==='clear'?[pick(l,['q','r','type','claimed','status','prefab'])]:visibility==='fog'?[pick(l,['q','r'])]:[];}),
+      landmarks:[...s.landmarks.values()].flatMap(l=>{const visibility=core.exploration.visibility(s.map,l);return visibility==='clear'?[pick(l,['q','r','type','claimed','status','consent','prefab'])]:visibility==='fog'?[pick(l,['q','r'])]:[];}),
       enemies:s.enemies.map(e=>pick(e,['id','type','name','bossKind','x','y','hp','maxHp','armorHp','maxArmorHp','magicHp','maxMagicHp','alive','slowFactor'])),
       projectiles:(s.projectiles||[]).map(p=>pick(p,['kind','x','y','x1','y1','x2','y2','r','ttl','max','color','tower','id','hits','hitAt'])),
       mines:(s.mines||[]).map(m=>pick(m,['id','x','y','color'])),
       ...(index===player?{hand:[...s.hand],placements:copy(placements(s)),rescueCard:s.rescueCard?copy(s.rescueCard):null,tunnelOffer:s.tunnelOffer?copy(s.tunnelOffer):null,ultimateUnlocks:[...s.ultimateUnlocks],buildingUnlocks:[...s.buildingUnlocks],deckCounts:s.deck.reduce((a,id)=>(a[id]=(a[id]||0)+1,a),{}),loadout:[...s.towerLoadout],rewardOffer:s.rewardOffer?{...pick(s.rewardOffer,['kind','choices','skippable']),id:offerId(s.rewardOffer.id)}:null,celebration:s.activeCelebration?copy(s.activeCelebration):null}:{}),
     }));
-    return {protocol:1,serverId,epoch,revision,player,connection:presence,next:seats[player].next,hp:match.hp,maxHp:match.maxHp,wave:match.wave,phase:match.phase,ready:[...match.ready],finished:[...match.finished],portals:copy(match.portals),reinforcements:copy(match.reinforcements),pendingHelp:match.pendingHelp.map(h=>h?{at:h.at}:null),support:copy(match.support),boards};
+    return {protocol:1,serverId,epoch,revision,player,connection:presence,next:seats[player].next,hp:match.hp,maxHp:match.maxHp,wave:match.wave,phase:match.phase,ready:[...match.ready],finished:[...match.finished],portals:copy(match.portals),reinforcements:copy(match.reinforcements),pendingHelp:match.pendingHelp.map(h=>h?{at:h.at}:null),result:publicResult(),rematch:match.rematch||[false,false],support:copy(match.support),delivery:match.delivery?{wave:match.delivery.wave,offers:match.delivery.offers.map((o,i)=>i===player?{...copy(o),id:offerId(o.id)}:{index:o.index===null?null:0})}:null,boards};
   }
-  function checkpoint(){if(ended||expired||match.phase==='gameover')return null;return {format:'autohex-room',version:1,ruleset:RULESET,epoch,revision,seats:copy(seats),match:core.duo.capture(match)};}
-  return {setMaintenance,connect,touch,claim,leave,receive,view,checkpoint,tick(){if(connection().paused)return;core.duo.tick(match);revision++;}};
+  function publicResult(){return match.result?{...copy(match.result),id:offerId(match.result.id)}:null;}
+  function checkpoint(){if(ended||expired)return null;return {format:'autohex-room',version:1,ruleset:RULESET,epoch,revision,seats:copy(seats),match:core.duo.capture(match)};}
+  return {get result(){return publicResult();},setMaintenance,connect,touch,claim,leave,receive,view,checkpoint,tick(){if(connection().paused)return;core.duo.tick(match);revision++;}};
 }
 module.exports={createRoom,payloadValid};

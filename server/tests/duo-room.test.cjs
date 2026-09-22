@@ -48,3 +48,9 @@ test('rate limiting and foreign match epochs reject commands without affecting t
  test('waiting in a lobby does not consume the reconnect window before the partner joins',()=>{
  let time=0;const room=createRoom({loadouts:[loadout,loadout],now:()=>time}),a=room.connect(0);time=600000;room.connect(1);assert.equal(room.view(a.token).connection.expired,false);assert.equal(room.view(a.token).connection.paused,false);
  });
+
+test('guardian votes are seat-bound, idempotent and visible to both players after restart',()=>{
+ const initial=setup(),snapshot=initial.room.checkpoint(),core=require('../../headless-core.cjs')(),m=core.duo.restore(snapshot.match);m.boards[0].state.landmarks.set('1,0',{q:1,r:0,type:'boss',claimed:true,status:'pending',consent:[false,false]});snapshot.match=core.duo.capture(m);let room=createRoom({snapshot});const [a,b]=initial.seats;for(const seat of [a,b])room.touch(seat.token);
+ const vote=packet(room,a,'guardian',{board:0,id:'1,0',value:true});assert.ok(room.receive(a.token,vote).ok);assert.equal(room.receive(a.token,vote).duplicate,true);let landmark=room.view(b.token).boards[0].landmarks.find(l=>l.q===1&&l.r===0);assert.deepEqual(landmark.consent,[true,false]);assert.equal(landmark.status,'pending');
+ assert.equal(room.receive(b.token,packet(room,b,'guardian',{board:0,id:'1,0',value:true,player:0})).ok,false);room=createRoom({snapshot:room.checkpoint()});for(const seat of [a,b])room.touch(seat.token);assert.ok(room.receive(b.token,packet(room,b,'guardian',{board:0,id:'1,0',value:true})).ok);landmark=room.view(a.token).boards[0].landmarks.find(l=>l.q===1&&l.r===0);assert.equal(landmark.status,'ready');
+});

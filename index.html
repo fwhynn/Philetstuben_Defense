@@ -12,6 +12,7 @@
   </head>
 
   <body>
+    <div id="fpsCounter" class="fpsCounter hidden" data-no-translate aria-label="FPS">FPS: —</div>
     <div id="app">
       <!-- Vollbild-Spielfeld -->
       <section class="boardWrap">
@@ -65,7 +66,7 @@
         <h1>Autohex TD <span data-app-version></span></h1>
         <div class="dockButtons">
           <button class="secondary drawerBtn" data-drawer="rulesDrawer"><svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18H6zM9 7h6M9 11h6M9 15h4"/></svg> Regeln</button>
-          <button class="secondary drawerBtn" data-drawer="settingsDrawer"><svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="8" cy="18" r="2"/></svg> Einstellungen</button>
+          <button id="settingsOpenBtn" class="secondary drawerBtn" data-drawer="settingsDrawer"><svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="8" cy="18" r="2"/></svg> Einstellungen</button>
           <button id="pauseBtn" class="secondary pauseBtn">⏸ Pause (P)</button>
         </div>
       </nav>
@@ -101,7 +102,7 @@
               class="dropdownArrow" aria-hidden="true">▾</span></summary>
           <div class="statPopup">
             <h2>Deck &amp; Kartenstapel</h2>
-            <p class="hint">Die Ziehreihenfolge bleibt verborgen.</p>
+            <p class="hint">Nachziehstapel: Die nächste Karte steht links oben.</p>
             <div id="deckOverview" class="deckOverview"></div>
           </div>
         </details>
@@ -130,10 +131,12 @@
       </header>
       </div>
 
+      <aside id="hotkeyTip" class="hotkeyTip hidden" role="note"><strong>Praktische Tastenbelegung</strong><p>Mit Hotkeys geht vieles schneller. Öffne die Einstellungen mit Escape und dort die Tastenbelegung.</p><button id="hotkeyTipOpen" type="button">Einstellungen öffnen</button><button id="hotkeyTipClose" type="button">Verstanden</button></aside>
       <!-- Unten Mitte: die drei spielbaren Karten -->
       <section class="handDock" aria-label="Handkarten">
         <div class="handHead"><strong id="phaseLabel">Hex platzieren</strong><span id="handHint" class="hint">Karte
-            wählen (1–3) · R dreht · Hex anklicken</span></div>
+            wählen (1–3) · R dreht · Hex anklicken</span>
+        <button id="rotateHexBtn" class="secondary" type="button" disabled aria-label="Ausgewählte Hexkarte drehen">↻ Drehen</button></div>
         <div id="hand" class="hand"></div>
       </section>
 
@@ -198,7 +201,7 @@
           <h2>Einstellungen</h2><button class="secondary drawerClose" aria-label="Schließen"
             title="Schließen (Escape)"><small>Esc</small> ×</button>
         </div>
-        <p class="hint">Escape schließt offene Menüs und Infofenster.</p>
+        <p class="hint">Escape öffnet die Einstellungen oder schließt offene Menüs und Infofenster.</p>
         <details class="biomeRules">
           <summary>Biome und ihre Effekte</summary>
           <p>Die Base startet im Grasland. Beim Erkunden ab drei Hexen Entfernung erscheinen Regionen; Effekte gelten
@@ -208,13 +211,13 @@
             Angriffsrate.</p>
           <p>🟥 Aschelande: Feuer +20 % Schaden; Freeze −15 % Reichweite, Wasser-Slow −25 % Dauer.</p>
         </details>
-        <details class="hotkeyHelp">
-          <summary>Hotkeys</summary>
+        <details id="hotkeyHelp" class="hotkeyHelp">
+          <summary id="hotkeyHelpSummary">Hotkeys</summary>
           <p>W/A/S/D: Kamera vorwärts/links/rückwärts/rechts<br>Q/E: Kamera drehen (halten)<br>R oder Mausrad-Klick: Hex
             drehen<br>1–3: Handkarte auswählen (bei zwei Fronten am Anfang 1–5)<br>1–9: Turm im geöffneten Baumenü
-            auswählen<br>Leertaste: Wave starten<br>F: Tempo erhöhen, nach 8× zurück auf 1×<br>P: Pause<br>G: Hexgrid
+            auswählen<br>Leertaste: Wave starten<br>F: Tempo erhöhen, nach 8× zurück auf 1×<br>Strg + F: FPS-Anzeige ein/aus<br>P: Pause<br>G: Hexgrid
             ein/aus<br>U: Upgrade-Status ein/aus<br>Strg + Klick: mehrere Bauplätze oder Türme auswählen<br>Escape:
-            Fenster schließen<br>Mausrad: Zoom · Ziehen: Kamera bewegen/drehen</p>
+            Einstellungen öffnen / Fenster schließen<br>Mausrad: Zoom · Ziehen: Kamera bewegen/drehen</p>
         </details>
         <label class="toggle"><input id="upgradeStatus" type="checkbox" /> Upgrade-Status (U): ↑ im Run ausbaubar
           (unabhängig vom Gold)</label>
@@ -277,6 +280,7 @@
       <div class="modeBox">
         <h2 id="playModeTitle">Wie möchtest du spielen?</h2>
         <div id="playModeChoices" class="modeChoices">
+          <button class="modeChoice duoComingSoon" type="button" disabled><strong>Duo · Freunde-Beta</strong><small>Zwei Festungen, ein Team. Private Lobby mit Einladungscode.</small><strong>Noch nicht verfügbar · Coming Soon</strong></button>
           <button id="standardModeBtn" class="modeChoice"><strong>Standardspiel</strong><span>Schwierigkeit
               wählen</span><small>Eigene Festung und eigenes Loadout · regionale Biome</small></button>
           <button id="dailyModeBtn" class="modeChoice"><strong>Tägliche Herausforderung</strong><span>Die letzte
@@ -315,7 +319,7 @@
     <div id="rewardOverlay" class="overlay hidden" role="dialog" aria-modal="true">
       <div class="rewardBox">
         <div id="rewardSelection">
-          <h2 id="rewardTitle">Deck erweitern</h2>
+          <h2 id="rewardTitle" tabindex="-1" data-dialog-initial-focus>Deck erweitern</h2>
           <p id="rewardDescription">Wähle 1 von 3 Hexkarten.</p>
           <div id="rewardChoices" class="rewardChoices"></div>
           <button id="skipRemovalBtn" class="secondary hidden">Keine Karte entfernen</button>
@@ -339,8 +343,6 @@
         <div id="difficultyChoices" class="heroChoices" aria-label="Schwierigkeitsstufe"></div>
         <div id="heroChoices" class="heroChoices" aria-label="Startfestung"></div>
         <p>Nur diese fünf Turmtypen stehen im nächsten Run zur Verfügung. Sie werden weiterhin mit Gold gebaut.</p>
-        <div class="loadoutSummary"><strong id="loadoutCount">5/5 gewählt</strong><span id="diamondCount">◆ 0
-            Diamanten</span></div>
         <details class="prepPresets"><summary>Vorlagen</summary><div id="loadoutPresets" class="loadoutPresets"></div></details>
         <div id="loadoutChoices" class="loadoutChoices"></div><p id="preparationInfo" class="preparationInfo" aria-live="polite">Fünf Türme für den nächsten Run.</p>
         <p id="loadoutWarning" class="loadoutWarning" aria-live="polite"></p>
@@ -411,7 +413,7 @@
         const drawers = [...document.querySelectorAll('.drawer')], close = () => drawers.forEach(d => d.classList.add('hidden'));
         document.querySelectorAll('.drawerBtn').forEach(b => b.addEventListener('click', () => { const d = document.getElementById(b.dataset.drawer), open = d.classList.contains('hidden'); close(); if (open) d.classList.remove('hidden'); }));
         document.querySelectorAll('.drawerClose').forEach(b => b.addEventListener('click', close));
-        addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+        // Escape is handled centrally by game.js (close first, otherwise settings).
       })();
 
 

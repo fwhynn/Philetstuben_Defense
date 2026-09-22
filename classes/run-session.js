@@ -1,6 +1,7 @@
 /* DOM-free progression shared by Solo and the forthcoming two-board session. */
 const HexRunSession=(()=>{
   function preparation(state,random){
+    if(state.duoDeliveryPending){state.phase='duoDelivery';return;}
     state.phase='place';state.drawResult=HexRunFlow.drawHand(state,random);promoteCelebration(state);
   }
   function promoteCelebration(state){

@@ -62,7 +62,7 @@ const HexRewards=(()=>{
     else{
       if(!Number.isInteger(index)||index<0||index>=offer.choices.length)return false;
       const choice=offer.choices[index];
-      if(choice.kind==='card'){state.deck.push(choice.cardId);state.discard.push(choice.cardId);}
+      if(choice.kind==='card'){HexDeck.addReward(state,choice.cardId);}
       else if(choice.kind==='remove'){if(!HexDeck.remove(state,choice.cardId))return false;}
       else if(choice.kind==='upgrade'){if(!upgrade(state,choice.choice))return false;}
       else if(choice.kind==='blessing'){if(!blessing(state,choice.blessing))return false;}

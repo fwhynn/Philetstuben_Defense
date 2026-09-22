@@ -32,7 +32,9 @@ const HexBiomes=(()=>{
   function highlight(state){
     const intro=!(state.selectedBuilding||state.hoverBuilding||state.buildingTarget||state.previewBuilding)?introIds(state):[];
     const ids=new Set([...intro,...(state.highlightBiome?[state.highlightBiome]:[])]);
-    return ids.size?{color:intro.length?'#ffe39a':definitions[state.highlightBiome].color,tiles:visibleTiles(state).filter(t=>ids.has(forTile(state,t)))}:null;
+    if(!ids.size)return null;
+    const tiles=visibleTiles(state).filter(t=>ids.has(forTile(state,t)));
+    return {color:'#ffffff',tiles,tileColors:Object.fromEntries(tiles.map(t=>[t.q+','+t.r,definitions[forTile(state,t)].color]))};
   }
   function atWorld(state,x,y){
     const r=y/(HexMap.HEX*1.5),q=x/(HexMap.HEX*Math.sqrt(3))-r/2,s=-q-r;

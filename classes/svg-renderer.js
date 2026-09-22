@@ -41,7 +41,7 @@ function create(svg,commands){
         }
       }
       const label=text(c.x,c.y+5,visibility==='clear'?(landmark.type==='shrine'?'✦':landmark.type==='boss'?'☠':'◆'):'?',24,'#b7bfba','700');label.style.pointerEvents='none';scene.appendChild(label);
-      if(visibility==='clear'){const note=text(c.x,c.y+27,landmark.type==='shrine'?'Shrine · Bonus unbekannt':landmark.type==='boss'?'Wächter · inaktiv':'Schatz +20 Gold · ungesammelt',8,'#b7bfba');note.style.pointerEvents='none';scene.appendChild(note);}
+      if(visibility==='clear'){const note=text(c.x,c.y+27,landmark.type==='shrine'?'Shrine · Bonus unbekannt':landmark.type==='boss'?'Wächter · inaktiv':'Schatz +'+HexExploration.treasureReward(landmark)+' Gold · ungesammelt',8,'#b7bfba');note.style.pointerEvents='none';scene.appendChild(note);}
     }
 
     // Global passes keep all roads below every tower, regardless of tile age.
@@ -49,7 +49,7 @@ function create(svg,commands){
     for(const tile of state.map.values()) drawTile(tile,'roads');
     for(const landmark of state.landmarks.values()) if(landmark.status){const c=axialToWorld(landmark.q,landmark.r),label=text(c.x,c.y+35,{ready:'☠ bereit',fighting:'☠ Kampf',defeated:'☠ besiegt',escaped:'☠ entkommen'}[landmark.status],9,'#e8b7b0','700');label.style.pointerEvents='none';scene.appendChild(label);}
 
-    if(state.phase==='place'&&!state.waveRunning&&state.hand.length){
+    if(state.phase==='place'&&!state.waveRunning&&state.hand[state.selectedCard]){
       const id=state.hand[state.selectedCard],card=id==='rescue'?state.rescueCard:CARD_LIBRARY[id];
       for(const s of placementTargets){
         const legal=s.legal; const c=axialToWorld(s.q,s.r);
@@ -107,7 +107,7 @@ function create(svg,commands){
     }
     const highlight=HexBiomes.highlight(state)||HexBuildings.highlight(state);
     for(const tile of highlight.otherTiles||[]){const c=axialToWorld(tile.q,tile.r),p=drawPoly(c.x,c.y,HEX-3,highlight.otherColor,highlight.otherColor,1);p.setAttribute('fill-opacity',.10);p.setAttribute('stroke-opacity',.5);p.setAttribute('data-overlay','other-building');}
-    for(const tile of highlight.tiles){const c=axialToWorld(tile.q,tile.r),p=drawPoly(c.x,c.y,HEX-3,highlight.color,highlight.color,1);p.setAttribute('fill-opacity',.18);p.setAttribute('stroke-width',3);p.setAttribute('data-overlay','building');}
+    for(const tile of highlight.tiles){const c=axialToWorld(tile.q,tile.r),p=drawPoly(c.x,c.y,HEX-3,highlight.tileColors?.[tile.q+','+tile.r]||highlight.color,highlight.tileColors?.[tile.q+','+tile.r]||highlight.color,1);p.setAttribute('fill-opacity',.18);p.setAttribute('stroke-width',3);p.setAttribute('data-overlay','building');}
     for(const tile of highlight.currentTiles||[]){const c=axialToWorld(tile.q,tile.r),p=drawPoly(c.x,c.y,HEX-3,highlight.currentColor,highlight.currentColor,1);p.setAttribute('fill-opacity',.48);p.setAttribute('stroke-width',5);p.setAttribute('data-overlay','current-building-target');}
   }
   function roadPolyline(points,color,width,parent=scene,dashed=false){
@@ -130,7 +130,7 @@ function create(svg,commands){
     });
   }
   function drawUpgradeHints(){
-    if(!['build','wave'].includes(state.phase)||state.hp<=0) return;
+    if(!['place','build','wave'].includes(state.phase)||state.hp<=0) return;
     for(const tile of state.map.values()) (tile.towers||[]).forEach((tower,index)=>{
       if(!tower||(state.showUpgradeStatus&&!HexData.upgradeStatus(state,tower))||(!state.showUpgradeStatus&&!HexData.runUpgrades(state,tower).some(([,upgrade])=>state.gold>=HexBuildings.cost(state,tile,upgrade.cost)))) return;
       const p=slotPositions(tile)[index];let hint;
@@ -138,7 +138,7 @@ function create(svg,commands){
       else hint=text(p.x+12,p.y-8,'↑',13,'#ffffff','800');hint.setAttribute('stroke','#172019');hint.setAttribute('stroke-width',1.5);hint.setAttribute('paint-order','stroke');hint.style.pointerEvents='none';scene.appendChild(hint);
     });
   }
-  function drawBuildingUpgradeHints(){if(!state.showUpgradeStatus||state.hp<=0||!['build','wave'].includes(state.phase))return;for(const tile of state.map.values())(tile.buildings||[]).forEach((b,i)=>{if(!b||!HexBuildings.nextUpgrade(state,b))return;const p=buildingPosition(tile,i),arrow=document.createElementNS(NS,'polygon');for(const [k,v] of Object.entries({points:'14,2 26,14 19,14 19,30 9,30 9,14 2,14',transform:'translate('+(p.x-14)+','+(p.y-43)+')',fill:'#ffffff',stroke:'#172019','stroke-width':1.5,'stroke-linejoin':'round','aria-label':'Gebäude ausbaubar'}))arrow.setAttribute(k,v);arrow.style.pointerEvents='none';scene.appendChild(arrow);});}
+  function drawBuildingUpgradeHints(){if(state.hp<=0||!['place','build','wave'].includes(state.phase))return;for(const tile of state.map.values())(tile.buildings||[]).forEach((b,i)=>{const next=b&&HexBuildings.nextUpgrade(state,b);if(!next||!state.showUpgradeStatus&&state.gold<next.cost)return;const p=buildingPosition(tile,i),arrow=document.createElementNS(NS,'polygon');for(const [k,v] of Object.entries({points:'14,2 26,14 19,14 19,30 9,30 9,14 2,14',transform:'translate('+(p.x-14)+','+(p.y-43)+')',fill:'#ffffff',stroke:'#172019','stroke-width':1.5,'stroke-linejoin':'round','aria-label':'Gebäude ausbaubar'}))arrow.setAttribute(k,v);arrow.style.pointerEvents='none';scene.appendChild(arrow);});}
   function drawSelectedRange(){
     if(state.selectedBase){const weapon=HexHeroes.weapon(state);if(weapon){const circle=document.createElementNS(NS,'circle');circle.setAttribute('cx',0);circle.setAttribute('cy',0);circle.setAttribute('r',weapon.range);circle.setAttribute('fill',weapon.color);circle.setAttribute('fill-opacity','.13');circle.setAttribute('stroke',weapon.color);circle.style.pointerEvents='none';scene.appendChild(circle);}return;}
     const selected=state.dragTower?state.dragSlot:state.selectedTower||(state.previewTower?state.selectedSlot:null);if(!selected) return;
@@ -147,9 +147,10 @@ function create(svg,commands){
     const p=slotPositions(tile)[selected.index],def=HexData.towerDefinition(tw||{type,biome:HexBiomes.forTile(state,tile),rangeFactor:state.challengeDay?.85:1,tileType:tile.type});
     const circle=document.createElementNS(NS,'circle');
     circle.setAttribute('cx',p.x);circle.setAttribute('cy',p.y);circle.setAttribute('r',def.range);
-    circle.setAttribute('fill',def.color);circle.setAttribute('fill-opacity','.13');
-    circle.setAttribute('stroke',def.color);circle.setAttribute('stroke-opacity','.65');circle.setAttribute('stroke-width',2);
+    circle.setAttribute('fill',def.color);circle.setAttribute('fill-opacity','.18');
+    circle.setAttribute('stroke',def.color);circle.setAttribute('stroke-opacity','.85');circle.setAttribute('stroke-width',2);
     circle.style.pointerEvents='none';scene.appendChild(circle);
+    if(tw&&state.previewUpgrade?.tower===tw&&state.previewUpgrade.definition.range!==def.range){const next=state.previewUpgrade.definition,preview=document.createElementNS(NS,'circle');for(const [key,value] of Object.entries({cx:p.x,cy:p.y,r:next.range,fill:next.color,'fill-opacity':.045,stroke:next.color,'stroke-opacity':.35,'stroke-width':2,'stroke-dasharray':'6 4','data-upgrade-range':'preview'}))preview.setAttribute(key,value);preview.style.pointerEvents='none';scene.appendChild(preview);}
   }
 
   function drawTile(tile,layer){
@@ -174,7 +175,7 @@ function create(svg,commands){
     }
     if(tile.tunnelLabel){const t=text(c.x,c.y-16,tile.tunnelLabel+' ⇄',12,'#8ff3ff','700');t.style.pointerEvents='none';scene.appendChild(t);}
     if(tile.income){const t=text(c.x,c.y+44,'+'+tile.income+' Gold',10,'#fff4c3','700');t.style.pointerEvents='none';scene.appendChild(t);}
-    const terrain=CARD_LIBRARY[tile.type],bonus=terrain?.towerBonus?'+25 % '+HexData.TOWERS[terrain.requiredTower].name+(terrain.towerBonus.range?' Reichweite':' Schaden'):terrain?.towerRange?'+'+Math.round((terrain.towerRange-1)*100)+' % Reichweite':terrain?.towerDamage?'+'+Math.round((terrain.towerDamage-1)*100)+' % Schaden':terrain?.archerDamage?'+25 % Archer':null;
+    const terrain=CARD_LIBRARY[tile.type],bonus=HexData.tileBonusLabel(terrain);
     if(bonus){const label=text(c.x,c.y+35,bonus,9,'#fff4c3','700');label.style.pointerEvents='none';scene.appendChild(label);}
     const slots=slotPositions(tile);
     for(let i=0;i<(tile.buildingSlots||0);i++){
@@ -183,14 +184,14 @@ function create(svg,commands){
       slot.addEventListener('pointerenter',()=>commands.hoverBuilding?.({q:tile.q,r:tile.r,index:i}));
       slot.addEventListener('pointerleave',()=>commands.hoverBuilding?.(null));
       slot.addEventListener('click',e=>{e.stopPropagation();commands.selectBuilding(tile.q,tile.r,i);});scene.appendChild(slot);
-      if(!building&&state.showSlotHints!==false&&['build','wave'].includes(state.phase)){const gem=document.createElementNS(NS,'polygon');gem.setAttribute('points',`${p.x},${p.y-29} ${p.x+6},${p.y-20} ${p.x},${p.y-11} ${p.x-6},${p.y-20}`);gem.setAttribute('fill',tile.type==='deadEnd'?'#c991ff':'#59e0d2');gem.setAttribute('stroke','#d3fff8');gem.setAttribute('class','buildingDiamond');gem.style.pointerEvents='none';scene.appendChild(gem);}
+      if(!building&&state.showSlotHints!==false&&['place','build','wave'].includes(state.phase)){const gem=document.createElementNS(NS,'polygon');gem.setAttribute('points',`${p.x},${p.y-29} ${p.x+6},${p.y-20} ${p.x},${p.y-11} ${p.x-6},${p.y-20}`);gem.setAttribute('fill',tile.type==='deadEnd'?'#c991ff':'#59e0d2');gem.setAttribute('stroke','#d3fff8');gem.setAttribute('class','buildingDiamond');gem.style.pointerEvents='none';scene.appendChild(gem);}
       const label=text(p.x,p.y+4,building?HexBuildings.definitions[building.type].icon:tile.type==='deadEnd'?'◉':'⌂',11,'#fff4c3','700');label.style.pointerEvents='none';scene.appendChild(label);
     }
     slots.forEach((p,i)=>{
       const tw=tile.towers[i];
       if(tw){drawTower(p,tw,tile,i);} else {
         const selected=state.selectedSlot&&state.selectedSlot.q===tile.q&&state.selectedSlot.r===tile.r&&state.selectedSlot.index===i;
-        if(state.showSlotHints!==false&&['build','wave'].includes(state.phase)){const marker=document.createElementNS(NS,'g');marker.setAttribute('transform',`translate(${p.x},${p.y-20})`);marker.setAttribute('data-slot-hint','true');marker.style.pointerEvents='none';const floating=document.createElementNS(NS,'g');floating.setAttribute('class','slotDiamondFloat');const gem=document.createElementNS(NS,'polygon');gem.setAttribute('points','0,-7 5,0 0,7 -5,0');gem.setAttribute('fill','#ffffff');gem.setAttribute('stroke','#251130');gem.setAttribute('class','slotDiamondTurn');floating.appendChild(gem);marker.appendChild(floating);scene.appendChild(marker);}
+        if(state.showSlotHints!==false&&['place','build','wave'].includes(state.phase)){const marker=document.createElementNS(NS,'g');marker.setAttribute('transform',`translate(${p.x},${p.y-20})`);marker.setAttribute('data-slot-hint','true');marker.style.pointerEvents='none';const floating=document.createElementNS(NS,'g');floating.setAttribute('class','slotDiamondFloat');const gem=document.createElementNS(NS,'polygon');gem.setAttribute('points','0,-7 5,0 0,7 -5,0');gem.setAttribute('fill','#ffffff');gem.setAttribute('stroke','#251130');gem.setAttribute('class','slotDiamondTurn');floating.appendChild(gem);marker.appendChild(floating);scene.appendChild(marker);}
         const circ=document.createElementNS(NS,'circle');circ.setAttribute('cx',p.x);circ.setAttribute('cy',p.y);circ.setAttribute('r',12);circ.setAttribute('fill',selected?'#f4d36d':'#314d39');circ.setAttribute('stroke','#f1ddb1');circ.setAttribute('stroke-width',2);circ.style.cursor='pointer';circ.addEventListener('click',e=>{e.stopPropagation();commands.selectSlot(tile.q,tile.r,i,e.ctrlKey||e.metaKey);});scene.appendChild(circ);
         const plus=text(p.x,p.y+4,'+',14,'#fff','700');plus.style.pointerEvents='none';scene.appendChild(plus);
       }

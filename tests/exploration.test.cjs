@@ -34,8 +34,8 @@ test('map growth reveals fog landmarks before identifying them', () => {
 });
 test('treasures pay once only after a tile is placed at their location', () => {
   const { rules } = load(), state = { map: new Map(), landmarks: new Map([['3,0', { q: 3, r: 0, claimed: false }]]), gold: 70, goldEarned: {} };
-  assert.equal(rules.claim(state, 3, 0), 0); state.map.set('3,0', { q: 3, r: 0, roads: [3] }); assert.equal(rules.claim(state, 3, 0), 0); state.map.set('2,0', { q: 2, r: 0, roads: [0] }); assert.equal(rules.claim(state, 3, 0), 20); assert.equal(state.gold, 90); assert.equal(state.goldEarned.treasure, 20);
-  assert.equal(rules.claim(state, 3, 0), 0); assert.equal(state.gold, 90);
+  assert.equal(rules.claim(state, 3, 0), 0); state.map.set('3,0', { q: 3, r: 0, roads: [3] }); assert.equal(rules.claim(state, 3, 0), 0); state.map.set('2,0', { q: 2, r: 0, roads: [0] }); assert.equal(rules.claim(state, 3, 0), 15); assert.equal(state.gold, 85); assert.equal(state.goldEarned.treasure, 15);
+  assert.equal(rules.claim(state, 3, 0), 0); assert.equal(state.gold, 85);
 });
 
 
@@ -87,10 +87,12 @@ test('prefab geometry is seeded and every boss has six fixed exits', () => {
 });
 test('fixed special fields attach through matching neighboring roads and pay once', () => {
   const { rules } = load(), landmark = { q: 2, r: 0, type: 'treasure', claimed: false, prefab: { type: 'straight', roads: [0, 3], rotation: 0, slots: 1 } }, state = { map: new Map([['0,0', { q: 0, r: 0, type: 'base', roads: [0] }], ['1,0', { q: 1, r: 0, type: 'straight', roads: [0, 3] }]]), landmarks: new Map([['2,0', landmark]]), gold: 70, goldEarned: {} };
-  const result = rules.attach(state); assert.equal(result.count, 1); assert.equal(result.gold, 20); assert.equal(state.map.get('2,0').type, 'straight'); assert.deepEqual(Array.from(state.map.get('2,0').roads), [0, 3]); assert.equal(state.gold, 90); assert.equal(rules.attach(state).count, 0); assert.equal(state.gold, 90);
+  const result = rules.attach(state); assert.equal(result.count, 1); assert.equal(result.gold, 10); assert.equal(state.map.get('2,0').type, 'straight'); assert.deepEqual(Array.from(state.map.get('2,0').roads), [0, 3]); assert.equal(state.gold, 80); assert.equal(rules.attach(state).count, 0); assert.equal(state.gold, 80);
 });
 test('placement respects fixed special roads and disconnected specials stay inactive', () => {
   const { rules, mapRules: m } = load(), landmark = { q: 2, r: 0, type: 'boss', claimed: false, prefab: rules.prefab(1, { q: 2, r: 0 }, 'boss') }, map = new Map([['0,0', { q: 0, r: 0, type: 'base', roads: [0] }]]), landmarks = new Map([['2,0', landmark]]);
   assert.equal(m.canPlace(map, 1, 0, { id: 'straight', roads: [0, 3] }, 0, landmarks), true); assert.equal(m.canPlace(map, 1, 0, { id: 'smallCurve', roads: [2, 3] }, 0, landmarks), false);
   const state = { map, landmarks, gold: 70, goldEarned: {} }; assert.equal(rules.attach(state).count, 0); assert.equal(landmark.claimed, false);
 });
+
+test('treasure value uses direct hex distance equally in every direction',()=>{const {rules}=load();for(const p of [{q:4,r:0},{q:0,r:4},{q:-4,r:4},{q:-4,r:0},{q:0,r:-4},{q:4,r:-4}])assert.equal(rules.treasureReward(p),20);assert.equal(rules.treasureReward({q:3,r:2}),25);});

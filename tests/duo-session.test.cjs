@@ -65,3 +65,29 @@ test('guest mines credit damage to sender, kill gold to recipient and disappear 
  b.mines=[{id:1,x:100,y:0,damage:10,splash:30,source:{type:'mine',guestOwner:0}},{id:2,x:900,y:900,damage:10,splash:30,source:{type:'mine',guestOwner:0}}];
  c.duo.tick(m);assert.equal(m.support[0].mine,5);assert.equal(b.runTowerStats.mine?.damage,undefined);assert.equal(a.gold,goldA+c.waves.economy.completion);assert.equal(b.gold,goldB+7+c.waves.economy.completion);assert.equal(b.mines.length,0);assert.equal(m.pendingHelp[0],null);
 });
+
+test('Duo guardians require both votes, allow postponement and retain votes after restore',()=>{
+ const h=setup();buildBoth(h);const {c,m,send}=h,s=m.boards[0].state,guardian={q:1,r:0,type:'boss',claimed:false};s.landmarks.set('1,0',guardian);c.exploration.claim(s,1,0);assert.equal(guardian.status,'pending');
+ assert.ok(send(0,'guardian',{board:0,id:'1,0',value:true}));assert.equal(guardian.status,'pending');assert.ok(send(1,'guardian',{board:0,id:'1,0',value:true}));assert.equal(guardian.status,'ready');assert.ok(send(1,'guardian',{board:0,id:'1,0',value:false}));assert.equal(guardian.status,'pending');
+ const restored=c.duo.restore(json(c.duo.capture(m)));assert.deepEqual(json(restored.boards[0].state.landmarks.get('1,0').consent),[true,false]);
+ assert.equal(send(1,'guardian',{board:1,id:'missing',value:true}),false);assert.ok(send(1,'guardian',{board:0,id:'1,0',value:true}));send(0,'ready',{value:true});send(1,'ready',{value:true});assert.equal(guardian.status,'fighting');assert.ok(s.enemies.some(e=>e.landmarkId==='1,0'));assert.equal(m.boards[1].state.enemies.some(e=>e.landmarkId==='1,0'),false);assert.equal(send(1,'guardian',{board:0,id:'1,0',value:false}),false);
+});
+test('pending guardians do not block the next wave or spawn without approval',()=>{
+ const h=setup();buildBoth(h);const {c,m,send}=h,s=m.boards[0].state;s.landmarks.set('1,0',{q:1,r:0,type:'boss',claimed:false});c.exploration.claim(s,1,0);send(0,'ready',{value:true});send(1,'ready',{value:true});assert.equal(m.phase,'combat');assert.equal(s.landmarks.get('1,0').status,'pending');assert.equal(s.enemies.some(e=>e.landmarkId==='1,0'),false);
+});
+
+test('shared guardian loot gives each player one offer per guardian without duplicating local loot',()=>{
+ const h=setup();buildBoth(h);const {c,m,send}=h;send(0,'ready',{value:true});send(1,'ready',{value:true});
+ for(const {state:s} of m.boards){s.spawnQueue=[];s.pendingSpawns=0;s.enemies=[];s.bossRewards=['1,0'];}
+ c.duo.tick(m);for(const {state:s} of m.boards){assert.equal(s.bossRewards.length,2);assert.equal(new Set(s.bossRewards).size,2);assert.equal(s.phase,'bossReward');assert.equal(s.rewardOffer.kind,'boss');}
+ assert.notEqual(m.boards[0].state.rewardOffer.id,m.boards[1].state.rewardOffer.id);const restored=c.duo.restore(json(c.duo.capture(m)));
+ for(let player=0;player<2;player++)for(let reward=0;reward<2;reward++){
+   const s=m.boards[player].state,offer=s.rewardOffer,before=s.deck.length;
+   const packet={id:'loot-'+player+'-'+reward,wave:m.wave,action:'reward',payload:{offerId:offer.id,index:0}};
+   assert.ok(c.duo.command(m,player,packet));assert.ok(c.duo.command(restored,player,packet));assert.equal(s.deck.length,before+1);assert.equal(c.duo.command(m,player,packet),false);
+ }
+ for(const {state:s} of m.boards)assert.equal(s.bossRewards.length,0);assert.deepEqual(json(c.duo.capture(m)),json(c.duo.capture(restored)));c.duo.tick(m);assert.equal(m.boards[0].state.bossRewards.length,0);
+});
+test('periodic boss loot is not shared with the other board',()=>{
+ const h=setup();buildBoth(h);const {c,m,send}=h;send(0,'ready',{value:true});send(1,'ready',{value:true});for(const {state:s} of m.boards){s.spawnQueue=[];s.pendingSpawns=0;s.enemies=[];}m.boards[0].state.bossRewards=['wave:15'];c.duo.tick(m);assert.equal(m.boards[0].state.rewardOffer.kind,'boss');assert.equal(m.boards[1].state.rewardOffer,undefined);
+});

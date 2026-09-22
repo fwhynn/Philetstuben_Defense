@@ -469,3 +469,40 @@ Nächste offene Arbeit: kontrollierte Versionswechsel/Wartungsmodus, danach Lief
 Lokaler Wartungsmodus umgesetzt: neue Räume/Beitritte sperren, beide Kämpfe und Verbindungsfristen pausieren, sofort sichern, ausdrücklich fortsetzen. Steuerung über lokale Konsole oder DUO_MAINTENANCE=1 beim Start; sichtbarer Wartungsstatus in Spiel und Lobby. Tests decken mehrstündige Wartung, wiederholte Bestätigungen, wartende Lobby und Prozessneustart ohne Aufholsimulation ab. Checkpoints bleiben versionsgeprüft; inkompatible Dateien werden nicht automatisch migriert. Keine Internet-Freigabe.
 
 Nächster spielerischer Schritt: Lieferungen nach jeder fünften gemeinsamen Welle gemäß Abschnitt 3.5, danach Wächter-Zustimmung und gemeinsame Ergebnisse. Produktionsbetrieb, automatisierter Release-/Rollback-Ablauf, Lastabnahme und dauerhafte Ergebnisabrechnung bleiben offen.
+
+### Fortschritt: Partner-Lieferungen nach jeder fünften Welle
+
+Im lokalen und servergesteuerten Duo-Prototyp umgesetzt. Nach jeder fünften gemeinsam überstandenen Welle erledigen beide zunächst ihre persönlichen Belohnungen. Danach schenkt jeder dem anderen kostenlos 20 Gold oder eine von zwei Hexkarten. Die Karten berücksichtigen die Turmauswahl des Empfängers, schließen Rettungskarten aus und verwenden eigene vorläufige Duo-Gewichte: Gewöhnlich 55, Ungewöhnlich 30, Selten 15. Betrag, Intervall und Gewichte stehen zentral in HexDuoSession.DELIVERY.
+
+Eine geschenkte Karte landet im Deck und oben auf dem Nachziehstapel. Beide Lieferungen müssen zugestellt sein, bevor neue Hände gezogen werden; eine zusätzliche Empfängerbestätigung ist nicht nötig. Der Server akzeptiert nur die eigene gespeicherte Auswahl, keine frei angegebenen Goldbeträge oder Karten. Wiederholungen, verlorene Bestätigungen und Wiederverbindungen dürfen keine zweite Zustellung auslösen. Die Partneransicht enthält nur den Zustellstatus, nicht dessen noch offene Auswahl.
+
+Duo-Checkpointversion 3 speichert Angebote und Zustellungen. Version 2 wird ausdrücklich übernommen, ohne vergangene Lieferungen nachträglich auszuzahlen; bestehende Runs erhalten das erste Geschenk beim nächsten gemeinsam abgeschlossenen Fünfer-Meilenstein. Andere inkompatible Versionen bleiben gesperrt. Automatisierte Tests prüfen Belohnungsreihenfolge, Ziehbarriere, verschiedene Empfänger-Turmauswahlen, Teilzustellung/Neustart, Manipulationsversuche und HTTP-Wiederholung. Kein Browser-/Gerätetest.
+
+Nächste offene Schritte: gemeinsame Zustimmung vor Wächterkämpfen, gemeinsamer Ergebnisbildschirm und dauerhafte, gegen doppelte Auszahlung abgesicherte Diamantenabrechnung. Danach produktiver Transport/Hosting, Betriebs- und Lastabnahme sowie Freunde-Beta.
+
+### Fortschritt: gemeinsame Wächter-Freigabe
+
+Neu angeschlossene Wächter warten im Duo auf zwei Zustimmungen. Beide Spieler können ihre Zustimmung vor dem Wellenstart zurücknehmen; der Wächter bleibt dann für später erhalten. Eine Änderung setzt die Wellenbereitschaft zurück, damit niemand mit einer veralteten Auswahl startet. Freigegebene Wächter kämpfen nur auf der Entdeckerkarte in der nächsten gemeinsamen Welle. Normale Bosswellen bleiben unverändert. Stimmen liegen im gespeicherten Landmark-Zustand und werden über den servervalidierten guardian-Befehl geändert. Bestehende, bereits aktivierte Wächter in alten Spielständen bleiben aktiv.
+
+Noch offen: gemeinsame Wächter-Belohnungen für beide Spieler, gemeinsamer Ergebnisbildschirm und dauerhafte Diamantenabrechnung, anschließend Hosting und Betriebsabnahme.
+
+### Aktueller Stand und Weg zum Duo-MVP
+
+Gemeinsame Erkundungswächter-Beute umgesetzt: nach gemeinsamem Wellenabschluss erhält jeder Spieler genau ein eigenes Angebot je besiegtem Wächter, passend zur eigenen Turmauswahl. Herkunftskarte und Koordinate unterscheiden auch gleich liegende Wächter auf beiden Karten. Die lokale Auswahl wird ersetzt, nicht zusätzlich ausgeschüttet. Kill-Gold bleibt beim Kampf auf der Entdeckerkarte. Reguläre Wellenboss-Belohnungen bleiben lokal. Offene Belohnungen sind bereits Teil der wiederherstellbaren Zwischenstände und verwenden die bestehende idempotente Befehlsprüfung.
+
+Spielbarer lokaler/servergesteuerter Prototyp: private Lobby mit Code/Link, zwei eigene Karten mit Partneransicht, gemeinsames Leben, gemeinsame Wellenbereitschaft, Portal-Verstärkung, Lieferungen, Wächterzustimmung und gemeinsame Wächter-Beute. Serverseitige Befehlsprüfung, Wiederverbindung, Zwischenstände, Sitzungsübernahme, Verlassen und Wartungsmodus sind implementiert.
+
+Bis zu einem online testbaren Freunde-MVP bleiben in dieser Reihenfolge offen:
+1. Gemeinsamer Abschluss mit Sieg/Niederlage, Unterstützungs- und Turmstatistik, Rückkehr zur Lobby und sauberem Neustart.
+2. Dauerhafte Ergebnisablage und einmalige Diamantenabrechnung inklusive Wiederholungen/Neustart; Profilzuordnung und Umgang mit lokalem Spielstand festlegen.
+3. Serverbetrieb mit HTTPS, produktivem Transport, Konfiguration, Protokollierung und Backup/Restore; öffentliche Adressen und Kosten hängen vom gewählten Hosting ab.
+4. Gesamtdurchlauf mit zwei Clients einschließlich längerer Partien, Verbindungsabbruch während Belohnungen, Wartung, Versionswechsel und Ergebniswiederaufnahme.
+5. Browser-/Geräteabnahme mit zwei Spielern und begrenzte Freunde-Beta. Automatische Node-/HTTP-Tests ersetzen diese Abnahme nicht.
+
+Aktuell kein öffentlich freigegebener Online-MVP. Konten/Freundeslisten, Matchmaking und Ranglisten sind für den ersten privaten Einladungs-MVP nicht erforderlich.
+
+## Online-MVP: Abschluss und Betriebsübergabe (22.09.2026)
+
+Gemeinsames Ergebnis bei Niederlage/Welle 35, Turm- und Unterstützungsstatistik, beidseitiger Neustart und dauerhaft gespeicherte Ergebnisbelege sind umgesetzt. Das lokale Profil verbucht jeden Beleg einmal; Export/Import erhält diese Kennungen. HTTPS-/Container-Vorlage, privater Public-Build, Healthcheck, schreibfreier Online-Prüfbefehl und validierte Backup-Kopie sind vorbereitet.
+
+Verbindlicher aktueller Stand, Profilmodell, Betriebsbefehle und verbleibende Aufgaben: [Online-MVP-Übergabe](ONLINE_MVP_HANDOFF.md). Frühere „noch offen“-Listen oben sind Fortschrittsprotokolle. Live-Installation, TLS und Prüfung auf echten Browsern/Geräten sind noch offen. Die Domain ist bekannt; Hosting/Deployment-Zugang noch nicht. Keine öffentliche Freigabe behauptet.

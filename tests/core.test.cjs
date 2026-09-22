@@ -155,9 +155,9 @@ test('a tower can be selected and bought during a wave and immediately participa
   a.state.phase = 'build'; a.state.waveRunning = false; sellSelectedTower(); assert.equal(a.state.gold, 57); assert.equal(tile.towers[0], null);
 });
 
-test('tower purchases remain blocked in placement, reward and game over phases', () => {
+test('tower purchases remain blocked in reward and game over phases', () => {
   const { a, buyTower } = load(), tile = { q: 1, r: 0, slots: 1, towers: [null] }; a.state.map.set('1,0', tile);
-  for (const phase of ['place', 'reward', 'gameover']) {
+  for (const phase of ['reward', 'gameover']) {
     a.state.phase = phase; a.state.selectedSlot = { q: 1, r: 0, index: 0 }; buyTower('archer'); a.state.selectedTower = { q: 1, r: 0, index: 0 }; assert.equal(tile.towers[0], null); assert.equal(a.state.gold, 70);
   }
 });
@@ -365,7 +365,7 @@ for (const effect of ['card', 'epic', 'legendary']) test('shrine ' + effect + ' 
   a.state.landmarks = new Map([['1,0', { q: 1, r: 0, type: 'shrine', shrineEffect: effect, claimed: false }]]); a.state.hand = ['straight']; a.state.selectedCard = 0; a.state.rotation = 0; a.state.phase = 'place'; elements.get('autoStart').checked = true;
   const deck = a.state.deck.length, draw = JSON.stringify(a.state.drawPile), gold = a.state.gold, before = elements.get('rewardChoices').children.length; a.placeTile(1, 0);
   assert.equal(a.state.phase, 'shrineReward'); assert.equal(timers.size, 0); assert.ok(elements.get('rewardTitle').textContent.includes(effect === 'legendary' ? 'Legendary-Karte' : effect === 'epic' ? 'Epic-Karte' : 'Zusätzliche Karte'));
-  const choice = elements.get('rewardChoices').children[before]; choice.listeners.click(); assert.equal(a.state.deck.length, deck + 1); assert.equal(a.state.phase, 'build'); assert.equal(a.state.gold, gold); assert.equal(a.state.hand.length, 0); assert.equal(JSON.stringify(a.state.drawPile), draw); assert.equal(timers.size, 1);
+  const choice = elements.get('rewardChoices').children[before]; choice.listeners.click(); assert.equal(a.state.deck.length, deck + 1); assert.equal(a.state.phase, 'build'); assert.equal(a.state.gold, gold); assert.equal(a.state.hand.length, 0); assert.equal(JSON.stringify(a.state.drawPile.slice(0,-1)), draw); assert.equal(a.state.drawPile.at(-1),a.state.deck.at(-1)); assert.equal(timers.size, 1);
   if (effect !== 'card') assert.equal(a.CARD_LIBRARY[a.state.deck.at(-1)].rarity, effect === 'legendary' ? 'Legendary' : 'Epic'); choice.listeners.click(); assert.equal(a.state.deck.length, deck + 1);
 });
 test('skipping a shrine card reward consumes it without changing the deck', () => {
@@ -394,7 +394,7 @@ test('selling a fully upgraded older tower refunds half of all investment', () =
 });
 test('sale uses discounted investment, rounds down and stays available in other live phases', () => {
   const context = {}; vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../classes/data.js'), 'utf8') + ';globalThis.refund=HexData.towerRefund;', context);
-  const tower = { paid: 103, builtOnWave: 0 }; for (const phase of ['place', 'wave', 'reward', 'removal', 'shrineReward', 'bossReward']) assert.equal(context.refund({ hp: 20, phase, wave: 0, waveRunning: phase === 'wave' }, tower).amount, 51);
+  const tower = { paid: 103, builtOnWave: 0 }; for (const phase of ['wave', 'reward', 'removal', 'shrineReward', 'bossReward']) assert.equal(context.refund({ hp: 20, phase, wave: 0, waveRunning: phase === 'wave' }, tower).amount, 51);
   assert.equal(context.refund({ hp: 20, phase: 'build', wave: 0, waveRunning: false }, tower).amount, 103); assert.equal(context.refund({ hp: 0, phase: 'gameover', wave: 0 }, tower), null);
 });
 

@@ -1,0 +1,17 @@
+.git
+node_modules
+*.log
+.env
+.env.*
+*.tmp
+coverage
+server-data
+backups
+public-build
+
+.deploy-webhook-secret
+.local
+.claude
+.codex
+.agents
+webhook.php

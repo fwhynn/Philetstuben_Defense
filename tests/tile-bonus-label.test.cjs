@@ -1,0 +1,2 @@
+const {test}=require('node:test'),assert=require('node:assert/strict'),loadCore=require('../headless-core.cjs');
+test('Dragon Bend displays both bonuses and applies both to its tower',()=>{const {data}=loadCore(),label=data.tileBonusLabel(data.CARD_LIBRARY.warBend);assert.match(label,/40 % Schaden/);assert.match(label,/20 % Reichweite/);const plain=data.towerDefinition({type:'archer'}),buffed=data.towerDefinition({type:'archer',tileType:'warBend'});assert.equal(buffed.damage,plain.damage*1.4);assert.equal(buffed.range,plain.range*1.2);});

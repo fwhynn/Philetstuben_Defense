@@ -4,7 +4,7 @@
  */
 const HexRunSnapshot=(()=>{
   const VERSION=1,RULES='duo-foundation-4';
-  const ui=new Set(['duoPortal','buildingTarget','previewBuilding','selectedCard','rotation','hoveredPlacement','showHexGrid','showSlotHints','hoverBuilding','selectedSlot','selectedSlots','selectedTower','selectedTowers','selectedBuilding','selectedBase','previewTower','dragTower','dragSlot','highlightBiome','biomeIntro','showUpgradeStatus','inspectEndMap']);
+  const ui=new Set(['duoPortal','buildingTarget','previewBuilding','selectedCard','rotation','hoveredPlacement','showHexGrid','showSlotHints','hoverBuilding','selectedSlot','selectedSlots','selectedTower','selectedTowers','selectedBuilding','selectedBase','previewTower','previewUpgrade','dragTower','dragSlot','highlightBiome','biomeIntro','showUpgradeStatus','inspectEndMap']);
   function encode(value,stack=new Set()){
     if(value===undefined)return ['undefined'];
     if(typeof value==='number'&&!Number.isFinite(value))return ['number',String(value)];
@@ -36,8 +36,9 @@ const HexRunSnapshot=(()=>{
     }
   }
   function supported(state){
+    if(state.phase==='duoDelivery')return state.duoMode===true&&state.duoDeliveryPending===true;
     if(state.celebrationActive&&!state.activeCelebration)return false;
-    if(['victory','wave','build','duoWait'].includes(state.phase))return true;
+    if(['gameover','victory','wave','build','duoWait'].includes(state.phase))return true;
     if(state.phase==='place')return Array.isArray(state.hand)&&state.hand.every(id=>id==='rescue'?!!state.rescueCard:!!HexData.CARD_LIBRARY[id]);
     return ['reward','bossReward','shrineReward','removal'].includes(state.phase)&&state.rewardOffer?.phase===state.phase&&state.rewardOffer.wave===state.wave;
   }

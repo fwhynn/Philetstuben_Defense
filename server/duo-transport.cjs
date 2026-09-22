@@ -1,19 +1,21 @@
 'use strict';
 const http=require('node:http'),fs=require('node:fs'),path=require('node:path');
 const root=path.resolve(__dirname,'..');
-const assets=new Set(["classes/translations.js","classes/i18n.js","duo-lobby.html","duo-lobby.js","duo-prototype.html","classes/duo-prototype.js","duo-client.js","classes/random.js","classes/biomes.js","classes/data.js","classes/map.js","classes/heroes.js","classes/waves.js","classes/exploration.js","classes/placement-commands.js","classes/run-flow.js","classes/run-session.js","classes/buildings.js","classes/tower-commands.js","classes/deck.js","classes/rewards.js","classes/combat.js","classes/run-runtime.js","classes/run-snapshot.js","classes/duo-session.js","classes/camera.js","classes/svg-renderer.js"]);
-function createTransport(room,{browser=false,autoTick=false}={}){
+const assets=new Set(["classes/profile.js","classes/translations.js","classes/i18n.js","duo-lobby.html","duo-lobby.js","duo-prototype.html","classes/duo-prototype.js","duo-client.js","classes/random.js","classes/biomes.js","classes/data.js","classes/map.js","classes/heroes.js","classes/waves.js","classes/exploration.js","classes/placement-commands.js","classes/run-flow.js","classes/run-session.js","classes/buildings.js","classes/tower-commands.js","classes/deck.js","classes/rewards.js","classes/combat.js","classes/run-runtime.js","classes/run-snapshot.js","classes/duo-session.js","classes/camera.js","classes/svg-renderer.js"]);
+function createTransport(room,{browser=false,autoTick=false,publicOrigin=null}={}){
  const attempts=new Map();
  const server=http.createServer(async(req,res)=>{
   const send=(status,value)=>{if(res.writableEnded)return;res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(value));};
   const origin=req.headers.origin;
-  if(origin&&(!browser||origin!=='http://'+req.headers.host))return send(403,{error:'cross-origin-disabled'});
+  if(origin&&(!browser||origin!==(publicOrigin||'http://'+req.headers.host)))return send(403,{error:'cross-origin-disabled'});
   if(browser&&req.method==='GET'){
    const file=req.url==='/'?(room.create?'duo-lobby.html':'duo-prototype.html'):req.url.slice(1);
    if(assets.has(file)){res.writeHead(200,{'Content-Type':file.endsWith('.html')?'text/html; charset=utf-8':'text/javascript; charset=utf-8','Cache-Control':'no-store','Referrer-Policy':'no-referrer','X-Content-Type-Options':'nosniff'});return res.end(fs.readFileSync(path.join(root,file)));}
   }
+  if(req.method==='GET'&&req.url==='/healthz')return send(room.healthy===false?503:200,{ok:room.healthy!==false});
   const token=req.headers.authorization?.replace(/^Bearer /,'');
   if(room.healthy===false)return send(503,{error:'storage-unavailable'});
+  if(req.method==='GET'&&req.url==='/results'&&room.receipts){const receipts=room.receipts(token);return receipts?send(200,{receipts}):send(401,{error:'unauthorized'});}
   const lobbyAction=req.method==='POST'&&room.create&&['/lobby/create','/lobby/join'].includes(req.url);
   if(!lobbyAction&&(!token||!room.view(token)))return send(401,{error:'unauthorized'});
   if(lobbyAction){const ip=req.socket.remoteAddress,time=Date.now(),old=attempts.get(ip);if(!old||time-old.at>60000)attempts.set(ip,{at:time,count:1});else if(++old.count>20)return send(429,{error:'rate-limit'});if(attempts.size>1024)for(const [key,value] of attempts)if(time-value.at>60000)attempts.delete(key);}
