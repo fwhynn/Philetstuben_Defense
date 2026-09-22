@@ -40,7 +40,16 @@ Portal-Verstärkung im lokalen Prototyp umgesetzt: freien Slot reservieren, eige
 
 Map-Umschalter umgesetzt: eine große Map, Auswahl von Spieler 1/2, Partnerphase/Bereitschaft und Hinweis auf unterwegs befindliche Verstärkung. Beide Runs simulieren weiter; Kamera pro Map bleibt erhalten. Der lokale Prototyp bleibt endlos und schaltet keinen Solo-Profilfortschritt frei.
 
-Nächster Arbeitsschritt: Server-Command-Grenze mit verbindungsgebundener Spielerzuordnung und validierten Eingaben für einen echten Zwei-Client-Test vorbereiten. Lobby/Einladungen, Wiederverbinden und Hosting folgen. Noch keine spielbare Onlinepartie.
+
+Duo-Servergrundlage umgesetzt: server/duo-room.cjs bindet Sitzungen an feste Spielerplätze; exakte Aktionsschemata, Match-Epoche, Sequenz, Wave/Phase und begrenzte Rate. Netzwerkansichten verbergen Seeds, Ziehreihenfolgen, Partnerhand und unerforschte Eventtypen; Angebots-IDs werden gehasht. Lokaler HTTP-Testadapter mit zwei echten Clients. Noch keine Online-Spieloberfläche, automatische Ticksteuerung, Lobby, Einladungen, Reconnect oder Hosting. 253 Tests bestanden, keine Browsertests.
+
+
+- Duo-Serverprototyp mit Frontend verbunden: node server/start-duo.cjs startet auf 127.0.0.1:8090 und gibt zwei Spielerlinks aus. Server simuliert automatisch in 50-ms-Schritten; Client zeigt Netzwerkansicht, eigene Bauaktionen und lesbare Partner-Map. Legale Platzierungen und Biome vom Server. Derselbe SVG-Renderer, keine Client-Kampfberechnung. Verlorene Kaufbestätigung wird mit identischer Sequenz wiederholt. Netzwerkmodus ohne lokale Reset-/Checkpoint-/Tempokontrolle; vorerst 1× und feste Start-Loadouts. Noch keine Internet-Lobby oder Neustart-Persistenz. 256 Tests bestanden, keine Browsertests.
+
+
+- Duo-Lobbys umgesetzt: Startseite mit Erstellen/Beitreten, zehnstelligem Einladungscode und kopierbarem Link im Spiel. Zwei feste Plätze, Sperre von Aktionen vor Partnerbeitritt, atomarer Beitritt und idempotente Wiederholung bei verlorener Antwort. Maximal acht getrennte Räume; Inaktivitätsablauf und begrenzte Anfragerate. Launcher gibt jetzt Lobby-Adresse aus, keine Sitzungstokens. Noch nur Loopback, kein Internet-Hosting oder dauerhafter Reconnect. 260 Tests bestanden, keine Browsertests.
+
+Nächster Arbeitsschritt: Trennungs-/Wiederverbindungsregeln samt sichtbarem Verbindungsstatus und Wiederbeitrittsfenster umsetzen. Die aktuelle HTTP-Verbindung ist ein lokaler Entwicklungsadapter, noch kein Produktionshosting. Lobby/Einladungen, Wiederverbinden und Hosting folgen. Noch keine spielbare Onlinepartie.
 
 ## 2. Was im vorhandenen Projekt bereits hilft – und was fehlt
 
@@ -429,6 +438,6 @@ Dafür wiederverwendbar: Lobby/Einladung, zwei getrennte Boards, Besitzprüfung,
 
 ## 15. Nächster konkreter Schritt
 
-**Etappe 3 vorbereiten:** Server-Command-Grenze und echter Zwei-Client-Test. Map-Umschalter mit Partnerstatus ist lokal umgesetzt. Team-HP, Bereitschaft, gemeinsamer Abschluss und Portal-Verstärkung sind lokal umgesetzt. Vor Online-Freigabe fehlen insbesondere verbindungsgebundene Besitzprüfung, gehärtete Eingabevalidierung, Netzwerktransport, Lobby und Wiederverbinden.
+**Etappe 5 vorbereiten:** Trennungs-/Wiederverbindungsregeln. Private Lobby, begrenzte Raumverwaltung und Einladung sind lokal umgesetzt. Etappe 3 ist als lokaler HTTP-Prototyp mit Frontend und automatischem Tick spielbar; produktiven Transport und Lastverhalten vor Internet-Freigabe prüfen. Map-Umschalter mit Partnerstatus ist lokal umgesetzt. Team-HP, Bereitschaft, gemeinsamer Abschluss und Portal-Verstärkung sind lokal umgesetzt. Vor Online-Freigabe fehlen insbesondere produktiver Transport, Ticksteuerung, Frontend-Anbindung, Lobby und Wiederverbinden sowie weitere Last-/Missbrauchstests.
 
 Dieses Dokument wurde anhand des aktuellen Quellcodes und offizieller Framework-/Betriebsdokumentation erstellt. Bei Erstellung des Plans wurden keine Multiplayer-Komponenten implementiert. Der inzwischen umgesetzte lokale Prototyp ist oben dokumentiert; weiterhin keine Dienste eingerichtet und keine Browsertests ausgeführt.

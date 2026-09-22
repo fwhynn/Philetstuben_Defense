@@ -1,0 +1,14 @@
+/* Network adapter: presentation state only; never ticks or mutates the server simulation. */
+const HexDuoClient=(()=>{
+ function presentation(view,old){return {...view,boards:view.boards.map((board,i)=>{const previous=old?.boards[i]?.state;return {state:{...board,remoteView:true,showSlotHints:true,duoPortal:view.portals[i],selectedSlot:previous?.selectedSlot,selectedTower:previous?.selectedTower,selectedBuilding:previous?.selectedBuilding,hp:view.hp,maxHp:view.maxHp,hand:board.hand||[],deck:Object.entries(board.deckCounts||{}).flatMap(([id,n])=>Array(n).fill(id)),map:new Map(board.map.map(t=>[t.q+','+t.r,t])),landmarks:new Map(board.landmarks.map(t=>[t.q+','+t.r,t])),towerLoadout:board.loadout||[],ultimateUnlocks:board.ultimateUnlocks||[],buildingUnlocks:board.buildingUnlocks||[],waveRunning:board.phase==='wave',celebrationActive:!!board.celebration,activeCelebration:board.celebration,projectiles:board.projectiles||[],selectedCard:previous?.selectedCard||0,rotation:previous?.rotation||0,hoveredPlacement:previous?.hoveredPlacement}};})};}
+ function create({token,fetchImpl=fetch,onView=()=>{},onStatus=()=>{}}){
+  let view=null,busy=false,stopped=false,timer;
+  async function request(path,packet){const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),5000);try{const response=await fetchImpl(path,{method:packet?'POST':'GET',headers:{Authorization:'Bearer '+token,...(packet?{'Content-Type':'application/json'}:{})},...(packet?{body:JSON.stringify(packet)}:{}),signal:controller.signal});if(!response.ok)throw Error('Verbindung fehlgeschlagen ('+response.status+').');return await response.json();}finally{clearTimeout(timeout);}}
+  async function refresh(){const next=await request('/state');if(next.protocol!==1)throw Error('Unpassende Serverversion.');if(!view||view.epoch!==next.epoch||(next.revision>view.revision||next.revision===view.revision&&next.next>=view.next)){view=next;onView(view);}return view;}
+  async function send(action,payload={}){if(busy||!view)throw Error('Bitte auf die Serverbestätigung warten.');busy=true;const packet={epoch:view.epoch,sequence:view.next,wave:view.wave,phase:view.boards[view.player].phase,action,payload};try{let result;for(let attempt=0;attempt<2;attempt++){try{result=await request('/command',packet);break;}catch(error){if(attempt)throw error;}}await refresh();if(!result.ok)throw Error('Aktion abgelehnt: '+result.reason);return result;}finally{busy=false;}}
+  async function poll(){if(stopped)return;try{if(!busy){await refresh();onStatus('Verbunden · Server steuert den Run');}}catch(error){onStatus(error.message+' Neuer Versuch läuft …');}finally{if(!stopped)timer=setTimeout(poll,100);}}
+  return {send,start(){stopped=false;poll();},stop(){stopped=true;clearTimeout(timer);},get player(){return view?.player;},get busy(){return busy;}};
+ }
+ return {create,presentation};
+})();
+if(typeof module!=='undefined')module.exports=HexDuoClient;

@@ -14,7 +14,7 @@ const HexBiomes=(()=>{
     const sector=Math.floor(((angle+rotation+bend)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)/(Math.PI*2/3));
     return ['desert','storm','ash'][sector];
   }
-  const forTile=(state,tile)=>at(state.challengeDay?null:state.biomeSeed,tile.q,tile.r);
+  const forTile=(state,tile)=>state.remoteView?(tile.biome||'grass'):at(state.challengeDay?null:state.biomeSeed,tile.q,tile.r);
   function atWorld(state,x,y){
     const r=y/(HexMap.HEX*1.5),q=x/(HexMap.HEX*Math.sqrt(3))-r/2,s=-q-r;
     let rq=Math.round(q),rr=Math.round(r),rs=Math.round(s);
