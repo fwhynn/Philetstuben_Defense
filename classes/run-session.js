@@ -50,6 +50,6 @@ const HexRunSession=(()=>{
     else if(result==='defeat'){state.hp=0;state.waveRunning=false;state.phase='gameover';state.enemies=[];state.projectiles=[];state.spawnQueue=[];state.pendingSpawns=0;}
     return result;
   }
-  function endless(state,random){if(state.phase!=='victory'||!state.campaignWon)return false;state.endless=true;waveRewards(state,random);return true;}
+  function endless(state,random){if(state.phase!=='victory'||!(state.campaignWon||state.challengeDay&&state.challengeWon))return false;state.endless=true;waveRewards(state,random);return true;}
   return {endless,create,place,choose,finish,advance,preparation,waveRewards,shrine,promoteCelebration,acknowledge};
 })();

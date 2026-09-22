@@ -17,10 +17,12 @@ function createTransport(room,{browser=false,autoTick=false}={}){
   const lobbyAction=req.method==='POST'&&room.create&&['/lobby/create','/lobby/join'].includes(req.url);
   if(!lobbyAction&&(!token||!room.view(token)))return send(401,{error:'unauthorized'});
   if(lobbyAction){const ip=req.socket.remoteAddress,time=Date.now(),old=attempts.get(ip);if(!old||time-old.at>60000)attempts.set(ip,{at:time,count:1});else if(++old.count>20)return send(429,{error:'rate-limit'});if(attempts.size>1024)for(const [key,value] of attempts)if(time-value.at>60000)attempts.delete(key);}
+  const sessionAction=req.method==='POST'&&req.url==='/session'&&room.claim,clientId=req.headers['x-duo-client'];
+  if(!lobbyAction&&!sessionAction&&room.claim){let access;try{access=room.claim(token,clientId);}catch{return send(503,{error:'storage-unavailable'});}if(!access.ok)return send(409,{error:access.reason});}
   if(req.method==='GET'&&req.url==='/state'){room.touch?.(token);return send(200,room.view(token));}
-  if(!lobbyAction&&(req.method!=='POST'||req.url!=='/command'))return send(404,{error:'not-found'});
+  if(!lobbyAction&&!sessionAction&&(req.method!=='POST'||req.url!=='/command'))return send(404,{error:'not-found'});
   let length=0,chunks=[];
-  try{for await(const chunk of req){length+=chunk.length;if(length>8192){send(413,{error:'too-large'});req.resume();return;}chunks.push(chunk);}const packet=JSON.parse(Buffer.concat(chunks).toString('utf8'));send(200,lobbyAction?(req.url==='/lobby/create'?room.create(packet):room.join(packet)):room.receive(token,packet));}
+  try{for await(const chunk of req){length+=chunk.length;if(length>8192){send(413,{error:'too-large'});req.resume();return;}chunks.push(chunk);}const packet=JSON.parse(Buffer.concat(chunks).toString('utf8'));if(sessionAction){if(!packet||Array.isArray(packet)||Object.keys(packet).length!==1||!['takeover','leave'].includes(packet.action))return send(400,{error:'invalid-session-action'});const access=room.claim(token,clientId,packet.action==='takeover');if(!access.ok)return send(409,{error:access.reason});return send(200,packet.action==='leave'?room.leave(token):{ok:true});}if(!lobbyAction&&room.claim){const access=room.claim(token,clientId);if(!access.ok)return send(409,{error:access.reason});}send(200,lobbyAction?(req.url==='/lobby/create'?room.create(packet):room.join(packet)):room.receive(token,packet));}
   catch{send(room.healthy===false?503:400,{error:room.healthy===false?'storage-unavailable':'invalid-json'});}
  });
  server.requestTimeout=5000;server.headersTimeout=5000;

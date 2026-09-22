@@ -30,19 +30,36 @@ function createRoom({seed=crypto.randomUUID(),loadouts,now=()=>Date.now(),discon
   const core=loadCore(),match=snapshot?core.duo.restore(snapshot.match):core.duo.create(seed,loadouts),epoch=snapshot?.epoch||crypto.randomUUID(),seats=snapshot?copy(snapshot.seats):[null,null];let revision=(snapshot?.revision||0)+1;
   // Restore disconnected. Both original seats must return before combat resumes.
   if(snapshot)for(const seat of seats)if(seat){seat.seen=now()-disconnectMs;seat.at=now();seat.tokens=40;}
-  const serverId=crypto.randomUUID();let connectionKey='',expired=false;
+  const serverId=crypto.randomUUID();let connectionKey='',expired=false,ended=null,maintenanceAt=null;
+  const presenceNow=()=>maintenanceAt??now();
+  function setMaintenance(enabled){if(typeof enabled!=='boolean')throw Error('Invalid maintenance state');if(enabled&&maintenanceAt===null)maintenanceAt=now();else if(!enabled&&maintenanceAt!==null){const elapsed=now()-maintenanceAt;for(const s of seats)if(s)s.seen+=Math.max(0,elapsed);maintenanceAt=null;}connection();}
   function connection(){
-    const time=now(),players=seats.map(s=>!s?'waiting':time-s.seen>=disconnectMs?'disconnected':'connected');
+    const time=presenceNow(),players=seats.map(s=>!s?'waiting':time-s.seen>=disconnectMs?'disconnected':'connected');
     const missing=seats.filter(s=>s&&time-s.seen>=disconnectMs);
     const remaining=missing.length?Math.max(0,Math.ceil((Math.min(...missing.map(s=>s.seen+disconnectMs+reconnectMs))-time)/1000)):null;
     if(seats.every(Boolean)&&remaining===0)expired=true;
-    const paused=seats.every(Boolean)&&missing.length>0||expired;
-    const status={players,paused,expired,remainingSeconds:paused?remaining:null};
+    const paused=seats.every(Boolean)&&missing.length>0||expired||!!ended||maintenanceAt!==null;
+    const status={players,paused,expired,maintenance:maintenanceAt!==null,remainingSeconds:paused?remaining:null,...(ended?{ended:{...ended}}:{})};
     const key=JSON.stringify(status);if(key!==connectionKey){connectionKey=key;revision++;}return status;
   }
   function connect(player){if(!integer(player,0,1)||seats[player])throw Error('Seat unavailable');const token=crypto.randomBytes(32).toString('hex');seats[player]={token,next:1,last:null,tokens:40,at:now(),seen:now()};if(seats.every(Boolean))for(const s of seats)s.seen=now();connection();return {token,epoch,player};}
-  function touch(token){const player=seat(token);if(player<0)return false;connection();if(expired)return false;seats[player].seen=now();connection();return true;}
+  function touch(token){const player=seat(token);if(player<0)return false;connection();if(expired)return false;seats[player].seen=presenceNow();connection();return true;}
   function seat(token){return seats.findIndex(s=>s&&s.token===token);}
+  function claim(token,clientId,takeover=false){
+    const player=seat(token);if(player<0)return {ok:false,reason:'unauthorized'};
+    const session=seats[player];
+    if(clientId===undefined&&!session.clientId)return {ok:true,changed:false};
+    if(typeof clientId!=='string'||!/^[a-f0-9-]{36}$/.test(clientId))return {ok:false,reason:'invalid-client'};
+    if(session.clientId&&session.clientId!==clientId&&!takeover)return {ok:false,reason:'session-replaced'};
+    if(session.clientId===clientId)return {ok:true,changed:false};
+    session.clientId=clientId;revision++;return {ok:true,changed:true};
+  }
+  function leave(token){
+    const player=seat(token);if(player<0)return {ok:false,reason:'unauthorized'};
+    if(ended)return {ok:true,duplicate:true};
+    ended={reason:'player-left',player};match.ready=[false,false];revision++;
+    return {ok:true};
+  }
   function receive(token,packet){
     const player=seat(token);if(player<0)return {ok:false,reason:'unauthorized'};
     const session=seats[player],time=now();session.tokens=Math.min(40,session.tokens+Math.max(0,time-session.at)*.02);session.at=time;
@@ -53,7 +70,7 @@ function createRoom({seed=crypto.randomUUID(),loadouts,now=()=>Date.now(),discon
     if(packet.sequence!==session.next)return {ok:false,reason:'sequence',next:session.next};
     let result;
     const presence=connection();
-    if(presence.paused)result={ok:false,reason:presence.expired?'reconnect-expired':'disconnected'};
+    if(presence.paused)result={ok:false,reason:ended?'match-ended':presence.maintenance?'maintenance':presence.expired?'reconnect-expired':'disconnected'};
     else if(packet.wave!==match.wave||packet.phase!==match.boards[player].state.phase)result={ok:false,reason:'stale'};
     else {let payload=packet.payload;if(packet.action==='reward'){const offer=match.boards[player].state.rewardOffer;payload={...payload,offerId:offer&&offerId(offer.id)===payload.offerId?offer.id:''};}const ok=core.duo.command(match,player,{id:epoch+':'+player+':'+packet.sequence,wave:packet.wave,action:packet.action,payload});if(ok)revision++;result={ok,reason:ok?null:'illegal'};}
     result={...result,sequence:packet.sequence,next:++session.next,revision};session.last={fingerprint,result};return {...result};
@@ -72,7 +89,7 @@ function createRoom({seed=crypto.randomUUID(),loadouts,now=()=>Date.now(),discon
     }));
     return {protocol:1,serverId,epoch,revision,player,connection:presence,next:seats[player].next,hp:match.hp,maxHp:match.maxHp,wave:match.wave,phase:match.phase,ready:[...match.ready],finished:[...match.finished],portals:copy(match.portals),reinforcements:copy(match.reinforcements),pendingHelp:match.pendingHelp.map(h=>h?{at:h.at}:null),support:copy(match.support),boards};
   }
-  function checkpoint(){if(expired||match.phase==='gameover')return null;return {format:'autohex-room',version:1,ruleset:RULESET,epoch,revision,seats:copy(seats),match:core.duo.capture(match)};}
-  return {connect,touch,receive,view,checkpoint,tick(){if(connection().paused)return;core.duo.tick(match);revision++;}};
+  function checkpoint(){if(ended||expired||match.phase==='gameover')return null;return {format:'autohex-room',version:1,ruleset:RULESET,epoch,revision,seats:copy(seats),match:core.duo.capture(match)};}
+  return {setMaintenance,connect,touch,claim,leave,receive,view,checkpoint,tick(){if(connection().paused)return;core.duo.tick(match);revision++;}};
 }
 module.exports={createRoom,payloadValid};

@@ -30,3 +30,11 @@ Nur die neuen Szenarien:
 22.09.2026: 283 automatisierte Tests bestanden. Neu: Trennungspause beider Boards, zeitbegrenzter Wiederbeitritt, Ablauf, reservierte Plätze und idempotente Bestätigung nach Rückkehr. Tests verwenden eine kontrollierte Uhr; kein Browser und keine Internet-/Neustart-Abnahme.
 
 Aktueller Prüfstand: 287 automatisierte Tests bestanden. Zusätzlich geprüft: Dateispeicher-Neustart inklusive Lobby/Plätzen, pausierter Kampf und unverändertem Gold; Wiederholung verlorener Bestätigung; Schutz inkompatibler Dateien; HTTP 503 bei Schreibfehlern. Keine Browser-, Internet- oder Stromausfallabnahme.
+
+## Sitzungsverwaltung: Übernahme und Verlassen
+
+Gesamtsuite: 312 Tests bestanden. Vier zusätzliche automatisierte Tests prüfen explizite Tab-Übernahme über HTTP, Sperre alter Tabs, dauerhafte Sitzzuordnung nach Neustart, idempotentes Verlassen, keine Wiederbelebung verlassener Partien, Kapazitätsfreigabe und zwei echte Client-Adapter einschließlich verlorener Verlassen-Antwort. Keine Browser-/Geräteabnahme und keine Internet-Freigabe.
+
+## Wartungsmodus
+
+316 Tests der Gesamtsuite bestanden. Neue Prüfungen: mehrstündige gemeinsame Pause ohne Ablauf der Wiederbeitrittsfrist, unveränderte Kämpfe, abgewiesene neue Lobbys/Beitritte, wiederholte Bestätigungen und Fortsetzung nach echtem Datei-Restore. Zusätzlich Solo-Regression für Grasland-Schatz vor Nicht-Grasland-Schatz. Keine Browser-/Geräteabnahme.

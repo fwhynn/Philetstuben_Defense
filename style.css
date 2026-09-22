@@ -435,3 +435,9 @@ button.card{background:#efe3c2;color:#2b281f}button.card:disabled{opacity:.7}
 .biomeIntro{position:fixed;right:84px;top:40%;z-index:75;width:min(310px,calc(100vw - 100px));box-sizing:border-box;padding:16px;border:1px solid #e9c667;border-radius:12px;background:#1d3028;color:#fff2ce;box-shadow:0 6px 24px #0006;font-size:14px;line-height:1.5}
 .biomeIntro p{margin:8px 0 12px}.biomeIntro button{min-height:44px;background:#466e52;color:#fff2ce;border:1px solid #9fbe95;border-radius:8px;padding:8px 16px}.biomeIcon.biomeIntroTarget{outline:3px solid #ffe39a;outline-offset:4px;box-shadow:0 0 22px #ffe39a99}
 @media(max-width:900px),(max-height:600px){.biomeIntro{top:144px;right:16px;max-height:calc(100dvh - 164px);overflow:auto;font-size:13px;padding:12px}}
+
+/* During onboarding, biome effect text lives inside the hint instead of behind it. */
+body:has(#biomeIntro:not(.hidden)) .biomeTooltip{display:none!important}
+.biomeIntroDetail{padding:10px;background:#12231c;border-radius:8px;overflow-wrap:anywhere;border-left:3px solid #e9c667}
+.biomeIntro{max-height:calc(100dvh - 130px);overflow:auto;top:100px}
+@media(max-width:900px),(max-height:600px){.biomeIntro{top:144px;max-height:calc(100dvh - 160px)}}

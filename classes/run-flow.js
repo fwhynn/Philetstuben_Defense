@@ -97,10 +97,11 @@ const HexRunFlow=(()=>{
   function finish(state){
     if(state.hp<=0||state.wave<1||state.pendingSpawns>0||state.enemies.some(e=>e.alive)||state.lastCompletedWave===state.wave)return null;
     state.lastCompletedWave=state.wave;state.waveRunning=false;
-    if(state.challengeDay&&state.wave===20){state.challengeWon=true;state.phase='gameover';state.enemies=[];state.projectiles=[];return {victory:true};}
     state.gold+=HexWaves.economy.completion+state.income;state.projectiles=[];state.mines=[];
     for(const tile of state.map.values())for(const tower of tile.towers||[])if(tower)tower.souls=[];
-    state.goldEarned.completion+=HexWaves.economy.completion;state.goldEarned.income+=state.income;state.phase='place';return {victory:false};
+    state.goldEarned.completion+=HexWaves.economy.completion;state.goldEarned.income+=state.income;state.phase='place';
+    if(state.challengeDay&&state.wave===20&&!state.challengeWon){state.challengeWon=true;state.phase='victory';return {victory:true};}
+    return {victory:false};
   }
   return {shuffle,drawHand,start,finish};
 })();

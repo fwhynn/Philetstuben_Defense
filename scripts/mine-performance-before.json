@@ -1,0 +1,26 @@
+{
+  "node": "v24.19.0",
+  "cpu": "AMD Ryzen 7 9850X3D 8-Core Processor           ",
+  "scope": "41 tiles, 10 mine layers, 200 advances of 2 seconds, no enemies/DOM/rendering; includes runtime and mine scans",
+  "samples": [
+    {
+      "ms": 689.1623000000001,
+      "geometryCalls": 82000,
+      "mines": 2000,
+      "checksum": "fbe915a8a6101e21072043c6af1a6af074170e24ad37ac055168d31edb32349c"
+    },
+    {
+      "ms": 488.32360000000017,
+      "geometryCalls": 82000,
+      "mines": 2000,
+      "checksum": "fbe915a8a6101e21072043c6af1a6af074170e24ad37ac055168d31edb32349c"
+    },
+    {
+      "ms": 509.06089999999995,
+      "geometryCalls": 82000,
+      "mines": 2000,
+      "checksum": "fbe915a8a6101e21072043c6af1a6af074170e24ad37ac055168d31edb32349c"
+    }
+  ],
+  "meanMs": 562.1822666666667
+}

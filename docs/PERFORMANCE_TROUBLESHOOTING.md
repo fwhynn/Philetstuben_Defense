@@ -98,3 +98,9 @@ Bitte notiere diese Punkte und melde sie zurück, damit gezielt gesucht werden k
 3. **Veralteter Grafiktreiber.**
 4. **Sehr hohe Bildwiederholrate des Monitors** (120/144 Hz oder mehr). Das Spiel begrenzt seit `v2` die Bildrate auf 60 in einer Wave und 30 sonst.
 5. **Ein Problem im Spiel selbst.** Dann brauchen wir die Angaben aus Schritt 6.
+
+## Entwicklung: hohe Wellen und Hintergrundbetrieb
+
+Der konkrete Maßnahmenplan, Messaufbau und erste Ergebnisse stehen in [PERFORMANCE_PLAN.md](PERFORMANCE_PLAN.md). Die erste Optimierung reduziert wiederholte Turmberechnungen; weitere Schritte betreffen UI, Wegdaten, Zielsuche, Darstellung, Hintergrundbetrieb und Duo.
+
+Verbindlich: keine Reduktion der Grafikqualität, Effekte, Gegner oder Spielregeln. Frühere Hinweise zu optionalen Low-/Diagnosemodi in diesem Dokument sind keine Strategie für diese Optimierungen. Historische Bildratenangaben oben sind keine aktuelle Messung oder garantierte Begrenzung. Browser-/GPU- und Mobile-Messungen stehen noch aus.

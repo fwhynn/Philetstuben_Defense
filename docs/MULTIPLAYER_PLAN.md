@@ -453,3 +453,19 @@ Nächster konkreter Schritt ist jetzt **dauerhafte versionierte Checkpoints mit 
 Versionierte Raum- und Lobby-Checkpoints sind jetzt im lokalen Launcher aktiviert. Gespeichert werden beide Runs inklusive Zufallszustand, private Sitzungen, Lobbycode und Aktionsbestätigungen. Commands werden vor Bestätigung gespeichert, Kampfzustand jede Sekunde. Neustart pausiert bis zur Rückkehr beider Spieler. Inkompatible Dateien bleiben unverändert; Speicherausfall stoppt neue Aktionen. Das ist eine lokale Einzelprozess-Grundlage, keine Produktionsfreigabe.
 
 **Jetzt als Nächstes:** explizite Sitzungsübernahme/Verlassen, Wiederherstellungshinweise und sichere Versionswechsel; danach Lieferungen, Wächter-Zustimmung und gemeinsame Ergebnisse/Statistik. Für die Freunde-Beta fehlen weiterhin dauerhafte idempotente Ergebnisabrechnung, produktiver Transport/Hosting, Backup-/Rollback-Prüfung, Last-/Missbrauchstests und Geräte-Abnahme. Achievements stehen separat im Meta-Progressionsplan.
+
+### Fortschritt: explizite Sitzungsübernahme und Verlassen
+
+Umgesetzt: Ein Netzwerkclient beansprucht seinen Sitz mit einer zufälligen Tab-ID. Ein zweiter Tab mit demselben privaten Spielerlink wird gesperrt und bietet „Sitzung hier übernehmen“ an. Übernahme erhält Run, Sitz und Aktionssequenz; danach sind Zustandsabfragen und Commands des alten Tabs gesperrt. Keine automatische Rückübernahme. Neue Sitzzuordnung wird vor Bestätigung gespeichert; normale Heartbeats schreiben sie nicht erneut. Das ist eine Bedienungssperre zwischen Tabs mit demselben privaten Token, kein Ersatz für dessen Geheimhaltung.
+
+„Partie verlassen“ verlangt eine zweite Bestätigung am Button und beendet beide Boards ohne Diamantenabrechnung. Der Partner bekommt einen eindeutigen Hinweis; die Partie kann nicht durch Neustart wiederbelebt werden. Der beendete Raum bleibt 60 Sekunden für die Abschlussanzeige erreichbar, dann wird seine Kapazität frei. Bei verlorenem Antwortpaket ist Wiederholung idempotent. Ein bloßer Verbindungsabbruch behält weiterhin das Wiederbeitrittsfenster.
+
+Automatisiert geprüft: zwei echte HTTP-Clients, explizite Übernahme, gesperrter alter Tab, unveränderte Aktionssequenz, idempotente Commands und Verlassen, Wiederaufnahme nach Prozessneustart, verlorene Verlassen-Antwort, später Beitritt in verlassene Lobby und Freigabe der Kapazität. Keine Browser-/Geräteabnahme.
+
+Nächste offene Arbeit: kontrollierte Versionswechsel/Wartungsmodus, danach Lieferungen, Wächter-Zustimmung und gemeinsame Ergebnisse samt dauerhafter Abrechnung. Produktiver Transport, Hosting, Backup-/Rollback-Abnahme und Freunde-Beta bleiben offen; der Multiplayer ist noch nicht öffentlich fertig freigegeben.
+
+### Fortschritt: kontrollierte Wartung vor Serverneustarts
+
+Lokaler Wartungsmodus umgesetzt: neue Räume/Beitritte sperren, beide Kämpfe und Verbindungsfristen pausieren, sofort sichern, ausdrücklich fortsetzen. Steuerung über lokale Konsole oder DUO_MAINTENANCE=1 beim Start; sichtbarer Wartungsstatus in Spiel und Lobby. Tests decken mehrstündige Wartung, wiederholte Bestätigungen, wartende Lobby und Prozessneustart ohne Aufholsimulation ab. Checkpoints bleiben versionsgeprüft; inkompatible Dateien werden nicht automatisch migriert. Keine Internet-Freigabe.
+
+Nächster spielerischer Schritt: Lieferungen nach jeder fünften gemeinsamen Welle gemäß Abschnitt 3.5, danach Wächter-Zustimmung und gemeinsame Ergebnisse. Produktionsbetrieb, automatisierter Release-/Rollback-Ablauf, Lastabnahme und dauerhafte Ergebnisabrechnung bleiben offen.

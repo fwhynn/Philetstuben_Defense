@@ -9,6 +9,28 @@ function setup() {
   return { state, step: context.step, towers: context.towers };
 }
 function enemy(x, y = 0, hp = 100) { return { x, y, hp, alive: true, index: 0, t: 0, speed: 0, points: [{ x, y }, { x: x + 500, y }] }; }
+test('tick-local tower values refresh after upgrades and support changes without mutating caller refs', () => {
+  const {state,step,towers}=setup(),tw={type:'archer',lastShot:0},ref={tw,pos:{x:0,y:0}};
+  state.enemies=[enemy(10,0,10000)];
+  step(state,[ref],towers,0,2000);
+  const first=10000-state.enemies[0].hp;
+  tw.supportDamage=2;
+  step(state,[ref],towers,0,4000);
+  assert.equal(10000-first-state.enemies[0].hp,first*2);
+  tw.branch='marksman';state.enemies=[enemy(180,0,10000)];
+  step(state,[ref],towers,0,6000);
+  assert.ok(state.enemies[0].hp<10000,'new branch range must apply immediately');
+  assert.equal(Object.hasOwn(ref,'definition'),false,'do not persist stale values on caller reference');
+});
+test('explicit aura definitions are preserved and do not stack their slow', () => {
+  const {state,step,towers}=setup();state.enemies=[enemy(0)];state.enemies[0].speed=20;
+  const ref={tw:{type:'freeze'},pos:{x:0,y:0},definition:{aura:true,range:100,slow:.3}};
+  step(state,[ref,ref],towers,1,1000);
+  assert.ok(Math.abs(state.enemies[0].x-6)<1e-9);
+  ref.definition={aura:true,range:100,slow:.8};
+  step(state,[ref],towers,1,2000);
+  assert.ok(Math.abs(state.enemies[0].x-22)<1e-9);
+});
 test('catapult piercing hits only the first three enemies along the shot, independent of array order', () => {
   const { state, step, towers } = setup(); state.enemies = [enemy(80), enemy(20), enemy(60), enemy(40), enemy(30, 50)];
   step(state, [{ tw: { type: 'catapult', lastShot: 0 }, pos: { x: 0, y: 0 } }], towers, 0, 2000);

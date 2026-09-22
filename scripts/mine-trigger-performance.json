@@ -1,0 +1,39 @@
+{
+  "node": "v24.19.0",
+  "cpu": "AMD Ryzen 7 9850X3D 8-Core Processor           ",
+  "scope": "Mine trigger phase only, alternating reference/current, 10 warmups + 50 samples; distance instrumentation in both",
+  "results": [
+    {
+      "kind": "spread",
+      "hash": "9f1f0acc8917a531112b4f93a41e58f516243bf475b9eac1716284a47e7abd98",
+      "beforeChecksPerRun": 62500,
+      "afterChecksPerRun": 288,
+      "beforeMeanMs": 50.89628800000002,
+      "afterMeanMs": 1.3665340000000037
+    },
+    {
+      "kind": "mixed",
+      "hash": "1f9d49d6465d7c09494554972a0eb48e8a689eb7bf2735db5dfd6538a1d2d3c7",
+      "beforeChecksPerRun": 65550,
+      "afterChecksPerRun": 6548,
+      "beforeMeanMs": 46.186716000000004,
+      "afterMeanMs": 4.112915999999968
+    },
+    {
+      "kind": "dense",
+      "hash": "3723a3349cc73a390a797c4a22452a2b7a05c78026d1c1beca102939b369792a",
+      "beforeChecksPerRun": 1125,
+      "afterChecksPerRun": 1125,
+      "beforeMeanMs": 3.2955119999999987,
+      "afterMeanMs": 3.7859920000000784
+    },
+    {
+      "kind": "small",
+      "hash": "2c69a7a1d57c313f9ab7764ad1cd00b24812b696931162520308c49a4fd5d5fb",
+      "beforeChecksPerRun": 32,
+      "afterChecksPerRun": 32,
+      "beforeMeanMs": 0.022514000000010127,
+      "afterMeanMs": 0.019151999999976396
+    }
+  ]
+}

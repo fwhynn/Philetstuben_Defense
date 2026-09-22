@@ -3,6 +3,25 @@
  */
 const HexRunRuntime=(()=>{
   const VERSION=1;
+  // Derived data stays outside checkpoints and is reclaimed with its map/run.
+  const routeCache=new WeakMap(),waveCache=new WeakMap();
+  function cachedRoutes(map){
+    // Include topology/order rather than size alone: rotations, replacements and
+    // tunnels may change without adding a tile. Portals are read live below.
+    const signature=JSON.stringify([...map].map(([id,t])=>[id,t.q,t.r,t.type,
+      typeof HexData!=='undefined'?HexData.CARD_LIBRARY[t.type]?.model:null,t.roads||[],t.tunnels||[]]));
+    let entry=routeCache.get(map);
+    if(!entry||entry.signature!==signature){entry={signature,routes:HexMap.routeGraph(map)};routeCache.set(map,entry);}
+    return entry.routes;
+  }
+  function spawnPlan(state){
+    const challenge=!!state.challengeDay;let entry=waveCache.get(state);
+    if(!entry||entry.wave!==state.wave||entry.income!==state.income||entry.challenge!==challenge){
+      entry={wave:state.wave,income:state.income,challenge,plan:HexWaves.plan(state.wave,state.income,challenge)};
+      waveCache.set(state,entry);
+    }
+    return entry.plan;
+  }
   function create({seed,runId,loadout,unlocks=[],heroId='standard',difficulty='normal',challengeDay=null}){
     if(typeof seed!=='string'||!seed||typeof runId!=='string'||!runId)throw new Error('Seed and run ID required');
     if(!Array.isArray(loadout)||loadout.length!==5||new Set(loadout).size!==5||loadout.some(id=>!Object.hasOwn(HexData.TOWERS,id)))throw new Error('Invalid run loadout');
@@ -36,7 +55,7 @@ const HexRunRuntime=(()=>{
   }
   const {key,neighbor,axialToWorld,edgePoint}=HexMap;
   function spawnSources(state){
-    const routes=HexMap.routeGraph(state.map),sources=[];
+    const routes=cachedRoutes(state.map),sources=[];
     for(const tile of state.map.values()){
       const id=key(tile.q,tile.r);if(tile.type==='base'||!routes.distances.has(id)) continue;
       if(tile.type==='deadEnd'&&tile.buildings?.some(b=>b?.type==='portal'))sources.push({tile,dir:6,points:[routes.geometry.get(id).hub],routes,branchCounts:new Map()});
@@ -68,7 +87,7 @@ const HexRunRuntime=(()=>{
 
   function spawnEnemy(state,points,idx){
     if(state.hp<=0) return;
-    const plan=HexWaves.plan(state.wave,state.income,!!state.challengeDay),profile=plan.enemies[idx||0],hp=profile.hp;
+    const plan=spawnPlan(state),profile=plan.enemies[idx||0],hp=profile.hp;
     const start=points[0];
     state.enemies.push({id:state.nextEnemyId++,...profile,points,index:0,t:0,hp,maxHp:hp,maxArmorHp:profile.armorHp||0,maxMagicHp:profile.magicHp||0,alive:true,x:start.x,y:start.y});
   }
@@ -78,8 +97,11 @@ const HexRunRuntime=(()=>{
     if(!state.waveRunning)return 'idle';
     state.elapsedMs+=dt*1000;const time=state.elapsedMs;let sources;
     drain(state,time,job=>{sources??=spawnSources(state);const source=sources.find(s=>s.tile.q===job.source.q&&s.tile.r===job.source.r&&s.dir===job.source.dir);if(!source)throw new Error('Spawn source missing');spawnEnemy(state,nextSourcePoints(state,random,source),job.index);});
-    for(const boss of [...state.enemies]){if(!boss.alive||!boss.summonInterval||(boss.summoned||0)>=boss.summonLimit)continue;boss.nextSummonAt??=time+boss.summonInterval;if(time<boss.nextSummonAt)continue;boss.nextSummonAt=time+boss.summonInterval;boss.summoned=(boss.summoned||0)+1;const hp=Math.round(boss.maxHp*.025);state.projectiles.push({kind:'blast',x:boss.x,y:boss.y,r:24,ttl:1,max:1,color:'#c598ff'});state.enemies.push({id:state.nextEnemyId++,type:'swarm',name:'Seelendiener',summoned:true,hp,maxHp:hp,armorHp:0,magicHp:0,speed:boss.speed*.8,killGold:0,baseDamage:1,alive:true,points:boss.points.map(p=>({...p})),index:boss.index,t:boss.t,x:boss.x,y:boss.y});}
-    const refs=[];for(const tile of state.map.values()){const slots=HexMap.slotPositions(tile);(tile.towers||[]).forEach((tw,i)=>{if(tw)refs.push({tw,pos:slots[i],tile});});}
+    // Capture length: newly summoned units are processed from the next step,
+    // exactly as with the former array snapshot, without copying every enemy.
+    const existingEnemyCount=state.enemies.length;
+    for(let i=0;i<existingEnemyCount;i++){const boss=state.enemies[i];if(!boss.alive||!boss.summonInterval||(boss.summoned||0)>=boss.summonLimit)continue;boss.nextSummonAt??=time+boss.summonInterval;if(time<boss.nextSummonAt)continue;boss.nextSummonAt=time+boss.summonInterval;boss.summoned=(boss.summoned||0)+1;const hp=Math.round(boss.maxHp*.025);state.projectiles.push({kind:'blast',x:boss.x,y:boss.y,r:24,ttl:1,max:1,color:'#c598ff'});state.enemies.push({id:state.nextEnemyId++,type:'swarm',name:'Seelendiener',summoned:true,hp,maxHp:hp,armorHp:0,magicHp:0,speed:boss.speed*.8,killGold:0,baseDamage:1,alive:true,points:boss.points.map(p=>({...p})),index:boss.index,t:boss.t,x:boss.x,y:boss.y});}
+    const refs=[];for(const tile of state.map.values()){if(!tile.towers?.some(Boolean))continue;const slots=HexMap.slotPositions(tile);(tile.towers||[]).forEach((tw,i)=>{if(tw)refs.push({tw,pos:slots[i],tile});});}
     const base=HexHeroes.combatRef(state);if(base)refs.push(base);
     HexCombat.step(state,refs,HexData.TOWERS,dt,time,emit);
     return state.hp<=0?'defeat':state.pendingSpawns===0&&state.enemies.length===0?'complete':'running';

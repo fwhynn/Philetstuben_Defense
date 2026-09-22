@@ -50,3 +50,21 @@ Der Launcher speichert standardmäßig unter `~/.autohex-duo/checkpoint.json`, a
 Erstellen, Beitreten und Commands werden vor der Antwort atomar gespeichert (temporäre Datei, fsync, Umbenennen). Die Kampfsimulation sichert zusätzlich jede Sekunde. Nach hartem Prozessverlust können bis zu etwa einer Sekunde Kampfzeit zurückgerollt werden; bestätigte Käufe sind bereits gespeichert. SIGINT/SIGTERM sichern abschließend. Die Wiederherstellung prüft Format, Snapshotversion und Spielversion; unbekannte/defekte Dateien führen zum Startfehler und werden nicht überschrieben. Schreibfehler stoppen Simulation und neue Aktionen (HTTP 503).
 
 Beim Neustart bleiben Lobbycode, Plätze, private Spielerlinks, Aktionssequenzen und letzte Bestätigungen erhalten. Beide Spieler müssen innerhalb des neu gestarteten Rückkehrfensters zurückkommen. Bis dahin bleibt die Partie pausiert, ohne Zeit nachzuholen. Eine neue Serverinstanz wird vom Client auch bei niedrigerer Snapshotrevision erkannt. Beendete oder abgelaufene Partien werden nicht wiederhergestellt; noch keine dauerhafte Ergebnis-/Diamantenabrechnung. Der Dateispeicher ist nur für genau einen lokalen Serverprozess vorgesehen. Produktiver Mehrprozessbetrieb, Verzeichnis-Durabilität bei Stromverlust und Backup-/Betriebsabnahme bleiben offen.
+
+## Sitzungsübernahme und bewusstes Verlassen
+
+Aktueller Stand: Nur ein Browser-Tab kontrolliert einen Sitz. Ein weiterer Tab mit demselben privaten Spielerlink zeigt einen Konflikt; „Sitzung hier übernehmen“ überträgt die Kontrolle ausdrücklich. Der bisherige Tab erhält danach HTTP 409 und darf keine weiteren Spielaktionen senden. Ein Reload erzeugt ebenfalls eine neue Tab-ID und kann daher eine explizite Übernahme verlangen. Die Bindung wird im Checkpoint gespeichert.
+
+„Partie verlassen“ wird am selben Button ein zweites Mal bestätigt und beendet die Partie für beide Spieler. Das ist kein vorübergehendes Trennen und zahlt keine Diamanten aus. Der Partner kann die Map noch sehen und zur Lobby zurückkehren. Nach 60 Sekunden wird der Raum entfernt, bei Serverneustart sofort nicht wiederhergestellt.
+
+Transport: X-Duo-Client bindet Tab-ID und privaten Sitzungstoken. POST /session akzeptiert ausschließlich {action: 'takeover'} oder {action: 'leave'}. Alte tablose Entwicklungsclients funktionieren nur, solange noch keine Tab-Bindung besteht. Bei Commands wird die Bindung nach Einlesen des Bodys erneut geprüft, damit eine inzwischen erfolgte Übernahme berücksichtigt wird. Niemals Tab-ID als Authentifizierung statt des Tokens verwenden.
+
+Noch keine Internet-Freigabe, Kontoanmeldung oder Geräte-Abnahme.
+
+## Kontrollierte Wartung (lokaler Betreiber)
+
+Im interaktiven Launcher: `maintenance on`, `maintenance off`, `status`. Beim Start: `DUO_MAINTENANCE=1`. Keine öffentliche Verwaltungs-HTTP-Schnittstelle.
+
+Wartung sperrt neue Räume und Beitritte, pausiert beide Maps samt Wiederbeitritts-/Lobbyfristen und sichert sofort atomar. Statusabfragen, Sitzungsübernahme und bewusstes Verlassen bleiben möglich. Bereits bestätigte Aktionen sind weiterhin idempotent. Beide Clients und die Lobby zeigen einen Wartungshinweis.
+
+Update-Ablauf: Wartung einschalten und Speicherbestätigung abwarten; mit Strg+C beenden; private Checkpoint-Datei sichern; kompatiblen Release bereitstellen; mit DUO_MAINTENANCE=1 starten; Status und Speicherung prüfen; Wartung bewusst beenden. Inkompatible Spiel-/Snapshotversionen bleiben ein Startfehler und überschreiben keine Datei. Für Rollback passenden alten Release und Checkpoint aufbewahren. Keine automatische Migration und keine Produktionsabnahme. Die Wartungseinstellung wird beim Start ausdrücklich gewählt und nicht dauerhaft im Spielcheckpoint gespeichert.

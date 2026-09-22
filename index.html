@@ -53,7 +53,7 @@
 
       <nav class="compactToolbar" aria-label="Spielsteuerung"><button data-compact="menu" aria-expanded="false">Menü</button><button data-compact="stats" aria-expanded="false">Werte</button><button data-compact="towers" aria-expanded="false">Türme</button><button data-compact="biomes" aria-expanded="false">Biome</button></nav>
       <nav id="quickLoadout" class="mapRail loadoutRail" aria-label="Loadout: Turm auf einen freien Platz ziehen"></nav>
-      <aside id="biomeIntro" class="biomeIntro hidden" role="status"><strong>Neues Biom entdeckt</strong><p>Hier rechts findest du die sichtbaren Biome und ihre Effekte. Fahre über ein Symbol oder tippe darauf: Die zugehörigen Felder werden hervorgehoben.</p><button id="biomeIntroClose" type="button">Verstanden</button></aside>
+      <aside id="biomeIntro" class="biomeIntro hidden" role="status"><strong id="biomeIntroTitle">Neues Biom entdeckt</strong><p>Hier rechts findest du die sichtbaren Biome und ihre Effekte. Fahre über ein Symbol oder tippe darauf: Die zugehörigen Felder werden hervorgehoben.</p><p id="biomeIntroDetail" class="biomeIntroDetail" aria-live="polite"></p><button id="biomeIntroClose" type="button">Verstanden</button></aside>
       <nav id="biomeRail" class="mapRail biomeRail" aria-label="Entdeckte Biome"></nav>
       <div id="tutorialTargets" class="tutorialTargets hidden" aria-hidden="true"></div>
       <div id="tutorialSpotlight" class="tutorialSpotlight hidden" aria-hidden="true"></div>
@@ -290,6 +290,7 @@
             <p>Sandsturm: −15 % Gegnertempo und Turmreichweite. Jeder zehnte normale Gegner trägt eine Kasse: +15 Gold
               extra beim Kill, −10 Gold bei Durchbruch. Einmal täglich +10 Diamanten beim Sieg. Gleicher Tages-Seed für
               alle; Wechsel um 00:00 UTC. Regeln bleiben dauerhaft verfügbar.</p>
+            <p>Nach Welle 20 kannst du im Endlosmodus weiterspielen. Die Tagesbelohnung gibt es nur einmal pro Tag.</p>
             <p id="dailyProgress"></p><button id="dailyStartBtn" class="primary">Heutige Karawane starten</button>
           </section>
         </div>
@@ -354,7 +355,8 @@
         <p class="eyebrow">FESTUNG VERTEIDIGT</p>
         <h2 id="campaignVictoryTitle">Wave 35 geschafft!</h2>
         <p id="campaignVictoryText"></p>
-        <p>Deine Map und Türme bleiben im Endless-Modus erhalten. Diamanten werden beim Beenden des Runs abgerechnet.
+        <details id="dailyVictoryStatistics" class="hidden"><summary>Turmstatistik</summary><div id="dailyVictoryStatsContent"></div></details>
+        <p id="campaignVictoryNote">Deine Map und Türme bleiben im Endless-Modus erhalten. Diamanten werden beim Beenden des Runs abgerechnet.
         </p>
         <div class="loadoutActions"><button id="victoryMenuBtn" class="secondary">Run abschließen · Hauptmenü</button><button
             id="endlessBtn" class="primary">Im Endless-Modus weiterspielen</button></div>

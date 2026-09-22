@@ -1,6 +1,46 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const loadCore=require('../headless-core.cjs'),{load}=require('./helpers/game.cjs');
 const loadout=['archer','chain','freeze','mine','catapult'];
+
+test('grassland treasure first never consumes the later non-grass landmark introduction',()=>{
+ for(const stale of [false,true]){
+  const {a,elements}=load();elements.get('mainMenu').classList.add('hidden');a.state.biomeSeed='grass-first';
+  a.state.landmarks=new Map([
+   ['0,3',{q:0,r:3,type:'treasure',claimed:false,prefab:{type:'smallCurve',roads:[0,1],slots:1}}],
+   ['4,0',{q:4,r:0,type:'treasure',claimed:false,prefab:{type:'smallCurve',roads:[0,1],slots:1}}]
+  ]);
+  a.state.map.set('0,1',{q:0,r:1,type:'straight',roads:[1,4],slots:0,towers:[]});a.renderAll();
+  assert.equal(a.state.biomeIntro,null);assert.ok(!a.state.biomeIntroAcknowledged);
+  // Legacy/invalid grass-only UI state must not consume the non-grass introduction.
+  if(stale){a.state.biomeIntro=['grass'];elements.get('biomeIntroClose').listeners.click();assert.ok(!a.state.biomeIntroAcknowledged);a.state.biomeIntroAcknowledged=true;}
+  a.state.map.set('2,0',{q:2,r:0,type:'straight',roads:[0,3],slots:0,towers:[]});a.renderAll();
+  assert.ok(a.state.biomeIntro.length);assert.ok(!a.state.biomeIntro.includes('grass'));
+  assert.equal(elements.get('biomeIntro').classList.contains('hidden'),false);
+  elements.get('biomeIntroClose').listeners.click();a.renderAll();assert.equal(a.state.biomeIntro,null);assert.ok(a.state.biomeIntroAcknowledgedIds.length);
+ }
+});
+
+test('revealing an unconnected treasure, shrine or guardian triggers the biome hint at clear distance',()=>{
+  for(const type of ['treasure','shrine','boss']){
+    const {a,elements}=load(),c=loadCore();elements.get('mainMenu').classList.add('hidden');a.state.biomeSeed='landmark-intro';
+    const special={q:4,r:0,type,claimed:false,prefab:{type:'smallCurve',roads:[0,1],rotation:0,slots:1}};
+    a.state.landmarks=new Map([['4,0',special]]);
+    a.state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:0,towers:[]});a.renderAll();
+    assert.equal(c.exploration.visibility(a.state.map,special),'fog');assert.ok(!a.state.biomeIntro);
+    assert.equal(elements.get('biomeRail').children.length,1);
+    a.state.map.set('2,0',{q:2,r:0,type:'straight',roads:[0,3],slots:0,towers:[]});a.renderAll();
+    assert.equal(c.exploration.visibility(a.state.map,special),'clear');assert.equal(a.state.map.has('4,0'),false);
+    assert.deepEqual(Array.from(a.state.biomeIntro),[c.biomes.forTile(a.state,special)]);
+    assert.equal(elements.get('biomeIntro').classList.contains('hidden'),false);
+    assert.equal(elements.get('biomeRail').children.filter(b=>b.classList.contains('biomeIntroTarget')).length,1);
+    assert.ok(c.biomes.highlight(a.state).tiles.some(t=>t.q===4&&t.r===0));
+    // Connection must not duplicate the special tile or trigger another introduction.
+    elements.get('biomeIntroClose').listeners.click();special.claimed=true;
+    a.state.map.set('4,0',{...special.prefab,q:4,r:0,towers:[null]});a.renderAll();
+    assert.equal(c.biomes.visibleTiles(a.state).filter(t=>t.q===4&&t.r===0).length,1);
+    assert.equal(a.state.biomeIntro,null);
+  }
+});
 function setup(core,state){
   state.phase='build';state.gold=500;state.map.get('0,0').roads=[0,3];
   state.map.set('1,0',{q:1,r:0,type:'deadEnd',rotation:3,roads:[3],slots:2,towers:[null,null],buildingSlots:1,buildings:[null]});
@@ -68,4 +108,18 @@ test('non-grass biomes start at distance four in every direction',()=>{
 });
 test('a placed biome triggers the hint even during the tutorial and reward phase',()=>{
  const {a,elements}=load({initialStorage:{'tutorial-v1':'','biome-intro-v1':'done'}});elements.get('mainMenu').classList.add('hidden');a.state.biomeSeed='intro';a.state.phase='reward';a.state.map.set('4,0',{q:4,r:0,type:'straight',roads:[0,3],slots:0,towers:[]});a.renderAll();assert.ok(a.state.biomeIntro);assert.equal(elements.get('biomeIntro').classList.contains('hidden'),false);
+});
+
+test('first hint marks every simultaneously discovered biome and shows hover effects inside itself',()=>{
+ const {a,elements}=load(),c=loadCore();elements.get('mainMenu').classList.add('hidden');a.state.biomeSeed='all-regions';a.state.landmarks=new Map();
+ for(let q=-3;q<=3;q++)for(let r=-3;r<=3;r++)if(Math.max(Math.abs(q),Math.abs(r),Math.abs(q+r))===3)a.state.map.set(q+','+r,{q,r,type:'straight',roads:[0,3],slots:0,towers:[]});
+ a.renderAll();assert.deepEqual(Array.from(a.state.biomeIntro).sort(),['ash','desert','storm']);
+ const buttons=elements.get('biomeRail').children;assert.equal(buttons.filter(b=>b.classList.contains('biomeIntroTarget')).length,3);
+ assert.equal(elements.get('biomeIntroTitle').textContent,'Neue Biome entdeckt');
+ for(const id of a.state.biomeIntro)assert.ok(c.biomes.highlight(a.state).tiles.some(t=>c.biomes.forTile(a.state,t)===id));
+ const desert=buttons[1];desert.listeners.pointerenter();assert.ok(elements.get('biomeIntroDetail').textContent.includes('Dünenmeer'));assert.ok(elements.get('biomeIntroDetail').textContent.includes('15 %'));
+ assert.equal(buttons.filter(b=>b.classList.contains('biomeIntroTarget')).length,3);
+ for(const id of a.state.biomeIntro)assert.ok(c.biomes.highlight(a.state).tiles.some(t=>c.biomes.forTile(a.state,t)===id));
+ desert.listeners.pointerleave();assert.ok(elements.get('biomeIntroDetail').textContent.includes('Aschelande'));
+ elements.get('biomeIntroClose').listeners.click();assert.equal(a.state.biomeIntro,null);assert.equal(buttons.filter(b=>b.classList.contains('biomeIntroTarget')).length,0);
 });

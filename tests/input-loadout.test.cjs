@@ -119,7 +119,7 @@ test('run results show paid tower costs, refunds and a reversible map view witho
   a.state.hp = 0; a.state.waveRunning = true; a.state.pendingSpawns = 1; a.update(.01, 1); assert.match(elements.get('runStatistics').innerHTML, /Schaden\/🪙/); assert.match(elements.get('runStatistics').innerHTML, /verkauft/); const saved = storage.get('hex-bastion-profile-v1'); elements.get('gameOverMapBtn').listeners.click(); assert.equal(a.state.inspectEndMap, true); elements.get('backToRunResultBtn').listeners.click(); assert.equal(a.state.inspectEndMap, false); assert.equal(storage.get('hex-bastion-profile-v1'), saved); assert.equal(a.state.phase, 'gameover');
 });
 test('daily victory also exposes statistics and map inspection', () => {
-  const { a, elements } = load(); a.newRun(undefined, undefined, undefined, '2026-09-21'); a.state.wave = 20; a.endWave(); assert.equal(a.state.challengeWon, true); assert.match(elements.get('runStatistics').innerHTML, /Turmstatistik/); elements.get('gameOverMapBtn').listeners.click(); assert.equal(a.state.inspectEndMap, true);
+  const { a, elements } = load(); a.newRun(undefined, undefined, undefined, '2026-09-21'); a.state.wave = 20; a.endWave(); assert.equal(a.state.challengeWon, true); assert.match(elements.get('dailyVictoryStatsContent').innerHTML, /Turmstatistik/); const panel=elements.get('campaignVictory');panel.listeners.click({target:panel});assert.equal(panel.classList.contains('inspectCampaign'),true);
 });
 
 test('multi-build sums local discounts and buys exactly the marked slots atomically', () => {

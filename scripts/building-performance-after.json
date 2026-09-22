@@ -1,0 +1,107 @@
+{
+  "scope": "60 tiles, 180 towers, six buildings; effects for all tiles, one forge overlay and full support refresh",
+  "node": "v24.19.0",
+  "samples": [
+    {
+      "ms": 4.037400000000002,
+      "definitions": 723,
+      "hash": "96fa0fdcce31ae32236b91095997101d782160b4ca9c9cc529cd9076799e3073"
+    },
+    {
+      "ms": 4.416699999999999,
+      "definitions": 723,
+      "hash": "96fa0fdcce31ae32236b91095997101d782160b4ca9c9cc529cd9076799e3073"
+    },
+    {
+      "ms": 4.937400000000004,
+      "definitions": 723,
+      "hash": "96fa0fdcce31ae32236b91095997101d782160b4ca9c9cc529cd9076799e3073"
+    },
+    {
+      "ms": 4.4007000000000005,
+      "definitions": 723,
+      "hash": "96fa0fdcce31ae32236b91095997101d782160b4ca9c9cc529cd9076799e3073"
+    },
+    {
+      "ms": 4.038499999999999,
+      "definitions": 723,
+      "hash": "96fa0fdcce31ae32236b91095997101d782160b4ca9c9cc529cd9076799e3073"
+    },
+    {
+      "ms": 4.317500000000003,
+      "definitions": 723,
+      "hash": "96fa0fdcce31ae32236b91095997101d782160b4ca9c9cc529cd9076799e3073"
+    },
+    {
+      "ms": 4.255499999999998,
+      "definitions": 723,
+      "hash": "96fa0fdcce31ae32236b91095997101d782160b4ca9c9cc529cd9076799e3073"
+    },
+    {
+      "ms": 3.8175000000000097,
+      "definitions": 723,
+      "hash": "96fa0fdcce31ae32236b91095997101d782160b4ca9c9cc529cd9076799e3073"
+    },
+    {
+      "ms": 3.683000000000007,
+      "definitions": 723,
+      "hash": "96fa0fdcce31ae32236b91095997101d782160b4ca9c9cc529cd9076799e3073"
+    },
+    {
+      "ms": 3.362800000000007,
+      "definitions": 723,
+      "hash": "96fa0fdcce31ae32236b91095997101d782160b4ca9c9cc529cd9076799e3073"
+    },
+    {
+      "ms": 3.8511000000000024,
+      "definitions": 723,
+      "hash": "96fa0fdcce31ae32236b91095997101d782160b4ca9c9cc529cd9076799e3073"
+    },
+    {
+      "ms": 3.813699999999997,
+      "definitions": 723,
+      "hash": "96fa0fdcce31ae32236b91095997101d782160b4ca9c9cc529cd9076799e3073"
+    },
+    {
+      "ms": 3.45859999999999,
+      "definitions": 723,
+      "hash": "96fa0fdcce31ae32236b91095997101d782160b4ca9c9cc529cd9076799e3073"
+    },
+    {
+      "ms": 3.488500000000002,
+      "definitions": 723,
+      "hash": "96fa0fdcce31ae32236b91095997101d782160b4ca9c9cc529cd9076799e3073"
+    },
+    {
+      "ms": 3.697100000000006,
+      "definitions": 723,
+      "hash": "96fa0fdcce31ae32236b91095997101d782160b4ca9c9cc529cd9076799e3073"
+    },
+    {
+      "ms": 3.25,
+      "definitions": 723,
+      "hash": "96fa0fdcce31ae32236b91095997101d782160b4ca9c9cc529cd9076799e3073"
+    },
+    {
+      "ms": 3.6571,
+      "definitions": 723,
+      "hash": "96fa0fdcce31ae32236b91095997101d782160b4ca9c9cc529cd9076799e3073"
+    },
+    {
+      "ms": 3.689000000000007,
+      "definitions": 723,
+      "hash": "96fa0fdcce31ae32236b91095997101d782160b4ca9c9cc529cd9076799e3073"
+    },
+    {
+      "ms": 3.178600000000003,
+      "definitions": 723,
+      "hash": "96fa0fdcce31ae32236b91095997101d782160b4ca9c9cc529cd9076799e3073"
+    },
+    {
+      "ms": 3.543300000000002,
+      "definitions": 723,
+      "hash": "96fa0fdcce31ae32236b91095997101d782160b4ca9c9cc529cd9076799e3073"
+    }
+  ],
+  "meanMs": 3.844700000000002
+}

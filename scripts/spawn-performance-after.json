@@ -1,0 +1,98 @@
+{
+  "node": "v24.19.0",
+  "platform": "win32",
+  "cpu": "AMD Ryzen 7 9850X3D 8-Core Processor           ",
+  "scope": "40-tile straight road, all normal wave spawns; no combat, DOM or renderer",
+  "cases": [
+    {
+      "wave": 40,
+      "enemies": 85,
+      "tiles": 41,
+      "samples": [
+        {
+          "ms": 11.474100000000007,
+          "graphs": 1,
+          "plans": 1,
+          "checksum": "30c86af5b98abb3b5dba69a4c45d0620e137ea4405ed7e52cf90646670949036"
+        },
+        {
+          "ms": 10.180499999999995,
+          "graphs": 1,
+          "plans": 1,
+          "checksum": "30c86af5b98abb3b5dba69a4c45d0620e137ea4405ed7e52cf90646670949036"
+        },
+        {
+          "ms": 10.824399999999997,
+          "graphs": 1,
+          "plans": 1,
+          "checksum": "30c86af5b98abb3b5dba69a4c45d0620e137ea4405ed7e52cf90646670949036"
+        }
+      ],
+      "ms": 11.474100000000007,
+      "graphs": 1,
+      "plans": 1,
+      "checksum": "30c86af5b98abb3b5dba69a4c45d0620e137ea4405ed7e52cf90646670949036",
+      "meanMs": 10.826333333333332
+    },
+    {
+      "wave": 50,
+      "enemies": 105,
+      "tiles": 41,
+      "samples": [
+        {
+          "ms": 15.715500000000006,
+          "graphs": 1,
+          "plans": 1,
+          "checksum": "a9444b7e32eccfebdcf0ae726ab4edb38ed3af99b87ea15cfdf2c3dc3214f6dc"
+        },
+        {
+          "ms": 11.986899999999991,
+          "graphs": 1,
+          "plans": 1,
+          "checksum": "a9444b7e32eccfebdcf0ae726ab4edb38ed3af99b87ea15cfdf2c3dc3214f6dc"
+        },
+        {
+          "ms": 11.813199999999995,
+          "graphs": 1,
+          "plans": 1,
+          "checksum": "a9444b7e32eccfebdcf0ae726ab4edb38ed3af99b87ea15cfdf2c3dc3214f6dc"
+        }
+      ],
+      "ms": 15.715500000000006,
+      "graphs": 1,
+      "plans": 1,
+      "checksum": "a9444b7e32eccfebdcf0ae726ab4edb38ed3af99b87ea15cfdf2c3dc3214f6dc",
+      "meanMs": 13.171866666666665
+    },
+    {
+      "wave": 60,
+      "enemies": 125,
+      "tiles": 41,
+      "samples": [
+        {
+          "ms": 15.265199999999993,
+          "graphs": 1,
+          "plans": 1,
+          "checksum": "ec3d5bef0f914b78176b97d2ebdab5f405ca965f855c6dad8a83225ca13f72f3"
+        },
+        {
+          "ms": 13.256400000000014,
+          "graphs": 1,
+          "plans": 1,
+          "checksum": "ec3d5bef0f914b78176b97d2ebdab5f405ca965f855c6dad8a83225ca13f72f3"
+        },
+        {
+          "ms": 13.965900000000005,
+          "graphs": 1,
+          "plans": 1,
+          "checksum": "ec3d5bef0f914b78176b97d2ebdab5f405ca965f855c6dad8a83225ca13f72f3"
+        }
+      ],
+      "ms": 15.265199999999993,
+      "graphs": 1,
+      "plans": 1,
+      "checksum": "ec3d5bef0f914b78176b97d2ebdab5f405ca965f855c6dad8a83225ca13f72f3",
+      "meanMs": 14.162500000000003
+    }
+  ]
+}

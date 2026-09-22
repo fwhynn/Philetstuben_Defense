@@ -1,0 +1,53 @@
+{
+  "date": "2026-09-22T11:42:39.877Z",
+  "node": "v24.19.0",
+  "platform": "win32",
+  "arch": "x64",
+  "cpu": "AMD Ryzen 7 9850X3D 8-Core Processor           ",
+  "combatHash": "90e9ae7593647685b8d224f2418b6784d29d8b41d5b364d87831c3b87a99b738",
+  "scope": "Synthetic combat only; no DOM, rendering, runtime spawn routing or mine road geometry. Real wave profiles, simultaneous enemies, 40 basic towers, 20 seconds simulated per sample.",
+  "cases": [
+    {
+      "wave": 40,
+      "enemies": 85,
+      "towers": 40,
+      "ticksPerSample": 400,
+      "samples": 3,
+      "p50TickMs": 5.903000000000247,
+      "p95TickMs": 13.193999999999505,
+      "meanTickMs": 6.761052583333339,
+      "definitionCalls": 1392000,
+      "checksum": "209329fce05633d68509de1be067f2419abfd6139b766b6c5bd59735d58708f1",
+      "maxMines": 53,
+      "maxProjectiles": 18
+    },
+    {
+      "wave": 50,
+      "enemies": 105,
+      "towers": 40,
+      "ticksPerSample": 400,
+      "samples": 3,
+      "p50TickMs": 7.3224000000009255,
+      "p95TickMs": 16.60069999999905,
+      "meanTickMs": 8.571766333333278,
+      "definitionCalls": 1712000,
+      "checksum": "9d19885de5c59d87745e7614870708eddb0a9f08701c176cf971e1d7012e87bb",
+      "maxMines": 53,
+      "maxProjectiles": 18
+    },
+    {
+      "wave": 60,
+      "enemies": 125,
+      "towers": 40,
+      "ticksPerSample": 400,
+      "samples": 3,
+      "p50TickMs": 8.292300000000978,
+      "p95TickMs": 18.179500000005646,
+      "meanTickMs": 9.494101250000192,
+      "definitionCalls": 2032000,
+      "checksum": "21f9d93be65aaea581adeaa83b37ea27344e24c593a85c4e965eefb6b94a7749",
+      "maxMines": 53,
+      "maxProjectiles": 18
+    }
+  ]
+}

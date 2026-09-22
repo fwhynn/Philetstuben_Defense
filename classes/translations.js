@@ -944,3 +944,43 @@ Aktuelles Zusatzhex:|Current extra hex:
 kräftig markiert|strongly highlighted
 Zusatzhex auswählen|Choose extra hex
 `);
+
+HexTranslations.add(`
+Neue Biome entdeckt|New biomes discovered
+`);
+
+HexTranslations.add(`
+Sitzung hier übernehmen|Take over session here
+Partie verlassen|Leave match
+Wirklich verlassen? Partie endet für beide.|Really leave? The match ends for both players.
+Zur Lobby|Back to lobby
+Diese Sitzung ist in einem anderen Tab geöffnet.|This session is open in another tab.
+Du kannst sie hier ausdrücklich übernehmen.|You can explicitly take it over here.
+Sitzung zuerst in diesem Tab übernehmen.|Take over the session in this tab first.
+Sitzung in diesem Tab übernommen.|Session taken over in this tab.
+Die Partie wurde von einem Spieler verlassen. Zurück zur Lobby.|A player left the match. Return to the lobby.
+Sitzungsaktion abgelehnt.|Session action rejected.
+`);
+
+HexTranslations.add(`
+Die Partie wurde verlassen. Zur Lobby zurückkehren.|The match has been left. Return to the lobby.
+Wiederbeitrittsfenster abgelaufen. Bitte eine neue Lobby erstellen.|The reconnect window expired. Please create a new lobby.
+Partie pausiert. Warte auf die Wiederverbindung deines Partners.|Match paused. Waiting for your partner to reconnect.
+`);
+
+HexTranslations.add(`
+Serverwartung · Partie sicher pausiert. Bitte warten.|Server maintenance · Match safely paused. Please wait.
+Serverwartung. Neue Partien und Beitritte sind vorübergehend gesperrt.|Server maintenance. New matches and joins are temporarily disabled.
+`);
+
+HexTranslations.add(`
+Die Karawane ist gerettet!|The caravan is saved!
+Welle 20 geschafft! Tagessieg: +10 Diamanten|Wave 20 completed! Daily victory: +10 diamonds
+Welle 20 geschafft! Tagesbelohnung bereits erhalten.|Wave 20 completed! Daily reward already claimed.
+Spiele mit deiner Karte und deinen Türmen im Endlosmodus weiter. Die Karawanenregeln bleiben aktiv. Die Tagesbelohnung gibt es nur einmal pro Tag.|Continue in endless mode with your map and towers. Caravan rules remain active. The daily reward is available only once per day.
+Endlosmodus|Endless mode
+`);
+
+HexTranslations.add(`
+Nach Welle 20 kannst du im Endlosmodus weiterspielen. Die Tagesbelohnung gibt es nur einmal pro Tag.|After wave 20, you can continue in endless mode. The daily reward is available only once per day.
+`);

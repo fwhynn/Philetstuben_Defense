@@ -18,9 +18,22 @@ const HexBiomes=(()=>{
   function visibleTiles(state){
     const cells=new Map(state.map);if(state.remoteView)return [...cells.values()];
     for(const tile of state.map.values())for(let d=0;d<6;d++){const n=HexMap.neighbor(tile.q,tile.r,d),id=HexMap.key(n.q,n.r);if(!cells.has(id)&&(!state.landmarks?.has(id)||state.landmarks.get(id).claimed))cells.set(id,n);}
+    // Revealed special tiles show biome terrain even before the road reaches them.
+    // Keep fog silhouettes excluded, matching the renderer's discovery boundary.
+    for(const landmark of state.landmarks?.values()||[]){
+      if(landmark.claimed||!landmark.prefab||HexExploration.visibility(state.map,landmark)!=='clear')continue;
+      const id=HexMap.key(landmark.q,landmark.r);if(!cells.has(id))cells.set(id,landmark);
+    }
     return [...cells.values()];
   }
-  function highlight(state){const id=state.highlightBiome||(!(state.selectedBuilding||state.hoverBuilding||state.buildingTarget||state.previewBuilding)&&state.biomeIntro);return id?{color:definitions[id].color,tiles:visibleTiles(state).filter(t=>forTile(state,t)===id)}:null;}
+  function introIds(state){return [...new Set(Array.isArray(state.biomeIntro)?state.biomeIntro:state.biomeIntro?[state.biomeIntro]:[])].filter(id=>id!=='grass'&&Object.hasOwn(definitions,id));}
+  function introAcknowledged(state){return Array.isArray(state.biomeIntroAcknowledgedIds)&&state.biomeIntroAcknowledgedIds.some(id=>id!=='grass'&&Object.hasOwn(definitions,id));}
+  function acknowledgeIntro(state){const ids=introIds(state);if(!ids.length)return false;state.biomeIntroAcknowledgedIds=ids;state.biomeIntroAcknowledged=true;state.biomeIntro=null;return true;}
+  function highlight(state){
+    const intro=!(state.selectedBuilding||state.hoverBuilding||state.buildingTarget||state.previewBuilding)?introIds(state):[];
+    const ids=new Set([...intro,...(state.highlightBiome?[state.highlightBiome]:[])]);
+    return ids.size?{color:intro.length?'#ffe39a':definitions[state.highlightBiome].color,tiles:visibleTiles(state).filter(t=>ids.has(forTile(state,t)))}:null;
+  }
   function atWorld(state,x,y){
     const r=y/(HexMap.HEX*1.5),q=x/(HexMap.HEX*Math.sqrt(3))-r/2,s=-q-r;
     let rq=Math.round(q),rr=Math.round(r),rs=Math.round(s);
@@ -43,5 +56,5 @@ const HexBiomes=(()=>{
     return def;
   }
   function guardian(state,tile){const originBiome=forTile(state,tile);return {originBiome,resistances:originBiome==='ash'?{fire:.5}:originBiome==='storm'?{lightning:.5,wind:.5}:{},slowResistance:originBiome==='desert'?.5:0};}
-  return {visibleTiles,highlight,guardian,definitions,at,forTile,atWorld,apply};
+  return {introAcknowledged,acknowledgeIntro,introIds,visibleTiles,highlight,guardian,definitions,at,forTile,atWorld,apply};
 })();
