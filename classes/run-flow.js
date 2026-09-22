@@ -5,7 +5,19 @@ const HexRunFlow=(()=>{
   function drawHand(state,random){
     const CARD_LIBRARY=HexData.CARD_LIBRARY;let result='ready';
     const shuffle=arr=>HexRunFlow.shuffle(arr,random);
-    function hasAnyPlacement(card,rotation){if(!card)return false;for(const tile of state.map.values())for(let d=0;d<6;d++){const n=HexMap.neighbor(tile.q,tile.r,d);if(HexPlacementCommands.canPlace(state,n.q,n.r,card,rotation))return true;}return false;}
+    // A building plot or a closing road never satisfies the road-progress guarantee.
+    function hasAnyPlacement(card,rotation){
+      if((card?.roads?.length||0)<2)return false;
+      const checked=new Set();
+      for(const tile of state.map.values())for(let d=0;d<6;d++){
+        const n=HexMap.neighbor(tile.q,tile.r,d),id=key(n.q,n.r);if(checked.has(id))continue;checked.add(id);
+        if(!HexPlacementCommands.canPlace(state,n.q,n.r,card,rotation))continue;
+        const roads=HexMap.rotatedRoads(card,rotation),candidate=new Map(state.map);candidate.set(id,{...n,type:card.id,roads});
+        const outside=HexMap.exterior(candidate,state.landmarks);
+        if(roads.some(dir=>{const next=HexMap.neighbor(n.q,n.r,dir);return outside.has(key(next.q,next.r));}))return true;
+      }
+      return false;
+    }
   function refillDraw(){
     if(state.drawPile.length===0){state.drawPile=shuffle(state.discard);state.discard=[];}
   }
@@ -34,35 +46,15 @@ const HexRunFlow=(()=>{
       return false;
     }));
     if(!playableIds.size) return false;
-    let guard=0;
-    while(!handHasPlayable() && guard<20){
-      state.discard.push(...state.hand);
-      state.hand=[];
-      while(state.hand.length<3){
-        refillDraw(); if(!state.drawPile.length) break;
-        state.hand.push(state.drawPile.pop());
-      }
-      guard++;
-    }
-    // Guarantee progress even when random redraws repeatedly miss a playable card.
-    if(!handHasPlayable()){
-      const pile=[state.drawPile,state.discard].find(p=>p.some(id=>playableIds.has(id)));
-      if(!pile)return false;
-      const index=pile.findIndex(id=>playableIds.has(id));
-      const [id]=pile.splice(index,1);
-      if(state.hand.length===3) state.discard.push(state.hand.pop());
-      state.hand.push(id);
-    }
+    if(state.hand.some(id=>playableIds.has(id)))return true;
+    // Replace only one card; preserve the other options, pile counts and opening hand size.
+    const pile=[state.drawPile,state.discard].find(p=>p.some(id=>playableIds.has(id)));
+    if(!pile)return false;
+    const [id]=pile.splice(pile.findIndex(id=>playableIds.has(id)),1);
+    if(state.hand.length)state.discard.push(state.hand.pop());
+    state.hand.push(id);
     return true;
   }
-  function handHasPlayable(){
-    return state.hand.some(id=>{
-      const card=id==='rescue'?state.rescueCard:CARD_LIBRARY[id];
-      for(let rot=0;rot<6;rot++) if(hasAnyPlacement(card,rot)) return true;
-      return false;
-    });
-  }
-
 
     return draw();
   }

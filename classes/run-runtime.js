@@ -39,6 +39,7 @@ const HexRunRuntime=(()=>{
     const routes=HexMap.routeGraph(state.map),sources=[];
     for(const tile of state.map.values()){
       const id=key(tile.q,tile.r);if(tile.type==='base'||!routes.distances.has(id)) continue;
+      if(tile.type==='deadEnd'&&tile.buildings?.some(b=>b?.type==='portal'))sources.push({tile,dir:6,points:[routes.geometry.get(id).hub],routes,branchCounts:new Map()});
       for(const d of tile.roads||[]){
         const n=neighbor(tile.q,tile.r,d);if(state.map.has(key(n.q,n.r))) continue;
         const c=axialToWorld(tile.q,tile.r),spawn=edgePoint(c.x,c.y,d,1.02);
@@ -77,7 +78,7 @@ const HexRunRuntime=(()=>{
     if(!state.waveRunning)return 'idle';
     state.elapsedMs+=dt*1000;const time=state.elapsedMs;let sources;
     drain(state,time,job=>{sources??=spawnSources(state);const source=sources.find(s=>s.tile.q===job.source.q&&s.tile.r===job.source.r&&s.dir===job.source.dir);if(!source)throw new Error('Spawn source missing');spawnEnemy(state,nextSourcePoints(state,random,source),job.index);});
-    for(const boss of [...state.enemies]){if(!boss.alive||!boss.summonInterval||(boss.summoned||0)>=boss.summonLimit)continue;boss.nextSummonAt??=time+boss.summonInterval;if(time<boss.nextSummonAt)continue;boss.nextSummonAt=time+boss.summonInterval;boss.summoned=(boss.summoned||0)+1;const hp=Math.round(boss.maxHp*.025);state.enemies.push({id:state.nextEnemyId++,type:'swarm',name:'Seelendiener',summoned:true,hp,maxHp:hp,armorHp:0,magicHp:0,speed:42,killGold:0,baseDamage:1,alive:true,points:boss.points.map(p=>({...p})),index:boss.index,t:boss.t,x:boss.x,y:boss.y});}
+    for(const boss of [...state.enemies]){if(!boss.alive||!boss.summonInterval||(boss.summoned||0)>=boss.summonLimit)continue;boss.nextSummonAt??=time+boss.summonInterval;if(time<boss.nextSummonAt)continue;boss.nextSummonAt=time+boss.summonInterval;boss.summoned=(boss.summoned||0)+1;const hp=Math.round(boss.maxHp*.025);state.projectiles.push({kind:'blast',x:boss.x,y:boss.y,r:24,ttl:1,max:1,color:'#c598ff'});state.enemies.push({id:state.nextEnemyId++,type:'swarm',name:'Seelendiener',summoned:true,hp,maxHp:hp,armorHp:0,magicHp:0,speed:boss.speed*.8,killGold:0,baseDamage:1,alive:true,points:boss.points.map(p=>({...p})),index:boss.index,t:boss.t,x:boss.x,y:boss.y});}
     const refs=[];for(const tile of state.map.values()){const slots=HexMap.slotPositions(tile);(tile.towers||[]).forEach((tw,i)=>{if(tw)refs.push({tw,pos:slots[i],tile});});}
     const base=HexHeroes.combatRef(state);if(base)refs.push(base);
     HexCombat.step(state,refs,HexData.TOWERS,dt,time,emit);

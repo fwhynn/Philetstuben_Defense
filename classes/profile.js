@@ -8,6 +8,7 @@ const HexProfile=(()=>{
   function affordableUnlocks(profile){return Object.entries(TOWER_UNLOCKS).filter(([id,o])=>!profile.unlockedTowers.includes(id)&&profile.diamonds>=o.cost).length+Object.entries(ULTIMATE_UNLOCKS).filter(([id,o])=>profile.unlockedTowers.includes(id)&&!profile.unlocks.includes('ultimate:'+id)&&profile.diamonds>=o.cost).length+Object.entries(BUILDING_UNLOCKS).filter(([id,o])=>!profile.unlocks.includes('building:'+id)&&profile.diamonds>=o.cost).length;}
   function resetValue(profile){let amount=0;for(const [kind,offers] of [['tower',TOWER_UNLOCKS],['ultimate',ULTIMATE_UNLOCKS],['building',BUILDING_UNLOCKS]])for(const [id,offer] of Object.entries(offers)){const key=kind+':'+id,owned=kind==='tower'?profile.unlockedTowers.includes(id):profile.unlocks.includes(key);if(owned){const paid=profile.unlockCosts?.[key];amount+=Number.isFinite(paid)&&paid>=0?paid:offer.cost;}}return amount;}
   function resetUnlocks(profile,definitions){const clean=normalize(profile,definitions),refund=resetValue(clean);return {refund,profile:save({...clean,diamonds:clean.diamonds+refund,unlockedTowers:[...START_TOWERS],activeLoadout:[...START_TOWERS],loadoutPresets:defaults().loadoutPresets,unlocks:clean.unlocks.filter(id=>!['tower:','ultimate:','building:'].some(prefix=>id.startsWith(prefix))),unlockCosts:{}},definitions)};}
+  function heroUnlocked(profile,id){return id==='standard'||id==='builder'&&profile.milestones?.includes('standard35')||id==='merchant'&&profile.milestones?.includes('dual35')||false;}
   function defaults(){const loadout=[...START_TOWERS];return {version:1,activeHero:'standard',diamonds:0,unlockedTowers:loadout,activeLoadout:[...loadout],loadoutPresets:Array.from({length:3},(_,i)=>({name:`Preset ${i+1}`,towers:[...loadout]})),unlocks:[],milestones:[],settledRuns:[],records:{highestWave:0,bossesKilled:0,runsPlayed:0},lifetime:{normalKills:0,diamondsEarned:0,towers:{}}};}
   function validIds(ids,definitions){return [...new Set(Array.isArray(ids)?ids:[])].filter(id=>definitions[id]);}
   function normalize(raw,definitions){
@@ -18,7 +19,7 @@ const HexProfile=(()=>{
     for(const id of unlocked) if(active.length<5&&!active.includes(id)) active.push(id);
     active=active.slice(0,5);
     const presets=Array.from({length:3},(_,i)=>{const item=source.loadoutPresets?.[i],ids=validIds(item?.towers||item,definitions).filter(id=>unlocked.includes(id));return {name:String(item?.name||`Preset ${i+1}`).slice(0,30),towers:ids.length===5?ids:[...active]};});
-    return {...base,...source,version:1,difficulty:source.difficulty==='dual'&&source.milestones?.includes('standard35')?'dual':'normal',activeHero:['standard','builder','merchant'].includes(source.activeHero)?source.activeHero:'standard',diamonds:Math.max(0,Number(source.diamonds)||0),unlockedTowers:unlocked,activeLoadout:active,
+    return {...base,...source,version:1,difficulty:source.difficulty==='dual'&&source.milestones?.includes('standard35')?'dual':'normal',activeHero:heroUnlocked(source,source.activeHero)?source.activeHero:'standard',diamonds:Math.max(0,Number(source.diamonds)||0),unlockedTowers:unlocked,activeLoadout:active,
       loadoutPresets:presets,unlocks:[...new Set(Array.isArray(source.unlocks)?source.unlocks:[])],milestones:Array.isArray(source.milestones)?source.milestones:[],settledRuns:Array.isArray(source.settledRuns)?source.settledRuns.slice(-100):[],
       records:{...base.records,...(source.records||{})},lifetime:{...base.lifetime,...(source.lifetime||{}),towers:{...(source.lifetime?.towers||{})}}};
   }
@@ -92,5 +93,5 @@ const HexProfile=(()=>{
     if(previous!==null)localStorage.setItem(STORAGE_KEY+'-before-import',previous);
     localStorage.setItem(STORAGE_KEY,JSON.stringify(next));return next;
   }
-  return {exportFile,readFile,importFile,resetValue,resetUnlocks,affordableUnlocks,BUILDING_UNLOCKS,unlockBuilding,STORAGE_KEY,START_TOWERS,TOWER_UNLOCKS,ULTIMATE_UNLOCKS,defaults,normalize,load,save,setLoadout,savePreset,runReward,settleRun,settleDaily,unlockTower,unlockUltimate};
+  return {heroUnlocked,exportFile,readFile,importFile,resetValue,resetUnlocks,affordableUnlocks,BUILDING_UNLOCKS,unlockBuilding,STORAGE_KEY,START_TOWERS,TOWER_UNLOCKS,ULTIMATE_UNLOCKS,defaults,normalize,load,save,setLoadout,savePreset,runReward,settleRun,settleDaily,unlockTower,unlockUltimate};
 })();

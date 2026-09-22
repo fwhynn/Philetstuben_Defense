@@ -2,7 +2,7 @@
 
 Stand: 20.09.2026, einschließlich lokaler Änderungen. Status: Umsetzungsstand und Designplan. Etappe 1 bis 3 sind umgesetzt. Das Meta-Arsenal enthält Balliste, Flammenturm und eine dauerhaft freischaltbare vierte Stufe für jeden vorhandenen Turm. Elementturm und Nekromantenturm sind ebenfalls umgesetzt.
 
-Aktueller Stand: Loadout, Diamanten, Arsenal, drei Presets, Turmstatistiken sowie drei frei wählbare Heroes und Base-Ausbau sind umgesetzt. Hero-/Base-Werte stehen in der App-README und heroes.js; Freischaltungsmeilensteine für Heroes sind weiterhin Zukunftsvorschläge. Abschnitte mit „Vorschlag“ oder „Zielbild“ sind nicht implementierte Ideen; sie beschreiben keine aktuellen Voraussetzungen oder Menüs.
+Aktueller Stand: Loadout, Diamanten, Arsenal, drei Presets, Turmstatistiken sowie drei Startfestungen und Base-Ausbau sind umgesetzt. Standardfestung ist sofort verfügbar; Festungsbauer benötigt den Sieg über Welle 35 auf Stufe 1, Händlerstadt auf Stufe 2. Werte stehen in README und heroes.js. Abschnitte mit „Vorschlag“ oder „Zielbild“ sind nicht implementierte Ideen; sie beschreiben keine aktuellen Voraussetzungen oder Menüs.
 
 ## 1. Ziel des Systems
 
@@ -362,3 +362,15 @@ Vom Nutzer vorgemerkt, noch nicht umgesetzt: Bestimmte Meta-Upgrades sollen erst
 - Duo-Zurechnung ausdrücklich definieren (persönliche Kills, Teamfortschritt oder beide). Späteres Online-Profil serverseitig fortschreiben. Aktuelle Killstatistiken reichen noch nicht für eine zuverlässige rückwirkende Zuordnung nach Resistenztypen.
 
 Diese Idee gehört zur späteren Meta-Progression; keine neuen Kaufbedingungen im aktuellen Arsenal aktiviert.
+
+## Geplant: Achievements und Gegner-Meilensteine
+
+Noch nicht implementiert. Erfolge sollen langfristige Ziele sichtbar machen, zum Beispiel „Besiege 1.000 Golems“, „Besiege 100 Bosse“ oder „Überstehe jede Biom-Wächterart“. Die Zahlen sind Vorschläge für späteres Balancing. Ein eigener Bereich zeigt Fortschrittsbalken, Beschreibung und erreichte Erfolge; neue Erfolge werden nach einer Belohnungswahl gemeldet, ohne diese zu verdecken.
+
+Zuerst stabile Gegner-/Boss-IDs und profilweite Zähler einführen, dann versionierte Erfolgsdefinitionen. Nur tatsächliche Tötungen zählen, keine Vorschauen, wiederhergestellten Ereignisse oder mehrfach empfangenen Netzwerkpakete. Solo und Duo müssen klare Zurechnungsregeln erhalten (eigene Kills oder Teamerfolge ausdrücklich benennen). Export/Import und Migration alter Profile mitdenken: Vergangene Gegnerarten nicht aus einem Gesamtzähler erfinden. Belohnungen und Verknüpfungen mit Arsenal-Freischaltungen erst separat festlegen; vorhandene Freischaltungen nicht rückwirkend entziehen. Dies ergänzt die bereits geplanten gegnerabhängigen Meta-Upgrades.
+
+## Offene Idee: Handkarten neu ziehen (Reroll)
+
+Status: unverbindliche Ideensammlung, weder beschlossen noch umgesetzt. Handkarten könnten gegen Gold neu gezogen werden. Offen ist, ob dies nur für die Starthand oder in jeder Bauphase möglich sein soll; ebenso Umfang (ganze Hand/einzelne Karten), Preis und mögliche steigende Kosten.
+
+Mögliche Meta-Progression: ein kostenloser Reroll pro Run oder ein kostenloser Reroll alle fünf Runden. Ebenfalls offen: Ansparen/Limit, Startzeitpunkt und genaue Freischaltkosten. Erst nach Spieltests entscheiden; Rettungsmechaniken dürfen keine kostenpflichtigen Rerolls voraussetzen. Bei einer Umsetzung Deck-/Ablageregeln, deterministischen Zufall, Speicherung und serverseitige Duo-Prüfung berücksichtigen.

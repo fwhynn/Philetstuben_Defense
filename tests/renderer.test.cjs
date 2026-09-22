@@ -53,3 +53,7 @@ test('renderer owns camera reset and releases camera listeners', () => {
 test('rotate hint belongs to the hover-only placement preview', () => {
   const { renderer, svg, state } = setup(); renderer.render(state, [{ q: 1, r: 0, legal: true }]); const preview = svg.children[1].children.find(child => child.children.some(text => text.textContent === 'R / Mausrad-Klick · Drehen')); assert.ok(preview); assert.equal(preview.style.display, 'none'); const hit = svg.children[1].children.find(child => child.listeners.pointerenter); hit.listeners.pointerenter(); assert.equal(preview.style.display, ''); hit.listeners.pointerleave(); assert.equal(preview.style.display, 'none');
 });
+
+test('U marks upgradeable houses, forges and markets without requiring gold and hides completed buildings',()=>{
+ const {renderer,svg,state}=setup();Object.assign(state,{phase:'build',gold:0,hp:20,hand:[],showUpgradeStatus:true,buildingUnlocks:['building:forge']});const buildings=[{type:'house',level:1},{type:'forge',level:3},{type:'market',level:3,special:true}];buildings.forEach((b,i)=>state.map.set((i+1)+',0',{q:i+1,r:0,type:'village',roads:[0,2],slots:0,towers:[],buildingSlots:1,buildings:[b]}));const arrows=()=>svg.children[3].children.filter(n=>n.attributes['aria-label']==='Gebäude ausbaubar');renderer.render(state);assert.equal(arrows().length,2);buildings[1].special=true;renderer.render(state);assert.equal(arrows().length,1);state.showUpgradeStatus=false;renderer.render(state);assert.equal(arrows().length,0);
+});

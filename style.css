@@ -263,3 +263,175 @@ html,body{height:100%;overflow:hidden}
 .card .deckCopyCount{margin:8px 0 0;font-size:12px;font-weight:700;color:#403921}
 
 #saleConfirmOverlay{z-index:60}#saleConfirmOverlay button{min-height:44px;margin:6px}
+.menuLanguage{display:flex;align-items:center;justify-content:center;gap:12px;padding:8px}.menuLanguage select,[data-language-picker]{font:inherit;color:var(--text);background:#283d31;border:1px solid #718a6c;border-radius:8px;padding:7px 12px;min-height:38px}
+
+/* Shared UI contract: see docs/DESIGN_SYSTEM.md. */
+:root{--ui-space-1:4px;--ui-space-2:8px;--ui-space-3:12px;--ui-space-4:16px;--ui-space-6:24px;--ui-text:#f4ecd6;--ui-muted:#c8d4c9;--ui-surface:#1d2922;--ui-button:#293f32;--ui-primary:#326345;--ui-confirm:#246c41;--ui-border:#73917b;--ui-control:44px;--ui-radius:10px}
+button{background:var(--ui-button);color:var(--ui-text);min-height:var(--ui-control);line-height:1.35;overflow-wrap:anywhere}
+button.primary{background:var(--ui-primary);color:#fff}button.secondary{background:#384b3e;color:var(--ui-text)}button.danger{background:#6f3834;color:#fff}
+button.confirmSale{background:var(--ui-confirm);color:#fff;border:2px solid #a4e7b8;font-weight:700}
+button:focus-visible,summary:focus-visible,select:focus-visible{outline:3px solid #ffe198;outline-offset:3px}
+button:disabled:not(.card){opacity:1;background:#28382e;color:#b9c6bc;cursor:not-allowed}button:disabled:not(.card) small{color:inherit}
+button.card{background:#efe3c2;color:#2b281f}button.card:disabled{opacity:.7}
+#campaignVictory .loadoutActions{display:flex;flex-wrap:wrap;gap:12px;background:transparent;padding:0}#campaignVictory .loadoutActions button{flex:1 1 220px;width:auto;min-width:0}
+#buildingOptions>button{color:var(--ui-text);background:var(--ui-button);text-align:left}#buildingOptions>button:disabled{color:#b9c6bc;background:#28382e}
+.gameHeader{position:fixed;top:max(12px,env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));display:flex;flex-wrap:wrap;align-items:flex-start;gap:12px;z-index:7;pointer-events:none}
+.gameHeader .dockTL{position:static;flex:1 1 260px;min-width:0;pointer-events:auto}.gameHeader .dockTL>div{display:flex;flex-wrap:wrap;gap:6px}
+.gameHeader .hud{position:relative;inset:auto;flex:0 1 auto;max-width:100%;gap:6px;pointer-events:auto}
+.gameHeader .hudStat,.gameHeader summary{min-height:44px}.gameHeader:has(.statDetails[open]){z-index:35}
+.drawer,.towerPanel{z-index:35}.drawer button,.towerPanel button{min-height:44px}
+.tutorialSpotlight{position:fixed;z-index:20;border:3px solid #ffe198;border-radius:12px;background:transparent;box-shadow:0 0 0 100vmax #0c141166;pointer-events:none}
+.tutorialSpotlight.hidden{display:none}.message.tutorialActive{z-index:30;max-width:min(520px,calc(100vw - 120px));font-size:14px;line-height:1.45}
+.message .tutorialPanel button{min-height:36px}.tutorialFeedback{margin:12px 0 0;padding:10px 12px;border:1px solid #e9b583;border-radius:8px;background:#4b3023;color:#fff0dc;font-size:14px;line-height:1.4}
+#saveOverlay{background:#0b110d66}.menuBackdropOn #saveOverlay{background:#0b110d44}
+.mapRail{top:calc(var(--play-top,90px) + 12px);bottom:calc(var(--play-bottom,200px) + 12px);transform:none;justify-content:center;overflow-y:auto;overflow-x:clip;scrollbar-width:thin}
+.mapRail button{flex-shrink:0}.biomeRail{overflow:visible}.loadoutRail{justify-content:safe center}
+@media(max-width:1100px){
+ .gameHeader .dockTL{flex-basis:100%}.gameHeader .hud{flex:1 1 100%;justify-content:flex-start}
+ .gameHeader .dockTL h1{font-size:20px}.gameHeader .dockTL{flex-direction:row;align-items:center;flex-wrap:wrap;gap:8px}
+}
+@media(max-width:1000px){
+ .dockBL,.mapControls{top:calc(var(--header-bottom,140px) + 8px);bottom:auto}.dockBL{left:12px}.mapControls{right:12px;left:auto;max-width:calc(100% - 156px)}.mapControls span{display:none}
+ .dockBR{left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));flex-wrap:wrap;align-items:stretch;gap:8px}
+ .dockBR .speedControl{flex:1 1 145px;min-width:0}.dockBR .primary{flex:1 1 145px;width:auto;font-size:14px;padding:8px}
+ .handDock,.handDock:has(.openingHand){bottom:calc(var(--footer-height,90px) + 24px);width:calc(100% - 24px);max-width:none}
+ .handDock .card{min-width:0;min-height:100px;padding:5px}.handDock .card h3{font-size:13px}.handDock .slots{font-size:11px}
+ .handHint{max-width:100%;white-space:normal}
+}
+@media(max-width:600px){
+ .gameHeader{gap:6px}.gameHeader .dockTL{gap:4px}.gameHeader .dockTL h1{font-size:18px}.gameHeader .dockTL button{padding:6px 8px;font-size:12px}
+ .gameHeader .hud{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;width:100%}.gameHeader .hudStat,.gameHeader .statDetails>summary{min-width:0;padding:6px;font-size:13px}
+ .mapControls{gap:4px;justify-content:flex-end}.mapControls button{font-size:12px;padding:5px 8px}.dockBL button{font-size:12px;padding:6px 8px}
+ .handDock .card .slots{display:none}.handDock .card h3{font-size:12px}.handDock .card{min-height:90px}.handDock .rarity{font-size:9px}.handDock .miniPath{max-height:34px}
+ .mapRail button{width:44px;min-height:44px}.loadoutRail{left:6px}.biomeRail{right:6px}.message.tutorialActive{max-width:calc(100vw - 112px);padding:10px;font-size:13px}.message .tutorialPanel p{font-size:13px}
+ .rewardChoices,.loadoutChoices{grid-template-columns:1fr}.rewardChoices .card{min-height:130px}.loadoutActions{flex-wrap:wrap}.modeBox,.rewardBox,.gameOverBox{max-width:calc(100vw - 24px);padding:16px;max-height:calc(100dvh - 24px);overflow:auto}
+}
+@media(prefers-reduced-motion:reduce){button,.card{transition:none}.tutorialSpotlight{animation:none}}
+#backToVictoryBtn{display:none}#campaignVictory.inspectCampaign{background:transparent;pointer-events:none}#campaignVictory.inspectCampaign .gameOverBox{display:none}#campaignVictory.inspectCampaign #backToVictoryBtn{display:block;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);width:auto;max-width:90vw;pointer-events:auto}
+@media(min-width:650px) and (max-height:560px){
+ .gameHeader .dockTL{flex:1 1 220px}.gameHeader .hud{display:flex;flex:0 1 auto;gap:4px}.gameHeader .hud .hudStat,.gameHeader .hud summary{min-width:52px;padding:5px;font-size:12px}.gameHeader .dockTL h1{display:none}
+ .handDock,.handDock:has(.openingHand){left:auto;right:12px;transform:none;width:300px}.handDock .card{min-height:80px}.handDock .card p,.handDock .slots,.handDock .handHint{display:none}.handDock .card h3{font-size:12px}
+ .message.tutorialActive{max-width:min(320px,calc(100vw - 120px));padding:8px}.message .tutorialPanel p{font-size:12px;margin:4px 0}.tutorialFeedback{font-size:12px;padding:6px;margin-top:6px}
+ .mapRail{gap:3px}.mapRail button{min-height:40px;width:40px}.quickTower .researchIcon{width:24px;height:24px}.biomeRail{flex-direction:row;top:calc(var(--play-top,60px) + 8px);bottom:auto}
+}
+
+/* Shared native controls: match the forest-green panels, including scrolling. */
+:root{scrollbar-color:#789180 #17251d;scrollbar-width:thin}
+*{scrollbar-color:#789180 #17251d;scrollbar-width:thin}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:#17251d;border-radius:8px}
+::-webkit-scrollbar-thumb{background:#789180;border:2px solid #17251d;border-radius:8px}
+::-webkit-scrollbar-thumb:hover{background:#a2baa7}
+::-webkit-scrollbar-corner{background:#17251d}
+.menuButtons .menuLanguage{width:100%;min-height:48px;padding:10px 14px;display:flex;justify-content:space-between;gap:12px;background:#2c3f33;border:1px solid #4d684f;border-radius:9px;color:#eee1c2;font-size:17px}
+.menuButtons .menuLanguage select{min-width:0;max-width:65%;min-height:32px;padding:3px 24px 3px 8px;border:0;background:#2c3f33;color:#eee1c2;font-size:inherit;cursor:pointer}
+@media(max-height:700px){.menuButtons .menuLanguage{font-size:15px;padding:6px 12px;min-height:44px}}
+/* Hidden state always wins over a component's flex/grid/display rule. */
+.hidden{display:none!important}
+
+/* Compact navigation replaces permanent rails and overlapping header controls. */
+.compactToolbar{display:none}.tutorialActions{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;align-items:stretch}
+.message .tutorialActions button{min-height:44px;margin:0;font-size:14px}
+#tutorialNextBtn.hidden{display:block!important;visibility:hidden;pointer-events:none}
+#skipTutorialBtn{grid-column:2}.tutorialPanel p{min-height:60px}
+.tutorialTargets{position:fixed;inset:0;z-index:20;pointer-events:none}.tutorialTargets svg{width:100%;height:100%;display:block}
+@media(max-width:900px),(max-height:600px){
+ .compactToolbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;position:fixed;left:12px;right:12px;top:max(8px,env(safe-area-inset-top));z-index:38}
+ .compactToolbar button{min-width:0;padding:8px 4px;border:1px solid var(--ui-border);font-size:14px}.compactToolbar button[aria-expanded=true]{background:var(--ui-primary);outline:2px solid #ffe198}
+ .gameHeader{top:64px;z-index:37;display:block}.gameHeader .dockTL,.gameHeader .hud,#quickLoadout,#biomeRail,.mapControls,.dockBL{display:none}
+ html[data-compact=menu] .gameHeader .dockTL,html[data-compact=stats] .gameHeader .hud{display:flex;background:var(--ui-surface);padding:12px;border:1px solid var(--ui-border);border-radius:12px;max-height:55dvh;overflow:auto}
+ .gameHeader .dockTL h1{display:none}.gameHeader .dockButtons{width:100%}.gameHeader .dockButtons button{flex:1 1 80px;font-size:14px}
+ html[data-compact=stats] .gameHeader .hud{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%}
+ html[data-compact=towers] #quickLoadout,html[data-compact=biomes] #biomeRail{display:flex;flex-direction:row;justify-content:center;flex-wrap:wrap;position:fixed;top:64px;bottom:auto;left:12px;right:12px;transform:none;padding:12px;background:var(--ui-surface);border:1px solid var(--ui-border);border-radius:12px;z-index:37;max-height:50dvh;overflow:auto}
+ .mapRail button{width:48px;min-height:48px}.biomeTooltip{position:fixed;left:16px;right:16px;top:140px;transform:none;width:auto;max-height:45dvh;overflow:auto}
+ .dockBR{display:grid;grid-template-columns:minmax(100px,1fr) minmax(130px,1.4fr);gap:8px;left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));width:auto;z-index:8}
+ .dockBR .speedControl,.dockBR .primary{width:auto;min-width:0;margin:0;padding:8px;font-size:14px;min-height:64px}.dockBR .speedControl input{width:100%}
+ .handDock,.handDock:has(.openingHand){bottom:calc(var(--footer-height,80px) + 28px);left:12px;right:12px;transform:none;width:auto;max-width:none}
+ .handDock .card{min-width:0;min-height:88px}.handDock .card p,.handDock .slots{display:none}.handDock .card h3{font-size:12px}.handDock .rarity{font-size:10px}
+ .message.tutorialActive{max-width:calc(100vw - 32px);width:480px;font-size:14px}.message .tutorialPanel p{font-size:14px}.tutorialPanel p{min-height:60px}.tutorialActions{gap:12px;margin-top:12px}
+}
+@media(min-width:650px) and (max-height:600px){.handDock,.handDock:has(.openingHand){left:auto;width:42vw}.dockBR{left:auto;width:42vw}.message.tutorialActive{max-width:44vw}.handHint{display:none}}
+.message.tutorialActive{top:100px!important}.message .tutorialPanel{display:grid;grid-template-columns:1fr}.tutorialPanel>strong{order:0}.tutorialPanel>.tutorialActions{order:1}.tutorialPanel>p{order:2;margin-bottom:0}
+@media(max-width:900px),(max-height:600px){.message.tutorialActive{top:64px!important}.tutorialActions{margin-top:10px}.message .tutorialActions button{font-size:12px;padding:8px}.tutorialPanel>p{max-height:24dvh;overflow:auto}}
+@media(max-width:900px),(max-height:600px){body:has(.message.tutorialActive) .gameHeader,body:has(.message.tutorialActive) #quickLoadout,body:has(.message.tutorialActive) #biomeRail{top:calc(var(--tutorial-bottom,250px) + 8px)}}
+:root{--ui-font-body:16px;--ui-font-control:14px;--ui-font-meta:12px}
+.drawer,.towerPanel,.statPopup{font-size:var(--ui-font-control);line-height:1.5}.drawer h2,.towerPanel h2{font-size:18px;font-weight:700}.drawer .hint,.towerPanel small,.rules ul{font-size:var(--ui-font-meta);line-height:1.5}
+.uiIcon{width:20px;height:20px;display:inline-block;vertical-align:middle;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}#healthStat>.uiIcon{color:#f78390;fill:#b63756;stroke:#f78390}
+.overlay,.mainMenu,.celebration{z-index:50}#loadoutOverlay,#playModeOverlay,#menuRulesOverlay,#arsenalOverlay{z-index:60}#saveOverlay{z-index:65}
+@media(max-width:900px),(max-height:600px){.gameHeader{z-index:7}.gameHeader:has(.statDetails[open]){z-index:37}}
+/* Tutorial actions retain their screen anchor across changing target/layout steps. */
+.message.tutorialActive{left:50%!important;transform:translateX(-50%)}
+@media(min-width:650px) and (max-height:600px){.message.tutorialActive{left:24%!important}}
+
+/* Scrollbars belong inside the rounded surface, including native overlay bars. */
+.loadoutBox,.rewardBox,.gameOverBox,.drawer,.towerPanel,.statPopup{clip-path:inset(0 round 14px);background-clip:padding-box}
+::-webkit-scrollbar-track{margin-block:12px}
+#campaignVictory #victoryMenuBtn{background-color:#384b3e;color:#f4ecd6}
+#campaignVictory #endlessBtn{background-color:#326345;color:#ffffff}
+#campaignVictory .loadoutActions{background:transparent}
+/* Run preparation: one compact sheet, no page scrollbar. */
+#loadoutOverlay{padding:12px;overflow:hidden}
+#loadoutOverlay>.loadoutBox{width:min(1100px,calc(100vw - 24px));max-height:calc(100dvh - 24px);padding:18px;overflow:visible;clip-path:none;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+#loadoutOverlay .eyebrow,#loadoutOverlay .loadoutBox>p:not(.preparationInfo):not(.loadoutWarning){display:none}
+#loadoutTitle{grid-column:1/-1;font-size:24px;margin:0}
+#difficultyChoices{grid-column:span 2;grid-template-columns:repeat(2,minmax(0,1fr))}
+#heroChoices{grid-column:span 4;grid-template-columns:repeat(3,minmax(0,1fr))}
+#loadoutOverlay .heroChoices{margin:0;gap:6px}
+#loadoutOverlay .heroChoices .loadoutChoice{min-height:60px;padding:8px;gap:4px}
+#loadoutOverlay .heroChoices small{display:none}#loadoutOverlay .heroChoices strong{font:600 14px/1.3 Inter,system-ui,sans-serif}
+#loadoutOverlay .loadoutSummary{grid-column:span 4;margin:0;padding:0;align-self:center}
+.prepPresets{grid-column:span 2;position:relative;justify-self:end}.prepPresets>summary{min-height:44px;display:grid;place-items:center;cursor:pointer;background:#293f32;border:1px solid #73917b;border-radius:9px;padding:8px 14px}
+.prepPresets[open]>#loadoutPresets{position:absolute;right:0;top:100%;z-index:5;width:min(620px,calc(100vw - 64px));padding:12px;background:#17251d;border:1px solid #73917b;border-radius:12px;box-shadow:0 8px 24px #0008;grid-template-columns:repeat(3,minmax(0,1fr))}
+#loadoutChoices{grid-column:1/-1;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+#loadoutOverlay #loadoutChoices .loadoutChoice{min-height:100px;padding:8px;gap:4px;align-items:center;text-align:center}
+#loadoutChoices .researchIcon{float:none;margin:0;width:36px;height:36px}
+#loadoutChoices small,#loadoutChoices .loadoutRole{display:none}
+#loadoutChoices strong{font:600 14px/1.25 Inter,system-ui,sans-serif}
+#loadoutChoices .loadoutCheck{font-size:12px;margin:0}
+#loadoutOverlay .preparationInfo{grid-column:1/-1;font-size:13px;line-height:1.4;margin:0;min-height:36px}
+#loadoutOverlay .loadoutWarning{grid-column:1/-1;margin:0;font-size:12px;line-height:1.3}
+#loadoutOverlay .loadoutActions{grid-column:1/-1;display:flex;flex-direction:row;gap:12px;margin:0;padding:0;background:transparent}
+#loadoutOverlay .loadoutActions button{flex:1;min-width:0;min-height:44px;padding:8px;font-size:14px}
+@media(max-width:600px){
+ #loadoutOverlay>.loadoutBox{padding:12px;gap:7px}#loadoutTitle{font-size:20px}
+ #difficultyChoices,#heroChoices{grid-column:1/-1}
+ #loadoutOverlay .heroChoices .loadoutChoice{min-height:44px;padding:5px}#loadoutOverlay .heroChoices strong{font-size:12px}
+ #loadoutChoices{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+ #loadoutOverlay #loadoutChoices .loadoutChoice{min-height:56px;position:relative;padding:4px;gap:2px}#loadoutChoices .researchIcon{width:22px;height:22px}#loadoutChoices strong{font-size:12px}#loadoutChoices .loadoutCheck{font-size:10px}
+ #loadoutOverlay .preparationInfo{font-size:12px;min-height:32px}#diamondCount{display:none}
+ #loadoutOverlay .loadoutWarning{font-size:11px}#loadoutOverlay .loadoutActions button{font-size:12px}
+}
+@media(max-height:600px) and (min-width:650px){
+ #loadoutOverlay>.loadoutBox{gap:6px;padding:10px}#loadoutTitle{font-size:20px}#loadoutOverlay .heroChoices .loadoutChoice{min-height:44px;padding:5px}
+ #loadoutOverlay #loadoutChoices .loadoutChoice{min-height:60px;padding:4px;gap:2px}#loadoutChoices .researchIcon{width:24px;height:24px}#loadoutChoices .loadoutCheck{display:none}#loadoutOverlay .preparationInfo{font-size:12px;min-height:28px}
+}
+@media(max-width:600px){#loadoutChoices .loadoutCheck{display:none}#loadoutChoices .loadoutChoice.selected:after{content:'✓';position:absolute;right:4px;top:2px;color:#b9f1c7;font-weight:700}#loadoutOverlay .preparationInfo{min-height:18px}#loadoutOverlay .loadoutChoice:disabled strong:before{content:'🔒 ';font-size:11px}}
+@media(max-width:600px){#loadoutOverlay #loadoutChoices .loadoutChoice{display:grid;grid-template-columns:22px minmax(0,1fr);align-content:center;min-height:44px;gap:3px}#loadoutChoices strong{text-align:left;font-size:11px}#loadoutOverlay .loadoutActions button{white-space:normal}}
+/* Tutorial: stable skip action above the title; Continue stays below the text. */
+.message .tutorialPanel>#skipTutorialBtn{order:-1;grid-column:1;justify-self:center;min-height:36px;margin:0 0 8px;padding:6px 14px;font-size:12px}
+.message .tutorialPanel>strong{order:0}.message .tutorialPanel>p{order:1}.message .tutorialPanel>.tutorialActions{order:2;display:flex;justify-content:center;margin-top:10px}
+.message .tutorialActions>#tutorialNextBtn.hidden{display:none!important}
+.tutorialTargets,.tutorialTargets *,.tutorialSpotlight{pointer-events:none!important;user-select:none;-webkit-user-drag:none}
+
+/* Card labels must fit their grid cell, including longer translated rarities. */
+.card>*{min-width:0;max-width:100%;overflow-wrap:anywhere}
+.card .rarity{box-sizing:border-box;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;line-height:1.25;text-align:center}
+.handDock .hand .card{overflow:hidden;grid-template-columns:minmax(0,1fr)}
+.handDock .hand .card h3,.handDock .hand .card p,.handDock .hand .card .slots{white-space:normal;overflow-wrap:anywhere}
+.handDock .hand{container-type:inline-size;container-name:hand-cards}
+@container hand-cards (max-width:420px){.handDock .hand .card::before{display:none}}
+@media(max-width:900px),(max-height:600px){
+ .handDock .hand .card::before{display:none}
+ .handDock .hand .card .rarity{padding:3px;letter-spacing:0;font-size:10px}
+}
+/* Reuse the Arsenal silhouettes in each build offer. */
+#towerMenu .towerBtn{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:10px;align-items:start}
+.towerBuildIcon{display:flex;justify-content:center;align-items:center;width:40px;min-width:0;pointer-events:none}
+.towerBuildIcon .researchIcon{float:none;margin:0;width:36px;height:36px}
+#towerMenu .towerBtn.tutorialChoice,#towerUpgrades .upgradeOption.tutorialChoice{outline:3px solid #ffe198;outline-offset:-3px;background:#3b4b2b;box-shadow:inset 0 0 20px #ffe19833;opacity:1}
+@media(max-width:600px){#towerMenu .towerBtn{grid-template-columns:30px minmax(0,1fr) auto;gap:6px}.towerBuildIcon{width:30px}.towerBuildIcon .researchIcon{width:28px;height:28px}}
+
+/* One-time biome discovery hint; does not block map input. */
+.biomeIntro{position:fixed;right:84px;top:40%;z-index:75;width:min(310px,calc(100vw - 100px));box-sizing:border-box;padding:16px;border:1px solid #e9c667;border-radius:12px;background:#1d3028;color:#fff2ce;box-shadow:0 6px 24px #0006;font-size:14px;line-height:1.5}
+.biomeIntro p{margin:8px 0 12px}.biomeIntro button{min-height:44px;background:#466e52;color:#fff2ce;border:1px solid #9fbe95;border-radius:8px;padding:8px 16px}.biomeIcon.biomeIntroTarget{outline:3px solid #ffe39a;outline-offset:4px;box-shadow:0 0 22px #ffe39a99}
+@media(max-width:900px),(max-height:600px){.biomeIntro{top:144px;right:16px;max-height:calc(100dvh - 164px);overflow:auto;font-size:13px;padding:12px}}

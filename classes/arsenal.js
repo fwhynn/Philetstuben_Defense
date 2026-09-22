@@ -20,6 +20,7 @@ const HexArsenal=(()=>{
       }tree.appendChild(branches);host.appendChild(tree);
     }
     for(const [type,def] of Object.entries(HexBuildings.definitions)){
+      if(!HexBuildings.upgrades[type])continue;
       const tree=document.createElement('section');tree.className='researchTree buildingTree';tree.id='research-'+type;node(tree,type,def.name,def.desc,'✓ Im Run: '+def.cost+' Gold');
       const lane=document.createElement('div');lane.className='researchLane';for(let i=0;i<2;i++){const u=HexBuildings.upgrades[type][i];node(lane,type,def.name+' · Stufe '+(i+2),HexBuildings.definition({type,level:i+2}).desc,'Im Run: '+u.cost+' Gold');}
       const special=HexBuildings.specials[type],owned=profile.unlocks.includes('building:'+type);node(lane,type,special.name,special.desc+' Im Run: '+special.cost+' Gold nach Stufe 3.',owned?'✓ Dauerhaft freigeschaltet':'Meta-Freischaltung',owned?null:{kind:'building',cost:HexProfile.BUILDING_UNLOCKS[type].cost});tree.appendChild(lane);host.appendChild(tree);

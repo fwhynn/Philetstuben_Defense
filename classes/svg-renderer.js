@@ -83,7 +83,7 @@ function create(svg,commands){
     }
 
     drawFreezeAuras();drawSelectedRange();
-    hintLayer.innerHTML='';scene=hintLayer;if(state.buildingTarget)for(const tile of state.map.values()){const c=axialToWorld(tile.q,tile.r),hit=drawPoly(c.x,c.y,HEX-3,'rgba(110,220,200,.25)','#8ff3df',1);hit.style.pointerEvents='all';hit.style.cursor='pointer';hit.addEventListener('click',e=>{e.stopPropagation();commands.placeTile(tile.q,tile.r);});}drawUpgradeHints();drawTileOverlays();drawSelectionRings();if(state.duoPortal){const slot=state.duoPortal,tile=state.map.get(key(slot.q,slot.r)),p=tile&&slotPositions(tile)[slot.index];if(p){const ring=document.createElementNS(NS,'circle');for(const [name,value] of Object.entries({cx:p.x,cy:p.y,r:21,fill:'none',stroke:'#7b36fa','stroke-width':4}))ring.setAttribute(name,value);scene.appendChild(ring);scene.appendChild(text(p.x,p.y-27,'Partner-Portal',10,'#30125e','700'));}}scene=worldLayer;
+    hintLayer.innerHTML='';scene=hintLayer;if(state.buildingTarget)for(const tile of state.map.values()){if(!HexBuildings.canTarget(state,state.buildingTarget,key(tile.q,tile.r)))continue;const c=axialToWorld(tile.q,tile.r),hit=drawPoly(c.x,c.y,HEX-3,'rgba(110,220,200,.25)','#8ff3df',1);hit.style.pointerEvents='all';hit.style.cursor='pointer';hit.addEventListener('click',e=>{e.stopPropagation();commands.placeTile(tile.q,tile.r);});}drawUpgradeHints();drawBuildingUpgradeHints();drawTileOverlays();drawSelectionRings();if(state.duoPortal){const slot=state.duoPortal,tile=state.map.get(key(slot.q,slot.r)),p=tile&&slotPositions(tile)[slot.index];if(p){const ring=document.createElementNS(NS,'circle');for(const [name,value] of Object.entries({cx:p.x,cy:p.y,r:21,fill:'none',stroke:'#7b36fa','stroke-width':4}))ring.setAttribute(name,value);scene.appendChild(ring);scene.appendChild(text(p.x,p.y-27,'Partner-Portal',10,'#30125e','700'));}}scene=worldLayer;
     for(const mine of state.mines||[]) drawMine(mine);
     for(const e of state.enemies) drawEnemy(e);
     for(const p of state.projectiles) drawProjectile(p);
@@ -105,8 +105,10 @@ function create(svg,commands){
     if(state.showHexGrid)for(const tile of HexExploration.gridCells(state.map,state.landmarks)){
       const c=axialToWorld(tile.q,tile.r),p=drawPoly(c.x,c.y,HEX-1,'none','#d4e7d2',.8);p.setAttribute('stroke-width',1.5);p.setAttribute('data-overlay','grid');
     }
-    const highlight=state.highlightBiome?{color:HexBiomes.definitions[state.highlightBiome].color,tiles:[...state.map.values()].filter(t=>HexBiomes.forTile(state,t)===state.highlightBiome)}:HexBuildings.highlight(state);
+    const highlight=HexBiomes.highlight(state)||HexBuildings.highlight(state);
+    for(const tile of highlight.otherTiles||[]){const c=axialToWorld(tile.q,tile.r),p=drawPoly(c.x,c.y,HEX-3,highlight.otherColor,highlight.otherColor,1);p.setAttribute('fill-opacity',.10);p.setAttribute('stroke-opacity',.5);p.setAttribute('data-overlay','other-building');}
     for(const tile of highlight.tiles){const c=axialToWorld(tile.q,tile.r),p=drawPoly(c.x,c.y,HEX-3,highlight.color,highlight.color,1);p.setAttribute('fill-opacity',.18);p.setAttribute('stroke-width',3);p.setAttribute('data-overlay','building');}
+    for(const tile of highlight.currentTiles||[]){const c=axialToWorld(tile.q,tile.r),p=drawPoly(c.x,c.y,HEX-3,highlight.currentColor,highlight.currentColor,1);p.setAttribute('fill-opacity',.48);p.setAttribute('stroke-width',5);p.setAttribute('data-overlay','current-building-target');}
   }
   function roadPolyline(points,color,width,parent=scene,dashed=false){
     const path=document.createElementNS(NS,'polyline');
@@ -136,6 +138,7 @@ function create(svg,commands){
       else hint=text(p.x+12,p.y-8,'↑',13,'#ffffff','800');hint.setAttribute('stroke','#172019');hint.setAttribute('stroke-width',1.5);hint.setAttribute('paint-order','stroke');hint.style.pointerEvents='none';scene.appendChild(hint);
     });
   }
+  function drawBuildingUpgradeHints(){if(!state.showUpgradeStatus||state.hp<=0||!['build','wave'].includes(state.phase))return;for(const tile of state.map.values())(tile.buildings||[]).forEach((b,i)=>{if(!b||!HexBuildings.nextUpgrade(state,b))return;const p=buildingPosition(tile,i),arrow=document.createElementNS(NS,'polygon');for(const [k,v] of Object.entries({points:'14,2 26,14 19,14 19,30 9,30 9,14 2,14',transform:'translate('+(p.x-14)+','+(p.y-43)+')',fill:'#ffffff',stroke:'#172019','stroke-width':1.5,'stroke-linejoin':'round','aria-label':'Gebäude ausbaubar'}))arrow.setAttribute(k,v);arrow.style.pointerEvents='none';scene.appendChild(arrow);});}
   function drawSelectedRange(){
     if(state.selectedBase){const weapon=HexHeroes.weapon(state);if(weapon){const circle=document.createElementNS(NS,'circle');circle.setAttribute('cx',0);circle.setAttribute('cy',0);circle.setAttribute('r',weapon.range);circle.setAttribute('fill',weapon.color);circle.setAttribute('fill-opacity','.13');circle.setAttribute('stroke',weapon.color);circle.style.pointerEvents='none';scene.appendChild(circle);}return;}
     const selected=state.dragTower?state.dragSlot:state.selectedTower||(state.previewTower?state.selectedSlot:null);if(!selected) return;
@@ -180,8 +183,8 @@ function create(svg,commands){
       slot.addEventListener('pointerenter',()=>commands.hoverBuilding?.({q:tile.q,r:tile.r,index:i}));
       slot.addEventListener('pointerleave',()=>commands.hoverBuilding?.(null));
       slot.addEventListener('click',e=>{e.stopPropagation();commands.selectBuilding(tile.q,tile.r,i);});scene.appendChild(slot);
-      if(!building&&state.showSlotHints!==false&&['build','wave'].includes(state.phase)){const gem=document.createElementNS(NS,'polygon');gem.setAttribute('points',`${p.x},${p.y-29} ${p.x+6},${p.y-20} ${p.x},${p.y-11} ${p.x-6},${p.y-20}`);gem.setAttribute('fill','#59e0d2');gem.setAttribute('stroke','#d3fff8');gem.setAttribute('class','buildingDiamond');gem.style.pointerEvents='none';scene.appendChild(gem);}
-      const label=text(p.x,p.y+4,building?HexBuildings.definitions[building.type].icon:'⌂',11,'#fff4c3','700');label.style.pointerEvents='none';scene.appendChild(label);
+      if(!building&&state.showSlotHints!==false&&['build','wave'].includes(state.phase)){const gem=document.createElementNS(NS,'polygon');gem.setAttribute('points',`${p.x},${p.y-29} ${p.x+6},${p.y-20} ${p.x},${p.y-11} ${p.x-6},${p.y-20}`);gem.setAttribute('fill',tile.type==='deadEnd'?'#c991ff':'#59e0d2');gem.setAttribute('stroke','#d3fff8');gem.setAttribute('class','buildingDiamond');gem.style.pointerEvents='none';scene.appendChild(gem);}
+      const label=text(p.x,p.y+4,building?HexBuildings.definitions[building.type].icon:tile.type==='deadEnd'?'◉':'⌂',11,'#fff4c3','700');label.style.pointerEvents='none';scene.appendChild(label);
     }
     slots.forEach((p,i)=>{
       const tw=tile.towers[i];

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-const REPO_ROOT = __DIR__ . '/..';
+const REPO_ROOT = __DIR__;
 const APP_ROOT = __DIR__;
 const REMOTE_NAME = 'origin';
 const SECRET_FILE = REPO_ROOT . '/.deploy-webhook-secret';

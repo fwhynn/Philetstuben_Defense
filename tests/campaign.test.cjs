@@ -11,3 +11,21 @@ test('boss roster differentiates armor, speed and magic; summons are bounded and
  const run=c.session.create({seed:'summon',runId:'summon',loadout:['archer','catapult','chain','freeze','mine']}),s=run.state;s.phase='wave';s.wave=35;s.waveRunning=true;s.spawnQueue=[];s.pendingSpawns=0;s.enemies=[{...queen,id:s.nextEnemyId++,speed:0,maxHp:queen.hp,alive:true,points:[{x:10000,y:0},{x:20000,y:0}],x:10000,y:0,index:0,t:0}];
  for(let i=0;i<140;i++)c.runtime.advance(s,run.random,.05);assert.equal(s.enemies.filter(e=>e.summoned===true).length,1);const restored=c.snapshot.restore(JSON.parse(JSON.stringify(c.snapshot.capture(s,run.random))));for(let i=0;i<1000;i++){c.runtime.advance(s,run.random,.05);c.runtime.advance(restored.state,restored.random,.05);}assert.equal(s.enemies.filter(e=>e.summoned===true).length,6);assert.ok(s.enemies.filter(e=>e.summoned===true).every(e=>e.killGold===0));assert.deepEqual(JSON.parse(JSON.stringify(c.snapshot.capture(s,run.random))),JSON.parse(JSON.stringify(c.snapshot.capture(restored.state,restored.random))));
 });
+
+test('fortress unlocks require the matching wave-35 victory and survive export/import and Arsenal reset',()=>{
+ const {a,elements,storage}=load({initialProfile:{activeHero:'merchant',records:{highestWave:100}}});assert.equal(a.state.heroId,'standard');
+ elements.get('newRunBtn').listeners.click();assert.equal(elements.get('heroChoices').children[1].disabled,true);assert.equal(elements.get('heroChoices').children[2].disabled,true);
+ finish35(a);elements.get('newRunBtn').listeners.click();assert.equal(elements.get('heroChoices').children[1].disabled,false);assert.equal(elements.get('heroChoices').children[2].disabled,true);
+ a.newRun(undefined,'builder','dual');assert.equal(a.state.heroId,'builder');assert.equal(a.state.difficulty,'dual');finish35(a);const profile=JSON.parse(storage.get('hex-bastion-profile-v1'));assert.ok(profile.milestones.includes('dual35'));
+ const fresh=load({initialProfile:{...profile,activeHero:'merchant'}});assert.equal(fresh.a.state.heroId,'merchant');fresh.elements.get('menuArsenalBtn').listeners.click();fresh.elements.get('resetDiamondsBtn').listeners.click();fresh.elements.get('resetDiamondsBtn').listeners.click();assert.ok(JSON.parse(fresh.storage.get('hex-bastion-profile-v1')).milestones.includes('dual35'));
+ const vm=require('node:vm'),fs=require('node:fs'),ctx={localStorage:{getItem:()=>null,setItem(){}}};vm.createContext(ctx);vm.runInContext(fs.readFileSync(require('node:path').join(__dirname,'../classes/profile.js'),'utf8'),ctx);const rules=vm.runInContext('HexProfile',ctx),definitions=loadCore().data.TOWERS;
+ const imported=rules.readFile(rules.exportFile({...profile,activeHero:'merchant'},definitions),definitions);assert.equal(imported.activeHero,'merchant');assert.ok(imported.milestones.includes('dual35'));
+});
+
+test('victory can be hidden for map inspection without settling or starting endless',()=>{
+ const {a,elements}=load();finish35(a);const panel=elements.get('campaignVictory');panel.listeners.click({target:panel});assert.equal(panel.classList.contains('inspectCampaign'),true);assert.equal(a.state.phase,'victory');assert.equal(a.state.metaSettled,false);elements.get('backToVictoryBtn').listeners.click();assert.equal(panel.classList.contains('inspectCampaign'),false);
+});
+
+test('summoner minion starts exactly at the boss route position and follows more slowly',()=>{
+ const c=loadCore(),run=c.session.create({seed:'summon-position',runId:'summon-position',loadout:['archer','catapult','chain','freeze','mine']}),s=run.state,boss={...c.waves.bossProfile(35),id:1,maxHp:1000,hp:1000,alive:true,points:[{x:10000,y:0},{x:11000,y:0},{x:12000,y:0}],x:10300,y:0,index:0,t:.3,nextSummonAt:0};Object.assign(s,{phase:'wave',wave:35,waveRunning:true,spawnQueue:[],pendingSpawns:0,enemies:[boss],nextEnemyId:2});c.runtime.advance(s,run.random,0);const minion=s.enemies.find(e=>e.summoned===true);assert.ok(minion);assert.equal(minion.x,boss.x);assert.equal(minion.y,boss.y);assert.equal(minion.index,boss.index);assert.equal(minion.t,boss.t);assert.equal(minion.speed,boss.speed*.8);assert.equal(minion.killGold,0);assert.ok(s.projectiles.some(p=>p.kind==='blast'));c.runtime.advance(s,run.random,.05);assert.ok(minion.x<boss.x);
+});

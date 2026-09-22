@@ -21,8 +21,12 @@ Keine Browser-/WebGL-/Touch-Abnahme. Kein echtes WLAN-/Internet-Störungsprofil.
 
 Vom Repository-Hauptordner:
 
-    node --test --test-isolation=none towerdefense-v0.1/tests/*.test.cjs server/tests/*.test.cjs
+    node --test --test-isolation=none tests/*.test.cjs server/tests/*.test.cjs
 
 Nur die neuen Szenarien:
 
     node --test --test-isolation=none server/tests/duo-resilience.test.cjs
+
+22.09.2026: 283 automatisierte Tests bestanden. Neu: Trennungspause beider Boards, zeitbegrenzter Wiederbeitritt, Ablauf, reservierte Plätze und idempotente Bestätigung nach Rückkehr. Tests verwenden eine kontrollierte Uhr; kein Browser und keine Internet-/Neustart-Abnahme.
+
+Aktueller Prüfstand: 287 automatisierte Tests bestanden. Zusätzlich geprüft: Dateispeicher-Neustart inklusive Lobby/Plätzen, pausierter Kampf und unverändertem Gold; Wiederholung verlorener Bestätigung; Schutz inkompatibler Dateien; HTTP 503 bei Schreibfehlern. Keine Browser-, Internet- oder Stromausfallabnahme.

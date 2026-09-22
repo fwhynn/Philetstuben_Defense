@@ -97,7 +97,7 @@ test('WASD pans continuously and U distinguishes locked, available and maxed upg
 });
 
 test('defeat leads to main menu and loadout cancellation no longer offers a dead run', () => {
-  const { a, elements } = load(); a.state.hp = 0; a.state.waveRunning = true; a.state.pendingSpawns = 1; a.update(.01, 1); assert.equal(a.state.phase, 'gameover'); elements.get('changeLoadoutBtn').listeners.click(); assert.equal(elements.get('cancelLoadoutBtn').textContent, 'Zurück zum Hauptmenü'); elements.get('cancelLoadoutBtn').listeners.click(); assert.equal(elements.get('menuContinueBtn').classList.contains('hidden'), true); elements.get('gameOverMenuBtn').listeners.click(); assert.equal(elements.get('gameOverOverlay').classList.contains('hidden'), true);
+  const { a, elements } = load(); a.state.hp = 0; a.state.waveRunning = true; a.state.pendingSpawns = 1; a.update(.01, 1); assert.equal(a.state.phase, 'gameover'); elements.get('changeLoadoutBtn').listeners.click(); assert.equal(elements.get('cancelLoadoutBtn').title, 'Zurück zum Hauptmenü'); elements.get('cancelLoadoutBtn').listeners.click(); assert.equal(elements.get('menuContinueBtn').classList.contains('hidden'), true); elements.get('gameOverMenuBtn').listeners.click(); assert.equal(elements.get('gameOverOverlay').classList.contains('hidden'), true);
 });
 
 test('research map exposes all towers and buildings and reset needs confirmation before refund', () => {
@@ -106,7 +106,7 @@ test('research map exposes all towers and buildings and reset needs confirmation
 });
 
 test('research map pans without scrolling, zooms around the pointer and fits the viewport', () => {
-  const fs = require('node:fs'), path = require('node:path'), vm = require('node:vm'), html = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8'); assert.ok(html.indexOf('src="classes/arsenal.js"') < html.indexOf("s.src='classes/game.js'"));
+  const fs = require('node:fs'), path = require('node:path'), vm = require('node:vm'), html = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8'); const arsenal=html.search(/src\s*=\s*["']classes\/arsenal\.js["']/),game=html.search(/s\.src\s*=\s*["']classes\/game\.js["']/); assert.ok(arsenal>=0&&game>arsenal,'Arsenal must load before the game controller');
   const context = {}; vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../classes/arsenal.js'), 'utf8') + ';globalThis.drag=HexArsenal.enableDrag;', context);
   const handlers = {}, content = { style: {}, offsetWidth: 1600, offsetHeight: 1200 }, view = { clientWidth: 800, clientHeight: 600, scrollLeft: 0, scrollTop: 0, getBoundingClientRect() { return { left: 0, top: 0 }; }, addEventListener(k, v) { handlers[k] = v; }, setPointerCapture() { } }; const camera = context.drag(view, content);
   handlers.pointerdown({ button: 0, pointerId: 1, clientX: 100, clientY: 100, target: {}, preventDefault() { } }); handlers.pointermove({ pointerId: 1, clientX: 70, clientY: 90 }); assert.equal(Number(content.style.zoom), .73); assert.ok(Math.abs(parseFloat(content.style.left) * .73 + 30) < 1e-8); assert.ok(Math.abs(parseFloat(content.style.top) * .73 + 10) < 1e-8); handlers.pointercancel({ pointerId: 1 }); handlers.pointermove({ pointerId: 1, clientX: 0, clientY: 0 }); assert.equal(view.scrollLeft, 0);
@@ -163,7 +163,7 @@ test('quick build supports keyboard/tap, cancels outside and does not charge inv
   button.listeners.pointerdown({ button: 0, pointerId: 1, clientX: 0, clientY: 0, preventDefault() { }, stopPropagation() { } }); documentListeners.pointermove({ pointerId: 1, clientX: 100, clientY: 100 }); documentListeners.pointerup({ pointerId: 1, clientX: 100, clientY: 100 }); assert.equal(a.state.dragTower, null); assert.equal(a.state.gold, 25);
   button.listeners.click({ detail: 0 }); documentListeners.pointercancel(); assert.equal(a.state.dragTower, null); button.listeners.click({ detail: 0 }); a.state.phase = 'reward'; a.renderAll(); assert.equal(a.state.dragTower, null); assert.equal(button.disabled, true);
 });
-test('biome rail discovers regions only from placed tiles and highlights them by hover or pinned click', () => {
+test('biome rail discovers visible regions and highlights them by hover or pinned click', () => {
   const { a, elements } = load(); a.state.biomeSeed = 'biome-rail'; a.renderAll(); assert.equal(elements.get('biomeRail').children.length, 1);
   for (let q = -8; q <= 8; q += 4)for (let r = -8; r <= 8; r += 4) { if (!q && !r) continue; a.state.map.set(q + ',' + r, { q, r, type: 'straight', roads: [0, 3], slots: 1, towers: [null] }); } a.renderAll(); const rail = elements.get('biomeRail'); assert.equal(rail.children.length, 4);
   const desert = rail.children[1]; assert.match(desert.innerHTML, /Dünenmeer/); assert.match(desert.innerHTML, /15 %/); desert.listeners.pointerenter(); assert.equal(a.state.highlightBiome, 'desert'); const overlays = elements.get('board').children[3]; assert.ok(overlays.children.some(e => e.attributes['data-overlay'] === 'building'));
@@ -189,4 +189,22 @@ test('drag draws visible free-slot targets and dropping on their projected cente
   pan = 80; a.rendererCommands.viewChanged(); const point = slotPositions(tile)[0], x = point.x + 300 + pan, y = point.y + 250; assert.ok(shade.innerHTML.includes('left:' + x + 'px;top:' + y + 'px'));
   documentListeners.pointermove({ pointerId: 9, clientX: box.left + x, clientY: box.top + y }); assert.equal(a.state.dragSlot.index, 0); assert.match(shade.innerHTML, /dragBuildTarget active/);
   documentListeners.pointerup({ pointerId: 9, clientX: box.left + x, clientY: box.top + y }); assert.equal(tile.towers[0].type, 'archer'); assert.equal(a.state.gold, 175); assert.equal(shade.classList.contains('hidden'), true);
+});
+
+test('a clicked quick-build selection cancels on an outside press and keeps valid tower slots active',()=>{
+ let hit=null;const {a,elements,documentListeners,selectSlot}=load({pickSlot:()=>hit});a.state.phase='build';a.state.gold=100;const tile={q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[null]};a.state.map.set('1,0',tile);a.renderAll();const button=elements.get('quickLoadout').children[0];
+ button.listeners.click({detail:0});assert.equal(a.state.dragTower,'archer');documentListeners.pointerdown({button:0,clientX:800,clientY:600});assert.equal(a.state.dragTower,null);assert.equal(elements.get('towerDragShade').classList.contains('hidden'),true);assert.equal(a.state.gold,100);
+ button.listeners.click({detail:0});hit={q:1,r:0,index:0};documentListeners.pointerdown({button:0,clientX:200,clientY:200});assert.equal(a.state.dragTower,'archer');selectSlot(1,0,0);assert.equal(tile.towers[0].type,'archer');assert.equal(a.state.gold,75);
+ tile.towers[0]=null;button.listeners.click({detail:0});a.rendererCommands.clearSelection();assert.equal(a.state.dragTower,null);
+});
+
+test('HUD popups stay below their own button even when the central tutorial is visible',()=>{
+ const {a,elements,document}=load({initialStorage:{'tutorial-v1':''}});
+ const rect=(left,top,width,height)=>({left,top,width,height,right:left+width,bottom:top+height});
+ document.documentElement={clientWidth:1912,clientHeight:948};
+ elements.get('message').getBoundingClientRect=()=>rect(696,94,520,122);
+ for(const id of ['quickLoadout','biomeRail'])elements.get(id).getBoundingClientRect=()=>rect(0,0,0,0);
+ const popup={style:{},offsetWidth:380,getBoundingClientRect:()=>rect(0,0,380,148),parentElement:{getBoundingClientRect:()=>rect(1500,14,90,56)}};
+ document.querySelectorAll=selector=>selector.includes('.dockTL')?[{getBoundingClientRect:()=>rect(0,14,1912,56)}]:selector==='.statDetails[open]>.statPopup'?[popup]:[];
+ a.layoutMenus();assert.equal(popup.style.top,'82px');assert.equal(popup.style.left,'1210px');
 });

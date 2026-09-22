@@ -150,7 +150,7 @@ function create(host0,commands){
     flash:makePool(new THREE.SphereGeometry(1,10,8),220,additive()),
     rocks:makePool(new THREE.IcosahedronGeometry(1,0),48,new THREE.MeshStandardMaterial({color:'#ffffff',roughness:.95,metalness:0}))};
   const mats={empty:std('#ffffff',{transparent:true,opacity:.6}),legal:basic('#7fcf6a',.25),illegal:basic('#c0594c',.16),outlineLegal:basic('#a9dc93'),outlineIllegal:basic('#ba6b60'),
-    hint:basic('#ffffff'),buildingSlot:basic('#59e0d2',.9),slot:basic('#ffffff',1),select:basic('#f4d36d',.9),bar:basic('#321a18'),hp:basic('#78b95f'),armor:basic('#df8b3a'),magic:basic('#69aee8')};
+    portalSlot:basic('#c991ff'),hint:basic('#ffffff'),buildingSlot:basic('#59e0d2',.9),slot:basic('#ffffff',1),select:basic('#f4d36d',.9),bar:basic('#321a18'),hp:basic('#78b95f'),armor:basic('#df8b3a'),magic:basic('#69aee8')};
   const enemyGeometry={small:new THREE.SphereGeometry(9,14,10),boss:new THREE.SphereGeometry(15,16,12)},barGeometry=new THREE.PlaneGeometry(1,1);
   const ghostMaterials=new Map(),biomeMaterials=new Map();
   function ghostMaterial(material,legal){
@@ -193,17 +193,21 @@ function create(host0,commands){
   function rebuildAll(){for(const [map,group] of [[tileRecords,layer.tiles],[landmarkRecords,layer.landmarks],[objectRecords,layer.objects]]){map.clear();clearGroup(group);}emptySig=targetSig=ghostSig='';pickDirty=true;}
 
   const gridGeometry=ringGeometry(HEX-.5,HEX-1.7),buffGeometry=new THREE.CircleGeometry(HEX-3,6).rotateZ(Math.PI/6).rotateX(-Math.PI/2);
+  const otherBuffMaterial=basic('#b8a5db',.10),otherBuffBorder=basic('#b8a5db',.5);
+  const currentBuffMaterial=basic('#ff6b1a',.48),currentBuffBorder=basic('#ff6b1a',1);
   const gridMaterial=basic('#d4e7d2',.7),buffMaterial=basic('#ffffff',.18),buffBorderMaterial=basic('#ffffff',.95);
-  for(const material of [gridMaterial,buffMaterial,buffBorderMaterial]){material.depthTest=false;material.depthWrite=false;}
+  for(const material of [gridMaterial,buffMaterial,buffBorderMaterial,otherBuffMaterial,otherBuffBorder,currentBuffMaterial,currentBuffBorder]){material.depthTest=false;material.depthWrite=false;}
   let overlaySig='';
   function clearOverlays(){for(const mesh of [...layer.overlays.children]){layer.overlays.remove(mesh);mesh.dispose();}overlaySig='';}
   function syncTileOverlays(){
-    const highlight=state.highlightBiome?{color:HexBiomes.definitions[state.highlightBiome].color,tiles:[...state.map.values()].filter(t=>HexBiomes.forTile(state,t)===state.highlightBiome)}:HexBuildings.highlight(state),cells=state.showHexGrid?HexExploration.gridCells(state.map,state.landmarks):[];
-    const sig=JSON.stringify([cells.map(t=>key(t.q,t.r)),highlight.color,highlight.tiles.map(t=>key(t.q,t.r))]);if(sig===overlaySig)return;
+    const highlight=HexBiomes.highlight(state)||HexBuildings.highlight(state),cells=state.showHexGrid?HexExploration.gridCells(state.map,state.landmarks):[];
+    const sig=JSON.stringify([cells.map(t=>key(t.q,t.r)),highlight.color,highlight.tiles.map(t=>key(t.q,t.r)),highlight.otherColor,(highlight.otherTiles||[]).map(t=>key(t.q,t.r)),highlight.currentColor,(highlight.currentTiles||[]).map(t=>key(t.q,t.r))]);if(sig===overlaySig)return;
     clearOverlays();overlaySig=sig;
     const add=(tiles,geometry,material,order)=>{if(!tiles.length)return;const mesh=new THREE.InstancedMesh(geometry,material,tiles.length),matrix=new THREE.Matrix4();tiles.forEach((tile,i)=>{const p=axialToWorld(tile.q,tile.r);matrix.makeTranslation(p.x,3,p.y);mesh.setMatrixAt(i,matrix);});mesh.instanceMatrix.needsUpdate=true;mesh.renderOrder=order;layer.overlays.add(mesh);};
     add(cells,gridGeometry,gridMaterial,10);
+    if(highlight.otherTiles?.length){otherBuffMaterial.color.set(highlight.otherColor);otherBuffBorder.color.set(highlight.otherColor);add(highlight.otherTiles,buffGeometry,otherBuffMaterial,10);add(highlight.otherTiles,outline,otherBuffBorder,10);}
     if(highlight.color){buffMaterial.color.set(highlight.color);buffBorderMaterial.color.set(highlight.color);add(highlight.tiles,buffGeometry,buffMaterial,11);add(highlight.tiles,outline,buffBorderMaterial,12);}
+    if(highlight.currentTiles?.length){currentBuffMaterial.color.set(highlight.currentColor);currentBuffBorder.color.set(highlight.currentColor);add(highlight.currentTiles,buffGeometry,currentBuffMaterial,13);add(highlight.currentTiles,outline,currentBuffBorder,14);}
   }
 
   // ---- Tiles ----
@@ -314,6 +318,7 @@ function create(host0,commands){
     const visual=HexData.BRANCH_VISUALS[tower.branch];
     if(visual){const ring=new THREE.Mesh(torus,basic(visual.color));ring.scale.setScalar(20);ring.position.y=2;holder.add(ring);
       if(tower.finalUpgrade){const gold=new THREE.Mesh(torus,basic(tower.ultimate?'#8de8ff':'#ffe39a'));gold.scale.setScalar(tower.ultimate?28:24);gold.position.y=2;holder.add(gold);}}
+    obj.focusObjects=[...holder.children];
     if(def.aura){const fill=new THREE.Mesh(circle,basic(def.color,.06)),edge=new THREE.Mesh(circleRing,basic(def.color,.22));for(const m of [fill,edge]){m.scale.setScalar(def.range);m.position.set(0,1.5,0);holder.add(m);}}
     obj.hint=new THREE.Mesh(hintGeometry,mats.hint);obj.hint.position.y=66;obj.hint.visible=false;holder.add(obj.hint);
     const pick=new THREE.Mesh(towerPick,invisible);pick.userData.pick={kind:'tower',q:tile.q,r:tile.r,index};holder.add(pick);obj.pick=pick;
@@ -323,7 +328,10 @@ function create(host0,commands){
     const p=buildingPosition(tile,index),group=new THREE.Group(),type=building?.type;group.position.set(p.x,0,p.y);
     const model=building&&templates.get('building_'+type);
     if(model){const g=new THREE.Group();g.scale.setScalar(S);addParts(g,model.parts);group.add(g);}
-    else if(building){
+    else if(type==='portal'){
+      const arch=new THREE.Mesh(new THREE.TorusGeometry(12,3,6,16),std('#8254b5',{emissive:'#a16bdb',emissiveIntensity:.5}));arch.position.y=14;group.add(arch);
+      const core=new THREE.Mesh(new THREE.CircleGeometry(10,16),new THREE.MeshBasicMaterial({color:'#c991ff',transparent:true,opacity:.65,side:THREE.DoubleSide}));core.position.y=14;group.add(core);
+    }else if(building){
       const palette={house:['#c9a066','#a94a3a'],forge:['#6b6e75','#3d3f45'],market:['#d8c48a','#b8443a']}[type]||['#bc914d','#7a5a2c'];
       const body=new THREE.Mesh(new THREE.BoxGeometry(26,18,22).translate(0,9,0),std(palette[0])),roof=new THREE.Mesh(new THREE.ConeGeometry(21,13,4).rotateY(Math.PI/4).translate(0,24.5,0),std(palette[1]));
       body.castShadow=roof.castShadow=true;group.add(body,roof);
@@ -345,7 +353,7 @@ function create(host0,commands){
         if(tower){const obj=towerObject(tile,i,tower);group.add(obj.holder);towers.push(obj);picks.push(obj.pick);}
         else if(slots[i]){const glow=new THREE.Mesh(slotDiamondGeometry,mats.slot);glow.material.depthTest=false;glow.material.depthWrite=false;glow.material.transparent=true;glow.renderOrder=50;glow.position.set(slots[i].x,22,slots[i].y);group.add(glow);slotHints.push(glow);const pick=new THREE.Mesh(slotPick,invisible);pick.position.set(slots[i].x,0,slots[i].y);pick.userData.pick={kind:'slot',q:tile.q,r:tile.r,index:i};group.add(pick);picks.push(pick);}
       });
-      for(let i=0;i<(tile.buildingSlots||0);i++){const b=buildingObject(tile,i,tile.buildings?.[i]);group.add(b.group);picks.push(b.pick);if(!tile.buildings?.[i]){const p=buildingPosition(tile,i),gem=new THREE.Mesh(slotDiamondGeometry,mats.buildingSlot);gem.material.depthTest=false;gem.material.depthWrite=false;gem.material.transparent=true;gem.renderOrder=50;gem.position.set(p.x,22,p.y);group.add(gem);slotHints.push(gem);}}
+      for(let i=0;i<(tile.buildingSlots||0);i++){const b=buildingObject(tile,i,tile.buildings?.[i]);group.add(b.group);picks.push(b.pick);if(!tile.buildings?.[i]){const p=buildingPosition(tile,i),gem=new THREE.Mesh(slotDiamondGeometry,tile.type==='deadEnd'?mats.portalSlot:mats.buildingSlot);gem.material.depthTest=false;gem.material.depthWrite=false;gem.material.transparent=true;gem.renderOrder=50;gem.position.set(p.x,22,p.y);group.add(gem);slotHints.push(gem);}}
       layer.objects.add(group);objectRecords.set(id,{sig,group,towers,picks,slotHints});pickDirty=true;
     }
     for(const [id,record] of [...objectRecords]) if(!seen.has(id)){layer.objects.remove(record.group);objectRecords.delete(id);pickDirty=true;}
@@ -514,7 +522,7 @@ function create(host0,commands){
   function label(id,x,z,text,cls='',lift=0){
     usedLabels.add(id);let entry=labels.get(id);
     if(!entry){const el=document.createElement('div');el.style.cssText='position:absolute;transform:translate(-50%,-50%);color:#fff4c3;text-shadow:0 1px 3px #000,0 0 2px #000;font:700 11px Inter,system-ui,sans-serif;white-space:nowrap;pointer-events:none';labelLayer.appendChild(el);entry={el,pos:new THREE.Vector3()};labels.set(id,entry);}
-    if(entry.text!==text||entry.cls!==cls){entry.text=text;entry.cls=cls;entry.el.textContent=text;entry.el.style.fontSize=cls==='big'?'26px':'11px';entry.el.style.color=id.startsWith('upgrade:')?'#14532d':cls==='big'?'#e6ecf2':'#fff4c3';if(id.startsWith('upgrade:')){entry.el.style.textShadow='none';entry.el.innerHTML='<svg width="28" height="32" viewBox="0 0 28 32" aria-label="Turm ausbaubar"><polygon points="14,2 26,14 19,14 19,30 9,30 9,14 2,14" fill="#ffffff" stroke="#172019" stroke-width="2" stroke-linejoin="round"/></svg>';}}
+    if(entry.text!==text||entry.cls!==cls){entry.text=text;entry.cls=cls;entry.el.textContent=text;entry.el.style.fontSize=cls==='big'?'26px':'11px';entry.el.style.color=id.startsWith('upgrade:')?'#14532d':cls==='big'?'#e6ecf2':'#fff4c3';if(id.startsWith('upgrade:')){entry.el.style.textShadow='none';entry.el.innerHTML='<svg width="28" height="32" viewBox="0 0 28 32" aria-label="Ausbaubar"><polygon points="14,2 26,14 19,14 19,30 9,30 9,14 2,14" fill="#ffffff" stroke="#172019" stroke-width="2" stroke-linejoin="round"/></svg>';}}
     entry.pos.set(x,lift+6,z);return entry;
   }
   function syncLabels(){
@@ -525,6 +533,7 @@ function create(host0,commands){
     for(const tile of state.map.values()){
       const c=axialToWorld(tile.q,tile.r),terrain=CARD_LIBRARY[tile.type],id=key(tile.q,tile.r);
       if(state.showUpgradeStatus)(tile.towers||[]).forEach((tower,i)=>{if(tower&&HexData.upgradeStatus(state,tower)){const p=slotPositions(tile)[i];label('upgrade:'+id+':'+i,p.x,p.y,HexData.upgradeStatus(state,tower),'big',72);}});
+      if(state.showUpgradeStatus&&state.hp>0&&['build','wave'].includes(state.phase))(tile.buildings||[]).forEach((b,i)=>{if(b&&HexBuildings.nextUpgrade(state,b)){const p=buildingPosition(tile,i);label('upgrade:building:'+id+':'+i,p.x,p.y,'Gebäude ausbaubar','big',72);}});
       if(tile.tunnelLabel)label('tunnel:'+id,c.x,c.y,tile.tunnelLabel+' ⇄','',24);
       if(tile.income) label(`inc:${id}`,c.x,c.y+44,'+'+tile.income+' Gold');
       const bonus=terrain?.towerBonus?'+25 % '+HexData.TOWERS[terrain.requiredTower].name+(terrain.towerBonus.range?' Reichweite':' Schaden'):terrain?.towerRange?'+'+Math.round((terrain.towerRange-1)*100)+' % Reichweite':terrain?.towerDamage?'+'+Math.round((terrain.towerDamage-1)*100)+' % Schaden':terrain?.archerDamage?'+25 % Archer':null;
@@ -548,6 +557,7 @@ function create(host0,commands){
     if(pickDirty){pickables=[...objectRecords.values()].flatMap(r=>r.picks).concat(layer.targets.children.map(g=>g.children[1]));pickDirty=false;}
   }
   function project(position,height=30){
+    camera.updateMatrixWorld(true);
     tmp.set(position.x,height,position.y).project(camera);if(tmp.z>1) return null;
     const box=host.getBoundingClientRect(),outer=wrap.getBoundingClientRect();
     return {x:(tmp.x+1)/2*box.width+box.left-outer.left,y:(1-tmp.y)/2*box.height+box.top-outer.top,width:outer.width,height:outer.height};
@@ -656,7 +666,13 @@ function create(host0,commands){
   const resize=new ResizeObserver(()=>{const w=Math.max(1,host.clientWidth),h=Math.max(1,host.clientHeight);gl.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();if(state) commands.viewChanged?.();});
   resize.observe(host);applyCamera();raf=requestAnimationFrame(loop);
 
-  return {render,reset,project,pickSlot(event){
+  function towerBounds(slot){
+    const obj=objectRecords.get(key(slot.q,slot.r))?.towers.find(t=>t.index===slot.index);if(!obj)return null;
+    obj.holder.updateWorldMatrix(true,true);const bounds=new THREE.Box3();for(const part of obj.focusObjects||[])bounds.union(new THREE.Box3().setFromObject(part));if(bounds.isEmpty())return null;
+    const points=[];for(const x of [bounds.min.x,bounds.max.x])for(const y of [bounds.min.y,bounds.max.y])for(const z of [bounds.min.z,bounds.max.z]){const p=project({x,y:z},y);if(p)points.push(p);}if(points.length!==8)return null;
+    const left=Math.min(...points.map(p=>p.x)),top=Math.min(...points.map(p=>p.y));return {left,top,width:Math.max(...points.map(p=>p.x))-left,height:Math.max(...points.map(p=>p.y))-top};
+  }
+  return {render,reset,project,towerBounds,pickSlot(event){
     // Use exactly the same projected ground centers and screen radius as the drag overlay.
     // The old elevated raycast cylinders drifted relative to those circles at oblique camera angles.
     const box=wrap.getBoundingClientRect(),slots=[];
@@ -666,7 +682,7 @@ function create(host0,commands){
     destroy(){
       destroyed=true;cancelAnimationFrame(raf);resize.disconnect();for(const [name,fn,options] of listeners) dom.removeEventListener(name,fn,options);
       windPool.mesh.geometry.dispose();windPool.mesh.material.dispose();windPool.mesh.dispose();mistPool.mesh.geometry.dispose();mistPool.mesh.material.dispose();mistPool.mesh.dispose();
-      clearOverlays();buildingPadGeometry.dispose();buildingPadMaterial.dispose();slotDiamondGeometry.dispose();gridGeometry.dispose();buffGeometry.dispose();gridMaterial.dispose();buffMaterial.dispose();buffBorderMaterial.dispose();
+      clearOverlays();buildingPadGeometry.dispose();buildingPadMaterial.dispose();slotDiamondGeometry.dispose();gridGeometry.dispose();buffGeometry.dispose();gridMaterial.dispose();otherBuffMaterial.dispose();otherBuffBorder.dispose();buffMaterial.dispose();buffBorderMaterial.dispose();
       for(const material of biomeMaterials.values())material.dispose();biomeMaterials.clear();
       gl.dispose();host.remove();wrap.classList.remove('is3d');if(hintText) hintText.textContent=oldHint;host0.style.display='';
     }};

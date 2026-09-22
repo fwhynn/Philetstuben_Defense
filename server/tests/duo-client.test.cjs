@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const {createRoom}=require('../duo-room.cjs'),{createTransport}=require('../duo-transport.cjs');
-const client=require('../../towerdefense-v0.1/duo-client.js');
+const client=require('../../duo-client.js');
 const loadout=['archer','catapult','chain','freeze','mine'];
 test('browser adapter retries a lost acknowledgement with same sequence and uses only authoritative state',async t=>{
  const room=createRoom({seed:'network-adapter',loadouts:[loadout,loadout]}),seat=room.connect(0);room.connect(1);const server=createTransport(room,{browser:true,autoTick:true});await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));t.after(()=>new Promise(resolve=>{server.closeAllConnections();server.close(resolve);}));const origin='http://127.0.0.1:'+server.address().port;
@@ -23,8 +23,28 @@ test('both sanitized board views render through the SVG adapter without secret s
  const vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
  function element(){return {style:{},children:[],setAttribute(){},addEventListener(){},appendChild(e){this.children.push(e);return e;},remove(){}};}
  const context=vm.createContext({document:{createElementNS:element}});
- for(const name of ['biomes','data','map','heroes','exploration','buildings','camera','svg-renderer'])vm.runInContext(fs.readFileSync(path.join(__dirname,'../../towerdefense-v0.1/'+name+'.js'),'utf8'),context);
+ for(const name of ['biomes','data','map','heroes','exploration','buildings','camera','svg-renderer'])vm.runInContext(fs.readFileSync(path.join(__dirname,'../../classes/'+name+'.js'),'utf8'),context);
  const room=createRoom({loadouts:[loadout,loadout]}),seat=room.connect(0);room.connect(1);const view=room.view(seat.token),model=client.presentation(view);
  const renderer=vm.runInContext('HexSvgRenderer',context).create(element(),{});
  for(const {state} of model.boards)assert.doesNotThrow(()=>renderer.render(state,state.placements?.[0]?.[0]||[]));
+});
+
+test('Duo pages serve every referenced script after the directory migration',async t=>{
+ const room=createRoom({loadouts:[loadout,loadout]}),seat=room.connect(0);
+ const server=createTransport(room,{browser:true});
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ t.after(()=>new Promise(resolve=>{server.closeAllConnections();server.close(resolve);}));
+ const origin='http://127.0.0.1:'+server.address().port;
+ for(const page of ['/duo-prototype.html','/duo-lobby.html']){
+  const response=await fetch(origin+page);assert.equal(response.status,200);
+  const html=await response.text(),sources=[...html.matchAll(/<script[^>]+src=["']([^"']+)["']/g)];
+  assert.ok(sources.length>0);
+  for(const [,source] of sources){
+   const script=await fetch(new URL(source,origin+page));
+   assert.equal(script.status,200,source);
+   assert.match(script.headers.get('content-type'),/javascript/,source);
+   assert.ok((await script.text()).length>0,source);
+  }
+ }
+ assert.equal((await fetch(origin+'/server/duo-room.cjs',{headers:{Authorization:'Bearer '+seat.token}})).status,404);
 });

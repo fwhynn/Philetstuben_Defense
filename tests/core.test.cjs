@@ -19,7 +19,7 @@ test('all rotations agree with neighbor direction and reciprocal road connection
 });
 
 test('multiple neighbors must all match; occupied fields are rejected', () => {
-  const { a } = load(); a.state.map.clear();
+  const { a } = load(); a.state.map.clear(); a.state.landmarks.clear(); // Isolate this road fixture from random exploration prefabs.
   a.state.map.set('0,0', { q: 0, r: 0, roads: [0] });
   a.state.map.set('2,0', { q: 2, r: 0, roads: [] });
   assert.equal(a.canPlace(1, 0, a.CARD_LIBRARY.straight, 0), false);

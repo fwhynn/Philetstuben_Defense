@@ -37,3 +37,11 @@ Als spätere Spezialkarte sinnvoll: sichtbare Überquerung belegter Hexe mit Kä
 ## Abnahme vor Einführung
 
 Geschlossene Ein-Feld- und Mehr-Feld-Taschen; Gebäude schließen letzten Korridor; eingeschlossene Nebenfront bei freier Hauptfront; Schleifen; Zwei-Fronten-Start; angrenzende Sonderfelder; alte bereits blockierte Runs; große Karten und Snapshot-Wiederaufnahme. Visuelle Prüfung durch den Nutzer, keine eigenständigen Browsertests.
+
+## Umgesetzt: Straßen-Garantie statt Baugrund als Rettung
+
+Status: umgesetzt. Die frühere Handprüfung akzeptierte jede legal platzierbare Karte; Baugrund konnte dadurch die Rettung blockieren. Jetzt muss eine Karte mindestens zwei Straßenanschlüsse haben, legal platzierbar sein und am neuen Hex einen Ausgang zum äußeren freien Raum erhalten.
+
+Regel: Mindestens eine Handkarte muss eine von der Basis erreichbare Straße sinnvoll fortsetzen und eine äußere Straßenfront erhalten. Leere Gebäudefelder und reine Sackgassen zählen nicht als Rettung, bleiben aber normale optionale Handkarten. Existiert eine passende Straßenkarte im Deck, wird bei Bedarf eine Handposition aus Nachzieh-/Ablagestapel damit ersetzt (kein Duplikat, keine Deckvergrößerung). Existiert keine passende Straßenkarte, greift das kostenlose Rettungshex; bei räumlichem Einschluss der Rettungstunnel. Das ist unabhängig vom optionalen, noch unentschiedenen Gold-Reroll.
+
+Abnahme: viele Baugrundkarten, genau eine passende Straßenkarte, keine passende Straßenkarte, normales Startdeck, Zwei-Fronten-Start, Sackgassenportal, deterministische Duo-Ziehungen und Erhalt aller Karten in Hand/Nachzieh-/Ablagestapel.

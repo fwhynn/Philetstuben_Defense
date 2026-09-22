@@ -24,11 +24,11 @@
         </div>
         <div id="message" class="message"><span id="messageText">Wähle eine Hexkarte und lege sie an die offene Straße
             der Base.</span><button id="tunnelRescueBtn" class="secondary hidden">Rettungstunnel ansehen</button>
-          <section id="tutorialPanel" class="tutorialPanel hidden" aria-label="Mini-Tutorial"><strong
+          <section id="tutorialPanel" class="tutorialPanel hidden" aria-label="Mini-Tutorial"><button id="skipTutorialBtn" class="secondary">Tutorial überspringen</button><strong
               id="tutorialTitle"></strong>
-            <p id="tutorialText" aria-live="polite"></p><button id="skipTutorialBtn" class="secondary">Tutorial
-              überspringen</button>
+            <p id="tutorialText" aria-live="polite"></p><div class="tutorialActions"><button id="tutorialNextBtn" class="secondary hidden">Verstanden · Weiter</button></div>
           </section>
+          <p id="tutorialFeedback" class="tutorialFeedback hidden" role="alert"></p>
         </div>
         <section id="towerPanel" class="towerPanel hidden" aria-label="Ausgewählter Turm">
           <div class="panelHead">
@@ -51,23 +51,28 @@
         </section>
       </section>
 
+      <nav class="compactToolbar" aria-label="Spielsteuerung"><button data-compact="menu" aria-expanded="false">Menü</button><button data-compact="stats" aria-expanded="false">Werte</button><button data-compact="towers" aria-expanded="false">Türme</button><button data-compact="biomes" aria-expanded="false">Biome</button></nav>
       <nav id="quickLoadout" class="mapRail loadoutRail" aria-label="Loadout: Turm auf einen freien Platz ziehen"></nav>
+      <aside id="biomeIntro" class="biomeIntro hidden" role="status"><strong>Neues Biom entdeckt</strong><p>Hier rechts findest du die sichtbaren Biome und ihre Effekte. Fahre über ein Symbol oder tippe darauf: Die zugehörigen Felder werden hervorgehoben.</p><button id="biomeIntroClose" type="button">Verstanden</button></aside>
       <nav id="biomeRail" class="mapRail biomeRail" aria-label="Entdeckte Biome"></nav>
+      <div id="tutorialTargets" class="tutorialTargets hidden" aria-hidden="true"></div>
+      <div id="tutorialSpotlight" class="tutorialSpotlight hidden" aria-hidden="true"></div>
       <div id="towerDragGhost" class="towerDragGhost hidden" aria-hidden="true"></div>
       <div id="towerDragShade" class="towerDragShade hidden" aria-hidden="true"></div>
       <!-- Oben links: Titel und Menü -->
+      <div class="gameHeader">
       <nav class="dockTL" aria-label="Menü">
         <h1>Autohex TD <span data-app-version></span></h1>
         <div class="dockButtons">
-          <button class="secondary drawerBtn" data-drawer="rulesDrawer">📜 Regeln</button>
-          <button class="secondary drawerBtn" data-drawer="settingsDrawer">⚙ Einstellungen</button>
+          <button class="secondary drawerBtn" data-drawer="rulesDrawer"><svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18H6zM9 7h6M9 11h6M9 15h4"/></svg> Regeln</button>
+          <button class="secondary drawerBtn" data-drawer="settingsDrawer"><svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="8" cy="18" r="2"/></svg> Einstellungen</button>
           <button id="pauseBtn" class="secondary pauseBtn">⏸ Pause (P)</button>
         </div>
       </nav>
 
       <!-- Oben rechts: Leben, Gold, Wave, Deck -->
       <header class="hud">
-        <div class="hudStat">❤️ <strong id="hp">20/20</strong></div>
+        <div id="healthStat" class="hudStat"><svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21 3 12C-3 3 8-1 12 6 16-1 27 3 21 12z"/></svg> <strong id="hp">20/20</strong></div>
         <details class="statDetails">
           <summary aria-label="Goldplanung öffnen">🪙 <strong id="gold">70</strong> <span id="bonusIncome">(+0)</span>
             <span class="dropdownArrow" aria-hidden="true">▾</span>
@@ -123,6 +128,7 @@
           </div>
         </details>
       </header>
+      </div>
 
       <!-- Unten Mitte: die drei spielbaren Karten -->
       <section class="handDock" aria-label="Handkarten">
@@ -141,7 +147,7 @@
 
       <!-- Unten links: Turm-Shop -->
       <div class="dockBL">
-        <button class="secondary drawerBtn" data-drawer="towerDrawer">🏹 Türme bauen</button>
+        <button class="secondary drawerBtn" data-drawer="towerDrawer"><svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 20 9-11M11 5l4-3 6 6-3 4z"/></svg> Türme bauen</button>
       </div>
 
       <!-- Unterfelder -->
@@ -171,7 +177,9 @@
         </div>
         <ul>
           <li>Die Startfestung bestimmt HP und Gold; die Base lässt sich ausbauen.</li>
-          <li>Jedes offene Straßenende ist ein Spawnpunkt.</li>
+          <li>Menüs und Informationen schließen durch einen Klick außerhalb oder mit Escape. Beim Verkauf bestätigt ein zweiter Klick auf denselben Knopf. Belohnungen bleiben offen, bis du gewählt oder sie über „Karte anschauen“ ausgeblendet hast.</li>
+          <li>Jedes offene Straßenende ist ein Spawnpunkt. Die Welle hat eine feste Gegneranzahl, die auf die offenen Enden aufgeteilt wird. Mehr Enden erzeugen keine zusätzlichen Gegner.</li>
+          <li>Die epische Bastionssackgasse hat einen eigenen Gegnerportal-Platz. Für 250 Gold entsteht dort zwischen den Wellen ein zusätzlicher Eingang, der sich die feste Gegnerzahl mit den Straßenenden teilt. Normale Gebäude sind auf diesem Platz nicht möglich.</li>
           <li>Stufe 1 abschließen: Wave 35 überleben, dadurch Stufe 2 · Zwei Fronten freischalten. Nach Wave 35: Run
             beenden oder mit gleicher Map im Endless-Modus weiterspielen.</li>
           <li>Ab Wave 15 erscheint alle 10 Waves ein Boss an einem zufälligen Eingang. Bosswellen werden vor dem Start
@@ -219,18 +227,7 @@
         <label class="toggle"><input id="soundEnabled" type="checkbox" checked /> Sounds aktiv</label>
         <label class="toggle">Lautstärke <input id="soundVolume" type="range" min="0" max="100" value="35"
             aria-label="Sound-Lautstärke" /></label>
-        <section class="renderModes" aria-label="Ansicht wählen">
-          <strong>Ansicht</strong>
-          <p class="hint">3D-Kamera drehen: Q nach links, E nach rechts.</p>
-          <p id="renderModeStatus" class="hint">HTTP(S): 3D automatisch, Datei direkt geöffnet: SVG.</p>
-          <div class="renderModeLinks">
-            <a class="secondary renderLink" href="./">Automatisch</a>
-            <a class="secondary renderLink" href="./?low">3D Low Poly</a>
-            <a class="secondary renderLink" href="./?high">3D Hoch</a>
-            <a class="secondary renderLink" href="./?svg">SVG</a>
-            <a class="secondary renderLink" href="./viewer.html">Modell-Galerie</a>
-          </div>
-        </section>
+        <label class="toggle">Sprache <select data-language-picker aria-label="Sprache"><option value="de">Deutsch</option><option value="en">English</option></select></label>
         <label class="toggle">Startwert für nächsten Run (Seed) <input id="runSeed" type="text" maxlength="100"
             placeholder="Leer = zufälliger Run" /></label>
         <small class="hint">Derselbe Startwert wiederholt bei gleichen Entscheidungen die Karten und
@@ -252,6 +249,7 @@
           <button id="menuContinueBtn" class="primary hidden">Weiterspielen</button>
           <button id="menuPlayBtn" class="primary">Neuer Run</button>
           <button id="menuArsenalBtn" class="secondary">◆ Arsenal</button>
+          <label class="menuLanguage">Sprache <select data-language-picker aria-label="Sprache"><option value="de">Deutsch</option><option value="en">English</option></select></label>
           <button id="menuRulesBtn" class="secondary">📜 Spielregeln</button>
         </div>
 
@@ -262,14 +260,6 @@
       </div>
     </div>
 
-    <div id="saleConfirmOverlay" class="overlay hidden" role="dialog" aria-modal="true"
-      aria-labelledby="saleConfirmTitle">
-      <div class="modeBox">
-        <h2 id="saleConfirmTitle">Möchtest du wirklich verkaufen?</h2>
-        <p id="saleConfirmText"></p><button id="cancelSaleBtn" class="secondary">Abbrechen · Esc</button><button
-          id="confirmSaleBtn" class="primary">Ja, verkaufen</button>
-      </div>
-    </div>
     <div id="saveOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="saveTitle">
       <div class="modeBox">
         <h2 id="saveTitle">Spielstand mitnehmen</h2>
@@ -344,14 +334,14 @@
     <div id="loadoutOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="loadoutTitle">
       <div class="loadoutBox">
         <p class="eyebrow">RUNVORBEREITUNG</p>
-        <h2 id="loadoutTitle">Wähle deine Festung und fünf Türme</h2>
+        <h2 id="loadoutTitle">Run vorbereiten</h2>
         <div id="difficultyChoices" class="heroChoices" aria-label="Schwierigkeitsstufe"></div>
         <div id="heroChoices" class="heroChoices" aria-label="Startfestung"></div>
         <p>Nur diese fünf Turmtypen stehen im nächsten Run zur Verfügung. Sie werden weiterhin mit Gold gebaut.</p>
         <div class="loadoutSummary"><strong id="loadoutCount">5/5 gewählt</strong><span id="diamondCount">◆ 0
             Diamanten</span></div>
-        <div id="loadoutPresets" class="loadoutPresets"></div>
-        <div id="loadoutChoices" class="loadoutChoices"></div>
+        <details class="prepPresets"><summary>Vorlagen</summary><div id="loadoutPresets" class="loadoutPresets"></div></details>
+        <div id="loadoutChoices" class="loadoutChoices"></div><p id="preparationInfo" class="preparationInfo" aria-live="polite">Fünf Türme für den nächsten Run.</p>
         <p id="loadoutWarning" class="loadoutWarning" aria-live="polite"></p>
         <div class="loadoutActions"><button id="cancelLoadoutBtn" class="secondary">Zurück zum Run</button><button
             id="confirmLoadoutBtn" class="primary">Run mit diesem Loadout starten</button></div>
@@ -366,9 +356,10 @@
         <p id="campaignVictoryText"></p>
         <p>Deine Map und Türme bleiben im Endless-Modus erhalten. Diamanten werden beim Beenden des Runs abgerechnet.
         </p>
-        <div class="loadoutActions"><button id="victoryMenuBtn">Run abschließen · Hauptmenü</button><button
-            id="endlessBtn">Im Endless-Modus weiterspielen</button></div>
+        <div class="loadoutActions"><button id="victoryMenuBtn" class="secondary">Run abschließen · Hauptmenü</button><button
+            id="endlessBtn" class="primary">Im Endless-Modus weiterspielen</button></div>
       </div>
+      <button id="backToVictoryBtn" class="primary">Zurück zum Sieg · Esc</button>
     </div>
     <div id="gameOverOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle">
       <div class="gameOverBox">
@@ -421,28 +412,7 @@
         addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
       })();
 
-      (() => {
-        const status = document.getElementById('renderModeStatus');
-        if (!status) return;
-        const query = new URLSearchParams(location.search);
-        if (query.has('svg')) {
-          status.textContent = 'Aktiv: SVG-Ansicht. 3D ist unter Automatisch, 3D Low Poly oder 3D Hoch erreichbar.';
-          return;
-        }
-        if (!location.protocol.startsWith('http')) {
-          status.textContent = 'Aktiv: SVG-Ansicht per Datei-Start. Für 3D die Seite über HTTP(S) öffnen.';
-          return;
-        }
-        if (query.has('low')) {
-          status.textContent = 'Aktiv: 3D Low Poly. Weniger Pixel, kleinere Schatten, stabiler auf schwächeren Geräten.';
-          return;
-        }
-        if (query.has('high')) {
-          status.textContent = 'Aktiv: 3D Hoch. Maximale Qualität, falls WebGL und Three.js verfügbar sind.';
-          return;
-        }
-        status.textContent = 'Aktiv: Automatisch. Unter HTTP(S) startet 3D, bei Problemen fällt das Spiel auf SVG zurück.';
-      })();
+
     </script>
     <script>
       (() => {
@@ -458,6 +428,11 @@
           .catch(() => { });
       })();
     </script>
+    <script src="classes/translations.js"></script>
+    <script src="classes/i18n.js"></script>
+    <script src="classes/menu-controls.js"></script>
+    <script src="classes/compact-controls.js"></script>
+    <script src="classes/dialog-focus.js"></script>
     <script src="classes/api.js"></script>
     <script>
       (() => {

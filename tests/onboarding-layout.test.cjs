@@ -18,19 +18,21 @@ test('base buying is consistent during placement, building and waves and explain
   a.state.gold = 100; a.state.phase = 'reward'; a.renderAll(); assert.match(elements.get('baseWallsBtn').textContent, /offene Belohnung/);
 });
 test('first-run tutorial follows real actions, suppresses auto-start and persists completion', () => {
-  const { a, elements, documentListeners, selectSlot, buyTower, storage, timers } = load({ initialStorage: { 'tutorial-v1': 'new' } });
-  assert.match(elements.get('tutorialTitle').textContent, /1\/5/);
-  documentListeners.keydown({ key: 'r' }); assert.match(elements.get('tutorialTitle').textContent, /2\/5/);
+  const { a, elements, documentListeners, selectSlot, buyTower, upgradeSelectedTower, storage, timers } = load({ initialStorage: { 'tutorial-v1': 'new' } });
+  assert.match(elements.get('tutorialTitle').textContent, /1\/7/);
+  documentListeners.keydown({ key: 'r' }); assert.match(elements.get('tutorialTitle').textContent, /2\/7/);
   a.state.hand = ['straight']; a.state.selectedCard = 0; a.state.rotation = 0; elements.get('autoStart').checked = true; a.placeTile(1, 0);
-  assert.match(elements.get('tutorialTitle').textContent, /3\/5/); assert.equal(timers.size, 0); assert.equal(a.state.waveRunning, false);
-  selectSlot(1, 0, 0); assert.match(elements.get('tutorialTitle').textContent, /4\/5/);
-  buyTower('archer'); assert.match(elements.get('tutorialTitle').textContent, /5\/5/);
+  assert.match(elements.get('tutorialTitle').textContent, /3\/7/); assert.equal(timers.size, 0); assert.equal(a.state.waveRunning, false);
+  selectSlot(1, 0, 0); assert.match(elements.get('tutorialTitle').textContent, /4\/7/);
+  buyTower('archer'); assert.match(elements.get('tutorialTitle').textContent, /5\/7/); assert.equal(elements.get('towerDrawer').classList.contains('hidden'),true);
+  a.rendererCommands.selectTower(1,0,0);upgradeSelectedTower('marksman');assert.match(elements.get('tutorialTitle').textContent,/6\/7/);assert.equal(a.state.selectedTower,null);assert.equal(elements.get('towerPanel').classList.contains('hidden'),true);
+  elements.get('tutorialNextBtn').listeners.click();assert.match(elements.get('tutorialTitle').textContent,/7\/7/);
   a.startWave(); assert.equal(storage.get('tutorial-v1'), 'done');
 });
 test('tutorial skip/restart and slot visibility settings persist without resetting the run', () => {
   const { a, elements, storage } = load({ initialStorage: { 'tutorial-v1': 'new' } }), run = a.state;
   elements.get('skipTutorialBtn').listeners.click(); assert.equal(storage.get('tutorial-v1'), 'done');
-  elements.get('restartTutorialBtn').listeners.click(); assert.equal(a.state, run); assert.match(elements.get('tutorialTitle').textContent, /1\/5/);
+  elements.get('restartTutorialBtn').listeners.click(); assert.equal(a.state, run); assert.match(elements.get('tutorialTitle').textContent, /1\/7/);
   elements.get('slotHints').checked = false; elements.get('slotHints').listeners.change(); assert.equal(a.state.showSlotHints, false); assert.equal(storage.get('slotHints'), 'false'); a.newRun(); assert.equal(a.state.showSlotHints, false);
 });
 
@@ -42,4 +44,49 @@ test('drag hit areas match displayed screen circles and choose the nearest slot 
     assert.equal(rules.pickScreenSlot([first], first.x, first.y + rules.dropRadius, 1200, 800).index, 0); assert.equal(rules.pickScreenSlot([first], first.x, first.y + rules.dropRadius + .1, 1200, 800), null);
   }
   assert.equal(rules.pickScreenSlot([{ q: 0, r: 0, index: 0, x: 0, y: 0 }], -1, 0, 1200, 800), null); assert.equal(rules.pickScreenSlot([], 100, 100, 1200, 800), null);
+});
+
+test('invalid placement remains visible below the active tutorial and clears after valid placement',()=>{
+ const {a,elements}=load({initialStorage:{'tutorial-v1':'new'}});a.state.hand=['straight'];a.state.selectedCard=0;a.state.rotation=1;a.placeTile(1,0);assert.equal(elements.get('tutorialPanel').classList.contains('hidden'),false);assert.equal(elements.get('tutorialFeedback').classList.contains('hidden'),false);assert.match(elements.get('tutorialFeedback').textContent,/Nicht erlaubt/);
+ a.state.rotation=0;a.placeTile(1,0);assert.equal(elements.get('tutorialFeedback').classList.contains('hidden'),true);
+});
+
+test('life and wave tutorial steps position the spotlight using current target bounds',()=>{
+ const {a,elements,document,selectSlot,buyTower,upgradeSelectedTower}=load({initialStorage:{'tutorial-v1':'new'}});document.getElementById('healthStat');a.state.phase='build';a.state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[null]});selectSlot(1,0,0);buyTower('archer');
+ elements.get('healthStat').getBoundingClientRect=()=>({left:900,top:20,width:100,height:44});elements.get('startWaveBtn').getBoundingClientRect=()=>({left:1000,top:700,width:200,height:50});a.rendererCommands.selectTower(1,0,0);upgradeSelectedTower('marksman');assert.equal(elements.get('tutorialSpotlight').style.left,'896px');assert.equal(elements.get('tutorialSpotlight').classList.contains('hidden'),false);
+ elements.get('tutorialNextBtn').listeners.click();assert.equal(elements.get('tutorialSpotlight').style.top,'696px');a.startWave();a.renderAll();assert.equal(elements.get('tutorialSpotlight').classList.contains('hidden'),true);
+});
+
+test('save transfer stays over the main menu and closes on backdrop click',()=>{
+ const {elements}=load();elements.get('openMainMenuBtn').listeners.click();const menu=elements.get('mainMenu'),save=elements.get('saveOverlay');elements.get('menuSaveBtn').listeners.click();assert.equal(menu.classList.contains('hidden'),false);assert.equal(save.classList.contains('hidden'),false);save.listeners.click({target:save});assert.equal(save.classList.contains('hidden'),true);assert.equal(menu.classList.contains('hidden'),false);
+});
+
+test('short landscape menus can use the free rectangle beside the hand instead of a collapsed band',()=>{
+ const rules=layout(),rect=(left,top,width,height)=>({left,top,right:left+width,bottom:top+height,width,height});
+ const controls=[rect(12,12,820,44),rect(532,176,300,90),rect(12,288,820,90),rect(12,76,110,44),rect(684,76,148,44)];
+ const area=rules.freeArea(844,390,controls),panel=rules.fit(area,320,400);
+ assert.ok(panel.width>=240);assert.ok(panel.height>=100);
+ for(const b of controls)assert.ok(panel.x+panel.width<=b.left||panel.x>=b.right||panel.y+panel.height<=b.top||panel.y>=b.bottom);
+});
+
+test('each early tutorial step highlights its actual cards, legal fields, slots, build menu and upgrade panel',()=>{
+ const box={left:0,top:0,width:1200,height:800},game=load({initialStorage:{'tutorial-v1':'new'},boardBox:box,project:p=>({x:500+p.x,y:300+p.y})}),{a,document,elements,documentListeners,selectSlot,buyTower}=game;
+ document.querySelector=selector=>{if(selector==='.boardWrap')return {getBoundingClientRect:()=>box};if(selector==='.handDock')return {getBoundingClientRect:()=>({left:350,top:600,width:500,height:120})};const id=selector.startsWith('#')?selector.slice(1).split(':')[0]:null;if(id&&elements.has(id)&&!elements.get(id).classList.contains('hidden'))return {getBoundingClientRect:()=>({left:30,top:170,width:330,height:300})};return null;};
+ a.state.hand=['straight'];a.state.selectedCard=0;a.renderAll();assert.match(elements.get('tutorialTargets').innerHTML,/x="346" y="596"/);
+ documentListeners.keydown({key:'r'});a.state.rotation=0;a.renderAll();assert.match(elements.get('tutorialTargets').innerHTML,/<polygon/);assert.doesNotMatch(elements.get('tutorialTargets').innerHTML,/<circle/);
+ a.placeTile(1,0);assert.match(elements.get('tutorialTargets').innerHTML,/<circle/);
+ selectSlot(1,0,0);assert.match(elements.get('tutorialTargets').innerHTML,/x="26" y="166"/);
+ buyTower('archer');a.rendererCommands.selectTower(1,0,0);a.renderAll();assert.match(elements.get('tutorialTargets').innerHTML,/x="26" y="166"/);
+ elements.get('skipTutorialBtn').listeners.click();assert.equal(elements.get('tutorialTargets').classList.contains('hidden'),true);
+});
+
+test('camera changes immediately reproject tutorial targets without waiting for another game action',()=>{
+ let offset=0;const {a,elements,documentListeners}=load({initialStorage:{'tutorial-v1':'new'},boardBox:{left:0,top:0,width:1200,height:800},project:p=>({x:p.x+500+offset,y:p.y+300})});a.state.hand=['straight'];a.state.selectedCard=0;documentListeners.keydown({key:'r'});a.state.rotation=0;a.renderAll();const before=elements.get('tutorialTargets').innerHTML;offset=100;a.rendererCommands.viewChanged();const after=elements.get('tutorialTargets').innerHTML;assert.notEqual(after,before);assert.match(after,/<polygon/);
+});
+
+test('tutorial highlights only Archer in build menu, then its upgrades, and clears highlighting after upgrade',()=>{
+ const {a,elements,selectSlot,buyTower,upgradeSelectedTower}=load({initialStorage:{'tutorial-v1':'new'}});a.state.phase='build';a.state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[null]});selectSlot(1,0,0);
+ const offers=elements.get('towerMenu').children;assert.ok(offers.every(b=>b.innerHTML.includes('towerBuildIcon')&&b.innerHTML.includes('<svg')));assert.equal(offers.filter(b=>b.classList.contains('tutorialChoice')).length,1);assert.ok(offers[0].classList.contains('tutorialChoice'));
+ buyTower('archer');a.rendererCommands.selectTower(1,0,0);const upgrades=elements.get('towerUpgrades').children.filter(b=>b.listeners.click);assert.ok(upgrades.length);assert.ok(upgrades.every(b=>b.classList.contains('tutorialChoice')));assert.equal(elements.get('towerMenu').children.some(b=>b.classList.contains('tutorialChoice')),false);
+ upgradeSelectedTower('marksman');assert.equal(elements.get('towerPanel').classList.contains('hidden'),true);
 });

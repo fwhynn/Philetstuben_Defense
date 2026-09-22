@@ -7,7 +7,7 @@ const FILES=['towers/tower_archer','towers/tower_catapult','towers/tower_chain',
   'enemies/enemy_normal','enemies/enemy_armored','enemies/enemy_warded','enemies/enemy_swarm','enemies/enemy_boss',
   'landmarks/landmark_shrine','landmarks/landmark_treasure','buildings/building_house','buildings/building_forge','buildings/building_market',
   'tiles/tile_straight','tiles/tile_bigCurve','tiles/tile_tee','tiles/tile_village','tiles/tile_grove'];
-const WATCHED=['mainMenu','loadoutOverlay','arsenalOverlay','playModeOverlay','menuRulesOverlay'];
+const WATCHED=['mainMenu','loadoutOverlay','arsenalOverlay','saveOverlay','playModeOverlay','menuRulesOverlay'];
 
 const backdrop=document.createElement('div');backdrop.id='menuBackdrop';
 const canvas=document.createElement('canvas');backdrop.append(canvas);document.body.insertBefore(backdrop,document.body.firstChild);

@@ -157,3 +157,27 @@ Duo-Servergrundlage umgesetzt: server/duo-room.cjs bindet Sitzungen an feste Spi
 - Duo-Lobbys umgesetzt: Startseite mit Erstellen/Beitreten, zehnstelligem Einladungscode und kopierbarem Link im Spiel. Zwei feste Plätze, Sperre von Aktionen vor Partnerbeitritt, atomarer Beitritt und idempotente Wiederholung bei verlorener Antwort. Maximal acht getrennte Räume; Inaktivitätsablauf und begrenzte Anfragerate. Launcher gibt jetzt Lobby-Adresse aus, keine Sitzungstokens. Noch nur Loopback, kein Internet-Hosting oder dauerhafter Reconnect. 260 Tests bestanden, keine Browsertests.
 
 - Zusätzliche Multiplayer-Tests ohne Browser: parallele Kaufwiederholungen, fehlerhafte/große Pakete, neue HTTP-Verbindung mit gleicher Sitzung, 110 ungültige Aktions-Payloads, getrennte/abgelaufene Lobbys, drei Bot-Runs bis Wave 10/12/12 und acht gleichzeitig belegte Räume mit 16 HTTP-Clients. Insgesamt 265 Tests bestanden; keine neuen Fehler gefunden. Grenzen und Messwerte in server/MULTIPLAYER_TEST_REPORT.md.
+
+
+## Strukturabgleich 22.09.2026
+
+Maßgeblich ist der Repo-Root als App-Verzeichnis. Spielmodule liegen unter classes/, Dokumente unter docs/, Duo-Server unter server/. Alte Pfade über towerdefense-v0.1 sind entfernt; Headless-Einstieg exportiert auch die Biomregeln. Der Webhook arbeitet direkt im Repo-Root. assets/index.json wird vom Entwicklungsserver beziehungsweise Deployment generiert und ist ignoriert. Der wiedergefundene alte Index enthält dieselben 40 Modellpfade; alle Dateien sind vorhanden. Prüfstand: 266 automatisierte Tests ohne Browser.
+
+
+## Sprache und Bedienung · 22.09.2026
+Deutsch/Englisch als gespeicherte Sprachauswahl im Hauptmenü, Einstellungen und Duo ergänzt. Sichtbare Begriffe werden vereinheitlicht (Bogenschütze, Frostturm, Welle, Basis, Turmauswahl); interne IDs und Speicherformate bleiben stabil. Neue Texte im zentralen Katalog classes/translations.js ergänzen. HUD-Dropdowns exklusiv und unter ihrem Knopf verankert, Tutorial verschiebt sie nicht mehr. Turmbau: Hammer-Symbol; angeklickte Schnellbau-Auswahl per Klick außerhalb eines Turmplatzes abbrechbar. Ansichtsauswahl aus Einstellungen entfernt. Keine Browsertests.
+
+## UI-Regeln und Fortschritt (22.09.2026)
+
+Verbindliche Gestaltung und bekannte Verbesserungen stehen in `docs/DESIGN_SYSTEM.md`. Neue Oberflächen müssen responsive sein und beide Sprachen unterstützen. Informationsfenster/Dropdowns schließen per Außenklick. Pflichtbelohnungen bleiben dabei erhalten und wechseln zur Kartenansicht. Verkäufe benötigen zwei Klicks auf denselben Knopf; Escape/Außenklick verwirft die Bestätigung. Sieben Tutorialschritte erklären auch das erste Upgrade, Leben und Wellenstart; ungültige Platzierungen bleiben darunter sichtbar. Festungsbauer benötigt `standard35`, Händlerstadt `dual35`; reine Rekordwerte reichen nicht. Spielstandtransfer bleibt über dem Hauptmenü-Hintergrund. Keine Browsertests ohne ausdrücklichen Auftrag.
+
+### Verbindliche UI-Ergänzung (22.09.2026)
+Alle Informationsdialoge inklusive Spielregeln und Einstellungen schließen per Außenklick. Sowohl `pointerdown` als auch `click` im Capture-Pfad absichern und testen; versteckte Elemente dürfen durch Display-Spezialregeln nicht wieder sichtbar werden. Scrollbars und Sprachauswahl folgen dem Hauptmenü-/Panelstil. Die Gegnerzahl einer Welle wird auf Straßenenden verteilt; zusätzliche Enden erhöhen sie nicht.
+
+### Aktueller Arbeitsstand: Tutorial, Mobile und Duo-Speicherung
+Alle sieben Tutorialschritte markieren ihre Ziele; Überspringen bleibt an festem Aktionsplatz. Kleine Bildschirme bündeln Menü/Werte/Türme/Biome; keine zusätzliche Zoomleiste. Achievements sind als Zukunftsarbeit in docs/META_PROGRESSION_PLAN.md festgehalten (Golem-/Boss-Zähler, eindeutige Ereignisse, Export/Import, Solo/Duo-Zurechnung). Duo speichert lokal außerhalb des Webroots, bestätigt Commands erst nach Speicherung und unterstützt Prozessneustart mit denselben Spielerlinks. Noch keine produktive Onlinefreigabe oder Duo-Diamantenabrechnung.
+
+### Gebäudebuffs und Beschwörer (aktueller Stand)
+Fernschmiede darf nur Hexe ohne bestehende Schmiedeversorgung wählen, einschließlich bestehender Fernziele; Prüfung liegt in HexBuildings.canTarget/setTarget, beide Renderer zeigen passende Ziele. Hover berücksichtigt zusätzlich andere Gebäude desselben Typs in blasser Farbe. U markiert auch ausbaubare Gebäude ohne Goldprüfung. Welle-35-Boss beschwört alle sechs Spielsekunden maximal sechs Diener an seiner aktuellen Wegposition; sie übernehmen den Restweg, laufen mit 80 % seines Grundtempos und geben kein Gold. Violetter Ring macht die Beschwörung sichtbar.
+
+Tutorial-Korrektur: ganze Hexkontur statt Kreismarker beim Platzieren; Schritt 4 Baumenü/Schnellbau markieren; voller 3D-Turmbereich in Schritt 5, danach Upgradefenster schließen. Überspringen oberhalb der Überschrift. Kameramatrix vor Projektion aktualisieren und Tutorial bei viewChanged nachführen. Außenklick nicht doppelt auf pointerdown und den zugehörigen click anwenden (sonst schließt das bei pointerup geöffnete Baumenü sofort).

@@ -32,7 +32,7 @@ test('automated players complete multiple waves across seeded matches without by
   const send=(seat,action,payload)=>{now+=60;const result=room.receive(seat.token,command(room,seat,action,payload));assert.ok(result.ok,JSON.stringify({action,result}));};
   for(let turn=0;turn<150;turn++){
    let v=room.view(seats[0].token);if(v.phase==='gameover'||v.wave>=12){results.push({seed,wave:v.wave,phase:v.phase,hp:v.hp,ticks});break;}
-   if(v.phase==='combat'){for(let i=0;i<400;i++){room.tick();now+=50;ticks++;}continue;}
+   if(v.phase==='combat'){for(let i=0;i<400;i++){for(const seat of seats)room.touch(seat.token);room.tick();now+=50;ticks++;}continue;}
    for(const seat of seats){v=room.view(seat.token);const b=v.boards[seat.player];if(v.ready[seat.player])continue;
     if(b.celebration){send(seat,'acknowledge',{});continue;}
     if(b.rewardOffer){send(seat,'reward',{offerId:b.rewardOffer.id,index:b.rewardOffer.skippable?null:0});continue;}

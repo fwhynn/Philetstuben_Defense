@@ -18,7 +18,7 @@ Enthalten: zwei Maps, gemeinsame HP, gleichzeitige Wellen, Portal-Verstärkung, 
 
 ## Entwicklungsstand 21.09.2026 – lokaler Duo-Prototyp
 
-Etappe 1 ist begonnen, noch nicht abgeschlossen. Im bestehenden Solo-Spiel wird bereits das DOM-freie Modul `towerdefense-v0.1/run-runtime.js` verwendet: Spawn-Aufträge enthalten nur Zeitpunkt, Gegnerindex und Quellkoordinaten/-richtung. Keine Callbacks mehr im Runzustand. Der Controller rekonstruiert die Wegdaten beim Ausführen; Reihenfolge, Abstände und bisheriger Zufallsstrom bleiben erhalten.
+Etappe 1 ist begonnen, noch nicht abgeschlossen. Im bestehenden Solo-Spiel wird bereits das DOM-freie Modul `../classes/run-runtime.js` verwendet: Spawn-Aufträge enthalten nur Zeitpunkt, Gegnerindex und Quellkoordinaten/-richtung. Keine Callbacks mehr im Runzustand. Der Controller rekonstruiert die Wegdaten beim Ausführen; Reihenfolge, Abstände und bisheriger Zufallsstrom bleiben erhalten.
 
 `HexRandom.create` liefert weiterhin eine aufrufbare Funktion, ergänzt um `snapshot()`. `HexRandom.restore` setzt denselben Zufallsstrom aus einem versionierten Zustand fort; auch der separate Minen-Zufall lässt sich so sichern. Automatisierte Tests prüfen unabhängige Warteschlangen zweier Runs, JSON-Wiederaufnahme und exakte Fortsetzung beider Zufallsströme ohne DOM.
 
@@ -69,7 +69,7 @@ Diese Bestandsaufnahme beruht auf dem Code, nicht auf älteren Inhaltszahlen in 
 | `serve.cjs` liefert statische Dateien | Noch kein Lobby-, Sitzungs- oder Spielserver. |
 | Dokumentiertes nginx/PHP-Tag-Deployment | Belegt einen Web-Deployment-Weg, aber nicht die Verfügbarkeit eines dauerhaften Node-Prozesses. |
 
-Referenzen im Repository: [Architektur](towerdefense-v0.1/ARCHITECTURE.md), [Controller](towerdefense-v0.1/game.js), [Kampf](towerdefense-v0.1/combat.js), [Zufall](towerdefense-v0.1/random.js), [Profil](towerdefense-v0.1/profile.js), [Deployment-Beschreibung](README.md#deployment).
+Referenzen im Repository: [Architektur](ARCHITECTURE.md), [Controller](../classes/game.js), [Kampf](../classes/combat.js), [Zufall](../classes/random.js), [Profil](../classes/profile.js), [Deployment-Beschreibung](../README.md#deployment).
 
 ## 3. Verbindliche Spielregeln für den ersten Prototyp
 
@@ -220,14 +220,14 @@ Kapazität wird mit realistischen Zwei-Map-Runs gemessen: fortgeschrittene Waves
 ### 6.1 Regeln, Sitzung und Oberfläche trennen
 
 ```text
-towerdefense-v0.1/core/        neue DOM-freie Run-/Duo-Steuerung
+core/                               neue DOM-freie Run-/Duo-Steuerung
   run.mjs                     ein eigener Map-Run
   match.mjs                   zwei Runs + gemeinsamer Lebenszyklus
   commands.mjs                validierte Aktionen
   snapshot.mjs                versionierte Speicherung/Wiederherstellung
   modes/solo.mjs, duo.mjs      unterschiedliche Regeln, dieselben Grundsysteme
 
-towerdefense-v0.1/client/      lokale Darstellung und Bedienung
+client/                          lokale Darstellung und Bedienung
   session-local.*             Solo-/lokaler Testadapter
   session-online.*            Online-Adapter und SDK-Anbindung
   lobby.*                     Vorbereitung und Einladung
@@ -438,6 +438,18 @@ Dafür wiederverwendbar: Lobby/Einladung, zwei getrennte Boards, Besitzprüfung,
 
 ## 15. Nächster konkreter Schritt
 
-**Etappe 5 vorbereiten:** Trennungs-/Wiederverbindungsregeln. Private Lobby, begrenzte Raumverwaltung und Einladung sind lokal umgesetzt. Etappe 3 ist als lokaler HTTP-Prototyp mit Frontend und automatischem Tick spielbar; produktiven Transport und Lastverhalten vor Internet-Freigabe prüfen. Map-Umschalter mit Partnerstatus ist lokal umgesetzt. Team-HP, Bereitschaft, gemeinsamer Abschluss und Portal-Verstärkung sind lokal umgesetzt. Vor Online-Freigabe fehlen insbesondere produktiver Transport, Ticksteuerung, Frontend-Anbindung, Lobby und Wiederverbinden sowie weitere Last-/Missbrauchstests.
+**Etappe 5 abschließen:** Lokale Trennungspause und persistente Wiederaufnahme sind umgesetzt. Als Nächstes folgen explizite Sitzungsübernahme/Verlassen und kontrollierte Versionswechsel. Danach Etappe 6 mit Lieferungen, Wächter-Zustimmung, gemeinsamen Ergebnissen und idempotenter Abrechnung. Vor Online-Freigabe fehlen produktiver Transport, Hosting, Backups, Last-/Missbrauchstests und gemeinsame Geräte-Abnahme.
 
 Dieses Dokument wurde anhand des aktuellen Quellcodes und offizieller Framework-/Betriebsdokumentation erstellt. Bei Erstellung des Plans wurden keine Multiplayer-Komponenten implementiert. Der inzwischen umgesetzte lokale Prototyp ist oben dokumentiert; weiterhin keine Dienste eingerichtet und keine Browsertests ausgeführt.
+
+### Fortschritt 22.09.2026: Trennungspause und Wiederbeitritt
+
+Der nächste Teil von Etappe 5 ist umgesetzt: Anwesenheit je Sitz, zehn Sekunden Erkennung, danach zwei Minuten reserviertes Wiederbeitrittsfenster; beide Maps pausieren gemeinsam. Derselbe Sitzungstoken setzt im laufenden Prozess fort, ohne Kampfzeit nachzuholen oder bestätigte Käufe erneut auszuführen. Der Client zeigt Verbindungszustand und verbleibendes Fenster. Abgelaufene Räume bleiben gesperrt; es erfolgt keine automatische Auszahlung. Automatisierte Tests decken Pause, Rückkehr, beide getrennten Spieler, Ablauf, verlorene Bestätigung und langes Warten vor dem Lobbybeitritt ab. Noch keine Browser-Abnahme.
+
+Nächster konkreter Schritt ist jetzt **dauerhafte versionierte Checkpoints mit Wiederaufnahme nach Prozessneustart**. Danach folgen explizite Sitzungsübernahme, produktiver Transport und Hostingabnahme. Der ältere Abschnitt 15 beschreibt den Ausgangsstand vor diesem Arbeitspaket.
+
+### Fortschritt: persistente lokale Wiederaufnahme
+
+Versionierte Raum- und Lobby-Checkpoints sind jetzt im lokalen Launcher aktiviert. Gespeichert werden beide Runs inklusive Zufallszustand, private Sitzungen, Lobbycode und Aktionsbestätigungen. Commands werden vor Bestätigung gespeichert, Kampfzustand jede Sekunde. Neustart pausiert bis zur Rückkehr beider Spieler. Inkompatible Dateien bleiben unverändert; Speicherausfall stoppt neue Aktionen. Das ist eine lokale Einzelprozess-Grundlage, keine Produktionsfreigabe.
+
+**Jetzt als Nächstes:** explizite Sitzungsübernahme/Verlassen, Wiederherstellungshinweise und sichere Versionswechsel; danach Lieferungen, Wächter-Zustimmung und gemeinsame Ergebnisse/Statistik. Für die Freunde-Beta fehlen weiterhin dauerhafte idempotente Ergebnisabrechnung, produktiver Transport/Hosting, Backup-/Rollback-Prüfung, Last-/Missbrauchstests und Geräte-Abnahme. Achievements stehen separat im Meta-Progressionsplan.

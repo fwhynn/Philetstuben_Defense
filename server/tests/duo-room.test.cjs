@@ -3,7 +3,7 @@ const {createRoom}=require('../duo-room.cjs'),{createTransport}=require('../duo-
 const loadout=['archer','catapult','chain','freeze','mine'];
 function setup(){const room=createRoom({seed:'private-seed',loadouts:[loadout,loadout]});const seats=[room.connect(0),room.connect(1)];return {room,seats};}
 function packet(room,seat,action,payload){const v=room.view(seat.token);return {epoch:seat.epoch,sequence:v.next,wave:v.wave,phase:v.boards[seat.player].phase,action,payload};}
-function place(room,seat){const v=room.view(seat.token),core=require('../../towerdefense-v0.1/headless-core.cjs')();for(const [index,id] of v.boards[seat.player].hand.entries())for(let rotation=0;rotation<6;rotation++)if(core.map.rotatedRoads(core.data.CARD_LIBRARY[id],rotation).includes(3))return packet(room,seat,'place',{q:1,r:0,index,rotation});throw Error('No opening');}
+function place(room,seat){const v=room.view(seat.token),core=require('../../headless-core.cjs')();for(const [index,id] of v.boards[seat.player].hand.entries())for(let rotation=0;rotation<6;rotation++)if(core.map.rotatedRoads(core.data.CARD_LIBRARY[id],rotation).includes(3))return packet(room,seat,'place',{q:1,r:0,index,rotation});throw Error('No opening');}
 test('binding, malformed payloads, stale phases and sequence retries protect authoritative state',()=>{
  const {room,seats:[a,b]}=setup();assert.throws(()=>room.connect(0));assert.equal(room.receive('wrong',{}).reason,'unauthorized');
  const cmd=place(room,a),before=room.view(a.token);for(const payload of [null,[],{},'x',{slots:'bad'}])assert.equal(room.receive(a.token,{...cmd,action:'tower',payload}).ok,false);
@@ -27,3 +27,24 @@ test('two real HTTP clients share a server match and may only build on their own
 test('rate limiting and foreign match epochs reject commands without affecting the match',()=>{
  const {room,seats:[a]}=setup(),before=room.view(a.token),cmd=place(room,a);assert.equal(room.receive(a.token,{...cmd,epoch:'another-match'}).reason,'invalid');let result;for(let i=0;i<50;i++)result=room.receive(a.token,{...cmd,payload:null});assert.equal(result.reason,'rate-limit');assert.deepEqual(room.view(a.token),before);
 });
+
+ test('disconnect pauses both boards, reserves seats and resumes without catch-up or duplicate purchases',()=>{
+ let time=0;const room=createRoom({seed:'return',loadouts:[loadout,loadout],now:()=>time}),a=room.connect(0),b=room.connect(1);
+ for(const seat of [a,b])assert.equal(room.receive(seat.token,place(room,seat)).ok,true);
+ const buy=packet(room,a,'tower',{type:'archer',slots:[{q:1,r:0,index:0}]});assert.equal(room.receive(a.token,buy).ok,true);
+ for(const seat of [a,b])assert.equal(room.receive(seat.token,packet(room,seat,'ready',{value:true})).ok,true);
+ room.tick();const before=room.view(a.token);time=10001;room.touch(a.token);room.tick();const paused=room.view(a.token);
+ assert.equal(paused.connection.paused,true);assert.equal(paused.connection.players[1],'disconnected');assert.deepEqual(paused.boards,before.boards);assert.throws(()=>room.connect(1));assert.equal(room.touch('wrong'),false);
+ assert.equal(room.receive(a.token,packet(room,a,'ready',{value:false})).reason,'disconnected');
+ time=11000;room.touch(b.token);assert.equal(room.view(a.token).connection.paused,false);assert.equal(room.receive(a.token,buy).reason,'sequence');room.tick();assert.equal(room.view(a.token).boards[0].elapsedMs,before.boards[0].elapsedMs+50);assert.equal(room.view(a.token).boards[0].gold,before.boards[0].gold);
+ });
+
+ test('lost acknowledgement remains idempotent across reconnect; expired grace cannot resurrect a match',()=>{
+ let time=0;const room=createRoom({loadouts:[loadout,loadout],now:()=>time}),a=room.connect(0),b=room.connect(1);const cmd=place(room,a);assert.equal(room.receive(a.token,cmd).ok,true);
+ time=10001;room.touch(b.token);assert.equal(room.view(b.token).connection.paused,true);time=11000;room.touch(a.token);assert.equal(room.receive(a.token,cmd).duplicate,true);assert.equal(room.view(a.token).boards[0].map.length,2);
+ time=141001;assert.equal(room.touch(a.token),false);assert.equal(room.view(a.token).connection.expired,true);const state=room.view(a.token).boards;room.tick();assert.deepEqual(room.view(a.token).boards,state);
+ });
+
+ test('waiting in a lobby does not consume the reconnect window before the partner joins',()=>{
+ let time=0;const room=createRoom({loadouts:[loadout,loadout],now:()=>time}),a=room.connect(0);time=600000;room.connect(1);assert.equal(room.view(a.token).connection.expired,false);assert.equal(room.view(a.token).connection.paused,false);
+ });

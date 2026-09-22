@@ -1,16 +1,18 @@
 # Autohex TD – aktuelle Architektur
 
-Stand: 20.09.2026, einschließlich lokaler Änderungen. Historische Zwischenstände stehen im [CHANGELOG](CHANGELOG.md).
+Stand: 22.09.2026, einschließlich lokaler Änderungen. Historische Zwischenstände stehen im [CHANGELOG](CHANGELOG.md).
 
 ## Laufzeit und Darstellung
 
 Vanilla JavaScript, HTML und CSS ohne Build-Schritt. Node.js betreibt den lokalen Server und die automatisierten Tests. Three.js ist die implementierte 3D-Bibliothek; SVG bleibt alternative Darstellung und Fallback. index.html lädt die Regelmodule und anschließend den passenden Renderer sowie game.js. serve.cjs liefert statische Dateien und unter /assets/index.json die vorhandenen GLB-Modelle.
 
+Die Spielmodule der folgenden Tabelle liegen unter `classes/`. HTML-Einstiege, `headless-core.cjs` und die Netzwerkadapter `duo-client.js`/`duo-lobby.js` liegen im Repo-Root; Servercode und dessen Tests unter `server/`.
+
 ## Verantwortlichkeiten
 
 | Datei             | Aufgabe                                                                                                  |
 | ----------------- | -------------------------------------------------------------------------------------------------------- |
-| data.js           | Karten, sieben Türme, Upgradezweige, Stufe 4 und Wertberechnung                                          |
+| data.js           | Karten, neun Turmtypen, Upgradezweige, Stufe 4 und Wertberechnung                                          |
 | map.js            | Axiale Hexkoordinaten, Platzierung, gemeinsame Straßen- und Slotgeometrie, Routengraph                   |
 | random.js         | Seedbasierte Zufallsströme mit versioniertem Snapshot/Restore                                            |
 | run-runtime.js    | DOM-freie Run-Factory, Spawn-Aufträge, Wege und laufende Kampf-Simulation; vom Solo-Controller verwendet |
@@ -59,11 +61,11 @@ Die Base-Waffe wird als zusätzliche Kampfreferenz mit eigenen Werten an combat.
 
 Basismodelle für Tiles, Sonderfelder, sieben Türme, fünf Gegner, drei Gebäude und Straßenminen sind eingebunden. Eigene Upgrade-Modelle fehlen. Grafikstufen, automatische Qualitätsabsenkung, Render-Taktung und gebündelte Effekte/Overlays sind vorhanden; große Karten und viele Gegner bleiben Gegenstand der Performanceprüfung.
 
-Zuletzt 249 automatisierte Tests bestanden (21.09.2026). Sie prüfen Regeln, Controller mit DOM-Ersatz, SVG-Renderer, Kamera und Modellzuordnung. Sie ersetzen keinen WebGL- oder visuellen Test. Browsertests übernimmt der Nutzer, außer er beauftragt sie ausdrücklich.
+Zuletzt 293 automatisierte Tests bestanden (22.09.2026), einschließlich HTTP-/Duo-Tests. Sie prüfen Regeln, Controller mit DOM-Ersatz, SVG-Renderer, Kamera, Modellzuordnung, Tutorial, Menüschließen und Layoutgeometrie. Sie ersetzen keinen WebGL- oder visuellen Test. Browsertests übernimmt der Nutzer, außer er beauftragt sie ausdrücklich.
 
 ## Offene technische Arbeit
 
-Für den gewählten Duo-Modus gilt der [Multiplayer-Umsetzungsplan vom 21.09.2026](MULTIPLAYER_PLAN.md). Die darin beschriebene Online-Architektur ist ein Zielbild, noch kein vorhandener Server: zuerst Runsteuerung/Simulation vom DOM trennen und versioniert speichern, dann zwei Maps lokal verbinden, danach Netzwerk, Lobby und Wiederaufnahme.
+Für den gewählten Duo-Modus gilt der [Multiplayer-Umsetzungsplan vom 21.09.2026](MULTIPLAYER_PLAN.md). Run-Kern, zwei Maps, Portalverstärkung, autoritativer HTTP-Server und Lobby/Einladung sind implementiert. Dauerhafte Wiederaufnahme und Internet-Hosting bleiben offen.
 
 - Runsteuerung und HUD weiter trennen.
 - Laufende Runs versioniert speichern und laden, einschließlich Zufallszustand und ausstehender Entscheidungen.
@@ -86,14 +88,31 @@ Checkpoints gelten für laufende Waves, abgeschlossene Bauphasen und persistente
 
 `duo-session.js` koordiniert zwei unabhängige Run-Instanzen. Der gemeinsame Takt beträgt 50 ms; Team-HP werden nach jedem Simulationsschritt und jeder erfolgreichen Aktion gespiegelt. Die Phase `duoWait` hält einen fertigen Kampf ohne vorzeitige Abschlusszahlung an. Beide abgeschlossenen Maps gehen gemeinsam in die Belohnungsfolge. Der Duo-Checkpoint umschließt zwei Run-Checkpoints und den Teamzustand; beendete Matches werden noch nicht gespeichert. Command-IDs werden pro Spieler begrenzt gespeichert, Wave und Bereitschaft geprüft. Dies ist ein lokaler Kern, keine Netzwerk-Authentifizierung.
 
-`duo-prototype.html`/`.js` stellen eine separate lokale Entwicklungsoberfläche mit zwei SVG-Maps bereit. Kein Solo-Profilzugriff, kein Online-Transport, keine dauerhafte Speicherung. Checkpoint merken/laden hält nur eine Kopie im Tab. Responsive Anordnung und explizite Dreh-/Zoom-Buttons; noch keine vollständige mobile Abnahme. Portal-Verstärkung ist umgesetzt; Lieferungen und Netzwerk folgen.
+`duo-prototype.html` und `classes/duo-prototype.js` stellen eine separate lokale Entwicklungsoberfläche mit zwei SVG-Maps bereit. Kein Solo-Profilzugriff und keine dauerhafte Speicherung. Der Netzwerkmodus nutzt `duo-client.js` und den Duo-Server. Checkpoint merken/laden hält nur eine Kopie im Tab. Responsive Anordnung und explizite Dreh-/Zoom-Buttons; noch keine vollständige mobile Abnahme. Portal-Verstärkung und Netzwerkadapter sind umgesetzt; Lieferungen bleiben offen.
 
 Duo-Checkpoint Version 2 speichert Portalreservierung, Verstärkungswahl, Wellenstart-Kopie, ausstehende Ankunft und Unterstützungsstatistik. Gäste tragen `guestOwner`, nutzen die Zielterrain-Effekte und werden in getrennte Schadenssummen abgerechnet. Gastminen behalten die Herkunft in ihrer Schadensreferenz. Kampfgedächtnis wird nicht übertragen, Ankunft frühestens nach 1500 ms, Bereinigung am Teamabschluss/Teamtod. Der lokale Command-Adapter sperrt Portalbau und Gastupgrades; kein Verkauf im Duo-Prototyp.
 
 Kampagnenabschluss liegt in `run-session.js`: nach abgerechneter Wave 35 eigener speicherbarer Zustand `victory`, `endless()` setzt einmalig die ausstehenden Belohnungen fort. Solo-Adapter speichert nur den Freischaltungsmeilenstein beim Sieg; Diamanten erst beim Runende. Profile normalisieren gesperrte Zwei-Fronten-Auswahl zurück auf Standard. Duo markiert seine Runs mit `duoMode` und läuft ohne Solo-Abschluss weiter. Bossbeschwörungen nutzen Simulationszeit und begrenzte Zähler im Gegnerzustand.
 
-Duo-Servergrundlage umgesetzt: server/duo-room.cjs bindet Sitzungen an feste Spielerplätze; exakte Aktionsschemata, Match-Epoche, Sequenz, Wave/Phase und begrenzte Rate. Netzwerkansichten verbergen Seeds, Ziehreihenfolgen, Partnerhand und unerforschte Eventtypen; Angebots-IDs werden gehasht. Lokaler HTTP-Testadapter mit zwei echten Clients. Noch keine Online-Spieloberfläche, automatische Ticksteuerung, Lobby, Einladungen, Reconnect oder Hosting. 253 Tests bestanden, keine Browsertests.
+Duo-Servergrundlage umgesetzt: server/duo-room.cjs bindet Sitzungen an feste Spielerplätze; exakte Aktionsschemata, Match-Epoche, Sequenz, Wave/Phase und begrenzte Rate. Netzwerkansichten verbergen Seeds, Ziehreihenfolgen, Partnerhand und unerforschte Eventtypen; Angebots-IDs werden gehasht. Lokaler HTTP-Testadapter mit zwei echten Clients. Die Oberfläche verwendet diesen Adapter; automatischer Takt und Lobby/Einladungen sind implementiert. Dauerhafter Reconnect und öffentliches Hosting bleiben offen.
 
-- Duo-Serverprototyp mit Frontend verbunden: node server/start-duo.cjs startet auf 127.0.0.1:8090 und gibt zwei Spielerlinks aus. Server simuliert automatisch in 50-ms-Schritten; Client zeigt Netzwerkansicht, eigene Bauaktionen und lesbare Partner-Map. Legale Platzierungen und Biome vom Server. Derselbe SVG-Renderer, keine Client-Kampfberechnung. Verlorene Kaufbestätigung wird mit identischer Sequenz wiederholt. Netzwerkmodus ohne lokale Reset-/Checkpoint-/Tempokontrolle; vorerst 1× und feste Start-Loadouts. Noch keine Internet-Lobby oder Neustart-Persistenz. 256 Tests bestanden, keine Browsertests.
+- Duo-Serverprototyp mit Frontend verbunden: node server/start-duo.cjs startet auf 127.0.0.1:8090 und gibt die Lobby-Adresse aus. Server simuliert automatisch in 50-ms-Schritten; Client zeigt Netzwerkansicht, eigene Bauaktionen und lesbare Partner-Map. Legale Platzierungen und Biome vom Server. Derselbe SVG-Renderer, keine Client-Kampfberechnung. Verlorene Kaufbestätigung wird mit identischer Sequenz wiederholt. Netzwerkmodus ohne lokale Reset-/Checkpoint-/Tempokontrolle; vorerst 1× und feste Start-Loadouts. Noch keine Internet-Lobby oder Neustart-Persistenz.
 
-- Duo-Lobbys umgesetzt: Startseite mit Erstellen/Beitreten, zehnstelligem Einladungscode und kopierbarem Link im Spiel. Zwei feste Plätze, Sperre von Aktionen vor Partnerbeitritt, atomarer Beitritt und idempotente Wiederholung bei verlorener Antwort. Maximal acht getrennte Räume; Inaktivitätsablauf und begrenzte Anfragerate. Launcher gibt jetzt Lobby-Adresse aus, keine Sitzungstokens. Noch nur Loopback, kein Internet-Hosting oder dauerhafter Reconnect. 260 Tests bestanden, keine Browsertests.
+- Duo-Lobbys umgesetzt: Startseite mit Erstellen/Beitreten, zehnstelligem Einladungscode und kopierbarem Link im Spiel. Zwei feste Plätze, Sperre von Aktionen vor Partnerbeitritt, atomarer Beitritt und idempotente Wiederholung bei verlorener Antwort. Maximal acht getrennte Räume; Inaktivitätsablauf und begrenzte Anfragerate. Launcher gibt jetzt Lobby-Adresse aus, keine Sitzungstokens. Noch nur Loopback, kein Internet-Hosting oder dauerhafter Reconnect.
+
+
+## Sprache und Menüs
+
+`classes/translations.js` hält die deutsche Begriffsnormierung und den englischen Textkatalog. `classes/i18n.js` übersetzt ausschließlich sichtbare DOM-/SVG-Texte und Beschriftungsattribute, einschließlich dynamischer Renderer-Labels. Ein MutationObserver verarbeitet geänderte Knoten; ein begrenzter Cache vermeidet wiederholte Textarbeit. Originaltexte bleiben in einer WeakMap für verlustfreien Sprachwechsel erhalten. Eingabewerte, IDs, Profil und Simulationsdaten bleiben unverändert. Sprache wird separat unter `language` gespeichert. Neue sichtbare Texte und dynamische Fragmente im Katalog ergänzen; native Bestätigungsdialoge verwenden `HexI18n.text()`. `data-no-translate` schützt fremde oder vom Nutzer eingegebene Inhalte.
+
+Hauptmenü, Einstellungen und Duo bieten dieselbe Sprachauswahl. Die HUD-Dropdowns bilden eine exklusive Gruppe über `menu-controls.js`. Ihre Position hängt vom jeweiligen Knopf ab, nicht von der Höhe des mittigen Tutorials.
+
+## Responsive UI und Fortschrittsfreigaben
+
+Die Gestaltungsgrundlage ist [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md). Ein gemeinsamer Flex-Header verhindert konkurrierende absolute Positionen. `ResizeObserver` misst Kopf-/Fußleisten und Hand; `ui-layout.js` reserviert freie Rechtecke in kurzem Querformat. Das siebenstufige Tutorial richtet seinen Spotlight an den aktuellen DOM-Grenzen von Leben und Wellenstart aus. Platzierungsfehler besitzen einen eigenen Textbereich. Verkaufsbestätigung ist lokaler Zustand am vorhandenen Button, kein eigener Dialog. `profile.js` prüft Festungsfreigaben anhand von `standard35` bzw. `dual35`; Auswahl und Runstart prüfen dieselbe Regel.
+
+## Biom-Erstkontakt und Sackgassenportal
+
+`HexBiomes.visibleTiles()` umfasst gelegte Hexe und ihre sichtbaren farbigen Nachbarfelder, keine entfernten Wahrzeichen-Silhouetten. Die Biomleiste nutzt dieselbe Menge wie die Hervorhebung. Der erste Nicht-Grasland-Kontakt zeigt einen Hinweis, der ausschließlich über seinen Bestätigungsknopf verschwindet (kein Außenklick, Hover oder Escape); Die Bestätigung wird pro Run als `biomeIntroAcknowledged` gespeichert; die frühere browserweite Kennzeichnung wird ignoriert. Der Hinweis wartet nicht auf den Tutorialabschluss. Nicht-Grasland beginnt frühestens bei Hexdistanz 4 von der Basis. Der UI-Zustand `biomeIntro` bleibt außerhalb der Run-Checkpoints.
+
+`deadEnd` besitzt zusätzlich zu zwei Turmplätzen einen exklusiven `portal`-Gebäudeplatz im Straßenmittelpunkt. Bau kostet 250 Gold; Kauf und Verkauf sind nur in der Bauphase möglich, damit laufende Spawn-Jobs ihren Eingang behalten. `HexBuildings.allowedTypes()` gilt auch für Duo und verhindert normale Gebäude auf diesem Platz sowie Portale auf normalen Gebäudeplätzen. Portale haben keine Gebäude-Upgrades oder Arsenal-Freischaltung. `spawnSources()` liefert für gebaute Portale einen zusätzlichen Eingang mit der reservierten Richtung 6; die Route beginnt am Straßenende. Die feste Wellen-Gegnerzahl bleibt unverändert und wird auf alle Quellen verteilt. Die bisherige Schutzregel für das letzte offene Straßenende bleibt bestehen.
