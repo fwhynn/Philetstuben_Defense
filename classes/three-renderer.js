@@ -252,11 +252,37 @@ function create(host0,commands){
       const roadTemplate=template.parts.some(p=>p.material.name==='road')?template:(modelTemplate('straight')||template);
       const roadBase=roadTemplate.parts.find(p=>p.material.name==='road')?.material||fallbackMaterial,road=ghost?ghostMaterial(roadBase,true):roadBase;
       const vergeBase=roadTemplate.parts.find(p=>p.material.name==='road_verge')?.material||roadBase,verge=ghost?ghostMaterial(vergeBase,true):vergeBase;
-      const paths=[...HexMap.roadGeometry(tile).legs.values()].map(points=>points.map(p=>({x:p.x-c.x,y:p.y-c.y})));
-      for(const points of paths)holder.add(ribbon(points,verge,22,.85));
-      for(const points of paths)holder.add(ribbon(points,road,18,1));
+      // Breiten decken sich mit den gebackenen Straßen (ASSET_SPEC.md: Bankett 0,47, Fahrbahn 0,33 × Hexradius 54).
+      const VERGE_WIDTH=0.47*S,ROAD_WIDTH=0.33*S;
+      const geometry=HexMap.roadGeometry(tile);
+      const paths=[...geometry.legs.values()].map(points=>points.map(p=>({x:p.x-c.x,y:p.y-c.y})));
+      for(const points of paths)holder.add(ribbon(points,verge,VERGE_WIDTH,.85));
+      for(const points of paths)holder.add(ribbon(points,road,ROAD_WIDTH,1));
+      // Die Bänder enden am Knoten gerade abgeschnitten. Innen (Astabstand < 180°) überlappen sie ohnehin,
+      // außen (> 180°, z. B. Fächerkreuzung, Kurven) bliebe zwischen den Schnittkanten eine Kerbe. Die füllt
+      // ein Bogen mit Radius = halbe Bandbreite – wie das road_*_hub-Stück der gebackenen Tiles, ragt also
+      // nirgends über die Straßenbreite hinaus.
+      if(paths.length>1){
+        const hub=paths[0][0];
+        const angles=paths.map(points=>Math.atan2(points[1].y-hub.y,points[1].x-hub.x)).sort((a,b)=>a-b);
+        holder.add(hubArc(hub,angles,VERGE_WIDTH/2,.85,verge));
+        holder.add(hubArc(hub,angles,ROAD_WIDTH/2,1,road));
+      }
     }
     return holder;
+  }
+  function hubArc(hub,angles,radius,height,material){
+    const positions=[hub.x,height,hub.y],indices=[],STEP_ANGLE=Math.PI/24;
+    angles.forEach((a1,i)=>{
+      let gap=angles[(i+1)%angles.length]-a1;if(gap<=0) gap+=Math.PI*2;
+      const sweep=gap-Math.PI;if(sweep<=1e-6) return;
+      const steps=Math.max(1,Math.ceil(sweep/STEP_ANGLE)),first=positions.length/3;
+      for(let k=0;k<=steps;k++){const a=a1+Math.PI/2+sweep*k/steps;positions.push(hub.x+Math.cos(a)*radius,height,hub.y+Math.sin(a)*radius);}
+      for(let k=0;k<steps;k++) indices.push(0,first+k+1,first+k);   // Wicklung wie ribbon(): Vorderseite zeigt nach oben
+    });
+    if(!indices.length) return new THREE.Group();
+    const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setIndex(indices);geometry.computeVertexNormals();
+    const mesh=new THREE.Mesh(geometry,material);mesh.receiveShadow=true;return mesh;
   }
   function ribbon(points,material,width=18,height=1){
     const positions=[],indices=[];
