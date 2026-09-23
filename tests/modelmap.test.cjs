@@ -4,13 +4,15 @@ function load() { const context = {}; for (const file of ['data.js', 'map.js', '
 test('every card type has a model and its road edges match the shape table', () => {
   const { data, models } = load();
   for (const [id, card] of Object.entries(data.CARD_LIBRARY)) {
-    const m = models.modelFor({ type: id, rotation: 0, roads: card.roads }); assert.equal(m.name, (card.procedural ? 'straight' : card.model) || ({ supplyRoad: 'straight', signalCross: 'cross' })[id] || id); assert.equal(m.rotation, 0);
+    const m = models.modelFor({ type: id, rotation: 0, roads: card.roads }); assert.equal(m.name, models.NAMED_TILES.includes(id) ? id : (card.procedural ? 'straight' : card.model) || id); assert.equal(m.rotation, 0);
   }
 });
 test('tiles keep their stored rotation and base uses the base model', () => {
   const { models } = load();
   assert.deepEqual({ ...models.modelFor({ type: 'tee', rotation: 4, roads: [4, 0, 2] }) }, { name: 'tee', rotation: 4 });
   assert.equal(models.modelFor({ type: 'base', roads: [0] }).name, 'base');
+  assert.equal(models.modelFor({ type: 'base', roads: [0], baseVariant: 'base_keep' }).name, 'base_keep');
+  assert.equal(models.modelFor({ type: 'base', roads: [0, 3], baseVariant: 'base_keep' }).proceduralRoads, true);
 });
 test('rescue hexes pick a model by road shape and rotation, with a procedural fallback', () => {
   const { models } = load();

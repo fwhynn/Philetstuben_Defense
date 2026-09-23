@@ -3,6 +3,7 @@
  */
 const HexRunRuntime=(()=>{
   const VERSION=1;
+  const BASE_VARIANTS=['base_hex','base_keep','base_motte','base_beacon','base_royal'];
   // Derived data stays outside checkpoints and is reclaimed with its map/run.
   const routeCache=new WeakMap(),waveCache=new WeakMap();
   function cachedRoutes(map){
@@ -32,7 +33,8 @@ const HexRunRuntime=(()=>{
     state.baseExits=state.difficulty==='dual'?HexMap.randomBaseExits(HexRandom.create(seed+'|base-exits')):[0];HexHeroes.initialize(state,heroId);delete state.selectedBase;
     state.landmarks=HexExploration.create(HexRandom.create(seed+'|exploration'));
     state.vision=HexExploration.expand(state.landmarks,new Map([['0,0',{q:0,r:0}]]));
-    state.map.set('0,0',{q:0,r:0,type:'base',roads:state.baseExits,slots:0,towers:[],income:0});
+    const baseVariant=BASE_VARIANTS[Math.floor(HexRandom.create(seed+'|base-variant')()*BASE_VARIANTS.length)];
+    state.map.set('0,0',{q:0,r:0,type:'base',roads:state.baseExits,slots:0,towers:[],income:0,baseVariant});
     return {state,random:HexRandom.create(seed)};
   }
   function schedule(state,sources,enemies,spacing=20){

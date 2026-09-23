@@ -48,7 +48,7 @@ function makeTemplate(name,scene,kind){
   const slotNodes=[],padNodes=[];scene.traverse(n=>{if(isSlot(n)) slotNodes.push(n);else if(isPad(n)) padNodes.push(n);});
   const skip=n=>isSlot(n)||isPad(n);
   template.parts=bake(scene,skip);
-  if(name==='tile_rescue'||name==='tile_base'||name==='tile_straight') template.noRoad=bake(scene,n=>skip(n)||n.name==='road'||n.name==='road_verge');
+  if(name==='tile_rescue'||name==='tile_straight'||name.startsWith('tile_base')) template.noRoad=bake(scene,n=>skip(n)||n.name==='road'||n.name==='road_verge');
   template.slots=slotNodes.sort((a,b)=>a.name.localeCompare(b.name)).map(n=>({pos:worldPosition(n),parts:bake(n)}));
   template.pad=padNodes[0]?{pos:worldPosition(padNodes[0]),parts:bake(padNodes[0])}:null;
   if(kind==='landmarks'&&name!=='landmark_boss'){                    // Deko separat, damit sie auf jede Straßenform passt
@@ -313,7 +313,9 @@ function create(host0,commands){
 
   // ---- Türme, Gebäude, Turmplätze ----
   function towerObject(tile,index,tower){
-    const template=modelTemplate(tower.type,'tower'),def=HexData.towerDefinition(tower),p=slotPositions(tile)[index],holder=new THREE.Group(),obj={holder,def,tower,tile,index,pos:p,angle:0};
+    const variant=tower.finalUpgrade||tower.branch;
+    const template=(variant&&modelTemplate(`${tower.type}_${variant}`,'tower'))||modelTemplate(tower.type,'tower');
+    const def=HexData.towerDefinition(tower),p=slotPositions(tile)[index],holder=new THREE.Group(),obj={holder,def,tower,tile,index,pos:p,angle:0};
     holder.position.set(p.x,0,p.y);
     const model=new THREE.Group();model.scale.setScalar(S);holder.add(model);
     if(template){
@@ -426,7 +428,9 @@ function create(host0,commands){
   // ---- Gegner und Geschosse ----
   const model0=m=>m.isGroup;
   function makeEnemy(e){
-    const type=ENEMY_COLOR[e.type]?e.type:'normal',boss=type==='boss',template=templates.get('enemy_'+({splitter:'armored',shard:'armored',healer:'warded',elementCarrier:'warded'}[type]||type)),group=new THREE.Group(),bar=new THREE.Group();
+    const type=ENEMY_COLOR[e.type]?e.type:'normal',boss=type==='boss';
+    const baseType=({splitter:'armored',shard:'armored',healer:'warded',elementCarrier:'warded'}[type]||type);
+    const template=(boss&&e.originBiome&&templates.get('enemy_boss_'+e.originBiome))||templates.get('enemy_'+baseType),group=new THREE.Group(),bar=new THREE.Group();
     const obj={group,bar,radius:boss?15:type==='shard'?6:9,phase:0,angle:0,targetAngle:0,last:null,slowed:false,limbs:[],barY:0};
     if(template){
       obj.pivot=new THREE.Group();const model=new THREE.Group();model.scale.setScalar(S*(type==='shard'?.6:1));obj.pivot.add(model);addParts(model,template.parts);

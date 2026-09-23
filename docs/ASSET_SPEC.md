@@ -25,40 +25,46 @@ Damit deine Modelle ohne Nacharbeit zur Spiellogik passen. Alle Maße sind aus `
 ### Turm- und Gebäudeplätze
 Flache Bauplattformen (Sockel/Steinplatte, Radius ca. 0,22), auf denen später der Turm steht. Als Objekt `tower_slot_1`, `tower_slot_2` (Gruppe aus Sockel und Platte) modellieren, Platte auf Höhe ca. 0,03–0,05.
 
-**Die Position bestimmt das Spiel, nicht das Modell.** Der Renderer verschiebt die Plattformen an die Spielpositionen aus `map.js` (`SLOT_LAYOUTS`, je Hexart eigene Lage, damit Türme neben der Straße statt darauf stehen). Die Position im Modell ist nur ein Platzhalter; wichtig sind Anzahl (`tower_slot_N` für alle Plätze der Karte) und die Höhe. Der Gebäudeplatz bleibt bei (0, 0,56 Süd), ein quadratischer Platz von ca. 0,33 Breite (`building_pad`).
+**Die Position bestimmt das Spiel, nicht das Modell.** Der Renderer verschiebt die Plattformen an die Spielpositionen aus `map.js` (`SLOT_LAYOUTS`, je Hexart eigene Lage, damit Türme neben der Straße statt darauf stehen) – **nur X/Z**. Die **Höhe** (Blender-Z bzw. Renderer-Y) liest der Renderer dagegen direkt aus der Position des `tower_slot_N`-Objekts in deinem Modell. Anzahl, Höhe und die grobe Lage relativ zu Straße/Deko musst du also selbst richtig setzen; die exakte X/Z-Position wird beim Laden überschrieben. Der Gebäudeplatz bleibt bei (0, 0,56 Süd), ein quadratischer Platz von ca. 0,33 Breite (`building_pad`).
 
 Beim Modellieren der Deko (Büsche, Steine, Bäume) beachten: Die Spielpositionen der Türme stehen in `SLOT_LAYOUTS` in `map.js`. Plattformen dort nicht mit großer Deko zustellen.
+
+### Referenzkoordinaten je Tile
+
+Die Spalte „Turmplätze" unten gibt die tatsächlichen Spielpositionen aus `SLOT_LAYOUTS` an, umgerechnet in Blender-Einheiten (Weltkoordinate ÷ 54, Y invertiert, weil das Spiel Y nach Süden zählt und Blender Y nach Norden). Modelliere deine `tower_slot_N`-Sockel an diesen Stellen (bei Rotation 0) – dann steht die von dir gestaltete Plattform/Deko später exakt dort, wo der Turm im Spiel tatsächlich erscheint, auch wenn die X/Z-Position technisch überschrieben wird. Bei mehreren Slots ist die Reihenfolge in der Tabelle gleich der Reihenfolge `tower_slot_1`, `tower_slot_2`.
 
 ### Benötigte Tiles
 
 Priorität 1 – Grundformen (Kartenkennung = Dateiname `tile_<id>.glb`):
 
-| Datei | Straßenkanten | Slots | Besonderheit |
-|---|---|---|---|
-| `tile_base` | mind. 1 (bei Rotation 0: 0) | – | Festung/Burg, zentral |
-| `tile_straight` | 0, 3 | 1 | Wiese |
-| `tile_smallCurve` | 0, 1 | 1 | enge Kurve |
-| `tile_bigCurve` | 0, 2 | 1 | weite Kurve |
-| `tile_tee` | 0, 2, 4 | 2 | Y-Kreuzung |
-| `tile_tJunction` | 0, 2, 3 | 2 | T-Kreuzung |
-| `tile_cross` | 0, 1, 3, 4 | 2 | Kreuzung |
-| `tile_fullCross` | 0–5 | 2 | Sechserkreuzung |
-| `tile_village` | 0, 2 | 1 + Gebäudeplatz | Dorf, Häuschen |
-| `tile_empty` | 0, 3 | 2 | weites Land |
-| `tile_longRoad` | 0, 3 | 2 | geschlängelt |
+| Datei | Straßenkanten | Slots | Turmplätze (Blender X, Y) | Besonderheit |
+|---|---|---|---|---|
+| `tile_base` | mind. 1 (bei Rotation 0: 0) | – | – | Festung/Burg, zentral |
+| `tile_straight` | 0, 3 | 1 | (−0,26, 0,44) | Wiese |
+| `tile_smallCurve` | 0, 1 | 1 | (−0,11, 0,07) | enge Kurve |
+| `tile_bigCurve` | 0, 2 | 1 | (0,04, −0,59) | weite Kurve |
+| `tile_tee` | 0, 2, 4 | 2 | (0,26, 0,44) · (0,26, −0,44) | Y-Kreuzung |
+| `tile_tJunction` | 0, 2, 3 | 2 | (−0,56, −0,44) · (−0,07, −0,44) | T-Kreuzung |
+| `tile_cross` | 0, 1, 3, 4 | 2 | (−0,26, 0,44) · (0,26, −0,44) | Kreuzung |
+| `tile_fullCross` | 0–5 | 2 | (0, 0,78) · (0, −0,78) | Sechserkreuzung |
+| `tile_village` | 0, 2 | 1 + Gebäudeplatz | (0,07, 0,74) | Dorf, Häuschen |
+| `tile_empty` | 0, 3 | 2 | (−0,26, 0,44) · (−0,56, −0,44) | weites Land |
+| `tile_longRoad` | 0, 3 | 2 | (0,22, 0,59) · (−0,22, −0,59) | geschlängelt |
 
 Priorität 2 – Sonderkarten (gleiche Straßenformen, eigene Optik):
 
-| Datei | Kanten | Slots | Optik-Idee |
-|---|---|---|---|
-| `tile_grove` | 0, 2 | 1 | Wald |
-| `tile_highGround` | 0, 2, 4 | 1 | Hügel/Fels |
-| `tile_treasury` | 0, 3 | 0 | Handelsposten, Waren |
-| `tile_battlefield` | 0, 3 | 1 | Kampfplatz, Banner |
-| `tile_watchtower` | 0, 2 | 2 | Wachturm-Ruine |
-| `tile_citadel` | 0, 2, 4 | 2 | prächtige Bastion |
-| `tile_royalVillage` | 0, 3 | 1 + Gebäudeplatz | goldenes Dorf |
-| `tile_warCross` | 0, 1, 3, 4 | 2 | Kriegslager |
+| Datei | Kanten | Slots | Turmplätze (Blender X, Y) | Optik-Idee |
+|---|---|---|---|---|
+| `tile_grove` | 0, 2 | 1 | (0,04, −0,59) | Wald |
+| `tile_highGround` | 0, 2, 4 | 1 | (0,26, 0,44) | Hügel/Fels |
+| `tile_treasury` | 0, 3 | 0 | – | Handelsposten, Waren |
+| `tile_battlefield` | 0, 3 | 1 | (−0,26, 0,44) | Kampfplatz, Banner |
+| `tile_watchtower` | 0, 2 | 2 | (0,37, 0,52) · (0,04, −0,59) | Wachturm-Ruine |
+| `tile_citadel` | 0, 2, 4 | 2 | (0,26, 0,44) · (0,26, −0,44) | prächtige Bastion |
+| `tile_royalVillage` | 0, 3 | 1 + Gebäudeplatz | (−0,26, 0,44) | goldenes Dorf |
+| `tile_warCross` | 0, 1, 3, 4 | 2 | (−0,26, 0,44) · (0,26, −0,44) | Kriegslager |
+
+Zwei prozedurale Sonderfälle, falls du sie mitbaust (Kanten variieren je nach gezogener Karte, siehe `data.js`): `supplyRoad` (Kanten 0/3, 1 Slot bei (−0,26, 0,44)) und `signalCross` (Kanten 0/1/3/4, 2 Slots bei (−0,26, 0,44) und (0,26, −0,44)) – beide aliasen aktuell auf `tile_straight` bzw. `tile_cross`.
 
 Priorität 3 – Sonderfelder und Nebel:
 - `landmark_treasure`, `landmark_shrine`, `landmark_boss`: Boss-Feld hat immer sechs Straßenöffnungen und keine Slots. Schatz/Shrine bekommen die Straßenformen gerade/Kurve/Y/T mit 1 Slot (Details werden geklärt, wenn wir dort sind).
@@ -69,7 +75,7 @@ Tipp: Wenn du Zeit sparen willst, baue pro **Straßenform** ein neutrales Basist
 
 ## Türme
 
-- Ursprung = Mitte des Sockels auf Höhe 0. Grundfläche max. Radius **0,20**, Höhe ca. **0,5–0,8**.
+- Ursprung = Mitte des Sockels auf Höhe 0. Grundfläche max. Radius **0,29** (gilt inzwischen für alle Türme, nicht nur die Balliste; Türme mit Ausleger, Deck oder Beinen dürfen bis dahin ausgreifen), Höhe ca. **0,5–0,8** für die Basistürme. Für Upgrade-Modelle gilt die Höhenhierarchie aus `ASSET_SPEC_v3.md` (max. 0,65, nur die Balliste-Endstufen dürfen höher werden).
 - Wichtige bewegliche Teile als **eigene Objekte mit festem Namen** (damit ich sie animieren kann):
   - `turret`: Teil, das sich zum Gegner dreht (Bogen, Katapult-Ausleger-Plattform, Blitzspule). Pivot in der Drehachse, senkrecht.
   - `arm` (nur Katapult): schwenkender Wurfarm.
