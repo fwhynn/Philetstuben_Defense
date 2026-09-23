@@ -1,4 +1,4 @@
-# Autohex TD – aktuelle Architektur
+# AutoHex TD – aktuelle Architektur
 
 Stand: 22.09.2026, einschließlich lokaler Änderungen. Historische Zwischenstände stehen im [CHANGELOG](CHANGELOG.md).
 

@@ -1,4 +1,4 @@
-# Autohex TD – Duo „Zwillingsfestungen“: Umsetzung und Betrieb
+# AutoHex TD – Duo „Zwillingsfestungen“: Umsetzung und Betrieb
 
 Stand: 21.09.2026. **Lokaler Zwei-Map-Prototyp umgesetzt; Online-Multiplayer weiterhin geplant.**
 

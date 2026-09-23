@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Autohex TD</title>
+    <title>AutoHex TD</title>
     <link rel="icon" type="image/png" href="assets/favicon.png" />
     <link rel="stylesheet" href="style.css" /><link rel="stylesheet" href="duo.css" />
     <script
@@ -64,7 +64,7 @@
       <!-- Oben links: Titel und Menü -->
       <div class="gameHeader">
       <nav class="dockTL" aria-label="Menü">
-        <h1>Autohex TD <span data-app-version></span></h1>
+        <h1>AutoHex TD <span data-app-version></span></h1>
         <div class="dockButtons">
           <button class="secondary drawerBtn" data-drawer="rulesDrawer"><svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18H6zM9 7h6M9 11h6M9 15h4"/></svg> Regeln</button>
           <button id="settingsOpenBtn" class="secondary drawerBtn" data-drawer="settingsDrawer"><svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="8" cy="18" r="2"/></svg> Einstellungen</button>
@@ -245,7 +245,7 @@
       <div class="menuBox">
         <img class="menuLogo" src="assets/favicon.png" alt="" />
         <p class="eyebrow">TOWER DEFENSE</p>
-        <h1 id="mainMenuTitle">Autohex TD</h1>
+        <h1 id="mainMenuTitle">AutoHex TD</h1>
         <p class="menuTagline">Map bauen → Türme setzen → Wave überleben → Deck erweitern</p>
         <p id="menuLoadoutInfo" class="menuLoadoutInfo"></p>
         <div class="menuButtons">
@@ -417,7 +417,7 @@
         const applyVersion = (version) => {
           if (!version) return;
           const label = `v${String(version).replace(/^v/, '')}`;
-          document.title = `Autohex TD ${label}`;
+          document.title = `AutoHex TD ${label}`;
           document.querySelectorAll('[data-app-version]').forEach(node => { node.textContent = label; });
         };
         fetch('./package.json', { cache: 'no-store' })
@@ -437,10 +437,10 @@
         if (!globalThis.HexApi || typeof globalThis.HexApi.getUserById !== 'function') return;
         globalThis.HexApi.getUserById(0)
           .then((payload) => {
-            console.info('Autohex TD API test user loaded:', payload);
+            console.info('AutoHex TD API test user loaded:', payload);
           })
           .catch((error) => {
-            console.warn('Autohex TD API test user request failed:', error);
+            console.warn('AutoHex TD API test user request failed:', error);
           });
       })();
     </script>

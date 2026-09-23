@@ -1,4 +1,4 @@
-# Autohex TD – V0.7-dev
+# AutoHex TD – V0.7-dev
 
 Tempo: gespeicherter Regler von 1× bis 8×; F schaltet 1× → 2× → … → 8× → 1×. Hintergrundtimer führt Waves auch ohne Bildschirmausgabe fort; gedrosselte Zeit wird schrittweise nachgeholt. Vollständig eingefrorene Tabs rechnen erst beim Aufwachen weiter. P pausiert weiterhin ausdrücklich. Freie Turmplätze sind weiß, Gebäudeplätze türkis markiert.
 

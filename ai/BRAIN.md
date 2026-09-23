@@ -1,4 +1,4 @@
-# Autohex TD – Projektgedächtnis
+# AutoHex TD – Projektgedächtnis
 
 Stand: 21.09.2026, einschließlich der aktuellen lokalen Änderungen. Kompakte Übersicht über Ziele, Entscheidungen und spätere Ideen. Ausführlicher Verlauf: [Übergabeprotokoll](../docs/README_TowerDefense_Projekt.md). Technische Grenzen: [Architektur](../docs/ARCHITECTURE.md). Änderungen: [Spielreferenz](../docs/GAME_REFERENCE.md).
 

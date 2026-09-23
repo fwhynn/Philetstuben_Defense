@@ -1,4 +1,4 @@
-# Autohex TD – Designregeln und Bestandsprüfung
+# AutoHex TD – Designregeln und Bestandsprüfung
 
 Stand: 22.09.2026. Gilt für neue Oberflächen und die schrittweise Überarbeitung bestehender Menüs, in Deutsch und Englisch, mit Maus, Tastatur und Touch.
 

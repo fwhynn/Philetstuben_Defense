@@ -2,7 +2,7 @@
 
 Die folgenden Einträge dokumentieren frühere Zwischenstände. Verbindlicher aktueller Funktionsstand: [README.md](README.md). Spätere Einträge können frühere Angaben ersetzen.
 
-# Autohex TD – V0.7-dev
+# AutoHex TD – V0.7-dev
 
 ## V0.7 – Tutorial im Hinweisfeld und neue Run-Belohnungen
 
