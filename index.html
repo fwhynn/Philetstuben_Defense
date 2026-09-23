@@ -272,6 +272,24 @@
         <input id="uploadSaveInput" type="file" accept=".json,application/json" />
         <p id="saveStatus" role="status" aria-live="polite"></p>
         <button id="confirmImportBtn" class="primary hidden">Vorhandenes Profil ersetzen</button>
+
+        <h3>Account (Beta)</h3>
+        <div id="accountLoggedOut">
+          <p><label for="accountUsername">Benutzername</label>
+            <input id="accountUsername" type="text" autocomplete="username" maxlength="32" /></p>
+          <p><label for="accountPassword">Passwort</label>
+            <input id="accountPassword" type="password" autocomplete="current-password" /></p>
+          <button id="accountLoginBtn" class="primary">Einloggen</button>
+          <button id="accountRegisterBtn" class="secondary">Account erstellen</button>
+        </div>
+        <div id="accountLoggedIn" class="hidden">
+          <p id="accountWhoami"></p>
+          <button id="accountSaveServerBtn" class="primary">Auf Server speichern</button>
+          <button id="accountLoadServerBtn" class="secondary">Vom Server laden</button>
+          <button id="accountLogoutBtn" class="secondary">Ausloggen</button>
+        </div>
+        <p id="accountStatus" role="status" aria-live="polite"></p>
+
         <button id="closeSaveBtn" class="secondary">Zurück · Esc</button>
       </div>
     </div>

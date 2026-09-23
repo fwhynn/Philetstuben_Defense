@@ -935,11 +935,50 @@ R dreht die Karte, dann Feld anklicken.`;}
   const saveOverlay=document.getElementById('saveOverlay'),saveStatus=document.getElementById('saveStatus'),confirmImport=document.getElementById('confirmImportBtn');
   let pendingImport=null,importReadId=0;
   function closeSave(){pendingImport=null;importReadId++;saveOverlay.classList.add('hidden');openMainMenu();document.getElementById('menuSaveBtn').focus?.();}
-  document.getElementById('menuSaveBtn').addEventListener('click',()=>{pendingImport=null;importReadId++;confirmImport.classList.add('hidden');document.getElementById('uploadSaveInput').value='';saveStatus.textContent='Ein Import ersetzt dein Profil. Lade zur Sicherheit zuerst eine Kopie herunter.';saveOverlay.classList.remove('hidden');});
+  document.getElementById('menuSaveBtn').addEventListener('click',()=>{pendingImport=null;importReadId++;confirmImport.classList.add('hidden');document.getElementById('uploadSaveInput').value='';saveStatus.textContent='Ein Import ersetzt dein Profil. Lade zur Sicherheit zuerst eine Kopie herunter.';saveOverlay.classList.remove('hidden');document.getElementById('accountStatus').textContent='';refreshAccountView();});
   document.getElementById('closeSaveBtn').addEventListener('click',closeSave);
   document.getElementById('downloadSaveBtn').addEventListener('click',()=>{try{const blob=new Blob([HexProfile.exportFile(profile,TOWERS)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='autohex-spielstand-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);saveStatus.textContent='Spielstanddatei zum Download bereitgestellt.';}catch{saveStatus.textContent='Download fehlgeschlagen. Bitte erneut versuchen.';}});
   document.getElementById('uploadSaveInput').addEventListener('change',async event=>{const readId=++importReadId;pendingImport=null;confirmImport.classList.add('hidden');const file=event.target.files?.[0];if(!file)return;try{if(hasActiveRun&&state.hp>0)throw new Error('Bitte zuerst den laufenden Run beenden. Ein Profilwechsel während eines Durchlaufs ist nicht möglich.');if(file.size>2000000)throw new Error('Datei zu groß (maximal 2 MB).');const text=await file.text();if(readId!==importReadId)return;const next=HexProfile.readFile(text,TOWERS);pendingImport=text;saveStatus.textContent=next.diamonds+' Diamanten · '+next.unlockedTowers.length+' Türme freigeschaltet · Bestmarke Wave '+next.records.highestWave+'. Dein bisheriges Profil mit '+profile.diamonds+' Diamanten wird ersetzt. Eine lokale Sicherung wird angelegt.';confirmImport.classList.remove('hidden');}catch(error){if(readId===importReadId)saveStatus.textContent=error.message;}});
   confirmImport.addEventListener('click',()=>{if(!pendingImport||hasActiveRun&&state.hp>0)return;try{profile=HexProfile.importFile(pendingImport,TOWERS);pendingLoadout=[...profile.activeLoadout];pendingHero=profile.activeHero;pendingDifficulty=profile.difficulty;pendingImport=null;confirmImport.classList.add('hidden');renderLoadout();renderUI();updateArsenalHint();saveStatus.textContent='Spielstand importiert. Dein Profil ist für den nächsten Run bereit.';}catch(error){saveStatus.textContent='Import fehlgeschlagen: '+error.message;}});
+  // ---- Account (Beta): Login/Registrierung + Spielstand-Sync über die API ----
+  const accountStatus=document.getElementById('accountStatus'),accountLoggedOut=document.getElementById('accountLoggedOut'),accountLoggedIn=document.getElementById('accountLoggedIn'),accountWhoami=document.getElementById('accountWhoami');
+  async function refreshAccountView(){
+    let user=null;
+    if(globalThis.HexApi?.isLoggedIn()){try{user=await HexApi.currentUser();}catch{user=null;}}
+    accountLoggedOut.classList.toggle('hidden',!!user);
+    accountLoggedIn.classList.toggle('hidden',!user);
+    if(user)accountWhoami.textContent='Eingeloggt als '+user.username;
+  }
+  document.getElementById('accountRegisterBtn').addEventListener('click',async()=>{
+    const username=document.getElementById('accountUsername').value.trim(),password=document.getElementById('accountPassword').value;
+    accountStatus.textContent='Account wird erstellt …';
+    try{const user=await HexApi.register(username,password);accountStatus.textContent='Account erstellt. Eingeloggt als '+user.username+'.';await refreshAccountView();}
+    catch(error){accountStatus.textContent='Registrierung fehlgeschlagen: '+error.message;}
+  });
+  document.getElementById('accountLoginBtn').addEventListener('click',async()=>{
+    const username=document.getElementById('accountUsername').value.trim(),password=document.getElementById('accountPassword').value;
+    accountStatus.textContent='Einloggen …';
+    try{const user=await HexApi.login(username,password);accountStatus.textContent='Eingeloggt als '+user.username+'.';await refreshAccountView();}
+    catch(error){accountStatus.textContent='Login fehlgeschlagen: '+error.message;}
+  });
+  document.getElementById('accountLogoutBtn').addEventListener('click',async()=>{await HexApi.logout();accountStatus.textContent='Ausgeloggt.';await refreshAccountView();});
+  document.getElementById('accountSaveServerBtn').addEventListener('click',async()=>{
+    accountStatus.textContent='Speichere auf dem Server …';
+    try{await HexApi.putSave(HexProfile.exportFile(profile,TOWERS));accountStatus.textContent='Spielstand auf dem Server gesichert.';}
+    catch(error){accountStatus.textContent='Speichern fehlgeschlagen: '+error.message;}
+  });
+  document.getElementById('accountLoadServerBtn').addEventListener('click',async()=>{
+    if(hasActiveRun&&state.hp>0){accountStatus.textContent='Bitte zuerst den laufenden Run beenden.';return;}
+    accountStatus.textContent='Lade vom Server …';
+    try{
+      const data=await HexApi.getSave();
+      if(!data){accountStatus.textContent='Auf dem Server liegt noch kein Spielstand für diesen Account.';return;}
+      profile=HexProfile.importFile(JSON.stringify(data),TOWERS);
+      pendingLoadout=[...profile.activeLoadout];pendingHero=profile.activeHero;pendingDifficulty=profile.difficulty;
+      renderLoadout();renderUI();updateArsenalHint();
+      accountStatus.textContent='Spielstand vom Server geladen. Dein lokales Profil wurde ersetzt.';
+    }catch(error){accountStatus.textContent='Laden fehlgeschlagen: '+error.message;}
+  });
   function updateArsenalHint(){const count=HexProfile.affordableUnlocks(profile),button=document.getElementById('menuArsenalBtn');button.classList.toggle('upgradeAvailable',count>0);button.textContent=count?'◆ Arsenal · Upgrade verfügbar':'◆ Arsenal';button.title=count?count+' Freischaltungen bezahlbar':'Arsenal';}
   function openMainMenu(){document.getElementById('biomeIntro').classList.add('hidden');cancelQuickTower();resetCameraKeys();updateArsenalHint();const today=new Date().toISOString().slice(0,10),daily=profile.dailyResults?.[today];document.getElementById('dailyProgress').textContent=today+' (UTC) · '+(daily?.won?'Heute geschafft · Belohnung erhalten':'Tagesbestmarke: '+(daily?.best||0)+'/20 Waves');document.getElementById('menuContinueBtn').classList.toggle('hidden',!hasActiveRun||state.hp<=0);document.getElementById('menuPlayBtn').textContent=hasActiveRun?'Neuer Run':'Spielen';document.getElementById('menuLoadoutInfo').textContent='Loadout: '+profile.activeLoadout.map(id=>TOWERS[id]?.name||id).join(' · ');mainMenu.classList.remove('hidden');}
   document.getElementById('dailyStartBtn').addEventListener('click',()=>{mainMenu.classList.add('hidden');document.getElementById('playModeOverlay').classList.add('hidden');newRun(undefined,'standard','dual',new Date().toISOString().slice(0,10));});
