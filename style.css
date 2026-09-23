@@ -465,9 +465,6 @@ body:has(#biomeIntro:not(.hidden)) .biomeTooltip{display:none!important}
 @media(prefers-reduced-motion:reduce){.rewardChoices .card{transition:none}.rewardChoices .card:hover,.rewardChoices .card:focus-visible{transform:none}}
 /* Touch rotation and guidance share the existing HUD spacing and palette. */
 #rotateHexBtn{min-width:100px;min-height:44px;flex-shrink:0;margin:4px 0 6px}
-.duoComingSoon:disabled{opacity:1;color:var(--text,#f3e9cf);cursor:default}
-.duoComingSoon span{color:inherit}
-.duoComingSoon>strong:last-child{color:#edc866;font-size:.9rem}
 [role="dialog"]:focus{outline:none}
 .hotkeyGuide{outline:3px solid #f3cf70!important;outline-offset:3px;box-shadow:0 0 18px #eec86a66}
 .hotkeyTip{position:fixed;z-index:50;left:16px;top:calc(var(--header-bottom,90px) + 12px);width:min(320px,calc(100vw - 32px));padding:16px;background:#1e3027;color:#f3e9cf;border:1px solid #e5c366;border-radius:12px;box-shadow:0 8px 24px #0005}
