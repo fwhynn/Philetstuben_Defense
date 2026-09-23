@@ -506,3 +506,7 @@ Aktuell kein öffentlich freigegebener Online-MVP. Konten/Freundeslisten, Matchm
 Gemeinsames Ergebnis bei Niederlage/Welle 35, Turm- und Unterstützungsstatistik, beidseitiger Neustart und dauerhaft gespeicherte Ergebnisbelege sind umgesetzt. Das lokale Profil verbucht jeden Beleg einmal; Export/Import erhält diese Kennungen. HTTPS-/Container-Vorlage, privater Public-Build, Healthcheck, schreibfreier Online-Prüfbefehl und validierte Backup-Kopie sind vorbereitet.
 
 Verbindlicher aktueller Stand, Profilmodell, Betriebsbefehle und verbleibende Aufgaben: [Online-MVP-Übergabe](ONLINE_MVP_HANDOFF.md). Frühere „noch offen“-Listen oben sind Fortschrittsprotokolle. Live-Installation, TLS und Prüfung auf echten Browsern/Geräten sind noch offen. Die Domain ist bekannt; Hosting/Deployment-Zugang noch nicht. Keine öffentliche Freigabe behauptet.
+
+## Lobby und gemeinsame Oberfläche (23.09.2026)
+
+Auf `codex/multiplayer-test`: eigener Warteraum vor Spielbeginn, persistente Bereitschaft beider Spieler und serverseitige Startsperre. Duo verwendet jetzt `index.html` und `classes/game.js` inklusive 3D-Darstellung; der zusätzliche Adapter übersetzt Aktionen in Serverbefehle. Partneransicht, Portal/Verstärkung, Geschenke und Wächterzustimmung sind in diese Oberfläche integriert. Lokale Simulation ist im Netzwerkmodus ausgeschaltet. 430 automatische Tests bestanden; Browser-Abnahme steht aus. Aktuelle Schritte siehe [Übergabe](ONLINE_MVP_HANDOFF.md).

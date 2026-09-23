@@ -52,7 +52,10 @@ const HexDuoSession=(()=>{
       return true;
     }
     const run=match.boards[player],s=run.state,hp=s.hp,max=s.maxHp;let ok=false;
-    if(action==='ready'){
+    if(action==='pause'||action==='speed'){
+      if(action==='pause'&&typeof payload.value==='boolean'){match.paused=payload.value;ok=true;}
+      if(action==='speed'&&Number.isInteger(payload.value)&&payload.value>=1&&payload.value<=8){match.speed=payload.value;ok=true;}
+    }else if(action==='ready'){
       if(match.phase!=='prepare'||typeof payload.value!=='boolean'||payload.value&&!canReady(run))return false;
       match.ready[player]=payload.value;ok=true;
     }else{
@@ -71,6 +74,11 @@ const HexDuoSession=(()=>{
       else if(action==='acknowledge'&&match.phase==='prepare')ok=HexRunSession.acknowledge(s);
       else if(action==='tower'&&!payload.slots?.some(slot=>same(slot,match.portals[player])))ok=HexTowerCommands.buy(s,payload.type,payload.slots).ok;
       else if(action==='upgrade'&&slotAt(s,payload.slot)?.towers[payload.slot.index]?.guestOwner===undefined)ok=HexTowerCommands.upgrade(s,payload.slot,payload.upgrade);
+      else if(action==='baseUpgrade')ok=HexHeroes.buy(s,payload.kind);
+      else if(action==='buildingTarget')ok=HexBuildings.setTarget(s,payload.slot,payload.target);
+      else if(action==='sellBuilding')ok=HexBuildings.sell(s,payload.slot);
+      else if(action==='sellTower'){const tile=slotAt(s,payload.slot),tower=tile?.towers[payload.slot.index],refund=HexData.towerRefund(s,tower);if(refund){HexData.recordTowerStat(s,tower,'refundGold',refund.amount);if(s.runTowerDetails[tower.statId])s.runTowerDetails[tower.statId].sold=true;s.gold+=refund.amount;tile.towers[payload.slot.index]=null;if(same(payload.slot,match.reinforcements[player]))match.reinforcements[player]=null;ok=true;}}
+      else if(action==='targetPriority'){const tower=slotAt(s,payload.slot)?.towers[payload.slot.index],allowed=['closestBase','furthestBase','mostHealth','leastHealth','mostArmor','mostMagic','boss','healer','closestTower','furthestTower'];if(tower&&tower.guestOwner===undefined&&Array.isArray(payload.priorities)&&payload.priorities.length===3&&new Set(payload.priorities).size===3&&payload.priorities.every(p=>allowed.includes(p))){tower.targetPriority=[...payload.priorities];ok=true;}}
       else if(action==='building')ok=HexBuildings.buy(s,payload.slot,payload.type);
       else if(action==='buildingUpgrade')ok=HexBuildings.upgrade(s,payload.slot);
       else if(action==='tunnel'&&match.phase==='prepare')ok=HexRunRuntime.rescueTunnel(s);
@@ -86,7 +94,7 @@ const HexDuoSession=(()=>{
     return true;
   }
   function tick(match){
-    if(match.phase!=='combat')return;
+    if(match.paused||match.phase!=='combat')return;
     match.elapsedMs+=50;launchHelp(match);
     for(let i=0;i<2;i++){
       const run=match.boards[i],s=run.state;if(match.finished[i]){s.elapsedMs=match.elapsedMs;continue;}
@@ -108,7 +116,7 @@ const HexDuoSession=(()=>{
   }
   function capture(match){
 
-    return {duo:JSON.parse(JSON.stringify({portals:match.portals,reinforcements:match.reinforcements,waveHelp:match.waveHelp,pendingHelp:match.pendingHelp,leaked:match.leaked,support:match.support,delivery:match.delivery||null,result:match.result||null,rematch:match.rematch||[false,false]})),format:'autohex-duo',version:VERSION,seed:match.seed,hp:match.hp,maxHp:match.maxHp,wave:match.wave,phase:match.phase,ready:[...match.ready],finished:[...match.finished],elapsedMs:match.elapsedMs,receipts:match.receipts.map(r=>[...r]),boards:match.boards.map(run=>HexRunSnapshot.capture(run.state,run.random))};
+    return {duo:JSON.parse(JSON.stringify({speed:match.speed||1,paused:!!match.paused,portals:match.portals,reinforcements:match.reinforcements,waveHelp:match.waveHelp,pendingHelp:match.pendingHelp,leaked:match.leaked,support:match.support,delivery:match.delivery||null,result:match.result||null,rematch:match.rematch||[false,false]})),format:'autohex-duo',version:VERSION,seed:match.seed,hp:match.hp,maxHp:match.maxHp,wave:match.wave,phase:match.phase,ready:[...match.ready],finished:[...match.finished],elapsedMs:match.elapsedMs,receipts:match.receipts.map(r=>[...r]),boards:match.boards.map(run=>HexRunSnapshot.capture(run.state,run.random))};
   }
   function restore(snapshot){
     if(snapshot?.format!=='autohex-duo'||![2,VERSION].includes(snapshot.version)||!Array.isArray(snapshot.boards)||snapshot.boards.length!==2||!['prepare','combat','gameover','victory'].includes(snapshot.phase))throw new Error('Invalid Duo checkpoint');
@@ -116,6 +124,8 @@ const HexDuoSession=(()=>{
     if(!Number.isFinite(snapshot.hp)||snapshot.hp<0||!Number.isFinite(snapshot.maxHp)||snapshot.hp>snapshot.maxHp||!Number.isInteger(snapshot.wave)||snapshot.wave<0||!Number.isFinite(snapshot.elapsedMs)||snapshot.elapsedMs<0)throw new Error('Invalid Duo checkpoint');
     const match={version:VERSION,seed:snapshot.seed,hp:snapshot.hp,maxHp:snapshot.maxHp,wave:snapshot.wave,phase:snapshot.phase,ready:[...snapshot.ready],finished:[...snapshot.finished],elapsedMs:snapshot.elapsedMs,receipts:snapshot.receipts.map(r=>[...r]),boards:snapshot.boards.map(HexRunSnapshot.restore)};
     if(match.boards.some(r=>r.state.wave!==match.wave||r.state.hp!==match.hp||r.state.maxHp!==match.maxHp))throw new Error('Inconsistent Duo checkpoint');
+    if(snapshot.duo?.speed!==undefined&&(!Number.isInteger(snapshot.duo.speed)||snapshot.duo.speed<1||snapshot.duo.speed>8)||snapshot.duo?.paused!==undefined&&typeof snapshot.duo.paused!=='boolean')throw Error('Invalid Duo clock');
+    match.speed=snapshot.duo?.speed||1;match.paused=!!snapshot.duo?.paused;
     for(const field of ['portals','reinforcements','waveHelp','pendingHelp','leaked','support']){if(!Array.isArray(snapshot.duo?.[field])||snapshot.duo[field].length!==2)throw new Error('Invalid Duo checkpoint');match[field]=JSON.parse(JSON.stringify(snapshot.duo[field]));}
     match.delivery=snapshot.version===2?null:JSON.parse(JSON.stringify(snapshot.duo.delivery??null));
     match.result=snapshot.duo?.result?JSON.parse(JSON.stringify(snapshot.duo.result)):null;match.rematch=snapshot.duo?.rematch||[false,false];

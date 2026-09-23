@@ -1,5 +1,9 @@
 (() => {
   'use strict';
+  const duoToken=typeof location==='undefined'?null:new URLSearchParams(location.hash.slice(1)).get('duo');
+  let duoBridge=null;
+  function duoAction(action,payload={}){return duoBridge?.send(action,payload);}
+
 
   const svg = document.getElementById('board');
   const rendererCommands={
@@ -35,7 +39,7 @@
   const speedToggle=document.getElementById('doubleSpeed');
   let gameSpeed=1;try{gameSpeed=Math.max(1,Math.min(8,Math.round(Number(localStorage.getItem('gameSpeed'))||1)));}catch{}
   speedToggle.value=String(gameSpeed);document.getElementById('speedValue').textContent=gameSpeed+'×';
-  function changeSpeed(value){advanceClock(performance.now());gameSpeed=Math.max(1,Math.min(8,Math.round(Number(value)||1)));speedToggle.value=String(gameSpeed);document.getElementById('speedValue').textContent=gameSpeed+'×';try{localStorage.setItem('gameSpeed',String(gameSpeed));}catch{}}
+  function changeSpeed(value){if(duoToken){duoAction('speed',{value:Number(value)});return;}advanceClock(performance.now());gameSpeed=Math.max(1,Math.min(8,Math.round(Number(value)||1)));speedToggle.value=String(gameSpeed);document.getElementById('speedValue').textContent=gameSpeed+'×';try{localStorage.setItem('gameSpeed',String(gameSpeed));}catch{}}
   speedToggle.addEventListener('input',()=>changeSpeed(speedToggle.value));
   const towerMenu = document.getElementById('towerMenu');
   const rewardOverlay = document.getElementById('rewardOverlay');
@@ -53,6 +57,7 @@
 
   let showHexGrid=false;try{showHexGrid=localStorage.getItem('hexGrid')==='true';}catch{}
   let showSlotHints=true,tutorialSeen=false;try{showSlotHints=localStorage.getItem('slotHints')!=='false';tutorialSeen=localStorage.getItem('tutorial-v1')==='done'||profile.records.runsPlayed>0;}catch{}
+  if(duoToken)tutorialSeen=true;
   let tutorial={active:false,step:0};
   let state;
   let random;
@@ -61,6 +66,7 @@
   const deckRenderKeys=new Map(),uiWavePlans=new Map();
   // UI-only cache: never handed to the simulation or modified by consumers.
   function uiWavePlan(wave){
+    if(duoToken&&state.wavePlans?.some(p=>p.wave===wave))return state.wavePlans.find(p=>p.wave===wave);
     const cacheKey=JSON.stringify([wave,state.income,!!state.challengeDay,state.seed,state.towerLoadout]);
     if(!uiWavePlans.has(cacheKey)){
       if(uiWavePlans.size>=4)uiWavePlans.delete(uiWavePlans.keys().next().value);
@@ -109,10 +115,11 @@
   }
 
   function placementTargets(card){
+    if(duoToken)return state.placements?.[state.selectedCard]?.[state.rotation||0]||[];
     if(card.roads.length)return openRoadTargets();
     const targets=new Map();for(const tile of state.map.values())for(let d=0;d<6;d++){const n=neighbor(tile.q,tile.r,d);if(!state.map.has(key(n.q,n.r)))targets.set(key(n.q,n.r),n);}return [...targets.values()];
   }
-  function canPlace(q,r,card,rot){return HexPlacementCommands.canPlace(state,q,r,card,rot); }
+  function canPlace(q,r,card,rot){if(duoToken)return !!state.placements?.[state.selectedCard]?.[rot]?.find(p=>p.q===q&&p.r===r)?.legal;return HexPlacementCommands.canPlace(state,q,r,card,rot); }
   function buildGraph(){return HexMap.buildGraph(state.map);}
   const pathToBase=HexMap.pathToBase;
 
@@ -120,7 +127,7 @@
 
   const slotPositions=HexMap.slotPositions;
 
-  function applyBuildingTarget(q,r){if(!state.buildingTarget)return false;const ok=HexBuildings.setTarget(state,state.buildingTarget,key(q,r));if(ok){state.buildingTarget=null;setMessage('Zusätzliches Hex versorgt.');renderAll();}else{setMessage('Dieses Hex ist bereits versorgt. Wähle ein unversorgtes Hex.');renderAll();}return true;}
+  function applyBuildingTarget(q,r){if(!state.buildingTarget)return false;if(duoToken){duoAction('buildingTarget',{slot:state.buildingTarget,target:key(q,r)});state.buildingTarget=null;return true;}const ok=HexBuildings.setTarget(state,state.buildingTarget,key(q,r));if(ok){state.buildingTarget=null;setMessage('Zusätzliches Hex versorgt.');renderAll();}else{setMessage('Dieses Hex ist bereits versorgt. Wähle ein unversorgtes Hex.');renderAll();}return true;}
   function placeTile(q,r){
     if(state.dragTower){cancelQuickTower();renderAll();return;}
     if(applyBuildingTarget(q,r))return;
@@ -130,6 +137,7 @@
     if(!canPlace(q,r,card,state.rotation)){
       setMessage(HexPlacementCommands.failureMessage(state,card),true); return;
     }
+    if(duoToken){duoAction('place',{q,r,index:state.selectedCard,rotation:state.rotation});return;}
     const result=HexRunSession.place(state,random,{q,r,index:state.selectedCard,rotation:state.rotation});if(!result)return;
     const {connected,treasure}=result;sound.play('place');state.hoveredPlacement=null;
     if(result.opening){state.selectedCard=null;state.rotation=0;setMessage('Erster Ausgang erweitert. Lege jetzt eine Karte direkt an den zweiten Base-Ausgang.');renderAll();return;}
@@ -162,6 +170,7 @@
   }
 
   function buyTower(type){
+    if(duoToken){duoAction('tower',{type,slots:selections('Slot')});return;}
     const result=HexTowerCommands.buy(state,type,selections('Slot'));
     if(!result.ok){if(result.reason==='gold')setMessage('Nicht genug Gold.');return;}
     if(tutorial.active&&tutorial.step===3)document.getElementById('towerDrawer').classList.add('hidden');
@@ -171,6 +180,7 @@
   }
 
   function sellSelectedTower(){
+    if(duoToken){duoAction('sellTower',{slot:state.selectedTower});return;}
     if(selections('Tower').length!==1) return;
     const selected=state.selectedTower,tile=state.map.get(key(selected.q,selected.r)),tower=tile?.towers[selected.index];
     const refund=HexData.towerRefund(state,tower);if(!refund) return;
@@ -180,6 +190,7 @@
     sound.play('build');setMessage(`Turm zurückgegeben: +${refund.amount} Gold (${refund.percent} % der gesamten Investition inklusive Upgrades).`);renderAll();
   }
   function upgradeSelectedTower(branch){
+    if(duoToken){duoAction('upgrade',{slot:state.selectedTower,upgrade:branch});return;}
     state.previewUpgrade=null;
     if(selections('Tower').length!==1||!HexTowerCommands.upgrade(state,state.selectedTower,branch))return;
     const tutorialUpgrade=tutorial.active&&tutorial.step===4;
@@ -191,6 +202,7 @@
 
   const SPAWN_SPACING=20;   // Weltmaß zwischen zwei nacheinander gespawnten Gegnern
   function startWave(){
+    if(duoToken){duoBridge?.ready();return;}
     if(state.phase==='place'){setMessage('Lege zuerst dein Hex, bevor du die nächste Welle startest.');return;}
     const result=HexRunFlow.start(state,random);if(!result)return;
     last=performance.now();clockDebt=0;tutorialEvent('wave');state.selectedSlot=null;state.previewTower=null;sound.play('wave');startWaveBtn.disabled=true;
@@ -211,7 +223,7 @@
   }
   rewardOverlay.addEventListener('pointerdown',event=>{rewardPointerReady=performance.now()>=rewardInputAfter;if(!rewardPointerReady){event.preventDefault();event.stopImmediatePropagation();}},true);
   rewardOverlay.addEventListener('click',event=>{if(performance.now()<rewardInputAfter||event.detail>0&&!rewardPointerReady){event.preventDefault();event.stopImmediatePropagation();}},true);
-  function takeReward(id,index){if(!HexRunSession.choose(state,random,id,index))return false;renderSessionPhase();return true;}
+  function takeReward(id,index){if(duoToken){duoAction('reward',{offerId:id,index});return false;}if(!HexRunSession.choose(state,random,id,index))return false;renderSessionPhase();return true;}
   function endWave(){
     const best=state.challengeDay?(profile.dailyResults?.[state.challengeDay]?.best||0):profile.records.highestWave||0;
     const result=HexRunSession.finish(state,random,best);if(!result)return;
@@ -246,7 +258,7 @@
     document.getElementById('celebration').classList.remove('hidden');sound.play('complete');
     document.getElementById('celebrationContinue').focus?.();
   }
-  function closeCelebration(){HexRunSession.acknowledge(state);document.getElementById('celebration').classList.add('hidden');renderHotkeyTip();startWaveBtn.focus?.();}
+  function closeCelebration(){if(duoToken){duoAction('acknowledge');return;}HexRunSession.acknowledge(state);document.getElementById('celebration').classList.add('hidden');renderHotkeyTip();startWaveBtn.focus?.();}
 
   function showBossReward(){
     inspectReward('selection');
@@ -327,6 +339,7 @@
   }
 
   function update(dt,time,paint=true){
+    if(duoToken)return;
     if(!state.waveRunning) return;
     const outcome=HexRunRuntime.advance(state,random,dt*gameSpeed,name=>sound.play(name));
     if(state.hp<=0){state.hp=0;state.waveRunning=false;state.phase='gameover';state.enemies=[];state.projectiles=[];state.spawnQueue=[];clearRunTimers();sound.play('gameover');setMessage(`Run beendet. Du hast Wave ${state.wave} erreicht.`);showGameOver();}
@@ -335,6 +348,7 @@
   }
 
   function buildRescueTunnel(){
+    if(duoToken){duoAction('tunnel');return;}
     if(!state.tunnelOffer||state.phase!=='build'||state.waveRunning||state.hp<=0)return;
     const plan=HexMap.tunnelPlan(state.map,state.landmarks,state.difficulty==='dual');if(!plan)return;
     if(!state.tunnelConfirmed){state.tunnelConfirmed=true;setMessage('Rettungstunnel von Hex '+plan.source+' nach '+plan.q+','+plan.r+'. Kostenlos, keine Gebäude werden entfernt.');renderAll();return;}
@@ -421,7 +435,7 @@ R dreht die Karte, dann Feld anklicken.`;}
     renderBuildingPanel();
     handEl.classList.toggle('openingHand',state.hand.length>3);handEl.classList.toggle('singleCard',state.hand.length===1);
     document.getElementById('towerHotkeyHint').textContent=`1–${Math.min(9,state.towerLoadout.filter(id=>TOWERS[id]).length)}: Turm im geöffneten Baumenü auswählen`;document.getElementById('handHint').textContent=state.openingRemaining?`Noch ${state.openingRemaining} Base-Ausgang erweitern · Karten 1–${state.hand.length} · R dreht`:'Karte wählen (1–3) · Drehen: Knopf oder R · Hex antippen';
-    document.getElementById('phaseLabel').textContent={place:'Hex platzieren',build:'Bauphase',wave:'Wave läuft',reward:'Kartenbelohnung',removal:'Deck ausdünnen (optional)',shrineReward:'Shrine-Belohnung',bossReward:'Boss-Beute',gameover:'Run beendet'}[state.phase];
+    document.getElementById('phaseLabel').textContent={place:'Hex platzieren',build:'Bauphase',wave:'Wave läuft',duoWait:'Warte auf Partner',duoDelivery:'Partner-Geschenk',reward:'Kartenbelohnung',removal:'Deck ausdünnen (optional)',shrineReward:'Shrine-Belohnung',bossReward:'Boss-Beute',gameover:'Run beendet'}[state.phase];
     const handKey=JSON.stringify([state.hand,state.selectedCard,state.rotation,state.rescueCard,uiLanguageRevision]);
     if(handKey!==handRenderKey){
     handRenderKey=handKey;handEl.innerHTML='';
@@ -460,7 +474,7 @@ R dreht die Karte, dann Feld anklicken.`;}
     startWaveBtn.disabled=state.phase!=='build'||state.waveRunning||state.hp<=0;
     startWaveBtn.title=state.phase==='place'?'Lege zuerst dein Hex, bevor du die nächste Welle startest.':'';
     startWaveBtn.textContent=state.phase==='place'?'Zuerst Hex legen':!state.waveRunning&&HexWaves.bossProfile(state.wave+1)?`Bosswelle ${state.wave+1} starten (Leertaste)`:'Wave starten (Leertaste)';
-    if(document.getElementById('deckDropdown').open) renderDeckOverview();renderSaleState();layoutMenus();
+    if(document.getElementById('deckDropdown').open) renderDeckOverview();renderSaleState();layoutMenus();duoBridge?.render();
   }
   function bindUpgradePreview(button,tower,next){
     const show=()=>{state.previewUpgrade={tower,definition:next};renderBoard();};
@@ -618,11 +632,11 @@ R dreht die Karte, dann Feld anklicken.`;}
         const button=document.createElement('button');button.className='upgradeOption';const blocked=HexBuildings.buildBlockReason(tile,type);button.title=blocked||'Kräftig: aktueller Wirkbereich. Blass: Versorgung durch andere Gebäude desselben Typs.';button.innerHTML=`<strong>${definition.name} · ${definition.cost} Gold</strong><small>${definition.desc}</small>${blocked?'<small class="buildBlockedReason">🔒 '+blocked+'</small>':''}`;
         const preview=()=>{if(HexBuildings.buildBlockReason(tile,type))return;state.previewBuilding={...selected,type};renderBoard();},clear=()=>{state.previewBuilding=null;renderBoard();};
         button.addEventListener('pointerenter',preview);button.addEventListener('pointerleave',clear);button.addEventListener('focus',preview);button.addEventListener('blur',clear);
-        button.addEventListener('click',()=>{state.previewBuilding=null;if(HexBuildings.buy(state,state.selectedBuilding,type)){sound.play('build');renderAll();}});content.appendChild(button);buildingButtons.set(type,button);
+        button.addEventListener('click',()=>{state.previewBuilding=null;if(duoToken){duoAction('building',{slot:state.selectedBuilding,type});return;}if(HexBuildings.buy(state,state.selectedBuilding,type)){sound.play('build');renderAll();}});content.appendChild(button);buildingButtons.set(type,button);
       }
     }
     if(building&&buildingChanged){const content=document.getElementById('buildingOptions');content.innerHTML='';const next=HexBuildings.nextUpgrade(state,building);
-      if(next){const button=document.createElement('button');button.className='upgradeOption';button._cost=next.cost;buildingButtons.set('upgrade',button);const after=HexBuildings.definition({...building,level:(building.level||1)+1});button.textContent=(next.name||'Ausbauen')+' · '+next.cost+' Gold · '+(next.desc||after.desc);button.disabled=state.gold<next.cost||state.hp<=0||!['place','build','wave'].includes(state.phase);button.addEventListener('click',()=>{if(HexBuildings.upgrade(state,state.selectedBuilding))renderAll();});content.appendChild(button);}
+      if(next){const button=document.createElement('button');button.className='upgradeOption';button._cost=next.cost;buildingButtons.set('upgrade',button);const after=HexBuildings.definition({...building,level:(building.level||1)+1});button.textContent=(next.name||'Ausbauen')+' · '+next.cost+' Gold · '+(next.desc||after.desc);button.disabled=state.gold<next.cost||state.hp<=0||!['place','build','wave'].includes(state.phase);button.addEventListener('click',()=>{if(duoToken){duoAction('buildingUpgrade',{slot:state.selectedBuilding});return;}if(HexBuildings.upgrade(state,state.selectedBuilding))renderAll();});content.appendChild(button);}
       else if((building.level||1)===3&&!building.special&&HexBuildings.specials[building.type]){const hint=document.createElement('p');hint.textContent='Spezialausbau im Arsenal für 40 Diamanten freischalten. Ab dem nächsten Run verfügbar.';content.appendChild(hint);}
       if(building.special&&building.type!=='house'){const choose=document.createElement('button');panel._targetButton=choose;choose.textContent=state.buildingTarget?'Hex auf der Map anklicken · Abbrechen':(building.target?'Zusatz-Hex ändern':'Zusatz-Hex auf der Map auswählen');choose.title=building.target?'Aktuelles Zusatzhex: '+building.target+' · kräftig markiert':'Zusatzhex auswählen';choose.addEventListener('pointerenter',()=>renderBoard());choose.addEventListener('focus',()=>renderBoard());choose.disabled=state.hp<=0||!['place','build','wave'].includes(state.phase);choose.addEventListener('click',()=>{state.buildingTarget=state.buildingTarget?null:{...state.selectedBuilding};state.selectedBuilding=null;setMessage('Zusatzwirkung: ein erkundetes Hex anklicken · Escape: abbrechen');renderAll();});content.appendChild(choose);}
     }
@@ -647,7 +661,7 @@ R dreht die Karte, dann Feld anklicken.`;}
         const labels={closestBase:'Nächste an der Base',furthestBase:'Weiteste von der Base',mostHealth:'Meistes Leben',leastHealth:'Wenigstes Leben',mostArmor:'Meiste Rüstung',mostMagic:'Meiste Magieresistenz',boss:'Bosse',healer:'Heiler',closestTower:'Nächste am Turm',furthestTower:'Weiteste vom Turm'},defaults=['closestBase','mostHealth','boss'];
         tower.targetPriority=[...new Set(tower.targetPriority||defaults)];for(const value of defaults)if(tower.targetPriority.length<3&&!tower.targetPriority.includes(value))tower.targetPriority.push(value);tower.targetPriority=tower.targetPriority.slice(0,3);
         const targeting=document.createElement('section');targeting.className='targetPriorities';targeting.innerHTML='<strong>Angriffsfokus</strong><small>Priorität 1 wird zuerst geprüft. Gibt es dafür kein gültiges Ziel, folgt die nächste Zeile.</small>';
-        tower.targetPriority.forEach((value,index)=>{const row=document.createElement('label');row.textContent=`${index+1}.`;const select=document.createElement('select');select.setAttribute('aria-label','Angriffsfokus Priorität '+(index+1));const mixed=targetable.some(t=>(t.targetPriority||defaults)[index]!==value);if(mixed){const option=document.createElement('option');option.value='';option.textContent='Unterschiedliche Einstellungen';option.disabled=true;option.selected=true;select.appendChild(option);}for(const [id,label] of Object.entries(labels)){const option=document.createElement('option');option.value=id;option.textContent=label;option.selected=!mixed&&id===value;select.appendChild(option);}select.addEventListener('change',()=>{for(const target of targetable){target.targetPriority=[...(target.targetPriority||defaults)];const old=target.targetPriority[index],other=target.targetPriority.indexOf(select.value);target.targetPriority[index]=select.value;if(other>=0&&other!==index)target.targetPriority[other]=old;}towerPanelKey='';renderAll();});row.appendChild(select);targeting.appendChild(row);});content.appendChild(targeting);
+        tower.targetPriority.forEach((value,index)=>{const row=document.createElement('label');row.textContent=`${index+1}.`;const select=document.createElement('select');select.setAttribute('aria-label','Angriffsfokus Priorität '+(index+1));const mixed=targetable.some(t=>(t.targetPriority||defaults)[index]!==value);if(mixed){const option=document.createElement('option');option.value='';option.textContent='Unterschiedliche Einstellungen';option.disabled=true;option.selected=true;select.appendChild(option);}for(const [id,label] of Object.entries(labels)){const option=document.createElement('option');option.value=id;option.textContent=label;option.selected=!mixed&&id===value;select.appendChild(option);}select.addEventListener('change',()=>{if(duoToken){const packets=selections('Tower').map(slot=>{const target=state.map.get(key(slot.q,slot.r))?.towers[slot.index],priorities=[...(target.targetPriority||defaults)],old=priorities[index],other=priorities.indexOf(select.value);priorities[index]=select.value;if(other>=0&&other!==index)priorities[other]=old;return {slot,priorities};});duoBridge?.priorities(packets);return;}for(const target of targetable){target.targetPriority=[...(target.targetPriority||defaults)];const old=target.targetPriority[index],other=target.targetPriority.indexOf(select.value);target.targetPriority[index]=select.value;if(other>=0&&other!==index)target.targetPriority[other]=old;}towerPanelKey='';renderAll();});row.appendChild(select);targeting.appendChild(row);});content.appendChild(targeting);
       }
       if(group){const hint=document.createElement('p');hint.className='hint';hint.textContent='Änderungen gelten für '+targetable.length+' Türme mit Angriffsfokus. Unterschiedliche bisherige Einstellungen werden durch die Auswahl je Zeile angepasst. Support und Minenleger bleiben unverändert. Upgrades und Verkauf: einzelnen Turm auswählen.';content.appendChild(hint);}
       else if(tower.ultimate){const hint=document.createElement('p');hint.className='hint';hint.textContent='Meta-Stufe 4 erreicht.';content.appendChild(hint);}
@@ -847,7 +861,7 @@ R dreht die Karte, dann Feld anklicken.`;}
     document.getElementById('cancelLoadoutBtn').textContent='Zurück';document.getElementById('cancelLoadoutBtn').title=hasActiveRun&&!loadoutEdit?'Zurück zum Run':'Zurück zum Hauptmenü';
   }
   let loadoutEdit=false;   // true: vom Hauptmenü geöffnet, Bestätigen speichert nur und startet keinen Run
-  function openLoadout(edit=false){loadoutEdit=edit===true;pendingDifficulty=profile.difficulty||'normal';pendingHero=profile.activeHero;pendingLoadout=[...profile.activeLoadout];renderLoadout();loadoutOverlay.classList.remove('hidden');}
+  function openLoadout(edit=false){if(duoToken){location.assign('/duo-lobby.html');return;}loadoutEdit=edit===true;pendingDifficulty=profile.difficulty||'normal';pendingHero=profile.activeHero;pendingLoadout=[...profile.activeLoadout];renderLoadout();loadoutOverlay.classList.remove('hidden');}
   function confirmLoadout(){
     const saved=HexProfile.setLoadout({...profile,activeHero:pendingHero,difficulty:pendingDifficulty},pendingLoadout,TOWERS);if(!saved) return;
     profile=saved;loadoutOverlay.classList.add('hidden');
@@ -921,7 +935,7 @@ R dreht die Karte, dann Feld anklicken.`;}
   function setHexGrid(enabled){showHexGrid=enabled;gridToggle.checked=enabled;state.showHexGrid=enabled;try{localStorage.setItem('hexGrid',String(enabled));}catch{}renderBoard();}
   gridToggle.addEventListener('change',()=>setHexGrid(gridToggle.checked));
   document.getElementById('baseDropdown').addEventListener('toggle',()=>{state.selectedBase=document.getElementById('baseDropdown').open;renderBoard();});
-  for(const [kind,id] of [['walls','baseWallsBtn'],['weapon','baseWeaponBtn']])document.getElementById(id).addEventListener('click',()=>{if(HexHeroes.buy(state,kind)){sound.play('build');renderAll();}});
+  for(const [kind,id] of [['walls','baseWallsBtn'],['weapon','baseWeaponBtn']])document.getElementById(id).addEventListener('click',()=>{if(duoToken){duoAction('baseUpgrade',{kind});return;}if(HexHeroes.buy(state,kind)){sound.play('build');renderAll();}});
   if(typeof ResizeObserver!=='undefined'){const observer=new ResizeObserver(()=>requestAnimationFrame(layoutMenus));for(const node of document.querySelectorAll('.gameHeader,.dockBR,.handDock,.mapControls,.dockBL'))observer.observe(node);}
   globalThis.addEventListener?.('hexlanguagechange',()=>{uiLanguageRevision++;if(state){renderRunStatistics();renderUI();}});globalThis.addEventListener?.('resize',layoutMenus);document.addEventListener('toggle',layoutMenus,true);document.addEventListener('click',()=>requestAnimationFrame(layoutMenus));
   document.getElementById('hotkeyTipOpen').addEventListener('click',openHotkeySettings);
@@ -941,7 +955,7 @@ R dreht die Karte, dann Feld anklicken.`;}
   document.getElementById('uploadSaveInput').addEventListener('change',async event=>{const readId=++importReadId;pendingImport=null;confirmImport.classList.add('hidden');const file=event.target.files?.[0];if(!file)return;try{if(hasActiveRun&&state.hp>0)throw new Error('Bitte zuerst den laufenden Run beenden. Ein Profilwechsel während eines Durchlaufs ist nicht möglich.');if(file.size>2000000)throw new Error('Datei zu groß (maximal 2 MB).');const text=await file.text();if(readId!==importReadId)return;const next=HexProfile.readFile(text,TOWERS);pendingImport=text;saveStatus.textContent=next.diamonds+' Diamanten · '+next.unlockedTowers.length+' Türme freigeschaltet · Bestmarke Wave '+next.records.highestWave+'. Dein bisheriges Profil mit '+profile.diamonds+' Diamanten wird ersetzt. Eine lokale Sicherung wird angelegt.';confirmImport.classList.remove('hidden');}catch(error){if(readId===importReadId)saveStatus.textContent=error.message;}});
   confirmImport.addEventListener('click',()=>{if(!pendingImport||hasActiveRun&&state.hp>0)return;try{profile=HexProfile.importFile(pendingImport,TOWERS);pendingLoadout=[...profile.activeLoadout];pendingHero=profile.activeHero;pendingDifficulty=profile.difficulty;pendingImport=null;confirmImport.classList.add('hidden');renderLoadout();renderUI();updateArsenalHint();saveStatus.textContent='Spielstand importiert. Dein Profil ist für den nächsten Run bereit.';}catch(error){saveStatus.textContent='Import fehlgeschlagen: '+error.message;}});
   function updateArsenalHint(){const count=HexProfile.affordableUnlocks(profile),button=document.getElementById('menuArsenalBtn');button.classList.toggle('upgradeAvailable',count>0);button.textContent=count?'◆ Arsenal · Upgrade verfügbar':'◆ Arsenal';button.title=count?count+' Freischaltungen bezahlbar':'Arsenal';}
-  function openMainMenu(){document.getElementById('biomeIntro').classList.add('hidden');cancelQuickTower();resetCameraKeys();updateArsenalHint();const today=new Date().toISOString().slice(0,10),daily=profile.dailyResults?.[today];document.getElementById('dailyProgress').textContent=today+' (UTC) · '+(daily?.won?'Heute geschafft · Belohnung erhalten':'Tagesbestmarke: '+(daily?.best||0)+'/20 Waves');document.getElementById('menuContinueBtn').classList.toggle('hidden',!hasActiveRun||state.hp<=0);document.getElementById('menuPlayBtn').textContent=hasActiveRun?'Neuer Run':'Spielen';document.getElementById('menuLoadoutInfo').textContent='Loadout: '+profile.activeLoadout.map(id=>TOWERS[id]?.name||id).join(' · ');mainMenu.classList.remove('hidden');}
+  function openMainMenu(){if(duoToken){location.assign('/duo-lobby.html');return;}document.getElementById('biomeIntro').classList.add('hidden');cancelQuickTower();resetCameraKeys();updateArsenalHint();const today=new Date().toISOString().slice(0,10),daily=profile.dailyResults?.[today];document.getElementById('dailyProgress').textContent=today+' (UTC) · '+(daily?.won?'Heute geschafft · Belohnung erhalten':'Tagesbestmarke: '+(daily?.best||0)+'/20 Waves');document.getElementById('menuContinueBtn').classList.toggle('hidden',!hasActiveRun||state.hp<=0);document.getElementById('menuPlayBtn').textContent=hasActiveRun?'Neuer Run':'Spielen';document.getElementById('menuLoadoutInfo').textContent='Loadout: '+profile.activeLoadout.map(id=>TOWERS[id]?.name||id).join(' · ');mainMenu.classList.remove('hidden');}
   document.getElementById('dailyStartBtn').addEventListener('click',()=>{mainMenu.classList.add('hidden');document.getElementById('playModeOverlay').classList.add('hidden');newRun(undefined,'standard','dual',new Date().toISOString().slice(0,10));});
   document.getElementById('menuPlayBtn').addEventListener('click',()=>{mainMenu.classList.add('hidden');document.getElementById('playModeChoices').classList.remove('hidden');document.getElementById('dailyModeDetails').classList.add('hidden');document.getElementById('playModeOverlay').classList.remove('hidden');});
   document.getElementById('duoModeBtn').addEventListener('click',()=>{location.href='duo-lobby.html';});
@@ -980,7 +994,7 @@ R dreht die Karte, dann Feld anklicken.`;}
     const target=event.target;if(!target?.closest||!state||target.closest('#rewardOverlay,#celebration,#campaignVictory'))return;
     let changed=false;
     if(saleRequest&&!target.closest('#'+(saleRequest.kind==='tower'?'sellTowerBtn':'sellBuildingBtn'))){closeSale();changed=true;}
-    if(!target.closest('.towerPanel,.drawer,.loadoutRail')){
+    if(!target.closest('.towerPanel,.drawer,.loadoutRail,#duoHud')){
       if(state.selectedTower||state.selectedBuilding||state.selectedSlot){state.selectedTower=null;state.selectedBuilding=null;state.selectedSlot=null;state.previewTower=null;state.previewBuilding=null;changed=true;}
     }
     if(dismissBiomeInfoOutside(event))changed=true;
@@ -999,7 +1013,7 @@ R dreht die Karte, dann Feld anklicken.`;}
     const object=state.map.get(key(slot.q,slot.r))?.[kind==='tower'?'towers':'buildings']?.[slot.index];
     const refund=kind==='tower'?HexData.towerRefund(state,object):HexBuildings.refund(state,object);if(!refund){closeSale();renderAll();return;}
     if(saleRequest?.run===state&&saleRequest.kind===kind&&saleRequest.object===object&&saleRequest.amount===refund.amount){
-      closeSale();if(kind==='tower')sellSelectedTower();else if(HexBuildings.sell(state,slot))renderAll();return;
+      closeSale();if(kind==='tower')sellSelectedTower();else if(duoToken)duoAction('sellBuilding',{slot});else if(HexBuildings.sell(state,slot))renderAll();return;
     }
     closeSale();saleRequest={run:state,kind,slot:{...slot},object,amount:refund.amount};renderSaleState();
   }
@@ -1069,9 +1083,10 @@ R dreht die Karte, dann Feld anklicken.`;}
   }
   let last=performance.now();
   let paused=false,clockDebt=0;
-  function togglePause(){advanceClock(performance.now());paused=!paused;clockDebt=0;last=performance.now();document.getElementById('app').classList.toggle('paused',paused);const b=document.getElementById('pauseBtn');if(b) b.textContent=paused?'▶ Weiter (P)':'⏸ Pause (P)';}
+  function togglePause(){if(duoToken){duoBridge?.pause();return;}advanceClock(performance.now());paused=!paused;clockDebt=0;last=performance.now();document.getElementById('app').classList.toggle('paused',paused);const b=document.getElementById('pauseBtn');if(b) b.textContent=paused?'▶ Weiter (P)':'⏸ Pause (P)';}
   document.getElementById('pauseBtn')?.addEventListener('click',togglePause);
   function advanceClock(now){
+    if(duoToken){last=now;clockDebt=0;return;}
     const elapsed=Math.max(0,(now-last)/1000);last=now;
     if(paused||!state.waveRunning){clockDebt=0;return;}
     clockDebt+=elapsed;const step=.05/gameSpeed;let count=0;
@@ -1093,5 +1108,27 @@ R dreht die Karte, dann Feld anklicken.`;}
   function frame(now){animationFrames++;advanceCamera(now);advanceClock(now);updateFps(now);requestAnimationFrame(frame);}
   globalThis.setInterval?.(()=>{if(document.hidden)advanceClock(performance.now());},250);
   document.addEventListener('visibilitychange',()=>{fpsStart=null;if(fpsVisible)fpsEl.textContent='FPS: —';cancelQuickTower();resetCameraKeys();advanceClock(performance.now());});
-  newRun(); hasActiveRun=false; openMainMenu(); requestAnimationFrame(frame);
+  if(duoToken){
+    newRun();tutorial.active=false;mainMenu.classList.add('hidden');document.body.classList.add('duoGame');
+    duoBridge=HexDuoGame.mount({token:duoToken,getState:()=>state,render:renderAll,renderer,cardElement,setMessage,
+      accept(next,switched=false){
+        if(switched){closeSale();cancelQuickTower();state.selectedSlot=state.selectedTower=state.selectedBuilding=null;state.selectedSlots=[];state.selectedTowers=[];state.previewUpgrade=state.previewTower=state.previewBuilding=state.buildingTarget=state.hoveredPlacement=null;state.selectedCard=null;state.rotation=0;towerMenuKey=towerPanelKey=buildingPanelKey='';renderer.reset();}
+        const changedHand=state.hand.join('|')!==next.hand.join('|')||state.phase!==next.phase;
+        Object.assign(state,next);
+        state.selectedSlots=selections('Slot').filter(slot=>{const t=state.map.get(key(slot.q,slot.r));return t&&slot.index<t.slots&&!t.towers[slot.index];});state.selectedSlot=state.selectedSlots.at(-1)||null;
+        state.selectedTowers=selections('Tower').filter(slot=>state.map.get(key(slot.q,slot.r))?.towers[slot.index]);state.selectedTower=state.selectedTowers.at(-1)||null;
+        if(changedHand){state.selectedCard=null;state.rotation=0;}
+        profile=HexProfile.load(TOWERS);tutorial.active=false;hasActiveRun=true;mainMenu.classList.add('hidden');renderAll();
+      },commandAccepted(action){if(['tower','upgrade','building','buildingUpgrade','sellTower','sellBuilding','baseUpgrade'].includes(action)){state.previewTower=state.previewUpgrade=null;sound.play('build');renderAll();}},reward(offer,kind){
+        const signature=JSON.stringify([offer,kind]);if(duoBridge?.offerKey===signature)return;if(duoBridge)duoBridge.offerKey=signature;
+        rewardChoices.innerHTML='';if(!offer){rewardOverlay.classList.add('hidden');return;}
+        inspectReward('selection');
+        document.getElementById('rewardTitle').textContent=kind==='delivery'?'Geschenk für deinen Partner':kind==='result'?'Gemeinsamer Durchlauf beendet':offer.kind==='removal'?'Deck ausdünnen (optional)':'Belohnung wählen';
+        document.getElementById('rewardDescription').textContent=kind==='delivery'?'Wähle eine Karte oder Gold für deinen Partner.':kind==='result'?offer.description:'Wähle deine Belohnung.';
+        document.getElementById('skipRemovalBtn').classList.toggle('hidden',!offer.skippable);document.getElementById('rewardInspectActions').classList.add('hidden');
+        for(const [index,choice] of offer.choices.entries()){const button=choice.cardId?cardElement(choice.cardId,false):document.createElement('button');if(!choice.cardId){button.className='upgradeOption';button.textContent=choice.label||choice.choice?.name||({bastion:'+5 Team-Leben',income:'+2 Einkommen',repair:'Heilquelle',supplies:'+30 Gold'})[choice.blessing]||'+'+choice.amount+' Gold';}button.addEventListener('click',()=>duoBridge.choose(kind,offer,index));rewardChoices.appendChild(button);}
+        state.rewardOffer=kind==='result'?null:offer;openRewardSelection();
+      }});
+    requestAnimationFrame(frame);
+  }else{newRun(); hasActiveRun=false; openMainMenu(); requestAnimationFrame(frame);}
 })();

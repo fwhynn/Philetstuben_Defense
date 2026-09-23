@@ -5,6 +5,7 @@
   "description": "Autohex TD - Hex-Tower-Defense-Prototyp",
   "scripts": {
     "start": "node serve.cjs",
+    "start:duo": "node server/start-duo.cjs",
     "generate-assets-index": "node serve.cjs --write-index",
     "tag": "node tag-and-push.cjs"
   },

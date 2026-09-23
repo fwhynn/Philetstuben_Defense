@@ -50,8 +50,24 @@ Docker/Caddy sind lokal nicht installiert. Image-Build, Zertifikatsausstellung u
 6. **Darstellung:** Desktop und schmales Fenster, Deutsch/Englisch, Kartenwahl/Zoom/Bedienung prüfen. Belohnungskarten brauchen nach kurzem Öffnungsschutz nur einen bewussten Klick. Keine vorausgewählte Handkarte; Hover-Schrift bleibt scharf.
 7. **Freunde-Beta:** Erst nach diesen Prüfungen begrenzt öffnen. Längere Partien und bis zu acht Lobbys auf dem echten Host beobachten. Die lokalen kleinen Lasttests belegen keine Kapazität für beliebig große Karten oder einen öffentlichen Launch.
 
-Eine spätere Angleichung der Duo-Oberfläche an die vollständige Solo-3D-Oberfläche, freie Duo-Turmauswahl, Konten, Matchmaking und Ranglisten sind weitere Produktarbeit; der aktuelle Freunde-MVP verwendet die bestehende Duo-Oberfläche und feste Turmauswahl.
+Die Duo-Partie verwendet jetzt die gemeinsame Solo-3D-Oberfläche. Freie Duo-Turmauswahl, Konten, Matchmaking und Ranglisten bleiben weitere Produktarbeit; die Turmauswahl ist vorerst fest.
 
 ## Debian 12 und Socket.IO (23.09.2026)
 
 Für den bestehenden Host unter `/var/www/html/net.zlyfer.autohextd` gilt jetzt die konkrete Betreiberanleitung in `deploy/systemd/README.md`. Sie enthält systemd-Service, eng begrenzte sudoers-Regeln für den PHP-Webhook und Nginx-Proxybeispiel. `/socket.io/*` muss zusätzlich zu den HTTP-Endpunkten zum Node-Dienst gelangen. Tag-Updates stoppen den Dienst vor Dateiänderungen mit abschließendem Checkpoint und starten ihn danach inklusive Healthcheck wieder. Die Spielverbindung verwendet nun Socket.IO; der frühere reine HTTP-Abfragebetrieb ist nur noch Kompatibilitätsweg. Betreiberinstallation und Browser-Abnahme bleiben offen.
+
+## Neue Lobby und gemeinsame Spieloberfläche (23.09.2026)
+
+Auf Branch `codex/multiplayer-test`: Lobby erstellen/beitreten führt zuerst in einen eigenen Warteraum. Beide Spieler bestätigen ausdrücklich „Bereit“, erst danach wechseln beide auf `index.html#duo=…`. Der Server verhindert einen Spielstart vor beiden Bestätigungen. Gespeicherte ältere laufende Partien bleiben direkt fortsetzbar.
+
+Die Partie verwendet dieselbe 3D-Karte, Kartenhand, Bau-/Upgrade-Menüs, Deckansicht und Einstellungen wie Solo. Aktionen gehen zum Server; im Browser läuft keine zweite Simulation. Tempo und Pause gelten gemeinsam. Das Duo-Menü ergänzt Partneransicht (nur anschauen), Portalreservierung, Turmverstärkung, Geschenke und gemeinsame Wächterfreigabe. Portal und Verstärkung werden auf der 3D-Karte markiert. Serverupdates erhalten offene Auswahlen. Kartenwechsel räumt lokale Vorschauen auf.
+
+Lokaler Test nach Neustart des Servers mit `npm run start:duo`:
+1. `http://localhost:8090/duo-lobby.html` öffnen und Lobby erstellen. Das Spiel darf noch nicht erscheinen.
+2. Einladung in einem zweiten Browser/privaten Fenster öffnen und beitreten. Nach nur einer Bereitschaftsbestätigung bleiben beide in der Lobby; erst die zweite startet die gemeinsame Bauphase.
+3. Beide Hexe legen, Türme bauen/verbessern und je „Bereit für die Welle“ wählen. Offene Bauauswahl während Updates beobachten.
+4. Einen freien Turmplatz als Partner-Portal reservieren, einen eigenen Turm zur Verstärkung wählen. Nach verlustfreiem Wellenabschluss hilft eine Kopie auf der noch kämpfenden Partnerkarte. Partneransicht, Markierungen und Ankunft prüfen.
+5. Nach Welle 5 Geschenke wählen; danach weiterbauen. Pause/Tempo, Wiederbeitritt und gemeinsamer Neustart prüfen.
+6. Auf schmalem Bildschirm Menüs, Karte, Tooltip-Positionen und Deutsch/Englisch prüfen.
+
+Automatisiert geprüft: Lobby-Sperre und persistente Bereitschaft, HTTP-/Socket.IO-Befehle, geteilte Steuerung, echte Spieloberfläche mit DOM-Testadapter, stabile Auswahlen, schreibgeschützte Partnerkarte und Geschenkweiterleitung. Keine Browser-/3D-Sichtprüfung und kein Live-Deployment durchgeführt. Vorhandene Backend-Prozesse müssen für den neuen Code neu gestartet werden.

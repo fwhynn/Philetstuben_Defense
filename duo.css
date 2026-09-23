@@ -1,0 +1,18 @@
+.lobbySeats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:24px 0}.lobbySeats>div{padding:18px;border:1px solid #6c8767;border-radius:12px;background:#24342a}.eyebrow{font-size:12px;font-weight:700;letter-spacing:.12em;color:#e2b857}
+#waitingLobby[hidden],#lobbyEntry[hidden]{display:none}
+.duoHud{position:absolute;top:100px;left:16px;z-index:25;max-width:min(350px,calc(100vw - 32px));color:var(--text);background:var(--panel);border:1px solid #607c61;border-radius:12px;box-shadow:0 8px 24px #0005}
+.duoHud>summary{cursor:pointer;padding:12px;font-weight:700}.duoHudBody{padding:0 12px 12px;max-height:55vh;overflow:auto}.duoHudBody p{font-size:13px;line-height:1.5}.duoHudBody button{min-height:44px;margin:4px 0}.duoMapSwitch{display:flex;gap:8px}.duoMapSwitch button{flex:1}.duoMapSwitch [aria-pressed=true]{outline:2px solid var(--accent)}
+.duoMapLabel,.duoTransfer{position:absolute;top:100px;left:50%;transform:translateX(-50%);z-index:10;padding:8px 14px;border-radius:8px;background:#1d2922e8;color:var(--text);pointer-events:none}.duoTransfer{top:145px}
+.duoGame #message{top:160px}.duoGame .towerPanel{z-index:30}.duoGame #activeSeed{display:none}
+@media(max-width:900px){.duoHud{top:68px;left:12px;max-width:calc(100vw - 24px)}.duoMapLabel{top:118px;font-size:12px}.duoTransfer{top:152px}.duoHudBody{max-height:45vh}}
+@media(max-height:600px){.duoHud{top:62px}.duoMapLabel{top:64px;left:auto;right:12px;transform:none}.duoGame #message{top:112px;max-width:40vw}}
+@media(prefers-reduced-motion:reduce){.duoTransfer{animation:none}}
+
+/* Duo is part of the existing responsive menu bar; it cannot cover the tower panel. */
+.dockTL .duoHud{position:relative;top:auto;left:auto;max-width:250px;box-shadow:none}
+.dockTL .duoHud>summary{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px}
+.dockTL .duoHudBody{position:absolute;top:calc(100% + 8px);left:0;width:min(350px,calc(100vw - 32px));background:var(--panel);border:1px solid #607c61;border-radius:12px;box-shadow:0 8px 24px #0006}
+
+.duoTransfer .researchIcon{width:48px;height:48px;display:block;margin:4px auto}
+
+@media(max-width:900px),(max-height:600px){.dockTL .duoHud{width:100%;max-width:none}.dockTL .duoHudBody{position:static;width:100%;max-height:none;overflow:visible;border:0;box-shadow:none}}
