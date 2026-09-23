@@ -126,9 +126,11 @@ Turm- und Gebäudemenüs werden am linken Rand des freien Bildschirmbereichs pos
 
 Hauptmenü-Dialoge (Spielmodus, Spielregeln, Spielstand, Arsenal und Durchlaufvorbereitung) bleiben bei Außenklicks offen. Sie werden über ihre ausdrücklichen Zurück-/Schließen-Schaltflächen geschlossen. Die Außenklick-Regel für Ingame-Dialoge bleibt bestehen. Die Durchlaufvorbereitung hat keinen Statusbalken mit Diamanten und Auswahlzähler mehr; Hinweise auf eine unvollständige Turmauswahl bleiben erhalten.
 
-### Arsenal: Icon und Titel
+### Arsenal: Werkstatt statt Forschungskarte
 
-Forschungszweige sind 230 px breit. Jede Forschungskarte besitzt eine gemeinsame Flex-Kopfzeile mit einem festen 44-px-Icon und 10 px Abstand zum Titel. Lange Titel dürfen innerhalb ihrer Textspalte umbrechen, jedoch nicht unter das Icon rutschen. Besitz und aktive Auswahl haben unterschiedliche Statusbeschriftungen; Aktivieren verbraucht keine Diamanten und gilt ab dem nächsten Run.
+Das Arsenal zeigt keine verschiebbare Zoom-Karte mehr, sondern immer nur einen Forschungsbaum in normaler Lesegröße. Links liegt eine Leiste mit allen Türmen und Gebäuden (Icon, Name, Kurzstatus wie aktives Ultimate oder „Turm gesperrt“); ein goldener ◆-Punkt markiert Bäume mit bezahlbarer Freischaltung. Beim ersten Öffnen ist der erste Baum mit bezahlbarer Freischaltung gewählt, danach bleibt die letzte Auswahl erhalten. Pfeiltasten wechseln zwischen den Einträgen. Unter 760 px Breite wird die Leiste zu einer waagerecht scrollbaren Chip-Reihe über dem Baum.
+
+Der gewählte Baum hat einen Kopfbereich (großes Icon, Beschreibung, Baukosten, Turmfreischaltung) und darunter die Ausbaupfade als Spalten: Stufe 2 → Stufe 3 → Ultimate bzw. Spezial. Jeder Baum verwendet die Turmfarbe als Akzent (`--tree-color`), Gebäude verwenden Gold. Hinweise zur Ultimate-Exklusivität stehen einmal pro Baum statt auf jeder Karte. Zustände: gesperrt = abgedunkelt mit gestrichelten Verbindern, freigeschaltet = grün, aktiv = goldener Rahmen mit Schein, bezahlbar = goldener Hauptbutton. Besitz und aktive Auswahl haben unterschiedliche Statusbeschriftungen; Aktivieren verbraucht keine Diamanten und gilt ab dem nächsten Run.
 
 ## Deutsche Texte und Gebäuderegeln (23.09.2026)
 

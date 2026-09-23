@@ -385,22 +385,16 @@
     <div id="arsenalOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="arsenalTitle">
       <div class="loadoutBox">
         <header class="arsenalToolbar">
-          <h2 id="arsenalTitle">Arsenal</h2><span class="arsenalBalance">◆ <strong
+          <h2 id="arsenalTitle">Arsenal</h2><span class="arsenalBalance" title="Diamanten">◆ <strong
               id="arsenalDiamonds">0</strong></span>
-          <div class="arsenalZoomControls"><button id="arsenalZoomOut" class="secondary"
-              aria-label="Forschungsmap verkleinern">−</button><output id="arsenalZoomValue">73 %</output><button
-              id="arsenalZoomIn" class="secondary" aria-label="Forschungsmap vergrößern">+</button><button
-              id="arsenalFit" class="secondary">Übersicht</button></div>
-          <details class="arsenalHelp">
-            <summary aria-label="Arsenal-Hilfe">ⓘ</summary>
-            <p>Ziehen: verschieben. Mausrad / Zwei-Finger-Geste: zoomen.<br>◆ schaltet dauerhaft frei; Gold bezahlt den
-              Ausbau im Run.</p>
-          </details>
+          <p class="arsenalLegend">◆ schaltet dauerhaft frei · 🪙 Gold bezahlt den Ausbau im Run</p>
           <button id="resetDiamondsBtn" class="secondary">Reset</button><button id="closeArsenalBtn" class="secondary"
             aria-label="Arsenal schließen (Escape)" title="Zurück (Escape)">Zurück · Esc</button>
         </header>
-        <div id="arsenalMap" class="arsenalMap" tabindex="0" aria-label="Verschiebbare Forschungsmap">
-          <div id="arsenalChoices" class="researchMap"></div>
+        <div class="arsenalBody">
+          <nav id="arsenalTabs" class="arsenalRail" role="tablist" aria-label="Forschungsbäume"
+            aria-orientation="vertical"></nav>
+          <div id="arsenalChoices" class="arsenalDetail"></div>
         </div>
         <p id="arsenalMessage" class="loadoutWarning" aria-live="polite"></p>
       </div>

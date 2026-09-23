@@ -1180,3 +1180,19 @@ Warte auf deinen Partner|Waiting for your partner
 Gemeinsame Welle läuft|Co-op wave in progress
 Nach einer verlustfreien Welle hilft eine Kopie beim Partner. Sein Portal muss frei sein. Alle 5 Wellen wählt ihr ein Geschenk füreinander.|After a wave without leaks, a copy helps your partner. Their portal must be free. Every 5 waves, you choose gifts for each other.
 `);
+HexTranslations.add(`
+◆ schaltet dauerhaft frei · 🪙 Gold bezahlt den Ausbau im Run|◆ unlocks permanently · 🪙 gold pays for upgrades during a run
+Forschungsbäume|Research trees
+Freischaltung bezahlbar|Unlock affordable
+Pro Turm ist höchstens ein Ultimate aktiv. Wechseln kostet keine Diamanten.|Each tower can have at most one active ultimate. Switching costs no diamonds.
+Gebäude sind immer verfügbar. Der Spezialausbau wird dauerhaft freigeschaltet.|Buildings are always available. The special upgrade is unlocked permanently.
+Schalte zuerst den Turm frei, um seine Ausbaupfade zu nutzen.|Unlock the tower first to use its upgrade paths.
+Spezial freigeschaltet|Special unlocked
+Spezial gesperrt|Special locked
+Immer verfügbar|Always available
+nach Stufe 3|after level 3
+Ultimate|Ultimate
+Spezial|Special
+Pfad|Path
+Bau:|Build:
+`);

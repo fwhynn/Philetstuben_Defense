@@ -918,12 +918,8 @@ R dreht die Karte, dann Feld anklicken.`;}
     const refund=HexProfile.resetValue(profile),button=document.getElementById('resetDiamondsBtn');button.disabled=refund===0;button.textContent=resetArsenalPending?'Bestätigen: alle Freischaltungen zurücksetzen · +'+refund+' ◆':'Reset · +'+refund+' ◆';
     document.getElementById('arsenalMessage').textContent=message||'';
   }
-  const arsenalCamera=HexArsenal.enableDrag(document.getElementById('arsenalMap'),document.getElementById('arsenalChoices'),scale=>document.getElementById('arsenalZoomValue').textContent=Math.round(scale*100)+' %');
-  document.getElementById('arsenalZoomIn').addEventListener('click',()=>arsenalCamera.zoom(1.2));
-  document.getElementById('arsenalZoomOut').addEventListener('click',()=>arsenalCamera.zoom(1/1.2));
-  document.getElementById('arsenalFit').addEventListener('click',()=>arsenalCamera.fit());
   document.getElementById('resetDiamondsBtn').addEventListener('click',()=>{if(!resetArsenalPending){resetArsenalPending=true;renderArsenal('Alle Turm- und Meta-Freischaltungen werden entfernt; Loadouts werden auf die fünf Starttürme zurückgesetzt. Ein bereits laufender Run behält seine Startauswahl. Erneut klicken zum Bestätigen.');return;}const result=HexProfile.resetUnlocks(profile,TOWERS);profile=result.profile;pendingLoadout=[...profile.activeLoadout];resetArsenalPending=false;renderLoadout();renderArsenal(result.refund+' Diamanten erstattet. Du kannst dich neu entscheiden.');renderUI();});
-  function openArsenal(){resetArsenalPending=false;renderArsenal();arsenalOverlay.classList.remove('hidden');arsenalCamera.start();}
+  function openArsenal(){resetArsenalPending=false;renderArsenal();arsenalOverlay.classList.remove('hidden');}
 
   function toggleUpgradeStatus(value=!state.showUpgradeStatus){state.showUpgradeStatus=value;document.getElementById('upgradeStatus').checked=value;renderBoard();}
   document.getElementById('upgradeStatus').addEventListener('change',e=>toggleUpgradeStatus(e.target.checked));
