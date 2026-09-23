@@ -7,7 +7,9 @@ const REMOTE_NAME = 'origin';
 const SECRET_FILE = REPO_ROOT . '/.deploy-webhook-secret';
 const LOCK_FILE = '/tmp/autohextd-tag-webhook.lock';
 const ERROR_LOG_FILE = APP_ROOT . '/webhook-error.log';
-const RUN_NPM_CI = true;
+const DEPLOY_BRANCH = 'main';
+const NODE_BIN = '/usr/local/bin/node';
+const NPM_BIN = '/usr/local/bin/npm';
 const DUO_SERVICE = 'autohextd-duo.service';
 const ALLOWED_ACTORS = ['autophil317', 'fwhynn', 'zlyfer'];
 
@@ -89,35 +91,27 @@ try {
             ]);
         }
 
-        set_time_limit(180);
+        set_time_limit(300);
         $steps = [];
 
-        $steps[] = runCheckedCommand(gitCommand('fetch --prune --tags ' . escapeshellarg(REMOTE_NAME)), REPO_ROOT, 'Fetching tags failed.');
-        $steps[] = runCheckedCommand(gitCommand('rev-parse --verify --quiet ' . escapeshellarg('refs/tags/' . $tag)), REPO_ROOT, 'Requested tag does not exist after fetch.');
-        // Stop BEFORE changing code or node_modules. SIGTERM saves all active rooms.
-        $steps[] = runCheckedCommand('/usr/bin/sudo -n /usr/bin/systemctl stop ' . DUO_SERVICE, REPO_ROOT, 'Duo stop failed; deployment aborted before changing files.');
-        $stopped = runCheckedCommand('/usr/bin/systemctl show ' . DUO_SERVICE . ' --property=ExecMainStatus --value', REPO_ROOT, 'Could not verify Duo shutdown.');
-        if (trim($stopped['stdout']) !== '0') {
-            respond(500, ['ok' => false, 'message' => 'Duo did not stop cleanly; checkpoint must be checked. No code update performed.']);
-        }
-        $steps[] = $stopped;
-        $steps[] = runCheckedCommand(gitCommand('checkout --force --detach ' . escapeshellarg($tag)), REPO_ROOT, 'Checking out the tag failed.');
-
-        if (RUN_NPM_CI && file_exists(APP_ROOT . '/package-lock.json')) {
-            $steps[] = runCheckedCommand('npm ci --omit=dev', APP_ROOT, 'npm ci failed.');
-        }
-
-        $steps[] = writeAssetsIndex(APP_ROOT);
-        $steps[] = runCheckedCommand('/usr/bin/sudo -n /usr/bin/systemctl start ' . DUO_SERVICE, REPO_ROOT, 'Duo start failed. Check journalctl; checkpoint is preserved.');
-        $steps[] = runCheckedCommand('node deploy/check-duo-health.cjs', APP_ROOT, 'Duo health check failed. Check service logs before reopening the game.');
+        // Der Tag-Push löst das Update nur aus; ausgeliefert wird immer der aktuelle Stand von main.
+        $steps[] = runCheckedCommand(gitCommand('checkout ' . escapeshellarg(DEPLOY_BRANCH)), REPO_ROOT, 'Switching to ' . DEPLOY_BRANCH . ' failed.');
+        $steps[] = runCheckedCommand(gitCommand('pull --ff-only ' . escapeshellarg(REMOTE_NAME) . ' ' . escapeshellarg(DEPLOY_BRANCH)), REPO_ROOT, 'git pull failed.');
+        $steps[] = runCheckedCommand(NPM_BIN . ' ci --omit=dev', APP_ROOT, 'npm ci failed.');
+        $steps[] = runCheckedCommand(NPM_BIN . ' run generate-assets-index', APP_ROOT, 'npm run generate-assets-index failed.');
+        $steps[] = runCheckedCommand('/usr/bin/sudo -n /usr/bin/systemctl restart ' . DUO_SERVICE, REPO_ROOT, 'Duo restart failed. Check journalctl.');
+        // Nicht fatal: Das Spiel ist zu diesem Zeitpunkt bereits aktualisiert.
+        $health = runCommand(NODE_BIN . ' deploy/check-duo-health.cjs', APP_ROOT);
+        $steps[] = $health;
 
         $head = runCheckedCommand(gitCommand('rev-parse HEAD'), REPO_ROOT, 'Could not read deployed commit.');
 
         respond(200, [
             'ok' => true,
-            'message' => 'Tag deployed successfully.',
+            'message' => $health['exitCode'] === 0 ? 'Deployed successfully.' : 'Deployed, but Duo health check failed.',
             'actor' => $actor,
             'tag' => $tag,
+            'branch' => DEPLOY_BRANCH,
             'commit' => trim($head['stdout']),
             'steps' => $steps,
         ]);
@@ -206,44 +200,19 @@ function ensureDeployPreconditions(): void
     if (!is_writable(REPO_ROOT) || !is_writable(REPO_ROOT . '/.git')) {
         throw new RuntimeException('Repository is not writable for PHP-FPM. Grant the PHP user write access before using this webhook.');
     }
-    if (RUN_NPM_CI && file_exists(APP_ROOT . '/package-lock.json') && !is_writable(APP_ROOT)) {
+    if (!is_writable(APP_ROOT)) {
         throw new RuntimeException('App directory is not writable for npm ci. Grant the PHP user write access before using this webhook.');
+    }
+    foreach ([NODE_BIN, NPM_BIN] as $binary) {
+        if (!is_executable($binary)) {
+            throw new RuntimeException($binary . ' not found or not executable.');
+        }
     }
 }
 
 function gitCommand(string $arguments): string
 {
     return 'git -c safe.directory=' . escapeshellarg(REPO_ROOT) . ' ' . $arguments;
-}
-
-function writeAssetsIndex(string $appRoot): array
-{
-    $assetsDir = $appRoot . '/assets';
-    $models = [];
-    if (is_dir($assetsDir)) {
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($assetsDir, FilesystemIterator::SKIP_DOTS)
-        );
-        foreach ($iterator as $file) {
-            if ($file->isFile() && strcasecmp($file->getExtension(), 'glb') === 0) {
-                $models[] = str_replace('\\', '/', substr($file->getPathname(), strlen($assetsDir) + 1));
-            }
-        }
-        sort($models);
-    }
-    $indexFile = $assetsDir . '/index.json';
-    if (!is_dir($assetsDir) && !mkdir($assetsDir, 0755, true) && !is_dir($assetsDir)) {
-        throw new RuntimeException('Could not create assets directory for index.json.');
-    }
-    if (file_put_contents($indexFile, json_encode($models, JSON_UNESCAPED_SLASHES)) === false) {
-        throw new RuntimeException('Could not write assets/index.json.');
-    }
-    return [
-        'cwd' => $appRoot,
-        'command' => 'write assets/index.json',
-        'stdout' => count($models) . ' models',
-        'exitCode' => 0,
-    ];
 }
 
 function runCheckedCommand(string $command, string $cwd, string $failureMessage): array
@@ -261,7 +230,8 @@ function runCheckedCommand(string $command, string $cwd, string $failureMessage)
 
 function runCommand(string $command, string $cwd): array
 {
-    $fullCommand = 'cd ' . escapeshellarg($cwd) . ' && ' . $command . ' 2>&1';
+    // npm startet per "#!/usr/bin/env node" und npm-Skripte rufen "node" auf: PHP-FPM hat /usr/local/bin oft nicht im PATH.
+    $fullCommand = 'export PATH=' . escapeshellarg(dirname(NODE_BIN) . ':/usr/bin:/bin') . ' && cd ' . escapeshellarg($cwd) . ' && ' . $command . ' 2>&1';
     $output = [];
     $exitCode = 0;
     exec($fullCommand, $output, $exitCode);
