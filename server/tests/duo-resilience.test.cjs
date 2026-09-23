@@ -49,6 +49,7 @@ test('automated players complete multiple waves across seeded matches without by
 test('all eight supported lobbies advance independently under concurrent polling',async t=>{
  const rooms=createLobbies(),pairs=[];for(let i=0;i<8;i++){const host=rooms.create({requestId:randomUUID()}),guest=rooms.join({requestId:randomUUID(),code:host.code});assert.ok(host.ok&&guest.ok);pairs.push([host,guest]);}
  assert.equal(rooms.create({requestId:randomUUID()}).reason,'capacity');
+ for(const pair of pairs)require('./start-lobby.cjs')(rooms,pair);
  for(const pair of pairs)for(const seat of pair){assert.ok(rooms.receive(seat.token,command(rooms,seat,'place',opening(rooms,seat))).ok);assert.ok(rooms.receive(seat.token,command(rooms,seat,'ready',{value:true})).ok);}
  const url=await start(t,rooms),durations=[];for(let i=0;i<40;i++){const start=performance.now();rooms.tick();durations.push(performance.now()-start);}
  const snapshots=await Promise.all(pairs.flat().map(seat=>fetch(url+'/state',{headers:{Authorization:'Bearer '+seat.token}}).then(r=>r.json())));

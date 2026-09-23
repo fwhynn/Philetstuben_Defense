@@ -12,6 +12,7 @@ test('Socket.IO authenticates, rejects foreign origins, preserves commands and r
  const a=store.create({requestId:crypto.randomUUID()}),b=store.join({requestId:crypto.randomUUID(),code:a.code}),auth=[{token:a.token,clientId:crypto.randomUUID()},{token:b.token,clientId:crypto.randomUUID()}];
  await assert.rejects(connect(url(),{token:'bad',clientId:'bad'}));await assert.rejects(connect(url(),auth[0],'https://foreign.invalid'));
  let sockets=await Promise.all(auth.map(x=>connect(url(),x)));t.after(()=>sockets.forEach(s=>s.close()));
+ for(const [i,seat] of [a,b].entries()){const v=store.view(seat.token);assert.equal((await request(sockets[i],'/command',{epoch:v.epoch,sequence:v.next,wave:v.wave,phase:v.boards[i].phase,action:'lobbyReady',payload:{value:true}})).body.ok,true);}
  const views=await Promise.all(sockets.map(s=>request(s,'/state')));assert.equal(views[0].status,200);
  const v=views[0].body,board=v.boards[0];let choice;for(let index=0;index<board.placements.length&&!choice;index++)for(let rotation=0;rotation<6&&!choice;rotation++){const target=board.placements[index][rotation].find(p=>p.legal);if(target)choice={index,rotation,q:target.q,r:target.r};}
  const packet={epoch:v.epoch,sequence:v.next,wave:v.wave,phase:board.phase,action:'place',payload:choice};assert.equal((await request(sockets[0],'/command',packet)).body.ok,true);
