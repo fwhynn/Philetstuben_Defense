@@ -22,6 +22,26 @@ Damit deine Modelle ohne Nacharbeit zur Spiellogik passen. Alle Maße sind aus `
 - Kanten sind nummeriert wie im Spiel. Bei Rotation 0 liegt Kante 0 im **Osten**, dann gegen den Uhrzeigersinn: 1 = Nordost, 2 = Nordwest, 3 = West, 4 = Südwest, 5 = Südost.
 - Die Straßenmittellinie soll dem Spiel-Wegverlauf folgen, da Gegner darauf laufen. Gerade = Linie. Kurven = weiche Bögen über einen Punkt zwischen Mitte und Kanten. `longRoad` = leicht geschlängelt.
 
+### Straße = zwei Teile, nicht eine Fläche (Korrektur 23.09.2026)
+
+Einige neuere Tiles haben die Straße versehentlich als **eine einzige Fläche** mit einem Material `road_dirt` gebaut. Richtig sind **zwei flache, übereinanderliegende Teile** je Straßenabschnitt (Werte hier an der Geraden gemessen, gelten sinngemäß für jede Wegform):
+
+| Teil | Objektname | Tiefe (quer zur Straße) | Höhe (Y) | Material |
+|---|---|---|---|---|
+| Bankett/Rand (breiter, dunkler, unten) | `road_verge_0` | **0,47** | 0,006 | `road_verge` |
+| Fahrbahn (schmaler, heller, oben) | `road_surface_0` | **0,33** | 0,014 | `road` |
+
+Beide sind mittig zentriert (gleiche Mitte), die Fahrbahn ist schmaler und liegt 0,008 höher als das Bankett – daraus ergibt sich der leicht erhabene, zweifarbige „Straße mit Seitenstreifen"-Look. Materialwerte:
+
+| Material | Basisfarbe (RGB, 0–1) | Rauheit | Metallic |
+|---|---|---|---|
+| `road` | 0,716 / 0,497 / 0,223 | 0,9 | 0 |
+| `road_verge` | 0,440 / 0,270 / 0,109 | 0,9 | 0 |
+
+**Materialnamen exakt `road` und `road_verge` verwenden, nicht `road_dirt`.** Der Renderer sucht bei Tiles ohne eigene gebackene Straße (Kreuzungen mit codegezeichneter Straße) gezielt nach einem Material namens `road` als Fallback – mit einheitlicher Benennung bleibt das zuverlässig.
+
+Betroffen (haben aktuell nur `road_dirt` statt der zwei Teile): `tile_ballistaRoad`, `tile_base_beacon`, `tile_base_hex`, `tile_base_keep`, `tile_base_motte`, `tile_base_royal`, `tile_battleFork`, `tile_crownCross`, `tile_emberBend`, `tile_empty`, `tile_frostBend`, `tile_goldRoad`, `tile_lightningFork`, `tile_longRoad`, `tile_mineRoad`, `tile_royalBend`, `tile_sentryBend`, `tile_siegeRoad`, `tile_signalCross`, `tile_soulFork`, `tile_supplyRoad`, `tile_warBend`.
+
 ### Turm- und Gebäudeplätze
 Flache Bauplattformen (Sockel/Steinplatte, Radius ca. 0,22), auf denen später der Turm steht. Als Objekt `tower_slot_1`, `tower_slot_2` (Gruppe aus Sockel und Platte) modellieren, Platte auf Höhe ca. 0,03–0,05.
 
