@@ -247,8 +247,11 @@ function create(host0,commands){
       }
     }
     if(spec.proceduralRoads){
-      const roadBase=template.parts.find(p=>p.material.name==='road')?.material||fallbackMaterial,road=ghost?ghostMaterial(roadBase,true):roadBase;
-      const vergeBase=template.parts.find(p=>p.material.name==='road_verge')?.material||roadBase,verge=ghost?ghostMaterial(vergeBase,true):vergeBase;
+      // Eigenständige Terrains ohne gebackene Straße (mirrorJunction u. Ä.) haben kein 'road'-Material;
+      // dann das Straßenmaterial vom Standard-Geradenmodell übernehmen statt auf Rasengrün zurückzufallen.
+      const roadTemplate=template.parts.some(p=>p.material.name==='road')?template:(modelTemplate('straight')||template);
+      const roadBase=roadTemplate.parts.find(p=>p.material.name==='road')?.material||fallbackMaterial,road=ghost?ghostMaterial(roadBase,true):roadBase;
+      const vergeBase=roadTemplate.parts.find(p=>p.material.name==='road_verge')?.material||roadBase,verge=ghost?ghostMaterial(vergeBase,true):vergeBase;
       const paths=[...HexMap.roadGeometry(tile).legs.values()].map(points=>points.map(p=>({x:p.x-c.x,y:p.y-c.y})));
       for(const points of paths)holder.add(ribbon(points,verge,22,.85));
       for(const points of paths)holder.add(ribbon(points,road,18,1));
