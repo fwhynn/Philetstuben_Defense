@@ -9,6 +9,8 @@
     "tag": "node tag-and-push.cjs"
   },
   "dependencies": {
+    "socket.io": "4.8.3",
+    "socket.io-client": "4.8.3",
     "three": "^0.186.0"
   }
 }

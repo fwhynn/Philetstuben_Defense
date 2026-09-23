@@ -8,6 +8,7 @@ const SECRET_FILE = REPO_ROOT . '/.deploy-webhook-secret';
 const LOCK_FILE = '/tmp/autohextd-tag-webhook.lock';
 const ERROR_LOG_FILE = APP_ROOT . '/webhook-error.log';
 const RUN_NPM_CI = true;
+const DUO_SERVICE = 'autohextd-duo.service';
 const ALLOWED_ACTORS = ['autophil317', 'fwhynn', 'zlyfer'];
 
 header('Content-Type: application/json; charset=utf-8');
@@ -88,10 +89,18 @@ try {
             ]);
         }
 
+        set_time_limit(180);
         $steps = [];
 
         $steps[] = runCheckedCommand(gitCommand('fetch --prune --tags ' . escapeshellarg(REMOTE_NAME)), REPO_ROOT, 'Fetching tags failed.');
         $steps[] = runCheckedCommand(gitCommand('rev-parse --verify --quiet ' . escapeshellarg('refs/tags/' . $tag)), REPO_ROOT, 'Requested tag does not exist after fetch.');
+        // Stop BEFORE changing code or node_modules. SIGTERM saves all active rooms.
+        $steps[] = runCheckedCommand('/usr/bin/sudo -n /usr/bin/systemctl stop ' . DUO_SERVICE, REPO_ROOT, 'Duo stop failed; deployment aborted before changing files.');
+        $stopped = runCheckedCommand('/usr/bin/systemctl show ' . DUO_SERVICE . ' --property=ExecMainStatus --value', REPO_ROOT, 'Could not verify Duo shutdown.');
+        if (trim($stopped['stdout']) !== '0') {
+            respond(500, ['ok' => false, 'message' => 'Duo did not stop cleanly; checkpoint must be checked. No code update performed.']);
+        }
+        $steps[] = $stopped;
         $steps[] = runCheckedCommand(gitCommand('checkout --force --detach ' . escapeshellarg($tag)), REPO_ROOT, 'Checking out the tag failed.');
 
         if (RUN_NPM_CI && file_exists(APP_ROOT . '/package-lock.json')) {
@@ -99,6 +108,8 @@ try {
         }
 
         $steps[] = writeAssetsIndex(APP_ROOT);
+        $steps[] = runCheckedCommand('/usr/bin/sudo -n /usr/bin/systemctl start ' . DUO_SERVICE, REPO_ROOT, 'Duo start failed. Check journalctl; checkpoint is preserved.');
+        $steps[] = runCheckedCommand('node deploy/check-duo-health.cjs', APP_ROOT, 'Duo health check failed. Check service logs before reopening the game.');
 
         $head = runCheckedCommand(gitCommand('rev-parse HEAD'), REPO_ROOT, 'Could not read deployed commit.');
 

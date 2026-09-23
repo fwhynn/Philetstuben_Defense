@@ -4,7 +4,7 @@ autohextd.zlyfer.net {
     Referrer-Policy no-referrer
     X-Content-Type-Options nosniff
   }
-  @duo path /state /command /session /results /healthz /lobby/*
+  @duo path /state /command /session /results /healthz /lobby/* /socket.io/*
   handle @duo {
     reverse_proxy duo:8090
   }

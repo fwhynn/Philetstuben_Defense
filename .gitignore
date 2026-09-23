@@ -5,3 +5,4 @@ node_modules/
 webhook-error.log
 assets/index.json
 .deploy-webhook-secret
+.npm-cache/

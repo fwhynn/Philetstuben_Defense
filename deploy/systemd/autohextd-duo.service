@@ -1,0 +1,34 @@
+[Unit]
+Description=AutoHex TD Duo Socket.IO server
+After=network.target
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=autohextd
+Group=autohextd
+WorkingDirectory=/var/www/html/net.zlyfer.autohextd
+Environment=NODE_ENV=production
+Environment=DUO_HOST=127.0.0.1
+Environment=DUO_PORT=8090
+Environment=DUO_PUBLIC_ORIGIN=https://autohextd.zlyfer.net
+Environment=DUO_SAVE_FILE=/var/lib/autohextd/checkpoint.json
+EnvironmentFile=-/etc/autohextd/duo.env
+ExecStart=/usr/bin/node /var/www/html/net.zlyfer.autohextd/server/start-duo.cjs
+Restart=on-failure
+RestartSec=5
+KillSignal=SIGTERM
+TimeoutStopSec=45
+StateDirectory=autohextd
+StateDirectoryMode=0700
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

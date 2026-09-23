@@ -51,3 +51,7 @@ Docker/Caddy sind lokal nicht installiert. Image-Build, Zertifikatsausstellung u
 7. **Freunde-Beta:** Erst nach diesen Prüfungen begrenzt öffnen. Längere Partien und bis zu acht Lobbys auf dem echten Host beobachten. Die lokalen kleinen Lasttests belegen keine Kapazität für beliebig große Karten oder einen öffentlichen Launch.
 
 Eine spätere Angleichung der Duo-Oberfläche an die vollständige Solo-3D-Oberfläche, freie Duo-Turmauswahl, Konten, Matchmaking und Ranglisten sind weitere Produktarbeit; der aktuelle Freunde-MVP verwendet die bestehende Duo-Oberfläche und feste Turmauswahl.
+
+## Debian 12 und Socket.IO (23.09.2026)
+
+Für den bestehenden Host unter `/var/www/html/net.zlyfer.autohextd` gilt jetzt die konkrete Betreiberanleitung in `deploy/systemd/README.md`. Sie enthält systemd-Service, eng begrenzte sudoers-Regeln für den PHP-Webhook und Nginx-Proxybeispiel. `/socket.io/*` muss zusätzlich zu den HTTP-Endpunkten zum Node-Dienst gelangen. Tag-Updates stoppen den Dienst vor Dateiänderungen mit abschließendem Checkpoint und starten ihn danach inklusive Healthcheck wieder. Die Spielverbindung verwendet nun Socket.IO; der frühere reine HTTP-Abfragebetrieb ist nur noch Kompatibilitätsweg. Betreiberinstallation und Browser-Abnahme bleiben offen.
