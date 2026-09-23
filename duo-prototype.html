@@ -4,7 +4,7 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width,initial-scale=1">
-		<title>Duo · Lokaler Prototyp</title>
+		<title>Duo · Lokaler Prototyp</title><script>const session=new URLSearchParams(location.hash.slice(1)).get('session');if(session)location.replace('/index.html#duo='+encodeURIComponent(session));</script>
 		<style>
 			* {
 				box-sizing: border-box

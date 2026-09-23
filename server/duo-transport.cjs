@@ -11,6 +11,8 @@ function createTransport(room,{browser=false,autoTick=false,publicOrigin=null}={
   if(origin&&(!browser||origin!==(publicOrigin||'http://'+req.headers.host)))return send(403,{error:'cross-origin-disabled'});
   if(browser&&req.method==='GET'){
    const file=req.url==='/'?(room.create?'duo-lobby.html':'duo-prototype.html'):req.url.slice(1);
+   const publicFile=file==='index.html'||file==='style.css'||file==='duo.css'||file.startsWith('classes/')&&/^[a-z0-9-]+\.js$/.test(file.slice(8))||(file.startsWith('assets/')||file.startsWith('node_modules/three/'))&&!file.split('/').some(part=>part.startsWith('.')||part.includes('\\'));
+   if(publicFile){const resolved=path.resolve(root,file);if(!resolved.startsWith(root+path.sep))return send(403,{error:'forbidden'});fs.readFile(resolved,(error,data)=>{if(error)return send(404,{error:'not-found'});const ext=path.extname(file),mime={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json','.png':'image/png','.jpg':'image/jpeg','.svg':'image/svg+xml','.glb':'model/gltf-binary'}[ext]||'application/octet-stream';res.writeHead(200,{'Content-Type':mime,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(data);});return;}
    if(assets.has(file)){res.writeHead(200,{'Content-Type':file.endsWith('.html')?'text/html; charset=utf-8':'text/javascript; charset=utf-8','Cache-Control':'no-store','Referrer-Policy':'no-referrer','X-Content-Type-Options':'nosniff'});return res.end(fs.readFileSync(path.join(root,file)));}
   }
   if(req.method==='GET'&&req.url==='/healthz')return send(room.healthy===false?503:200,{ok:room.healthy!==false,service:'autohex-duo',maintenance:!!room.maintenance});

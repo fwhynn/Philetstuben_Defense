@@ -20,7 +20,7 @@ function createLobbies({now=()=>Date.now(),limit=8,snapshot,maintenance=false}={
  if(maintenanceAt!==null)return {ok:false,reason:'maintenance'};
  if(attempts.size>=1000)return {ok:false,reason:'capacity'};
  let record,seat;
- if(kind==='create'){if(rooms.size>=limit)return {ok:false,reason:'capacity'};let code;do{code=crypto.randomBytes(5).toString('hex').toUpperCase();}while(rooms.has(code));record={code,room:createRoom({loadouts:[loadout,loadout],now}),players:1,tokens:[],seen:now()};seat=record.room.connect(0);rooms.set(code,record);}
+ if(kind==='create'){if(rooms.size>=limit)return {ok:false,reason:'capacity'};let code;do{code=crypto.randomBytes(5).toString('hex').toUpperCase();}while(rooms.has(code));record={code,room:createRoom({loadouts:[loadout,loadout],now,lobbyRequired:true}),players:1,tokens:[],seen:now()};seat=record.room.connect(0);rooms.set(code,record);}
  else{if(typeof body.code!=='string'||! /^[A-F0-9]{10}$/.test(body.code))return {ok:false,reason:'invalid'};record=rooms.get(body.code);if(!record)return {ok:false,reason:'not-found'};if(record.endedAt!==undefined)return {ok:false,reason:'expired'};if(record.players!==1)return {ok:false,reason:'full'};seat=record.room.connect(1);record.players=2;}
  record.seen=now();record.tokens.push(seat.token);sessions.set(seat.token,record);const result={ok:true,code:record.code,...seat};attempts.set(key,{signature,result,at:now()});return {...result};
  }

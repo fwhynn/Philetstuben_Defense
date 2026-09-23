@@ -2,7 +2,7 @@ const {test}=require('node:test'),assert=require('node:assert/strict'),{randomUU
 const {createLobbies}=require('../duo-lobbies.cjs'),{createStore}=require('../duo-store.cjs');
 const fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 function packet(l,seat,action,payload){const v=l.view(seat.token);return {epoch:v.epoch,sequence:v.next,wave:v.wave,phase:v.boards[seat.player].phase,action,payload};}
-function start(l,seats){let last;for(const seat of seats){const board=l.view(seat.token).boards[seat.player];let p;for(let index=0;index<board.placements.length&&!p;index++)for(let rotation=0;rotation<6&&!p;rotation++){const n=board.placements[index][rotation].find(x=>x.legal);if(n)p={q:n.q,r:n.r,index,rotation};}assert.ok(l.receive(seat.token,packet(l,seat,'place',p)).ok);last=packet(l,seat,'ready',{value:true});assert.ok(l.receive(seat.token,last).ok);}return last;}
+function start(l,seats){require('./start-lobby.cjs')(l,seats);let last;for(const seat of seats){const board=l.view(seat.token).boards[seat.player];let p;for(let index=0;index<board.placements.length&&!p;index++)for(let rotation=0;rotation<6&&!p;rotation++){const n=board.placements[index][rotation].find(x=>x.legal);if(n)p={q:n.q,r:n.r,index,rotation};}assert.ok(l.receive(seat.token,packet(l,seat,'place',p)).ok);last=packet(l,seat,'ready',{value:true});assert.ok(l.receive(seat.token,last).ok);}return last;}
 
 test('maintenance freezes both combats and reconnect clocks; duplicate ACK survives the pause',()=>{
  let time=0;const l=createLobbies({now:()=>time}),a=l.create({requestId:randomUUID()}),b=l.join({requestId:randomUUID(),code:a.code}),last=start(l,[a,b]);l.tick();
