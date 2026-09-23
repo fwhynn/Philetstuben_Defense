@@ -42,6 +42,16 @@ Beide sind mittig zentriert (gleiche Mitte), die Fahrbahn ist schmaler und liegt
 
 Betroffen (haben aktuell nur `road_dirt` statt der zwei Teile): `tile_ballistaRoad`, `tile_base_beacon`, `tile_base_hex`, `tile_base_keep`, `tile_base_motte`, `tile_base_royal`, `tile_battleFork`, `tile_crownCross`, `tile_emberBend`, `tile_empty`, `tile_frostBend`, `tile_goldRoad`, `tile_lightningFork`, `tile_longRoad`, `tile_mineRoad`, `tile_royalBend`, `tile_sentryBend`, `tile_siegeRoad`, `tile_signalCross`, `tile_soulFork`, `tile_supplyRoad`, `tile_warBend`.
 
+### Einheitliche Grasfarbe (23.09.2026)
+
+Alle Tiles und Landmarken nutzen dasselbe Wiesen-Grün, sonst sieht man an der Hexgrenze einen Farbsprung:
+
+| Material | Basisfarbe (RGB, 0–1) | Rauheit |
+|---|---|---|
+| Wiese (`grass_meadow` bzw. `grass`) | 0,366 / 0,521 / 0,133 | 1 |
+
+Die älteren Grundformen (`tile_straight`, Kurven, `tee`, `cross`, `rescue` usw.) sowie `landmark_shrine`/`landmark_treasure` hatten ein dunkleres `grass` (0,25 / 0,434 / 0,095) und sind in den GLB-Dateien bereits auf diesen Wert umgestellt; dunklere Seitenkante `grass_side` entsprechend 0,228 / 0,355 / 0,083. Bei einer Neulieferung dieser Dateien bitte die neue Farbe übernehmen. Ausnahme: `tile_empty` mit bewusst trockenem `grass_dry`.
+
 ### Turm- und Gebäudeplätze
 Flache Bauplattformen (Sockel/Steinplatte, Radius ca. 0,22), auf denen später der Turm steht. Als Objekt `tower_slot_1`, `tower_slot_2` (Gruppe aus Sockel und Platte) modellieren, Platte auf Höhe ca. 0,03–0,05.
 
