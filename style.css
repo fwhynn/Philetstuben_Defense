@@ -485,3 +485,19 @@ body:has(#biomeIntro:not(.hidden)) .biomeTooltip{display:none!important}
 .researchHeader strong{min-width:0;overflow-wrap:break-word}
 
 .presetName{min-width:0;width:100%;box-sizing:border-box;background:#14261c;color:#f3ead2;border:1px solid #688653;border-radius:6px;padding:8px;font:inherit}.presetCard strong{overflow-wrap:anywhere}
+
+/* A single rescue card occupies the middle hand slot at every viewport width. */
+.handDock .hand.singleCard{grid-template-columns:repeat(3,minmax(0,1fr))}
+.handDock .hand.singleCard>.card{grid-column:2}
+.biomeIntroDetail{white-space:pre-line}
+
+.handDock:has(.singleCard){left:50%;right:auto;transform:translateX(-50%);width:min(640px,calc(100% - 24px))}
+
+/* Server reachability is independent of the Duo mode's release status. */
+.modeChoice .duoServerStatus{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:400;color:var(--text,#f5eedb)}
+.duoServerDot{width:9px;height:9px;flex:0 0 9px;border-radius:50%;background:#b5b6af}
+.duoServerStatus[data-state="online"] .duoServerDot{background:#75df91;animation:duoServerPulse 2s ease-out infinite}
+.duoServerStatus[data-state="offline"] .duoServerDot{background:#ef9087}
+.duoServerStatus[data-state="maintenance"] .duoServerDot{background:#efc76e}
+@keyframes duoServerPulse{0%{box-shadow:0 0 0 0 #75df9155}75%,100%{box-shadow:0 0 0 5px #75df9100}}
+@media(prefers-reduced-motion:reduce){.duoServerStatus[data-state="online"] .duoServerDot{animation:none}}

@@ -3,7 +3,7 @@
 
   const svg = document.getElementById('board');
   const rendererCommands={
-    placeTile,selectSlot(q,r,index,multiple){if(!applyBuildingTarget(q,r))selectSlot(q,r,index,multiple);},inspectBiome,
+    placeTile,inspectCaravan(){document.getElementById('waveDropdown').open=true;},selectSlot(q,r,index,multiple){if(!applyBuildingTarget(q,r))selectSlot(q,r,index,multiple);},inspectBiome,
     fieldClick(){document.getElementById('towerDrawer').classList.add('hidden');if(state?.dragTower){cancelQuickTower();renderAll();}},
     selectBase(){if(applyBuildingTarget(0,0))return;document.getElementById('towerDrawer').classList.add('hidden');state.selectedBase=true;state.selectedTower=null;state.selectedSlot=null;state.selectedBuilding=null;document.getElementById('baseDropdown').open=true;renderAll();},
     hoverBuilding(slot){state.hoverBuilding=slot;renderBoard();},
@@ -61,10 +61,10 @@
   const deckRenderKeys=new Map(),uiWavePlans=new Map();
   // UI-only cache: never handed to the simulation or modified by consumers.
   function uiWavePlan(wave){
-    const cacheKey=JSON.stringify([wave,state.income,!!state.challengeDay]);
+    const cacheKey=JSON.stringify([wave,state.income,!!state.challengeDay,state.seed,state.towerLoadout]);
     if(!uiWavePlans.has(cacheKey)){
       if(uiWavePlans.size>=4)uiWavePlans.delete(uiWavePlans.keys().next().value);
-      uiWavePlans.set(cacheKey,HexWaves.plan(wave,state.income,!!state.challengeDay));
+      uiWavePlans.set(cacheKey,HexWaves.plan(wave,state.income,!!state.challengeDay,state));
     }
     return uiWavePlans.get(cacheKey);
   }
@@ -128,7 +128,7 @@
     const id=state.hand[state.selectedCard]; if(!id) return;
     const card=id==='rescue'?state.rescueCard:CARD_LIBRARY[id];
     if(!canPlace(q,r,card,state.rotation)){
-      setMessage(state.openingRemaining?'Erweitere einen freien Base-Ausgang. Straßen müssen passen; der zweite Ausgang muss mit der übrigen Hand bebaubar bleiben.':'Nicht erlaubt: Straßen müssen passen und mindestens eine Straße muss zum äußeren freien Raum führen.',true); return;
+      setMessage(HexPlacementCommands.failureMessage(state,card),true); return;
     }
     const result=HexRunSession.place(state,random,{q,r,index:state.selectedCard,rotation:state.rotation});if(!result)return;
     const {connected,treasure}=result;sound.play('place');state.hoveredPlacement=null;
@@ -391,13 +391,13 @@ R dreht die Karte, dann Feld anklicken.`;}
     const active=!!state.hotkeyHintStarted&&!state.hotkeyHintDone&&!['gameover','victory'].includes(state.phase)&&!tutorial.active&&hasActiveRun&&mainMenu.classList.contains('hidden');
     if(active&&help.open&&!settings.classList.contains('hidden'))state.hotkeyHintDone=true;
     const shown=active&&!state.hotkeyHintDone;
-    tip.classList.toggle('hidden',!shown);
+    tip.classList.toggle('hidden',!shown||!settings.classList.contains('hidden'));
     document.getElementById('settingsOpenBtn').classList.toggle('hotkeyGuide',shown&&settings.classList.contains('hidden'));
     document.getElementById('hotkeyHelpSummary').classList.toggle('hotkeyGuide',shown&&!settings.classList.contains('hidden'));
     document.querySelector?.('[data-compact="menu"]')?.classList.toggle('hotkeyGuide',shown&&settings.classList.contains('hidden'));
     const inSettings=!settings.classList.contains('hidden');
     tip.classList.toggle('settingsVisible',inSettings);
-    if(tip.parentElement){if(inSettings&&tip.parentElement!==help.parentElement)help.before(tip);else if(!inSettings&&tip.parentElement!==app)app.appendChild(tip);}
+    if(tip.parentElement&&tip.parentElement!==app)app.appendChild(tip);
   }
   function openHotkeySettings(){
     document.querySelectorAll?.('.drawer').forEach(panel=>panel.classList.add('hidden'));
@@ -419,7 +419,8 @@ R dreht die Karte, dann Feld anklicken.`;}
     document.getElementById('profileStats').textContent=`${profile.records.runsPlayed} Runs · Bestmarke Wave ${profile.records.highestWave} · ${profile.records.bossesKilled} Bosse besiegt · ${profile.lifetime.normalKills} normale Gegner besiegt.`;
     document.getElementById('bonusIncome').textContent=`(+${state.income})`;
     renderBuildingPanel();
-    handEl.classList.toggle('openingHand',state.hand.length>3);document.getElementById('handHint').textContent=state.openingRemaining?`Noch ${state.openingRemaining} Base-Ausgang erweitern · Karten 1–${state.hand.length} · R dreht`:'Karte wählen (1–3) · Drehen: Knopf oder R · Hex antippen';
+    handEl.classList.toggle('openingHand',state.hand.length>3);handEl.classList.toggle('singleCard',state.hand.length===1);
+    document.getElementById('towerHotkeyHint').textContent=`1–${Math.min(9,state.towerLoadout.filter(id=>TOWERS[id]).length)}: Turm im geöffneten Baumenü auswählen`;document.getElementById('handHint').textContent=state.openingRemaining?`Noch ${state.openingRemaining} Base-Ausgang erweitern · Karten 1–${state.hand.length} · R dreht`:'Karte wählen (1–3) · Drehen: Knopf oder R · Hex antippen';
     document.getElementById('phaseLabel').textContent={place:'Hex platzieren',build:'Bauphase',wave:'Wave läuft',reward:'Kartenbelohnung',removal:'Deck ausdünnen (optional)',shrineReward:'Shrine-Belohnung',bossReward:'Boss-Beute',gameover:'Run beendet'}[state.phase];
     const handKey=JSON.stringify([state.hand,state.selectedCard,state.rotation,state.rescueCard,uiLanguageRevision]);
     if(handKey!==handRenderKey){
@@ -500,14 +501,15 @@ R dreht die Karte, dann Feld anklicken.`;}
     const groups=new Map();
     plan.enemies.forEach(enemy=>{const entry=groups.get(enemy.type)||{count:0,profile:enemy};entry.count++;groups.set(enemy.type,entry);});
     const defenses=p=>`${p.hp} Leben${p.armorHp?` + ${p.armorHp} Rüstung`:''}${p.magicHp?` + ${p.magicHp} Magieresistenz`:''}`;
-    document.getElementById('waveForecast').textContent='Wave '+plan.wave+': '+plan.count+' Gegner. '+[...groups.values()].map(({count,profile})=>count+' × '+profile.name+' ('+defenses(profile)+(profile.type==='swarm'?', schnell':'')+')').join(' · ')+'. Gelb = Leben, Orange = Rüstung, Blau = Magieresistenz.';
+    document.getElementById('waveForecast').textContent='Wave '+plan.wave+': '+plan.count+' Gegner. '+[...groups.values()].map(({count,profile})=>count+' × '+profile.name+' ('+defenses(profile)+(profile.description?', '+profile.description:profile.type==='swarm'?', schnell':'')+')').join(' · ')+'. Gelb = Leben, Orange = Rüstung, Blau = Magieresistenz.';
+    if(state.challengeDay)document.getElementById('waveForecast').textContent+=' 🪙 Geldtransport: Besiegen bringt 15 Gold extra. Erreicht er die Basis, verlierst du 10 Gold.';
     if(readyBossCount) document.getElementById('waveForecast').textContent+=` Zusätzlich ${readyBossCount} Wächter: je ${defenses(boss)}, ${boss.baseDamage} Basisschaden, +${boss.killGold} Gold plus Kartenbeute (90 % Epic, 10 % Legendary).`;
     if(plan.boss) document.getElementById('waveForecast').textContent+=` Bosswelle: ${plan.boss.name} mit ${defenses(plan.boss)} und ${plan.boss.baseDamage} Basisschaden an einem zufälligen Eingang. ${plan.boss.description} +${plan.boss.killGold} Gold und Kartenbeute bei Sieg.`;
     document.getElementById('goldForecast').textContent=`Maximal +${plan.maxGold+bossGold} Gold: ${plan.count} Kills inklusive Karawanenboni = ${plan.killGold}, Bossloot +${bossGold+(plan.boss?.killGold||0)}, Wave-Abschluss +${plan.completionGold}, Hex-Bonus +${plan.income}. Nur wenn alle Gegner besiegt werden und die Wave überlebt wird. Mit aktuellem Gold: maximal ${state.gold+plan.maxGold+bossGold} vor Bauausgaben und weiteren Einnahmen der laufenden Wave.`;
     const earned=state.goldEarned;
-    document.getElementById('goldSources').textContent=`Startgold ${HexHeroes.hero(state.heroId).gold} · Hero-Einkommen +${HexHeroes.hero(state.heroId).income} · pro Kill +${HexWaves.economy.kill} · pro überlebter Wave +${HexWaves.economy.completion} · Dorf +2, Handelsstraße +4, Haus zusätzlich +3 pro Wave. Im Run verdient: Kills ${earned.kills}, Abschlüsse ${earned.completion}, Hex-/Haus-/Hero-/Beuteboni ${earned.income}, Shrines ${earned.shrine||0}, Schätze ${earned.treasure||0}, Bosse ${earned.boss||0}. Undo erstattet nur den Kaufpreis, erzeugt kein Einkommen.`;
+    document.getElementById('goldSources').textContent=`Startgold ${HexHeroes.hero(state.heroId).gold} · Hero-Einkommen +${HexHeroes.hero(state.heroId).income} · regulärer Gegner +${HexWaves.economy.kill} (Splittergolem: auf drei Einheiten verteilt) · pro überlebter Wave +${HexWaves.economy.completion} · Dorf +2, Handelsstraße +4, Haus zusätzlich +3 pro Wave. Im Run verdient: Kills ${earned.kills}, Abschlüsse ${earned.completion}, Hex-/Haus-/Hero-/Beuteboni ${earned.income}, Shrines ${earned.shrine||0}, Schätze ${earned.treasure||0}, Bosse ${earned.boss||0}. Undo erstattet nur den Kaufpreis, erzeugt kein Einkommen.`;
     const remainingGold=uiWavePlan(state.wave).enemies.slice(-state.pendingSpawns||Infinity).reduce((sum,e)=>sum+(e.killGold??HexWaves.economy.kill),0)+aliveGold+HexWaves.economy.completion+state.income;
-    document.getElementById('liveWaveInfo').textContent=state.waveRunning?`Laufende Wave ${state.wave}: ${state.pendingSpawns} Gegner kommen noch, ${alive.length} sind auf der Map (davon ${alive.filter(e=>e.type==='boss').length} Wächter), ${state.waveKills} normale Gegner besiegt. Noch maximal +${remainingGold} Gold bis Wave-Ende.`:'Vor dem Hex-Placement ist der Hex-Bonus vorläufig; er wird nach dem Placement aktualisiert.';
+    document.getElementById('liveWaveInfo').textContent=state.waveRunning?`Laufende Wave ${state.wave}: ${state.pendingSpawns} Gegner kommen noch, ${alive.length} sind auf der Map (davon ${alive.filter(e=>e.type==='boss').length} Wächter), ${state.waveKills} normale Gegner besiegt. Noch maximal +${remainingGold} Gold bis Wave-Ende.`:'Vor dem Platzieren des Hexes ist der Einkommensbonus vorläufig; danach wird er aktualisiert.';
     const budgetSlot=state.selectedSlot||state.selectedTower||state.selectedBuilding;
     document.getElementById('towerBudget').textContent=(budgetSlot?'Preise am ausgewählten Hex: ':'Loadoutpreise: ')+state.towerLoadout.map(id=>TOWERS[id]).filter(Boolean).map(t=>{const price=HexBuildings.cost(state,budgetSlot,t.cost);return t.name+': '+price+' Gold'+(state.gold<price?' (noch '+(price-state.gold)+' nötig)':' (bezahlbar)');}).join(' · ');
 
@@ -613,8 +615,8 @@ R dreht die Karte, dann Feld anklicken.`;}
     if(buildingChanged){
       buildingPanelKey=panelKey;panel._targetButton=null;buildingButtons.clear();const content=document.getElementById('buildingOptions');content.innerHTML='';
       if(!building) for(const [type,definition] of Object.entries(HexBuildings.definitions).filter(([type])=>HexBuildings.allowedTypes(tile).includes(type))){
-        const button=document.createElement('button');button.className='upgradeOption';button.title='Kräftig: aktueller Wirkbereich. Blass: Versorgung durch andere Gebäude desselben Typs.';button.innerHTML=`<strong>${definition.name} · ${definition.cost} Gold</strong><small>${definition.desc}</small>`;
-        const preview=()=>{state.previewBuilding={...selected,type};renderBoard();},clear=()=>{state.previewBuilding=null;renderBoard();};
+        const button=document.createElement('button');button.className='upgradeOption';const blocked=HexBuildings.buildBlockReason(tile,type);button.title=blocked||'Kräftig: aktueller Wirkbereich. Blass: Versorgung durch andere Gebäude desselben Typs.';button.innerHTML=`<strong>${definition.name} · ${definition.cost} Gold</strong><small>${definition.desc}</small>${blocked?'<small class="buildBlockedReason">🔒 '+blocked+'</small>':''}`;
+        const preview=()=>{if(HexBuildings.buildBlockReason(tile,type))return;state.previewBuilding={...selected,type};renderBoard();},clear=()=>{state.previewBuilding=null;renderBoard();};
         button.addEventListener('pointerenter',preview);button.addEventListener('pointerleave',clear);button.addEventListener('focus',preview);button.addEventListener('blur',clear);
         button.addEventListener('click',()=>{state.previewBuilding=null;if(HexBuildings.buy(state,state.selectedBuilding,type)){sound.play('build');renderAll();}});content.appendChild(button);buildingButtons.set(type,button);
       }
@@ -625,7 +627,7 @@ R dreht die Karte, dann Feld anklicken.`;}
       if(building.special&&building.type!=='house'){const choose=document.createElement('button');panel._targetButton=choose;choose.textContent=state.buildingTarget?'Hex auf der Map anklicken · Abbrechen':(building.target?'Zusatz-Hex ändern':'Zusatz-Hex auf der Map auswählen');choose.title=building.target?'Aktuelles Zusatzhex: '+building.target+' · kräftig markiert':'Zusatzhex auswählen';choose.addEventListener('pointerenter',()=>renderBoard());choose.addEventListener('focus',()=>renderBoard());choose.disabled=state.hp<=0||!['place','build','wave'].includes(state.phase);choose.addEventListener('click',()=>{state.buildingTarget=state.buildingTarget?null:{...state.selectedBuilding};state.selectedBuilding=null;setMessage('Zusatzwirkung: ein erkundetes Hex anklicken · Escape: abbrechen');renderAll();});content.appendChild(choose);}
     }
     if(panel._targetButton)panel._targetButton.disabled=state.hp<=0||!['place','build','wave'].includes(state.phase);
-    for(const [type,button] of buildingButtons) button.disabled=(type==='portal'&&state.phase!=='build')||!['place','build','wave'].includes(state.phase)||state.hp<=0||state.gold<(button._cost||HexBuildings.definitions[type].cost);
+    for(const [type,button] of buildingButtons) button.disabled=!!HexBuildings.buildBlockReason(tile,type)||(type==='portal'&&(!['place','build'].includes(state.phase)||state.waveRunning))||!['place','build','wave'].includes(state.phase)||state.hp<=0||state.gold<(button._cost||HexBuildings.definitions[type].cost);
     const sell=document.getElementById('sellBuildingBtn'),refund=HexBuildings.refund(state,building);sell.disabled=!refund;sell.textContent=refund?`Verkaufen · ${refund.percent} % (+${refund.amount} Gold)`:'Gebäude verkaufen';
     positionTowerPanel();
   }
@@ -642,7 +644,7 @@ R dreht die Karte, dann Feld anklicken.`;}
       const targetable=selectedTowers.filter(t=>{const d=HexData.towerDefinition(t);return !d.aura&&!d.mine;});
       if(targetable.length){
         const tower=targetable[0];
-        const labels={closestBase:'Nächste an der Base',furthestBase:'Weiteste von der Base',mostHealth:'Meistes Leben',leastHealth:'Wenigstes Leben',mostArmor:'Meiste Rüstung',mostMagic:'Meiste Magieresistenz',boss:'Bosse',closestTower:'Nächste am Turm',furthestTower:'Weiteste vom Turm'},defaults=['closestBase','mostHealth','boss'];
+        const labels={closestBase:'Nächste an der Base',furthestBase:'Weiteste von der Base',mostHealth:'Meistes Leben',leastHealth:'Wenigstes Leben',mostArmor:'Meiste Rüstung',mostMagic:'Meiste Magieresistenz',boss:'Bosse',healer:'Heiler',closestTower:'Nächste am Turm',furthestTower:'Weiteste vom Turm'},defaults=['closestBase','mostHealth','boss'];
         tower.targetPriority=[...new Set(tower.targetPriority||defaults)];for(const value of defaults)if(tower.targetPriority.length<3&&!tower.targetPriority.includes(value))tower.targetPriority.push(value);tower.targetPriority=tower.targetPriority.slice(0,3);
         const targeting=document.createElement('section');targeting.className='targetPriorities';targeting.innerHTML='<strong>Angriffsfokus</strong><small>Priorität 1 wird zuerst geprüft. Gibt es dafür kein gültiges Ziel, folgt die nächste Zeile.</small>';
         tower.targetPriority.forEach((value,index)=>{const row=document.createElement('label');row.textContent=`${index+1}.`;const select=document.createElement('select');select.setAttribute('aria-label','Angriffsfokus Priorität '+(index+1));const mixed=targetable.some(t=>(t.targetPriority||defaults)[index]!==value);if(mixed){const option=document.createElement('option');option.value='';option.textContent='Unterschiedliche Einstellungen';option.disabled=true;option.selected=true;select.appendChild(option);}for(const [id,label] of Object.entries(labels)){const option=document.createElement('option');option.value=id;option.textContent=label;option.selected=!mixed&&id===value;select.appendChild(option);}select.addEventListener('change',()=>{for(const target of targetable){target.targetPriority=[...(target.targetPriority||defaults)];const old=target.targetPriority[index],other=target.targetPriority.indexOf(select.value);target.targetPriority[index]=select.value;if(other>=0&&other!==index)target.targetPriority[other]=old;}towerPanelKey='';renderAll();});row.appendChild(select);targeting.appendChild(row);});content.appendChild(targeting);
@@ -727,7 +729,7 @@ R dreht die Karte, dann Feld anklicken.`;}
   function renderBiomeIntroDetails(){
     const ids=HexBiomes.introIds(state),active=state.highlightBiome||pinnedBiome;
     document.getElementById('biomeIntroTitle').textContent=ids.length>1?'Neue Biome entdeckt':'Neues Biom entdeckt';
-    const detail=document.getElementById('biomeIntroDetail');detail.textContent=active?HexBiomes.definitions[active].name+': '+HexBiomes.definitions[active].description:ids.map(id=>HexBiomes.definitions[id].name+':\n'+HexBiomes.definitions[id].description).join('\n\n');
+    const detail=document.getElementById('biomeIntroDetail');detail.textContent=active?HexBiomes.definitions[active].name+': '+HexBiomes.definitions[active].description:ids.map(id=>HexBiomes.definitions[id].name).join('\n');
   }
   function showBiomeHighlight(id){state.highlightBiome=id;renderBiomeIntroDetails();renderBoard();}
   function renderQuickControls(){
@@ -860,7 +862,7 @@ R dreht die Karte, dann Feld anklicken.`;}
     const totals=Object.entries(state.runTowerStats).filter(([id])=>TOWERS[id]).sort((a,b)=>(b[1].damage||0)-(a[1].damage||0));
     let html='<h3>Turmstatistik</h3>'+ (totals.length?table(totals.map(([id,stats])=>row(TOWERS[id].name,stats,id==='freeze')).join('')):'<p>Keine Türme gebaut.</p>');
     const details=Object.entries(state.runTowerDetails||{});if(details.length)html+='<details><summary>Einzelne Türme ('+details.length+')</summary>'+table(details.map(([id,stats])=>row('#'+id+' '+TOWERS[stats.type].name+' · Hex '+stats.q+','+stats.r+' · Platz '+(stats.index+1)+(stats.sold?' · verkauft':''),stats,stats.type==='freeze')).join(''))+'</details>';
-    html+='<p class="hint">Tatsächlich verursachter Schaden an Leben, Rüstung und Magieresistenz, ohne Overkill; inklusive Minen und Geister. Schaden/Gold nutzt die bezahlten Bau- und Upgrade-Kosten vor Erstattungen. Rabatte zählen, kostenlose Shrine-Upgrades kosten 0. Freeze unterstützt durch Slow. Base-Waffenschaden separat: '+format(state.baseDamage)+'.</p>';
+    html+='<p class="hint">Tatsächlich verursachter Schaden an Leben, Rüstung und Magieresistenz, ohne Overkill; inklusive Minen- und Geisterschaden. Schaden/Gold nutzt die bezahlten Bau- und Verbesserungskosten vor Erstattungen. Rabatte zählen, kostenlose Shrine-Upgrades kosten 0. Freeze unterstützt durch Slow. Base-Waffenschaden separat: '+format(state.baseDamage)+'.</p>';
     document.getElementById('runStatistics').innerHTML=html;
   }
   function inspectCampaign(enabled){const panel=document.getElementById('campaignVictory');panel.classList.toggle('inspectCampaign',enabled);panel.setAttribute('aria-modal',String(!enabled));}
@@ -879,7 +881,7 @@ R dreht die Karte, dann Feld anklicken.`;}
       const milestone=state.difficulty==='dual'?'dual35':'standard35';if(!profile.milestones.includes(milestone))profile=HexProfile.save({...profile,milestones:[...profile.milestones,milestone]},TOWERS);
       title.textContent='Wave 35 geschafft!';
       document.getElementById('campaignVictoryText').textContent=state.difficulty==='normal'?'Welle 35 geschafft! Zwei Fronten und Festungsbauer sind jetzt freigeschaltet.':'Zwei Fronten gemeistert! Händlerstadt ist jetzt freigeschaltet.';
-      note.textContent='Deine Map und Türme bleiben im Endless-Modus erhalten. Diamanten werden beim Beenden des Runs abgerechnet.';
+      note.textContent='Deine Map und Türme bleiben im Endless-Modus erhalten. Diamanten werden beim Beenden des Durchlaufs abgerechnet.';
     }
     document.getElementById('campaignVictory').classList.remove('hidden');renderAll();
   }
@@ -936,7 +938,7 @@ R dreht die Karte, dann Feld anklicken.`;}
   document.getElementById('menuSaveBtn').addEventListener('click',()=>{pendingImport=null;importReadId++;confirmImport.classList.add('hidden');document.getElementById('uploadSaveInput').value='';saveStatus.textContent='Ein Import ersetzt dein Profil. Lade zur Sicherheit zuerst eine Kopie herunter.';saveOverlay.classList.remove('hidden');});
   document.getElementById('closeSaveBtn').addEventListener('click',closeSave);
   document.getElementById('downloadSaveBtn').addEventListener('click',()=>{try{const blob=new Blob([HexProfile.exportFile(profile,TOWERS)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='autohex-spielstand-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);saveStatus.textContent='Spielstanddatei zum Download bereitgestellt.';}catch{saveStatus.textContent='Download fehlgeschlagen. Bitte erneut versuchen.';}});
-  document.getElementById('uploadSaveInput').addEventListener('change',async event=>{const readId=++importReadId;pendingImport=null;confirmImport.classList.add('hidden');const file=event.target.files?.[0];if(!file)return;try{if(hasActiveRun&&state.hp>0)throw new Error('Bitte zuerst den laufenden Run beenden. Ein Profilwechsel während eines Runs ist nicht möglich.');if(file.size>2000000)throw new Error('Datei zu groß (maximal 2 MB).');const text=await file.text();if(readId!==importReadId)return;const next=HexProfile.readFile(text,TOWERS);pendingImport=text;saveStatus.textContent=next.diamonds+' Diamanten · '+next.unlockedTowers.length+' Türme freigeschaltet · Bestmarke Wave '+next.records.highestWave+'. Dein bisheriges Profil mit '+profile.diamonds+' Diamanten wird ersetzt. Eine lokale Sicherung wird angelegt.';confirmImport.classList.remove('hidden');}catch(error){if(readId===importReadId)saveStatus.textContent=error.message;}});
+  document.getElementById('uploadSaveInput').addEventListener('change',async event=>{const readId=++importReadId;pendingImport=null;confirmImport.classList.add('hidden');const file=event.target.files?.[0];if(!file)return;try{if(hasActiveRun&&state.hp>0)throw new Error('Bitte zuerst den laufenden Run beenden. Ein Profilwechsel während eines Durchlaufs ist nicht möglich.');if(file.size>2000000)throw new Error('Datei zu groß (maximal 2 MB).');const text=await file.text();if(readId!==importReadId)return;const next=HexProfile.readFile(text,TOWERS);pendingImport=text;saveStatus.textContent=next.diamonds+' Diamanten · '+next.unlockedTowers.length+' Türme freigeschaltet · Bestmarke Wave '+next.records.highestWave+'. Dein bisheriges Profil mit '+profile.diamonds+' Diamanten wird ersetzt. Eine lokale Sicherung wird angelegt.';confirmImport.classList.remove('hidden');}catch(error){if(readId===importReadId)saveStatus.textContent=error.message;}});
   confirmImport.addEventListener('click',()=>{if(!pendingImport||hasActiveRun&&state.hp>0)return;try{profile=HexProfile.importFile(pendingImport,TOWERS);pendingLoadout=[...profile.activeLoadout];pendingHero=profile.activeHero;pendingDifficulty=profile.difficulty;pendingImport=null;confirmImport.classList.add('hidden');renderLoadout();renderUI();updateArsenalHint();saveStatus.textContent='Spielstand importiert. Dein Profil ist für den nächsten Run bereit.';}catch(error){saveStatus.textContent='Import fehlgeschlagen: '+error.message;}});
   function updateArsenalHint(){const count=HexProfile.affordableUnlocks(profile),button=document.getElementById('menuArsenalBtn');button.classList.toggle('upgradeAvailable',count>0);button.textContent=count?'◆ Arsenal · Upgrade verfügbar':'◆ Arsenal';button.title=count?count+' Freischaltungen bezahlbar':'Arsenal';}
   function openMainMenu(){document.getElementById('biomeIntro').classList.add('hidden');cancelQuickTower();resetCameraKeys();updateArsenalHint();const today=new Date().toISOString().slice(0,10),daily=profile.dailyResults?.[today];document.getElementById('dailyProgress').textContent=today+' (UTC) · '+(daily?.won?'Heute geschafft · Belohnung erhalten':'Tagesbestmarke: '+(daily?.best||0)+'/20 Waves');document.getElementById('menuContinueBtn').classList.toggle('hidden',!hasActiveRun||state.hp<=0);document.getElementById('menuPlayBtn').textContent=hasActiveRun?'Neuer Run':'Spielen';document.getElementById('menuLoadoutInfo').textContent='Loadout: '+profile.activeLoadout.map(id=>TOWERS[id]?.name||id).join(' · ');mainMenu.classList.remove('hidden');}

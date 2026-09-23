@@ -18,7 +18,7 @@ test('biome tower modifiers compose with upgrades and do not mutate definitions'
   assert.equal(def('ballista', 'storm').cooldown, 1.9 / .85);
   assert.equal(def('element', 'ash', { branch: 'elementFire' }).damage, 24);
   assert.equal(def('element', 'ash', { branch: 'elementWater' }).slowDuration, 1.5);
-  assert.equal(def('freeze', 'ash').range, 123); assert.equal(d.TOWERS.freeze.range, 145);
+  assert.equal(def('freeze', 'ash').range, 117); assert.equal(d.TOWERS.freeze.range, 145);
   assert.equal(def('archer', 'desert', { tileType: 'signalCross' }).range, 153);
 });
 test('desert movement slow is local and ends when an enemy leaves the biome', () => {

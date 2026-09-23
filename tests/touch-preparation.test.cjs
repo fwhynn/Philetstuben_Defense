@@ -23,8 +23,8 @@ test('post-wave eleven guidance leads to hotkeys and is dismissed when they are 
  a.state.celebrationActive=false;a.renderAll();assert.equal(elements.get('hotkeyTip').classList.contains('hidden'),true);
  a.state.wave=11;a.state.lastCompletedWave=11;a.renderAll();assert.equal(elements.get('hotkeyTip').classList.contains('hidden'),false);assert.equal(elements.get('settingsOpenBtn').classList.contains('hotkeyGuide'),true);
  elements.get('hotkeyTipOpen').listeners.click();assert.equal(elements.get('settingsDrawer').classList.contains('hidden'),false);assert.equal(elements.get('hotkeyHelpSummary').classList.contains('hotkeyGuide'),true);
- documentListeners.click({target:{closest:()=>null}});assert.equal(elements.get('hotkeyTip').classList.contains('hidden'),false);assert.ok(!a.state.hotkeyHintDone);
- a.state.wave=12;a.state.phase='wave';a.state.waveRunning=true;a.renderAll();assert.equal(elements.get('hotkeyTip').classList.contains('hidden'),false);assert.equal(elements.get('hotkeyHelpSummary').classList.contains('hotkeyGuide'),true);
+ documentListeners.click({target:{closest:()=>null}});assert.equal(elements.get('hotkeyTip').classList.contains('hidden'),true);assert.ok(!a.state.hotkeyHintDone);
+ a.state.wave=12;a.state.phase='wave';a.state.waveRunning=true;a.renderAll();assert.equal(elements.get('hotkeyTip').classList.contains('hidden'),true);assert.equal(elements.get('hotkeyHelpSummary').classList.contains('hotkeyGuide'),true);
  a.state.wave=11;a.state.phase='place';a.state.waveRunning=false;elements.get('hotkeyHelp').open=true;elements.get('hotkeyHelp').listeners.toggle();assert.equal(a.state.hotkeyHintDone,true);assert.equal(elements.get('hotkeyHelpSummary').classList.contains('hotkeyGuide'),false);
 });
 test('Escape opens settings only without an existing selection',()=>{

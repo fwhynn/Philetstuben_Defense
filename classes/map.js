@@ -84,7 +84,7 @@ const HexMap=(()=>{
     if(!connects) return false;
     // Validate the resulting reachable network, without mutating the actual map.
     const candidate=new Map(map);candidate.set(key(q,r),{q,r,roads,type:card.id});
-    if(card.rescue&&card.minExits===2){const outside=exterior(candidate,landmarks);if(roads.filter(d=>{const n=neighbor(q,r,d);return outside.has(key(n.q,n.r));}).length<2)return false;}
+    if(card.rescue&&card.minExits){const outside=exterior(candidate,landmarks),exits=roads.filter(d=>{const n=neighbor(q,r,d);return outside.has(key(n.q,n.r));}).length;if(card.minExits===2?exits<2:exits!==1)return false;}
     return hasExteriorFront(candidate,landmarks);
   }
   function exterior(map,landmarks){
@@ -116,15 +116,16 @@ const HexMap=(()=>{
     return chosen;
   }
   function rescue(map,landmarks,minExits=1){
+    let best=null;
     for(const tile of map.values()) for(const direction of tile.roads||[]){
       const target=neighbor(tile.q,tile.r,direction);if(map.has(key(target.q,target.r))) continue;
       if(landmarks?.get(key(target.q,target.r))?.prefab) continue;
       const roads=[],free=[];
       for(let d=0;d<6;d++){const n=neighbor(target.q,target.r,d),fixed=landmarks?.get(key(n.q,n.r)),other=map.get(key(n.q,n.r))||(!fixed?.claimed?fixed?.prefab:null);if(!other) free.push(d);else if((other.roads||[]).includes(OPP(d))) roads.push(d);}
       const exits=minExits===2?free.flatMap((a,i)=>free.slice(i+1).map(b=>[a,b])):free.map(d=>[d]);
-      for(const outgoing of exits){const card={id:'rescue',name:'Rettungshex',rarity:'Common',roads:[...roads,...outgoing],slots:0,rescue:true,minExits,desc:minExits===2?'Rettungsstraße mit zwei offenen Ausgängen. Keine Turmplätze.':'Nur bei blockiertem Deck. Passende Anschlüsse, keine Turmplätze.'};if(canPlace(map,target.q,target.r,card,0,landmarks)) return card;}
+      for(const outgoing of exits){const card={id:'rescue',name:'Rettungshex',rarity:'Common',roads:[...roads,...outgoing],slots:0,rescue:true,minExits,desc:minExits===2?'Rettungsstraße mit zwei offenen Ausgängen. Keine Turmplätze.':'Nur bei blockiertem Deck. Passende Anschlüsse, keine Turmplätze.'};if(canPlace(map,target.q,target.r,card,0,landmarks)&&(!best||card.roads.length<best.roads.length))best=card;}
     }
-    return null;
+    return best;
   }
   function randomBaseExits(random){
     const first=Math.floor(random()*6),other=Math.floor(random()*5);

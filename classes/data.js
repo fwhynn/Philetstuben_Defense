@@ -39,7 +39,7 @@ const HexData=(()=>{
     grove: {requiredTower:'archer',id:'grove',name:'Waldkurve',rarity:'Rare',roads:[0,2],slots:1,archerDamage:1.25,desc:'+25 % Archer-Schaden auf diesem Hex. Nur 1 Slot.'},
     treasury: {id:'treasury',name:'Handelsstraße',rarity:'Rare',roads:[0,3],slots:0,income:4,desc:'+4 Gold je Wave. Keine Turret-Slots.'},
     citadel: {id:'citadel',name:'Bastionskreuzung',rarity:'Legendary',roads:[0,2,4],slots:2,towerRange:1.4,income:2,desc:'+40 % Tower-Reichweite, 2 Turret-Slots und +2 Gold je Wave.'},
-    battlefield: {id:'battlefield',name:'Kampfstraße',rarity:'Epic',roads:[0,3],slots:1,towerDamage:1.2,desc:'+20 % Schaden für alle Schadentürme auf diesem Hex.'},
+    battlefield: {id:'battlefield',name:'Kampfstraße',rarity:'Epic',roads:[0,3],slots:1,towerDamage:1.2,desc:'+20 % Schaden für alle Schadenstürme auf diesem Hex.'},
     watchtower: {id:'watchtower',name:'Wachtkurve',rarity:'Epic',roads:[0,2],slots:2,towerRange:1.15,desc:'2 Turret-Slots und +15 % Tower-Reichweite.'},
     royalVillage: {id:'royalVillage',name:'Königsstraße',rarity:'Legendary',roads:[0,3],slots:1,buildingSlots:1,income:5,desc:'+5 Gold je Wave, 1 Turret-Slot und 1 Gebäudeslot.'},
     warCross: {id:'warCross',name:'Kriegskreuzung',rarity:'Legendary',roads:[0,1,3,4],slots:2,towerDamage:1.3,desc:'Vier Straßenenden, 2 Slots, +30 % Tower-Schaden.'}
@@ -48,7 +48,7 @@ const HexData=(()=>{
   const TOWERS = {
     archer: {name:'Archer',cost:25,range:150,damage:9,cooldown:0.55,color:'#e7d89b',damageMultipliers:{hp:1.25,armor:1,magic:.65},desc:'Schneller Single-Target-Schaden.'},
     catapult: {name:'Katapult',cost:40,range:190,damage:18,cooldown:1.35,color:'#c88954',damageMultipliers:{hp:1,armor:1.5,magic:.6},pierce:true,pierceTargets:3,desc:'Stein durchschlägt bis zu 3 Gegner in einer Linie.'},
-    chain: {name:'Kettenblitz',cost:45,range:135,damage:8,cooldown:0.9,color:'#7fc6ff',damageMultipliers:{hp:1,armor:.65,magic:1.5},chain:3,jumpRange:75,desc:'Bis zu 3 Ziele, maximal 75 Abstand je Sprung.'},
+    chain: {name:'Kettenblitz',cost:45,range:135,damage:8,cooldown:0.9,color:'#7fc6ff',damageMultipliers:{hp:1,armor:.65,magic:1.5},chain:3,jumpRange:75,desc:'Bis zu 3 Ziele mit maximal 75 Einheiten Abstand je Sprung.'},
     freeze: {name:'Freeze',cost:30,range:145,damage:0,cooldown:1,color:'#a4eef5',aura:true,slow:.5,role:'Support',desc:'Aura: halbiert das Tempo aller Gegner in Reichweite.'},
     mine: {name:'Minenleger',cost:35,range:150,damage:24,cooldown:1.4,color:'#e6a75f',damageMultipliers:{hp:1.1,armor:1.4,magic:.65},mine:true,splash:45,role:'Wegkontrolle',desc:'Legt dauerhaft stapelbare Sprengminen auf Straßen.'},
     ballista: {name:'Balliste',cost:55,range:235,damage:46,cooldown:1.9,color:'#d9c08b',damageMultipliers:{hp:1.45,armor:1.15,magic:.7},bossMultiplier:1.3,role:'Bosskiller',desc:'Extrem weitreichender Einzelschuss gegen Eliten und Bosse.'},
@@ -59,7 +59,7 @@ const HexData=(()=>{
 
   const UPGRADES={
     elementFire:{tower:'element',name:'Feuerkern',cost:40,damage:20,splash:48,color:'#ff8654',desc:'Feuer trifft Gruppen im Umkreis von 48.'},
-    elementWater:{tower:'element',name:'Wasserkern',cost:40,damage:16,hitSlow:.65,slowDuration:2,color:'#69d8ff',desc:'Treffer verlangsamen 2 Sekunden lang um 35 %. Stärkster Slow zählt; Bossresistenz bleibt.'},
+    elementWater:{tower:'element',name:'Wasserkern',cost:40,damage:16,hitSlow:.65,slowDuration:2,color:'#69d8ff',desc:'Treffer verlangsamen 2 Sekunden lang um 35 %. Die stärkste Verlangsamung zählt; Bossresistenzen bleiben wirksam.'},
     elementWind:{tower:'element',name:'Windkern',cost:40,damage:18,range:210,pierce:true,pierceTargets:3,color:'#dbefae',desc:'Wind durchschlägt bis zu 3 Gegner auf einer Linie.'},
     elementVolcano:{tower:'element',requires:'elementFire',name:'Vulkanherz',cost:70,damage:34,splash:65,desc:'Stärkeres Feuer mit größerer Fläche.'},
     elementTide:{tower:'element',requires:'elementWater',name:'Gezeitenherz',cost:70,damage:26,hitSlow:.5,slowDuration:3,desc:'Halbiert das Tempo getroffener Gegner für 3 Sekunden.'},
@@ -71,7 +71,7 @@ const HexData=(()=>{
     volley:{tower:'archer',name:'Salve',cost:35,damage:7,cooldown:.65,splash:55,desc:'Treffer schädigen Gegner im Umkreis von 55.'},
     marksman:{tower:'archer',name:'Scharfschütze',cost:35,damage:22,cooldown:.85,range:190,desc:'Mehr Einzelzielschaden und Reichweite.'},
     siege:{tower:'catapult',name:'Belagerung',cost:45,damage:36,cooldown:1.8,range:230,desc:'Schwere Steine mit mehr Schaden und Reichweite.'},
-    barrage:{tower:'catapult',name:'Steinhagel',cost:45,damage:13,cooldown:.65,range:190,desc:'Schnelle durchschlagende Steine für gerade Killzones.'},
+    barrage:{tower:'catapult',name:'Steinhagel',cost:45,damage:13,cooldown:.65,range:190,desc:'Schnelle, durchschlagende Steine für gerade Straßenabschnitte.'},
     storm:{tower:'chain',name:'Sturmnetz',cost:45,damage:7,chain:5,jumpRange:95,desc:'Bis zu fünf Ziele und weitere Sprünge.'},
     overload:{tower:'chain',name:'Überladung',cost:45,damage:18,chain:2,cooldown:1.1,range:155,desc:'Zwei starke Treffer für robuste Gegner.'},
     deepFrost:{tower:'freeze',name:'Tiefenfrost',cost:35,slow:.35,range:125,desc:'65 % Slow in kleinerem Radius.'},
@@ -82,7 +82,7 @@ const HexData=(()=>{
     rockStorm:{tower:'catapult',requires:'barrage',name:'Steinsturm',cost:70,damage:21,cooldown:.5,desc:'Finale schnelle Steinsalven.'},
     tempest:{tower:'chain',requires:'storm',name:'Gewitter',cost:70,damage:11,chain:7,jumpRange:110,desc:'Großes Blitznetz für dichte Gruppen.'},
     thunder:{tower:'chain',requires:'overload',name:'Donnerschlag',cost:70,damage:32,chain:3,range:175,desc:'Starke Blitze für robuste Ziele.'},
-    absoluteZero:{tower:'freeze',requires:'deepFrost',name:'Eisstarre',cost:60,slow:.25,range:145,desc:'75 % Slow in der Killzone.'},
+    absoluteZero:{tower:'freeze',requires:'deepFrost',name:'Eisstarre',cost:60,slow:.25,range:145,desc:'75 % Verlangsamung im Kampfbereich.'},
     winter:{tower:'freeze',requires:'frostField',name:'Winterfeld',cost:60,slow:.5,range:250,desc:'50 % Slow auf großem Gebiet.'},
     demolition:{tower:'mine',name:'Sprengmeister',cost:40,damage:42,cooldown:1.8,range:170,splash:60,desc:'Langsam gelegte schwere Minen für robuste Gegner.'},
     minefield:{tower:'mine',name:'Minenfeld',cost:40,damage:16,cooldown:.75,range:140,splash:42,desc:'Legt schnell viele kleinere Minen gegen Gruppen.'},
@@ -128,6 +128,9 @@ const HexData=(()=>{
   function towerDefinition(tower,definitions=TOWERS){
     const def={...definitions[tower.type],...(tower.branch?UPGRADES[tower.branch]:{}),...(tower.finalUpgrade?UPGRADES[tower.finalUpgrade]:{})},terrain=CARD_LIBRARY[tower.tileType];
     const ultimate=tower.ultimate&&ultimateDefinition(tower);if(ultimate){def.name=ultimate.name;def.damage=(def.damage||0)*(ultimate.damageFactor||1);def.range=(def.range||0)*(ultimate.rangeFactor||1);def.cooldown=(def.cooldown||1)*(ultimate.cooldownFactor||1);if(def.slow)def.slow*=ultimate.slowFactor||1;if(def.splash)def.splash+=ultimate.splashBonus||0;if(def.chain)def.chain+=ultimate.chainBonus||0;if(def.jumpRange)def.jumpRange+=ultimate.jumpBonus||0;if(def.bossMultiplier)def.bossMultiplier*=ultimate.bossFactor||1;if(def.hitSlow)def.hitSlow*=ultimate.hitSlowFactor||1;for(const [field,bonus] of [['slowDuration','slowDurationBonus'],['pierceTargets','pierceBonus'],['soulLimit','soulLimitBonus'],['soulDuration','soulDurationBonus']])if(def[field])def[field]+=ultimate[bonus]||0;}
+    // Small balance adjustment applies to both upgrade branches and ultimates.
+    if(tower.type==='freeze')def.range*=.95;
+    if(tower.type==='flame')def.damage*=.95;
     if(typeof HexBiomes!=='undefined')HexBiomes.apply(def,tower);
     const bonus=terrain?.towerBonus?.type===tower.type?terrain.towerBonus:{};
     def.range=Math.round(def.range*(bonus.range||1)*(terrain?.towerRange||1)*(tower.rangeFactor||1));

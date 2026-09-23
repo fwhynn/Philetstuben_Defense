@@ -106,7 +106,7 @@ test('final lightning network damages all seven targets without negative damage'
 test('terrain bonuses affect attacks after specialization and aura range', () => {
   const { state, step, towers } = setup(); state.enemies = [enemy(10)];
   step(state, [{ tw: { type: 'archer', tileType: 'grove', branch: 'marksman', lastShot: 0 }, pos: { x: 0, y: 0 } }], towers, 0, 1000); assert.equal(state.enemies[0].hp, 65.625);
-  state.enemies = [enemy(175)];
+  state.enemies = [enemy(170)];
   step(state, [{ tw: { type: 'freeze', tileType: 'highGround', lastShot: 0 }, pos: { x: 0, y: 0 } }], towers, 0, 2000); assert.equal(state.enemies[0].slowFactor, .5); assert.equal(state.enemies[0].hp, 100);
 });
 

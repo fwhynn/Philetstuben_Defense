@@ -4,7 +4,7 @@ const HexBiomes=(()=>{
     grass:{name:'Grasland',color:'#688653',description:'Keine Biommodifikatoren.'},
     desert:{name:'Dünenmeer',color:'#e2bd69',description:'Gegner hier 15 % langsamer; Türme hier −15 % Reichweite. Wächter aus diesem Biom: Verlangsamungen wirken nur halb so stark.'},
     storm:{name:'Sturmhochland',color:'#7e8da9',description:'Kettenblitz +25 % Sprungweite; Wind +1 Durchschlagziel; Archer/Balliste −15 % Angriffsrate. Wächter: 50 % weniger Blitz- und Windschaden.'},
-    ash:{name:'Aschelande',color:'#bd6047',description:'Feuer +20 % Schaden; Freeze −15 % Reichweite; Wasser-Slow hält 25 % kürzer. Wächter: 50 % weniger Feuerschaden.'}
+    ash:{name:'Aschelande',color:'#bd6047',description:'Feuer +20 % Schaden; Freeze −15 % Reichweite; Verlangsamung durch Wasser wirkt 25 % kürzer. Wächter: 50 % weniger Feuerschaden.'}
   };
   function legacyAt(seed,q,r){
     if(seed==null||Math.max(Math.abs(q),Math.abs(r),Math.abs(q+r))<=3)return 'grass';

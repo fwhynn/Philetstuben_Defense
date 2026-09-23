@@ -54,7 +54,7 @@
 
       <nav class="compactToolbar" aria-label="Spielsteuerung"><button data-compact="menu" aria-expanded="false">Menü</button><button data-compact="stats" aria-expanded="false">Werte</button><button data-compact="towers" aria-expanded="false">Türme</button><button data-compact="biomes" aria-expanded="false">Biome</button></nav>
       <nav id="quickLoadout" class="mapRail loadoutRail" aria-label="Loadout: Turm auf einen freien Platz ziehen"></nav>
-      <aside id="biomeIntro" class="biomeIntro hidden" role="status"><strong id="biomeIntroTitle">Neues Biom entdeckt</strong><p>Hier rechts findest du die sichtbaren Biome und ihre Effekte. Fahre über ein Symbol oder tippe darauf: Die zugehörigen Felder werden hervorgehoben.</p><p id="biomeIntroDetail" class="biomeIntroDetail" aria-live="polite"></p><button id="biomeIntroClose" type="button">Verstanden</button></aside>
+      <aside id="biomeIntro" class="biomeIntro hidden" role="status"><strong id="biomeIntroTitle">Neues Biom entdeckt</strong><p>Fahre über ein Symbol oder tippe drauf, um die Effekte der Biome zu erfahren.</p><p id="biomeIntroDetail" class="biomeIntroDetail" aria-live="polite"></p><button id="biomeIntroClose" type="button">Verstanden</button></aside>
       <nav id="biomeRail" class="mapRail biomeRail" aria-label="Entdeckte Biome"></nav>
       <div id="tutorialTargets" class="tutorialTargets hidden" aria-hidden="true"></div>
       <div id="tutorialSpotlight" class="tutorialSpotlight hidden" aria-hidden="true"></div>
@@ -108,7 +108,7 @@
         </details>
         <details class="statDetails">
           <summary aria-label="Profilfortschritt öffnen">◆ <strong id="profileDiamonds">0</strong> <span
-              id="runDiamonds" title="Diamanten bei Ende des aktuellen Runs">(+0)</span> <span class="dropdownArrow"
+              id="runDiamonds" title="Diamanten bei Ende des aktuellen Durchlaufs">(+0)</span> <span class="dropdownArrow"
               aria-hidden="true">▾</span></summary>
           <div class="statPopup">
             <h2>Meta-Fortschritt</h2>
@@ -204,7 +204,7 @@
         <p class="hint">Escape öffnet die Einstellungen oder schließt offene Menüs und Infofenster.</p>
         <details class="biomeRules">
           <summary>Biome und ihre Effekte</summary>
-          <p>Die Base startet im Grasland. Beim Erkunden ab drei Hexen Entfernung erscheinen Regionen; Effekte gelten
+          <p>Die Base startet im Grasland. Beim Erkunden frühestens ab vier Hexen Entfernung erscheinen Regionen; Effekte gelten
             lokal.</p>
           <p>🟨 Dünenmeer: Gegner −15 % Tempo, Türme −15 % Reichweite.</p>
           <p>🟦 Sturmhochland: Kettenblitz +25 % Sprungweite, Wind +1 Durchschlagziel; Archer/Balliste −15 %
@@ -214,8 +214,7 @@
         <details id="hotkeyHelp" class="hotkeyHelp">
           <summary id="hotkeyHelpSummary">Hotkeys</summary>
           <p>W/A/S/D: Kamera vorwärts/links/rückwärts/rechts<br>Q/E: Kamera drehen (halten)<br>R oder Mausrad-Klick: Hex
-            drehen<br>1–3: Handkarte auswählen (bei zwei Fronten am Anfang 1–5)<br>1–9: Turm im geöffneten Baumenü
-            auswählen<br>Leertaste: Wave starten<br>F: Tempo erhöhen, nach 8× zurück auf 1×<br>Strg + F: FPS-Anzeige ein/aus<br>P: Pause<br>G: Hexgrid
+            drehen<br>1–3: Handkarte auswählen (bei zwei Fronten am Anfang 1–5)<br><span id="towerHotkeyHint"></span><br>Leertaste: Wave starten<br>F: Tempo erhöhen, nach 8× zurück auf 1×<br>Strg + F: FPS-Anzeige ein/aus<br>P: Pause<br>G: Hexgrid
             ein/aus<br>U: Upgrade-Status ein/aus<br>Strg + Klick: mehrere Bauplätze oder Türme auswählen<br>Escape:
             Einstellungen öffnen / Fenster schließen<br>Mausrad: Zoom · Ziehen: Kamera bewegen/drehen</p>
         </details>
@@ -231,7 +230,7 @@
         <label class="toggle">Lautstärke <input id="soundVolume" type="range" min="0" max="100" value="35"
             aria-label="Sound-Lautstärke" /></label>
         <label class="toggle">Sprache <select data-language-picker aria-label="Sprache"><option value="de">Deutsch</option><option value="en">English</option></select></label>
-        <label class="toggle">Startwert für nächsten Run (Seed) <input id="runSeed" type="text" maxlength="100"
+        <label class="toggle">Startwert für den nächsten Run (Seed) <input id="runSeed" type="text" maxlength="100"
             placeholder="Leer = zufälliger Run" /></label>
         <small class="hint">Derselbe Startwert wiederholt bei gleichen Entscheidungen die Karten und
           Belohnungen.</small>
@@ -280,9 +279,9 @@
       <div class="modeBox">
         <h2 id="playModeTitle">Wie möchtest du spielen?</h2>
         <div id="playModeChoices" class="modeChoices">
-          <button class="modeChoice duoComingSoon" type="button" disabled><strong>Duo · Freunde-Beta</strong><small>Zwei Festungen, ein Team. Private Lobby mit Einladungscode.</small><strong>Noch nicht verfügbar · Coming Soon</strong></button>
+          <button class="modeChoice duoComingSoon" type="button" disabled><strong>Duo · Freunde-Beta</strong><span id="duoServerStatus" class="duoServerStatus" data-state="checking" role="status" aria-live="polite"><span class="duoServerDot" aria-hidden="true"></span><span id="duoServerStatusText">Server wird geprüft …</span></span><small>Zwei Festungen, ein Team. Private Lobby mit Einladungscode.</small><strong>Noch nicht verfügbar · Coming Soon</strong></button>
           <button id="standardModeBtn" class="modeChoice"><strong>Standardspiel</strong><span>Schwierigkeit
-              wählen</span><small>Eigene Festung und eigenes Loadout · regionale Biome</small></button>
+              wählen</span><small>Eigene Festung und eigene Turmauswahl · regionale Biome</small></button>
           <button id="dailyModeBtn" class="modeChoice"><strong>Tägliche Herausforderung</strong><span>Die letzte
               Karawane</span><small>Feste Startbedingungen · neuer Tages-Seed · Ziel: Wave 20</small></button>
         </div>
@@ -292,7 +291,7 @@
               Handelsstraße, Dorfstraße. Türme: Archer, Balliste, Katapult, Minenleger, Freeze – für diesen Run
               kostenlos freigeschaltet; Stufe 4 gesperrt.</p>
             <p>Sandsturm: −15 % Gegnertempo und Turmreichweite. Jeder zehnte normale Gegner trägt eine Kasse: +15 Gold
-              extra beim Kill, −10 Gold bei Durchbruch. Einmal täglich +10 Diamanten beim Sieg. Gleicher Tages-Seed für
+              extra beim Besiegen, −10 Gold bei Durchbruch. Einmal täglich +10 Diamanten beim Sieg. Gleicher Tages-Seed für
               alle; Wechsel um 00:00 UTC. Regeln bleiben dauerhaft verfügbar.</p>
             <p>Nach Welle 20 kannst du im Endlosmodus weiterspielen. Die Tagesbelohnung gibt es nur einmal pro Tag.</p>
             <p id="dailyProgress"></p><button id="dailyStartBtn" class="primary">Heutige Karawane starten</button>
@@ -347,7 +346,7 @@
         <div id="loadoutChoices" class="loadoutChoices"></div><p id="preparationInfo" class="preparationInfo" aria-live="polite">Fünf Türme für den nächsten Run.</p>
         <p id="loadoutWarning" class="loadoutWarning" aria-live="polite"></p>
         <div class="loadoutActions"><button id="cancelLoadoutBtn" class="secondary">Zurück zum Run</button><button
-            id="confirmLoadoutBtn" class="primary">Run mit diesem Loadout starten</button></div>
+            id="confirmLoadoutBtn" class="primary">Run mit dieser Turmauswahl starten</button></div>
       </div>
     </div>
 
@@ -358,7 +357,7 @@
         <h2 id="campaignVictoryTitle">Wave 35 geschafft!</h2>
         <p id="campaignVictoryText"></p>
         <details id="dailyVictoryStatistics" class="hidden"><summary>Turmstatistik</summary><div id="dailyVictoryStatsContent"></div></details>
-        <p id="campaignVictoryNote">Deine Map und Türme bleiben im Endless-Modus erhalten. Diamanten werden beim Beenden des Runs abgerechnet.
+        <p id="campaignVictoryNote">Deine Map und Türme bleiben im Endless-Modus erhalten. Diamanten werden beim Beenden des Durchlaufs abgerechnet.
         </p>
         <div class="loadoutActions"><button id="victoryMenuBtn" class="secondary">Run abschließen · Hauptmenü</button><button
             id="endlessBtn" class="primary">Im Endless-Modus weiterspielen</button></div>
@@ -373,7 +372,7 @@
         <div id="diamondBreakdown" class="diamondBreakdown"></div>
         <div class="profileTotals"><span>◆ <strong id="gameOverDiamonds">0</strong> Diamanten
             gesamt</span><span>Bestmarke: Wave <strong id="gameOverBest">0</strong></span></div>
-        <section id="runStatistics" aria-label="Statistik des abgeschlossenen Runs"></section>
+        <section id="runStatistics" aria-label="Statistik des abgeschlossenen Durchlaufs"></section>
         <div class="loadoutActions"><button id="gameOverMapBtn" class="secondary">Map anschauen</button><button
             id="gameOverMenuBtn" class="secondary">Zum Hauptmenü</button><button id="changeLoadoutBtn"
             class="secondary">Loadout ändern</button><button id="retryLoadoutBtn" class="primary">Noch einmal mit diesem
@@ -477,6 +476,7 @@
     <script src="classes/tower-commands.js"></script>
     <script src="classes/arsenal.js"></script>
     <script src="classes/exploration.js"></script>
+    <script src="classes/duo-server-status.js"></script>
     <script src="classes/placement-commands.js"></script>
     <script src="classes/run-flow.js"></script>
     <script src="classes/run-session.js"></script>

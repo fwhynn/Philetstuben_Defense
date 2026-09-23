@@ -92,7 +92,7 @@ test('first coloured unplaced neighbor triggers biome introduction, dismissal la
   elements.get('biomeIntroClose').listeners.click();assert.equal(a.state.biomeIntro,null);assert.equal(a.state.biomeIntroAcknowledged,true);
   a.renderAll();assert.equal(elements.get('biomeIntro').classList.contains('hidden'),true);
   const next=load({initialStorage:{'biome-intro-v1':'done'}});next.elements.get('mainMenu').classList.add('hidden');
-  next.a.state.map.set('3,0',{q:3,r:0,type:'straight',roads:[0,3],slots:0,towers:[]});next.a.renderAll();assert.ok(next.a.state.biomeIntro);
+  next.a.state.biomeSeed='intro';next.a.state.map.set('3,0',{q:3,r:0,type:'straight',roads:[0,3],slots:0,towers:[]});next.a.renderAll();assert.ok(next.a.state.biomeIntro);
 });
 test('biome visibility includes colored neighbors but not distant landmark silhouettes',()=>{
   const c=loadCore(),{state:s}=c.runtime.create({seed:'visible',runId:'test',loadout});
@@ -139,4 +139,11 @@ test('ordinary click outside closes biome tooltip and information panel; inside 
  const {a,elements,documentListeners}=load();a.renderAll();const button=elements.get('biomeRail').children[0];button.listeners.click();assert.equal(button.classList.contains('active'),true);
  documentListeners.click({button:0,target:{closest:()=>button}});assert.equal(button.classList.contains('active'),true);
  elements.get('biomeInfoPanel').classList.remove('hidden');documentListeners.click({button:0,target:{closest:()=>null}});assert.equal(button.classList.contains('active'),false);assert.equal(a.state.highlightBiome,null);assert.equal(elements.get('biomeInfoPanel').classList.contains('hidden'),true);
+});
+
+test('portal can be bought and sold before placing the turn hex, but never during combat',()=>{
+ const c=loadCore(),{state:s}=c.runtime.create({seed:'portal-place',runId:'test',loadout}),slot=setup(c,s);s.phase='place';s.hand=['straight'];
+ assert.equal(c.buildings.buy(s,slot,'portal'),true);assert.equal(s.phase,'place');assert.equal(s.hand.length,1);assert.equal(s.gold,250);
+ s.waveRunning=true;assert.equal(c.buildings.sell(s,slot),false);s.waveRunning=false;assert.equal(c.buildings.sell(s,slot),true);
+ s.waveRunning=true;assert.equal(c.buildings.buy(s,slot,'portal'),false);
 });

@@ -9,7 +9,7 @@ const PREFIX={tiles:'tile',landmarks:'landmark',towers:'tower',enemies:'enemy',b
 const LIMBS=['leg_l','leg_r','arm_l','arm_r'];
 const LANDMARK_LABEL={shrine:'Shrine · Bonus unbekannt',boss:'Wächter · inaktiv',treasure:'Schatz'};
 const STATUS_LABEL={ready:'☠ bereit',fighting:'☠ Kampf',defeated:'☠ besiegt',escaped:'☠ entkommen'};
-const ENEMY_COLOR={boss:'#934f9e',armored:'#78818c',warded:'#477da4',swarm:'#b87832',normal:'#8d3c34'};
+const ENEMY_COLOR={boss:'#934f9e',armored:'#78818c',warded:'#477da4',swarm:'#b87832',normal:'#8d3c34',splitter:'#889591',shard:'#b3b9aa',healer:'#70c794',elementCarrier:'#d2a965'};
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 
 /** Fasst alle Meshes unterhalb von root je Material zu einem Mesh zusammen (Koordinaten relativ zu root). */
@@ -426,13 +426,13 @@ function create(host0,commands){
   // ---- Gegner und Geschosse ----
   const model0=m=>m.isGroup;
   function makeEnemy(e){
-    const type=ENEMY_COLOR[e.type]?e.type:'normal',boss=type==='boss',template=templates.get('enemy_'+type),group=new THREE.Group(),bar=new THREE.Group();
-    const obj={group,bar,radius:boss?15:9,phase:0,angle:0,targetAngle:0,last:null,slowed:false,limbs:[],barY:0};
+    const type=ENEMY_COLOR[e.type]?e.type:'normal',boss=type==='boss',template=templates.get('enemy_'+({splitter:'armored',shard:'armored',healer:'warded',elementCarrier:'warded'}[type]||type)),group=new THREE.Group(),bar=new THREE.Group();
+    const obj={group,bar,radius:boss?15:type==='shard'?6:9,phase:0,angle:0,targetAngle:0,last:null,slowed:false,limbs:[],barY:0};
     if(template){
-      obj.pivot=new THREE.Group();const model=new THREE.Group();model.scale.setScalar(S);obj.pivot.add(model);addParts(model,template.parts);
+      obj.pivot=new THREE.Group();const model=new THREE.Group();model.scale.setScalar(S*(type==='shard'?.6:1));obj.pivot.add(model);addParts(model,template.parts);
       for(const limb of template.limbs){const g=new THREE.Group();g.position.copy(limb.pos);addParts(g,limb.parts);model.add(g);obj.limbs.push({name:limb.name,g});}
       obj.ice=new THREE.Mesh(torus,basic('#79cdd9'));obj.ice.scale.setScalar(obj.radius+4);obj.ice.position.y=2;obj.ice.visible=false;
-      group.add(obj.pivot,obj.ice);obj.barY=template.height*S+12;obj.baseY=0;
+      group.add(obj.pivot,obj.ice);obj.barY=template.height*S*(type==='shard'?.6:1)+12;obj.baseY=0;
     }else{                                                             // Fallback ohne Modell: farbige Kugel
       obj.body=new THREE.Mesh(boss?enemyGeometry.boss:enemyGeometry.small,std(ENEMY_COLOR[type]));obj.body.castShadow=true;obj.color=ENEMY_COLOR[type];
       group.add(obj.body);obj.barY=obj.radius*2+14;obj.baseY=obj.radius+3;
@@ -542,10 +542,11 @@ function create(host0,commands){
     entry.pos.set(x,lift+6,z);return entry;
   }
   function syncLabels(){
+    for(const e of state.enemies)if(e.alive&&['splitter','shard','healer','elementCarrier'].includes(e.type)){const entry=label('enemy-ability:'+e.id,e.x,e.y,e.abilityIcon||({splitter:'◆ → ◆◆',shard:'◆',healer:'✚'})[e.type],'',38);entry.el.title=e.name+(e.description?' · '+e.description:'');entry.el.style.color=e.color||(e.type==='healer'?'#73e49c':'#e5e8de');}
     for(const e of state.enemies)if(e.alive&&e.bossKind)label('boss-name:'+e.id,e.x,e.y,e.name+' · '+({iron:'Rüstung',hunter:'Tempo',summoner:'MR · Beschwörung'})[e.bossKind],'',85);
     if(state.tunnelOffer&&state.tunnelConfirmed){const p=state.tunnelOffer,[q,r]=p.source.split(',').map(Number);for(const [name,t] of [['Eingang',{q,r}],['Ausgang',p]]){const c=axialToWorld(t.q,t.r);label('tunnel-preview:'+name,c.x,c.y,'Tunnel '+name+' · Vorschau','',30);}}
 
-    for(const e of state.enemies)if(e.alive&&e.caravan)label('caravan:'+e.id,e.x,e.y,'◆ Kasse +15 / −10','',55);
+    for(const e of state.enemies)if(e.alive&&e.caravan){const entry=label('caravan:'+e.id,e.x,e.y,'🪙','',55);if(!entry.caravan){entry.caravan=true;const el=entry.el;el.style.pointerEvents='auto';el.style.cursor='help';el.setAttribute('role','button');el.tabIndex=0;el.setAttribute('aria-label',e.splitOnDeath?'Geldtransport: 18 Gold verteilt auf Golem und Splitter. Erreicht der Golem die Basis, verlierst du 10 Gold.':'Geldtransport: Besiegen bringt 15 Gold extra. Erreicht er die Basis, verlierst du 10 Gold.');el.title=el.getAttribute('aria-label');for(const name of ['pointerdown','pointerup'])el.addEventListener(name,event=>event.stopPropagation());el.addEventListener('click',event=>{event.stopPropagation();commands.inspectCaravan?.();});el.addEventListener('keydown',event=>{if(['Enter',' '].includes(event.key)){event.preventDefault();event.stopPropagation();commands.inspectCaravan?.();}});}}
     for(const tile of state.map.values()){
       const c=axialToWorld(tile.q,tile.r),terrain=CARD_LIBRARY[tile.type],id=key(tile.q,tile.r);
       if(state.showUpgradeStatus)(tile.towers||[]).forEach((tower,i)=>{if(tower&&HexData.upgradeStatus(state,tower)){const p=slotPositions(tile)[i];label('upgrade:'+id+':'+i,p.x,p.y,HexData.upgradeStatus(state,tower),'big',72);}});

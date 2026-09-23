@@ -58,3 +58,8 @@ test('a drawer opened on pointerup is not closed by the click completing that sa
  handlers.pointerdown({button:0,target:{}});assert.equal(hidden,true);
  hidden=false;handlers.click({button:0,detail:0,target:{}});assert.equal(hidden,true);
 });
+
+test('German full phrases preserve gender and case after terminology replacement',()=>{
+ const {i}=languageContext();assert.equal(i.text('Noch einmal mit diesem Loadout'),'Noch einmal mit dieser Turmauswahl');assert.equal(i.text('75 % Slow in der Killzone.'),'75 % Verlangsamung im Kampfbereich.');assert.equal(i.text('Beenden des Runs'),'Beenden des Durchlaufs');assert.equal(i.text('Ausgewogenes Loadout'),'Ausgewogene Turmauswahl');assert.equal(i.text('pro Kill'),'pro besiegten Gegner');
+ assert.equal(i.text('Noch einmal mit dieser Turmauswahl','en'),'Try again with this loadout');assert.equal(i.text('75 % Verlangsamung im Kampfbereich.','en'),'75% slow in the combat zone.');
+});

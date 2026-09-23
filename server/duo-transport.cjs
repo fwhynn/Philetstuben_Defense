@@ -13,7 +13,7 @@ function createTransport(room,{browser=false,autoTick=false,publicOrigin=null}={
    const file=req.url==='/'?(room.create?'duo-lobby.html':'duo-prototype.html'):req.url.slice(1);
    if(assets.has(file)){res.writeHead(200,{'Content-Type':file.endsWith('.html')?'text/html; charset=utf-8':'text/javascript; charset=utf-8','Cache-Control':'no-store','Referrer-Policy':'no-referrer','X-Content-Type-Options':'nosniff'});return res.end(fs.readFileSync(path.join(root,file)));}
   }
-  if(req.method==='GET'&&req.url==='/healthz')return send(room.healthy===false?503:200,{ok:room.healthy!==false});
+  if(req.method==='GET'&&req.url==='/healthz')return send(room.healthy===false?503:200,{ok:room.healthy!==false,service:'autohex-duo',maintenance:!!room.maintenance});
   const token=req.headers.authorization?.replace(/^Bearer /,'');
   if(room.healthy===false)return send(503,{error:'storage-unavailable'});
   if(req.method==='GET'&&req.url==='/results'&&room.receipts){const receipts=room.receipts(token);return receipts?send(200,{receipts}):send(401,{error:'unauthorized'});}

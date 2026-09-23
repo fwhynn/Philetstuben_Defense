@@ -216,12 +216,12 @@ Spielstand zu stark verschachtelt.|Save file is nested too deeply.
 Unbekanntes oder neueres Spielstandformat.|Unknown or newer save format.
 Ungültige Profildaten.|Invalid profile data.
 Ungültiger Zahlenwert im Spielstand.|Invalid number in save file.
-Bitte zuerst den laufenden Run beenden. Ein Profilwechsel während eines Runs ist nicht möglich.|Finish the current run first. Profiles cannot be changed during a run.
+Bitte zuerst den laufenden Run beenden. Ein Profilwechsel während eines Durchlaufs ist nicht möglich.|Finish the current run first. Profiles cannot be changed during a run.
 Diamanten wird ersetzt. Eine lokale Sicherung wird angelegt.|diamonds will be replaced. A local backup will be created.
 Wie möchtest du spielen?|How would you like to play?
 Standardspiel|Standard game
 Schwierigkeit wählen|Choose difficulty
-Eigene Festung und eigenes Loadout · regionale Biome|Your fortress and loadout · regional biomes
+Eigene Festung und eigene Turmauswahl · regionale Biome|Your fortress and loadout · regional biomes
 Tägliche Herausforderung|Daily challenge
 Die letzte Karawane|The Last Caravan
 Feste Startbedingungen · neuer Tages-Seed · Ziel: Wave 20|Fixed starting conditions · new daily seed · Goal: wave 20
@@ -244,13 +244,13 @@ Wave 35 geschafft!|Wave 35 cleared!
 Wave 20 überlebt!|Wave 20 survived!
 Wave 35 ist überstanden! Stufe 2 · Zwei Fronten ist jetzt freigeschaltet.|Wave 35 cleared! Difficulty 2 · Two Fronts is now unlocked.
 Zwei Fronten gemeistert! Deine Festung hat alle drei Bosswellen überstanden.|Two Fronts conquered! Your fortress survived all three boss waves.
-Deine Map und Türme bleiben im Endless-Modus erhalten. Diamanten werden beim Beenden des Runs abgerechnet.|Your map and towers carry over into endless mode. Diamonds are awarded when the run ends.
+Deine Map und Türme bleiben im Endless-Modus erhalten. Diamanten werden beim Beenden des Durchlaufs abgerechnet.|Your map and towers carry over into endless mode. Diamonds are awarded when the run ends.
 Im Endless-Modus weiterspielen|Continue in endless mode
 Run abschließen · Hauptmenü|Finish run · Main menu
 Run beendet|Run ended
 Run beendet. Du hast Wave|Run ended. You reached wave
-Noch einmal mit diesem Loadout|Try again with this loadout
-Run mit diesem Loadout starten|Start run with this loadout
+Noch einmal mit dieser Turmauswahl|Try again with this loadout
+Run mit dieser Turmauswahl starten|Start run with this loadout
 Neue Bestmarken|New records
 Neuer persönlicher Rekord – Wave|New personal best – Wave
 Weiter geht’s!|Let's keep going!
@@ -363,7 +363,7 @@ Loadout speichern|Save loadout
 Loadout ändern|Change loadout
 Aktuell speichern|Save current
 Drei Presetplätze werden mit dem ersten zusätzlichen Turm freigeschaltet.|Three preset slots unlock with your first additional tower.
-Ausgewogenes Loadout: Leben, Rüstung, Magieresistenz, Support und Gruppen sind abgedeckt.|Balanced loadout: health, armor, magic resistance, support and groups are covered.
+Ausgewogene Turmauswahl: Leben, Rüstung, Magieresistenz, Support und Gruppen sind abgedeckt.|Balanced loadout: health, armor, magic resistance, support and groups are covered.
 Kein Supportturm zur Wegkontrolle.|No support tower for path control.
 Kein Turm für Gruppen oder Linien.|No tower for groups or lines.
 Kein klarer Spezialist gegen Magieresistenz.|No clear specialist against magic resistance.
@@ -381,7 +381,7 @@ Zwei zufällige Base-Ausgänge. Starte mit fünf Handkarten und erweitere beide 
 Mit Run-Gold ausbauen. Käufe sind beim Hex-Platzieren, in der Bauphase und während einer Wave möglich. Ausbau gilt nur für diesen Run.|Upgrade with run gold during placement, building or combat. Upgrades last for this run only.
 Noch keine Base-Waffe. Errichte die erste Stufe für automatische Verteidigung.|No base weapon yet. Build the first level for automatic defense.
 Automatische Verteidigung:|Automatic defense:
-Startwert für nächsten Run (Seed)|Seed for next run
+Startwert für den nächsten Run (Seed)|Seed for next run
 Leer = zufälliger Run|Empty = random run
 Derselbe Startwert wiederholt bei gleichen Entscheidungen die Karten und Belohnungen.|The same seed reproduces cards and rewards when you make the same choices.
 Aktueller Seed:|Current seed:
@@ -396,7 +396,7 @@ Biom-Info schließen|Close biome information
 Keine Biommodifikatoren.|No biome modifiers.
 Gegner hier 15 % langsamer; Türme hier −15 % Reichweite. Wächter aus diesem Biom: Verlangsamungen wirken nur halb so stark.|Enemies move 15% slower here; towers have 15% less range. Guardians from this biome halve the effects of slows.
 Kettenblitz +25 % Sprungweite; Wind +1 Durchschlagziel; Archer/Balliste −15 % Angriffsrate. Wächter: 50 % weniger Blitz- und Windschaden.|Chain Lightning: +25% jump range; wind: +1 piercing target; Archer/Ballista: −15% attack rate. Guardians take 50% less lightning and wind damage.
-Feuer +20 % Schaden; Freeze −15 % Reichweite; Wasser-Slow hält 25 % kürzer. Wächter: 50 % weniger Feuerschaden.|Fire: +20% damage; Frost Tower: −15% range; water slows last 25% less. Guardians take 50% less fire damage.
+Feuer +20 % Schaden; Freeze −15 % Reichweite; Verlangsamung durch Wasser wirkt 25 % kürzer. Wächter: 50 % weniger Feuerschaden.|Fire: +20% damage; Frost Tower: −15% range; water slows last 25% less. Guardians take 50% less fire damage.
 Effekte gelten lokal. Turmwerte enthalten die Boni und Nachteile bereits.|Effects apply locally. Tower stats already include bonuses and penalties.
 `);
 HexTranslations.add(`
@@ -415,7 +415,7 @@ Flächenkontrolle|Area control
 Elementwahl|Element selection
 Schneller Single-Target-Schaden.|Fast single-target damage.
 Stein durchschlägt bis zu 3 Gegner in einer Linie.|A stone pierces up to 3 enemies in a line.
-Bis zu 3 Ziele, maximal 75 Abstand je Sprung.|Up to 3 targets, maximum 75 distance per jump.
+Bis zu 3 Ziele mit maximal 75 Einheiten Abstand je Sprung.|Up to 3 targets, maximum 75 distance per jump.
 Aura: halbiert das Tempo aller Gegner in Reichweite.|Aura: halves the speed of all enemies in range.
 Legt dauerhaft stapelbare Sprengminen auf Straßen.|Places persistent, stackable explosive mines on roads.
 Extrem weitreichender Einzelschuss gegen Eliten und Bosse.|Very long-range single shots against elites and bosses.
@@ -471,7 +471,7 @@ Inferno|Inferno
 Sonnenfeuer|Solar Fire
 Weltenbrand|Worldfire
 Feuer trifft Gruppen im Umkreis von 48.|Fire hits groups within a radius of 48.
-Treffer verlangsamen 2 Sekunden lang um 35 %. Stärkster Slow zählt; Bossresistenz bleibt.|Hits slow by 35% for 2 seconds. Only the strongest slow applies; boss resistance still applies.
+Treffer verlangsamen 2 Sekunden lang um 35 %. Die stärkste Verlangsamung zählt; Bossresistenzen bleiben wirksam.|Hits slow by 35% for 2 seconds. Only the strongest slow applies; boss resistance still applies.
 Wind durchschlägt bis zu 3 Gegner auf einer Linie.|Wind pierces up to 3 enemies in a line.
 Stärkeres Feuer mit größerer Fläche.|Stronger fire with a larger area.
 Halbiert das Tempo getroffener Gegner für 3 Sekunden.|Halves the speed of hit enemies for 3 seconds.
@@ -485,7 +485,7 @@ Treffer schädigen Gegner im Umkreis von 55.|Hits damage enemies within a radius
 Finale Einzelziel-Spezialisierung.|Final single-target specialization.
 Größere und schnellere Flächentreffer.|Larger and faster area hits.
 Schwere Steine mit mehr Schaden und Reichweite.|Heavy stones with more damage and range.
-Schnelle durchschlagende Steine für gerade Killzones.|Fast piercing stones for straight combat zones.
+Schnelle, durchschlagende Steine für gerade Straßenabschnitte.|Fast piercing stones for straight combat zones.
 Finale schwere Belagerungssteine.|Final heavy siege stones.
 Finale schnelle Steinsalven.|Final rapid stone volleys.
 Starke Blitze für robuste Ziele.|Strong lightning against tough targets.
@@ -495,7 +495,7 @@ Großes Blitznetz für dichte Gruppen.|Large lightning network for tightly packe
 45 % Slow mit großem Wirkungsbereich.|45% slow over a large area.
 65 % Slow in kleinerem Radius.|65% slow in a smaller radius.
 50 % Slow auf großem Gebiet.|50% slow over a large area.
-75 % Slow in der Killzone.|75% slow in the combat zone.
+75 % Verlangsamung im Kampfbereich.|75% slow in the combat zone.
 Legt schnell viele kleinere Minen gegen Gruppen.|Quickly lays many smaller mines against groups.
 Langsam gelegte schwere Minen für robuste Gegner.|Slowly lays heavy mines against tough enemies.
 Finales dichtes Minenfeld für dauerhaften Flächenschaden.|Final dense minefield for sustained area damage.
@@ -524,13 +524,13 @@ Patrizierhaus|Patrician House
 Fernschmiede|Remote Forge
 Handelsnetz|Trade Network
 +3 Gold nach jeder überlebten Wave, zusätzlich zum automatischen Hex-Einkommen.|+3 gold after each survived wave, in addition to automatic hex income.
-+20 % Tower-Schaden auf diesem und direkt benachbarten Hexen. Nicht stapelbar.|+20% tower damage on this and adjacent hexes. Does not stack.
-15 % Rabatt auf Towerbau und Upgrades auf diesem und direkt benachbarten Hexen. Nicht stapelbar, keine Gebäuderabatte.|15% discount on towers and upgrades on this and adjacent hexes. Does not stack or affect buildings.
++20 % Tower-Schaden auf diesem Hex und direkt benachbarten Hexen. Nicht stapelbar.|+20% tower damage on this and adjacent hexes. Does not stack.
+15 % Rabatt auf Towerbau und Upgrades auf diesem Hex und direkt benachbarten Hexen. Nicht stapelbar, keine Gebäuderabatte.|15% discount on towers and upgrades on this and adjacent hexes. Does not stack or affect buildings.
 +16 Gold je Wave statt +8.|+16 gold per wave instead of +8.
 Zusätzlich ein frei wählbares gelegtes Hex mit +30 % Schaden versorgen.|Also supply one placed hex of your choice with +30% damage.
 Zusätzlich ein frei wählbares gelegtes Hex mit 25 % Rabatt versorgen.|Also supply one placed hex of your choice with a 25% discount.
-% Turmschaden auf diesem und benachbarten Hexen. Nicht stapelbar.|% tower damage on this and adjacent hexes. Does not stack.
-% Rabatt auf Turmbau und Upgrades auf diesem und benachbarten Hexen. Nicht stapelbar.|% discount on towers and upgrades on this and adjacent hexes. Does not stack.
+% Turmschaden auf diesem Hex und seinen Nachbarhexen. Nicht stapelbar.|% tower damage on this and adjacent hexes. Does not stack.
+% Rabatt auf Turmbau und Upgrades auf diesem Hex und seinen Nachbarhexen. Nicht stapelbar.|% discount on towers and upgrades on this and adjacent hexes. Does not stack.
 Optional einen Gebäudetyp bauen. Haus: zusätzliches Einkommen, Schmiede: Tower-Schaden, Markt: Tower-Rabatte. Ein Gebäude pro Slot.|Optionally build a building. House: extra income, Forge: tower damage, Market: tower discounts. One building per slot.
 Gerade|Straight
 Kleine Kurve|Small Bend
@@ -591,7 +591,7 @@ Gewundener Weg: Gegner bleiben länger im Hex.|Winding road: enemies stay on thi
 +25 % Archer-Schaden auf diesem Hex. Nur 1 Slot.|+25% Archer damage on this hex. Only 1 slot.
 +4 Gold je Wave. Keine Turret-Slots.|+4 gold per wave. No tower slots.
 +40 % Tower-Reichweite, 2 Turret-Slots und +2 Gold je Wave.|+40% tower range, 2 tower slots and +2 gold per wave.
-+20 % Schaden für alle Schadentürme auf diesem Hex.|+20% damage for all damage towers on this hex.
++20 % Schaden für alle Schadenstürme auf diesem Hex.|+20% damage for all damage towers on this hex.
 2 Turret-Slots und +15 % Tower-Reichweite.|2 tower slots and +15% tower range.
 +5 Gold je Wave, 1 Turret-Slot und 1 Gebäudeslot.|+5 gold per wave, 1 tower slot and 1 building slot.
 Vier Straßenenden, 2 Slots, +30 % Tower-Schaden.|Four road ends, 2 slots, +30% tower damage.
@@ -662,7 +662,7 @@ offene Fronten.|open fronts.
 Bestmarke|Best
 Platz|Slot
 Verloren|Lost
-pro Kill|per kill
+pro besiegten Gegner|per kill
 pro überlebter Wave|per survived wave
 Hero-Einkommen|Fortress income
 Hexbonus eingerechnet|hex bonus included
@@ -728,7 +728,7 @@ Server-Duo · Baue auf deiner eigenen Map. Die Partner-Map kannst du anschauen. 
 Kamera: Mausrad zoomt, mittlere/rechte Maustaste zieht. Auf Touch stehen Zoom-Buttons bereit. Kein Zugriff auf dein Solo-Profil.|Camera: wheel to zoom, middle/right-drag to pan. Touch zoom buttons are available. No access to your solo profile.
 Beide Maps an diesem Gerät steuern. Getrennt bauen, gemeinsam bereit werden. Nach einem sauberen Abschluss hilft dein gewählter Turm am Partner-Portal. Wechsle unten zwischen den beiden Maps. Beide werden lokal weiter simuliert. Noch ohne Online-Lobby und Profilbelohnungen.|Control both maps on this device. Build separately, ready up together. After a clean wave, your selected tower helps at your partner's portal. Switch maps below. Both keep simulating locally. No online lobby or profile rewards in this mode.
 Beide Festungen teilen sich das Team-Leben. Base-Ausbau folgt in einer späteren Duo-Etappe.|Both fortresses share team health. Base upgrades will follow in a later Duo phase.
-Beide Maps und der gemeinsame Zustand sind für diesen Tab gemerkt.|Both maps and team state are saved for this tab.
+Beide Karten und der gemeinsame Spielstand sind für diesen Tab gespeichert.|Both maps and team state are saved for this tab.
 Runzustand wiederhergestellt.|Run state restored.
 Der Run ist beendet.|The run has ended.
 Lokalen Duo-Run neu starten?|Restart local Duo run?
@@ -756,12 +756,12 @@ Ab Wave 15 erscheint alle 10 Waves ein Boss an einem zufälligen Eingang. Bosswe
 Jeder Gegner entscheidet an jeder Gabelung zufällig zwischen allen Wegen zur Base. Sackgassen und Schleifen werden ausgeschlossen.|At each junction, enemies randomly choose among all routes to the base. Dead ends and loops are excluded.
 Alle 2 Waves: 1 von 3 neuen Hexkarten ins Deck.|Every 2 waves: add 1 of 3 new hex cards to your deck.
 Sicht ab jedem gesetzten Hex: Radius 2 klar, bis Radius 6 Nebel, danach unsichtbar. ? = unbekanntes Sonderfeld. ◆ Schatz, ✦ Shrine, ☠ Boss. Feste Sonderfelder werden durch passende Nachbarstraßen angeschlossen.|Vision from each placed hex: clear within radius 2, fog up to radius 6, then hidden. ? = unknown special tile. ◆ Treasure, ✦ Shrine, ☠ Boss. Connect special tiles using matching adjacent roads.
-Die Base startet im Grasland. Beim Erkunden ab drei Hexen Entfernung erscheinen Regionen; Effekte gelten lokal.|The base starts in grassland. Other regions appear at least three hexes away; their effects apply locally.
+Die Base startet im Grasland. Beim Erkunden frühestens ab vier Hexen Entfernung erscheinen Regionen; Effekte gelten lokal.|The base starts in grassland. Other regions appear at least three hexes away; their effects apply locally.
 Dünenmeer: Gegner −15 % Tempo, Türme −15 % Reichweite.|Dune Sea: enemy speed −15%, tower range −15%.
 Sturmhochland: Kettenblitz +25 % Sprungweite, Wind +1 Durchschlagziel; Archer/Balliste −15 % Angriffsrate.|Storm Highlands: Chain Lightning jump range +25%, wind +1 piercing target; Archer/Ballista attack rate −15%.
 Aschelande: Feuer +20 % Schaden; Freeze −15 % Reichweite, Wasser-Slow −25 % Dauer.|Ashlands: fire damage +20%; Frost Tower range −15%, water slow duration −25%.
 Wave 20 überleben. Feste Standardfestung, zwei zufällige Ausgänge. Deck: 2× Gerade, Lange Straße, Handelsstraße, Dorfstraße. Türme: Archer, Balliste, Katapult, Minenleger, Freeze – für diesen Run kostenlos freigeschaltet; Stufe 4 gesperrt.|Survive wave 20. Standard Fortress, two random exits. Deck: 2× Straight, Long Road, Trade Road, Village Road. Towers: Archer, Ballista, Catapult, Mine Layer, Frost Tower – unlocked for free during this run; level 4 is locked.
-Sandsturm: −15 % Gegnertempo und Turmreichweite. Jeder zehnte normale Gegner trägt eine Kasse: +15 Gold extra beim Kill, −10 Gold bei Durchbruch. Einmal täglich +10 Diamanten beim Sieg. Gleicher Tages-Seed für alle; Wechsel um 00:00 UTC. Regeln bleiben dauerhaft verfügbar.|Sandstorm: −15% enemy speed and tower range. Every tenth normal enemy carries cargo: +15 gold when killed, −10 gold if it breaks through. Win +10 diamonds once per day. Everyone shares the daily seed; it changes at 00:00 UTC. These rules remain available permanently.
+Sandsturm: −15 % Gegnertempo und Turmreichweite. Jeder zehnte normale Gegner trägt eine Kasse: +15 Gold extra beim Besiegen, −10 Gold bei Durchbruch. Einmal täglich +10 Diamanten beim Sieg. Gleicher Tages-Seed für alle; Wechsel um 00:00 UTC. Regeln bleiben dauerhaft verfügbar.|Sandstorm: −15% enemy speed and tower range. Every tenth normal enemy carries cargo: +15 gold when killed, −10 gold if it breaks through. Win +10 diamonds once per day. Everyone shares the daily seed; it changes at 00:00 UTC. These rules remain available permanently.
 Hohe Magieresistenz. Ruft alle 6 Sekunden einen Diener, maximal sechs; Diener geben kein Gold.|High magic resistance. Summons a minion every 6 seconds, up to six; minions drop no gold.
 Bauen auch während der Wave. Rückgabe in der aktuellen Bauphase: 100 %. Danach Verkauf: 50 % inklusive Upgrades.|Build during combat too. Refund during the current build phase: 100%. Afterwards: 50%, including upgrades.
 ↑ Upgrade bezahlbar · 2 Spezialisierung · 3 Zweigfinale · 4 freischaltbare Meta-Stufe. Turm anklicken für Werte und Upgrades.|↑ Upgrade affordable · 2 Specialization · 3 Branch finale · 4 Unlockable meta level. Click a tower for stats and upgrades.
@@ -796,7 +796,7 @@ und|and
 Kills inklusive Karawanenboni|Kills including caravan bonuses
 Nur wenn alle Gegner besiegt werden und die Wave überlebt wird. Mit aktuellem Gold: maximal|Only if all enemies are defeated and the wave is survived. With current gold: up to
 Undo erstattet nur den Kaufpreis, erzeugt kein Einkommen.|Refunds only return the purchase price and do not generate income.
-Vor dem Hex-Placement ist der Hex-Bonus vorläufig; er wird nach dem Placement aktualisiert.|Before hex placement, the hex bonus is provisional; it updates after placement.
+Vor dem Platzieren des Hexes ist der Einkommensbonus vorläufig; danach wird er aktualisiert.|Before hex placement, the hex bonus is provisional; it updates after placement.
 Loadoutpreise:|Loadout prices:
 noch|still
 bezahlbar|affordable
@@ -842,7 +842,7 @@ Hinweis:|Note:
 `);
 HexTranslations.add(`
 20 HP · 70 Gold. Ausgewogener Start; zwei Stufen je Base-Ausbau.|20 HP · 70 gold. Balanced start; two levels per base upgrade.
-Tatsächlich verursachter Schaden an Leben, Rüstung und Magieresistenz, ohne Overkill; inklusive Minen und Geister. Schaden/Gold nutzt die bezahlten Bau- und Upgrade-Kosten vor Erstattungen. Rabatte zählen, kostenlose Shrine-Upgrades kosten 0. Freeze unterstützt durch Slow. Base-Waffenschaden separat:|Actual damage dealt to health, armor and magic resistance, excluding overkill; includes mines and spirits. Damage/gold uses paid build and upgrade costs before refunds. Discounts count; free shrine upgrades cost 0. Frost Tower supports through slows. Base weapon damage separately:
+Tatsächlich verursachter Schaden an Leben, Rüstung und Magieresistenz, ohne Overkill; inklusive Minen- und Geisterschaden. Schaden/Gold nutzt die bezahlten Bau- und Verbesserungskosten vor Erstattungen. Rabatte zählen, kostenlose Shrine-Upgrades kosten 0. Freeze unterstützt durch Slow. Base-Waffenschaden separat:|Actual damage dealt to health, armor and magic resistance, excluding overkill; includes mines and spirits. Damage/gold uses paid build and upgrade costs before refunds. Discounts count; free shrine upgrades cost 0. Frost Tower supports through slows. Base weapon damage separately:
 bis zu|up to
 für|for
 erreicht|reached
@@ -857,13 +857,13 @@ Menü|Menu
 Goldplanung öffnen|Open gold forecast
 Deck und Kartenstapel öffnen|Open deck and card piles
 Profilfortschritt öffnen|Open profile progress
-Diamanten bei Ende des aktuellen Runs|Diamonds awarded at the end of this run
+Diamanten bei Ende des aktuellen Durchlaufs|Diamonds awarded at the end of this run
 Handkarten|Hand cards
 Spielgeschwindigkeit|Game speed
 Deckübersicht|Deck overview
 Schwierigkeitsstufe|Difficulty
 Startfestung|Starting fortress
-Statistik des abgeschlossenen Runs|Completed run statistics
+Statistik des abgeschlossenen Durchlaufs|Completed run statistics
 Forschungsmap verkleinern|Zoom research map out
 Forschungsmap vergrößern|Zoom research map in
 Arsenal-Hilfe|Arsenal help
@@ -914,7 +914,7 @@ Vorlagen|Presets
 Wähle fünf Türme. Details erscheinen bei Fokus oder Auswahl.|Choose five towers. Details appear on focus or selection.
 5/5 Türme gewählt.|5/5 towers selected.
 Kräftig: aktueller Wirkbereich. Blass: Versorgung durch andere Gebäude desselben Typs.|Strong color: current area of effect. Faint color: coverage from other buildings of the same type.
-Hohe Magieresistenz. Ruft alle 6 Sekunden an seiner Position einen Diener, maximal sechs. Diener sind 20 % langsamer und geben kein Gold.|High magic resistance. Summons a minion at its position every 6 seconds, up to six. Minions are 20% slower and grant no gold.
+Hohe Magieresistenz. Ruft alle 6 Sekunden an ihrer Position einen Diener, maximal sechs. Diener sind 20 % langsamer und geben kein Gold.|High magic resistance. Summons a minion at its position every 6 seconds, up to six. Minions are 20% slower and grant no gold.
 Gebäude ausbaubar|Building can be upgraded
 Ausbaubar|Can be upgraded
 `);
@@ -1089,8 +1089,8 @@ Vier zusätzliche Geister gleichzeitig.|Four additional simultaneous spirits.
 Seelenherrscher|Soul Sovereign
 +50 % Turm- und Geisterschaden und +6 Sekunden Geisterdauer.|+50% tower and spirit damage and +6 seconds spirit lifetime.
 +16 Gold je Welle und +2 Gold für jedes weitere Patrizierhaus im Run.|+16 gold per wave and +2 gold for every other Patrician House in the run.
-Für nächsten Run aktivieren|Activate for next run
-Aktiv für nächsten Run|Active for next run
+Für den nächsten Run aktivieren|Activate for next run
+Aktiv für den nächsten Run|Active for next run
 Freigeschaltet · inaktiv|Unlocked · inactive
 Meta-Freischaltung · nur ein Pfad je Turmtyp aktiv|Meta unlock · only one active path per tower type
 im Arsenal freischalten und für den nächsten Run aktivieren.|unlock in the Arsenal and activate for the next run.
@@ -1099,4 +1099,51 @@ im Arsenal freischalten und für den nächsten Run aktivieren.|unlock in the Ars
 HexTranslations.add(`
 Vorlagenname|Preset name
 Name speichern|Save name
+`);
+
+// Phrase-level agreement: noun-only replacements cannot infer German gender/case.
+Object.assign(HexTranslations.de,{"mit diesem Loadout":"mit dieser Turmauswahl","eigenes Loadout":"eigene Turmauswahl","Ausgewogenes Loadout":"Ausgewogene Turmauswahl","des Runs":"des Durchlaufs","eines Runs":"eines Durchlaufs","aktuellen Runs":"aktuellen Durchlaufs","abgeschlossenen Runs":"abgeschlossenen Durchlaufs","75 % Slow in der Killzone.":"75 % Verlangsamung im Kampfbereich.","Schnelle durchschlagende Steine für gerade Killzones.":"Schnelle, durchschlagende Steine für gerade Straßenabschnitte.","Bis zu 3 Ziele, maximal 75 Abstand je Sprung.":"Bis zu 3 Ziele mit maximal 75 Einheiten Abstand je Sprung.","Stärkster Slow zählt; Bossresistenz bleibt.":"Die stärkste Verlangsamung zählt; Bossresistenzen bleiben wirksam.","auf diesem und direkt benachbarten Hexen":"auf diesem Hex und direkt benachbarten Hexen","auf diesem und benachbarten Hexen":"auf diesem Hex und seinen Nachbarhexen","Bau- und Upgrade-Kosten":"Bau- und Verbesserungskosten","inklusive Minen und Geister.":"inklusive Minen- und Geisterschaden.","Wasser-Slow hält 25 % kürzer.":"Verlangsamung durch Wasser wirkt 25 % kürzer.","an seiner Position einen Diener":"an ihrer Position einen Diener","Vor dem Hex-Placement ist der Hex-Bonus vorläufig; er wird nach dem Placement aktualisiert.":"Vor dem Platzieren des Hexes ist der Einkommensbonus vorläufig; danach wird er aktualisiert.","Beide Maps und der gemeinsame Zustand sind für diesen Tab gemerkt.":"Beide Karten und der gemeinsame Spielstand sind für diesen Tab gespeichert.","für nächsten Run":"für den nächsten Run","Für nächsten Run":"Für den nächsten Run","pro Kill":"pro besiegten Gegner","beim Kill":"beim Besiegen"});
+HexTranslations.add(`
+Auf diesem Hex steht bereits eine Schmiede. Der Schadensbonus ist nicht stapelbar.|This hex already has a Forge. Its damage bonus does not stack.
+Auf diesem Hex steht bereits ein Markt. Der Rabatt ist nicht stapelbar.|This hex already has a Market. Its discount does not stack.
+Beute +15 Gold · Flucht −10 Gold|Loot +15 gold · Escape −10 gold
+`);
+
+HexTranslations.add(`
+Rettungshex: Straßen müssen passen. Zwei Straßenenden des neuen Hexes müssen nach außen ins freie Gelände führen. Anschlüsse an vorhandene Hexe zählen nicht als offene Ausgänge.|Rescue hex: roads must match. Two road ends on the new hex must lead out into open terrain. Connections to existing hexes do not count as open exits.
+Geldtransport: Besiegen bringt 15 Gold extra. Erreicht er die Basis, verlierst du 10 Gold.|Gold carrier: defeating it earns 15 extra gold. If it reaches the base, you lose 10 gold.
+`);
+
+HexTranslations.add(`
+Splittergolem|Splinter Golem
+Golemsplitter|Golem Shard
+Feldheiler|Field Healer
+Heiler|Healers
+Elementträger|Element Bearer
+Zerfällt in zwei kleine Golems. Das Gold verteilt sich auf alle drei.|Splits into two small golems. The gold is divided among all three.
+Heilt andere Gegner im kleinen Umkreis alle 3 Sekunden um 5 %. Heiler heilen einander nicht.|Heals other nearby enemies by 5% every 3 seconds. Healers cannot heal each other.
+Immun gegen Feuer. Andere Schadensarten wirken normal.|Immune to fire. Other damage types work normally.
+Immun gegen Wasser. Andere Schadensarten wirken normal.|Immune to water. Other damage types work normally.
+Immun gegen Blitz. Andere Schadensarten wirken normal.|Immune to lightning. Other damage types work normally.
+`);
+
+HexTranslations.add(`
+Geldtransport: 18 Gold verteilt auf Golem und Splitter. Erreicht der Golem die Basis, verlierst du 10 Gold.|Gold transport: 18 gold shared by the golem and its shards. Lose 10 gold if the golem reaches the base.
+regulärer Gegner|regular enemy
+(Splittergolem: auf drei Einheiten verteilt)|(Splinter Golem: divided among three units)
+Wasserverlangsamung wirkt nicht; Frost-Auren wirken weiterhin.|Water slows have no effect; frost auras still work.
+`);
+
+HexTranslations.add(`
+Fahre über ein Symbol oder tippe drauf, um die Effekte der Biome zu erfahren.|Hover over a symbol or tap it to learn about the biome effects.
+Turm im geöffneten Baumenü auswählen|Select a tower in the open build menu
+Rettungshex: Straßen müssen passen. Genau ein Straßenende des neuen Hexes muss nach außen ins freie Gelände führen.|Rescue tile: Roads must match. Exactly one road end of the new tile must lead outside into open terrain.
+`);
+
+HexTranslations.add(`
+Server wird geprüft …|Checking server …
+Server erreichbar|Server reachable
+Server nicht erreichbar|Server unreachable
+Server in Wartung|Server under maintenance
+HTTP-Antwortzeit|HTTP response time
 `);

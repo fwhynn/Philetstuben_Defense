@@ -8,7 +8,7 @@ test('R rotates immediately while selected hand card button has focus, but not w
 test('Volley is first and range preview restores on leave without spending gold',()=>{
  const {a,elements,selectSlot,buyTower}=load();a.state.phase='build';a.state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[null]});selectSlot(1,0,0);buyTower('archer');a.rendererCommands.selectTower(1,0,0);const buttons=elements.get('towerUpgrades').children.filter(b=>b.className==='upgradeOption');assert.match(buttons[0].innerHTML,/Salve/);const tower=a.state.map.get('1,0').towers[0],gold=a.state.gold;buttons[1].listeners.pointerenter();assert.equal(a.state.previewUpgrade.tower,tower);assert.equal(a.state.previewUpgrade.definition.range,190);assert.equal(tower.branch,undefined);assert.equal(a.state.gold,gold);buttons[1].listeners.pointerleave();assert.equal(a.state.previewUpgrade,null);
 });
-test('deck uses hex icons and new biome description is visible without hover',()=>{
+test('deck uses hex icons and new biomes use one name per line until hovered',()=>{
  const {a,elements}=load();a.state.deck=['straight','straight'];a.state.drawPile=['straight'];a.state.discard=[];elements.get('deckDropdown').open=true;elements.get('deckDropdown').listeners.toggle();const sections=elements.get('deckOverview').children;assert.match(sections[0].children[1].children[0].innerHTML,/<svg/);assert.equal(sections[0].children[1].children[0].children.at(-1).textContent,'×2');
- a.state.biomeIntro=['desert'];a.state.highlightBiome=null;a.renderAll();assert.match(elements.get('biomeIntroDetail').textContent,/Dünenmeer:\nGegner hier 15/);
+ a.state.biomeIntro=['desert','ash','storm'];a.state.highlightBiome=null;a.renderAll();assert.equal(elements.get('biomeIntroDetail').textContent,'Dünenmeer\nAschelande\nSturmhochland');
 });

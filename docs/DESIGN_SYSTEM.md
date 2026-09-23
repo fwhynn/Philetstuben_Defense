@@ -129,3 +129,11 @@ Hauptmenü-Dialoge (Spielmodus, Spielregeln, Spielstand, Arsenal und Durchlaufvo
 ### Arsenal: Icon und Titel
 
 Forschungszweige sind 230 px breit. Jede Forschungskarte besitzt eine gemeinsame Flex-Kopfzeile mit einem festen 44-px-Icon und 10 px Abstand zum Titel. Lange Titel dürfen innerhalb ihrer Textspalte umbrechen, jedoch nicht unter das Icon rutschen. Besitz und aktive Auswahl haben unterschiedliche Statusbeschriftungen; Aktivieren verbraucht keine Diamanten und gilt ab dem nächsten Run.
+
+## Deutsche Texte und Gebäuderegeln (23.09.2026)
+
+Sprachprüfung von UI-Katalog, Karten-/Turm-/Gebäudebeschreibungen, Regeln, Statistiken und Duo-Texten. Ganze Formulierungen für grammatische Übereinstimmung verwenden: „mit dieser Turmauswahl“, „im Kampfbereich“, „des Durchlaufs“, „pro besiegten Gegner“. Einzelne englische Begriffe nicht blind austauschen, wenn dabei Genus/Kasus falsch werden. Eigene Vorlagennamen unverändert lassen. Englische Katalogeinträge entsprechend mitführen; Regressionstests für die problematischen Formulierungen bestehen.
+
+Je Hex maximal eine Schmiede und ein Markt, da ihre gleichartigen Boni nicht stapelbar sind. Beide unterschiedlichen Gebäude dürfen auf demselben Hex stehen; Häuser bleiben mehrfach baubar. Sperrgrund im Baumenü dauerhaft anzeigen und dieselbe Regel in den gemeinsamen Solo-/Duo-Baubefehlen prüfen. Verkauf gibt den entsprechenden Typ sofort wieder frei. Bereits bestehende doppelte Gebäude aus alten Partien werden nicht automatisch entfernt.
+
+Karawanengegner nur mit einem Münzsymbol markieren. Beim Darüberfahren erklärt der Tooltip die beiden Folgen; Antippen öffnet die bestehende Wellenplanung mit derselben kurzen Erklärung, ohne einen zusätzlichen Dialog. Bedeutung: tägliche Herausforderung, zusätzliche Beute beim Besiegen, Goldabzug beim Erreichen der Basis. Keine zusätzlichen Diamanten und kein Hexbonus. Die normale Beute beträgt derzeit 3 Gold, somit insgesamt 18 Gold für einen besiegten Karawanengegner.

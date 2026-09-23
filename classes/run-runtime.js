@@ -17,7 +17,7 @@ const HexRunRuntime=(()=>{
   function spawnPlan(state){
     const challenge=!!state.challengeDay;let entry=waveCache.get(state);
     if(!entry||entry.wave!==state.wave||entry.income!==state.income||entry.challenge!==challenge){
-      entry={wave:state.wave,income:state.income,challenge,plan:HexWaves.plan(state.wave,state.income,challenge)};
+      entry={wave:state.wave,income:state.income,challenge,plan:HexWaves.plan(state.wave,state.income,challenge,state)};
       waveCache.set(state,entry);
     }
     return entry.plan;
