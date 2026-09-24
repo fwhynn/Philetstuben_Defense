@@ -49,7 +49,7 @@ function makeTemplate(name,scene,kind){
   const skip=n=>isSlot(n)||isPad(n);
   template.parts=bake(scene,skip);
   if(name==='tile_rescue'||name==='tile_straight'||name.startsWith('tile_base')) template.noRoad=bake(scene,n=>skip(n)||n.name==='road'||n.name==='road_verge');
-  template.slots=slotNodes.sort((a,b)=>a.name.localeCompare(b.name)).map(n=>({pos:worldPosition(n),parts:bake(n)}));
+  template.slots=slotNodes.sort((a,b)=>a.name.localeCompare(b.name)).map(n=>({pos:worldPosition(n),parts:bake(n),top:new THREE.Box3().setFromObject(n).max.y}));
   template.pad=padNodes[0]?{pos:worldPosition(padNodes[0]),parts:bake(padNodes[0])}:null;
   if(kind==='landmarks'&&name!=='landmark_boss'){                    // Deko separat, damit sie auf jede Straßenform passt
     // Hauptobjekt (Schatztruhe bzw. Shrine) plus nahe Kisten. Bezugspunkt ist die Mitte des Hauptobjekts, nicht die aller Deko,
@@ -292,6 +292,12 @@ function create(host0,commands){
     const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setIndex(indices);geometry.computeVertexNormals();
     const mesh=new THREE.Mesh(geometry,material);mesh.receiveShadow=true;return mesh;
   }
+  // Erhöhte Turmsockel (z. B. Signalkreuzung): Turm steht auf dem Sockel statt darin. Normale Platten (~0,05) bleiben bei 0.
+  const STANDARD_SLOT_TOP=.05;
+  function slotLift(tile,index){
+    const spec=tileSpec(tile),template=spec.kind==='tile'&&modelTemplate(spec.name),slot=template&&(template.slots[index]||template.slots[0]);
+    return slot?Math.max(0,slot.top-STANDARD_SLOT_TOP)*S:0;
+  }
   function tileSpec(tile){
     const landmark=state.landmarks?.get(key(tile.q,tile.r));
     if(landmark?.type==='boss'&&landmark.status!=='defeated') return {kind:'landmark',name:'boss',rotation:0};
@@ -345,7 +351,7 @@ function create(host0,commands){
     const variant=tower.finalUpgrade||tower.branch;
     const template=(variant&&modelTemplate(`${tower.type}_${variant}`,'tower'))||modelTemplate(tower.type,'tower');
     const def=HexData.towerDefinition(tower),p=slotPositions(tile)[index],holder=new THREE.Group(),obj={holder,def,tower,tile,index,pos:p,angle:0};
-    holder.position.set(p.x,0,p.y);
+    holder.position.set(p.x,slotLift(tile,index),p.y);
     const model=new THREE.Group();model.scale.setScalar(S);holder.add(model);
     if(template){
       addParts(model,template.parts);
@@ -395,7 +401,7 @@ function create(host0,commands){
       if(tile.type==='base'){const pick=new THREE.Mesh(buildingPick,invisible);pick.scale.set(2,2,2);pick.userData.pick={kind:'base'};group.add(pick);picks.push(pick);}
       (tile.towers||[]).forEach((tower,i)=>{
         if(tower){const obj=towerObject(tile,i,tower);group.add(obj.holder);towers.push(obj);picks.push(obj.pick);}
-        else if(slots[i]){const glow=new THREE.Mesh(slotDiamondGeometry,mats.slot);glow.material.depthTest=false;glow.material.depthWrite=false;glow.material.transparent=true;glow.renderOrder=50;glow.position.set(slots[i].x,22,slots[i].y);group.add(glow);slotHints.push(glow);const pick=new THREE.Mesh(slotPick,invisible);pick.position.set(slots[i].x,0,slots[i].y);pick.userData.pick={kind:'slot',q:tile.q,r:tile.r,index:i};group.add(pick);picks.push(pick);}
+        else if(slots[i]){const glow=new THREE.Mesh(slotDiamondGeometry,mats.slot);glow.material.depthTest=false;glow.material.depthWrite=false;glow.material.transparent=true;glow.renderOrder=50;glow.position.set(slots[i].x,22+slotLift(tile,i),slots[i].y);group.add(glow);slotHints.push(glow);const pick=new THREE.Mesh(slotPick,invisible);pick.position.set(slots[i].x,0,slots[i].y);pick.userData.pick={kind:'slot',q:tile.q,r:tile.r,index:i};group.add(pick);picks.push(pick);}
       });
       for(let i=0;i<(tile.buildingSlots||0);i++){const b=buildingObject(tile,i,tile.buildings?.[i]);group.add(b.group);picks.push(b.pick);if(b.hint)buildings.push(b);if(!tile.buildings?.[i]){const p=buildingPosition(tile,i),gem=new THREE.Mesh(slotDiamondGeometry,tile.type==='deadEnd'?mats.portalSlot:mats.buildingSlot);gem.material.depthTest=false;gem.material.depthWrite=false;gem.material.transparent=true;gem.renderOrder=50;gem.position.set(p.x,22,p.y);group.add(gem);slotHints.push(gem);}}
       layer.objects.add(group);objectRecords.set(id,{sig,group,towers,buildings,picks,slotHints});pickDirty=true;
@@ -528,21 +534,22 @@ function create(host0,commands){
       }
       live.add(p.id);const t=clamp01(1-p.ttl/p.max),done=seenShots.get(p.id)||seenShots.set(p.id,{}).get(p.id);
       const src=p.kind==='chain'?p.pts[0]:{x:p.x1,y:p.y1},dst=p.kind==='chain'?p.pts.at(-1):{x:p.x2,y:p.y2};
-      if(!done.kick){done.kick=true;const tower=towerAt(src.x,src.y);if(tower) tower.kick=1;}   // Rückstoß des Turms
+      if(!done.kick){done.kick=true;const tower=towerAt(src.x,src.y);if(tower) tower.kick=1;done.srcH=SRC_H+(tower?.holder.position.y||0);}   // Rückstoß; Starthöhe folgt erhöhten Sockeln
+      const srcH=done.srcH;
       const dirx=dst.x-src.x,diry=dst.y-src.y,dlen=Math.hypot(dirx,diry)||1,ux=dirx/dlen,uy=diry/dlen;
-      if(t<.3){const k=1-t/.3;fx.flash.ball(src.x+ux*7,SRC_H+2,src.y+uy*7,1.5+3*k,MUZZLE,k*.9);}   // Mündungsblitz
+      if(t<.3){const k=1-t/.3;fx.flash.ball(src.x+ux*7,srcH+2,src.y+uy*7,1.5+3*k,MUZZLE,k*.9);}   // Mündungsblitz
       if(p.kind==='chain'){
         const fade=1-t*.8,seed=p.id*13+Math.floor(now/45);
         for(let i=0;i<p.pts.length-1;i++){
-          const a={x:p.pts[i].x,y:i?DST_H:SRC_H,z:p.pts[i].y},b={x:p.pts[i+1].x,y:DST_H,z:p.pts[i+1].y};
+          const a={x:p.pts[i].x,y:i?DST_H:srcH,z:p.pts[i].y},b={x:p.pts[i+1].x,y:DST_H,z:p.pts[i+1].y};
           lightning(p,a,b,seed+i*7,fade,high);
         }
         if(t<.5){const k=1-t/.5;p.pts.slice(1).forEach(pt=>fx.flash.ball(pt.x,DST_H,pt.y,2+3.5*k,p.color||'#93a5ff',k*.8));}   // Funken an jedem getroffenen Gegner
         if(!done.hit){done.hit=true;(p.hits||[]).forEach(popEnemy);}
       }else if(p.tower==='element'||p.tower==='necromancer'){
-        const f=clamp01(t/.8),x=lerp(src.x,dst.x,f),z=lerp(src.y,dst.y,f),y=lerp(SRC_H,DST_H,f);
+        const f=clamp01(t/.8),x=lerp(src.x,dst.x,f),z=lerp(src.y,dst.y,f),y=lerp(srcH,DST_H,f);
         fx.flash.ball(x,y,z,5,p.color,.7);fx.solid.ball(x,y,z,2,p.color,1);
-        fx.glow.segment(src.x,SRC_H,src.y,x,y,z,1.5,p.color,(1-t)*.5);
+        fx.glow.segment(src.x,srcH,src.y,x,y,z,1.5,p.color,(1-t)*.5);
         if(f===1&&!done.hit){done.hit=true;(p.hits||[]).forEach(popEnemy);}
       }else if(p.tower==='catapult'){                                   // Felsbrocken rollt und hüpft die Schusslinie entlang
         const f=clamp01(t/.9),x=lerp(src.x,dst.x,f),y=lerp(src.y,dst.y,f),hop=Math.abs(Math.sin(f*Math.PI*5))*9*(1-f*.4)+5;
@@ -552,7 +559,7 @@ function create(host0,commands){
           const key='pop'+i;if(t>=start&&!done[key]){done[key]=true;popEnemy(p.hits[i]);}});
       }else{                                                            // Pfeil (Archer) und Bolzen (Balliste)
         const bolt=p.tower==='ballista',f=clamp01(t/.8),arc=bolt?3:12,length=bolt?15:9,radius=bolt?1.1:.65;
-        const at=u=>({x:lerp(src.x,dst.x,u),y:lerp(SRC_H,DST_H,u)+Math.sin(Math.PI*u)*arc,z:lerp(src.y,dst.y,u)});
+        const at=u=>({x:lerp(src.x,dst.x,u),y:lerp(srcH,DST_H,u)+Math.sin(Math.PI*u)*arc,z:lerp(src.y,dst.y,u)});
         if(f<1){
           const head=at(f),before=at(Math.max(0,f-.06)),vx=head.x-before.x,vy=head.y-before.y,vz=head.z-before.z,vl=Math.hypot(vx,vy,vz)||1,nx=vx/vl,ny=vy/vl,nz=vz/vl;
           const tail={x:head.x-nx*length,y:head.y-ny*length,z:head.z-nz*length};
