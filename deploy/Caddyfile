@@ -1,4 +1,4 @@
-autohextd.zlyfer.net {
+autohextd.autophil.lol {
   encode zstd gzip
   header {
     Referrer-Policy no-referrer

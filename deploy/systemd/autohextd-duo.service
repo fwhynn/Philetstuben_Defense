@@ -12,7 +12,7 @@ WorkingDirectory=/var/www/html/net.zlyfer.autohextd
 Environment=NODE_ENV=production
 Environment=DUO_HOST=127.0.0.1
 Environment=DUO_PORT=8090
-Environment=DUO_PUBLIC_ORIGIN=https://autohextd.zlyfer.net/
+Environment=DUO_PUBLIC_ORIGIN=https://autohextd.autophil.lol
 Environment=DUO_SAVE_FILE=/var/lib/autohextd/checkpoint.json
 EnvironmentFile=-/etc/autohextd/duo.env
 ExecStart=/usr/local/bin/node /var/www/html/net.zlyfer.autohextd/server/start-duo.cjs

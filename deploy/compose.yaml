@@ -6,7 +6,7 @@ services:
       target: app
     restart: unless-stopped
     environment:
-      DUO_PUBLIC_ORIGIN: https://autohextd.zlyfer.net
+      DUO_PUBLIC_ORIGIN: https://autohextd.autophil.lol
       DUO_MAINTENANCE: '0'
     volumes:
       - duo_data:/data
