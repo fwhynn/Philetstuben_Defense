@@ -253,7 +253,7 @@ html,body{height:100%;overflow:hidden}
 
 .towerDragShade{display:block;overflow:hidden;isolation:isolate}.dragMapVeil{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.dragBuildTarget{position:absolute;z-index:1;display:grid;place-items:center;box-sizing:border-box;transform:translate(-50%,-50%);border:2px solid #fff;border-radius:50%;background:#effff136;box-shadow:0 0 0 2px #14251ce6,0 0 12px #ffffff80;color:#fff;font:bold 24px/1 system-ui;text-shadow:0 1px 4px #000;pointer-events:none}.dragBuildTarget.active{border-color:#9df3bd;background:#347858b3;box-shadow:0 0 0 3px #173d29,0 0 18px #9df3bd}.dragBuildTarget.unaffordable{border-color:#ed997a;color:#ed997a;background:#633a3299}
 
-#saveOverlay{z-index:45}#saveOverlay button{margin:6px;min-height:44px}#uploadSaveInput{max-width:100%}#menuSaveBtn{font-size:12px;padding:7px 12px}
+#saveOverlay,#accountOverlay{z-index:45}#saveOverlay button,#accountOverlay button{margin:6px;min-height:44px}#accountOverlay input{max-width:100%;min-height:36px}#uploadSaveInput{max-width:100%}#menuSaveBtn{font-size:12px;padding:7px 12px}
 
 #menuSaveBtn{min-height:44px}
 
@@ -280,7 +280,7 @@ button.card{background:#efe3c2;color:#2b281f}button.card:disabled{opacity:.7}
 .tutorialSpotlight{position:fixed;z-index:20;border:3px solid #ffe198;border-radius:12px;background:transparent;box-shadow:0 0 0 100vmax #0c141166;pointer-events:none}
 .tutorialSpotlight.hidden{display:none}.message.tutorialActive{z-index:30;max-width:min(520px,calc(100vw - 120px));font-size:14px;line-height:1.45}
 .message .tutorialPanel button{min-height:36px}.tutorialFeedback{margin:12px 0 0;padding:10px 12px;border:1px solid #e9b583;border-radius:8px;background:#4b3023;color:#fff0dc;font-size:14px;line-height:1.4}
-#saveOverlay{background:#0b110d66}.menuBackdropOn #saveOverlay{background:#0b110d44}
+#saveOverlay,#accountOverlay{background:#0b110d66}.menuBackdropOn #saveOverlay,.menuBackdropOn #accountOverlay{background:#0b110d44}
 .mapRail{top:calc(var(--play-top,90px) + 12px);bottom:calc(var(--play-bottom,200px) + 12px);transform:none;justify-content:center;overflow-y:auto;overflow-x:clip;scrollbar-width:thin}
 .mapRail button{flex-shrink:0}.biomeRail{overflow:visible}.loadoutRail{justify-content:safe center}
 @media(max-width:1100px){
@@ -354,7 +354,7 @@ button.card{background:#efe3c2;color:#2b281f}button.card:disabled{opacity:.7}
 :root{--ui-font-body:16px;--ui-font-control:14px;--ui-font-meta:12px}
 .drawer,.towerPanel,.statPopup{font-size:var(--ui-font-control);line-height:1.5}.drawer h2,.towerPanel h2{font-size:18px;font-weight:700}.drawer .hint,.towerPanel small,.rules ul{font-size:var(--ui-font-meta);line-height:1.5}
 .uiIcon{width:20px;height:20px;display:inline-block;vertical-align:middle;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}#healthStat>.uiIcon{color:#f78390;fill:#b63756;stroke:#f78390}
-.overlay,.mainMenu,.celebration{z-index:50}#loadoutOverlay,#playModeOverlay,#menuRulesOverlay,#arsenalOverlay{z-index:60}#saveOverlay{z-index:65}
+.overlay,.mainMenu,.celebration{z-index:50}#loadoutOverlay,#playModeOverlay,#menuRulesOverlay,#arsenalOverlay{z-index:60}#saveOverlay,#accountOverlay{z-index:65}
 @media(max-width:900px),(max-height:600px){.gameHeader{z-index:7}.gameHeader:has(.statDetails[open]){z-index:37}}
 /* Tutorial actions retain their screen anchor across changing target/layout steps. */
 .message.tutorialActive{left:50%!important;transform:translateX(-50%)}

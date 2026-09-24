@@ -1196,3 +1196,29 @@ Spezial|Special
 Pfad|Path
 Bau:|Build:
 `);
+HexTranslations.add(`
+Account (Beta)|Account (beta)
+Mit einem Account sicherst du deinen Spielstand auf dem Server und lädst ihn auf einem anderen Gerät wieder. Die Funktion ist noch im Test.|With an account you can back up your save on the server and load it on another device. This feature is still in testing.
+Benutzername|Username
+Passwort|Password
+Einloggen …|Logging in …
+Einloggen|Log in
+Account erstellen|Create account
+Account wird erstellt …|Creating account …
+Account erstellt.|Account created.
+Eingeloggt als|Logged in as
+Ausgeloggt.|Logged out.
+Ausloggen|Log out
+Registrierung fehlgeschlagen|Registration failed
+Login fehlgeschlagen|Login failed
+Auf Server speichern|Save to server
+Vom Server laden|Load from server
+Speichere auf dem Server …|Saving to server …
+Spielstand auf dem Server gesichert.|Save stored on the server.
+Speichern fehlgeschlagen|Saving failed
+Lade vom Server …|Loading from server …
+Auf dem Server liegt noch kein Spielstand für diesen Account.|There is no save on the server for this account yet.
+Spielstand vom Server geladen. Dein lokales Profil wurde ersetzt.|Save loaded from the server. Your local profile was replaced.
+Laden fehlgeschlagen|Loading failed
+Bitte zuerst den laufenden Run beenden.|Please finish the current run first.
+`);

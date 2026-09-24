@@ -57,6 +57,13 @@ test('life and wave tutorial steps position the spotlight using current target b
  elements.get('tutorialNextBtn').listeners.click();assert.equal(elements.get('tutorialSpotlight').style.top,'696px');a.startWave();a.renderAll();assert.equal(elements.get('tutorialSpotlight').classList.contains('hidden'),true);
 });
 
+test('main menu account button opens the account dialog; back and Escape close it',()=>{
+ const {elements,documentListeners}=load();elements.get('openMainMenuBtn').listeners.click();const menu=elements.get('mainMenu'),account=elements.get('accountOverlay');
+ elements.get('menuAccountBtn').listeners.click();assert.equal(account.classList.contains('hidden'),false);assert.equal(menu.classList.contains('hidden'),false);
+ elements.get('closeAccountBtn').listeners.click();assert.equal(account.classList.contains('hidden'),true);assert.equal(menu.classList.contains('hidden'),false);
+ elements.get('menuAccountBtn').listeners.click();documentListeners.keydown({key:'Escape'});assert.equal(account.classList.contains('hidden'),true);
+});
+
 test('save transfer stays open on backdrop click and closes through its back button',()=>{
  const {elements}=load();elements.get('openMainMenuBtn').listeners.click();const menu=elements.get('mainMenu'),save=elements.get('saveOverlay');elements.get('menuSaveBtn').listeners.click();assert.equal(menu.classList.contains('hidden'),false);assert.equal(save.classList.contains('hidden'),false);save.listeners.click?.({target:save});assert.equal(save.classList.contains('hidden'),false);elements.get('closeSaveBtn').listeners.click();assert.equal(save.classList.contains('hidden'),true);assert.equal(menu.classList.contains('hidden'),false);
 });
