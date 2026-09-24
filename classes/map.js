@@ -45,7 +45,7 @@ const HexMap=(()=>{
     grove: [[2,32]],
     citadel: [[14,-24],[14,24]],
     battlefield: [[-14,-24]],
-    watchtower: [[20,-28],[2,32]],
+    watchtower: [[20,-28],[-8.6,14]],   // zweiter Platz neben der Turmruine des Modells, nicht darauf
     royalVillage: [[-14,-24]],
     warCross: [[-14,-24],[14,24]]
   };
