@@ -116,7 +116,34 @@ function create(host0,commands){
   const loader=new GLTFLoader();
   const wanted=Object.entries(HexModelMap.ALL_MODELS).flatMap(([kind,names])=>names.map(name=>({kind,id:`${PREFIX[kind]}_${name}`})));
   const inventory=fetch('assets/index.json').then(r=>r.ok?r.json():null).catch(()=>null);   // nur vom mitgelieferten Server; sonst wird alles versucht
-  inventory.then(list=>{const available=list&&new Set(list);return Promise.all(wanted.filter(({kind,id})=>!available||available.has(`${kind}/${id}.glb`)).map(({kind,id})=>new Promise(done=>loader.load(`assets/${kind}/${id}.glb`,gltf=>{try{templates.set(id,makeTemplate(id,gltf.scene,kind));}catch(e){console.warn('Modell unbrauchbar:',id,e);}done();},undefined,e=>{console.warn('Modell fehlt:',id,e?.message||e);done();}))));}).then(()=>{ready=true;loading.remove();rebuildAll();if(state) render(state,targetList);});
+  // Lädt alle Modelle der gewählten Edition (Sakura mit Rückfall auf normal) in eine neue Template-Tabelle.
+  let modelGeneration=0;
+  function loadModels(){
+    const generation=++modelGeneration,edition=typeof HexAssetEdition!=='undefined'?HexAssetEdition:null;
+    return inventory.then(list=>{
+      const available=list&&new Set(list),next=new Map();
+      const sources=({kind,id})=>{const rel=`${kind}/${id}.glb`;return (edition?edition.paths(rel,available):[rel]).filter(src=>!available||available.has(src));};
+      return Promise.all(wanted.map(item=>new Promise(done=>{
+        const queue=sources(item);
+        const attempt=()=>{const src=queue.shift();if(!src)return done();
+          loader.load(`assets/${src}`,gltf=>{try{next.set(item.id,makeTemplate(item.id,gltf.scene,item.kind));}catch(e){console.warn('Modell unbrauchbar:',item.id,e);}done();},undefined,
+            e=>{if(queue.length)return attempt();console.warn('Modell fehlt:',item.id,e?.message||e);done();});};
+        attempt();
+      }))).then(()=>generation===modelGeneration&&!destroyed?next:null);
+    });
+  }
+  function applyModels(next){
+    if(!next)return;
+    for(const template of templates.values())for(const part of [...(template.parts||[]),...(template.slots||[]).flatMap(s=>s.parts),...(template.limbs||[]).flatMap(l=>l.parts)])part.geometry?.dispose();
+    templates.clear();for(const [id,template] of next)templates.set(id,template);
+    // Gegner und Minen halten eigene Modellkopien: beim Editionswechsel neu aufbauen.
+    for(const obj of enemyObjects.values()){layer.dynamic.remove(obj.group);obj.body?.material.dispose();}enemyObjects.clear();
+    for(const mesh of mineObjects.values())layer.dynamic.remove(mesh);mineObjects.clear();
+    for(const material of biomeMaterials.values())material?.dispose();biomeMaterials.clear();
+    ready=true;loading.remove();rebuildAll();if(state) render(state,targetList);
+  }
+  loadModels().then(applyModels);
+  const stopEditionWatch=(typeof HexAssetEdition!=='undefined'?HexAssetEdition:null)?.onChange(()=>loadModels().then(applyModels));
 
   // ---- gemeinsame Ressourcen ----
   const invisible=new THREE.MeshBasicMaterial({visible:false});
@@ -134,7 +161,7 @@ function create(host0,commands){
   const additive=()=>new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,depthWrite:false,blending:THREE.AdditiveBlending});
   function makePool(geometry,max,material){
     const mesh=new THREE.InstancedMesh(geometry,material,max);mesh.frustumCulled=false;mesh.count=0;mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-    const m=new THREE.Matrix4(),c=new THREE.Color(),q=new THREE.Quaternion(),up=new THREE.Vector3(0,1,0),d=new THREE.Vector3(),pos=new THREE.Vector3(),sc=new THREE.Vector3();
+    const euler=new THREE.Euler(),m=new THREE.Matrix4(),c=new THREE.Color(),q=new THREE.Quaternion(),up=new THREE.Vector3(0,1,0),d=new THREE.Vector3(),pos=new THREE.Vector3(),sc=new THREE.Vector3();
     mesh.setColorAt(0,c.set('#ffffff'));   // Farbpuffer von Anfang an anlegen, sonst kompiliert der Shader ohne Instanzfarben
     const put=(color,fade)=>{mesh.setMatrixAt(mesh.count,m);mesh.setColorAt(mesh.count,c.set(color).multiplyScalar(fade));mesh.count++;};
     return {mesh,
@@ -142,6 +169,7 @@ function create(host0,commands){
       segment(ax,ay,az,bx,by,bz,radius,color,fade=1){if(mesh.count>=max) return;d.set(bx-ax,by-ay,bz-az);const len=Math.max(d.length(),.01);q.setFromUnitVectors(up,d.divideScalar(len));pos.set((ax+bx)/2,(ay+by)/2,(az+bz)/2);sc.set(radius,len,radius);m.compose(pos,q,sc);put(color,fade);},
       ball(x,y,z,radius,color,fade=1){if(mesh.count>=max) return;q.identity();pos.set(x,y,z);sc.setScalar(radius);m.compose(pos,q,sc);put(color,fade);},
       cone(x,y,z,dx,dy,dz,length,radius,color){if(mesh.count>=max) return;d.set(dx,dy,dz).normalize();q.setFromUnitVectors(up,d);pos.set(x,y,z);sc.set(radius,length,radius);m.compose(pos,q,sc);put(color,1);},
+      flake(x,y,z,rx,ry,rz,size,color){if(mesh.count>=max) return;q.setFromEuler(euler.set(rx,ry,rz));pos.set(x,y,z);sc.set(size,size*.6,size);m.compose(pos,q,sc);put(color,1);},   // flaches, gedrehtes Plättchen (Blatt, Blüte)
       end(){mesh.instanceMatrix.needsUpdate=true;if(mesh.instanceColor) mesh.instanceColor.needsUpdate=true;}};
   }
   const fx={solid:makePool(new THREE.CylinderGeometry(1,1,1,6),700,new THREE.MeshBasicMaterial({color:'#ffffff'})),
@@ -177,8 +205,35 @@ function create(host0,commands){
 
   const windPool=makePool(new THREE.CylinderGeometry(1,1,1,5),240,new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:.35,depthWrite:false}));
   const mistPool=makePool(new THREE.SphereGeometry(1,8,4),60,new THREE.MeshBasicMaterial({color:'#dce8ee',transparent:true,opacity:.07,depthWrite:false}));
-  layer.dynamic.add(windPool.mesh,mistPool.mesh);
+  // Sakura-Stimmung je Biom: Blütenblätter, Ahornblätter, Sandkörner, Regen (nur hohe Grafikqualität).
+  const flakeGeometry=new THREE.CircleGeometry(1,5),flakeMaterial=new THREE.MeshBasicMaterial({color:'#ffffff',side:THREE.DoubleSide,depthWrite:false});
+  const flakePool=makePool(flakeGeometry,360,flakeMaterial),rainPool=makePool(new THREE.CylinderGeometry(1,1,1,4),260,new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:.45,depthWrite:false}));
+  layer.dynamic.add(windPool.mesh,mistPool.mesh,flakePool.mesh,rainPool.mesh);
   const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
+  const AMBIENT={
+    petals:{count:4,colors:['#f7c1d4','#fbe2ec','#f29bbb'],size:1.5},
+    maple:{count:3,colors:['#c8412a','#e0662c','#a52f22'],size:2.4},
+    sand:{count:5,colors:['#f1dca6','#e3c683'],size:.7},
+    rain:{count:6,colors:['#d3e2f7'],size:0}
+  };
+  function animateSakuraAmbient(now){
+    flakePool.begin();rainPool.begin();
+    if(state&&ready&&quality==='high'&&isSakura()&&!reducedMotion.matches){
+      const tiles=[...state.map.values()].map(tile=>({tile,p:axialToWorld(tile.q,tile.r)})).sort((a,b)=>Math.hypot(a.p.x-cam.x,a.p.y-cam.z)-Math.hypot(b.p.x-cam.x,b.p.y-cam.z)).slice(0,45);
+      for(const {tile,p} of tiles){
+        const kind=HexBiomes.sakuraAmbient?.[HexBiomes.forTile(state,tile)],fx=AMBIENT[kind];if(!fx)continue;
+        const phase=tile.q*1.7+tile.r*2.3;
+        for(let i=0;i<fx.count;i++){
+          const seed=phase*7.31+i*3.17,ox=Math.sin(seed*1.3)*26,oz=Math.cos(seed*2.1)*24,color=fx.colors[i%fx.colors.length];
+          if(kind==='rain'){const t=((now*.0011+seed)%1+1)%1,x=p.x+ox-t*6,z=p.y+oz,y=46-t*44;rainPool.segment(x,y,z,x+1.6,y+8,z,.28,color,1);continue;}
+          if(kind==='sand'){const t=((now*.00016+seed)%1+1)%1,x=p.x-30+t*60,z=p.y+oz+Math.sin(t*9+seed)*3,y=3+Math.abs(Math.sin(t*7+seed))*6,s=fx.size*Math.min(1,t*6,(1-t)*6);flakePool.flake(x,y,z,t*6,seed,0,s,color);continue;}
+          const slow=kind==='maple'?.00022:.0003,t=((now*slow+seed)%1+1)%1,s=fx.size*Math.min(1,t*6,(1-t)*6);   // Blätter: fallen, pendeln, drehen sich
+          flakePool.flake(p.x+ox+Math.sin(t*6.3+seed)*7+t*8,40-t*38,p.y+oz+Math.cos(t*4.7+seed)*5,t*9+seed,t*5,Math.sin(t*7+seed)*1.2,s,color);
+        }
+      }
+    }
+    flakePool.end();rainPool.end();
+  }
   function animateBiomeWind(now){
     windPool.begin();mistPool.begin();
     if(state&&ready&&!reducedMotion.matches){
@@ -231,7 +286,9 @@ function create(host0,commands){
     if(!template){const mesh=new THREE.Mesh(hexPad,fallbackMaterial);mesh.scale.setScalar(1);holder.add(mesh);return holder;}
     addParts(model,spec.proceduralRoads&&template.noRoad?template.noRoad:template.parts,ghost,legal);
     const biome=spec.name==='fog'?'grass':HexBiomes.forTile(state,tile);
-    if(biome!=='grass')model.traverse(mesh=>{if(!mesh.isMesh||!/(grass|foliage|soil)/i.test(mesh.material.name||''))return;const id=mesh.material.uuid+'|'+biome;let material=biomeMaterials.get(id);if(!material){material=mesh.material.clone();material.vertexColors=false;material.color.set(HexBiomes.definitions[biome].color);if(/soil/i.test(material.name))material.color.multiplyScalar(.6);else if(/foliage/i.test(material.name))material.color.multiplyScalar(.8);biomeMaterials.set(id,material);}mesh.material=material;});
+    if(biome!=='grass'){const sakura=isSakura();model.traverse(mesh=>{if(!mesh.isMesh)return;const id=mesh.material.uuid+'|'+biome+'|'+sakura;let material=biomeMaterials.get(id);
+      if(material===undefined){const color=biomeTint(mesh.material.name||'',biome,sakura);material=color?mesh.material.clone():null;if(material){material.vertexColors=false;material.color.copy(color);}biomeMaterials.set(id,material);}
+      if(material)mesh.material=material;});}
     // Turmplätze liegen an den Spielpositionen (HexMap.slotOffsets), nicht an den im Modell gespeicherten.
     HexMap.slotOffsets(tile.type,slotCount).forEach((offset,i)=>{
       const slot=template.slots[i]||template.slots[0];if(!slot) return;
@@ -295,6 +352,18 @@ function create(host0,commands){
   }
   // Erhöhte Turmsockel (z. B. Signalkreuzung): Turm steht auf dem Sockel statt darin. Normale Platten (~0,05) bleiben bei 0.
   const STANDARD_SLOT_TOP=.05;
+  const isSakura=()=>typeof HexAssetEdition!=='undefined'&&HexAssetEdition.get()==='sakura';
+  // Biomfarbe eines Materials oder null (unverändert). Sakura: Boden, Erde, Laub und Blüten je Jahreszeit; normal: eine Biomfarbe.
+  function biomeTint(name,biome,sakura){
+    if(sakura){
+      const season=HexBiomes.sakuraSeasons?.[biome];if(!season)return null;
+      const role=/blossom_light|petal/i.test(name)?'blossomLight':/blossom/i.test(name)?'blossom':/grass/i.test(name)?'ground':/soil/i.test(name)?'soil':/foliage|pine/i.test(name)?'foliage':null;
+      return role?new THREE.Color(season[role]):null;
+    }
+    if(!/(grass|foliage|soil)/i.test(name))return null;
+    const color=new THREE.Color(HexBiomes.definitions[biome].color);
+    return /soil/i.test(name)?color.multiplyScalar(.6):/foliage/i.test(name)?color.multiplyScalar(.8):color;
+  }
   function slotLift(tile,index){
     const spec=tileSpec(tile),template=spec.kind==='tile'&&modelTemplate(spec.name),slot=template&&(template.slots[index]||template.slots[0]);
     return slot?Math.max(0,slot.top-STANDARD_SLOT_TOP)*S:0;
@@ -721,7 +790,7 @@ function create(host0,commands){
         for(const limb of obj.limbs) limb.g.rotation.z=limb.name==='leg_l'?swing:limb.name==='leg_r'?-swing:limb.name==='arm_l'?-swing*.8:swing*.8;
       }
     }
-    animateBiomeWind(now);placeLabels();backgroundSun.position.copy(sun.position);backgroundSun.target.position.copy(sun.target.position);
+    animateBiomeWind(now);animateSakuraAmbient(now);placeLabels();backgroundSun.position.copy(sun.position);backgroundSun.target.position.copy(sun.target.position);
     gl.clear();gl.render(backgroundScene,camera);gl.clearDepth();gl.render(scene,camera);renderedFrameCount++;
   }
 
@@ -796,11 +865,11 @@ function create(host0,commands){
     return HexUiLayout.pickScreenSlot(slots,event.clientX-box.left,event.clientY-box.top,box.width,box.height);
   },rotateView,panView,zoom:factor=>zoom(factor),resetView:()=>resetView(true),getView,
     destroy(){
-      destroyed=true;cancelAnimationFrame(raf);resize.disconnect();for(const [name,fn,options] of listeners) dom.removeEventListener(name,fn,options);
-      windPool.mesh.geometry.dispose();windPool.mesh.material.dispose();windPool.mesh.dispose();mistPool.mesh.geometry.dispose();mistPool.mesh.material.dispose();mistPool.mesh.dispose();
+      destroyed=true;stopEditionWatch?.();cancelAnimationFrame(raf);resize.disconnect();for(const [name,fn,options] of listeners) dom.removeEventListener(name,fn,options);
+      windPool.mesh.geometry.dispose();windPool.mesh.material.dispose();windPool.mesh.dispose();for(const pool of [flakePool,rainPool]){pool.mesh.geometry.dispose();pool.mesh.material.dispose();pool.mesh.dispose();}mistPool.mesh.geometry.dispose();mistPool.mesh.material.dispose();mistPool.mesh.dispose();
       for(const materials of Object.values(biomeOverlayMaterials)){materials.fill.dispose();materials.border.dispose();}
       clearOverlays();buildingPadGeometry.dispose();buildingPadMaterial.dispose();slotDiamondGeometry.dispose();gridGeometry.dispose();buffGeometry.dispose();gridMaterial.dispose();otherBuffMaterial.dispose();otherBuffBorder.dispose();buffMaterial.dispose();buffBorderMaterial.dispose();
-      for(const material of biomeMaterials.values())material.dispose();biomeMaterials.clear();
+      for(const material of biomeMaterials.values())material?.dispose();biomeMaterials.clear();
       gl.dispose();host.remove();wrap.classList.remove('is3d');if(hintText) hintText.textContent=oldHint;host0.style.display='';
     }};
 }

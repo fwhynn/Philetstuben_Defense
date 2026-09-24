@@ -1196,3 +1196,12 @@ Spezial|Special
 Pfad|Path
 Bau:|Build:
 `);
+HexTranslations.add(`
+Grafikstil|Graphics style
+Sakura-Edition|Sakura Edition
+`);
+HexTranslations.add(`
+Zen-Sommer|Zen Summer
+Glyzinienregen|Wisteria Rain
+Momiji-Herbst|Momiji Autumn
+`);

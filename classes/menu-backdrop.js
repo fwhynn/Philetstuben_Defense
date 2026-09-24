@@ -25,7 +25,8 @@ if(renderer){
   scene.add(new THREE.HemisphereLight('#e6f1ff','#6b7a4c',1.4));
   const sun=new THREE.DirectionalLight('#fff1d0',2.2);sun.position.set(6,12,8);scene.add(sun);
 
-  const items=[];let running=false,last=0,loaded=false;
+  const items=[];let running=false,last=0,loaded=false,loadGeneration=0;
+  const inventory=fetch('assets/index.json').then(r=>r.ok?r.json():null).catch(()=>null);
   const rnd=(a,b)=>a+Math.random()*(b-a);
 
   function normalized(gltfScene,size){
@@ -46,9 +47,12 @@ if(renderer){
     }
   }
   function load(){
-    if(loaded) return;loaded=true;const loader=new GLTFLoader(),models=[];
-    Promise.all(FILES.map(f=>new Promise(done=>loader.load('assets/'+f+'.glb',g=>{models.push({template:normalized(g.scene,f.startsWith('tiles/')?2.2:f.startsWith('towers/')?2.4:1.9),tile:f.startsWith('tiles/')});done();},undefined,()=>done()))))
-      .then(()=>{if(models.length) populate(models);});
+    if(loaded) return;loaded=true;const loader=new GLTFLoader(),models=[],edition=typeof HexAssetEdition!=='undefined'?HexAssetEdition:null,generation=++loadGeneration;
+    // Sakura-Edition: vorhandene Sakura-Datei, sonst die normale.
+    const one=(f,available)=>new Promise(done=>{const queue=(edition?edition.paths(f+'.glb',available):[f+'.glb']).filter(p=>!available||available.has(p));
+      const attempt=()=>{const src=queue.shift();if(!src)return done();loader.load('assets/'+src,g=>{models.push({template:normalized(g.scene,f.startsWith('tiles/')?2.2:f.startsWith('towers/')?2.4:1.9),tile:f.startsWith('tiles/')});done();},undefined,attempt);};attempt();});
+    inventory.then(list=>Promise.all(FILES.map(f=>one(f,list&&new Set(list)))))
+      .then(()=>{if(generation===loadGeneration&&models.length) populate(models);});
   }
   function resize(){const w=backdrop.clientWidth||innerWidth,h=backdrop.clientHeight||innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
   function frame(now){
@@ -64,6 +68,7 @@ if(renderer){
     else if(!open) running=false;
   }
   new ResizeObserver(()=>{if(running) resize();}).observe(backdrop);
+  (typeof HexAssetEdition!=='undefined'?HexAssetEdition:null)?.onChange(()=>{for(const it of items) scene.remove(it.wrap);items.length=0;loaded=false;if(running) load();});
   const observer=new MutationObserver(sync);for(const o of overlays) observer.observe(o,{attributes:true,attributeFilter:['class']});
   sync();
 }else{

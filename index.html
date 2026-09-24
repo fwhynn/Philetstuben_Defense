@@ -231,6 +231,7 @@
         <label class="toggle">Lautstärke <input id="soundVolume" type="range" min="0" max="100" value="35"
             aria-label="Sound-Lautstärke" /></label>
         <label class="toggle">Sprache <select data-language-picker aria-label="Sprache"><option value="de">Deutsch</option><option value="en">English</option></select></label>
+        <label class="toggle">Grafikstil <select data-asset-edition aria-label="Grafikstil"><option value="normal">Normal</option><option value="sakura">Sakura-Edition</option></select></label>
         <label class="toggle">Startwert für den nächsten Run (Seed) <input id="runSeed" type="text" maxlength="100"
             placeholder="Leer = zufälliger Run" /></label>
         <small class="hint">Derselbe Startwert wiederholt bei gleichen Entscheidungen die Karten und
@@ -478,6 +479,7 @@
     <script src="classes/run-session.js"></script>
     <script src="classes/svg-renderer.js"></script>
     <script src="classes/model-map.js"></script>
+    <script src="classes/asset-edition.js"></script>
     <script type="module">
       if(new URLSearchParams(location.hash.slice(1)).has('duo'))await new Promise(resolve=>{const script=document.createElement('script');script.src='/socket.io/socket.io.js';script.onload=resolve;script.onerror=resolve;document.head.appendChild(script);});
       // 3D nur über http(s) (Modelle werden per fetch geladen); ?svg erzwingt den SVG-Prototyp, Doppelklick (file://) nutzt ihn automatisch.

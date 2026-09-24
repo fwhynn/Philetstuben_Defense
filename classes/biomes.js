@@ -83,5 +83,12 @@ const HexBiomes=(()=>{
     return def;
   }
   function guardian(state,tile){const originBiome=forTile(state,tile);return {originBiome,resistances:originBiome==='ash'?{fire:.5}:originBiome==='storm'?{lightning:.5,wind:.5}:{},slowResistance:originBiome==='desert'?.5:0};}
-  return {introAcknowledged,acknowledgeIntro,introIds,visibleTiles,highlight,guardian,definitions,at,forTile,atWorld,apply};
+  // Nur Darstellung (Sakura-Edition): jedes Biom als eigene japanische Jahreszeit. Grasland behält den Kirschblüten-Frühling.
+  const sakuraSeasons={
+    desert:{name:'Zen-Sommer',ground:'#e6cf98',soil:'#a3824f',foliage:'#8c9450',blossom:'#f1dfa8',blossomLight:'#fbf0cf',particles:'sand'},
+    storm:{name:'Glyzinienregen',ground:'#8e9ab0',soil:'#4c5569',foliage:'#3e6a63',blossom:'#9a7fd0',blossomLight:'#c6b3ee',particles:'rain'},
+    ash:{name:'Momiji-Herbst',ground:'#7d3a2c',soil:'#3c1d17',foliage:'#c0482b',blossom:'#d8412a',blossomLight:'#ef7a3a',particles:'maple'}
+  };
+  const sakuraAmbient={grass:'petals',desert:'sand',storm:'rain',ash:'maple'};
+  return {introAcknowledged,acknowledgeIntro,introIds,visibleTiles,highlight,guardian,definitions,at,forTile,atWorld,apply,sakuraSeasons,sakuraAmbient};
 })();
