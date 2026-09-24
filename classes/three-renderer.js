@@ -377,8 +377,12 @@ function create(host0,commands){
     const model=building&&templates.get('building_'+type);
     if(model){const g=new THREE.Group();g.scale.setScalar(S);addParts(g,model.parts);group.add(g);}
     else if(type==='portal'){
-      const arch=new THREE.Mesh(new THREE.TorusGeometry(12,3,6,16),std('#8254b5',{emissive:'#a16bdb',emissiveIntensity:.5}));arch.position.y=14;group.add(arch);
-      const core=new THREE.Mesh(new THREE.CircleGeometry(10,16),new THREE.MeshBasicMaterial({color:'#c991ff',transparent:true,opacity:.65,side:THREE.DoubleSide}));core.position.y=14;group.add(core);
+      // Öffnung zeigt zur Straße der Sackgasse (Ring liegt quer zur Straßenrichtung).
+      const gate=new THREE.Group(),road=tile.roads?.[0];
+      if(road!==undefined){const c=axialToWorld(tile.q,tile.r),n=neighbor(tile.q,tile.r,road),to=axialToWorld(n.q,n.r);gate.rotation.y=Math.atan2(to.x-c.x,to.y-c.y);}
+      const arch=new THREE.Mesh(new THREE.TorusGeometry(12,3,6,16),std('#8254b5',{emissive:'#a16bdb',emissiveIntensity:.5}));arch.position.y=14;gate.add(arch);
+      const core=new THREE.Mesh(new THREE.CircleGeometry(10,16),new THREE.MeshBasicMaterial({color:'#c991ff',transparent:true,opacity:.65,side:THREE.DoubleSide}));core.position.y=14;gate.add(core);
+      group.add(gate);
     }else if(building){
       const palette={house:['#c9a066','#a94a3a'],forge:['#6b6e75','#3d3f45'],market:['#d8c48a','#b8443a']}[type]||['#bc914d','#7a5a2c'];
       const body=new THREE.Mesh(new THREE.BoxGeometry(26,18,22).translate(0,9,0),std(palette[0])),roof=new THREE.Mesh(new THREE.ConeGeometry(21,13,4).rotateY(Math.PI/4).translate(0,24.5,0),std(palette[1]));
