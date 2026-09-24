@@ -105,13 +105,16 @@ test('research map exposes all towers and buildings and reset needs confirmation
   elements.get('resetDiamondsBtn').listeners.click(); assert.equal(JSON.parse(storage.get('hex-bastion-profile-v1')).diamonds, 80); elements.get('resetDiamondsBtn').listeners.click(); const p = JSON.parse(storage.get('hex-bastion-profile-v1')); assert.equal(p.diamonds, 100); assert.equal(p.unlockedTowers.includes('ballista'), false); assert.equal(elements.get('resetDiamondsBtn').disabled, true);
 });
 
-test('research map pans without scrolling, zooms around the pointer and fits the viewport', () => {
-  const fs = require('node:fs'), path = require('node:path'), vm = require('node:vm'), html = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8'); const arsenal=html.search(/src\s*=\s*["']classes\/arsenal\.js["']/),game=html.search(/s\.src\s*=\s*["']classes\/game\.js["']/); assert.ok(arsenal>=0&&game>arsenal,'Arsenal must load before the game controller');
-  const context = {}; vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../classes/arsenal.js'), 'utf8') + ';globalThis.drag=HexArsenal.enableDrag;', context);
-  const handlers = {}, content = { style: {}, offsetWidth: 1600, offsetHeight: 1200 }, view = { clientWidth: 800, clientHeight: 600, scrollLeft: 0, scrollTop: 0, getBoundingClientRect() { return { left: 0, top: 0 }; }, addEventListener(k, v) { handlers[k] = v; }, setPointerCapture() { } }; const camera = context.drag(view, content);
-  handlers.pointerdown({ button: 0, pointerId: 1, clientX: 100, clientY: 100, target: {}, preventDefault() { } }); handlers.pointermove({ pointerId: 1, clientX: 70, clientY: 90 }); assert.equal(Number(content.style.zoom), .73); assert.ok(Math.abs(parseFloat(content.style.left) * .73 + 30) < 1e-8); assert.ok(Math.abs(parseFloat(content.style.top) * .73 + 10) < 1e-8); handlers.pointercancel({ pointerId: 1 }); handlers.pointermove({ pointerId: 1, clientX: 0, clientY: 0 }); assert.equal(view.scrollLeft, 0);
-  let prevented = false; handlers.wheel({ deltaY: 100, deltaMode: 0, clientX: 200, clientY: 150, preventDefault() { prevented = true; } }); assert.ok(prevented); const scale = Number(content.style.zoom), x = parseFloat(content.style.left) * scale, y = parseFloat(content.style.top) * scale; assert.ok(scale < .73); assert.ok(Math.abs((200 - x) / scale - 230 / .73) < 1e-8); assert.ok(Math.abs((150 - y) / scale - 160 / .73) < 1e-8); assert.equal(view.scrollTop, 0);
-  camera.fit(); assert.equal(Number(content.style.zoom), .47333333333333333); camera.start(); assert.equal(Number(content.style.zoom), .73); assert.ok(Math.abs(parseFloat(content.style.left) * .73 - 8) < 1e-8);
+test('arsenal shows one tree at a time, picked from a rail that marks affordable unlocks', () => {
+  const fs = require('node:fs'), path = require('node:path'), html = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8'); const arsenal=html.search(/src\s*=\s*["']classes\/arsenal\.js["']/),game=html.search(/s\.src\s*=\s*["']classes\/game\.js["']/); assert.ok(arsenal>=0&&game>arsenal,'Arsenal must load before the game controller');
+  const { elements } = load({ initialProfile: { diamonds: 20 } }); elements.get('menuArsenalBtn').listeners.click();
+  const trees = elements.get('arsenalChoices').children, tabs = elements.get('arsenalTabs').children.filter(e => e.attributes.role === 'tab');
+  assert.equal(tabs.length, 12); assert.equal(trees.filter(t => !t.hidden).length, 1);
+  assert.ok(tabs.some(t => t.className.includes('affordable'))); assert.equal(tabs.find(t => t.attributes['aria-controls'] === 'research-ballista').className.includes('locked'), true);
+  const target = tabs.find(t => t.attributes['aria-controls'] === 'research-market'); target.listeners.click();
+  assert.equal(target.attributes['aria-selected'], 'true'); assert.deepEqual(trees.filter(t => !t.hidden).map(t => t.id), ['research-market']);
+  elements.get('closeArsenalBtn').listeners.click(); elements.get('menuArsenalBtn').listeners.click();
+  assert.deepEqual(elements.get('arsenalChoices').children.filter(t => !t.hidden).map(t => t.id), ['research-market']);
 });
 
 test('run results show paid tower costs, refunds and a reversible map view without settling twice', () => {

@@ -1,3 +1,3 @@
 # Install root-owned as /etc/sudoers.d/autohextd-duo (0440), validate with visudo.
 # Adjust www-data only if PHP-FPM actually runs as another account.
-www-data ALL=(root) NOPASSWD: /usr/bin/systemctl stop autohextd-duo.service, /usr/bin/systemctl start autohextd-duo.service
+www-data ALL=(root) NOPASSWD: /usr/bin/systemctl stop autohextd-duo.service, /usr/bin/systemctl start autohextd-duo.service, /usr/bin/systemctl restart autohextd-duo.service

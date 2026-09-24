@@ -165,7 +165,8 @@ const HexMap=(()=>{
   // Straßenmittellinien der 3D-Modelle (Rotation 0, Weltmaß, y nach unten, relativ zur Hexmitte), von der ersten zur zweiten Straßenkante.
   // Gegner sollen genau auf der gezeichneten Straße laufen. Die Kurven-Tiles teilen sich eine Form; Lange Straße ist punktsymmetrisch.
   const CURVE_CENTERLINE=[[46.8,0],[41.6,-0.1],[36.7,-0.5],[31.8,-1.1],[27.1,-2],[22.6,-3.1],[18.2,-4.5],[13.9,-6.1],[9.8,-8],[5.8,-10.1],[2,-12.5],[-1.7,-15.1],[-5.2,-18],[-8.6,-21.1],[-11.8,-24.5],[-14.9,-28.1],[-17.9,-32],[-20.7,-36.1],[-23.4,-40.5]];
-  const LONGROAD_CENTERLINE=[[46.8,0],[45,0.2],[43.3,0.4],[41.5,0.5],[39.7,0.8],[37.4,1.3],[34.5,2.4],[31.3,3.8],[28,5.1],[24.6,5.8],[20.3,5.8],[15.4,4.8],[10.3,3.2],[5.1,1.5],[0,0],[-5.1,-1.5],[-10.3,-3.2],[-15.4,-4.8],[-20.3,-5.8],[-24.6,-5.8],[-28,-5.1],[-31.3,-3.8],[-34.5,-2.4],[-37.4,-1.3],[-39.7,-0.8],[-41.5,-0.5],[-43.3,-0.4],[-45,-0.2],[-46.8,0]];
+  // Zickzack wie im Modell tile_longRoad.glb: gerade Abschnitte mit gerundeten Knicken bei x=±27 und ±14.
+  const LONGROAD_CENTERLINE=[[46.8,0],[27,0],[14,-10.8],[0,0],[-14,10.8],[-27,0],[-46.8,0]];
   const MODEL_ROADS={bigCurve:{roads:[0,2],line:CURVE_CENTERLINE},village:{roads:[0,2],line:CURVE_CENTERLINE},grove:{roads:[0,2],line:CURVE_CENTERLINE},watchtower:{roads:[0,2],line:CURVE_CENTERLINE},longRoad:{roads:[0,3],line:LONGROAD_CENTERLINE}};
   function modelRoadLegs(center,type,roads){
     const model=MODEL_ROADS[(typeof HexData!=='undefined'&&HexData.CARD_LIBRARY[type]?.model)||type];if(!model||roads.length!==2) return null;

@@ -1147,3 +1147,52 @@ Server nicht erreichbar|Server unreachable
 Server in Wartung|Server under maintenance
 HTTP-Antwortzeit|HTTP response time
 `);
+
+HexTranslations.add(`
+Gemeinsam starten|Start together
+Deine Festung|Your fortress
+Meine Karte|My map
+Partnerkarte · Nur anschauen|Partner map · View only
+Hier Partner-Portal reservieren|Reserve partner portal here
+Ausgewählten Turm als Verstärkung|Send selected tower as reinforcement
+Portal aufheben|Clear portal
+Verstärkung abwählen|Clear reinforcement
+Partie verlassen|Leave match
+Wirklich verlassen? Partie endet für beide.|Really leave? This ends the match for both players.
+Bereitschaft zurücknehmen|Cancel ready
+Bereit für die Welle (Leertaste)|Ready for the wave (Space)
+Geschenk für den Partner wählen|Choose a gift for your partner
+Geschenk für deinen Partner|Gift for your partner
+Wähle eine Karte oder Gold für deinen Partner.|Choose a card or gold for your partner.
+Gemeinsamer Durchlauf beendet|Co-op run finished
+Noch eine gemeinsame Partie|Play together again
+Neustart-Zustimmung zurücknehmen|Cancel rematch vote
+Zur Lobby|Back to lobby
+Partner ist bereit|Partner is ready
+Partnerverstärkung ist unterwegs!|Partner reinforcements are on their way!
+Deine Verstärkung fliegt zum Partner!|Your reinforcement is flying to your partner!
+Portal reserviert.|Portal reserved.
+Nicht bereit|Not ready
+Wartet auf Beitritt …|Waiting for partner …
+Dein Partner|Your partner
+Lobby verlassen|Leave lobby
+Warte auf deinen Partner|Waiting for your partner
+Gemeinsame Welle läuft|Co-op wave in progress
+Nach einer verlustfreien Welle hilft eine Kopie beim Partner. Sein Portal muss frei sein. Alle 5 Wellen wählt ihr ein Geschenk füreinander.|After a wave without leaks, a copy helps your partner. Their portal must be free. Every 5 waves, you choose gifts for each other.
+`);
+HexTranslations.add(`
+◆ schaltet dauerhaft frei · 🪙 Gold bezahlt den Ausbau im Run|◆ unlocks permanently · 🪙 gold pays for upgrades during a run
+Forschungsbäume|Research trees
+Freischaltung bezahlbar|Unlock affordable
+Pro Turm ist höchstens ein Ultimate aktiv. Wechseln kostet keine Diamanten.|Each tower can have at most one active ultimate. Switching costs no diamonds.
+Gebäude sind immer verfügbar. Der Spezialausbau wird dauerhaft freigeschaltet.|Buildings are always available. The special upgrade is unlocked permanently.
+Schalte zuerst den Turm frei, um seine Ausbaupfade zu nutzen.|Unlock the tower first to use its upgrade paths.
+Spezial freigeschaltet|Special unlocked
+Spezial gesperrt|Special locked
+Immer verfügbar|Always available
+nach Stufe 3|after level 3
+Ultimate|Ultimate
+Spezial|Special
+Pfad|Path
+Bau:|Build:
+`);

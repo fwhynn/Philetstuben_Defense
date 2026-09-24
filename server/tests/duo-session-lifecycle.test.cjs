@@ -4,6 +4,7 @@ const fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 
 test('HTTP seat takeover excludes the old tab; explicit leaving ends both boards idempotently',async t=>{
  const l=createLobbies(),a=l.create({requestId:randomUUID()}),b=l.join({requestId:randomUUID(),code:a.code});
+ require('./start-lobby.cjs')(l,[a,b]);
  const server=createTransport(l);await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
  t.after(()=>new Promise(resolve=>{server.closeAllConnections();server.close(resolve);}));
  const origin='http://127.0.0.1:'+server.address().port,first=randomUUID(),second=randomUUID(),partner=randomUUID();
@@ -18,7 +19,7 @@ test('HTTP seat takeover excludes the old tab; explicit leaving ends both boards
  assert.equal((await req(a.token,first,'/command',{})).status,409);
  assert.equal((await req(b.token,partner,'/state')).status,200);
  const view=await req(a.token,second,'/state').then(r=>r.json());
- assert.equal(view.player,0);assert.equal(view.next,1);assert.ok(!JSON.stringify(view).includes(second));
+ assert.equal(view.player,0);assert.equal(view.next,2);assert.ok(!JSON.stringify(view).includes(second));
  const board=view.boards[0];let placement;
  for(let index=0;index<board.placements.length&&!placement;index++)for(let rotation=0;rotation<6&&!placement;rotation++){const n=board.placements[index][rotation].find(x=>x.legal);if(n)placement={q:n.q,r:n.r,index,rotation};}
  const command={epoch:view.epoch,sequence:view.next,wave:view.wave,phase:board.phase,action:'place',payload:placement};

@@ -5,7 +5,7 @@ function packet(store,seat,action,payload){const v=store.view(seat.token);return
 function place(store,seat){const b=store.view(seat.token).boards[seat.player];for(let index=0;index<b.placements.length;index++)for(let rotation=0;rotation<6;rotation++){const p=b.placements[index][rotation].find(p=>p.legal);if(p)return {q:p.q,r:p.r,index,rotation};}throw Error('Missing opening');}
 test('disk restart retains lobby, seats, gold and lost acknowledgement; both players must return',t=>{
  const target=file(t);let time=0,store=createStore(target,{now:()=>time});const request={requestId:randomUUID()},a=store.create(request),b=store.join({requestId:randomUUID(),code:a.code});
- const positions=[a,b].map(seat=>{const p=place(store,seat);assert.ok(store.receive(seat.token,packet(store,seat,'place',p)).ok);return p;});
+ require('./start-lobby.cjs')(store,[a,b]);const positions=[a,b].map(seat=>{const p=place(store,seat);assert.ok(store.receive(seat.token,packet(store,seat,'place',p)).ok);return p;});
  const buy=packet(store,a,'tower',{type:'archer',slots:[{q:positions[0].q,r:positions[0].r,index:0}]});assert.ok(store.receive(a.token,buy).ok);const before=store.view(a.token);
  time=60000;store=createStore(target,{now:()=>time});assert.equal(store.view(a.token).connection.paused,true);assert.equal(store.create(request).token,a.token);assert.equal(JSON.stringify(store.view(a.token).boards),JSON.stringify(before.boards));assert.notEqual(store.view(a.token).serverId,before.serverId);
  store.touch(a.token);assert.equal(store.view(a.token).connection.paused,true);store.touch(b.token);assert.equal(store.view(a.token).connection.paused,false);assert.equal(store.receive(a.token,buy).duplicate,true);assert.equal(store.view(a.token).boards[0].gold,before.boards[0].gold);

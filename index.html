@@ -4,9 +4,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Autohex TD</title>
+    <title>AutoHex TD</title>
     <link rel="icon" type="image/png" href="assets/favicon.png" />
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="style.css" /><link rel="stylesheet" href="duo.css" />
     <script
       type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script>
   </head>
@@ -53,6 +53,7 @@
       </section>
 
       <nav class="compactToolbar" aria-label="Spielsteuerung"><button data-compact="menu" aria-expanded="false">Menü</button><button data-compact="stats" aria-expanded="false">Werte</button><button data-compact="towers" aria-expanded="false">Türme</button><button data-compact="biomes" aria-expanded="false">Biome</button></nav>
+      <details id="duoHud" class="duoHud hidden"><summary id="duoSummary">Duo · Partner</summary><div class="duoHudBody"><div class="duoMapSwitch"><button id="duoOwnMap">Meine Karte</button><button id="duoPartnerMap">Partnerkarte</button></div><p id="duoPartnerStatus"></p><p id="duoNetworkStatus" role="status"></p><p id="duoSupportInfo"></p><button id="duoReservePortal">Hier Partner-Portal reservieren</button><button id="duoSendTower">Ausgewählten Turm als Verstärkung</button><button id="duoClearPortal">Portal aufheben</button><button id="duoClearTower">Verstärkung abwählen</button><div id="duoGuardians"></div><button id="duoTakeover" class="hidden">Sitzung hier übernehmen</button><button id="duoLeave">Partie verlassen</button></div></details><div id="duoMapLabel" class="duoMapLabel hidden"></div><div id="duoTransfer" class="duoTransfer hidden" role="status"></div>
       <nav id="quickLoadout" class="mapRail loadoutRail" aria-label="Loadout: Turm auf einen freien Platz ziehen"></nav>
       <aside id="biomeIntro" class="biomeIntro hidden" role="status"><strong id="biomeIntroTitle">Neues Biom entdeckt</strong><p>Fahre über ein Symbol oder tippe drauf, um die Effekte der Biome zu erfahren.</p><p id="biomeIntroDetail" class="biomeIntroDetail" aria-live="polite"></p><button id="biomeIntroClose" type="button">Verstanden</button></aside>
       <nav id="biomeRail" class="mapRail biomeRail" aria-label="Entdeckte Biome"></nav>
@@ -63,7 +64,7 @@
       <!-- Oben links: Titel und Menü -->
       <div class="gameHeader">
       <nav class="dockTL" aria-label="Menü">
-        <h1>Autohex TD <span data-app-version></span></h1>
+        <h1>AutoHex TD <span data-app-version></span></h1>
         <div class="dockButtons">
           <button class="secondary drawerBtn" data-drawer="rulesDrawer"><svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18H6zM9 7h6M9 11h6M9 15h4"/></svg> Regeln</button>
           <button id="settingsOpenBtn" class="secondary drawerBtn" data-drawer="settingsDrawer"><svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="8" cy="18" r="2"/></svg> Einstellungen</button>
@@ -244,7 +245,7 @@
       <div class="menuBox">
         <img class="menuLogo" src="assets/favicon.png" alt="" />
         <p class="eyebrow">TOWER DEFENSE</p>
-        <h1 id="mainMenuTitle">Autohex TD</h1>
+        <h1 id="mainMenuTitle">AutoHex TD</h1>
         <p class="menuTagline">Map bauen → Türme setzen → Wave überleben → Deck erweitern</p>
         <p id="menuLoadoutInfo" class="menuLoadoutInfo"></p>
         <div class="menuButtons">
@@ -402,22 +403,16 @@
     <div id="arsenalOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="arsenalTitle">
       <div class="loadoutBox">
         <header class="arsenalToolbar">
-          <h2 id="arsenalTitle">Arsenal</h2><span class="arsenalBalance">◆ <strong
+          <h2 id="arsenalTitle">Arsenal</h2><span class="arsenalBalance" title="Diamanten">◆ <strong
               id="arsenalDiamonds">0</strong></span>
-          <div class="arsenalZoomControls"><button id="arsenalZoomOut" class="secondary"
-              aria-label="Forschungsmap verkleinern">−</button><output id="arsenalZoomValue">73 %</output><button
-              id="arsenalZoomIn" class="secondary" aria-label="Forschungsmap vergrößern">+</button><button
-              id="arsenalFit" class="secondary">Übersicht</button></div>
-          <details class="arsenalHelp">
-            <summary aria-label="Arsenal-Hilfe">ⓘ</summary>
-            <p>Ziehen: verschieben. Mausrad / Zwei-Finger-Geste: zoomen.<br>◆ schaltet dauerhaft frei; Gold bezahlt den
-              Ausbau im Run.</p>
-          </details>
+          <p class="arsenalLegend">◆ schaltet dauerhaft frei · 🪙 Gold bezahlt den Ausbau im Run</p>
           <button id="resetDiamondsBtn" class="secondary">Reset</button><button id="closeArsenalBtn" class="secondary"
             aria-label="Arsenal schließen (Escape)" title="Zurück (Escape)">Zurück · Esc</button>
         </header>
-        <div id="arsenalMap" class="arsenalMap" tabindex="0" aria-label="Verschiebbare Forschungsmap">
-          <div id="arsenalChoices" class="researchMap"></div>
+        <div class="arsenalBody">
+          <nav id="arsenalTabs" class="arsenalRail" role="tablist" aria-label="Forschungsbäume"
+            aria-orientation="vertical"></nav>
+          <div id="arsenalChoices" class="arsenalDetail"></div>
         </div>
         <p id="arsenalMessage" class="loadoutWarning" aria-live="polite"></p>
       </div>
@@ -440,7 +435,7 @@
         const applyVersion = (version) => {
           if (!version) return;
           const label = `v${String(version).replace(/^v/, '')}`;
-          document.title = `Autohex TD ${label}`;
+          document.title = `AutoHex TD ${label}`;
           document.querySelectorAll('[data-app-version]').forEach(node => { node.textContent = label; });
         };
         fetch('./package.json', { cache: 'no-store' })
@@ -460,10 +455,10 @@
         if (!globalThis.HexApi || typeof globalThis.HexApi.getUserById !== 'function') return;
         globalThis.HexApi.getUserById(0)
           .then((payload) => {
-            console.info('Autohex TD API test user loaded:', payload);
+            console.info('AutoHex TD API test user loaded:', payload);
           })
           .catch((error) => {
-            console.warn('Autohex TD API test user request failed:', error);
+            console.warn('AutoHex TD API test user request failed:', error);
           });
       })();
     </script>
@@ -495,12 +490,14 @@
     <script src="classes/arsenal.js"></script>
     <script src="classes/exploration.js"></script>
     <script src="classes/duo-server-status.js"></script>
+    <script src="duo-client.js"></script><script src="classes/duo-game.js"></script>
     <script src="classes/placement-commands.js"></script>
     <script src="classes/run-flow.js"></script>
     <script src="classes/run-session.js"></script>
     <script src="classes/svg-renderer.js"></script>
     <script src="classes/model-map.js"></script>
     <script type="module">
+      if(new URLSearchParams(location.hash.slice(1)).has('duo'))await new Promise(resolve=>{const script=document.createElement('script');script.src='/socket.io/socket.io.js';script.onload=resolve;script.onerror=resolve;document.head.appendChild(script);});
       // 3D nur über http(s) (Modelle werden per fetch geladen); ?svg erzwingt den SVG-Prototyp, Doppelklick (file://) nutzt ihn automatisch.
       if (location.protocol.startsWith('http') && !new URLSearchParams(location.search).has('svg')) {
         import('./classes/menu-backdrop.js').catch(error => console.warn('Menühintergrund nicht verfügbar:', error));

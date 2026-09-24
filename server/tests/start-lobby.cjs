@@ -1,0 +1,1 @@
+module.exports=(room,seats)=>{for(const seat of seats){const v=room.view(seat.token),result=room.receive(seat.token,{epoch:v.epoch,sequence:v.next,wave:v.wave,phase:v.boards[seat.player].phase,action:'lobbyReady',payload:{value:true}});require('node:assert/strict').equal(result.ok,true);}};
