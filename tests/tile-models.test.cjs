@@ -23,8 +23,6 @@ function bakedRoadEdges(file){
   })(gltf.scenes[gltf.scene||0].nodes[0],IDENTITY);
   return [...edges].sort((a,b)=>a-b);
 }
-// Known model mismatches, to be fixed in the assets: remove an entry once its model is corrected.
-const KNOWN_MISMATCHES={soulFork:'Modell zeigt Tee [0,2,4] statt T-Kreuzung [0,2,3]',crownCross:'Modell hat 4 statt 6 Anschlüsse'};
 
 test('named tiles with baked roads match their card road edges',()=>{
   const context={};vm.createContext(context);
@@ -33,7 +31,6 @@ test('named tiles with baked roads match their card road edges',()=>{
   const {NAMED_TILES,PROCEDURAL_ROAD_TILES}=context.HexModelMap;
   for(const type of NAMED_TILES.filter(t=>!PROCEDURAL_ROAD_TILES.includes(t))){
     const expected=[...context.HexData.CARD_LIBRARY[type].roads].sort((a,b)=>a-b),actual=bakedRoadEdges(path.join(__dirname,'../assets/tiles/tile_'+type+'.glb'));
-    if(KNOWN_MISMATCHES[type]){assert.notDeepEqual(actual,expected,type+' passt jetzt: Eintrag aus KNOWN_MISMATCHES entfernen');continue;}
     assert.deepEqual(actual,expected,type);
   }
 });
