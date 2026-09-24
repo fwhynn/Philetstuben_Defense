@@ -100,7 +100,7 @@
 			method: 'POST',
 			headers: {
 				Accept: 'application/json',
-				...authHeaders()
+				Authorization: `Bearer ${token}`
 			}
 		}).catch(() => {
 			// Token ist lokal schon entfernt; ein fehlgeschlagener Serveraufruf blockt den Logout nicht.
