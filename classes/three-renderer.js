@@ -147,7 +147,8 @@ function create(host0,commands){
   const fx={solid:makePool(new THREE.CylinderGeometry(1,1,1,6),700,new THREE.MeshBasicMaterial({color:'#ffffff'})),
     glow:makePool(new THREE.CylinderGeometry(1,1,1,6),700,additive()),
     tips:makePool(new THREE.ConeGeometry(1,1,6).translate(0,-.5,0),160,new THREE.MeshBasicMaterial({color:'#ffffff'})),   // Spitze zeigt in +Y, Ursprung an der Spitze
-    flash:makePool(new THREE.SphereGeometry(1,10,8),220,additive()),
+    flash:makePool(new THREE.SphereGeometry(1,10,8),420,additive()),
+    orbs:makePool(new THREE.SphereGeometry(1,8,6),260,new THREE.MeshBasicMaterial({color:'#ffffff'})),   // feste Kerne (Tropfen, Glutkern, Irrwisch)
     rocks:makePool(new THREE.IcosahedronGeometry(1,0),48,new THREE.MeshStandardMaterial({color:'#ffffff',roughness:.95,metalness:0}))};
   const mats={empty:std('#ffffff',{transparent:true,opacity:.6}),legal:basic('#7fcf6a',.25),illegal:basic('#c0594c',.16),outlineLegal:basic('#a9dc93'),outlineIllegal:basic('#ba6b60'),
     portalSlot:basic('#c991ff'),hint:basic('#ffffff'),buildingSlot:basic('#59e0d2',.9),slot:basic('#ffffff',1),select:basic('#f4d36d',.9),bar:basic('#321a18'),hp:basic('#78b95f'),armor:basic('#df8b3a'),magic:basic('#69aee8')};
@@ -521,6 +522,11 @@ function create(host0,commands){
       last=cur;
     }
   }
+  // Flugbahn: u von 0 (Mündung) bis 1 (Ziel), arc = Scheitelhöhe über der Geraden.
+  const flight=(src,dst,srcH,arc)=>u=>({x:lerp(src.x,dst.x,u),y:lerp(srcH,DST_H,u)+Math.sin(Math.PI*u)*arc,z:lerp(src.y,dst.y,u)});
+  function burst(x,y,z,radius,k,colors,count=10){                  // flacher Glutring, der sich bis zum Flächenradius ausbreitet (k: 0..1)
+    for(let i=0;i<count;i++){const a=i/count*Math.PI*2+k*.6;fx.flash.ball(x+Math.cos(a)*radius*k,y+2+Math.sin(k*Math.PI)*4,z+Math.sin(a)*radius*k,2.5+2*(1-k),colors[i%colors.length],(1-k)*.8);}
+  }
   function syncProjectiles(){
     const high=quality==='high',now=performance.now();
     for(const pool of Object.values(fx)) pool.begin();
@@ -531,7 +537,7 @@ function create(host0,commands){
         for(let i=0;i<12;i++){const a=i*Math.PI/6,b=(i+1)*Math.PI/6;fx.solid.segment(p.x+Math.cos(a)*p.r,34,p.y+Math.sin(a)*p.r,p.x+Math.cos(b)*p.r,34,p.y+Math.sin(b)*p.r,1.6,p.color||'#ffffff');}
         continue;
       }
-      if(p.id===undefined||!p.max){                                    // ältere Geschosse ohne Effektdaten (z. B. Flammenturm): einfacher Strahl
+      if(p.id===undefined||!p.max){                                    // Geschosse ohne Effektdaten (z. B. ältere Duo-Server): einfacher Strahl
         if(p.kind==='chain') for(let i=0;i<p.pts.length-1;i++) fx.solid.segment(p.pts[i].x,34,p.pts[i].y,p.pts[i+1].x,34,p.pts[i+1].y,1.6,p.color||'#ffffff');
         else fx.solid.segment(p.x1,34,p.y1,p.x2,34,p.y2,1.6,p.color||'#ffffff');
         continue;
@@ -550,29 +556,72 @@ function create(host0,commands){
         }
         if(t<.5){const k=1-t/.5;p.pts.slice(1).forEach(pt=>fx.flash.ball(pt.x,DST_H,pt.y,2+3.5*k,p.color||'#93a5ff',k*.8));}   // Funken an jedem getroffenen Gegner
         if(!done.hit){done.hit=true;(p.hits||[]).forEach(popEnemy);}
-      }else if(p.tower==='element'||p.tower==='necromancer'){
-        const f=clamp01(t/.8),x=lerp(src.x,dst.x,f),z=lerp(src.y,dst.y,f),y=lerp(srcH,DST_H,f);
-        fx.flash.ball(x,y,z,5,p.color,.7);fx.solid.ball(x,y,z,2,p.color,1);
-        fx.glow.segment(src.x,srcH,src.y,x,y,z,1.5,p.color,(1-t)*.5);
-        if(f===1&&!done.hit){done.hit=true;(p.hits||[]).forEach(popEnemy);}
+      }else if(p.tower==='element'&&p.variant==='elementWind'){        // Windkern: drei verdrillte Luftbänder bis zum Linienende
+        const f=clamp01(t/.85),at=flight(src,dst,srcH,0),fade=1-t*.6,px=-uy,pz=ux;
+        for(let s=0;s<3;s++){let last=null;
+          for(let i=0;i<=10;i++){const u=f*(.45+.55*i/10),q=at(u),a=u*26-now*.018+s*2.094,r=1.5+4.5*i/10,pt={x:q.x+px*Math.cos(a)*r,y:q.y+Math.sin(a)*r,z:q.z+pz*Math.cos(a)*r};
+            if(last) fx.glow.segment(last.x,last.y,last.z,pt.x,pt.y,pt.z,.9,'#dcffe9',.65*fade*i/10);last=pt;}}
+        const head=at(f);fx.flash.ball(head.x,head.y,head.z,4.5,'#c9f7a8',.5*fade);
+        (p.hitAt||[]).forEach((h,i)=>{const start=(h.along??1)*.85,key='pop'+i;if(t>=start&&!done[key]){done[key]=true;popEnemy(p.hits[i]);}});
+      }else if(p.tower==='element'&&p.variant==='elementWater'){       // Wasserkern: Tropfen mit Blasenspur, spritzt beim Treffer
+        const f=clamp01(t/.75),at=flight(src,dst,srcH,6);
+        if(f<1){const head=at(f),back=at(Math.max(0,f-.08));
+          fx.glow.segment(back.x,back.y,back.z,head.x,head.y,head.z,2.4,'#3fa9ff',.55);fx.flash.ball(head.x,head.y,head.z,5,'#2f8cff',.45);fx.orbs.ball(head.x,head.y,head.z,2.5,'#9fe0ff');
+          if(high) for(let i=1;i<=4;i++){const q=at(Math.max(0,f-i*.06));fx.orbs.ball(q.x+Math.sin(now*.02+i*1.7)*1.6,q.y+i*.7,q.z+Math.cos(now*.02+i*1.7)*1.6,Math.max(.35,1.2-i*.2),'#d8f3ff');}
+        }else{const k=clamp01((t-.75)/.25);
+          for(let i=0;i<8;i++){const a=i/8*Math.PI*2,r=4+14*k;fx.orbs.ball(dst.x+Math.cos(a)*r,DST_H+Math.sin(k*Math.PI)*8,dst.y+Math.sin(a)*r,.4+1.3*(1-k),'#9fe0ff');}
+          fx.flash.ball(dst.x,DST_H,dst.y,3+8*k,'#3fa9ff',(1-k)*.55);
+          if(!done.hit){done.hit=true;(p.hits||[]).forEach(popEnemy);}}
+      }else if(p.tower==='flame'||p.tower==='element'){               // Flammenturm: großer Feuerball im Bogen. Elementturm: gerade Arkankugel (Feuerkern: mit Glut)
+        const lob=p.tower==='flame',fire=lob||p.variant==='elementFire',f=clamp01(t/.75),at=flight(src,dst,srcH,lob?16:3),flick=.85+.15*Math.sin(now*.05+p.id);
+        const [outer,inner,core]=fire?['#ff5a1f','#ffb347','#fff1b0']:['#8f63ff','#c9b2ff','#ffffff'];
+        if(f<1){const head=at(f);
+          for(let i=4;i>=1;i--){const q=at(Math.max(0,f-i*.045));fx.flash.ball(q.x,q.y+(fire?i*.8:0),q.z,(lob?3.4:2.4)*(1-i*.15),fire?(i>2?'#8a2a12':'#ff6a2a'):'#6d48d8',.5-i*.09);}   // Glut- bzw. Funkenspur
+          fx.flash.ball(head.x,head.y,head.z,(lob?8:5.5)*flick,outer,.75);fx.flash.ball(head.x,head.y,head.z,(lob?4.8:3.4)*flick,inner,.9);fx.orbs.ball(head.x,head.y,head.z,lob?2.6:1.8,core);
+          if(!lob){const px=-uy,pz=ux;for(let i=0;i<3;i++){const a=now*.014+i*2.094;fx.flash.ball(head.x+px*Math.cos(a)*5.5,head.y+Math.sin(a)*5.5,head.z+pz*Math.cos(a)*5.5,1.4,fire?'#ffd27a':'#e6dcff',.9);}}   // umkreisende Funken
+        }else{const k=clamp01((t-.75)/.25),radius=(p.splash||14)*.9;
+          if(p.splash) burst(dst.x,DST_H,dst.y,radius,k,fire?['#ff6a2a','#ffb347','#d8431c']:['#8f63ff','#c9b2ff']);
+          fx.flash.ball(dst.x,DST_H,dst.y,3+(p.splash?10:6)*k,inner,(1-k)*.8);
+          if(!done.hit){done.hit=true;(p.hits||[]).forEach(popEnemy);}}
+      }else if(p.tower==='necromancer'){                               // Seelenlicht: schlingernder grüner Irrwisch mit Nebelspur
+        const f=clamp01(t/.8),base=flight(src,dst,srcH,5),px=-uy,pz=ux;
+        const wisp=u=>{const q=base(u),w=Math.sin(u*Math.PI*3+p.id)*6*Math.sin(Math.PI*u);return {x:q.x+px*w,y:q.y+Math.cos(u*Math.PI*4+p.id)*2,z:q.z+pz*w};};
+        if(f<1){for(let i=5;i>=1;i--){const q=wisp(Math.max(0,f-i*.05));fx.flash.ball(q.x,q.y+i*.6,q.z,3.6-i*.45,'#4fbf7a',.42-i*.06);}
+          const h=wisp(f);fx.flash.ball(h.x,h.y,h.z,5.5,'#72ff9f',.55);fx.orbs.ball(h.x,h.y,h.z,2.2,'#e9fff0');
+        }else{const k=clamp01((t-.8)/.2);for(let i=0;i<6;i++){const a=i/6*Math.PI*2;fx.flash.ball(dst.x+Math.cos(a)*7*k,DST_H+10*k,dst.y+Math.sin(a)*7*k,2.4*(1-k)+.5,'#72ff9f',(1-k)*.6);}
+          if(!done.hit){done.hit=true;(p.hits||[]).forEach(popEnemy);}}
       }else if(p.tower==='catapult'){                                   // Felsbrocken rollt und hüpft die Schusslinie entlang
         const f=clamp01(t/.9),x=lerp(src.x,dst.x,f),y=lerp(src.y,dst.y,f),hop=Math.abs(Math.sin(f*Math.PI*5))*9*(1-f*.4)+5;
-        if(f<1){fx.rocks.ball(x,hop,y,5.5,'#9a8f7e');if(high) fx.glow.segment(lerp(src.x,x,.75),hop,lerp(src.y,y,.75),x,hop,y,2,'#d8c9a3',.25);
+        if(f<1){fx.rocks.ball(x,hop,y,5.5,'#9a8f7e');
+          if(high) for(let i=1;i<=3;i++){const g=Math.max(0,f-i*.05);fx.flash.ball(lerp(src.x,dst.x,g),3+i,lerp(src.y,dst.y,g),2+i*1.3,'#cbbd9a',.22-i*.05);}   // Staubfahne
         }
         (p.hitAt||[]).forEach((h,i)=>{const start=(h.along??1)*.9,k=(t-start)/.35;if(k>=0&&k<1) fx.flash.ball(h.x,6,h.y,4+7*k,'#d9c7a0',(1-k)*.6);   // Staubwolke am Einschlag
           const key='pop'+i;if(t>=start&&!done[key]){done[key]=true;popEnemy(p.hits[i]);}});
-      }else{                                                            // Pfeil (Archer) und Bolzen (Balliste)
-        const bolt=p.tower==='ballista',f=clamp01(t/.8),arc=bolt?3:12,length=bolt?15:9,radius=bolt?1.1:.65;
-        const at=u=>({x:lerp(src.x,dst.x,u),y:lerp(srcH,DST_H,u)+Math.sin(Math.PI*u)*arc,z:lerp(src.y,dst.y,u)});
+      }else if(p.tower==='ballista'){                                   // Bolzen: schwer, fast flach, mit Leuchtspur und Druckring
+        const f=clamp01(t/.7),at=flight(src,dst,srcH,1.5),length=22,radius=1.5;
+        if(f<1){
+          const head=at(f),before=at(Math.max(0,f-.05)),vx=head.x-before.x,vy=head.y-before.y,vz=head.z-before.z,vl=Math.hypot(vx,vy,vz)||1,nx=vx/vl,ny=vy/vl,nz=vz/vl;
+          const tail={x:head.x-nx*length,y:head.y-ny*length,z:head.z-nz*length};
+          fx.glow.segment(src.x,srcH,src.y,tail.x,tail.y,tail.z,.7,'#fff3d0',.45*(1-f*.6));   // Leuchtspur ab der Mündung
+          fx.solid.segment(tail.x,tail.y,tail.z,head.x,head.y,head.z,radius,'#4a3a29');
+          fx.tips.cone(head.x+nx*4,head.y+ny*4,head.z+nz*4,nx,ny,nz,9,radius*2.6,'#8f98a6');
+          fx.solid.segment(tail.x-nx*.5,tail.y-ny*.5,tail.z-nz*.5,tail.x+nx*length*.22,tail.y+ny*length*.22,tail.z+nz*length*.22,radius*2.2,'#b8412f');   // rote Leitwerke
+        }else{
+          const k=clamp01((t-.7)/.3),h=at(1);fx.flash.ball(h.x,h.y,h.z,3+5*k,'#ffb060',(1-k)*.85);
+          for(let i=0;i<12;i++){const a=i*Math.PI/6,b=(i+1)*Math.PI/6,r=4+14*k;fx.glow.segment(h.x+Math.cos(a)*r,DST_H,h.y+Math.sin(a)*r,h.x+Math.cos(b)*r,DST_H,h.y+Math.sin(b)*r,1,'#f3e6c4',(1-k)*.7);}   // Druckring
+          if(!done.hit){done.hit=true;(p.hits||[]).forEach(popEnemy);}
+        }
+      }else{                                                            // Pfeil (Archer): leicht, hoher Bogen, helle Federn
+        const f=clamp01(t/.8),at=flight(src,dst,srcH,12),length=9,radius=.65;
         if(f<1){
           const head=at(f),before=at(Math.max(0,f-.06)),vx=head.x-before.x,vy=head.y-before.y,vz=head.z-before.z,vl=Math.hypot(vx,vy,vz)||1,nx=vx/vl,ny=vy/vl,nz=vz/vl;
           const tail={x:head.x-nx*length,y:head.y-ny*length,z:head.z-nz*length};
-          fx.solid.segment(tail.x,tail.y,tail.z,head.x,head.y,head.z,radius,bolt?'#5b4a36':'#8b6b43');
-          fx.tips.cone(head.x+nx*2.5,head.y+ny*2.5,head.z+nz*2.5,nx,ny,nz,bolt?7:5,radius*2.2,bolt?'#c9ced6':'#d9dde3');
+          fx.solid.segment(tail.x,tail.y,tail.z,head.x,head.y,head.z,radius,'#8b6b43');
+          fx.tips.cone(head.x+nx*2.5,head.y+ny*2.5,head.z+nz*2.5,nx,ny,nz,5,radius*2.2,'#d9dde3');
           fx.solid.segment(tail.x-nx*.5,tail.y-ny*.5,tail.z-nz*.5,tail.x+nx*length*.28,tail.y+ny*length*.28,tail.z+nz*length*.28,radius*2.4,'#e9e2cf');   // Federn
-          if(high){const back=at(Math.max(0,f-.35));fx.glow.segment(back.x,back.y,back.z,tail.x,tail.y,tail.z,bolt?1.6:.9,p.color||'#f5d06e',.5);}
+          if(high){const back=at(Math.max(0,f-.35));fx.glow.segment(back.x,back.y,back.z,tail.x,tail.y,tail.z,.9,p.color||'#f5d06e',.5);}
         }else{
-          const k=clamp01((t-.8)/.2),h=at(1);fx.flash.ball(h.x,h.y,h.z,2+4.5*k,bolt?'#ffb060':'#ffe08a',(1-k)*.85);   // Aufprallfunke
+          const k=clamp01((t-.8)/.2),h=at(1);fx.flash.ball(h.x,h.y,h.z,2+4.5*k,'#ffe08a',(1-k)*.85);   // Aufprallfunke
           if(!done.hit){done.hit=true;(p.hits||[]).forEach(popEnemy);}
         }
       }
