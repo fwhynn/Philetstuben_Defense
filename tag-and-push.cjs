@@ -218,40 +218,43 @@ async function main() {
   const releaseApi = await confirmApiRelease(hasApiRepo);
   if (releaseApi) ensureCleanRepo(apiRepo, 'API repo');
 
-  // If the user passed only --test, run test-only mode: create <latest>-testN on HEAD
-  const testOnly = testFlag && args.length === 1;
+  // If the user passed --test, run test-only mode: create <latest>-testN on HEAD
+  // In test mode we must NOT change package.json or create commits — only create/push test tags.
+  const testOnly = Boolean(testFlag);
   if (testOnly) {
-    console.log('Running test-only: will create <latest>-testN tags on HEAD for repos.');
-    // Game repo
+    console.log('Running test-only: will create <latest>-testN tags on HEAD for both repos using game base tag.');
+    // Determine base tag from the game repo
     try {
-      if (isGitRepo(repo)) {
-        const base = latestTag(repo);
-        if (!base) throw new Error('no base tag found in game repo');
-        const nGame = nextTestNumber(repo, base);
-        const testTagGame = `${base}-test${nGame}`;
-        // tag HEAD
-        git(['tag', '-a', testTagGame, '-m', testTagGame], { stdio: 'inherit' });
-        gitAt(repo, ['push', 'origin', testTagGame], { stdio: 'inherit' });
-        console.log(`Game: created and pushed test tag ${testTagGame}`);
-      }
-    } catch (e) {
-      console.error('Game: failed to create/push test tag:', e && e.message ? e.message : e);
-    }
+      if (!isGitRepo(repo)) throw new Error('game repo is not a git repository');
+      const base = latestTag(repo);
+      if (!base) throw new Error('no base tag found in game repo');
+      const n = nextTestNumber(repo, base);
+      const testTag = `${base}-test${n}`;
 
-    // API repo
-    try {
-      if (hasApiRepo && isGitRepo(apiRepo)) {
-        const baseApi = latestTag(apiRepo);
-        if (!baseApi) throw new Error('no base tag found in API repo');
-        const nApi = nextTestNumber(apiRepo, baseApi);
-        const testTagApi = `${baseApi}-test${nApi}`;
-        // tag HEAD in api repo
-        gitAt(apiRepo, ['tag', '-a', testTagApi, '-m', testTagApi], { stdio: 'inherit' });
-        gitAt(apiRepo, ['push', 'origin', testTagApi], { stdio: 'inherit' });
-        console.log(`API: created and pushed test tag ${testTagApi}`);
+      // Game: create test tag on HEAD and push
+      try {
+        git(['tag', '-a', testTag, '-m', testTag], { stdio: 'inherit' });
+        gitAt(repo, ['push', 'origin', testTag], { stdio: 'inherit' });
+        console.log(`Game: created and pushed test tag ${testTag}`);
+      } catch (e) {
+        console.error('Game: failed to create/push test tag:', e && e.message ? e.message : e);
       }
-    } catch (e) {
-      console.error('API: failed to create/push test tag:', e && e.message ? e.message : e);
+
+      // API: if present, create same test tag name on API HEAD and push
+      try {
+        if (hasApiRepo && isGitRepo(apiRepo)) {
+          gitAt(apiRepo, ['tag', '-a', testTag, '-m', testTag], { stdio: 'inherit' });
+          gitAt(apiRepo, ['push', 'origin', testTag], { stdio: 'inherit' });
+          console.log(`API: created and pushed test tag ${testTag}`);
+        } else {
+          console.log('API repo not available; skipped API test tag.');
+        }
+      } catch (e) {
+        console.error('API: failed to create/push test tag:', e && e.message ? e.message : e);
+      }
+
+    } catch (err) {
+      console.error('Test-only mode failed:', err && err.message ? err.message : err);
     }
 
     return;
