@@ -13,8 +13,10 @@ const args = process.argv.slice(2);
 const releaseAll = args.includes('--all');
 const releaseServerOnly = args.includes('--server');
 const releaseClientOnly = args.includes('--client');
+const testFlag = args.includes('--test');
 const positionalArgs = args.filter(arg => !arg.startsWith('--'));
-const unknownFlags = args.filter(arg => arg.startsWith('--') && !['--all', '--server', '--client'].includes(arg));
+const knownFlags = ['--all', '--server', '--client', '--test'];
+const unknownFlags = args.filter(arg => arg.startsWith('--') && !knownFlags.includes(arg));
 const packageJsonGitPath = path.relative(repo, packageJsonPath);
 const packageLockGitPath = path.relative(repo, packageLockPath);
 
@@ -91,6 +93,25 @@ function bumpDigitCarryVersion(version) {
 
 function bumpDigitCarryTag(tag) {
   return `v${bumpDigitCarryVersion(tag || '0.0.0')}`;
+}
+
+function nextTestNumber(cwd, baseTag) {
+  try {
+    const list = gitAt(cwd, ['tag', '--list', `${baseTag}-test*`], { stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    if (!list) return 1;
+    const tags = list.split(/\r?\n/);
+    let max = 0;
+    for (const t of tags) {
+      const m = /-test(\d+)$/.exec(t);
+      if (m) {
+        const n = Number(m[1]);
+        if (n > max) max = n;
+      }
+    }
+    return max + 1;
+  } catch {
+    return 1;
+  }
 }
 
 function isGitRepo(cwd) {
@@ -227,8 +248,27 @@ async function main() {
     pushRelease(repo, tag, 'Game');
 
     if (releaseApi) {
+      // create and push the normal API tag
       gitAt(apiRepo, ['tag', '-a', tag, '-m', tag], { stdio: 'inherit' });
       pushRelease(apiRepo, tag, 'API');
+
+      // create an extra empty commit in the API repo to trigger commit-based webhooks
+      try {
+        gitAt(apiRepo, ['commit', '--allow-empty', '-m', `chore: trigger webhook for ${tag}`], { stdio: 'inherit' });
+        gitAt(apiRepo, ['push', 'origin', 'HEAD'], { stdio: 'inherit' });
+        console.log('API: pushed an extra empty commit to trigger commit webhooks.');
+      } catch (e) {
+        console.error('Warning: could not create/push empty commit in API repo.', e && e.message ? e.message : e);
+      }
+
+      // if requested, also create and push a test tag like `${tag}-testN`
+      if (testFlag) {
+        const n = nextTestNumber(apiRepo, tag);
+        const testTag = `${tag}-test${n}`;
+        gitAt(apiRepo, ['tag', '-a', testTag, '-m', testTag], { stdio: 'inherit' });
+        pushRelease(apiRepo, testTag, 'API (test)');
+        console.log(`Created and pushed test tag ${testTag} in API repo.`);
+      }
     }
 
     console.log(`Released ${tag}${releaseApi ? ' for game and API' : ''}.`);
@@ -243,6 +283,24 @@ async function main() {
 
   gitAt(apiRepo, ['tag', '-a', apiTag, '-m', apiTag], { stdio: 'inherit' });
   pushRelease(apiRepo, apiTag, 'API');
+
+  // push extra empty commit to trigger commit-based webhooks
+  try {
+    gitAt(apiRepo, ['commit', '--allow-empty', '-m', `chore: trigger webhook for ${apiTag}`], { stdio: 'inherit' });
+    gitAt(apiRepo, ['push', 'origin', 'HEAD'], { stdio: 'inherit' });
+    console.log('API: pushed an extra empty commit to trigger commit webhooks.');
+  } catch (e) {
+    console.error('Warning: could not create/push empty commit in API repo.', e && e.message ? e.message : e);
+  }
+
+  if (testFlag) {
+    const n = nextTestNumber(apiRepo, apiTag);
+    const testTag = `${apiTag}-test${n}`;
+    gitAt(apiRepo, ['tag', '-a', testTag, '-m', testTag], { stdio: 'inherit' });
+    pushRelease(apiRepo, testTag, 'API (test)');
+    console.log(`Created and pushed test tag ${testTag} for API.`);
+  }
+
   console.log(`Released ${apiTag} for API.`);
 }
 
