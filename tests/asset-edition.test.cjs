@@ -19,7 +19,7 @@ test('asset edition defaults to normal and prefers sakura models with fallback o
 
 test('every sakura model replaces an existing normal model of the same name',()=>{
   const root=path.join(__dirname,'../assets');
-  for(const kind of ['tiles','towers','enemies','buildings']){
+  for(const kind of ['tiles','towers','enemies','buildings','bases']){
     const dir=path.join(root,'sakura',kind);if(!fs.existsSync(dir))continue;
     for(const file of fs.readdirSync(dir).filter(f=>f.endsWith('.glb')))assert.ok(fs.existsSync(path.join(root,kind,file)),'sakura/'+kind+'/'+file+' hat kein normales Gegenstück');
   }

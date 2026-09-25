@@ -5,7 +5,7 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 
 const S=54,STEP=Math.PI/3,TILT=55*Math.PI/180,PITCH_MIN=12*Math.PI/180,PITCH_MAX=88*Math.PI/180,DIST_MIN=220,DIST_MAX=3400,DIST_START=950,SKY='#a9cbd8';
-const PREFIX={tiles:'tile',landmarks:'landmark',towers:'tower',enemies:'enemy',buildings:'building',effects:'mine'};
+const PREFIX={tiles:'tile',landmarks:'landmark',towers:'tower',enemies:'enemy',buildings:'building',effects:'mine',bases:'base'};
 const LIMBS=['leg_l','leg_r','arm_l','arm_r'];
 const LANDMARK_LABEL={shrine:'Shrine · Bonus unbekannt',boss:'Wächter · inaktiv',treasure:'Schatz'};
 const STATUS_LABEL={ready:'☠ bereit',fighting:'☠ Kampf',defeated:'☠ besiegt',escaped:'☠ entkommen'};
@@ -38,6 +38,12 @@ function makeTemplate(name,scene,kind){
     const limbs=[];scene.traverse(n=>{if(LIMBS.includes(n.name)) limbs.push({name:n.name,pos:worldPosition(n),parts:bake(n)});});
     template.parts=bake(scene,n=>LIMBS.includes(n.name));template.limbs=limbs;
     template.height=boundsOf([...template.parts,...limbs.flatMap(l=>l.parts)]).max.y;
+    return template;
+  }
+  if(kind==='bases'){                                                // Mauer-/Waffenstufe einer Festung: Waffe dreht sich wie ein Turm
+    let turret,muzzle;scene.traverse(n=>{if(n.name==='turret'&&!turret) turret=n;if(n.name==='muzzle'&&!muzzle) muzzle=n;});
+    template.turret=turret?{pos:worldPosition(turret),parts:bake(turret)}:null;template.muzzleY=muzzle?worldPosition(muzzle).y:null;
+    template.parts=bake(scene,n=>n.name==='turret');
     return template;
   }
   if(kind==='towers'){
@@ -137,7 +143,7 @@ function create(host0,commands){
     for(const template of templates.values())for(const part of [...(template.parts||[]),...(template.slots||[]).flatMap(s=>s.parts),...(template.limbs||[]).flatMap(l=>l.parts)])part.geometry?.dispose();
     templates.clear();for(const [id,template] of next)templates.set(id,template);
     // Gegner und Minen halten eigene Modellkopien: beim Editionswechsel neu aufbauen.
-    for(const obj of enemyObjects.values()){layer.dynamic.remove(obj.group);obj.body?.material.dispose();}enemyObjects.clear();
+    for(const obj of enemyObjects.values()){layer.dynamic.remove(obj.group);obj.body?.material.dispose();obj.healGlow?.dispose();}enemyObjects.clear();
     for(const mesh of mineObjects.values())layer.dynamic.remove(mesh);mineObjects.clear();
     for(const material of biomeMaterials.values())material?.dispose();biomeMaterials.clear();
     ready=true;loading.remove();rebuildAll();if(state) render(state,targetList);
@@ -372,15 +378,34 @@ function create(host0,commands){
   function tileSpec(tile){
     const landmark=state.landmarks?.get(key(tile.q,tile.r));
     if(landmark?.type==='boss'&&landmark.status!=='defeated') return {kind:'landmark',name:'boss',rotation:0};
-    return {kind:'tile',...HexModelMap.modelFor(tile)};
+    const spec={kind:'tile',...HexModelMap.modelFor(tile)};
+    // Base der gewählten Festung statt der zufälligen Variante, sobald das Modell vorhanden ist.
+    if(tile.type==='base'&&state.heroId&&modelTemplate('base_'+state.heroId)) spec.name='base_'+state.heroId;
+    return spec;
+  }
+  // Sichtbare Mauer- und Waffenstufe der Festung; höhere Stufe ersetzt die niedrigere, Mauer und Waffe werden kombiniert.
+  function baseUpgradeParts(){
+    const hero=state.heroId,levels=state.baseUpgrades||{},part=(kind,level)=>{for(let l=level;l>0;l--){const name=`base_${hero}_${kind}_${l}`;if(templates.get(name)) return name;}return null;};
+    const walls=hero&&part('walls',levels.walls||0),weapon=hero&&part('weapon',levels.weapon||0);
+    return {walls,weapon,key:(walls||'-')+'/'+(weapon||'-')};
+  }
+  function attachBaseUpgrades(holder,tile,{walls,weapon}){
+    const model=new THREE.Group();model.scale.setScalar(S);holder.add(model);
+    if(walls) addParts(model,templates.get(walls).parts);
+    const template=weapon&&templates.get(weapon);if(!template) return null;
+    addParts(model,template.parts);
+    const c=axialToWorld(tile.q,tile.r),obj={pos:{x:c.x,y:c.y},angle:0,kick:0,muzzleH:(template.muzzleY??template.turret?.pos.y??.6)*S};
+    if(template.turret){obj.turret=new THREE.Group();obj.turret.position.copy(template.turret.pos);obj.turretBase=obj.turret.position.clone();addParts(obj.turret,template.turret.parts);model.add(obj.turret);}
+    return obj;
   }
   function syncTiles(){
     const seen=new Set();
     for(const tile of state.map.values()){
-      const id=key(tile.q,tile.r),spec=tileSpec(tile),sig=[spec.kind,spec.name,spec.rotation,tile.slots,tile.buildingSlots,tile.site,(tile.roads||[]).join('')].join('|');seen.add(id);
+      const id=key(tile.q,tile.r),spec=tileSpec(tile),upgrades=tile.type==='base'?baseUpgradeParts():null,sig=[spec.kind,spec.name,spec.rotation,tile.slots,tile.buildingSlots,tile.site,(tile.roads||[]).join(''),upgrades?.key].join('|');seen.add(id);
       const record=tileRecords.get(id);if(record?.sig===sig) continue;
       if(record) layer.tiles.remove(record.holder);
-      const holder=buildTile(spec,tile,tile.site==='shrine'||tile.site==='tradePost'?{prop:{name:tile.site==='shrine'?'shrine':'treasure',angle:HexModelMap.propAngle(tile.type,HexMap.slotOffsets(tile.type,tile.slots))}}:{});layer.tiles.add(holder);tileRecords.set(id,{sig,holder});
+      const holder=buildTile(spec,tile,tile.site==='shrine'||tile.site==='tradePost'?{prop:{name:tile.site==='shrine'?'shrine':'treasure',angle:HexModelMap.propAngle(tile.type,HexMap.slotOffsets(tile.type,tile.slots))}}:{});layer.tiles.add(holder);
+      const weapon=upgrades?attachBaseUpgrades(holder,tile,upgrades):null;tileRecords.set(id,{sig,holder,weapon});
     }
     for(const [id,record] of [...tileRecords]) if(!seen.has(id)){layer.tiles.remove(record.holder);tileRecords.delete(id);}
   }
@@ -541,16 +566,21 @@ function create(host0,commands){
 
   // ---- Gegner und Geschosse ----
   const model0=m=>m.isGroup;
+  const elementCoreMaterials=new Map();
+  function elementCoreMaterial(base,color){const id=base.uuid+'|'+color;let material=elementCoreMaterials.get(id);if(!material){material=base.clone();material.color.set(color);if(material.emissive){material.emissive.set(color);material.emissiveIntensity=Math.max(.6,material.emissiveIntensity||0);}elementCoreMaterials.set(id,material);}return material;}
   function makeEnemy(e){
     const type=ENEMY_COLOR[e.type]?e.type:'normal',boss=type==='boss';
     const baseType=({splitter:'armored',shard:'armored',healer:'warded',elementCarrier:'warded'}[type]||type);
-    const template=(boss&&e.originBiome&&templates.get('enemy_boss_'+e.originBiome))||templates.get('enemy_'+baseType),group=new THREE.Group(),bar=new THREE.Group();
+    const own=templates.get('enemy_'+type),template=(boss&&e.originBiome&&templates.get('enemy_boss_'+e.originBiome))||own||templates.get('enemy_'+baseType),group=new THREE.Group(),bar=new THREE.Group();
+    const shrink=type==='shard'&&!own?.6:1;   // Ersatzmodell für Golemsplitter verkleinert, eigenes Modell hat Zielgröße
     const obj={group,bar,radius:boss?15:type==='shard'?6:9,phase:0,angle:0,targetAngle:0,last:null,slowed:false,limbs:[],barY:0};
     if(template){
-      obj.pivot=new THREE.Group();const model=new THREE.Group();model.scale.setScalar(S*(type==='shard'?.6:1));obj.pivot.add(model);addParts(model,template.parts);
+      obj.pivot=new THREE.Group();const model=new THREE.Group();model.scale.setScalar(S*shrink);obj.pivot.add(model);addParts(model,template.parts);
       for(const limb of template.limbs){const g=new THREE.Group();g.position.copy(limb.pos);addParts(g,limb.parts);model.add(g);obj.limbs.push({name:limb.name,g});}
       obj.ice=new THREE.Mesh(torus,basic('#79cdd9'));obj.ice.scale.setScalar(obj.radius+4);obj.ice.position.y=2;obj.ice.visible=false;
-      group.add(obj.pivot,obj.ice);obj.barY=template.height*S*(type==='shard'?.6:1)+12;obj.baseY=0;
+      group.add(obj.pivot,obj.ice);obj.barY=template.height*S*shrink+12;obj.baseY=0;
+      if(type==='healer') obj.pivot.traverse(mesh=>{if(mesh.isMesh&&mesh.material.name==='heal_glow'){if(!obj.healGlow){obj.healGlow=mesh.material.clone();obj.healBase=obj.healGlow.emissiveIntensity||1;obj.healFlash=0;}mesh.material=obj.healGlow;}});   // Heilkugel pulsiert
+      if(e.color&&type==='elementCarrier') obj.pivot.traverse(mesh=>{if(mesh.isMesh&&mesh.material.name==='element_core'){mesh.material=elementCoreMaterial(mesh.material,e.color);}});   // Gefäß in Elementfarbe
     }else{                                                             // Fallback ohne Modell: farbige Kugel
       obj.body=new THREE.Mesh(boss?enemyGeometry.boss:enemyGeometry.small,std(ENEMY_COLOR[type]));obj.body.castShadow=true;obj.color=ENEMY_COLOR[type];
       group.add(obj.body);obj.barY=obj.radius*2+14;obj.baseY=obj.radius+3;
@@ -572,7 +602,7 @@ function create(host0,commands){
       obj.last={x:e.x,y:e.y};
       if(!state.remoteView||!obj.remoteMotion)obj.group.position.set(e.x,obj.baseY,e.y);for(const [field,max] of [['hp','maxHp'],['armorHp','maxArmorHp'],['magicHp','maxMagicHp']]){const fg=obj.fgs[field],visible=e[max]>0,ratio=visible?clamp((e[field]||0)/e[max],0,1):0;fg.visible=obj.barBgs[field].visible=visible;fg.scale.x=Math.max(.001,26*ratio);fg.position.x=-13*(1-ratio);}
     }
-    for(const [id,obj] of [...enemyObjects]) if(!alive.has(id)){layer.dynamic.remove(obj.group);obj.body?.material.dispose();enemyObjects.delete(id);}
+    for(const [id,obj] of [...enemyObjects]) if(!alive.has(id)){layer.dynamic.remove(obj.group);obj.body?.material.dispose();obj.healGlow?.dispose();enemyObjects.delete(id);}
   }
   function syncMines(){
     const alive=new Set();for(const mine of state.mines||[]){alive.add(mine.id);let mesh=mineObjects.get(mine.id);if(!mesh){const model=templates.get('mine_pickup');if(model){mesh=new THREE.Group();const g=new THREE.Group();g.scale.setScalar(S);addParts(g,model.parts);mesh.add(g);}else{mesh=new THREE.Mesh(new THREE.CylinderGeometry(7,7,3,10),std(mine.color||'#e6a75f',{metalness:.25}));mesh.castShadow=true;}layer.dynamic.add(mesh);mineObjects.set(mine.id,mesh);}mesh.position.set(mine.x,model0(mesh)?0:2,mine.y);}
@@ -583,7 +613,12 @@ function create(host0,commands){
   const rnd=(i,seed)=>{const v=Math.sin(i*127.1+seed*311.7)*43758.5453;return v-Math.floor(v);};
   const lerp=(a,b,t)=>a+(b-a)*t,clamp01=t=>Math.max(0,Math.min(1,t));
   const SRC_H=34,DST_H=12,MUZZLE='#ffe9a8';
-  function towerAt(x,y){for(const record of objectRecords.values()) for(const obj of record.towers) if(Math.abs(obj.pos.x-x)<.5&&Math.abs(obj.pos.y-y)<.5) return obj;return null;}
+  function towerAt(x,y){
+    for(const record of objectRecords.values()) for(const obj of record.towers) if(Math.abs(obj.pos.x-x)<.5&&Math.abs(obj.pos.y-y)<.5) return obj;
+    for(const record of tileRecords.values()) if(record.weapon&&Math.abs(record.weapon.pos.x-x)<.5&&Math.abs(record.weapon.pos.y-y)<.5) return record.weapon;   // Base-Waffe
+    return null;
+  }
+  const seenHealBlasts=new WeakSet();   // bereits ausgewertete Heilringe
   function popEnemy(id){const obj=enemyObjects.get(id);if(obj) obj.pop=1;}
   function lightning(p,a,b,seed,fade,high){                           // gezackter Blitz zwischen zwei Punkten, flackert etwa 22-mal pro Sekunde
     const dx=b.x-a.x,dz=b.z-a.z,len=Math.hypot(dx,dz)||1,px=-dz/len,pz=dx/len,amp=Math.min(7,len*.2),N=8;
@@ -618,7 +653,7 @@ function create(host0,commands){
       }
       live.add(p.id);const t=clamp01(1-p.ttl/p.max),done=seenShots.get(p.id)||seenShots.set(p.id,{}).get(p.id);
       const src=p.kind==='chain'?p.pts[0]:{x:p.x1,y:p.y1},dst=p.kind==='chain'?p.pts.at(-1):{x:p.x2,y:p.y2};
-      if(!done.kick){done.kick=true;const tower=towerAt(src.x,src.y);if(tower) tower.kick=1;done.srcH=SRC_H+(tower?.holder.position.y||0);}   // Rückstoß; Starthöhe folgt erhöhten Sockeln
+      if(!done.kick){done.kick=true;const tower=towerAt(src.x,src.y);if(tower) tower.kick=1;done.srcH=tower?.muzzleH??SRC_H+(tower?.holder?.position.y||0);}   // Rückstoß; Starthöhe folgt erhöhten Sockeln
       const srcH=done.srcH;
       const dirx=dst.x-src.x,diry=dst.y-src.y,dlen=Math.hypot(dirx,diry)||1,ux=dirx/dlen,uy=diry/dlen;
       if(t<.3){const k=1-t/.3;fx.flash.ball(src.x+ux*7,srcH+2,src.y+uy*7,1.5+3*k,MUZZLE,k*.9);}   // Mündungsblitz
@@ -789,7 +824,16 @@ function create(host0,commands){
         if(best){const wanted=Math.atan2(-(best.y-obj.pos.y),best.x-obj.pos.x),diff=Math.atan2(Math.sin(wanted-obj.angle),Math.cos(wanted-obj.angle));obj.angle+=diff*Math.min(1,dt*10);obj.turret.rotation.y=obj.angle;}
         if(obj.kick>0){obj.kick=Math.max(0,obj.kick-dt*9);const k=obj.kick*obj.kick*.045;obj.turret.position.set(obj.turretBase.x-Math.cos(obj.angle)*k,obj.turretBase.y,obj.turretBase.z+Math.sin(obj.angle)*k);}   // Rückstoß entgegen der Schussrichtung
       }
+      const baseRange=(typeof HexHeroes!=='undefined'&&HexHeroes.weapon(state)?.range)||0;
+      for(const record of tileRecords.values()){const obj=record.weapon;if(!obj?.turret) continue;
+        let best=null,bestDistance=baseRange;for(const e of enemies){const d=Math.hypot(e.x-obj.pos.x,e.y-obj.pos.y);if(d<=bestDistance){best=e;bestDistance=d;}}
+        if(best){const wanted=Math.atan2(-(best.y-obj.pos.y),best.x-obj.pos.x),diff=Math.atan2(Math.sin(wanted-obj.angle),Math.cos(wanted-obj.angle));obj.angle+=diff*Math.min(1,dt*10);obj.turret.rotation.y=obj.angle;}
+        if(obj.kick>0){obj.kick=Math.max(0,obj.kick-dt*9);const k=obj.kick*obj.kick*.045;obj.turret.position.set(obj.turretBase.x-Math.cos(obj.angle)*k,obj.turretBase.y,obj.turretBase.z+Math.sin(obj.angle)*k);}
+      }
+      for(const p of state.projectiles||[])if(p.kind==='blast'&&p.color==='#73e49c'&&!seenHealBlasts.has(p)){seenHealBlasts.add(p);
+        for(const obj of enemyObjects.values())if(obj.healGlow&&obj.last&&Math.hypot(obj.last.x-p.x,obj.last.y-p.y)<2) obj.healFlash=1;}
       for(const obj of enemyObjects.values()){
+        if(obj.healGlow){obj.healFlash=Math.max(0,obj.healFlash-dt*2.2);obj.healGlow.emissiveIntensity=obj.healBase*(.75+.35*Math.sin(now*.006+obj.group.id)+2.4*obj.healFlash);}
         if(state.remoteView&&obj.remoteMotion){const m=obj.remoteMotion,t=Math.min(1,Math.max(0,(now-m.start)/100));obj.group.position.set(m.x+(m.toX-m.x)*t,obj.baseY,m.y+(m.toY-m.y)*t);}
         obj.bar.quaternion.copy(camera.quaternion);
         if(!obj.pivot) continue;
