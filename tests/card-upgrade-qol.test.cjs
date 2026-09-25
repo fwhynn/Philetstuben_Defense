@@ -10,5 +10,5 @@ test('Volley is first and range preview restores on leave without spending gold'
 });
 test('deck uses hex icons and new biomes use one name per line until hovered',()=>{
  const {a,elements}=load();a.state.deck=['straight','straight'];a.state.drawPile=['straight'];a.state.discard=[];elements.get('deckDropdown').open=true;elements.get('deckDropdown').listeners.toggle();const sections=elements.get('deckOverview').children;assert.match(sections[0].children[1].children[0].innerHTML,/<svg/);assert.equal(sections[0].children[1].children[0].children.at(-1).textContent,'×2');
- a.state.biomeIntro=['desert','ash','storm'];a.state.highlightBiome=null;a.renderAll();assert.equal(elements.get('biomeIntroDetail').textContent,'Dünenmeer\nAschelande\nSturmhochland');
+ a.state.biomeIntro=['desert','ash','storm'];a.state.highlightBiome=null;a.renderAll();assert.deepEqual(elements.get('biomeIntroDetail').children.map(row=>row.textContent),['Dünenmeer','Aschelande','Sturmhochland']);assert.ok(elements.get('biomeIntroDetail').children.every(row=>row.className==='biomeIntroName'));
 });

@@ -40,6 +40,6 @@ test('wave HUD shows upcoming wave in preparation and current wave in combat',()
 });
 test('selected construction slots use singular only for exactly one slot',()=>{
  const {a,elements,selectSlot}=load();a.state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:2,towers:[null,null]});
- selectSlot(1,0,0);assert.match(elements.get('messageText').textContent,/^1 Bauplatz gewählt/);
- selectSlot(1,0,1,true);assert.match(elements.get('messageText').textContent,/^2 Bauplätze gewählt/);
+ selectSlot(1,0,0);assert.match(elements.get('towerSelectionHint').textContent,/^1 Bauplatz gewählt/);
+ selectSlot(1,0,1,true);assert.match(elements.get('towerSelectionHint').textContent,/^2 Bauplätze gewählt/);
 });

@@ -38,7 +38,8 @@ const HexRewards=(()=>{
     if(kind==='removal')choices=[...new Set(state.deck)].map(cardId=>({kind:'remove',cardId}));
     else {
       const effect=kind==='shrine'?HexExploration.shrineEffect(state.landmarks,state.pendingShrine):null;
-      if(effect==='repair'||effect==='upgrade'){
+      if(effect==='aura'){skippable=false;choices=[{kind:'site',effect:'damage',label:'Schrein · +10 % Schaden',desc:'Dauerhaft auf diesem Hex und seinen Nachbarhexen. Gleiche Boni stapeln nicht.'},{kind:'site',effect:'range',label:'Schrein · +15 % Reichweite',desc:'Dauerhaft auf diesem Hex und seinen Nachbarhexen. Gleiche Boni stapeln nicht.'}];}
+      else if(effect==='repair'||effect==='upgrade'){
         skippable=false;
         choices=effect==='upgrade'?upgradeChoices(state).map(choice=>({kind:'upgrade',choice})):[];
         if(!choices.length)choices=[{kind:'blessing',blessing:effect==='repair'?'repair':'supplies'}];
@@ -62,7 +63,8 @@ const HexRewards=(()=>{
     else{
       if(!Number.isInteger(index)||index<0||index>=offer.choices.length)return false;
       const choice=offer.choices[index];
-      if(choice.kind==='card'){HexDeck.addReward(state,choice.cardId);}
+      if(choice.kind==='site'){if(!HexExploration.activateShrine(state,offer.context,choice.effect))return false;}
+      else if(choice.kind==='card'){HexDeck.addReward(state,choice.cardId);}
       else if(choice.kind==='remove'){if(!HexDeck.remove(state,choice.cardId))return false;}
       else if(choice.kind==='upgrade'){if(!upgrade(state,choice.choice))return false;}
       else if(choice.kind==='blessing'){if(!blessing(state,choice.blessing))return false;}

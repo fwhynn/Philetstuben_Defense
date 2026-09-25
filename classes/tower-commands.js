@@ -10,8 +10,8 @@ const HexTowerCommands=(()=>{
     if(state.gold<total)return {ok:false,reason:'gold'};
     for(const selected of selectedSlots){
     const tile=state.map.get(key(selected.q,selected.r)),price=HexBuildings.cost(state,selected,tdef.cost);
-    tile.towers[selected.index]={type,biome:HexBiomes.forTile(state,tile),rangeFactor:state.challengeDay?.85:1,tileType:tile.type,level:1,lastShot:-Infinity,targetPriority:type==='ballista'?['boss','closestBase','mostHealth']:['closestBase','mostHealth','boss'],builtOnWave:['place','build'].includes(state.phase)?state.wave:null,paid:price};
-    const built=tile.towers[selected.index];built.statId=++state.nextTowerStatId;state.runTowerDetails[built.statId]={type,q:tile.q,r:tile.r,index:selected.index,damage:0,buildGold:0,upgradeGold:0,refundGold:0};HexData.recordTowerStat(state,built,'buildGold',price);
+    tile.towers[selected.index]={type,biome:HexBiomes.forTile(state,tile),rangeFactor:state.challengeDay&&state.challengeKind!=='garrison'?.85:1,tileType:tile.type,level:1,lastShot:-Infinity,targetPriority:HexData.defaultTargetPriority({type}),builtOnWave:['place','build'].includes(state.phase)?state.wave:null,paid:price};
+    const built=tile.towers[selected.index];built.statId=++state.nextTowerStatId;state.runTowerDetails[built.statId]={type,q:tile.q,r:tile.r,index:selected.index,damage:0,kills:0,buildGold:0,upgradeGold:0,refundGold:0};HexData.recordTowerStat(state,built,'buildGold',price);
     const usage=state.runTowerStats[type]||{builds:0,upgrades:0};usage.builds++;state.runTowerStats[type]=usage;
     state.gold-=price;}HexBuildings.refresh(state);
     return {ok:true,total};

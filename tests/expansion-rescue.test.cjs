@@ -43,3 +43,16 @@ test('placement checkpoints preserve a run-local rescue card and do not overwrit
  const restored=c.snapshot.restore(JSON.parse(JSON.stringify(c.snapshot.capture(a.state,a.random))));assert.deepEqual(Array.from(restored.state.rescueCard.roads),[0,3]);
  assert.ok(c.placement.place(restored.state,{q:1,r:0,index:0,rotation:0}));assert.equal(restored.state.deck.includes('rescue'),false);assert.equal(restored.state.discard.includes('rescue'),false);assert.deepEqual(Array.from(b.state.rescueCard.roads),[0,2]);
 });
+
+test('a straight connection through an event is drawn instead of a rescue card',()=>{
+ const c=loadCore(),{state:s,random}=c.runtime.create({seed:'event-bridge',runId:'bridge',loadout:['archer','catapult','chain','freeze','mine']});
+ s.map=new Map([['0,0',{q:0,r:0,type:'base',roads:[0],slots:0,towers:[]}]]);s.landmarks=new Map([['2,0',{q:2,r:0,type:'treasure',claimed:false,prefab:{type:'straight',roads:[0,3],slots:1,rotation:0}}]]);
+ s.deck=['straight','straight','straight'];s.hand=[];s.drawPile=[...s.deck];s.discard=[];s.phase='place';
+ assert.equal(c.flow.drawHand(s,random),'ready');assert.equal(s.hand.includes('rescue'),false);assert.ok(c.placement.place(s,{q:1,r:0,index:0,rotation:0}));assert.ok(s.map.has('2,0'));
+});
+
+test('a connected road tip in a one-cell pocket is not an expandable front',()=>{
+ const c=loadCore(),map=new Map([['0,0',{q:0,r:0,type:'base',roads:[0]}],['1,0',{q:1,r:0,type:'straight',roads:[0,3]}]]);
+ for(let d=0;d<6;d++){const n=c.map.neighbor(2,0,d),id=c.map.key(n.q,n.r);if(!map.has(id))map.set(id,{...n,type:'deadEnd',roads:[]});}
+ assert.equal(c.map.hasExteriorFront(map),false);
+});

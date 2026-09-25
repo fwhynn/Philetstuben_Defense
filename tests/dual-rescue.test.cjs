@@ -31,7 +31,7 @@ test('dual rescue rejection explains two exterior exits while normal placement k
 });
 
 test('gold carrier opens the existing wave information with an explicit outcome legend',()=>{
- const {load}=require('./helpers/game.cjs'),{a,elements}=load();a.newRun(undefined,undefined,undefined,'2026-09-23');a.renderAll();assert.match(elements.get('waveForecast').textContent,/Besiegen bringt 15 Gold extra/);assert.match(elements.get('waveForecast').textContent,/verlierst du 10 Gold/);a.rendererCommands.inspectCaravan();assert.equal(elements.get('waveDropdown').open,true);
+ const {load}=require('./helpers/game.cjs'),{a,elements}=load();a.newRun(undefined,undefined,undefined,'2026-09-22');a.renderAll();assert.match(elements.get('waveForecast').textContent,/Besiegen bringt 15 Gold extra/);assert.match(elements.get('waveForecast').textContent,/verlierst du 10 Gold/);a.rendererCommands.inspectCaravan();assert.equal(elements.get('waveDropdown').open,true);
 });
 
 test('single-front rescue prefers a simple road and cannot rotate into multiple exterior exits',()=>{

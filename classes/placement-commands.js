@@ -19,7 +19,7 @@ const HexPlacementCommands=(()=>{
     const id=state.hand[index],definition=card(state,id);if(!canPlace(state,q,r,definition,rotation))return null;
     const tile={q,r,type:id,rotation,roads:HexMap.rotatedRoads(definition,rotation),slots:definition.slots||0,buildingSlots:definition.buildingSlots||0,buildings:Array(definition.buildingSlots||0).fill(null),towers:Array(definition.slots||0).fill(null),income:definition.income||0};
     state.map.set(HexMap.key(q,r),tile);
-    const connected=HexExploration.attach(state);state.vision=HexExploration.expand(state.landmarks,state.map);state.income+=tile.income;
+    const connected=HexExploration.attach(state);state.vision=HexExploration.expand(state.landmarks,state.map);state.income+=tile.income;HexBuildings.refresh(state);
     if(state.openingRemaining){state.openingRemaining--;state.discard.push(id);state.hand.splice(index,1);if(state.openingRemaining)return {opening:true,connected,treasure:0};}
     state.discard.push(...state.hand.filter(id=>!card(state,id)?.rescue));state.hand=[];state.phase='build';
     return {opening:false,connected,treasure:HexExploration.claim(state,q,r)};

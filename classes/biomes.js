@@ -89,6 +89,7 @@ const HexBiomes=(()=>{
     storm:{name:'Glyzinienregen',ground:'#8e9ab0',soil:'#4c5569',foliage:'#3e6a63',blossom:'#9a7fd0',blossomLight:'#c6b3ee',particles:'rain'},
     ash:{name:'Momiji-Herbst',ground:'#7d3a2c',soil:'#3c1d17',foliage:'#c0482b',blossom:'#d8412a',blossomLight:'#ef7a3a',particles:'maple'}
   };
+  function groundColor(biome,sakura=false){return sakura&&biome==='grass'?'#eab3c3':definitions[biome].color;}
   const sakuraAmbient={grass:'petals',desert:'sand',storm:'rain',ash:'maple'};
-  return {introAcknowledged,acknowledgeIntro,introIds,visibleTiles,highlight,guardian,definitions,at,forTile,atWorld,apply,sakuraSeasons,sakuraAmbient};
+  return {groundColor,introAcknowledged,acknowledgeIntro,introIds,visibleTiles,highlight,guardian,definitions,at,forTile,atWorld,apply,sakuraSeasons,sakuraAmbient};
 })();

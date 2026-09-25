@@ -35,6 +35,14 @@ const HexRunRuntime=(()=>{
     state.vision=HexExploration.expand(state.landmarks,new Map([['0,0',{q:0,r:0}]]));
     const baseVariant=BASE_VARIANTS[Math.floor(HexRandom.create(seed+'|base-variant')()*BASE_VARIANTS.length)];
     state.map.set('0,0',{q:0,r:0,type:'base',roads:state.baseExits,slots:0,towers:[],income:0,baseVariant});
+    if(challengeDay){state.challengeKind=HexWaves.daily(challengeDay).id;state.challengeTarget=HexWaves.daily(challengeDay).target;}
+    if(state.challengeKind==='garrison'){
+      state.gold=1200;state.income=0;state.difficulty='normal';state.openingRemaining=0;state.baseExits=[0];state.map.get('0,0').roads=[0];state.landmarks=new Map();state.vision=[];state.hand=[];state.phase='build';
+      let p={q:0,r:0};const directions=[0,0,0,5,5,3,3,3,5,5,0,0];
+      for(let i=0;i<directions.length;i++){p=HexMap.neighbor(p.q,p.r,directions[i]);const roads=[HexMap.OPP(directions[i]),directions[i+1]??directions[i]];let type='straight',rotation=0;
+        for(const id of ['straight','smallCurve','bigCurve'])for(let rot=0;rot<6;rot++)if(HexMap.rotatedRoads(HexData.CARD_LIBRARY[id],rot).slice().sort().join()===roads.slice().sort().join()){type=id;rotation=rot;}
+        state.map.set(HexMap.key(p.q,p.r),{...p,type,roads,slots:HexData.CARD_LIBRARY[type].slots,towers:[],income:0,rotation});}
+    }
     return {state,random:HexRandom.create(seed)};
   }
   function schedule(state,sources,enemies,spacing=20){
@@ -110,7 +118,7 @@ const HexRunRuntime=(()=>{
   }
   function rescueTunnel(state){
     if(state.phase!=='build'||state.waveRunning||state.hp<=0)return false;
-    const plan=HexMap.tunnelPlan(state.map,state.landmarks,state.difficulty==='dual'&&!!state.tunnelOffer);if(!plan)return false;
+    const plan=HexMap.tunnelPlan(state.map,state.landmarks,!!state.tunnelOffer);if(!plan)return false;
     const id=key(plan.q,plan.r),source=state.map.get(plan.source),number=state.nextTunnelId=(state.nextTunnelId||0)+1;
     source.tunnels??=[];source.tunnels.push(id);source.tunnelLabel='Tunnel '+number;
     state.map.set(id,{q:plan.q,r:plan.r,type:'rescueTunnel',roads:state.difficulty==='dual'?[plan.dir,(plan.dir+1)%6]:[plan.dir],rotation:plan.dir,slots:0,towers:[],buildingSlots:0,buildings:[],income:0,tunnels:[plan.source],tunnelLabel:'Tunnel '+number});

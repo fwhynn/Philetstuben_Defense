@@ -1205,3 +1205,40 @@ Zen-Sommer|Zen Summer
 Glyzinienregen|Wisteria Rain
 Momiji-Herbst|Momiji Autumn
 `);
+
+HexTranslations.add(`
+Einsteigerhinweise anzeigen|Show beginner tips
+Mini-Tutorial, Tastenbelegungs-Hinweis und Hinweise zu neu entdeckten Biomen. Spielregeln und wichtige Spielmeldungen bleiben verfügbar.|Mini tutorial, hotkey tip and newly discovered biome tips. Rules and important game messages remain available.
+Nur Gegner in Reichweite zählen. Bei Gleichstand oder fehlenden Zielen entscheidet die nächste Priorität. Basisnähe meint den verbleibenden Straßenweg. Kettenblitze springen danach zum nächsten Gegner; durchschlagende Geschosse treffen entlang ihrer Flugbahn.|Only enemies in range count. Ties or missing targets use the next priority. Base proximity means remaining road distance. Chain lightning then jumps to the nearest enemy; piercing shots hit along their flight path.
+Werte gelten ohne Biom-, Hex- und Gebäudeboni. Vergleich jeweils mit der vorherigen Stufe.|Values exclude biome, tile and building bonuses. Each comparison is against the previous tier.
+Aura-Reichweite|Aura range
+Nachladezeit|Reload time
+Zeit je Mine|Time per mine
+Explosionsradius|Blast radius
+Blitzziele|Lightning targets
+Blitz-Sprungweite|Lightning jump range
+Durchschlagsziele|Piercing targets
+Verlangsamungsdauer|Slow duration
+Aura-Verlangsamung|Aura slow
+Treffer-Verlangsamung|Hit slow
+Geisterschaden pro Sekunde|Spirit damage per second
+Geisterlebensdauer|Spirit lifetime
+Bossschaden-Multiplikator|Boss damage multiplier
+Turmschaden-Bonus|Tower damage bonus
+Turm-Rabatt|Tower discount
+Zusätzlich versorgbare Wunschhexe|Additional chosen tiles supplied
+Ein Kill zählt für den Turm, der den tödlichen Treffer verursacht; Minen und Geister zählen zum Ursprungsturm.|A kill belongs to the tower that deals the final blow; mines and spirits count towards their source tower.
+`);
+
+Object.assign(HexTranslations.en,{
+'Krähenfüße':'Caltrops','Klebeharz':'Sticky resin','Verbrauchshilfen':'Consumables','Hilfen':'Support',
+'20 Spitzen × 5 Schaden. Reste verfallen am Wellenende.':'20 spikes × 5 damage. Unused spikes expire at wave end.',
+'Die nächsten 12 Gegner: 35 % langsamer für 4 Sekunden. Bis Wellenende.':'The next 12 enemies: 35% slower for 4 seconds. Until wave end.',
+'+50 % Angriffsgeschwindigkeit für 12 Sekunden. Bis Wellenende; nicht stapelbar.':'+50% attack speed for 12 seconds. Until wave end; does not stack.',
+'Die letzte Garnison':'The Last Garrison','Die Garnison hält stand!':'The garrison holds!',
+'Feste Karte · Budget einteilen · drei Angriffe abwehren':'Fixed map · Manage your budget · Survive three assaults',
+'Nur für diese Welle. In der Bauphase: für die nächste Welle.':'For this wave only. During preparation: for the next wave.',
+'Krähenfüße · 25 Gold':'Caltrops · 25 gold','Klebeharz · 30 Gold':'Sticky resin · 30 gold','Überladung · 40 Gold':'Overcharge · 40 gold',
+'20 Spitzen × 5 Schaden · Straßenhex wählen':'20 spikes × 5 damage · Select a road hex','12 Gegner: −35 % Tempo für 4 Sekunden':'12 enemies: −35% speed for 4 seconds','Turm: +50 % Angriffstempo für 12 Sekunden':'Tower: +50% attack speed for 12 seconds',
+'Heutige Mission starten':"Start today's mission"
+});

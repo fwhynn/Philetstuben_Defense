@@ -99,7 +99,11 @@ const HexMap=(()=>{
   function hasExteriorFront(map,landmarks){
     const network=new Map(map);for(const [id,l] of landmarks||[])if(!network.has(id)&&!l.claimed&&l.prefab)network.set(id,{...l.prefab,q:l.q,r:l.r});
     const outside=exterior(map,landmarks),connected=reachable(network);
-    for(const tile of network.values())if(tile.type!=='base'&&connected.has(key(tile.q,tile.r)))for(const d of tile.roads||[]){const n=neighbor(tile.q,tile.r,d);if(!map.has(key(n.q,n.r))&&outside.has(key(n.q,n.r)))return true;}
+    for(const tile of network.values())if(tile.type!=='base'&&connected.has(key(tile.q,tile.r)))for(const d of tile.roads||[]){const n=neighbor(tile.q,tile.r,d);if(!network.has(key(n.q,n.r))&&outside.has(key(n.q,n.r))){
+        // An empty pocket beside a road is not an expandable front unless a
+        // continuation can leave it toward the exterior without another tile.
+        for(let exit=0;exit<6;exit++){const next=neighbor(n.q,n.r,exit);if(!network.has(key(next.q,next.r))&&outside.has(key(next.q,next.r)))return true;}
+      }}
     return false;
   }
   function tunnelPlan(map,landmarks,allowExterior=false){

@@ -4,7 +4,7 @@
  */
 const HexRunSnapshot=(()=>{
   const VERSION=1,RULES='duo-foundation-4';
-  const ui=new Set(['duoPortal','buildingTarget','previewBuilding','selectedCard','rotation','hoveredPlacement','showHexGrid','showSlotHints','hoverBuilding','selectedSlot','selectedSlots','selectedTower','selectedTowers','selectedBuilding','selectedBase','previewTower','previewUpgrade','dragTower','dragSlot','highlightBiome','biomeIntro','showUpgradeStatus','inspectEndMap']);
+  const ui=new Set(['workshopPicking','duoPortal','consumablePickUI','buildingTarget','previewBuilding','selectedCard','rotation','hoveredPlacement','showHexGrid','showSlotHints','hoverBuilding','selectedSlot','selectedSlots','selectedTower','selectedTowers','selectedBuilding','selectedBase','previewTower','previewUpgrade','dragTower','dragSlot','highlightBiome','biomeIntro','showUpgradeStatus','inspectEndMap']);
   function encode(value,stack=new Set()){
     if(value===undefined)return ['undefined'];
     if(typeof value==='number'&&!Number.isFinite(value))return ['number',String(value)];

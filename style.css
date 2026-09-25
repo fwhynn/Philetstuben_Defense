@@ -187,7 +187,6 @@ html,body{height:100%;overflow:hidden}
 .menuRules{text-align:left;background:#162019;border:1px solid #3b5242;border-radius:12px;padding:12px 16px;margin-top:12px;max-height:38vh;overflow:auto}
 .menuRules ul{margin:0;padding-left:18px;font-size:13px;line-height:1.55;color:#d3dccf}
 .menuSound{margin-top:14px}.menuVersion{color:#6f7f70;margin-top:6px}
-.menuLoadoutInfo{color:#cfd8c9;font-size:12px;margin:0 0 12px;line-height:1.4}
 .menuLogo{width:120px;height:120px;filter:drop-shadow(0 6px 14px #000a);margin-bottom:-4px}
 
 .rewardInspectActions{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:12px;margin-top:24px}
@@ -211,7 +210,7 @@ html,body{height:100%;overflow:hidden}
 .mainMenu{overflow:hidden;box-sizing:border-box;padding:16px}
 .mainMenu .menuLogo{width:clamp(48px,12vh,104px);height:clamp(48px,12vh,104px)}
 .mainMenu .menuBox{gap:4px}
-.mainMenu .menuTagline,.mainMenu .menuLoadoutInfo{margin:8px 0}
+.mainMenu .menuTagline{margin:8px 0}
 .mainMenu .eyebrow{margin:4px 0}
 .modeBox{width:min(780px,94vw);box-sizing:border-box;padding:28px;background:#1d2922f5;border:1px solid #607d65;border-radius:18px;max-height:90dvh;overflow:auto;text-align:center}
 #playModeOverlay,#menuRulesOverlay{z-index:42}
@@ -220,8 +219,8 @@ html,body{height:100%;overflow:hidden}
 .modeChoice{display:flex;flex-direction:column;gap:14px;padding:28px 20px;border:1px solid #879a6c;border-radius:14px;background:#2c3f33;min-height:190px;text-align:left}
 .modeChoice strong{font-size:22px;color:#f5df9a}.modeChoice small{line-height:1.5;color:#c1cbbd}
 #playModeBackBtn,#menuRulesBackBtn{margin-top:20px}
-@media(max-height:700px){.mainMenu .menuLogo{width:58px;height:58px}.mainMenu .menuBox h1{font-size:40px}.mainMenu .menuButtons{gap:6px}.mainMenu .menuButtons button{padding:9px;font-size:15px}.mainMenu .menuTagline,.mainMenu .menuLoadoutInfo{margin:4px 0;font-size:11px}}
-@media(max-height:500px){.mainMenu .menuLogo,.mainMenu .eyebrow,.mainMenu .menuTagline,.mainMenu .menuLoadoutInfo,.mainMenu .menuVersion{display:none}.mainMenu .menuBox h1{font-size:30px}.mainMenu .menuButtons{display:grid;grid-template-columns:1fr 1fr}.mainMenu .menuSound{margin:0}}
+@media(max-height:700px){.mainMenu .menuLogo{width:58px;height:58px}.mainMenu .menuBox h1{font-size:40px}.mainMenu .menuButtons{gap:6px}.mainMenu .menuButtons button{padding:9px;font-size:15px}.mainMenu .menuTagline{margin:4px 0;font-size:11px}}
+@media(max-height:500px){.mainMenu .menuLogo,.mainMenu .eyebrow,.mainMenu .menuTagline,.mainMenu .menuVersion{display:none}.mainMenu .menuBox h1{font-size:30px}.mainMenu .menuButtons{display:grid;grid-template-columns:1fr 1fr}.mainMenu .menuSound{margin:0}}
 @media(max-width:550px){.modeChoices{grid-template-columns:1fr}.modeChoice{min-height:0;padding:18px}}
 
 .biomeWind{opacity:.45;animation:biomeWindDrift 4s ease-in-out infinite alternate}@keyframes biomeWindDrift{from{transform:translateX(-8px);opacity:.15}to{transform:translateX(12px);opacity:.6}}@media(prefers-reduced-motion:reduce){.biomeWind{animation:none;opacity:.25}}
@@ -581,3 +580,26 @@ body:has(#biomeIntro:not(.hidden)) .biomeTooltip{display:none!important}
  .arsenalHeroAction{grid-column:1/-1}.arsenalHeroAction .arsenalBuy{width:100%}
  .arsenalPaths{grid-template-columns:1fr}.arsenalPaths.single{max-width:none}
 }
+
+.arsenalChanges{padding-left:18px;margin:8px 0;color:var(--text);font-size:12px;line-height:1.55}.arsenalChanges li{margin:3px 0}
+
+.duoResultStats{grid-column:1 / -1;min-width:0}
+
+#loadoutOverlay .heroChoices .heroEffects{display:block;white-space:normal;line-height:1.4;margin-top:6px}
+#loadoutOverlay .loadoutBox{overflow-y:auto}
+.arsenalChanges{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;padding:0;list-style:none}.arsenalChanges .statChip{font-size:13px;white-space:nowrap}
+@media(max-width:900px),(max-height:600px){.towerPanel,.drawer{box-sizing:border-box;overflow-y:auto;width:min(400px,calc(100vw - 24px))}.modal{box-sizing:border-box;max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px);overflow-y:auto}}
+
+.duoQuickMap{position:fixed;left:16px;top:100px;z-index:38;min-height:44px}@media(max-width:900px),(max-height:600px){.duoQuickMap{top:64px;left:auto;right:12px}}
+
+.workshopChoices>button:not(:last-child){display:none}
+.runShareCard{padding:24px;border:1px solid #d9bc76;border-radius:14px;background:linear-gradient(130deg,#182f26,#283425);margin:16px 0;color:#f2e7cf}.runShareBrand{color:#d9bc76;font-weight:700;letter-spacing:.08em}.runShareWave{font-size:clamp(36px,7vw,64px);font-weight:800;line-height:1.15;margin-top:14px}.runShareCard>p{margin:8px 0}.runShareMetrics{display:flex;flex-wrap:wrap;gap:16px 40px;margin:20px 0}.runShareMetrics strong{display:block;font-size:28px}.runShareCard small{color:#b3c0b5}.runShareActions{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}.runShareStatus{font-size:13px;min-height:1.3em}
+@media(max-width:900px),(max-height:600px){body:has(#towerDrawer:not(.hidden)) #message:not(.tutorialActive){display:none}.runShareCard{padding:16px}}
+
+@media(max-width:900px),(max-height:600px){#towerSelectionHint{display:none}}
+
+.consumableMenu{position:fixed;left:12px;bottom:122px;z-index:24;background:#20332b;color:#f2e9d0;border:1px solid #6d8468;border-radius:12px;padding:10px;max-width:min(310px,calc(100vw - 24px));box-sizing:border-box}.consumableMenu summary{cursor:pointer;font-weight:bold}.consumableMenu button{display:block;width:100%;margin-top:8px}.consumableMenu small{display:block;margin:4px 0}.consumableMenu[open]{max-height:calc(100dvh - 220px);overflow:auto}body:has(.mainMenu:not(.hidden)) .consumableMenu{display:none}@media(max-width:900px),(max-height:600px){.consumableMenu{left:12px;bottom:154px;font-size:12px}}
+
+@media(max-width:900px),(max-height:600px){.compactToolbar{grid-template-columns:repeat(5,minmax(0,1fr))}.consumableMenu{top:64px;bottom:auto;right:12px;left:auto;width:310px;max-height:calc(100dvh - 210px)}.consumableMenu:not([open]){display:none}.consumableMenu summary{display:none}}
+
+.biomeIntroName{display:block}

@@ -52,8 +52,8 @@ test('special forge and market target an explored hex by map click; Escape cance
  a.rendererCommands.selectBuilding(0,0,0);const content=elements.get('buildingOptions');const find=node=>node.textContent?.includes('Zusatz-Hex auf')?node:(node.children||[]).map(find).find(Boolean);const button=find(content);assert.ok(button);button.listeners.click();assert.ok(a.state.buildingTarget);a.rendererCommands.placeTile(2,0);assert.equal(tile.buildings[0].target,'2,0');assert.equal(a.state.buildingTarget,null);
  a.state.buildingTarget={q:0,r:0,index:0};documentListeners.keydown({key:'Escape'});assert.equal(a.state.buildingTarget,null);assert.equal(tile.buildings[0].target,'2,0');}
 });
-test('new ballista prioritizes bosses and keeps editable priorities',()=>{
- const {a,selectSlot,buyTower}=load();a.state.phase='build';a.state.gold=1000;a.state.towerLoadout.push('ballista');a.state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[null]});selectSlot(1,0,0);buyTower('ballista');assert.equal(a.state.map.get('1,0').towers[0].targetPriority[0],'boss');
+test('new ballista prioritizes its strongest damage pool and keeps editable priorities',()=>{
+ const {a,selectSlot,buyTower}=load();a.state.phase='build';a.state.gold=1000;a.state.towerLoadout.push('ballista');a.state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[null]});selectSlot(1,0,0);buyTower('ballista');assert.equal(a.state.map.get('1,0').towers[0].targetPriority[0],'mostHealth');
 });
 
 test('remote forge target excludes its own radius and all existing forge coverage including remote targets',()=>{

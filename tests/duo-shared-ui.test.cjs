@@ -28,3 +28,11 @@ test('real Duo adapter keeps selections across snapshots and makes the partner m
  const gift=room.view(seat.token);gift.boards[0].phase='duoDelivery';gift.delivery={offers:[{id:'gift',index:null,choices:[{kind:'gold',amount:20}]},{index:null}]};duo.receive(gift);
  assert.equal(ui.elements.get('rewardTitle').textContent,'Geschenk für deinen Partner');ui.elements.get('rewardChoices').children[0].listeners.click();assert.equal(duo.calls.at(-1).action,'delivery');assert.equal(duo.calls.at(-1).payload.offerId,'gift');
 });
+
+test('Duo support can be selected button-first and quick map switch stays available',()=>{
+ const duo={real:true,calls:[]},ui=load({duo}),room=createRoom({seed:'pick-support',loadouts:Array(2).fill(['archer','catapult','chain','freeze','mine'])}),seat=room.connect(0);room.connect(1);duo.receive(room.view(seat.token));
+ const s=duo.api.getState();s.phase='build';s.map.set('1,0',{q:1,r:0,type:'straight',slots:2,towers:[{type:'archer',level:1,statId:1},null]});s.selectedSlot=s.selectedTower=null;
+ ui.elements.get('duoReservePortal').listeners.click();ui.rendererCommands.selectSlot(1,0,1);assert.equal(duo.calls.at(-1).action,'portal');assert.equal(duo.calls.at(-1).payload.slot.index,1);
+ ui.elements.get('duoSendTower').listeners.click();ui.rendererCommands.selectTower(1,0,0);assert.equal(duo.calls.at(-1).action,'reinforcement');
+ assert.equal(ui.elements.get('duoQuickMap').classList.contains('hidden'),false);ui.elements.get('duoQuickMap').listeners.click();assert.equal(ui.elements.get('duoMapLabel').textContent,'Partnerkarte · Nur anschauen');
+});

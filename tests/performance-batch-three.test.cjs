@@ -4,7 +4,7 @@ function combat(original){
   let distances=0;const math=Object.create(Math);math.hypot=(...args)=>{distances++;return Math.hypot(...args);};
   const context=vm.createContext({Math:math});for(const name of ['data','waves'])vm.runInContext(fs.readFileSync(path.join(__dirname,'../classes',name+'.js'),'utf8'),context);
   let source=fs.readFileSync(path.join(__dirname,'../classes/combat.js'),'utf8');
-  if(original)source=source.replace('nextChainTarget(state.enemies,hit,last,def.jumpRange)',require('./helpers/chain-target-reference.cjs'));
+  if(original)source=source.replace('nextChainTarget(state.enemies,hit,last,def.jumpRange,def.damageType)',require('./helpers/chain-target-reference.cjs'));
   vm.runInContext(source,context);return {step:vm.runInContext('HexCombat.step',context),get distances(){return distances;}};
 }
 test('linear chain search preserves complete damage and projectile results, including equidistant targets',()=>{

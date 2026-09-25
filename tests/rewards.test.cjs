@@ -16,7 +16,7 @@ test('full-health and no-upgrade shrines grant supplies instead of an unusable r
   for(const effect of ['repair','upgrade']){const {a,elements}=shrine(effect);a.placeTile(2,0);const before=a.state.gold;elements.get('rewardChoices').children[0].listeners.click();assert.equal(a.state.gold,before+30);assert.equal(a.state.goldEarned.shrine,30);}
 });
 test('workshop shrine upgrades a built loadout tower without increasing its sale value',()=>{
-  const {a,elements}=shrine('upgrade',true);a.placeTile(2,0);const buttons=elements.get('rewardChoices').children;assert.equal(buttons.length,2);
+  const {a,elements}=shrine('upgrade',true);a.placeTile(2,0);elements.get('rewardChoices').children.at(-1).listeners.click();assert.equal(a.state.workshopPicking,true);a.rendererCommands.selectTower(1,0,0);const buttons=elements.get('rewardChoices').children;assert.equal(buttons.length,3);
   const tower=a.state.map.get('1,0').towers[0],gold=a.state.gold;buttons[0].listeners.click();
   assert.equal(tower.level,2);assert.equal(tower.branch,'volley');assert.equal(tower.paid,25);assert.equal(a.state.gold,gold);
   buttons[1].listeners.click();assert.equal(tower.branch,'volley');assert.equal(a.state.phase,'build');

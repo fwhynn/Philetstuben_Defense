@@ -285,7 +285,8 @@ function create(host0,commands){
     const template=spec.kind==='landmark'?modelTemplate(spec.name,'landmark'):modelTemplate(spec.name);
     if(!template){const mesh=new THREE.Mesh(hexPad,fallbackMaterial);mesh.scale.setScalar(1);holder.add(mesh);return holder;}
     addParts(model,spec.proceduralRoads&&template.noRoad?template.noRoad:template.parts,ghost,legal);
-    const biome=spec.name==='fog'?'grass':HexBiomes.forTile(state,tile);
+    const actualBiome=HexBiomes.forTile(state,tile);
+    const biome=spec.name==='fog'?'grass':actualBiome;
     if(biome!=='grass'){const sakura=isSakura();model.traverse(mesh=>{if(!mesh.isMesh)return;const id=mesh.material.uuid+'|'+biome+'|'+sakura;let material=biomeMaterials.get(id);
       if(material===undefined){const color=biomeTint(mesh.material.name||'',biome,sakura);material=color?mesh.material.clone():null;if(material){material.vertexColors=false;material.color.copy(color);}biomeMaterials.set(id,material);}
       if(material)mesh.material=material;});}
@@ -376,10 +377,10 @@ function create(host0,commands){
   function syncTiles(){
     const seen=new Set();
     for(const tile of state.map.values()){
-      const id=key(tile.q,tile.r),spec=tileSpec(tile),sig=[spec.kind,spec.name,spec.rotation,tile.slots,tile.buildingSlots,(tile.roads||[]).join('')].join('|');seen.add(id);
+      const id=key(tile.q,tile.r),spec=tileSpec(tile),sig=[spec.kind,spec.name,spec.rotation,tile.slots,tile.buildingSlots,tile.site,(tile.roads||[]).join('')].join('|');seen.add(id);
       const record=tileRecords.get(id);if(record?.sig===sig) continue;
       if(record) layer.tiles.remove(record.holder);
-      const holder=buildTile(spec,tile);layer.tiles.add(holder);tileRecords.set(id,{sig,holder});
+      const holder=buildTile(spec,tile,tile.site==='shrine'||tile.site==='tradePost'?{prop:{name:tile.site==='shrine'?'shrine':'treasure',angle:HexModelMap.propAngle(tile.type,HexMap.slotOffsets(tile.type,tile.slots))}}:{});layer.tiles.add(holder);tileRecords.set(id,{sig,holder});
     }
     for(const [id,record] of [...tileRecords]) if(!seen.has(id)){layer.tiles.remove(record.holder);tileRecords.delete(id);}
   }
@@ -408,11 +409,12 @@ function create(host0,commands){
   }
   function syncEmpty(){
     const landmarkVisible=[...state.landmarks?.values()||[]].filter(l=>!l.claimed&&HexExploration.visibility(state.map,l)!=='hidden').map(l=>key(l.q,l.r));
-    const sig=state.map.size+'|'+landmarkVisible.join(';');if(sig===emptySig) return;emptySig=sig;clearGroup(layer.empty);
+    const sig=state.map.size+'|'+isSakura()+'|'+landmarkVisible.join(';');if(sig===emptySig) return;emptySig=sig;clearGroup(layer.empty);
     const adjacent=new Map();
     for(const tile of state.map.values()) for(let d=0;d<6;d++){const n=neighbor(tile.q,tile.r,d),id=key(n.q,n.r);if(!state.map.has(id)&&!landmarkVisible.includes(id)) adjacent.set(id,n);}
+    mats.empty.opacity=.6;
     const mesh=new THREE.InstancedMesh(hexPad,mats.empty,Math.max(1,adjacent.size)),matrix=new THREE.Matrix4();let i=0;
-    for(const n of adjacent.values()){const c=axialToWorld(n.q,n.r);mesh.setMatrixAt(i,matrix.makeTranslation(c.x,0,c.y));mesh.setColorAt(i++,new THREE.Color(HexBiomes.definitions[HexBiomes.forTile(state,n)].color));}
+    for(const n of adjacent.values()){const c=axialToWorld(n.q,n.r);mesh.setMatrixAt(i,matrix.makeTranslation(c.x,0,c.y));mesh.setColorAt(i++,new THREE.Color(HexBiomes.groundColor(HexBiomes.forTile(state,n),isSakura())));}
     mesh.count=adjacent.size;mesh.receiveShadow=true;layer.empty.add(mesh);
   }
 
@@ -520,7 +522,7 @@ function create(host0,commands){
     const selected=state.dragTower?state.dragSlot:state.selectedTower||state.hoverTower||(state.previewTower?state.selectedSlot:null);
     const tile=selected&&state.map.get(key(selected.q,selected.r)),tower=tile?.towers[selected.index],type=state.dragTower||tower?.type||state.previewTower;
     if(tile&&type){
-      const p=slotPositions(tile)[selected.index],def=HexData.towerDefinition(tower||{type,biome:HexBiomes.forTile(state,tile),rangeFactor:state.challengeDay?.85:1,tileType:tile.type});
+      const p=slotPositions(tile)[selected.index],def=HexData.towerDefinition(tower||{type,biome:HexBiomes.forTile(state,tile),rangeFactor:state.challengeDay?.85:1,tileType:tile.type,supportRange:HexBuildings.rangeBonus(state.map,selected)});
       for(const m of [rangeFill,rangeRing]){m.visible=true;m.position.set(p.x,.8,p.y);m.scale.setScalar(def.range);m.material.color.set(def.color);}
       if(tower&&state.previewUpgrade?.tower===tower){const next=state.previewUpgrade.definition;if(next.range!==def.range)for(const m of [previewRangeFill,previewRangeRing]){m.visible=true;m.position.set(p.x,.9,p.y);m.scale.setScalar(next.range);m.material.color.set(next.color);}}
     }else rangeFill.visible=rangeRing.visible=false;
@@ -534,7 +536,7 @@ function create(host0,commands){
     });
     const canHint=['place','build','wave'].includes(state.phase)&&state.hp>0;
     for(const record of objectRecords.values())for(const obj of record.buildings){const next=HexBuildings.nextUpgrade(state,obj.tile.buildings[obj.index]);obj.hint.visible=!state.showUpgradeStatus&&canHint&&!!next&&state.gold>=next.cost;}
-    for(const record of objectRecords.values()) for(const obj of record.towers) obj.hint.visible=!state.showUpgradeStatus&&canHint&&HexData.runUpgrades(state,obj.tower).some(([,u])=>state.gold>=HexBuildings.cost(state,obj.tile,u.cost));
+    for(const record of objectRecords.values()) for(const obj of record.towers) obj.hint.visible=state.workshopPicking&&HexData.availableUpgrades(obj.tower).length>0||!state.showUpgradeStatus&&canHint&&HexData.runUpgrades(state,obj.tower).some(([,u])=>state.gold>=HexBuildings.cost(state,obj.tile,u.cost));
   }
 
   // ---- Gegner und Geschosse ----
@@ -564,8 +566,11 @@ function create(host0,commands){
       if(slowed!==obj.slowed){obj.slowed=slowed;if(obj.body) obj.body.material.color.set(slowed?'#79cdd9':obj.color);if(obj.ice) obj.ice.visible=slowed;}
       if(obj.last){const dx=e.x-obj.last.x,dy=e.y-obj.last.y,moved=Math.hypot(dx,dy);   // Laufrichtung und Schrittphase aus der Bewegung
         if(moved>.05){obj.targetAngle=Math.atan2(-dy,dx);obj.phase+=moved*.14;if(!obj.oriented){obj.angle=obj.targetAngle;obj.oriented=true;}}}
+      if(state.remoteView&&(!obj.last||obj.last.x!==e.x||obj.last.y!==e.y)){
+        obj.remoteMotion=obj.last?{x:obj.group.position.x,y:obj.group.position.z,toX:e.x,toY:e.y,start:performance.now()}:null;
+      }
       obj.last={x:e.x,y:e.y};
-      obj.group.position.set(e.x,obj.baseY,e.y);for(const [field,max] of [['hp','maxHp'],['armorHp','maxArmorHp'],['magicHp','maxMagicHp']]){const fg=obj.fgs[field],visible=e[max]>0,ratio=visible?clamp((e[field]||0)/e[max],0,1):0;fg.visible=obj.barBgs[field].visible=visible;fg.scale.x=Math.max(.001,26*ratio);fg.position.x=-13*(1-ratio);}
+      if(!state.remoteView||!obj.remoteMotion)obj.group.position.set(e.x,obj.baseY,e.y);for(const [field,max] of [['hp','maxHp'],['armorHp','maxArmorHp'],['magicHp','maxMagicHp']]){const fg=obj.fgs[field],visible=e[max]>0,ratio=visible?clamp((e[field]||0)/e[max],0,1):0;fg.visible=obj.barBgs[field].visible=visible;fg.scale.x=Math.max(.001,26*ratio);fg.position.x=-13*(1-ratio);}
     }
     for(const [id,obj] of [...enemyObjects]) if(!alive.has(id)){layer.dynamic.remove(obj.group);obj.body?.material.dispose();enemyObjects.delete(id);}
   }
@@ -707,6 +712,8 @@ function create(host0,commands){
     entry.pos.set(x,lift+6,z);return entry;
   }
   function syncLabels(){
+    for(const [i,c] of (state.consumables||[]).entries()){const p=axialToWorld(c.q,c.r);label('consumable:'+i,p.x,p.y,(c.kind==='spikes'?'✦ Krähenfüße':'● Klebeharz')+' · '+c.charges,'',20);}
+    for(const tile of state.map.values())(tile.towers||[]).forEach((t,i)=>{if(t&&(t.overloadPending||t.overloadUntil>state.elapsedMs)){const p=slotPositions(tile)[i];label('overload:'+key(tile.q,tile.r)+':'+i,p.x,p.y,'ϟ Überladung','',95);}});
     for(const [id,slot,text] of [['duo:portal',state.duoPortal,'Partner-Portal'],['duo:reinforcement',state.duoReinforcement,'Verstärkung']]){const tile=slot&&state.map.get(key(slot.q,slot.r)),p=tile&&slotPositions(tile)[slot.index];if(p)label(id,p.x,p.y,text,'',id==='duo:portal'?30:85);}
     for(const tile of state.map.values())(tile.towers||[]).forEach((t,i)=>{if(t?.guestOwner!==undefined){const p=slotPositions(tile)[i];label('duo:guest:'+key(tile.q,tile.r)+':'+i,p.x,p.y,'Partnerhilfe','',85);}});
     for(const e of state.enemies)if(e.alive&&['splitter','shard','healer','elementCarrier'].includes(e.type)){const entry=label('enemy-ability:'+e.id,e.x,e.y,e.abilityIcon||({splitter:'◆ → ◆◆',shard:'◆',healer:'✚'})[e.type],'',38);entry.el.title=e.name+(e.description?' · '+e.description:'');entry.el.style.color=e.color||(e.type==='healer'?'#73e49c':'#e5e8de');}
@@ -719,6 +726,7 @@ function create(host0,commands){
       if(state.showUpgradeStatus)(tile.towers||[]).forEach((tower,i)=>{if(tower&&HexData.upgradeStatus(state,tower)){const p=slotPositions(tile)[i];label('upgrade:'+id+':'+i,p.x,p.y,HexData.upgradeStatus(state,tower),'big',72);}});
       if(state.showUpgradeStatus&&state.hp>0&&['place','build','wave'].includes(state.phase))(tile.buildings||[]).forEach((b,i)=>{if(b&&HexBuildings.nextUpgrade(state,b)){const p=buildingPosition(tile,i);label('upgrade:building:'+id+':'+i,p.x,p.y,'Gebäude ausbaubar','big',72);}});
       if(tile.tunnelLabel)label('tunnel:'+id,c.x,c.y,tile.tunnelLabel+' ⇄','',24);
+      if(tile.site)label(`site:${id}`,c.x,c.y+58,HexExploration.siteLabel(tile));
       if(tile.income) label(`inc:${id}`,c.x,c.y+44,'+'+tile.income+' Gold');
       const bonus=HexData.tileBonusLabel(terrain);
       if(bonus) label(`bon:${id}`,c.x,c.y+35,bonus);
@@ -782,6 +790,7 @@ function create(host0,commands){
         if(obj.kick>0){obj.kick=Math.max(0,obj.kick-dt*9);const k=obj.kick*obj.kick*.045;obj.turret.position.set(obj.turretBase.x-Math.cos(obj.angle)*k,obj.turretBase.y,obj.turretBase.z+Math.sin(obj.angle)*k);}   // Rückstoß entgegen der Schussrichtung
       }
       for(const obj of enemyObjects.values()){
+        if(state.remoteView&&obj.remoteMotion){const m=obj.remoteMotion,t=Math.min(1,Math.max(0,(now-m.start)/100));obj.group.position.set(m.x+(m.toX-m.x)*t,obj.baseY,m.y+(m.toY-m.y)*t);}
         obj.bar.quaternion.copy(camera.quaternion);
         if(!obj.pivot) continue;
         const diff=Math.atan2(Math.sin(obj.targetAngle-obj.angle),Math.cos(obj.targetAngle-obj.angle));obj.angle+=diff*Math.min(1,dt*10);obj.pivot.rotation.y=obj.angle;
