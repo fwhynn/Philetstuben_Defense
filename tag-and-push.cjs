@@ -218,6 +218,45 @@ async function main() {
   const releaseApi = await confirmApiRelease(hasApiRepo);
   if (releaseApi) ensureCleanRepo(apiRepo, 'API repo');
 
+  // If the user passed only --test, run test-only mode: create <latest>-testN on HEAD
+  const testOnly = testFlag && args.length === 1;
+  if (testOnly) {
+    console.log('Running test-only: will create <latest>-testN tags on HEAD for repos.');
+    // Game repo
+    try {
+      if (isGitRepo(repo)) {
+        const base = latestTag(repo);
+        if (!base) throw new Error('no base tag found in game repo');
+        const nGame = nextTestNumber(repo, base);
+        const testTagGame = `${base}-test${nGame}`;
+        // tag HEAD
+        git(['tag', '-a', testTagGame, '-m', testTagGame], { stdio: 'inherit' });
+        gitAt(repo, ['push', 'origin', testTagGame], { stdio: 'inherit' });
+        console.log(`Game: created and pushed test tag ${testTagGame}`);
+      }
+    } catch (e) {
+      console.error('Game: failed to create/push test tag:', e && e.message ? e.message : e);
+    }
+
+    // API repo
+    try {
+      if (hasApiRepo && isGitRepo(apiRepo)) {
+        const baseApi = latestTag(apiRepo);
+        if (!baseApi) throw new Error('no base tag found in API repo');
+        const nApi = nextTestNumber(apiRepo, baseApi);
+        const testTagApi = `${baseApi}-test${nApi}`;
+        // tag HEAD in api repo
+        gitAt(apiRepo, ['tag', '-a', testTagApi, '-m', testTagApi], { stdio: 'inherit' });
+        gitAt(apiRepo, ['push', 'origin', testTagApi], { stdio: 'inherit' });
+        console.log(`API: created and pushed test tag ${testTagApi}`);
+      }
+    } catch (e) {
+      console.error('API: failed to create/push test tag:', e && e.message ? e.message : e);
+    }
+
+    return;
+  }
+
   if (releaseMode === 'client') {
     const previousVersion = readVersion();
     const nextVersion = bumpDigitCarryVersion(previousVersion);
