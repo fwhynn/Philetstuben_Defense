@@ -41,29 +41,6 @@ try {
         ]);
     }
 
-    // Full request debug: write headers + raw body to webhook-debug.log (gitignored)
-    try {
-        $debugFile = APP_ROOT . '/webhook-debug.log';
-        $lines = [];
-        $lines[] = str_repeat('=', 62);
-        $lines[] = date('Y-m-d H:i:s');
-        $lines[] = 'Remote-Addr: ' . ($_SERVER['REMOTE_ADDR'] ?? '(unknown)');
-        $lines[] = 'Method: ' . ($_SERVER['REQUEST_METHOD'] ?? '(unknown)');
-        $lines[] = 'X-Github-Event: ' . ($_SERVER['HTTP_X_GITHUB_EVENT'] ?? '(none)');
-        $lines[] = 'X-Hub-Signature-256: ' . (isset($_SERVER['HTTP_X_HUB_SIGNATURE_256']) ? 'present' : 'missing');
-        $lines[] = 'Content-Length: ' . ($_SERVER['CONTENT_LENGTH'] ?? strlen($payloadRaw));
-        $lines[] = 'Headers:';
-        foreach (getallheaders() as $k => $v) {
-            $lines[] = "  $k: $v";
-        }
-        $lines[] = '';
-        $lines[] = 'Raw body:';
-        $lines[] = $payloadRaw;
-        $lines[] = "\n";
-        @file_put_contents($debugFile, implode("\n", $lines), FILE_APPEND | LOCK_EX);
-    } catch (Throwable $_) {
-        // ignore debug failures
-    }
     verifyGithubSignature($payloadRaw, $secret);
 
     $event = $_SERVER['HTTP_X_GITHUB_EVENT'] ?? '';
@@ -280,11 +257,7 @@ function runCommand(string $command, string $cwd): array
         'exitCode' => $exitCode,
     ];
 
-    try {
-        appendWebhookLog('debug', 'command', $result);
-    } catch (Throwable $_) {
-        // ignore
-    }
+    // debug-level command dumps removed
 
     return $result;
 }

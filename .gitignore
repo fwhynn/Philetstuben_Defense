@@ -3,7 +3,6 @@ node_modules/
 .local/
 *.log
 webhook.log
-webhook-debug.log
 assets/index.json
 .deploy-webhook-secret
 .npm-cache/
