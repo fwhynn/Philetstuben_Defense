@@ -941,7 +941,7 @@ R dreht die Karte, dann Feld anklicken.`;}
   document.getElementById('backToVictoryBtn').addEventListener('click',()=>inspectCampaign(false));
   function showCampaignVictory(){
     inspectCampaign(false);clearRunTimers();resetCameraKeys();
-    const title=document.getElementById('campaignVictoryTitle'),note=document.getElementById('campaignVictoryNote');
+    const title=document.getElementById('campaignVictoryTitle'),note=document.getElementById('campaignVictoryNote');applyPendingServerProfile();
     document.getElementById('dailyVictoryStatistics').classList.toggle('hidden',!state.challengeDay);
     if(state.challengeDay){
       renderRunStatistics();document.getElementById('dailyVictoryStatsContent').innerHTML=document.getElementById('runStatistics').innerHTML;
@@ -955,11 +955,11 @@ R dreht die Karte, dann Feld anklicken.`;}
       document.getElementById('campaignVictoryText').textContent=state.difficulty==='normal'?'Welle 35 geschafft! Zwei Fronten und Festungsbauer sind jetzt freigeschaltet.':'Zwei Fronten gemeistert! Händlerstadt ist jetzt freigeschaltet.';
       note.textContent='Deine Map und Türme bleiben im Endless-Modus erhalten. Diamanten werden beim Beenden des Durchlaufs abgerechnet.';
     }
-    document.getElementById('campaignVictory').classList.remove('hidden');renderAll();
+    document.getElementById('campaignVictory').classList.remove('hidden');renderAll();scheduleCloudSave();
   }
   document.getElementById('endlessBtn').addEventListener('click',()=>{if(!HexRunSession.endless(state,random))return;document.getElementById('campaignVictory').classList.add('hidden');renderSessionPhase();});
   document.getElementById('victoryMenuBtn').addEventListener('click',()=>{if(state.phase!=='victory')return;document.getElementById('campaignVictory').classList.add('hidden');state.phase='gameover';showGameOver();gameOverOverlay.classList.add('hidden');openMainMenu();});
-  function showGameOver(){hasActiveRun=false;resetCameraKeys();inspectEndMap(false);renderRunStatistics();
+  function showGameOver(){hasActiveRun=false;resetCameraKeys();inspectEndMap(false);renderRunStatistics();applyPendingServerProfile();
     if(state.challengeDay){const result=HexProfile.settleDaily(profile,state.challengeDay,Math.max(state.challengeWon?(state.challengeTarget||20):0,state.lastCompletedWave||Math.max(0,state.wave-1)),TOWERS,state.challengeTarget||20);profile=result.profile;state.metaSettled=true;document.getElementById('gameOverTitle').textContent=state.challengeKind==='garrison'?(state.challengeWon?'DIE GARNISON HÄLT STAND!':'Die Garnison ist gefallen'):(state.challengeWon?'DIE KARAWANE IST GERETTET!':'Die Karawane ist gefallen');document.getElementById('gameOverResult').textContent=(state.challengeKind==='garrison'?'Die letzte Garnison':'Die letzte Karawane')+' · '+state.challengeDay+' · '+(state.challengeWon?(state.endless?'Endlosmodus · Wave '+state.wave+' erreicht':'Welle '+(state.challengeTarget||20)+' überlebt!'):'Wave '+state.wave+' erreicht');document.getElementById('diamondBreakdown').textContent=result.reward?'Tagessieg: +10 Diamanten':state.challengeWon?'Tagesbelohnung bereits erhalten.':'Keine Tagesbelohnung – versuche es erneut!';document.getElementById('gameOverDiamonds').textContent=profile.diamonds;document.getElementById('gameOverBest').textContent=profile.dailyResults[state.challengeDay].best;gameOverOverlay.classList.remove('hidden');return;}
     document.getElementById('gameOverTitle').textContent='Die Bastion ist gefallen';
     let reward={wave:0,bosses:0,milestones:0,total:0,duplicate:true};
@@ -967,16 +967,16 @@ R dreht die Karte, dann Feld anklicken.`;}
     document.getElementById('gameOverResult').textContent=`Wave ${state.wave} erreicht · ${state.earnedMeta.normalKills} normale Gegner · ${state.earnedMeta.periodicBosses+state.earnedMeta.explorationBosses} Bosse besiegt`;
     document.getElementById('diamondBreakdown').innerHTML=`<div><strong>+${reward.wave}</strong>Wave-Fortschritt</div><div><strong>+${reward.bosses}</strong>Boss-Siege</div><div><strong>+${reward.milestones}</strong>Neue Bestmarken</div>`;
     document.getElementById('gameOverDiamonds').textContent=profile.diamonds;document.getElementById('gameOverBest').textContent=profile.records.highestWave;
-    document.getElementById('profileDiamonds').textContent=profile.diamonds;document.getElementById('runDiamonds').textContent='(+0)';gameOverOverlay.classList.remove('hidden');
+    document.getElementById('profileDiamonds').textContent=profile.diamonds;document.getElementById('runDiamonds').textContent='(+0)';gameOverOverlay.classList.remove('hidden');saveRunToCloud();
   }
   let resetArsenalPending=false;
   function renderArsenal(message=''){
     document.getElementById('arsenalDiamonds').textContent=profile.diamonds;
-    HexArsenal.render(document.getElementById('arsenalChoices'),profile,(kind,id)=>{const method={activateUltimate:HexProfile.activateUltimate,tower:HexProfile.unlockTower,ultimate:HexProfile.unlockUltimate,building:HexProfile.unlockBuilding}[kind],next=method(profile,id,TOWERS);if(!next)return;profile=next;resetArsenalPending=false;renderLoadout();renderArsenal('Freigeschaltet. Ab dem nächsten Run verfügbar.');renderUI();});
+    HexArsenal.render(document.getElementById('arsenalChoices'),profile,(kind,id)=>{const method={activateUltimate:HexProfile.activateUltimate,tower:HexProfile.unlockTower,ultimate:HexProfile.unlockUltimate,building:HexProfile.unlockBuilding}[kind],next=method(profile,id,TOWERS);if(!next)return;profile=next;resetArsenalPending=false;scheduleCloudSave();renderLoadout();renderArsenal('Freigeschaltet. Ab dem nächsten Run verfügbar.');renderUI();});
     const refund=HexProfile.resetValue(profile),button=document.getElementById('resetDiamondsBtn');button.disabled=refund===0;button.textContent=resetArsenalPending?'Bestätigen: alle Freischaltungen zurücksetzen · +'+refund+' ◆':'Reset · +'+refund+' ◆';
     document.getElementById('arsenalMessage').textContent=message||'';
   }
-  document.getElementById('resetDiamondsBtn').addEventListener('click',()=>{if(!resetArsenalPending){resetArsenalPending=true;renderArsenal('Alle Turm- und Meta-Freischaltungen werden entfernt; Loadouts werden auf die fünf Starttürme zurückgesetzt. Ein bereits laufender Run behält seine Startauswahl. Erneut klicken zum Bestätigen.');return;}const result=HexProfile.resetUnlocks(profile,TOWERS);profile=result.profile;pendingLoadout=[...profile.activeLoadout];resetArsenalPending=false;renderLoadout();renderArsenal(result.refund+' Diamanten erstattet. Du kannst dich neu entscheiden.');renderUI();});
+  document.getElementById('resetDiamondsBtn').addEventListener('click',()=>{if(!resetArsenalPending){resetArsenalPending=true;renderArsenal('Alle Turm- und Meta-Freischaltungen werden entfernt; Loadouts werden auf die fünf Starttürme zurückgesetzt. Ein bereits laufender Run behält seine Startauswahl. Erneut klicken zum Bestätigen.');return;}const result=HexProfile.resetUnlocks(profile,TOWERS);profile=result.profile;scheduleCloudSave();pendingLoadout=[...profile.activeLoadout];resetArsenalPending=false;renderLoadout();renderArsenal(result.refund+' Diamanten erstattet. Du kannst dich neu entscheiden.');renderUI();});
   function openArsenal(){resetArsenalPending=false;renderArsenal();arsenalOverlay.classList.remove('hidden');}
 
   function toggleUpgradeStatus(value=!state.showUpgradeStatus){state.showUpgradeStatus=value;document.getElementById('upgradeStatus').checked=value;renderBoard();}
@@ -1010,49 +1010,121 @@ R dreht die Karte, dann Feld anklicken.`;}
   document.getElementById('downloadSaveBtn').addEventListener('click',()=>{try{const blob=new Blob([HexProfile.exportFile(profile,TOWERS)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='autohex-spielstand-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);saveStatus.textContent='Spielstanddatei zum Download bereitgestellt.';}catch{saveStatus.textContent='Download fehlgeschlagen. Bitte erneut versuchen.';}});
   document.getElementById('uploadSaveInput').addEventListener('change',async event=>{const readId=++importReadId;pendingImport=null;confirmImport.classList.add('hidden');const file=event.target.files?.[0];if(!file)return;try{if(hasActiveRun&&state.hp>0)throw new Error('Bitte zuerst den laufenden Run beenden. Ein Profilwechsel während eines Durchlaufs ist nicht möglich.');if(file.size>2000000)throw new Error('Datei zu groß (maximal 2 MB).');const text=await file.text();if(readId!==importReadId)return;const next=HexProfile.readFile(text,TOWERS);pendingImport=text;saveStatus.textContent=next.diamonds+' Diamanten · '+next.unlockedTowers.length+' Türme freigeschaltet · Bestmarke Wave '+next.records.highestWave+'. Dein bisheriges Profil mit '+profile.diamonds+' Diamanten wird ersetzt. Eine lokale Sicherung wird angelegt.';confirmImport.classList.remove('hidden');}catch(error){if(readId===importReadId)saveStatus.textContent=error.message;}});
   confirmImport.addEventListener('click',()=>{if(!pendingImport||hasActiveRun&&state.hp>0)return;try{profile=HexProfile.importFile(pendingImport,TOWERS);pendingLoadout=[...profile.activeLoadout];pendingHero=profile.activeHero;pendingDifficulty=profile.difficulty;pendingImport=null;confirmImport.classList.add('hidden');renderLoadout();renderUI();updateArsenalHint();saveStatus.textContent='Spielstand importiert. Dein Profil ist für den nächsten Run bereit.';}catch(error){saveStatus.textContent='Import fehlgeschlagen: '+error.message;}});
-  // ---- Account (Beta): Login/Registrierung + Spielstand-Sync über die API ----
-  const accountOverlay=document.getElementById('accountOverlay'),accountStatus=document.getElementById('accountStatus'),accountLoggedOut=document.getElementById('accountLoggedOut'),accountLoggedIn=document.getElementById('accountLoggedIn'),accountWhoami=document.getElementById('accountWhoami');
-  function closeAccount(){accountOverlay.classList.add('hidden');document.getElementById('accountPassword').value='';openMainMenu();document.getElementById('menuAccountBtn').focus?.();}
-  document.getElementById('menuAccountBtn').addEventListener('click',()=>{accountStatus.textContent='';accountOverlay.classList.remove('hidden');refreshAccountView();});
-  document.getElementById('closeAccountBtn').addEventListener('click',closeAccount);
-  document.getElementById('accountPassword').addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault?.();document.getElementById('accountLoginBtn').click();}});
-  async function refreshAccountView(){
-    let user=null;
-    if(globalThis.HexApi?.isLoggedIn()){try{user=await HexApi.currentUser();}catch{user=null;}}
-    accountLoggedOut.classList.toggle('hidden',!!user);
-    accountLoggedIn.classList.toggle('hidden',!user);
-    if(user)accountWhoami.textContent='Eingeloggt als '+user.username;
+  // ---- Account: Anmeldung, Registrierung und automatischer Spielstand-Abgleich über die API ----
+  // Regeln: Anmelden lädt den Server-Stand (lokaler Stand wird vorher gesichert), Registrieren lädt den lokalen Stand hoch,
+  // nach jedem abgeschlossenen Spiel und nach Arsenal-Käufen wird gespeichert. Läuft gerade ein Spiel, wird ein geladener
+  // Server-Stand erst bei dessen Ende übernommen, damit die Abrechnung auf dem aktuellen Stand landet.
+  const accountOverlay=document.getElementById('accountOverlay'),accountStatus=document.getElementById('accountStatus'),accountLoggedOut=document.getElementById('accountLoggedOut'),accountLoggedIn=document.getElementById('accountLoggedIn');
+  const CLOUD_DIRTY='hex-cloud-dirty',CLOUD_LAST='hex-cloud-last-sync',PROFILE_BACKUP='hex-bastion-profile-backup';
+  const cloudStore={get(key){try{return localStorage.getItem(key);}catch{return null;}},set(key,value){try{if(value==null)localStorage.removeItem(key);else localStorage.setItem(key,value);}catch{/* Speicher nicht verfügbar */}}};
+  const accountApi=()=>globalThis.HexApi;
+  let accountUser=null,accountMode='login',accountBusy=false,pendingServerProfile=null,cloudSaveTimer=null;
+  function setAccountStatus(text,kind='info'){accountStatus.textContent=text;accountStatus.dataset.kind=text?kind:'';}
+  function formatSyncTime(iso){
+    const time=iso?Date.parse(iso):NaN;if(!Number.isFinite(time))return '–';
+    const minutes=Math.round((Date.now()-time)/60000);
+    if(minutes<1)return 'gerade eben';if(minutes<60)return 'vor '+minutes+' Min.';
+    return new Date(time).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
   }
-  document.getElementById('accountRegisterBtn').addEventListener('click',async()=>{
+  function renderAccount(){
+    const loggedIn=!!accountUser,dirty=cloudStore.get(CLOUD_DIRTY)==='1';
+    accountLoggedOut.classList.toggle('hidden',loggedIn);accountLoggedIn.classList.toggle('hidden',!loggedIn);
+    document.getElementById('menuAccountBtn').textContent=loggedIn?'👤 '+accountUser.username:'👤 Anmelden';
+    document.getElementById('accountAvatar').textContent=loggedIn?accountUser.username.slice(0,1).toUpperCase():'☁';
+    document.getElementById('accountTitle').textContent=loggedIn?'Hallo, '+accountUser.username+'!':'Dein Account';
+    document.getElementById('accountSubtitle').textContent=loggedIn?'Dein Fortschritt wird in deinem Account gesichert.':'Sichere deinen Fortschritt und spiele auf jedem Gerät weiter.';
+    if(!loggedIn)return;
+    document.getElementById('accountWhoami').textContent='Angemeldet als '+accountUser.username;
+    document.getElementById('accountSyncDot').dataset.state=dirty?'pending':'ok';
+    document.getElementById('accountSyncInfo').textContent=dirty?'Nicht gesicherte Änderungen – werden beim nächsten Mal übertragen.':'Wird automatisch nach jedem Spiel gesichert.';
+    document.getElementById('accountDiamonds').textContent=profile.diamonds;
+    document.getElementById('accountBestWave').textContent=profile.records?.highestWave||0;
+    document.getElementById('accountLastSync').textContent=formatSyncTime(cloudStore.get(CLOUD_LAST));
+  }
+  function setAccountMode(mode){
+    accountMode=mode;const register=mode==='register';
+    for(const [id,active] of [['accountTabLogin',!register],['accountTabRegister',register]]){const tab=document.getElementById(id);tab.classList.toggle('active',active);tab.setAttribute('aria-selected',String(active));}
+    document.getElementById('accountSubmitBtn').textContent=register?'Account erstellen':'Anmelden';
+    document.getElementById('accountPassword').setAttribute('autocomplete',register?'new-password':'current-password');
+    document.getElementById('accountHint').textContent=register?'Benutzername 3–20 Zeichen, Passwort mindestens 8 Zeichen. Dein aktueller Fortschritt wird übernommen.':'Nach der Anmeldung wird dein gespeicherter Spielstand automatisch geladen.';
+    setAccountStatus('');
+  }
+  function setAccountBusy(busy){accountBusy=busy;for(const id of ['accountSubmitBtn','accountSaveServerBtn','accountLoadServerBtn','accountLogoutBtn'])document.getElementById(id).disabled=busy;accountOverlay.classList.toggle('accountBusy',busy);}
+  async function refreshAccountView(){
+    if(accountApi()?.isLoggedIn()){try{accountUser=await accountApi().currentUser();}catch{/* offline: letzten bekannten Stand behalten */}}else accountUser=null;
+    renderAccount();
+  }
+  function applyServerProfile(data){
+    cloudStore.set(PROFILE_BACKUP,HexProfile.exportFile(profile,TOWERS));   // Sicherung des ersetzten lokalen Stands
+    profile=HexProfile.importFile(JSON.stringify(data),TOWERS);
+    pendingLoadout=[...profile.activeLoadout];pendingHero=profile.activeHero;pendingDifficulty=profile.difficulty;
+    renderLoadout();renderUI();updateArsenalHint();
+  }
+  function applyPendingServerProfile(){if(!pendingServerProfile)return;const data=pendingServerProfile;pendingServerProfile=null;applyServerProfile(data);}
+  // Server-Stand holen: 'loaded', 'deferred' (Spiel läuft) oder 'empty' (noch nichts gespeichert).
+  async function pullFromServer(){
+    const data=await accountApi().getSave();if(!data)return 'empty';
+    cloudStore.set(CLOUD_DIRTY,null);cloudStore.set(CLOUD_LAST,new Date().toISOString());
+    if(hasActiveRun&&state?.hp>0){pendingServerProfile=data;return 'deferred';}
+    applyServerProfile(data);return 'loaded';
+  }
+  async function pushToServer(){
+    if(!accountApi()?.isLoggedIn())return false;clearTimeout(cloudSaveTimer);
+    try{await accountApi().putSave(HexProfile.exportFile(profile,TOWERS));cloudStore.set(CLOUD_DIRTY,null);cloudStore.set(CLOUD_LAST,new Date().toISOString());renderAccount();return true;}
+    catch{cloudStore.set(CLOUD_DIRTY,'1');renderAccount();return false;}
+  }
+  function scheduleCloudSave(){if(!accountApi()?.isLoggedIn())return;cloudStore.set(CLOUD_DIRTY,'1');clearTimeout(cloudSaveTimer);cloudSaveTimer=setTimeout(pushToServer,800);}
+  // Nach einem abgeschlossenen Spiel: sichern und im Ergebnisfenster Bescheid geben.
+  async function saveRunToCloud(){
+    const note=document.getElementById('cloudSaveNote');note.classList.remove('hidden');
+    if(!accountApi()?.isLoggedIn()){note.dataset.state='hint';note.textContent='Tipp: Mit einem Account wird dein Fortschritt automatisch gesichert.';return;}
+    note.dataset.state='saving';note.textContent='☁ Spielstand wird gesichert …';
+    const ok=await pushToServer();note.dataset.state=ok?'ok':'error';note.textContent=ok?'☁ Spielstand in deinem Account gesichert.':'☁ Gerade offline – wird beim nächsten Mal gesichert.';
+  }
+  function openAccount(){setAccountStatus('');renderAccount();accountOverlay.classList.remove('hidden');refreshAccountView().then(()=>{if(!accountUser)document.getElementById('accountUsername').focus?.();});}
+  function closeAccount(){accountOverlay.classList.add('hidden');document.getElementById('accountPassword').value='';openMainMenu();document.getElementById('menuAccountBtn').focus?.();}
+  document.getElementById('menuAccountBtn').addEventListener('click',openAccount);
+  document.getElementById('closeAccountBtn').addEventListener('click',closeAccount);
+  document.getElementById('accountTabLogin').addEventListener('click',()=>setAccountMode('login'));
+  document.getElementById('accountTabRegister').addEventListener('click',()=>setAccountMode('register'));
+  document.getElementById('accountShowPassword').addEventListener('click',()=>{const input=document.getElementById('accountPassword'),show=input.type==='password';input.type=show?'text':'password';const button=document.getElementById('accountShowPassword');button.setAttribute('aria-label',show?'Passwort verbergen':'Passwort anzeigen');button.title=button.getAttribute('aria-label');});
+  document.getElementById('accountForm').addEventListener('submit',async event=>{
+    event.preventDefault?.();if(accountBusy||!accountApi())return;
     const username=document.getElementById('accountUsername').value.trim(),password=document.getElementById('accountPassword').value;
-    accountStatus.textContent='Account wird erstellt …';
-    try{const user=await HexApi.register(username,password);accountStatus.textContent='Account erstellt. Eingeloggt als '+user.username+'.';await refreshAccountView();}
-    catch(error){accountStatus.textContent='Registrierung fehlgeschlagen: '+error.message;}
+    if(!username||!password){setAccountStatus('Bitte Benutzername und Passwort eingeben.','error');return;}
+    const register=accountMode==='register';setAccountBusy(true);setAccountStatus(register?'Account wird erstellt …':'Anmelden …');
+    try{
+      accountUser=register?await accountApi().register(username,password):await accountApi().login(username,password);
+      document.getElementById('accountPassword').value='';
+      if(register){const ok=await pushToServer();setAccountStatus(ok?'Account erstellt. Dein Fortschritt ist jetzt gesichert.':'Account erstellt. Der Spielstand wird beim nächsten Mal gesichert.','success');}
+      else{
+        setAccountStatus('Angemeldet. Spielstand wird geladen …');
+        const result=await pullFromServer();
+        if(result==='empty'){await pushToServer();setAccountStatus('Willkommen, '+accountUser.username+'! Dein aktueller Fortschritt wurde in deinem Account gesichert.','success');}
+        else if(result==='deferred')setAccountStatus('Angemeldet. Dein Spielstand wird nach dem laufenden Spiel übernommen.','success');
+        else setAccountStatus('Willkommen zurück, '+accountUser.username+'! Dein Spielstand wurde geladen.','success');
+      }
+    }catch(error){setAccountStatus((register?'Registrierung fehlgeschlagen: ':'Anmeldung fehlgeschlagen: ')+error.message,'error');}
+    finally{setAccountBusy(false);renderAccount();}
   });
-  document.getElementById('accountLoginBtn').addEventListener('click',async()=>{
-    const username=document.getElementById('accountUsername').value.trim(),password=document.getElementById('accountPassword').value;
-    accountStatus.textContent='Einloggen …';
-    try{const user=await HexApi.login(username,password);accountStatus.textContent='Eingeloggt als '+user.username+'.';await refreshAccountView();}
-    catch(error){accountStatus.textContent='Login fehlgeschlagen: '+error.message;}
-  });
-  document.getElementById('accountLogoutBtn').addEventListener('click',async()=>{await HexApi.logout();accountStatus.textContent='Ausgeloggt.';await refreshAccountView();});
+  document.getElementById('accountLogoutBtn').addEventListener('click',async()=>{setAccountBusy(true);await accountApi()?.logout();accountUser=null;pendingServerProfile=null;cloudStore.set(CLOUD_DIRTY,null);setAccountBusy(false);setAccountMode('login');renderAccount();setAccountStatus('Abgemeldet. Dein Spielstand bleibt auf diesem Gerät erhalten.','success');});
   document.getElementById('accountSaveServerBtn').addEventListener('click',async()=>{
-    accountStatus.textContent='Speichere auf dem Server …';
-    try{await HexApi.putSave(HexProfile.exportFile(profile,TOWERS));accountStatus.textContent='Spielstand auf dem Server gesichert.';}
-    catch(error){accountStatus.textContent='Speichern fehlgeschlagen: '+error.message;}
+    setAccountBusy(true);setAccountStatus('Spielstand wird gesichert …');
+    const ok=await pushToServer();setAccountBusy(false);setAccountStatus(ok?'Spielstand gesichert.':'Sichern fehlgeschlagen. Bitte Verbindung prüfen.',ok?'success':'error');
   });
   document.getElementById('accountLoadServerBtn').addEventListener('click',async()=>{
-    if(hasActiveRun&&state.hp>0){accountStatus.textContent='Bitte zuerst den laufenden Run beenden.';return;}
-    accountStatus.textContent='Lade vom Server …';
-    try{
-      const data=await HexApi.getSave();
-      if(!data){accountStatus.textContent='Auf dem Server liegt noch kein Spielstand für diesen Account.';return;}
-      profile=HexProfile.importFile(JSON.stringify(data),TOWERS);
-      pendingLoadout=[...profile.activeLoadout];pendingHero=profile.activeHero;pendingDifficulty=profile.difficulty;
-      renderLoadout();renderUI();updateArsenalHint();
-      accountStatus.textContent='Spielstand vom Server geladen. Dein lokales Profil wurde ersetzt.';
-    }catch(error){accountStatus.textContent='Laden fehlgeschlagen: '+error.message;}
+    setAccountBusy(true);setAccountStatus('Spielstand wird geladen …');
+    try{const result=await pullFromServer();setAccountStatus(result==='empty'?'Auf dem Server liegt noch kein Spielstand für diesen Account.':result==='deferred'?'Der Spielstand wird nach dem laufenden Spiel übernommen.':'Spielstand vom Server geladen.',result==='empty'?'info':'success');}
+    catch(error){setAccountStatus('Laden fehlgeschlagen: '+error.message,'error');}
+    finally{setAccountBusy(false);renderAccount();}
   });
+  // Beim Start: angemeldet bleiben und abgleichen. Nicht übertragene Änderungen zuerst hochladen, sonst den Server-Stand holen.
+  (async()=>{
+    if(!accountApi()?.isLoggedIn())return;
+    await refreshAccountView();if(!accountUser)return;
+    try{if(cloudStore.get(CLOUD_DIRTY)==='1')await pushToServer();else await pullFromServer();}catch{/* offline: später erneut */}
+    renderAccount();
+  })();
   function updateArsenalHint(){const count=HexProfile.affordableUnlocks(profile),button=document.getElementById('menuArsenalBtn');button.classList.toggle('upgradeAvailable',count>0);button.textContent=count?'◆ Arsenal · Upgrade verfügbar':'◆ Arsenal';button.title=count?count+' Freischaltungen bezahlbar':'Arsenal';}
   function renderDailyMission(){const day=new Date().toISOString().slice(0,10),mission=HexWaves.daily(day),garrison=mission.id==='garrison';document.getElementById('dailyMissionName').textContent=mission.name;document.getElementById('dailyMissionShort').textContent='Ziel: '+mission.target+' Wellen · Wechsel um 00:00 UTC';document.getElementById('dailyMissionTitle').textContent=mission.name+' · Tägliche Herausforderung';document.getElementById('dailyCaravanRules').classList.toggle('hidden',garrison);document.getElementById('dailyGarrisonRules').classList.toggle('hidden',!garrison);document.getElementById('dailyStartBtn').textContent='Heutige Mission starten';}
   function openMainMenu(){renderDailyMission();if(duoToken){location.assign('/duo-lobby.html');return;}document.getElementById('biomeIntro').classList.add('hidden');cancelQuickTower();resetCameraKeys();updateArsenalHint();const today=new Date().toISOString().slice(0,10),daily=profile.dailyResults?.[today];document.getElementById('dailyProgress').textContent=today+' (UTC) · '+(daily?.won?'Heute geschafft · Belohnung erhalten':'Tagesbestmarke: '+(daily?.best||0)+'/'+HexWaves.daily(today).target+' Wellen');document.getElementById('menuContinueBtn').classList.toggle('hidden',!hasActiveRun||state.hp<=0);document.getElementById('menuPlayBtn').textContent=hasActiveRun?'Neuer Run':'Spielen';mainMenu.classList.remove('hidden');}

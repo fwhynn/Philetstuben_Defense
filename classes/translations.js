@@ -1268,3 +1268,53 @@ Object.assign(HexTranslations.en,{
 '20 Spitzen × 5 Schaden · Straßenhex wählen':'20 spikes × 5 damage · Select a road hex','12 Gegner: −35 % Tempo für 4 Sekunden':'12 enemies: −35% speed for 4 seconds','Turm: +50 % Angriffstempo für 12 Sekunden':'Tower: +50% attack speed for 12 seconds',
 'Heutige Mission starten':"Start today's mission"
 });
+HexTranslations.add(`
+Dein Account|Your account
+Sichere deinen Fortschritt und spiele auf jedem Gerät weiter.|Back up your progress and keep playing on any device.
+Fortschritt sicher auf dem Server|Progress stored safely on the server
+Auf jedem Gerät weiterspielen|Continue on any device
+Automatisch nach jedem Spiel gesichert|Saved automatically after every game
+Anmelden oder registrieren|Sign in or register
+Anmelden|Sign in
+Registrieren|Register
+Passwort anzeigen|Show password
+Passwort verbergen|Hide password
+Nach der Anmeldung wird dein gespeicherter Spielstand automatisch geladen.|After signing in, your saved progress is loaded automatically.
+Benutzername 3–20 Zeichen, Passwort mindestens 8 Zeichen. Dein aktueller Fortschritt wird übernommen.|Username 3–20 characters, password at least 8 characters. Your current progress is carried over.
+Angemeldet als|Signed in as
+Wird automatisch nach jedem Spiel gesichert.|Saved automatically after every game.
+Nicht gesicherte Änderungen – werden beim nächsten Mal übertragen.|Unsaved changes – they will be uploaded next time.
+Beste Welle|Best wave
+Letzte Sicherung|Last backup
+gerade eben|just now
+☁ Jetzt sichern|☁ Save now
+⇩ Vom Server laden|⇩ Load from server
+Abmelden|Sign out
+Hallo,|Hello,
+Dein Fortschritt wird in deinem Account gesichert.|Your progress is backed up to your account.
+Bitte Benutzername und Passwort eingeben.|Please enter username and password.
+Anmelden …|Signing in …
+Account wird erstellt …|Creating account …
+Account erstellt. Dein Fortschritt ist jetzt gesichert.|Account created. Your progress is now backed up.
+Account erstellt. Der Spielstand wird beim nächsten Mal gesichert.|Account created. Your progress will be backed up next time.
+Angemeldet. Spielstand wird geladen …|Signed in. Loading your progress …
+Willkommen,|Welcome,
+Willkommen zurück,|Welcome back,
+Dein aktueller Fortschritt wurde in deinem Account gesichert.|Your current progress was backed up to your account.
+Dein Spielstand wurde geladen.|Your progress was loaded.
+Angemeldet. Dein Spielstand wird nach dem laufenden Spiel übernommen.|Signed in. Your progress will be applied after the current game.
+Registrierung fehlgeschlagen:|Registration failed:
+Anmeldung fehlgeschlagen:|Sign-in failed:
+Abgemeldet. Dein Spielstand bleibt auf diesem Gerät erhalten.|Signed out. Your progress stays on this device.
+Spielstand wird gesichert …|Saving progress …
+Spielstand gesichert.|Progress saved.
+Sichern fehlgeschlagen. Bitte Verbindung prüfen.|Saving failed. Please check your connection.
+Spielstand wird geladen …|Loading progress …
+Der Spielstand wird nach dem laufenden Spiel übernommen.|Your progress will be applied after the current game.
+Spielstand vom Server geladen.|Progress loaded from the server.
+Tipp: Mit einem Account wird dein Fortschritt automatisch gesichert.|Tip: With an account, your progress is backed up automatically.
+☁ Spielstand wird gesichert …|☁ Saving progress …
+☁ Spielstand in deinem Account gesichert.|☁ Progress backed up to your account.
+☁ Gerade offline – wird beim nächsten Mal gesichert.|☁ Offline right now – it will be backed up next time.
+Account schließen (Escape)|Close account (Escape)
+`);

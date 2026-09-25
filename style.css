@@ -603,3 +603,54 @@ body:has(#biomeIntro:not(.hidden)) .biomeTooltip{display:none!important}
 @media(max-width:900px),(max-height:600px){.compactToolbar{grid-template-columns:repeat(5,minmax(0,1fr))}.consumableMenu{top:64px;bottom:auto;right:12px;left:auto;width:310px;max-height:calc(100dvh - 210px)}.consumableMenu:not([open]){display:none}.consumableMenu summary{display:none}}
 
 .biomeIntroName{display:block}
+
+/* Account-Fenster: Karte mit Kopf, Vorteilen, Anmelde-/Registrier-Umschalter und Sicherungsstatus. */
+#accountOverlay .accountBox{position:relative;width:min(440px,94vw);max-height:92dvh;overflow:auto;box-sizing:border-box;padding:26px 26px 20px;background:linear-gradient(180deg,#223329f7,#16221bfa);border:1px solid #5d7a63;border-radius:20px;box-shadow:0 22px 60px #000b,inset 0 1px 0 #ffffff12;text-align:left;color:var(--text)}
+#accountOverlay button{margin:0}
+.accountClose{position:absolute;top:12px;right:12px;width:36px;height:36px;min-height:0!important;padding:0;border-radius:50%;background:#ffffff10;border:1px solid #ffffff1f;color:#dfe8dc;font-size:20px;line-height:1;cursor:pointer}
+.accountClose:hover{background:#ffffff22}
+.accountHeader{display:flex;align-items:center;gap:14px;margin:0 36px 18px 0}
+.accountAvatar{flex:0 0 52px;display:grid;place-items:center;width:52px;height:52px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#f7e7b4,#d3b566 60%,#9d7c2e);color:#2a1e08;font:700 24px Georgia,serif;box-shadow:0 4px 14px #0008,inset 0 1px 0 #fff8}
+.accountHeader h2{margin:0;font:700 22px Georgia,serif;color:#f7f1dc}
+.accountSubtitle{margin:4px 0 0;font-size:13px;line-height:1.4;color:var(--muted)}
+.accountPerks{list-style:none;margin:0 0 18px;padding:12px 14px;display:grid;gap:8px;background:#0f1a1499;border:1px solid #34493b;border-radius:14px;font-size:14px}
+.accountPerks li{display:flex;align-items:center;gap:10px}
+.accountPerks span{flex:0 0 24px;display:grid;place-items:center;width:24px;height:24px;border-radius:8px;background:#e2b85726;color:#f0d78c;font-size:13px}
+.accountTabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;margin-bottom:14px;background:#0c1611;border:1px solid #34493b;border-radius:12px}
+.accountTabs button{min-height:38px!important;border-radius:9px;background:transparent;color:#b9c3b7;font-weight:600;font-size:14px;cursor:pointer;transition:background .15s,color .15s}
+.accountTabs button.active{background:#35513f;color:#fff;box-shadow:0 2px 8px #0006}
+.accountForm{display:grid;gap:12px}
+.accountField{display:grid;gap:6px;font-size:13px;font-weight:600;color:#cfd9cc}
+.accountField input{width:100%;box-sizing:border-box;min-height:44px;padding:10px 12px;border-radius:10px;border:1px solid #4d684f;background:#0f1a14;color:#f5f0df;font:inherit;font-size:15px;font-weight:400;transition:border-color .15s,box-shadow .15s}
+.accountField input:focus{outline:none;border-color:#e2b857;box-shadow:0 0 0 3px #e2b85733}
+.accountPasswordWrap{position:relative;display:block}
+.accountPasswordWrap input{padding-right:46px}
+.accountPasswordWrap button{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:38px;height:36px;min-height:0!important;padding:0;border-radius:8px;background:transparent;color:#b9c3b7;font-size:16px;cursor:pointer}
+.accountPasswordWrap button:hover{background:#ffffff12}
+.accountHint{margin:-2px 0 2px;font-size:12px;line-height:1.45;color:var(--muted)}
+#accountSubmitBtn{width:100%;min-height:48px;border-radius:12px;font-size:16px;background:linear-gradient(180deg,#e9c86a,#b88f2e);color:#2a1e08;box-shadow:inset 0 1px 0 #fff6,0 4px 12px #0006}
+#accountSubmitBtn:hover:not(:disabled){filter:brightness(1.08)}
+.accountCard{padding:14px;margin-bottom:14px;background:#0f1a1499;border:1px solid #34493b;border-radius:14px}
+.accountSync{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px}
+.accountSync strong{display:block;font-size:15px}
+.accountSync small{display:block;margin-top:2px;font-size:12px;color:var(--muted)}
+.accountSyncDot{flex:0 0 10px;width:10px;height:10px;margin-top:5px;border-radius:50%;background:#75df91;box-shadow:0 0 0 4px #75df9122}
+.accountSyncDot[data-state="pending"]{background:#efc76e;box-shadow:0 0 0 4px #efc76e22}
+.accountStats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0}
+.accountStats div{padding:8px 10px;border-radius:10px;background:#ffffff08}
+.accountStats dt{font-size:11px;color:var(--muted)}
+.accountStats dd{margin:2px 0 0;font-size:15px;font-weight:700;color:#f7f1dc;font-variant-numeric:tabular-nums}
+.accountActions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.accountActions button{min-height:46px;border-radius:12px;font-size:14px;width:100%}
+.accountLogout{display:block;width:100%;margin-top:10px!important;min-height:40px;border-radius:10px;background:transparent;border:1px solid #6f383466;color:#efb2a8;font-size:14px;cursor:pointer}
+.accountLogout:hover{background:#6f383433}
+.accountStatus{min-height:0;margin:14px 0 0;font-size:13px;line-height:1.45}
+.accountStatus:empty{display:none}
+.accountStatus[data-kind]{padding:10px 12px;border-radius:10px;border:1px solid #4d684f;background:#0f1a14}
+.accountStatus[data-kind="success"]{border-color:#4f7d59;background:#1c3324;color:#b8ecc4}
+.accountStatus[data-kind="error"]{border-color:#8a4a42;background:#3a1f1c;color:#f3c1b9}
+#accountOverlay.accountBusy .accountBox{cursor:progress}
+#accountOverlay button:disabled{opacity:.55;cursor:progress}
+.cloudSaveNote{margin:10px 0 0;font-size:13px;color:var(--muted)}
+.cloudSaveNote[data-state="ok"]{color:#9ee0ad}.cloudSaveNote[data-state="error"]{color:#efc76e}
+@media(max-width:480px){#accountOverlay .accountBox{padding:20px 16px 16px}.accountStats{grid-template-columns:1fr 1fr}.accountActions{grid-template-columns:1fr}}

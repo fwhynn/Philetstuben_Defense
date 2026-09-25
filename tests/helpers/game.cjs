@@ -1,6 +1,6 @@
 const fs = require('node:fs'), vm = require('node:vm'), path = require('node:path');
 const classesDir = path.join(__dirname, '../../classes');
-function load({ duo = null, now = () => 0, headless = false, initialProfile = null, initialStorage = {}, rotateView = null, pickSlot = null, project = null, boardBox = null, getRenderedFrameCount = null } = {}) {
+function load({ duo = null, now = () => 0, headless = false, initialProfile = null, initialStorage = {}, rotateView = null, pickSlot = null, project = null, boardBox = null, getRenderedFrameCount = null, accountApi = null } = {}) {
   const elements = new Map();
   function element() { const classes = new Set(); return { textContent: '', get innerHTML() { return this.html || ''; }, set innerHTML(value) { this.html = value; this.children = []; }, style: {}, dataset: {}, replaceChildren(...items){this.children=items;}, children: [], attributes: {}, listeners: {}, captureListeners: {}, classList: { add(...names) { names.forEach(n => classes.add(n)); }, remove(...names) { names.forEach(n => classes.delete(n)); }, contains(n) { return classes.has(n); }, toggle(n, force) { const on = force ?? !classes.has(n); if (on) classes.add(n); else classes.delete(n); return on; } }, setAttribute(name, value) { this.attributes[name] = value; }, addEventListener(name, fn, capture) { (capture === true ? this.captureListeners : this.listeners)[name] = fn; }, appendChild(e) { this.children.push(e); } }; }
   const timers = new Map(); let next = 1;
@@ -11,6 +11,7 @@ function load({ duo = null, now = () => 0, headless = false, initialProfile = nu
   if (boardBox) context.document.querySelector = selector => selector === '.boardWrap' ? { getBoundingClientRect: () => boardBox } : null;
   context.document.getElementById('saveOverlay').classList.add('hidden');
   context.document.getElementById('accountOverlay').classList.add('hidden');
+  if (accountApi) context.HexApi = accountApi;
   let source = fs.readFileSync(path.join(classesDir, 'game.js'), 'utf8');
   if (headless) source = source.replace('renderBoard(); renderUI();', '');
   for (const file of ['run-share.js', 'biomes.js', 'data.js', 'ui-layout.js', 'tutorial.js', 'heroes.js', 'profile.js', 'map.js', 'random.js', 'run-runtime.js', 'run-snapshot.js', 'waves.js', 'combat.js', 'rewards.js', 'deck.js', 'buildings.js', 'tower-commands.js', 'exploration.js', 'placement-commands.js', 'run-flow.js', 'run-session.js', 'camera.js', 'svg-renderer.js', 'arsenal.js']) vm.runInNewContext(fs.readFileSync(path.join(classesDir, file), 'utf8'), context);
