@@ -51,11 +51,10 @@ try {
     $payload = json_decode($payloadRaw, true, 512, JSON_THROW_ON_ERROR);
     $tag = extractTagName($event, $payload);
     if ($tag === null) {
-        respond(202, [
-            'ok' => true,
-            'message' => 'Webhook ignored because the event is not a tag push.',
-            'event' => $event,
-        ]);
+        // ignore non-tag pushes without writing to the deploy log
+        http_response_code(202);
+        echo json_encode(['ok' => true, 'message' => 'Ignored non-tag push', 'event' => $event], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . "\n";
+        exit;
     }
 
     $actor = extractActor($payload);
@@ -94,8 +93,7 @@ try {
         set_time_limit(300);
         $steps = [];
 
-        // Der Tag-Push löst das Update nur aus; ausgeliefert wird immer der aktuelle Stand von main.
-        $steps[] = runCheckedCommand(gitCommand('checkout ' . escapeshellarg(DEPLOY_BRANCH)), REPO_ROOT, 'Switching to ' . DEPLOY_BRANCH . ' failed.');
+        // Repos on server are kept on `main`; just pull latest
         $steps[] = runCheckedCommand(gitCommand('pull --ff-only ' . escapeshellarg(REMOTE_NAME) . ' ' . escapeshellarg(DEPLOY_BRANCH)), REPO_ROOT, 'git pull failed.');
         $steps[] = runCheckedCommand(NPM_BIN . ' ci --omit=dev', APP_ROOT, 'npm ci failed.');
         $steps[] = runCheckedCommand(NPM_BIN . ' run generate-assets-index', APP_ROOT, 'npm run generate-assets-index failed.');
@@ -230,6 +228,11 @@ function runCheckedCommand(string $command, string $cwd, string $failureMessage)
             'command' => $result,
         ]);
     }
+    try {
+        appendWebhookLog('info', "STEP OK: $command", $result);
+    } catch (Throwable $_) {
+        // ignore
+    }
     return $result;
 }
 
@@ -240,12 +243,20 @@ function runCommand(string $command, string $cwd): array
     $output = [];
     $exitCode = 0;
     exec($fullCommand, $output, $exitCode);
-    return [
+    $result = [
         'cwd' => $cwd,
         'command' => $command,
         'stdout' => trim(implode("\n", $output)),
         'exitCode' => $exitCode,
     ];
+
+    try {
+        appendWebhookLog('debug', 'command', $result);
+    } catch (Throwable $_) {
+        // ignore
+    }
+
+    return $result;
 }
 
 function appendWebhookLog(string $level, string $message, $data = null): void
