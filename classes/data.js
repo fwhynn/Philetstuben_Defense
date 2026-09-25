@@ -17,7 +17,7 @@ const HexData=(()=>{
     siegeRoad:{"id":"siegeRoad","name":"Belagerungsgerade","rarity":"Rare","model":"straight","roads":[0,3],"slots":1,"requiredTower":"catapult","towerBonus":{"type":"catapult","damage":1.25},"desc":"+25 % Schaden für Katapult auf diesem Hex."},
     lightningFork:{"id":"lightningFork","name":"Blitzgabel","rarity":"Rare","model":"tee","roads":[0,2,4],"slots":2,"requiredTower":"chain","towerBonus":{"type":"chain","damage":1.25},"desc":"+25 % Schaden für Kettenblitz auf diesem Hex."},
     frostBend:{"id":"frostBend","name":"Frostbogen","rarity":"Rare","model":"smallCurve","roads":[0,1],"slots":1,"requiredTower":"freeze","towerBonus":{"type":"freeze","range":1.25},"desc":"+25 % Reichweite für Freeze auf diesem Hex."},
-    mineRoad:{"id":"mineRoad","name":"Minenstraße","rarity":"Rare","model":"longRoad","roads":[0,3],"slots":2,"requiredTower":"mine","towerBonus":{"type":"mine","damage":1.25},"desc":"+25 % Schaden für Minenleger auf diesem Hex."},
+    mineRoad:{"id":"mineRoad","name":"Minenstraße","rarity":"Rare","roads":[0,3],"slots":2,"slotLayout":[[10.8,14],[-21.6,-22.7]],"requiredTower":"mine","towerBonus":{"type":"mine","damage":1.25},"desc":"+25 % Schaden für Minenleger auf diesem Hex."},
     ballistaRoad:{"id":"ballistaRoad","name":"Schützenlinie","rarity":"Rare","model":"straight","roads":[0,3],"slots":1,"requiredTower":"ballista","towerBonus":{"type":"ballista","damage":1.25},"desc":"+25 % Schaden für Balliste auf diesem Hex."},
     emberBend:{"id":"emberBend","name":"Glutknick","rarity":"Rare","model":"smallCurve","roads":[0,1],"slots":1,"requiredTower":"flame","towerBonus":{"type":"flame","damage":1.25},"desc":"+25 % Schaden für Flammenturm auf diesem Hex."},
     elementCross:{"id":"elementCross","name":"Elementkreuzung","rarity":"Rare","model":"cross","roads":[0,1,3,4],"slots":2,"requiredTower":"element","towerBonus":{"type":"element","damage":1.25},"desc":"+25 % Schaden für Elementturm auf diesem Hex."},
@@ -112,8 +112,27 @@ const HexData=(()=>{
   function ultimateAvailable(state,tower){return state.ultimateUnlocks?.includes('ultimate:'+tower.type+':'+tower.branch)||state.ultimateUnlocks?.includes('ultimate:'+tower.type);}
   const BRANCH_VISUALS={marksman:{icon:'◎',color:'#f5d06e'},volley:{icon:'≋',color:'#96d47c'},siege:{icon:'◆',color:'#e99a5c'},barrage:{icon:'⋮',color:'#ffdca1'},storm:{icon:'ϟ',color:'#93a5ff'},overload:{icon:'✦',color:'#e2a1ff'},deepFrost:{icon:'❄',color:'#70d5ff'},frostField:{icon:'❆',color:'#c0f6ea'},demolition:{icon:'✹',color:'#ff9b55'},minefield:{icon:'••',color:'#d9bc72'},harpoon:{icon:'➶',color:'#e7d39e'},repeater:{icon:'»',color:'#d4b979'},inferno:{icon:'☀',color:'#ff7448'},wildfire:{icon:'≋',color:'#ff9b55'}};
   Object.assign(BRANCH_VISUALS,{elementFire:{icon:'♨',color:'#ff8654'},elementWater:{icon:'≈',color:'#69d8ff'},elementWind:{icon:'≋',color:'#dbefae'},soulChoir:{icon:'☽',color:'#a6edb4'},soulKeeper:{icon:'☠',color:'#c8a3ee'}});
+  function defaultTargetPriority(tower){
+    const def=towerDefinition(tower),m=def.damageMultipliers||{},kinds=[['hp','mostHealth'],['armor','mostArmor'],['magic','mostMagic']];
+    const ranked=kinds.map(([kind,priority])=>({priority,damage:(def.damage||0)*(m[kind]??1)})).sort((a,b)=>b.damage-a.damage);
+    const first=ranked[0].damage>ranked[1].damage?ranked[0].priority:'closestBase';
+    return [...new Set([first,'closestBase','mostHealth','boss'])].slice(0,3);
+  }
+  function upgradeChanges(before,after){
+    const lines=[],fmt=n=>Number(n.toFixed(2)).toLocaleString('de-DE');
+    const add=(label,a,b,unit='')=>{if(Math.abs(a-b)>1e-8)lines.push(label+': '+fmt(a)+unit+' → '+fmt(b)+unit);};
+    for(const [kind,label] of [['hp','Leben'],['armor','Rüstung'],['magic','Magieresistenz']])add('Schaden gegen '+label,(before.damage||0)*(before.damageMultipliers?.[kind]??1),(after.damage||0)*(after.damageMultipliers?.[kind]??1));
+    add(after.aura?'Aura-Reichweite':'Reichweite',before.range||0,after.range||0);
+    if(!after.aura)add(after.mine?'Zeit je Mine':'Nachladezeit',before.cooldown||0,after.cooldown||0,' s');
+    for(const [field,label,fallback,unit] of [['splash','Explosionsradius',0,''],['chain','Blitzziele',1,''],['jumpRange','Blitz-Sprungweite',0,''],['pierceTargets','Durchschlagsziele',0,''],['slowDuration','Verlangsamungsdauer',0,' s'],['soulLimit','Maximale Geister',0,''],['soulDamage','Geisterschaden pro Sekunde',0,''],['soulDuration','Geisterlebensdauer',0,' s'],['bossMultiplier','Bossschaden-Multiplikator',1,'×']]){
+      const value=d=>field==='pierceTargets'?(d.pierce?(d.pierceTargets||3):0):(d[field]??fallback);add(label,value(before),value(after),unit);
+    }
+    add('Aura-Verlangsamung',(1-(before.slow??1))*100,(1-(after.slow??1))*100,' %');
+    add('Treffer-Verlangsamung',(1-(before.hitSlow??1))*100,(1-(after.hitSlow??1))*100,' %');
+    return lines;
+  }
   function recordTowerStat(state,tower,field,amount){
-    if(!tower)return;if(tower.guestOwner!==undefined){if(field==='damage'){state.duoSupport??={};const totals=state.duoSupport[tower.guestOwner]??={};totals[tower.type]=(totals[tower.type]||0)+amount;}return;}if(tower===state.baseWeapon){if(field==='damage')state.baseDamage=(state.baseDamage||0)+amount;return;}
+    if(!tower)return;if(tower.guestOwner!==undefined){if(field==='damage'){state.duoSupport??={};const totals=state.duoSupport[tower.guestOwner]??={};totals[tower.type]=(totals[tower.type]||0)+amount;}return;}if(tower===state.baseWeapon){if(field==='damage')state.baseDamage=(state.baseDamage||0)+amount;if(field==='kills')state.baseKills=(state.baseKills||0)+amount;return;}
     state.runTowerStats??={};const usage=state.runTowerStats[tower.type]??={builds:0,upgrades:0};usage[field]=(usage[field]||0)+amount;
     const detail=state.runTowerDetails?.[tower.statId];if(detail)detail[field]=(detail[field]||0)+amount;
   }
@@ -133,7 +152,7 @@ const HexData=(()=>{
     if(tower.type==='flame')def.damage*=.95;
     if(typeof HexBiomes!=='undefined')HexBiomes.apply(def,tower);
     const bonus=terrain?.towerBonus?.type===tower.type?terrain.towerBonus:{};
-    def.range=Math.round(def.range*(bonus.range||1)*(terrain?.towerRange||1)*(tower.rangeFactor||1));
+    def.range=Math.round(def.range*(bonus.range||1)*(terrain?.towerRange||1)*(tower.rangeFactor||1)*(tower.supportRange||1));
     def.damage=def.damage*(bonus.damage||1)*(tower.type==='archer'?(terrain?.archerDamage||1):1)*(terrain?.towerDamage||1)*(tower.supportDamage||1);
     def.damage=Number(def.damage.toFixed(2));
     if(def.soulDamage)def.soulDamage*= (bonus.damage||1)* (terrain?.towerDamage||1)*(tower.supportDamage||1)*(ultimate?.damageFactor||1);
@@ -142,7 +161,7 @@ const HexData=(()=>{
   }
   function availableUpgrades(tower){return Object.entries(UPGRADES).filter(([,upgrade])=>upgrade.tower===tower.type&&!tower.finalUpgrade&&(tower.branch?upgrade.requires===tower.branch:!upgrade.requires));}
   function towerRefund(state,tower){
-    if(!tower||tower.guestOwner!==undefined||state.hp<=0||state.phase==='gameover') return null;
+    if(state.challengeKind==='garrison'||!tower||tower.guestOwner!==undefined||state.hp<=0||state.phase==='gameover') return null;
     const full=['place','build'].includes(state.phase)&&!state.waveRunning&&tower.builtOnWave===state.wave;
     return {amount:full?tower.paid:Math.floor(tower.paid*.5),percent:full?100:50};
   }
@@ -155,5 +174,5 @@ const HexData=(()=>{
     if(terrain.archerDamage)parts.push('+25 % Archer');
     return parts.join(' · ')||null;
   }
-  return {SPECIALIZATIONS,ultimateAvailable,tileBonusLabel,recordTowerStat,runUpgrades,upgradeStatus,ultimateDefinition,CARD_LIBRARY,TOWERS,UPGRADES,ULTIMATES,BRANCH_VISUALS,towerDefinition,availableUpgrades,towerRefund};
+  return {defaultTargetPriority,upgradeChanges,SPECIALIZATIONS,ultimateAvailable,tileBonusLabel,recordTowerStat,runUpgrades,upgradeStatus,ultimateDefinition,CARD_LIBRARY,TOWERS,UPGRADES,ULTIMATES,BRANCH_VISUALS,towerDefinition,availableUpgrades,towerRefund};
 })();

@@ -18,6 +18,7 @@ const HexRunSession=(()=>{
     if(messages.length)state.pendingCelebration={messages,wave:state.wave,bosses:state.bossRewards.length};
   }
   function waveRewards(state,random){
+    if(state.challengeKind==='garrison'){state.bossRewards=[];preparation(state,random);return;}
     if(state.bossRewards.length){state.phase='bossReward';HexRewards.offer(state,'boss',random);}
     else if(state.wave%2===0){state.phase='reward';HexRewards.offer(state,'normal',random);}
     else preparation(state,random);
@@ -48,7 +49,7 @@ const HexRunSession=(()=>{
   function advance(state,random,dt,best=0,emit=()=>{}){
     const result=HexRunRuntime.advance(state,random,dt,emit);
     if(result==='complete')finish(state,random,best);
-    else if(result==='defeat'){state.hp=0;state.waveRunning=false;state.phase='gameover';state.enemies=[];state.projectiles=[];state.spawnQueue=[];state.pendingSpawns=0;}
+    else if(result==='defeat'){HexCombat.clearConsumables(state);state.hp=0;state.waveRunning=false;state.phase='gameover';state.enemies=[];state.projectiles=[];state.spawnQueue=[];state.pendingSpawns=0;}
     return result;
   }
   function endless(state,random){if(state.phase!=='victory'||!(state.campaignWon||state.challengeDay&&state.challengeWon))return false;state.endless=true;waveRewards(state,random);return true;}

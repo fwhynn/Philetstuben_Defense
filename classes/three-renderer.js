@@ -5,7 +5,7 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 
 const S=54,STEP=Math.PI/3,TILT=55*Math.PI/180,PITCH_MIN=12*Math.PI/180,PITCH_MAX=88*Math.PI/180,DIST_MIN=220,DIST_MAX=3400,DIST_START=950,SKY='#a9cbd8';
-const PREFIX={tiles:'tile',landmarks:'landmark',towers:'tower',enemies:'enemy',buildings:'building',effects:'mine'};
+const PREFIX={tiles:'tile',landmarks:'landmark',towers:'tower',enemies:'enemy',buildings:'building',effects:'mine',bases:'base'};
 const LIMBS=['leg_l','leg_r','arm_l','arm_r'];
 const LANDMARK_LABEL={shrine:'Shrine · Bonus unbekannt',boss:'Wächter · inaktiv',treasure:'Schatz'};
 const STATUS_LABEL={ready:'☠ bereit',fighting:'☠ Kampf',defeated:'☠ besiegt',escaped:'☠ entkommen'};
@@ -38,6 +38,12 @@ function makeTemplate(name,scene,kind){
     const limbs=[];scene.traverse(n=>{if(LIMBS.includes(n.name)) limbs.push({name:n.name,pos:worldPosition(n),parts:bake(n)});});
     template.parts=bake(scene,n=>LIMBS.includes(n.name));template.limbs=limbs;
     template.height=boundsOf([...template.parts,...limbs.flatMap(l=>l.parts)]).max.y;
+    return template;
+  }
+  if(kind==='bases'){                                                // Mauer-/Waffenstufe einer Festung: Waffe dreht sich wie ein Turm
+    let turret,muzzle;scene.traverse(n=>{if(n.name==='turret'&&!turret) turret=n;if(n.name==='muzzle'&&!muzzle) muzzle=n;});
+    template.turret=turret?{pos:worldPosition(turret),parts:bake(turret)}:null;template.muzzleY=muzzle?worldPosition(muzzle).y:null;
+    template.parts=bake(scene,n=>n.name==='turret');
     return template;
   }
   if(kind==='towers'){
@@ -116,7 +122,34 @@ function create(host0,commands){
   const loader=new GLTFLoader();
   const wanted=Object.entries(HexModelMap.ALL_MODELS).flatMap(([kind,names])=>names.map(name=>({kind,id:`${PREFIX[kind]}_${name}`})));
   const inventory=fetch('assets/index.json').then(r=>r.ok?r.json():null).catch(()=>null);   // nur vom mitgelieferten Server; sonst wird alles versucht
-  inventory.then(list=>{const available=list&&new Set(list);return Promise.all(wanted.filter(({kind,id})=>!available||available.has(`${kind}/${id}.glb`)).map(({kind,id})=>new Promise(done=>loader.load(`assets/${kind}/${id}.glb`,gltf=>{try{templates.set(id,makeTemplate(id,gltf.scene,kind));}catch(e){console.warn('Modell unbrauchbar:',id,e);}done();},undefined,e=>{console.warn('Modell fehlt:',id,e?.message||e);done();}))));}).then(()=>{ready=true;loading.remove();rebuildAll();if(state) render(state,targetList);});
+  // Lädt alle Modelle der gewählten Edition (Sakura mit Rückfall auf normal) in eine neue Template-Tabelle.
+  let modelGeneration=0;
+  function loadModels(){
+    const generation=++modelGeneration,edition=typeof HexAssetEdition!=='undefined'?HexAssetEdition:null;
+    return inventory.then(list=>{
+      const available=list&&new Set(list),next=new Map();
+      const sources=({kind,id})=>{const rel=`${kind}/${id}.glb`;return (edition?edition.paths(rel,available):[rel]).filter(src=>!available||available.has(src));};
+      return Promise.all(wanted.map(item=>new Promise(done=>{
+        const queue=sources(item);
+        const attempt=()=>{const src=queue.shift();if(!src)return done();
+          loader.load(`assets/${src}`,gltf=>{try{next.set(item.id,makeTemplate(item.id,gltf.scene,item.kind));}catch(e){console.warn('Modell unbrauchbar:',item.id,e);}done();},undefined,
+            e=>{if(queue.length)return attempt();console.warn('Modell fehlt:',item.id,e?.message||e);done();});};
+        attempt();
+      }))).then(()=>generation===modelGeneration&&!destroyed?next:null);
+    });
+  }
+  function applyModels(next){
+    if(!next)return;
+    for(const template of templates.values())for(const part of [...(template.parts||[]),...(template.slots||[]).flatMap(s=>s.parts),...(template.limbs||[]).flatMap(l=>l.parts)])part.geometry?.dispose();
+    templates.clear();for(const [id,template] of next)templates.set(id,template);
+    // Gegner und Minen halten eigene Modellkopien: beim Editionswechsel neu aufbauen.
+    for(const obj of enemyObjects.values()){layer.dynamic.remove(obj.group);obj.body?.material.dispose();obj.healGlow?.dispose();}enemyObjects.clear();
+    for(const mesh of mineObjects.values())layer.dynamic.remove(mesh);mineObjects.clear();
+    for(const material of biomeMaterials.values())material?.dispose();biomeMaterials.clear();
+    ready=true;loading.remove();rebuildAll();if(state) render(state,targetList);
+  }
+  loadModels().then(applyModels);
+  const stopEditionWatch=(typeof HexAssetEdition!=='undefined'?HexAssetEdition:null)?.onChange(()=>loadModels().then(applyModels));
 
   // ---- gemeinsame Ressourcen ----
   const invisible=new THREE.MeshBasicMaterial({visible:false});
@@ -134,7 +167,7 @@ function create(host0,commands){
   const additive=()=>new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,depthWrite:false,blending:THREE.AdditiveBlending});
   function makePool(geometry,max,material){
     const mesh=new THREE.InstancedMesh(geometry,material,max);mesh.frustumCulled=false;mesh.count=0;mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-    const m=new THREE.Matrix4(),c=new THREE.Color(),q=new THREE.Quaternion(),up=new THREE.Vector3(0,1,0),d=new THREE.Vector3(),pos=new THREE.Vector3(),sc=new THREE.Vector3();
+    const euler=new THREE.Euler(),m=new THREE.Matrix4(),c=new THREE.Color(),q=new THREE.Quaternion(),up=new THREE.Vector3(0,1,0),d=new THREE.Vector3(),pos=new THREE.Vector3(),sc=new THREE.Vector3();
     mesh.setColorAt(0,c.set('#ffffff'));   // Farbpuffer von Anfang an anlegen, sonst kompiliert der Shader ohne Instanzfarben
     const put=(color,fade)=>{mesh.setMatrixAt(mesh.count,m);mesh.setColorAt(mesh.count,c.set(color).multiplyScalar(fade));mesh.count++;};
     return {mesh,
@@ -142,6 +175,7 @@ function create(host0,commands){
       segment(ax,ay,az,bx,by,bz,radius,color,fade=1){if(mesh.count>=max) return;d.set(bx-ax,by-ay,bz-az);const len=Math.max(d.length(),.01);q.setFromUnitVectors(up,d.divideScalar(len));pos.set((ax+bx)/2,(ay+by)/2,(az+bz)/2);sc.set(radius,len,radius);m.compose(pos,q,sc);put(color,fade);},
       ball(x,y,z,radius,color,fade=1){if(mesh.count>=max) return;q.identity();pos.set(x,y,z);sc.setScalar(radius);m.compose(pos,q,sc);put(color,fade);},
       cone(x,y,z,dx,dy,dz,length,radius,color){if(mesh.count>=max) return;d.set(dx,dy,dz).normalize();q.setFromUnitVectors(up,d);pos.set(x,y,z);sc.set(radius,length,radius);m.compose(pos,q,sc);put(color,1);},
+      flake(x,y,z,rx,ry,rz,size,color){if(mesh.count>=max) return;q.setFromEuler(euler.set(rx,ry,rz));pos.set(x,y,z);sc.set(size,size*.6,size);m.compose(pos,q,sc);put(color,1);},   // flaches, gedrehtes Plättchen (Blatt, Blüte)
       end(){mesh.instanceMatrix.needsUpdate=true;if(mesh.instanceColor) mesh.instanceColor.needsUpdate=true;}};
   }
   const fx={solid:makePool(new THREE.CylinderGeometry(1,1,1,6),700,new THREE.MeshBasicMaterial({color:'#ffffff'})),
@@ -177,8 +211,35 @@ function create(host0,commands){
 
   const windPool=makePool(new THREE.CylinderGeometry(1,1,1,5),240,new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:.35,depthWrite:false}));
   const mistPool=makePool(new THREE.SphereGeometry(1,8,4),60,new THREE.MeshBasicMaterial({color:'#dce8ee',transparent:true,opacity:.07,depthWrite:false}));
-  layer.dynamic.add(windPool.mesh,mistPool.mesh);
+  // Sakura-Stimmung je Biom: Blütenblätter, Ahornblätter, Sandkörner, Regen (nur hohe Grafikqualität).
+  const flakeGeometry=new THREE.CircleGeometry(1,5),flakeMaterial=new THREE.MeshBasicMaterial({color:'#ffffff',side:THREE.DoubleSide,depthWrite:false});
+  const flakePool=makePool(flakeGeometry,360,flakeMaterial),rainPool=makePool(new THREE.CylinderGeometry(1,1,1,4),260,new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:.45,depthWrite:false}));
+  layer.dynamic.add(windPool.mesh,mistPool.mesh,flakePool.mesh,rainPool.mesh);
   const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
+  const AMBIENT={
+    petals:{count:4,colors:['#f7c1d4','#fbe2ec','#f29bbb'],size:1.5},
+    maple:{count:3,colors:['#c8412a','#e0662c','#a52f22'],size:2.4},
+    sand:{count:5,colors:['#f1dca6','#e3c683'],size:.7},
+    rain:{count:6,colors:['#d3e2f7'],size:0}
+  };
+  function animateSakuraAmbient(now){
+    flakePool.begin();rainPool.begin();
+    if(state&&ready&&quality==='high'&&isSakura()&&!reducedMotion.matches){
+      const tiles=[...state.map.values()].map(tile=>({tile,p:axialToWorld(tile.q,tile.r)})).sort((a,b)=>Math.hypot(a.p.x-cam.x,a.p.y-cam.z)-Math.hypot(b.p.x-cam.x,b.p.y-cam.z)).slice(0,45);
+      for(const {tile,p} of tiles){
+        const kind=HexBiomes.sakuraAmbient?.[HexBiomes.forTile(state,tile)],fx=AMBIENT[kind];if(!fx)continue;
+        const phase=tile.q*1.7+tile.r*2.3;
+        for(let i=0;i<fx.count;i++){
+          const seed=phase*7.31+i*3.17,ox=Math.sin(seed*1.3)*26,oz=Math.cos(seed*2.1)*24,color=fx.colors[i%fx.colors.length];
+          if(kind==='rain'){const t=((now*.0011+seed)%1+1)%1,x=p.x+ox-t*6,z=p.y+oz,y=46-t*44;rainPool.segment(x,y,z,x+1.6,y+8,z,.28,color,1);continue;}
+          if(kind==='sand'){const t=((now*.00016+seed)%1+1)%1,x=p.x-30+t*60,z=p.y+oz+Math.sin(t*9+seed)*3,y=3+Math.abs(Math.sin(t*7+seed))*6,s=fx.size*Math.min(1,t*6,(1-t)*6);flakePool.flake(x,y,z,t*6,seed,0,s,color);continue;}
+          const slow=kind==='maple'?.00022:.0003,t=((now*slow+seed)%1+1)%1,s=fx.size*Math.min(1,t*6,(1-t)*6);   // Blätter: fallen, pendeln, drehen sich
+          flakePool.flake(p.x+ox+Math.sin(t*6.3+seed)*7+t*8,40-t*38,p.y+oz+Math.cos(t*4.7+seed)*5,t*9+seed,t*5,Math.sin(t*7+seed)*1.2,s,color);
+        }
+      }
+    }
+    flakePool.end();rainPool.end();
+  }
   function animateBiomeWind(now){
     windPool.begin();mistPool.begin();
     if(state&&ready&&!reducedMotion.matches){
@@ -230,8 +291,11 @@ function create(host0,commands){
     const template=spec.kind==='landmark'?modelTemplate(spec.name,'landmark'):modelTemplate(spec.name);
     if(!template){const mesh=new THREE.Mesh(hexPad,fallbackMaterial);mesh.scale.setScalar(1);holder.add(mesh);return holder;}
     addParts(model,spec.proceduralRoads&&template.noRoad?template.noRoad:template.parts,ghost,legal);
-    const biome=spec.name==='fog'?'grass':HexBiomes.forTile(state,tile);
-    if(biome!=='grass')model.traverse(mesh=>{if(!mesh.isMesh||!/(grass|foliage|soil)/i.test(mesh.material.name||''))return;const id=mesh.material.uuid+'|'+biome;let material=biomeMaterials.get(id);if(!material){material=mesh.material.clone();material.vertexColors=false;material.color.set(HexBiomes.definitions[biome].color);if(/soil/i.test(material.name))material.color.multiplyScalar(.6);else if(/foliage/i.test(material.name))material.color.multiplyScalar(.8);biomeMaterials.set(id,material);}mesh.material=material;});
+    const actualBiome=HexBiomes.forTile(state,tile);
+    const biome=spec.name==='fog'?'grass':actualBiome;
+    if(biome!=='grass'){const sakura=isSakura();model.traverse(mesh=>{if(!mesh.isMesh)return;const id=mesh.material.uuid+'|'+biome+'|'+sakura;let material=biomeMaterials.get(id);
+      if(material===undefined){const color=biomeTint(mesh.material.name||'',biome,sakura);material=color?mesh.material.clone():null;if(material){material.vertexColors=false;material.color.copy(color);}biomeMaterials.set(id,material);}
+      if(material)mesh.material=material;});}
     // Turmplätze liegen an den Spielpositionen (HexMap.slotOffsets), nicht an den im Modell gespeicherten.
     HexMap.slotOffsets(tile.type,slotCount).forEach((offset,i)=>{
       const slot=template.slots[i]||template.slots[0];if(!slot) return;
@@ -295,6 +359,18 @@ function create(host0,commands){
   }
   // Erhöhte Turmsockel (z. B. Signalkreuzung): Turm steht auf dem Sockel statt darin. Normale Platten (~0,05) bleiben bei 0.
   const STANDARD_SLOT_TOP=.05;
+  const isSakura=()=>typeof HexAssetEdition!=='undefined'&&HexAssetEdition.get()==='sakura';
+  // Biomfarbe eines Materials oder null (unverändert). Sakura: Boden, Erde, Laub und Blüten je Jahreszeit; normal: eine Biomfarbe.
+  function biomeTint(name,biome,sakura){
+    if(sakura){
+      const season=HexBiomes.sakuraSeasons?.[biome];if(!season)return null;
+      const role=/blossom_light|petal/i.test(name)?'blossomLight':/blossom/i.test(name)?'blossom':/grass/i.test(name)?'ground':/soil/i.test(name)?'soil':/foliage|pine/i.test(name)?'foliage':null;
+      return role?new THREE.Color(season[role]):null;
+    }
+    if(!/(grass|foliage|soil)/i.test(name))return null;
+    const color=new THREE.Color(HexBiomes.definitions[biome].color);
+    return /soil/i.test(name)?color.multiplyScalar(.6):/foliage/i.test(name)?color.multiplyScalar(.8):color;
+  }
   function slotLift(tile,index){
     const spec=tileSpec(tile),template=spec.kind==='tile'&&modelTemplate(spec.name),slot=template&&(template.slots[index]||template.slots[0]);
     return slot?Math.max(0,slot.top-STANDARD_SLOT_TOP)*S:0;
@@ -302,15 +378,34 @@ function create(host0,commands){
   function tileSpec(tile){
     const landmark=state.landmarks?.get(key(tile.q,tile.r));
     if(landmark?.type==='boss'&&landmark.status!=='defeated') return {kind:'landmark',name:'boss',rotation:0};
-    return {kind:'tile',...HexModelMap.modelFor(tile)};
+    const spec={kind:'tile',...HexModelMap.modelFor(tile)};
+    // Base der gewählten Festung statt der zufälligen Variante, sobald das Modell vorhanden ist.
+    if(tile.type==='base'&&state.heroId&&modelTemplate('base_'+state.heroId)) spec.name='base_'+state.heroId;
+    return spec;
+  }
+  // Sichtbare Mauer- und Waffenstufe der Festung; höhere Stufe ersetzt die niedrigere, Mauer und Waffe werden kombiniert.
+  function baseUpgradeParts(){
+    const hero=state.heroId,levels=state.baseUpgrades||{},part=(kind,level)=>{for(let l=level;l>0;l--){const name=`base_${hero}_${kind}_${l}`;if(templates.get(name)) return name;}return null;};
+    const walls=hero&&part('walls',levels.walls||0),weapon=hero&&part('weapon',levels.weapon||0);
+    return {walls,weapon,key:(walls||'-')+'/'+(weapon||'-')};
+  }
+  function attachBaseUpgrades(holder,tile,{walls,weapon}){
+    const model=new THREE.Group();model.scale.setScalar(S);holder.add(model);
+    if(walls) addParts(model,templates.get(walls).parts);
+    const template=weapon&&templates.get(weapon);if(!template) return null;
+    addParts(model,template.parts);
+    const c=axialToWorld(tile.q,tile.r),obj={pos:{x:c.x,y:c.y},angle:0,kick:0,muzzleH:(template.muzzleY??template.turret?.pos.y??.6)*S};
+    if(template.turret){obj.turret=new THREE.Group();obj.turret.position.copy(template.turret.pos);obj.turretBase=obj.turret.position.clone();addParts(obj.turret,template.turret.parts);model.add(obj.turret);}
+    return obj;
   }
   function syncTiles(){
     const seen=new Set();
     for(const tile of state.map.values()){
-      const id=key(tile.q,tile.r),spec=tileSpec(tile),sig=[spec.kind,spec.name,spec.rotation,tile.slots,tile.buildingSlots,(tile.roads||[]).join('')].join('|');seen.add(id);
+      const id=key(tile.q,tile.r),spec=tileSpec(tile),upgrades=tile.type==='base'?baseUpgradeParts():null,sig=[spec.kind,spec.name,spec.rotation,tile.slots,tile.buildingSlots,tile.site,(tile.roads||[]).join(''),upgrades?.key].join('|');seen.add(id);
       const record=tileRecords.get(id);if(record?.sig===sig) continue;
       if(record) layer.tiles.remove(record.holder);
-      const holder=buildTile(spec,tile);layer.tiles.add(holder);tileRecords.set(id,{sig,holder});
+      const holder=buildTile(spec,tile,tile.site==='shrine'||tile.site==='tradePost'?{prop:{name:tile.site==='shrine'?'shrine':'treasure',angle:HexModelMap.propAngle(tile.type,HexMap.slotOffsets(tile.type,tile.slots))}}:{});layer.tiles.add(holder);
+      const weapon=upgrades?attachBaseUpgrades(holder,tile,upgrades):null;tileRecords.set(id,{sig,holder,weapon});
     }
     for(const [id,record] of [...tileRecords]) if(!seen.has(id)){layer.tiles.remove(record.holder);tileRecords.delete(id);}
   }
@@ -339,11 +434,12 @@ function create(host0,commands){
   }
   function syncEmpty(){
     const landmarkVisible=[...state.landmarks?.values()||[]].filter(l=>!l.claimed&&HexExploration.visibility(state.map,l)!=='hidden').map(l=>key(l.q,l.r));
-    const sig=state.map.size+'|'+landmarkVisible.join(';');if(sig===emptySig) return;emptySig=sig;clearGroup(layer.empty);
+    const sig=state.map.size+'|'+isSakura()+'|'+landmarkVisible.join(';');if(sig===emptySig) return;emptySig=sig;clearGroup(layer.empty);
     const adjacent=new Map();
     for(const tile of state.map.values()) for(let d=0;d<6;d++){const n=neighbor(tile.q,tile.r,d),id=key(n.q,n.r);if(!state.map.has(id)&&!landmarkVisible.includes(id)) adjacent.set(id,n);}
+    mats.empty.opacity=.6;
     const mesh=new THREE.InstancedMesh(hexPad,mats.empty,Math.max(1,adjacent.size)),matrix=new THREE.Matrix4();let i=0;
-    for(const n of adjacent.values()){const c=axialToWorld(n.q,n.r);mesh.setMatrixAt(i,matrix.makeTranslation(c.x,0,c.y));mesh.setColorAt(i++,new THREE.Color(HexBiomes.definitions[HexBiomes.forTile(state,n)].color));}
+    for(const n of adjacent.values()){const c=axialToWorld(n.q,n.r);mesh.setMatrixAt(i,matrix.makeTranslation(c.x,0,c.y));mesh.setColorAt(i++,new THREE.Color(HexBiomes.groundColor(HexBiomes.forTile(state,n),isSakura())));}
     mesh.count=adjacent.size;mesh.receiveShadow=true;layer.empty.add(mesh);
   }
 
@@ -451,7 +547,7 @@ function create(host0,commands){
     const selected=state.dragTower?state.dragSlot:state.selectedTower||state.hoverTower||(state.previewTower?state.selectedSlot:null);
     const tile=selected&&state.map.get(key(selected.q,selected.r)),tower=tile?.towers[selected.index],type=state.dragTower||tower?.type||state.previewTower;
     if(tile&&type){
-      const p=slotPositions(tile)[selected.index],def=HexData.towerDefinition(tower||{type,biome:HexBiomes.forTile(state,tile),rangeFactor:state.challengeDay?.85:1,tileType:tile.type});
+      const p=slotPositions(tile)[selected.index],def=HexData.towerDefinition(tower||{type,biome:HexBiomes.forTile(state,tile),rangeFactor:state.challengeDay?.85:1,tileType:tile.type,supportRange:HexBuildings.rangeBonus(state.map,selected)});
       for(const m of [rangeFill,rangeRing]){m.visible=true;m.position.set(p.x,.8,p.y);m.scale.setScalar(def.range);m.material.color.set(def.color);}
       if(tower&&state.previewUpgrade?.tower===tower){const next=state.previewUpgrade.definition;if(next.range!==def.range)for(const m of [previewRangeFill,previewRangeRing]){m.visible=true;m.position.set(p.x,.9,p.y);m.scale.setScalar(next.range);m.material.color.set(next.color);}}
     }else rangeFill.visible=rangeRing.visible=false;
@@ -465,21 +561,26 @@ function create(host0,commands){
     });
     const canHint=['place','build','wave'].includes(state.phase)&&state.hp>0;
     for(const record of objectRecords.values())for(const obj of record.buildings){const next=HexBuildings.nextUpgrade(state,obj.tile.buildings[obj.index]);obj.hint.visible=!state.showUpgradeStatus&&canHint&&!!next&&state.gold>=next.cost;}
-    for(const record of objectRecords.values()) for(const obj of record.towers) obj.hint.visible=!state.showUpgradeStatus&&canHint&&HexData.runUpgrades(state,obj.tower).some(([,u])=>state.gold>=HexBuildings.cost(state,obj.tile,u.cost));
+    for(const record of objectRecords.values()) for(const obj of record.towers) obj.hint.visible=state.workshopPicking&&HexData.availableUpgrades(obj.tower).length>0||!state.showUpgradeStatus&&canHint&&HexData.runUpgrades(state,obj.tower).some(([,u])=>state.gold>=HexBuildings.cost(state,obj.tile,u.cost));
   }
 
   // ---- Gegner und Geschosse ----
   const model0=m=>m.isGroup;
+  const elementCoreMaterials=new Map();
+  function elementCoreMaterial(base,color){const id=base.uuid+'|'+color;let material=elementCoreMaterials.get(id);if(!material){material=base.clone();material.color.set(color);if(material.emissive){material.emissive.set(color);material.emissiveIntensity=Math.max(.6,material.emissiveIntensity||0);}elementCoreMaterials.set(id,material);}return material;}
   function makeEnemy(e){
     const type=ENEMY_COLOR[e.type]?e.type:'normal',boss=type==='boss';
     const baseType=({splitter:'armored',shard:'armored',healer:'warded',elementCarrier:'warded'}[type]||type);
-    const template=(boss&&e.originBiome&&templates.get('enemy_boss_'+e.originBiome))||templates.get('enemy_'+baseType),group=new THREE.Group(),bar=new THREE.Group();
+    const own=templates.get('enemy_'+type),template=(boss&&e.originBiome&&templates.get('enemy_boss_'+e.originBiome))||own||templates.get('enemy_'+baseType),group=new THREE.Group(),bar=new THREE.Group();
+    const shrink=type==='shard'&&!own?.6:1;   // Ersatzmodell für Golemsplitter verkleinert, eigenes Modell hat Zielgröße
     const obj={group,bar,radius:boss?15:type==='shard'?6:9,phase:0,angle:0,targetAngle:0,last:null,slowed:false,limbs:[],barY:0};
     if(template){
-      obj.pivot=new THREE.Group();const model=new THREE.Group();model.scale.setScalar(S*(type==='shard'?.6:1));obj.pivot.add(model);addParts(model,template.parts);
+      obj.pivot=new THREE.Group();const model=new THREE.Group();model.scale.setScalar(S*shrink);obj.pivot.add(model);addParts(model,template.parts);
       for(const limb of template.limbs){const g=new THREE.Group();g.position.copy(limb.pos);addParts(g,limb.parts);model.add(g);obj.limbs.push({name:limb.name,g});}
       obj.ice=new THREE.Mesh(torus,basic('#79cdd9'));obj.ice.scale.setScalar(obj.radius+4);obj.ice.position.y=2;obj.ice.visible=false;
-      group.add(obj.pivot,obj.ice);obj.barY=template.height*S*(type==='shard'?.6:1)+12;obj.baseY=0;
+      group.add(obj.pivot,obj.ice);obj.barY=template.height*S*shrink+12;obj.baseY=0;
+      if(type==='healer') obj.pivot.traverse(mesh=>{if(mesh.isMesh&&mesh.material.name==='heal_glow'){if(!obj.healGlow){obj.healGlow=mesh.material.clone();obj.healBase=obj.healGlow.emissiveIntensity||1;obj.healFlash=0;}mesh.material=obj.healGlow;}});   // Heilkugel pulsiert
+      if(e.color&&type==='elementCarrier') obj.pivot.traverse(mesh=>{if(mesh.isMesh&&mesh.material.name==='element_core'){mesh.material=elementCoreMaterial(mesh.material,e.color);}});   // Gefäß in Elementfarbe
     }else{                                                             // Fallback ohne Modell: farbige Kugel
       obj.body=new THREE.Mesh(boss?enemyGeometry.boss:enemyGeometry.small,std(ENEMY_COLOR[type]));obj.body.castShadow=true;obj.color=ENEMY_COLOR[type];
       group.add(obj.body);obj.barY=obj.radius*2+14;obj.baseY=obj.radius+3;
@@ -495,10 +596,13 @@ function create(host0,commands){
       if(slowed!==obj.slowed){obj.slowed=slowed;if(obj.body) obj.body.material.color.set(slowed?'#79cdd9':obj.color);if(obj.ice) obj.ice.visible=slowed;}
       if(obj.last){const dx=e.x-obj.last.x,dy=e.y-obj.last.y,moved=Math.hypot(dx,dy);   // Laufrichtung und Schrittphase aus der Bewegung
         if(moved>.05){obj.targetAngle=Math.atan2(-dy,dx);obj.phase+=moved*.14;if(!obj.oriented){obj.angle=obj.targetAngle;obj.oriented=true;}}}
+      if(state.remoteView&&(!obj.last||obj.last.x!==e.x||obj.last.y!==e.y)){
+        obj.remoteMotion=obj.last?{x:obj.group.position.x,y:obj.group.position.z,toX:e.x,toY:e.y,start:performance.now()}:null;
+      }
       obj.last={x:e.x,y:e.y};
-      obj.group.position.set(e.x,obj.baseY,e.y);for(const [field,max] of [['hp','maxHp'],['armorHp','maxArmorHp'],['magicHp','maxMagicHp']]){const fg=obj.fgs[field],visible=e[max]>0,ratio=visible?clamp((e[field]||0)/e[max],0,1):0;fg.visible=obj.barBgs[field].visible=visible;fg.scale.x=Math.max(.001,26*ratio);fg.position.x=-13*(1-ratio);}
+      if(!state.remoteView||!obj.remoteMotion)obj.group.position.set(e.x,obj.baseY,e.y);for(const [field,max] of [['hp','maxHp'],['armorHp','maxArmorHp'],['magicHp','maxMagicHp']]){const fg=obj.fgs[field],visible=e[max]>0,ratio=visible?clamp((e[field]||0)/e[max],0,1):0;fg.visible=obj.barBgs[field].visible=visible;fg.scale.x=Math.max(.001,26*ratio);fg.position.x=-13*(1-ratio);}
     }
-    for(const [id,obj] of [...enemyObjects]) if(!alive.has(id)){layer.dynamic.remove(obj.group);obj.body?.material.dispose();enemyObjects.delete(id);}
+    for(const [id,obj] of [...enemyObjects]) if(!alive.has(id)){layer.dynamic.remove(obj.group);obj.body?.material.dispose();obj.healGlow?.dispose();enemyObjects.delete(id);}
   }
   function syncMines(){
     const alive=new Set();for(const mine of state.mines||[]){alive.add(mine.id);let mesh=mineObjects.get(mine.id);if(!mesh){const model=templates.get('mine_pickup');if(model){mesh=new THREE.Group();const g=new THREE.Group();g.scale.setScalar(S);addParts(g,model.parts);mesh.add(g);}else{mesh=new THREE.Mesh(new THREE.CylinderGeometry(7,7,3,10),std(mine.color||'#e6a75f',{metalness:.25}));mesh.castShadow=true;}layer.dynamic.add(mesh);mineObjects.set(mine.id,mesh);}mesh.position.set(mine.x,model0(mesh)?0:2,mine.y);}
@@ -509,7 +613,12 @@ function create(host0,commands){
   const rnd=(i,seed)=>{const v=Math.sin(i*127.1+seed*311.7)*43758.5453;return v-Math.floor(v);};
   const lerp=(a,b,t)=>a+(b-a)*t,clamp01=t=>Math.max(0,Math.min(1,t));
   const SRC_H=34,DST_H=12,MUZZLE='#ffe9a8';
-  function towerAt(x,y){for(const record of objectRecords.values()) for(const obj of record.towers) if(Math.abs(obj.pos.x-x)<.5&&Math.abs(obj.pos.y-y)<.5) return obj;return null;}
+  function towerAt(x,y){
+    for(const record of objectRecords.values()) for(const obj of record.towers) if(Math.abs(obj.pos.x-x)<.5&&Math.abs(obj.pos.y-y)<.5) return obj;
+    for(const record of tileRecords.values()) if(record.weapon&&Math.abs(record.weapon.pos.x-x)<.5&&Math.abs(record.weapon.pos.y-y)<.5) return record.weapon;   // Base-Waffe
+    return null;
+  }
+  const seenHealBlasts=new WeakSet();   // bereits ausgewertete Heilringe
   function popEnemy(id){const obj=enemyObjects.get(id);if(obj) obj.pop=1;}
   function lightning(p,a,b,seed,fade,high){                           // gezackter Blitz zwischen zwei Punkten, flackert etwa 22-mal pro Sekunde
     const dx=b.x-a.x,dz=b.z-a.z,len=Math.hypot(dx,dz)||1,px=-dz/len,pz=dx/len,amp=Math.min(7,len*.2),N=8;
@@ -544,7 +653,7 @@ function create(host0,commands){
       }
       live.add(p.id);const t=clamp01(1-p.ttl/p.max),done=seenShots.get(p.id)||seenShots.set(p.id,{}).get(p.id);
       const src=p.kind==='chain'?p.pts[0]:{x:p.x1,y:p.y1},dst=p.kind==='chain'?p.pts.at(-1):{x:p.x2,y:p.y2};
-      if(!done.kick){done.kick=true;const tower=towerAt(src.x,src.y);if(tower) tower.kick=1;done.srcH=SRC_H+(tower?.holder.position.y||0);}   // Rückstoß; Starthöhe folgt erhöhten Sockeln
+      if(!done.kick){done.kick=true;const tower=towerAt(src.x,src.y);if(tower) tower.kick=1;done.srcH=tower?.muzzleH??SRC_H+(tower?.holder?.position.y||0);}   // Rückstoß; Starthöhe folgt erhöhten Sockeln
       const srcH=done.srcH;
       const dirx=dst.x-src.x,diry=dst.y-src.y,dlen=Math.hypot(dirx,diry)||1,ux=dirx/dlen,uy=diry/dlen;
       if(t<.3){const k=1-t/.3;fx.flash.ball(src.x+ux*7,srcH+2,src.y+uy*7,1.5+3*k,MUZZLE,k*.9);}   // Mündungsblitz
@@ -638,6 +747,8 @@ function create(host0,commands){
     entry.pos.set(x,lift+6,z);return entry;
   }
   function syncLabels(){
+    for(const [i,c] of (state.consumables||[]).entries()){const p=axialToWorld(c.q,c.r);label('consumable:'+i,p.x,p.y,(c.kind==='spikes'?'✦ Krähenfüße':'● Klebeharz')+' · '+c.charges,'',20);}
+    for(const tile of state.map.values())(tile.towers||[]).forEach((t,i)=>{if(t&&(t.overloadPending||t.overloadUntil>state.elapsedMs)){const p=slotPositions(tile)[i];label('overload:'+key(tile.q,tile.r)+':'+i,p.x,p.y,'ϟ Überladung','',95);}});
     for(const [id,slot,text] of [['duo:portal',state.duoPortal,'Partner-Portal'],['duo:reinforcement',state.duoReinforcement,'Verstärkung']]){const tile=slot&&state.map.get(key(slot.q,slot.r)),p=tile&&slotPositions(tile)[slot.index];if(p)label(id,p.x,p.y,text,'',id==='duo:portal'?30:85);}
     for(const tile of state.map.values())(tile.towers||[]).forEach((t,i)=>{if(t?.guestOwner!==undefined){const p=slotPositions(tile)[i];label('duo:guest:'+key(tile.q,tile.r)+':'+i,p.x,p.y,'Partnerhilfe','',85);}});
     for(const e of state.enemies)if(e.alive&&['splitter','shard','healer','elementCarrier'].includes(e.type)){const entry=label('enemy-ability:'+e.id,e.x,e.y,e.abilityIcon||({splitter:'◆ → ◆◆',shard:'◆',healer:'✚'})[e.type],'',38);entry.el.title=e.name+(e.description?' · '+e.description:'');entry.el.style.color=e.color||(e.type==='healer'?'#73e49c':'#e5e8de');}
@@ -650,6 +761,7 @@ function create(host0,commands){
       if(state.showUpgradeStatus)(tile.towers||[]).forEach((tower,i)=>{if(tower&&HexData.upgradeStatus(state,tower)){const p=slotPositions(tile)[i];label('upgrade:'+id+':'+i,p.x,p.y,HexData.upgradeStatus(state,tower),'big',72);}});
       if(state.showUpgradeStatus&&state.hp>0&&['place','build','wave'].includes(state.phase))(tile.buildings||[]).forEach((b,i)=>{if(b&&HexBuildings.nextUpgrade(state,b)){const p=buildingPosition(tile,i);label('upgrade:building:'+id+':'+i,p.x,p.y,'Gebäude ausbaubar','big',72);}});
       if(tile.tunnelLabel)label('tunnel:'+id,c.x,c.y,tile.tunnelLabel+' ⇄','',24);
+      if(tile.site)label(`site:${id}`,c.x,c.y+58,HexExploration.siteLabel(tile));
       if(tile.income) label(`inc:${id}`,c.x,c.y+44,'+'+tile.income+' Gold');
       const bonus=HexData.tileBonusLabel(terrain);
       if(bonus) label(`bon:${id}`,c.x,c.y+35,bonus);
@@ -712,7 +824,17 @@ function create(host0,commands){
         if(best){const wanted=Math.atan2(-(best.y-obj.pos.y),best.x-obj.pos.x),diff=Math.atan2(Math.sin(wanted-obj.angle),Math.cos(wanted-obj.angle));obj.angle+=diff*Math.min(1,dt*10);obj.turret.rotation.y=obj.angle;}
         if(obj.kick>0){obj.kick=Math.max(0,obj.kick-dt*9);const k=obj.kick*obj.kick*.045;obj.turret.position.set(obj.turretBase.x-Math.cos(obj.angle)*k,obj.turretBase.y,obj.turretBase.z+Math.sin(obj.angle)*k);}   // Rückstoß entgegen der Schussrichtung
       }
+      const baseRange=(typeof HexHeroes!=='undefined'&&HexHeroes.weapon(state)?.range)||0;
+      for(const record of tileRecords.values()){const obj=record.weapon;if(!obj?.turret) continue;
+        let best=null,bestDistance=baseRange;for(const e of enemies){const d=Math.hypot(e.x-obj.pos.x,e.y-obj.pos.y);if(d<=bestDistance){best=e;bestDistance=d;}}
+        if(best){const wanted=Math.atan2(-(best.y-obj.pos.y),best.x-obj.pos.x),diff=Math.atan2(Math.sin(wanted-obj.angle),Math.cos(wanted-obj.angle));obj.angle+=diff*Math.min(1,dt*10);obj.turret.rotation.y=obj.angle;}
+        if(obj.kick>0){obj.kick=Math.max(0,obj.kick-dt*9);const k=obj.kick*obj.kick*.045;obj.turret.position.set(obj.turretBase.x-Math.cos(obj.angle)*k,obj.turretBase.y,obj.turretBase.z+Math.sin(obj.angle)*k);}
+      }
+      for(const p of state.projectiles||[])if(p.kind==='blast'&&p.color==='#73e49c'&&!seenHealBlasts.has(p)){seenHealBlasts.add(p);
+        for(const obj of enemyObjects.values())if(obj.healGlow&&obj.last&&Math.hypot(obj.last.x-p.x,obj.last.y-p.y)<2) obj.healFlash=1;}
       for(const obj of enemyObjects.values()){
+        if(obj.healGlow){obj.healFlash=Math.max(0,obj.healFlash-dt*2.2);obj.healGlow.emissiveIntensity=obj.healBase*(.75+.35*Math.sin(now*.006+obj.group.id)+2.4*obj.healFlash);}
+        if(state.remoteView&&obj.remoteMotion){const m=obj.remoteMotion,t=Math.min(1,Math.max(0,(now-m.start)/100));obj.group.position.set(m.x+(m.toX-m.x)*t,obj.baseY,m.y+(m.toY-m.y)*t);}
         obj.bar.quaternion.copy(camera.quaternion);
         if(!obj.pivot) continue;
         const diff=Math.atan2(Math.sin(obj.targetAngle-obj.angle),Math.cos(obj.targetAngle-obj.angle));obj.angle+=diff*Math.min(1,dt*10);obj.pivot.rotation.y=obj.angle;
@@ -721,7 +843,7 @@ function create(host0,commands){
         for(const limb of obj.limbs) limb.g.rotation.z=limb.name==='leg_l'?swing:limb.name==='leg_r'?-swing:limb.name==='arm_l'?-swing*.8:swing*.8;
       }
     }
-    animateBiomeWind(now);placeLabels();backgroundSun.position.copy(sun.position);backgroundSun.target.position.copy(sun.target.position);
+    animateBiomeWind(now);animateSakuraAmbient(now);placeLabels();backgroundSun.position.copy(sun.position);backgroundSun.target.position.copy(sun.target.position);
     gl.clear();gl.render(backgroundScene,camera);gl.clearDepth();gl.render(scene,camera);renderedFrameCount++;
   }
 
@@ -796,11 +918,11 @@ function create(host0,commands){
     return HexUiLayout.pickScreenSlot(slots,event.clientX-box.left,event.clientY-box.top,box.width,box.height);
   },rotateView,panView,zoom:factor=>zoom(factor),resetView:()=>resetView(true),getView,
     destroy(){
-      destroyed=true;cancelAnimationFrame(raf);resize.disconnect();for(const [name,fn,options] of listeners) dom.removeEventListener(name,fn,options);
-      windPool.mesh.geometry.dispose();windPool.mesh.material.dispose();windPool.mesh.dispose();mistPool.mesh.geometry.dispose();mistPool.mesh.material.dispose();mistPool.mesh.dispose();
+      destroyed=true;stopEditionWatch?.();cancelAnimationFrame(raf);resize.disconnect();for(const [name,fn,options] of listeners) dom.removeEventListener(name,fn,options);
+      windPool.mesh.geometry.dispose();windPool.mesh.material.dispose();windPool.mesh.dispose();for(const pool of [flakePool,rainPool]){pool.mesh.geometry.dispose();pool.mesh.material.dispose();pool.mesh.dispose();}mistPool.mesh.geometry.dispose();mistPool.mesh.material.dispose();mistPool.mesh.dispose();
       for(const materials of Object.values(biomeOverlayMaterials)){materials.fill.dispose();materials.border.dispose();}
       clearOverlays();buildingPadGeometry.dispose();buildingPadMaterial.dispose();slotDiamondGeometry.dispose();gridGeometry.dispose();buffGeometry.dispose();gridMaterial.dispose();otherBuffMaterial.dispose();otherBuffBorder.dispose();buffMaterial.dispose();buffBorderMaterial.dispose();
-      for(const material of biomeMaterials.values())material.dispose();biomeMaterials.clear();
+      for(const material of biomeMaterials.values())material?.dispose();biomeMaterials.clear();
       gl.dispose();host.remove();wrap.classList.remove('is3d');if(hintText) hintText.textContent=oldHint;host0.style.display='';
     }};
 }

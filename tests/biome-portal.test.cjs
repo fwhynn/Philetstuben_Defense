@@ -122,7 +122,7 @@ test('first hint marks every simultaneously discovered biome and shows hover eff
  const desert=buttons[1];desert.listeners.pointerenter();assert.ok(elements.get('biomeIntroDetail').textContent.includes('Dünenmeer'));assert.ok(elements.get('biomeIntroDetail').textContent.includes('15 %'));
  assert.equal(buttons.filter(b=>b.classList.contains('biomeIntroTarget')).length,3);
  for(const id of a.state.biomeIntro)assert.ok(c.biomes.highlight(a.state).tiles.some(t=>c.biomes.forTile(a.state,t)===id));
- desert.listeners.pointerleave();assert.ok(elements.get('biomeIntroDetail').textContent.includes('Aschelande'));
+ desert.listeners.pointerleave();assert.ok(elements.get('biomeIntroDetail').children.some(row=>row.textContent==='Aschelande'));
  elements.get('biomeIntroClose').listeners.click();assert.equal(a.state.biomeIntro,null);assert.equal(buttons.filter(b=>b.classList.contains('biomeIntroTarget')).length,0);
 });
 

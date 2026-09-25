@@ -99,7 +99,11 @@ const HexMap=(()=>{
   function hasExteriorFront(map,landmarks){
     const network=new Map(map);for(const [id,l] of landmarks||[])if(!network.has(id)&&!l.claimed&&l.prefab)network.set(id,{...l.prefab,q:l.q,r:l.r});
     const outside=exterior(map,landmarks),connected=reachable(network);
-    for(const tile of network.values())if(tile.type!=='base'&&connected.has(key(tile.q,tile.r)))for(const d of tile.roads||[]){const n=neighbor(tile.q,tile.r,d);if(!map.has(key(n.q,n.r))&&outside.has(key(n.q,n.r)))return true;}
+    for(const tile of network.values())if(tile.type!=='base'&&connected.has(key(tile.q,tile.r)))for(const d of tile.roads||[]){const n=neighbor(tile.q,tile.r,d);if(!network.has(key(n.q,n.r))&&outside.has(key(n.q,n.r))){
+        // An empty pocket beside a road is not an expandable front unless a
+        // continuation can leave it toward the exterior without another tile.
+        for(let exit=0;exit<6;exit++){const next=neighbor(n.q,n.r,exit);if(!network.has(key(next.q,next.r))&&outside.has(key(next.q,next.r)))return true;}
+      }}
     return false;
   }
   function tunnelPlan(map,landmarks,allowExterior=false){
@@ -167,11 +171,16 @@ const HexMap=(()=>{
   const CURVE_CENTERLINE=[[46.8,0],[41.6,-0.1],[36.7,-0.5],[31.8,-1.1],[27.1,-2],[22.6,-3.1],[18.2,-4.5],[13.9,-6.1],[9.8,-8],[5.8,-10.1],[2,-12.5],[-1.7,-15.1],[-5.2,-18],[-8.6,-21.1],[-11.8,-24.5],[-14.9,-28.1],[-17.9,-32],[-20.7,-36.1],[-23.4,-40.5]];
   // Zickzack wie im Modell tile_longRoad.glb: gerade Abschnitte mit gerundeten Knicken bei x=±27 und ±14.
   const LONGROAD_CENTERLINE=[[46.8,0],[27,0],[14,-10.8],[0,0],[-14,10.8],[-27,0],[-46.8,0]];
-  const MODEL_ROADS={bigCurve:{roads:[0,2],line:CURVE_CENTERLINE},village:{roads:[0,2],line:CURVE_CENTERLINE},grove:{roads:[0,2],line:CURVE_CENTERLINE},watchtower:{roads:[0,2],line:CURVE_CENTERLINE},longRoad:{roads:[0,3],line:LONGROAD_CENTERLINE}};
-  function modelRoadLegs(center,type,roads){
+  // Eigener Zickzack wie im Modell tile_mineRoad.glb: große Zacke nach Norden, kurze nach Süden (bewusst anders als die lange Straße).
+  const MINEROAD_CENTERLINE=[[46.8,0],[30.2,0],[8.6,-21.6],[-9.7,0],[-21.6,9.2],[-32.4,0],[-46.8,0]];
+  const MODEL_ROADS={bigCurve:{roads:[0,2],line:CURVE_CENTERLINE},village:{roads:[0,2],line:CURVE_CENTERLINE},grove:{roads:[0,2],line:CURVE_CENTERLINE},watchtower:{roads:[0,2],line:CURVE_CENTERLINE},longRoad:{roads:[0,3],line:LONGROAD_CENTERLINE},mineRoad:{roads:[0,3],line:MINEROAD_CENTERLINE}};
+  function modelRoadLegs(center,type,roads,rotation){
     const model=MODEL_ROADS[(typeof HexData!=='undefined'&&HexData.CARD_LIBRARY[type]?.model)||type];if(!model||roads.length!==2) return null;
     const want=[...roads].sort().join();let rot=-1;
-    for(let r=0;r<6;r++) if(model.roads.map(d=>(d+r)%6).sort().join()===want){rot=r;break;}
+    // Nicht punktsymmetrische Formen (z. B. Minenstraße): die tatsächliche Drehung des Tiles hat Vorrang, wenn sie passt.
+    const fits=r=>model.roads.map(d=>(d+r)%6).sort().join()===want;
+    if(Number.isInteger(rotation)&&fits(((rotation%6)+6)%6)) rot=((rotation%6)+6)%6;
+    else for(let r=0;r<6;r++) if(fits(r)){rot=r;break;}
     if(rot<0) return null;
     const theta=-Math.PI/3*rot,cos=Math.cos(theta),sin=Math.sin(theta);
     const line=model.line.map(([x,y])=>({x:center.x+x*cos-y*sin,y:center.y+x*sin+y*cos}));
@@ -184,7 +193,7 @@ const HexMap=(()=>{
   function roadGeometry(tile){
     const type=(typeof HexData!=='undefined'&&HexData.CARD_LIBRARY[tile.type]?.model)||tile.type;
     const center=axialToWorld(tile.q,tile.r),roads=tile.roads||[];
-    const modeled=modelRoadLegs(center,tile.type,roads);if(modeled) return modeled;
+    const modeled=modelRoadLegs(center,tile.type,roads,tile.rotation);if(modeled) return modeled;
     let hub={...center};
     if(roads.length===2&&['smallCurve'].includes(type)){
       const edges=roads.map(d=>edgePoint(center.x,center.y,d,1));

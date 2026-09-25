@@ -11,16 +11,23 @@ const HexBuildings=(()=>{
   function canTarget(state,slot,target){const source=slot&&state.map.get(slot.q+','+slot.r),b=source?.buildings?.[slot.index],tile=state.map.get(target);if(!b?.special||b.type==='house'||!tile)return false;if(b.type==='forge')for(const t of state.map.values())for(const other of t.buildings||[])if(other?.type==='forge'&&applies(t,tile,other))return false;return true;}
   function setTarget(state,slot,target){const source=slot&&state.map.get(slot.q+','+slot.r),b=source?.buildings?.[slot.index];if(!canTarget(state,slot,target)||state.hp<=0||!['place','build','wave'].includes(state.phase))return false;b.target=target;state.buildingVersion=(state.buildingVersion||0)+1;refresh(state);return true;}
   function effects(map,target){
-    let damage=1,discount=1;if(!target) return {damage,discount};
+    let damage=1,discount=1,shrineDamage=1,range=1;if(!target) return {damage,discount};
     for(const tile of map.values()){
       const dq=tile.q-target.q,dr=tile.r-target.r;
       const distance=Math.max(Math.abs(dq),Math.abs(dr),Math.abs(dq+dr));
+      if(distance<=1){if(tile.siteEffect==='damage')shrineDamage=1.1;if(tile.siteEffect==='range')range=1.15;}
       for(const building of tile.buildings||[]){const def=definition(building);if(!def||!(distance<=def.radius||building.special&&building.target===target.q+','+target.r))continue;damage=Math.max(damage,def.damage||1);discount=Math.min(discount,def.discount||1);}
     }
-    return {damage,discount};
+    return {damage:damage*shrineDamage,discount,range};
   }
   function currentTarget(state,building){return building?.special&&building.target&&state.map.has(building.target)?{currentTiles:[state.map.get(building.target)],currentColor:building.type==='forge'?'#ff6b1a':'#00e7c0'}:{currentTiles:[]};}
   function highlight(state){
+    const focus=state.selectedTower||state.selectedSlot;
+    if(focus&&!state.selectedBuilding&&!state.buildingTarget&&!state.hoverBuilding){
+      const shrines=[...state.map.values()].filter(t=>t.siteEffect&&Math.max(Math.abs(t.q-focus.q),Math.abs(t.r-focus.r),Math.abs(t.q+t.r-focus.q-focus.r))<=1);
+      if(shrines.length)return {tiles:[...state.map.values()].filter(t=>shrines.some(s=>Math.max(Math.abs(t.q-s.q),Math.abs(t.r-s.r),Math.abs(t.q+t.r-s.q-s.r))<=1)),color:'#b3a1ff'};
+    }
+
     if(state.buildingTarget){const slot=state.buildingTarget,b=state.map.get(slot.q+','+slot.r)?.buildings?.[slot.index];if(b?.special&&b.type!=='house')return {tiles:[...state.map.values()].filter(t=>canTarget(state,slot,t.q+','+t.r)),color:definitions[b.type].color,...currentTarget(state,b)};}
     const preview=state.previewBuilding,selected=state.selectedBuilding,validPreview=preview&&selected&&preview.q===selected.q&&preview.r===selected.r&&preview.index===selected.index&&!state.map.get(preview.q+','+preview.r)?.buildings?.[preview.index];
     const slot=validPreview?preview:state.hoverBuilding||selected,source=slot&&state.map.get(slot.q+','+slot.r),building=validPreview?{type:preview.type,level:1}:source?.buildings?.[slot.index],def=definition(building);
@@ -46,7 +53,13 @@ const HexBuildings=(()=>{
     return best;
   }
   function patricianCount(state){let count=0;for(const tile of state.map.values())for(const b of tile.buildings||[])if(b?.type==='house'&&b.special)count++;return count;}
-  function refresh(state){const count=patricianCount(state),bonus=2*count*Math.max(0,count-1);state.income=(state.income||0)+bonus-(state.patricianBonusIncome||0);state.patricianBonusIncome=bonus;for(const tile of state.map.values()){if(!tile.towers?.some(Boolean))continue;const damage=effects(state.map,tile).damage;for(const tower of tile.towers)if(tower)tower.supportDamage=damage;}}
+  function rangeBonus(map,slot){const tile=slot&&map.get(slot.q+','+slot.r);return (effects(map,slot).range||1)*(tile?.site==='guardian'&&slot.index===tile.siteSlot?1.2:1);}
+  function refresh(state){
+    const posts=[...state.map.values()].filter(t=>t.site==='tradePost');let tradeIncome=0;
+    const connected=posts.length?HexMap.routeGraph(state.map).distances:null;
+    for(const tile of posts){tile.siteIncome=connected.has(tile.q+','+tile.r)&&tradeIncome<20?2:0;tradeIncome+=tile.siteIncome;}
+    state.income=(state.income||0)+tradeIncome-(state.tradePostIncome||0);state.tradePostIncome=tradeIncome;
+const count=patricianCount(state),bonus=2*count*Math.max(0,count-1);state.income=(state.income||0)+bonus-(state.patricianBonusIncome||0);state.patricianBonusIncome=bonus;for(const tile of state.map.values()){if(!tile.towers?.some(Boolean))continue;const support=effects(state.map,tile),damage=support.damage;tile.towers.forEach((tower,index)=>{if(tower){tower.supportDamage=damage;tower.supportRange=(support.range||1)*(tile.site==='guardian'&&index===tile.siteSlot?1.2:1);}});}}
   function buildBlockReason(tile,type){if(!['forge','market'].includes(type)||!tile?.buildings?.some(b=>b?.type===type))return '';return type==='forge'?'Auf diesem Hex steht bereits eine Schmiede. Der Schadensbonus ist nicht stapelbar.':'Auf diesem Hex steht bereits ein Markt. Der Rabatt ist nicht stapelbar.';}
   function buy(state,slot,type){
     const def=definitions[type],tile=slot?state.map.get(slot.q+','+slot.r):null;
@@ -62,5 +75,5 @@ const HexBuildings=(()=>{
     tile.buildings[slot.index]=null;state.gold+=value.amount;state.income-=definition(building).income||0;
     state.buildingVersion=(state.buildingVersion||0)+1;refresh(state);return true;
   }
-  return {buildBlockReason,allowedTypes,upgrades,specials,definition,nextUpgrade,upgrade,canTarget,setTarget,definitions,highlight,buy,effects,cost,freeSlotDiscount,refresh,refund,sell};
+  return {rangeBonus,buildBlockReason,allowedTypes,upgrades,specials,definition,nextUpgrade,upgrade,canTarget,setTarget,definitions,highlight,buy,effects,cost,freeSlotDiscount,refresh,refund,sell};
 })();

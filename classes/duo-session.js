@@ -39,7 +39,7 @@ const HexDuoSession=(()=>{
     match.result={id:match.seed+'|result',outcome,wave,players:match.boards.map((r,i)=>({wave,diamonds:Math.floor(wave/2)+(r.state.earnedMeta?.periodicBosses||0)*5+exploration*3,towers:JSON.parse(JSON.stringify(r.state.runTowerStats)),support:JSON.parse(JSON.stringify(match.support[i])),gold:r.state.gold}))};
     match.rematch=[false,false];
   }
-  function lose(match){cleanGuests(match);match.hp=0;match.phase='gameover';match.ready=[false,false];for(const {state:s} of match.boards){s.hp=0;s.phase='gameover';s.waveRunning=false;s.spawnQueue=[];s.pendingSpawns=0;s.enemies=[];s.projectiles=[];}finishMatch(match,'defeat');}
+  function lose(match){cleanGuests(match);match.hp=0;match.phase='gameover';match.ready=[false,false];for(const {state:s} of match.boards){HexCombat.clearConsumables(s);s.hp=0;s.phase='gameover';s.waveRunning=false;s.spawnQueue=[];s.pendingSpawns=0;s.enemies=[];s.projectiles=[];}finishMatch(match,'defeat');}
   function collectHealth(match,state,beforeHp,beforeMax){match.maxHp+=state.maxHp-beforeMax;match.hp=Math.min(match.maxHp,Math.max(0,match.hp+state.hp-beforeHp));sync(match);if(match.hp<=0)lose(match);}
   function canReady(run){const s=run.state;return s.phase==='build'&&!s.celebrationActive&&!s.openingRemaining&&!s.rewardOffer&&HexRunRuntime.spawnSources(s).length>0;}
   function command(match,player,{id,wave,action,payload={}}={}){
@@ -74,6 +74,7 @@ const HexDuoSession=(()=>{
       else if(action==='acknowledge'&&match.phase==='prepare')ok=HexRunSession.acknowledge(s);
       else if(action==='tower'&&!payload.slots?.some(slot=>same(slot,match.portals[player])))ok=HexTowerCommands.buy(s,payload.type,payload.slots).ok;
       else if(action==='upgrade'&&slotAt(s,payload.slot)?.towers[payload.slot.index]?.guestOwner===undefined)ok=HexTowerCommands.upgrade(s,payload.slot,payload.upgrade);
+      else if(action==='consumable')ok=HexCombat.buyConsumable(s,payload.kind,payload.slot);
       else if(action==='baseUpgrade')ok=HexHeroes.buy(s,payload.kind);
       else if(action==='buildingTarget')ok=HexBuildings.setTarget(s,payload.slot,payload.target);
       else if(action==='sellBuilding')ok=HexBuildings.sell(s,payload.slot);

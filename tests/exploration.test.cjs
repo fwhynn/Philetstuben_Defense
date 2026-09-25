@@ -1,6 +1,6 @@
 const { test } = require('node:test'), assert = require('node:assert/strict');
 const fs = require('node:fs'), path = require('node:path'), vm = require('node:vm');
-function load() { const context = {}; for (const file of ['random.js', 'map.js', 'exploration.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../classes', file), 'utf8'), context); vm.runInNewContext('globalThis.mapRules=HexMap;globalThis.rules=HexExploration;globalThis.random=HexRandom.create;', context); return context; }
+function load() { const context = {}; for (const file of ['random.js', 'map.js', 'data.js', 'buildings.js', 'exploration.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../classes', file), 'utf8'), context); vm.runInNewContext('globalThis.mapRules=HexMap;globalThis.rules=HexExploration;globalThis.random=HexRandom.create;', context); return context; }
 test('adjacent events connect on both sides, including across later exploration boundaries', () => {
   const { rules, random, mapRules: m } = load(); let pairs = 0, boundaryPairs = 0;
   for (let seed = 0; seed < 100; seed++) {
@@ -96,3 +96,15 @@ test('placement respects fixed special roads and disconnected specials stay inac
 });
 
 test('treasure value uses direct hex distance equally in every direction',()=>{const {rules}=load();for(const p of [{q:4,r:0},{q:0,r:4},{q:-4,r:4},{q:-4,r:0},{q:0,r:-4},{q:4,r:-4}])assert.equal(rules.treasureReward(p),20);assert.equal(rules.treasureReward({q:3,r:2}),25);});
+
+test('event groups keep outward road connections as well as matching adjacent events',()=>{
+ const {rules,random,mapRules:m}=load();
+ for(let seed=0;seed<100;seed++){const landmarks=rules.create(random('event-open-'+seed));rules.expand(landmarks,new Map([['8,0',{q:8,r:0}],['0,8',{q:0,r:8}]]));
+  for(const l of landmarks.values()){
+   const neighbors=l.prefab.roads.map(d=>m.neighbor(l.q,l.r,d));
+   // Each boundary event has an outward arm; interior events connect to these.
+   const required=Array.from({length:6},(_,d)=>m.neighbor(l.q,l.r,d)).filter(n=>landmarks.has(m.key(n.q,n.r)));
+   if(required.length<6)assert.ok(neighbors.some(n=>!landmarks.has(m.key(n.q,n.r))));
+  }
+ }
+});

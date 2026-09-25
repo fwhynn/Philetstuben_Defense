@@ -78,8 +78,8 @@ const HexProfile=(()=>{
     return save({...clean,diamonds:clean.diamonds-offer.cost,unlockCosts:{...clean.unlockCosts,['tower:'+id]:offer.cost},unlockedTowers:[...clean.unlockedTowers,id],unlocks:[...clean.unlocks,'tower:'+id]},definitions);
   }
   function unlockUltimate(profile,id,definitions){const [type,branch]=id.split(':'),offer=ULTIMATE_UNLOCKS[type],clean=normalize(profile,definitions),key='ultimate:'+id;if(!offer||branch&&!ULTIMATE_BRANCHES[type]?.includes(branch)||!clean.unlockedTowers.includes(type)||(branch?ownsUltimate(clean,type,branch):clean.unlocks.includes(key))||clean.diamonds<offer.cost)return null;return save({...clean,diamonds:clean.diamonds-offer.cost,unlockCosts:{...clean.unlockCosts,[key]:offer.cost},unlocks:[...clean.unlocks,key],activeUltimates:{...clean.activeUltimates,...(!activeUltimate(clean,type)&&branch?{[type]:branch}:{})}},definitions);}
-  function settleDaily(profile,day,wave,definitions){
-    const clean=normalize(profile,definitions),results={...(clean.dailyResults||{})},old=results[day]||{},won=wave>=20,reward=won&&!old.won?10:0;
+  function settleDaily(profile,day,wave,definitions,target=20){
+    const clean=normalize(profile,definitions),results={...(clean.dailyResults||{})},old=results[day]||{},won=wave>=target,reward=won&&!old.won?10:0;
     results[day]={best:Math.max(Number(old.best)||0,wave),won:!!old.won||won};
     return {profile:save({...clean,dailyResults:results,diamonds:clean.diamonds+reward,lifetime:{...clean.lifetime,diamondsEarned:clean.lifetime.diamondsEarned+reward}},definitions),reward};
   }

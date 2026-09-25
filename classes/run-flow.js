@@ -3,6 +3,7 @@ const HexRunFlow=(()=>{
   const {key}=HexMap;
   function shuffle(arr,random){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
   function drawHand(state,random){
+    if(state.challengeKind==='garrison'){state.hand=[];state.phase='build';return 'ready';}
     const CARD_LIBRARY=HexData.CARD_LIBRARY;let result='ready';
     const shuffle=arr=>HexRunFlow.shuffle(arr,random);
     // A building plot or a closing road never satisfies the road-progress guarantee.
@@ -13,8 +14,7 @@ const HexRunFlow=(()=>{
         const n=HexMap.neighbor(tile.q,tile.r,d),id=key(n.q,n.r);if(checked.has(id))continue;checked.add(id);
         if(!HexPlacementCommands.canPlace(state,n.q,n.r,card,rotation))continue;
         const roads=HexMap.rotatedRoads(card,rotation),candidate=new Map(state.map);candidate.set(id,{...n,type:card.id,roads});
-        const outside=HexMap.exterior(candidate,state.landmarks);
-        if(roads.some(dir=>{const next=HexMap.neighbor(n.q,n.r,dir);return outside.has(key(next.q,next.r));}))return true;
+        if(HexMap.hasExteriorFront(candidate,state.landmarks))return true;
       }
       return false;
     }
@@ -36,7 +36,7 @@ const HexRunFlow=(()=>{
     if(!playable){
       const rescue=HexMap.rescue(state.map,state.landmarks,state.difficulty==='dual'?2:1);
       if(rescue){state.discard.push(...state.hand);state.rescueCard=rescue;state.hand=['rescue'];result='rescue';}
-      else {state.phase='build';state.tunnelOffer=HexMap.tunnelPlan(state.map,state.landmarks,state.difficulty==='dual');result=state.tunnelOffer?'tunnel':'blocked';}
+      else {state.phase='build';state.tunnelOffer=HexMap.tunnelPlan(state.map,state.landmarks,true);result=state.tunnelOffer?'tunnel':'blocked';}
     }
     return result;
   }
@@ -97,10 +97,11 @@ const HexRunFlow=(()=>{
   function finish(state){
     if(state.hp<=0||state.wave<1||state.pendingSpawns>0||state.enemies.some(e=>e.alive)||state.lastCompletedWave===state.wave)return null;
     state.lastCompletedWave=state.wave;state.waveRunning=false;
-    state.gold+=HexWaves.economy.completion+state.income;state.projectiles=[];state.mines=[];
+    HexCombat.clearConsumables(state);
+    if(state.challengeKind!=='garrison')state.gold+=HexWaves.economy.completion+state.income;state.projectiles=[];state.mines=[];
     for(const tile of state.map.values())for(const tower of tile.towers||[])if(tower)tower.souls=[];
-    state.goldEarned.completion+=HexWaves.economy.completion;state.goldEarned.income+=state.income;state.phase='place';
-    if(state.challengeDay&&state.wave===20&&!state.challengeWon){state.challengeWon=true;state.phase='victory';return {victory:true};}
+    if(state.challengeKind!=='garrison'){state.goldEarned.completion+=HexWaves.economy.completion;state.goldEarned.income+=state.income;}state.phase='place';
+    if(state.challengeDay&&state.wave===(state.challengeTarget||20)&&!state.challengeWon){state.challengeWon=true;state.phase='victory';return {victory:true};}
     return {victory:false};
   }
   return {shuffle,drawHand,start,finish};

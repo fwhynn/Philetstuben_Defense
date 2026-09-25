@@ -44,10 +44,10 @@ const HexExploration=(()=>{
     const required=[];
     for(let d=0;d<6;d++) if(eventType(seed,HexMap.neighbor(position.q,position.r,d))) required.push(d);
     const original=make(shape,rotation);
-    if(required.every(d=>original.roads.includes(d))) return original;
+    if(required.every(d=>original.roads.includes(d))&&(required.length===6||original.roads.some(d=>!required.includes(d)))) return original;
     const candidates=[];
     for(const candidate of shapes) for(let turn=0;turn<6;turn++){
-      const p=make(candidate,turn);if(required.every(d=>p.roads.includes(d))) candidates.push(p);
+      const p=make(candidate,turn);if(required.every(d=>p.roads.includes(d))&&(required.length===6||p.roads.some(d=>!required.includes(d)))) candidates.push(p);
     }
     return candidates.length?candidates[Math.floor(hash(seed^86420,position.q,position.r)*candidates.length)]:make(['fullCross',[0,1,2,3,4,5]],0);
   }
@@ -64,7 +64,7 @@ const HexExploration=(()=>{
     return result;
   }
   function shrineEffect(landmarks,id){
-    const landmark=landmarks.get(id);if(landmark.shrineEffect) return landmark.shrineEffect;
+    const landmark=landmarks.get(id);if(landmark.shrineEffect)return landmark.shrineEffect;if(landmark.strategic)return 'aura';
     const roll=hash((landmarks.seed||0)^987654321,landmark.q,landmark.r);
     return roll<.2?'remove':roll<.4?'card':roll<.6?'epic':roll<.7?'legendary':roll<.85?'repair':'upgrade';
   }
@@ -85,9 +85,19 @@ const HexExploration=(()=>{
     const tile=state.map.get(id);
     if(!(tile.roads||[]).some(d=>{const n=HexMap.neighbor(q,r,d),other=state.map.get(HexMap.key(n.q,n.r));return other&&(other.roads||[]).includes(HexMap.OPP(d));})) return 0;
     landmark.claimed=true;
-    if(landmark.type==='shrine'){if(state.pendingShrine)(state.shrineQueue??=[]).push(id);else state.pendingShrine=id;return 0;}
+    if(landmark.type==='shrine'){landmark.strategic=true;tile.site='shrine';if(state.pendingShrine)(state.shrineQueue??=[]).push(id);else state.pendingShrine=id;return 0;}
     if(landmark.type==='boss'){landmark.status=state.duoMode?'pending':'ready';if(state.duoMode)landmark.consent=[false,false];return 0;}
-    const amount=treasureReward(landmark);state.gold+=amount;state.goldEarned.treasure=(state.goldEarned.treasure||0)+amount;return amount;
+    tile.site='tradePost';HexBuildings.refresh(state);const amount=treasureReward(landmark);state.gold+=amount;state.goldEarned.treasure=(state.goldEarned.treasure||0)+amount;return amount;
   }
-  return {clearRadius,fogRadius,treasureReward,distance,create,region,expand,visibility,claim,bossProfile,shrineEffect,bossRewardRarity,prefab,attach,gridCells};
+  function activateShrine(state,id,effect){
+    const tile=state.map.get(id),landmark=state.landmarks?.get(id);
+    if(!tile||!landmark?.strategic||tile.siteEffect||!['damage','range'].includes(effect))return false;
+    tile.siteEffect=effect;state.buildingVersion=(state.buildingVersion||0)+1;HexBuildings.refresh(state);return true;
+  }
+  function defeatGuardian(state,id){
+    const tile=state.map?.get(id),landmark=state.landmarks?.get(id);if(!tile||landmark?.type!=='boss'||tile.site==='guardian')return;
+    tile.site='guardian';tile.siteSlot=tile.slots||0;tile.slots=tile.siteSlot+1;tile.towers??=[];tile.towers.push(null);state.buildingVersion=(state.buildingVersion||0)+1;
+  }
+  function siteLabel(tile){return tile.site==='tradePost'?'Handelsposten · +'+(tile.siteIncome||0)+' Gold/Welle (gesamt max. 20)':tile.site==='guardian'?'Wächterplatz · +20 % Reichweite':tile.site==='shrine'?(tile.siteEffect==='damage'?'Schrein · +10 % Schaden · Nachbarhexe':tile.siteEffect==='range'?'Schrein · +15 % Reichweite · Nachbarhexe':'Schrein · Segen wählen'):'';}
+  return {activateShrine,defeatGuardian,siteLabel,clearRadius,fogRadius,treasureReward,distance,create,region,expand,visibility,claim,bossProfile,shrineEffect,bossRewardRarity,prefab,attach,gridCells};
 })();

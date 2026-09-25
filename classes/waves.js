@@ -1,5 +1,6 @@
 const HexWaves=(()=>{
   const economy={kill:3,completion:10,startGold:70};
+  function daily(day){const offset=Math.floor((Date.parse(day+'T00:00:00Z')-Date.UTC(2026,8,22))/86400000);return Math.abs(offset%2)===1?{id:'garrison',name:'Die letzte Garnison',target:3}:{id:'caravan',name:'Die letzte Karawane',target:20};}
   function bossProfile(wave){
     if(wave<15||(wave-15)%10!==0) return null;
     const hp=Math.round(1200*Math.pow((wave-5)/10,1.8));
@@ -14,6 +15,11 @@ const HexWaves=(()=>{
     return types[(hash+Math.max(0,wave-26))%types.length];
   }
   function plan(wave,income=0,caravan=false,context={}){
+    if(context.challengeKind==='garrison'){
+      const strength=18+Math.max(0,wave-1)*3,p=plan(strength,0,false,{...context,challengeKind:null});
+      for(const enemy of p.enemies)enemy.killGold=0;if(p.boss)p.boss.killGold=0;
+      return {...p,wave,killGold:0,completionGold:0,income:0,maxGold:0};
+    }
     // Keep the opening approachable; growing routes/defenses need compounding pressure.
     const count=wave===1?5:5+wave*2,hp=Math.round((28+wave*7)*Math.pow(1.10,Math.max(0,wave-3)));
     const speed=(.34+Math.min(.12,wave*.005))*54*Math.sqrt(3);
@@ -33,6 +39,6 @@ const HexWaves=(()=>{
     const bonus=enemies.filter(e=>e.caravan).length*15;
     return {wave,count,hp,speed,enemies,boss,type:'Gegner',killGold:count*economy.kill+bonus,completionGold:economy.completion,income,maxGold:count*economy.kill+bonus+economy.completion+income+(boss?.killGold||0)};
   }
-  return {economy,plan,bossProfile,elementFor};
+  return {daily,economy,plan,bossProfile,elementFor};
 })();
 
