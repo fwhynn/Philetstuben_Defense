@@ -20,7 +20,7 @@ try {
     if ($method === 'GET') {
         respond(200, [
             'ok' => true,
-            'message' => 'Send a signed GitHub tag-push webhook via POST to deploy. Only phil can deploy.',
+            'message' => 'Send a signed GitHub tag-push webhook via POST to deploy.',
             'repoRoot' => REPO_ROOT,
         ]);
     }
