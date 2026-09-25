@@ -6,7 +6,7 @@ const APP_ROOT = __DIR__;
 const REMOTE_NAME = 'origin';
 const SECRET_FILE = REPO_ROOT . '/.deploy-webhook-secret';
 const LOCK_FILE = '/tmp/autohextd-tag-webhook.lock';
-const ERROR_LOG_FILE = APP_ROOT . '/webhook-error.log';
+const WEBHOOK_LOG_FILE = APP_ROOT . '/webhook.log';
 const DEPLOY_BRANCH = 'main';
 const NODE_BIN = '/usr/local/bin/node';
 const NPM_BIN = '/usr/local/bin/npm';
@@ -219,6 +219,11 @@ function runCheckedCommand(string $command, string $cwd, string $failureMessage)
 {
     $result = runCommand($command, $cwd);
     if ($result['exitCode'] !== 0) {
+        try {
+            appendWebhookLog('error', "STEP FAILED: $command", $result);
+        } catch (Throwable $_) {
+            // ignore
+        }
         respond(500, [
             'ok' => false,
             'message' => $failureMessage,
@@ -243,40 +248,52 @@ function runCommand(string $command, string $cwd): array
     ];
 }
 
+function appendWebhookLog(string $level, string $message, $data = null): void
+{
+    $lines = [];
+    $lines[] = str_repeat('=', 78);
+    $lines[] = sprintf("%s [%s] %s", gmdate('c'), strtoupper($level), $message);
+    $lines[] = str_repeat('-', 78);
+
+    if (is_string($data) || is_numeric($data)) {
+        $lines[] = (string) $data;
+    } elseif (is_array($data)) {
+        if (isset($data['command'])) {
+            $lines[] = 'Command: ' . $data['command'];
+        }
+        if (isset($data['cwd'])) {
+            $lines[] = 'CWD: ' . $data['cwd'];
+        }
+        if (isset($data['exitCode'])) {
+            $lines[] = 'Exit code: ' . $data['exitCode'];
+        }
+        if (isset($data['stdout'])) {
+            $lines[] = 'Output:';
+            $outLines = explode("\n", (string) $data['stdout']);
+            foreach ($outLines as $ol) {
+                $lines[] = '  ' . $ol;
+            }
+        } else {
+            $lines[] = trim(print_r($data, true));
+        }
+    } elseif ($data !== null) {
+        $lines[] = trim(print_r($data, true));
+    }
+
+    $lines[] = "\n";
+    @file_put_contents(WEBHOOK_LOG_FILE, implode("\n", $lines), FILE_APPEND | LOCK_EX);
+}
+
 function respond(int $statusCode, array $payload): never
 {
-    if ($statusCode >= 400) {
-        logWebhookError($statusCode, $payload);
+    // always append to human-readable webhook log
+    try {
+        appendWebhookLog($statusCode >= 400 ? 'error' : 'info', 'respond', ['status' => $statusCode, 'payload' => $payload]);
+    } catch (Throwable $_) {
+        // ignore
     }
     http_response_code($statusCode);
     echo json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . "\n";
     exit;
 }
 
-function logWebhookError(int $statusCode, array $payload): void
-{
-    $context = [
-        'timestamp' => gmdate('c'),
-        'statusCode' => $statusCode,
-        'method' => $_SERVER['REQUEST_METHOD'] ?? '',
-        'uri' => $_SERVER['REQUEST_URI'] ?? '',
-        'remoteAddr' => $_SERVER['REMOTE_ADDR'] ?? '',
-        'event' => $_SERVER['HTTP_X_GITHUB_EVENT'] ?? '',
-        'payload' => $payload,
-    ];
-
-    $encoded = json_encode($context, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-    if (!is_string($encoded)) {
-        $encoded = json_encode([
-            'timestamp' => gmdate('c'),
-            'statusCode' => $statusCode,
-            'message' => 'Failed to encode webhook error payload.',
-        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-    }
-
-    if (!is_string($encoded)) {
-        return;
-    }
-
-    @file_put_contents(ERROR_LOG_FILE, $encoded . "\n", FILE_APPEND | LOCK_EX);
-}

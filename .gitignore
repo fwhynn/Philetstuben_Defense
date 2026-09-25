@@ -2,7 +2,7 @@ node_modules/
 .claude/
 .local/
 *.log
-webhook-error.log
+webhook.log
 assets/index.json
 .deploy-webhook-secret
 .npm-cache/

@@ -247,6 +247,19 @@ async function main() {
     git(['tag', '-a', tag, '-m', tag], { stdio: 'inherit' });
     pushRelease(repo, tag, 'Game');
 
+    // if requested, also create and push a test tag for the game repo
+    if (testFlag) {
+      try {
+        const nGame = nextTestNumber(repo, tag);
+        const testTagGame = `${tag}-test${nGame}`;
+        git(['tag', '-a', testTagGame, '-m', testTagGame], { stdio: 'inherit' });
+        pushRelease(repo, testTagGame, 'Game (test)');
+        console.log(`Created and pushed test tag ${testTagGame} in Game repo.`);
+      } catch (e) {
+        console.error('Warning: could not create/push test tag in Game repo.', e && e.message ? e.message : e);
+      }
+    }
+
     if (releaseApi) {
       // create and push the normal API tag
       gitAt(apiRepo, ['tag', '-a', tag, '-m', tag], { stdio: 'inherit' });
