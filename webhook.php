@@ -67,6 +67,13 @@ try {
         ]);
     }
 
+    // Start a human-readable chapter for this tag
+    try {
+        appendWebhookLog('info', 'New Tag', ['tag' => $tag, 'actor' => $actor]);
+    } catch (Throwable $_) {
+        // ignore logging failures
+    }
+
     ensureDeployPreconditions();
 
     $lockHandle = fopen(LOCK_FILE, 'c');
@@ -261,32 +268,39 @@ function runCommand(string $command, string $cwd): array
 
 function appendWebhookLog(string $level, string $message, $data = null): void
 {
-    $lines = [];
-    $lines[] = str_repeat('=', 78);
-    $lines[] = sprintf("%s [%s] %s", gmdate('c'), strtoupper($level), $message);
-    $lines[] = str_repeat('-', 78);
+    // Special: when starting a new tag chapter
+    if ($message === 'New Tag' && is_array($data) && isset($data['tag'])) {
+        $header = [];
+        $header[] = str_repeat('=', 62);
+        $header[] = date('Y-m-d H:i:s');
+        $header[] = sprintf('New Tag %s', $data['tag']);
+        $header[] = '';
+        @file_put_contents(WEBHOOK_LOG_FILE, implode("\n", $header) . "\n", FILE_APPEND | LOCK_EX);
+        return;
+    }
 
-    if (is_string($data) || is_numeric($data)) {
+    // Default: write an action block in the requested compact format
+    $lines = [];
+    // Action name
+    $lines[] = sprintf('- Action: %s', $message);
+
+    // Command (if available)
+    if (is_array($data) && isset($data['command'])) {
+        $lines[] = sprintf('- Command: %s', $data['command']);
+    }
+
+    // Output
+    $lines[] = '- Output:';
+    $lines[] = '';
+    if (is_array($data) && isset($data['stdout'])) {
+        $outLines = explode("\n", (string) $data['stdout']);
+        foreach ($outLines as $ol) {
+            $lines[] = $ol;
+        }
+    } elseif (is_string($data) || is_numeric($data)) {
         $lines[] = (string) $data;
     } elseif (is_array($data)) {
-        if (isset($data['command'])) {
-            $lines[] = 'Command: ' . $data['command'];
-        }
-        if (isset($data['cwd'])) {
-            $lines[] = 'CWD: ' . $data['cwd'];
-        }
-        if (isset($data['exitCode'])) {
-            $lines[] = 'Exit code: ' . $data['exitCode'];
-        }
-        if (isset($data['stdout'])) {
-            $lines[] = 'Output:';
-            $outLines = explode("\n", (string) $data['stdout']);
-            foreach ($outLines as $ol) {
-                $lines[] = '  ' . $ol;
-            }
-        } else {
-            $lines[] = trim(print_r($data, true));
-        }
+        $lines[] = trim(print_r($data, true));
     } elseif ($data !== null) {
         $lines[] = trim(print_r($data, true));
     }
