@@ -41,6 +41,21 @@ try {
         ]);
     }
 
+    // Temporary debug: record request metadata to help diagnose why only `respond` is logged
+    try {
+        $dbg = [];
+        $dbg[] = str_repeat('=', 62);
+        $dbg[] = date('Y-m-d H:i:s') . ' Request: ' . ($_SERVER['REQUEST_METHOD'] ?? '');
+        $dbg[] = sprintf('- X-Hub-Signature-256: %s', isset($_SERVER['HTTP_X_HUB_SIGNATURE_256']) ? 'present' : 'missing');
+        $dbg[] = sprintf('- X-Github-Event: %s', $_SERVER['HTTP_X_GITHUB_EVENT'] ?? '(none)');
+        $dbg[] = sprintf('- Content-Length: %s', $_SERVER['CONTENT_LENGTH'] ?? strlen($payloadRaw));
+        $dbg[] = sprintf('- Remote-Addr: %s', $_SERVER['REMOTE_ADDR'] ?? '(unknown)');
+        $dbg[] = '';
+        @file_put_contents(WEBHOOK_LOG_FILE, implode("\n", $dbg) . "\n", FILE_APPEND | LOCK_EX);
+    } catch (Throwable $_) {
+        // ignore
+    }
+
     verifyGithubSignature($payloadRaw, $secret);
 
     $event = $_SERVER['HTTP_X_GITHUB_EVENT'] ?? '';
