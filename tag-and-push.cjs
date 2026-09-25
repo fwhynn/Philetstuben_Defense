@@ -226,8 +226,10 @@ async function main() {
     // Determine base tag from the game repo
     try {
       if (!isGitRepo(repo)) throw new Error('game repo is not a git repository');
-      const base = latestTag(repo);
-      if (!base) throw new Error('no base tag found in game repo');
+      const rawBase = latestTag(repo);
+      if (!rawBase) throw new Error('no base tag found in game repo');
+      // strip any existing -testN suffix so test tags are always based on the release tag
+      const base = rawBase.replace(/-test\d+$/i, '');
       const n = nextTestNumber(repo, base);
       const testTag = `${base}-test${n}`;
 
