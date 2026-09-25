@@ -65,7 +65,7 @@ const HexCombat=(()=>{
   const mineRangeCache=new WeakMap();
   function mineSegments(state,ref,range){
     const signature=JSON.stringify([...state.map].map(([id,t])=>[id,t.q,t.r,t.type,
-      typeof HexData!=='undefined'?HexData.CARD_LIBRARY[t.type]?.model:null,t.roads||[]]));
+      typeof HexData!=='undefined'?HexData.CARD_LIBRARY[t.type]?.model:null,t.rotation||0,t.roads||[]]));
     const cached=mineRangeCache.get(ref.tw);
     if(cached&&cached.map===state.map&&cached.signature===signature&&cached.x===ref.pos.x&&cached.y===ref.pos.y&&cached.range===range)return cached;
     const segments=[];let total=0;

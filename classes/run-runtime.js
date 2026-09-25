@@ -3,14 +3,13 @@
  */
 const HexRunRuntime=(()=>{
   const VERSION=1;
-  const BASE_VARIANTS=['base_hex','base_keep','base_motte','base_beacon','base_royal'];
   // Derived data stays outside checkpoints and is reclaimed with its map/run.
   const routeCache=new WeakMap(),waveCache=new WeakMap();
   function cachedRoutes(map){
     // Include topology/order rather than size alone: rotations, replacements and
     // tunnels may change without adding a tile. Portals are read live below.
     const signature=JSON.stringify([...map].map(([id,t])=>[id,t.q,t.r,t.type,
-      typeof HexData!=='undefined'?HexData.CARD_LIBRARY[t.type]?.model:null,t.roads||[],t.tunnels||[]]));
+      typeof HexData!=='undefined'?HexData.CARD_LIBRARY[t.type]?.model:null,t.rotation||0,t.roads||[],t.tunnels||[]]));
     let entry=routeCache.get(map);
     if(!entry||entry.signature!==signature){entry={signature,routes:HexMap.routeGraph(map)};routeCache.set(map,entry);}
     return entry.routes;
@@ -33,8 +32,7 @@ const HexRunRuntime=(()=>{
     state.baseExits=state.difficulty==='dual'?HexMap.randomBaseExits(HexRandom.create(seed+'|base-exits')):[0];HexHeroes.initialize(state,heroId);delete state.selectedBase;
     state.landmarks=HexExploration.create(HexRandom.create(seed+'|exploration'));
     state.vision=HexExploration.expand(state.landmarks,new Map([['0,0',{q:0,r:0}]]));
-    const baseVariant=BASE_VARIANTS[Math.floor(HexRandom.create(seed+'|base-variant')()*BASE_VARIANTS.length)];
-    state.map.set('0,0',{q:0,r:0,type:'base',roads:state.baseExits,slots:0,towers:[],income:0,baseVariant});
+    state.map.set('0,0',{q:0,r:0,type:'base',roads:state.baseExits,slots:0,towers:[],income:0});
     if(challengeDay){state.challengeKind=HexWaves.daily(challengeDay).id;state.challengeTarget=HexWaves.daily(challengeDay).target;}
     if(state.challengeKind==='garrison'){
       state.gold=1200;state.income=0;state.difficulty='normal';state.openingRemaining=0;state.baseExits=[0];state.map.get('0,0').roads=[0];state.landmarks=new Map();state.vision=[];state.hand=[];state.phase='build';

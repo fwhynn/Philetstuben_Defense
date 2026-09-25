@@ -1,19 +1,18 @@
 /* Renderer-unabhängige Zuordnung Spielzustand -> 3D-Modell. Kein DOM, kein Three.js. */
 const HexModelMap=(()=>{
-  // Straßenkanten der Grundformen bei Rotation 0 (wie in ASSET_SPEC.md / data.js).
+  // Straßenkanten der Grundformen bei Rotation 0 (wie in docs/ASSET_SPEC.md / data.js).
   const SHAPES={straight:[0,3],smallCurve:[0,1],bigCurve:[0,2],tee:[0,2,4],tJunction:[0,2,3],cross:[0,1,3,4],fullCross:[0,1,2,3,4,5]};
   const TILE_MODELS=['straight','smallCurve','bigCurve','tee','tJunction','cross','fullCross','village','empty','longRoad','highGround','grove','treasury','citadel','battlefield','watchtower','royalVillage','warCross'];
-  // Belohnungskarten mit eigener Optik statt Alias auf eine Grundform (siehe ASSET_SPEC_v3.md, Abschnitt 2/3).
+  // Belohnungskarten mit eigener Optik statt Alias auf eine Grundform (siehe docs/ASSET_SPEC.md, Abschnitt 3.5).
   const NAMED_TILES=['mirrorJunction','fanJunction','sideCross','deadEnd','ballistaRoad','siegeRoad','lightningFork','frostBend','mineRoad','emberBend','soulFork','battleFork','goldRoad','warBend','royalBend','crownCross','sentryBend','supplyRoad','signalCross'];
   // Davon haben nur diese vier keine gebackene Straße: der Code zeichnet die Straße weiter selbst (variable Kreuzungsform).
   const PROCEDURAL_ROAD_TILES=['mirrorJunction','fanJunction','sideCross','deadEnd'];
   const TOWER_UPGRADES={archer:['marksman','eagleEye','volley','arrowRain'],catapult:['siege','fortressBreaker','barrage','rockStorm'],chain:['storm','tempest','overload','thunder'],freeze:['deepFrost','absoluteZero','frostField','winter'],mine:['demolition','earthquake','minefield','carpet'],ballista:['harpoon','dragonSlayer','repeater','boltStorm'],flame:['inferno','sunfire','wildfire','firestorm'],necromancer:['soulChoir','soulLegion','soulKeeper','soulLord']};
-  const BASE_VARIANTS=['base_hex','base_keep','base_motte','base_beacon','base_royal'];
   // Festungs-Basen je Festung (Heldenwahl) mit Ausbaustufen als Aufsatzteile (assets/bases/base_<festung>_<walls|weapon>_<stufe>.glb).
   const FORTRESSES={standard:2,builder:3,merchant:2};
   const BASE_PARTS=Object.entries(FORTRESSES).flatMap(([id,levels])=>['walls','weapon'].flatMap(kind=>Array.from({length:levels},(_,i)=>`${id}_${kind}_${i+1}`)));
   const ALL_MODELS={
-    tiles:['base','rescue','fog',...TILE_MODELS,...NAMED_TILES,...BASE_VARIANTS,...Object.keys(FORTRESSES).map(id=>'base_'+id)],
+    tiles:['base','rescue','fog',...TILE_MODELS,...NAMED_TILES,...Object.keys(FORTRESSES).map(id=>'base_'+id)],
     bases:BASE_PARTS,                                       // optional: Mauer- und Waffenstufen der Festungs-Basen
     landmarks:['boss','shrine','treasure'],
     towers:['archer','catapult','chain','freeze','mine','ballista','flame','necromancer',...Object.entries(TOWER_UPGRADES).flatMap(([type,ids])=>ids.map(id=>`${type}_${id}`))],
@@ -31,7 +30,8 @@ const HexModelMap=(()=>{
     if(NAMED_TILES.includes(tile.type)) return {name:tile.type,rotation:tile.rotation||0,...(PROCEDURAL_ROAD_TILES.includes(tile.type)?{proceduralRoads:true}:{})};
     if(HexData.CARD_LIBRARY[tile.type]?.procedural)return {name:'straight',rotation:tile.rotation||0,proceduralRoads:true};
     const alias=HexData.CARD_LIBRARY[tile.type]?.model;if(alias)return {name:alias,rotation:tile.rotation||0};
-    if(tile.type==='base') return {name:tile.baseVariant||'base',rotation:0,...(tile.roads?.length===2?{proceduralRoads:true}:{})};
+    if(tile.type==='base') return {name:'base',rotation:0,   // der Renderer wählt die Festung (tile_base_<heldId>), 'base' ist der Ersatz
+      ...(tile.roads?.length===2?{proceduralRoads:true}:{})};
     if(TILE_MODELS.includes(tile.type)) return {name:tile.type,rotation:tile.rotation||0};
     // Rettungshex und unbekannte Typen: Straßenform bestimmt das Modell.
     const match=matchShape(tile.roads||[]);
@@ -53,5 +53,5 @@ const HexModelMap=(()=>{
     }
     return best?best.angle:270;
   }
-  return {SHAPES,TILE_MODELS,NAMED_TILES,PROCEDURAL_ROAD_TILES,BASE_VARIANTS,FORTRESSES,ALL_MODELS,matchShape,modelFor,propAngle};
+  return {SHAPES,TILE_MODELS,NAMED_TILES,PROCEDURAL_ROAD_TILES,FORTRESSES,ALL_MODELS,matchShape,modelFor,propAngle};
 })();
