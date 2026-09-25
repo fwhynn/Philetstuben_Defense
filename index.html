@@ -257,6 +257,7 @@
           <button id="menuArsenalBtn" class="secondary">◆ Arsenal</button>
           <label class="menuLanguage">Sprache <select data-language-picker aria-label="Sprache"><option value="de">Deutsch</option><option value="en">English</option></select></label>
           <button id="menuRulesBtn" class="secondary">📜 Spielregeln</button>
+          <button id="menuAccountBtn" class="secondary">👤 Account (Beta)</button>
         </div>
 
         <button id="menuSaveBtn" class="secondary">Spielstand · Download / Upload</button>
@@ -277,6 +278,29 @@
         <p id="saveStatus" role="status" aria-live="polite"></p>
         <button id="confirmImportBtn" class="primary hidden">Vorhandenes Profil ersetzen</button>
         <button id="closeSaveBtn" class="secondary">Zurück · Esc</button>
+      </div>
+    </div>
+    <div id="accountOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="accountTitle">
+      <div class="modeBox">
+        <h2 id="accountTitle">Account (Beta)</h2>
+        <p>Mit einem Account sicherst du deinen Spielstand auf dem Server und lädst ihn auf einem anderen Gerät wieder.
+          Die Funktion ist noch im Test.</p>
+        <div id="accountLoggedOut">
+          <p><label for="accountUsername">Benutzername</label>
+            <input id="accountUsername" type="text" autocomplete="username" maxlength="32" /></p>
+          <p><label for="accountPassword">Passwort</label>
+            <input id="accountPassword" type="password" autocomplete="current-password" /></p>
+          <button id="accountLoginBtn" class="primary">Einloggen</button>
+          <button id="accountRegisterBtn" class="secondary">Account erstellen</button>
+        </div>
+        <div id="accountLoggedIn" class="hidden">
+          <p id="accountWhoami"></p>
+          <button id="accountSaveServerBtn" class="primary">Auf Server speichern</button>
+          <button id="accountLoadServerBtn" class="secondary">Vom Server laden</button>
+          <button id="accountLogoutBtn" class="secondary">Ausloggen</button>
+        </div>
+        <p id="accountStatus" role="status" aria-live="polite"></p>
+        <button id="closeAccountBtn" class="secondary">Zurück · Esc</button>
       </div>
     </div>
     <div id="playModeOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="playModeTitle">

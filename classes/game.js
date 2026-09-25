@@ -1010,6 +1010,49 @@ R dreht die Karte, dann Feld anklicken.`;}
   document.getElementById('downloadSaveBtn').addEventListener('click',()=>{try{const blob=new Blob([HexProfile.exportFile(profile,TOWERS)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='autohex-spielstand-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);saveStatus.textContent='Spielstanddatei zum Download bereitgestellt.';}catch{saveStatus.textContent='Download fehlgeschlagen. Bitte erneut versuchen.';}});
   document.getElementById('uploadSaveInput').addEventListener('change',async event=>{const readId=++importReadId;pendingImport=null;confirmImport.classList.add('hidden');const file=event.target.files?.[0];if(!file)return;try{if(hasActiveRun&&state.hp>0)throw new Error('Bitte zuerst den laufenden Run beenden. Ein Profilwechsel während eines Durchlaufs ist nicht möglich.');if(file.size>2000000)throw new Error('Datei zu groß (maximal 2 MB).');const text=await file.text();if(readId!==importReadId)return;const next=HexProfile.readFile(text,TOWERS);pendingImport=text;saveStatus.textContent=next.diamonds+' Diamanten · '+next.unlockedTowers.length+' Türme freigeschaltet · Bestmarke Wave '+next.records.highestWave+'. Dein bisheriges Profil mit '+profile.diamonds+' Diamanten wird ersetzt. Eine lokale Sicherung wird angelegt.';confirmImport.classList.remove('hidden');}catch(error){if(readId===importReadId)saveStatus.textContent=error.message;}});
   confirmImport.addEventListener('click',()=>{if(!pendingImport||hasActiveRun&&state.hp>0)return;try{profile=HexProfile.importFile(pendingImport,TOWERS);pendingLoadout=[...profile.activeLoadout];pendingHero=profile.activeHero;pendingDifficulty=profile.difficulty;pendingImport=null;confirmImport.classList.add('hidden');renderLoadout();renderUI();updateArsenalHint();saveStatus.textContent='Spielstand importiert. Dein Profil ist für den nächsten Run bereit.';}catch(error){saveStatus.textContent='Import fehlgeschlagen: '+error.message;}});
+  // ---- Account (Beta): Login/Registrierung + Spielstand-Sync über die API ----
+  const accountOverlay=document.getElementById('accountOverlay'),accountStatus=document.getElementById('accountStatus'),accountLoggedOut=document.getElementById('accountLoggedOut'),accountLoggedIn=document.getElementById('accountLoggedIn'),accountWhoami=document.getElementById('accountWhoami');
+  function closeAccount(){accountOverlay.classList.add('hidden');document.getElementById('accountPassword').value='';openMainMenu();document.getElementById('menuAccountBtn').focus?.();}
+  document.getElementById('menuAccountBtn').addEventListener('click',()=>{accountStatus.textContent='';accountOverlay.classList.remove('hidden');refreshAccountView();});
+  document.getElementById('closeAccountBtn').addEventListener('click',closeAccount);
+  document.getElementById('accountPassword').addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault?.();document.getElementById('accountLoginBtn').click();}});
+  async function refreshAccountView(){
+    let user=null;
+    if(globalThis.HexApi?.isLoggedIn()){try{user=await HexApi.currentUser();}catch{user=null;}}
+    accountLoggedOut.classList.toggle('hidden',!!user);
+    accountLoggedIn.classList.toggle('hidden',!user);
+    if(user)accountWhoami.textContent='Eingeloggt als '+user.username;
+  }
+  document.getElementById('accountRegisterBtn').addEventListener('click',async()=>{
+    const username=document.getElementById('accountUsername').value.trim(),password=document.getElementById('accountPassword').value;
+    accountStatus.textContent='Account wird erstellt …';
+    try{const user=await HexApi.register(username,password);accountStatus.textContent='Account erstellt. Eingeloggt als '+user.username+'.';await refreshAccountView();}
+    catch(error){accountStatus.textContent='Registrierung fehlgeschlagen: '+error.message;}
+  });
+  document.getElementById('accountLoginBtn').addEventListener('click',async()=>{
+    const username=document.getElementById('accountUsername').value.trim(),password=document.getElementById('accountPassword').value;
+    accountStatus.textContent='Einloggen …';
+    try{const user=await HexApi.login(username,password);accountStatus.textContent='Eingeloggt als '+user.username+'.';await refreshAccountView();}
+    catch(error){accountStatus.textContent='Login fehlgeschlagen: '+error.message;}
+  });
+  document.getElementById('accountLogoutBtn').addEventListener('click',async()=>{await HexApi.logout();accountStatus.textContent='Ausgeloggt.';await refreshAccountView();});
+  document.getElementById('accountSaveServerBtn').addEventListener('click',async()=>{
+    accountStatus.textContent='Speichere auf dem Server …';
+    try{await HexApi.putSave(HexProfile.exportFile(profile,TOWERS));accountStatus.textContent='Spielstand auf dem Server gesichert.';}
+    catch(error){accountStatus.textContent='Speichern fehlgeschlagen: '+error.message;}
+  });
+  document.getElementById('accountLoadServerBtn').addEventListener('click',async()=>{
+    if(hasActiveRun&&state.hp>0){accountStatus.textContent='Bitte zuerst den laufenden Run beenden.';return;}
+    accountStatus.textContent='Lade vom Server …';
+    try{
+      const data=await HexApi.getSave();
+      if(!data){accountStatus.textContent='Auf dem Server liegt noch kein Spielstand für diesen Account.';return;}
+      profile=HexProfile.importFile(JSON.stringify(data),TOWERS);
+      pendingLoadout=[...profile.activeLoadout];pendingHero=profile.activeHero;pendingDifficulty=profile.difficulty;
+      renderLoadout();renderUI();updateArsenalHint();
+      accountStatus.textContent='Spielstand vom Server geladen. Dein lokales Profil wurde ersetzt.';
+    }catch(error){accountStatus.textContent='Laden fehlgeschlagen: '+error.message;}
+  });
   function updateArsenalHint(){const count=HexProfile.affordableUnlocks(profile),button=document.getElementById('menuArsenalBtn');button.classList.toggle('upgradeAvailable',count>0);button.textContent=count?'◆ Arsenal · Upgrade verfügbar':'◆ Arsenal';button.title=count?count+' Freischaltungen bezahlbar':'Arsenal';}
   function renderDailyMission(){const day=new Date().toISOString().slice(0,10),mission=HexWaves.daily(day),garrison=mission.id==='garrison';document.getElementById('dailyMissionName').textContent=mission.name;document.getElementById('dailyMissionShort').textContent='Ziel: '+mission.target+' Wellen · Wechsel um 00:00 UTC';document.getElementById('dailyMissionTitle').textContent=mission.name+' · Tägliche Herausforderung';document.getElementById('dailyCaravanRules').classList.toggle('hidden',garrison);document.getElementById('dailyGarrisonRules').classList.toggle('hidden',!garrison);document.getElementById('dailyStartBtn').textContent='Heutige Mission starten';}
   function openMainMenu(){renderDailyMission();if(duoToken){location.assign('/duo-lobby.html');return;}document.getElementById('biomeIntro').classList.add('hidden');cancelQuickTower();resetCameraKeys();updateArsenalHint();const today=new Date().toISOString().slice(0,10),daily=profile.dailyResults?.[today];document.getElementById('dailyProgress').textContent=today+' (UTC) · '+(daily?.won?'Heute geschafft · Belohnung erhalten':'Tagesbestmarke: '+(daily?.best||0)+'/'+HexWaves.daily(today).target+' Wellen');document.getElementById('menuContinueBtn').classList.toggle('hidden',!hasActiveRun||state.hp<=0);document.getElementById('menuPlayBtn').textContent=hasActiveRun?'Neuer Run':'Spielen';mainMenu.classList.remove('hidden');}
@@ -1097,6 +1140,7 @@ R dreht die Karte, dann Feld anklicken.`;}
     if(e.key==='Escape'&&state.buildingTarget){state.buildingTarget=null;e.preventDefault?.();setMessage('Hex-Auswahl abgebrochen.');renderAll();return;}
     if(saleRequest&&e.key==='Escape'){e.preventDefault?.();closeSale();renderAll();return;}
     if(!saveOverlay.classList.contains('hidden')){if(e.key==='Escape'){e.preventDefault?.();closeSave();}return;}
+    if(!accountOverlay.classList.contains('hidden')){if(e.key==='Escape'){e.preventDefault?.();closeAccount();}return;}
     if(e.key==='Escape'&&state.dragTower){e.preventDefault?.();cancelQuickTower();renderAll();return;}
     if(e.key==='Escape'&&state.inspectEndMap){e.preventDefault?.();inspectEndMap(false);return;}
     if(e.key==='Escape'&&!arsenalOverlay.classList.contains('hidden')){e.preventDefault?.();closeArsenal();return;}
