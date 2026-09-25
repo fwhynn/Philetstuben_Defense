@@ -252,7 +252,8 @@ async function main() {
       try {
         const nGame = nextTestNumber(repo, tag);
         const testTagGame = `${tag}-test${nGame}`;
-        git(['tag', '-a', testTagGame, '-m', testTagGame], { stdio: 'inherit' });
+        // tag the same commit as the release tag
+        git(['tag', '-a', testTagGame, tag, '-m', testTagGame], { stdio: 'inherit' });
         pushRelease(repo, testTagGame, 'Game (test)');
         console.log(`Created and pushed test tag ${testTagGame} in Game repo.`);
       } catch (e) {
@@ -278,7 +279,8 @@ async function main() {
       if (testFlag) {
         const n = nextTestNumber(apiRepo, tag);
         const testTag = `${tag}-test${n}`;
-        gitAt(apiRepo, ['tag', '-a', testTag, '-m', testTag], { stdio: 'inherit' });
+        // explicitly tag the same commit that the release tag points to
+        gitAt(apiRepo, ['tag', '-a', testTag, tag, '-m', testTag], { stdio: 'inherit' });
         pushRelease(apiRepo, testTag, 'API (test)');
         console.log(`Created and pushed test tag ${testTag} in API repo.`);
       }
@@ -309,7 +311,8 @@ async function main() {
   if (testFlag) {
     const n = nextTestNumber(apiRepo, apiTag);
     const testTag = `${apiTag}-test${n}`;
-    gitAt(apiRepo, ['tag', '-a', testTag, '-m', testTag], { stdio: 'inherit' });
+    // tag the same commit as apiTag
+    gitAt(apiRepo, ['tag', '-a', testTag, apiTag, '-m', testTag], { stdio: 'inherit' });
     pushRelease(apiRepo, testTag, 'API (test)');
     console.log(`Created and pushed test tag ${testTag} for API.`);
   }
