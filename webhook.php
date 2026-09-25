@@ -41,21 +41,29 @@ try {
         ]);
     }
 
-    // Temporary debug: record request metadata to help diagnose why only `respond` is logged
+    // Full request debug: write headers + raw body to webhook-debug.log (gitignored)
     try {
-        $dbg = [];
-        $dbg[] = str_repeat('=', 62);
-        $dbg[] = date('Y-m-d H:i:s') . ' Request: ' . ($_SERVER['REQUEST_METHOD'] ?? '');
-        $dbg[] = sprintf('- X-Hub-Signature-256: %s', isset($_SERVER['HTTP_X_HUB_SIGNATURE_256']) ? 'present' : 'missing');
-        $dbg[] = sprintf('- X-Github-Event: %s', $_SERVER['HTTP_X_GITHUB_EVENT'] ?? '(none)');
-        $dbg[] = sprintf('- Content-Length: %s', $_SERVER['CONTENT_LENGTH'] ?? strlen($payloadRaw));
-        $dbg[] = sprintf('- Remote-Addr: %s', $_SERVER['REMOTE_ADDR'] ?? '(unknown)');
-        $dbg[] = '';
-        @file_put_contents(WEBHOOK_LOG_FILE, implode("\n", $dbg) . "\n", FILE_APPEND | LOCK_EX);
+        $debugFile = APP_ROOT . '/webhook-debug.log';
+        $lines = [];
+        $lines[] = str_repeat('=', 62);
+        $lines[] = date('Y-m-d H:i:s');
+        $lines[] = 'Remote-Addr: ' . ($_SERVER['REMOTE_ADDR'] ?? '(unknown)');
+        $lines[] = 'Method: ' . ($_SERVER['REQUEST_METHOD'] ?? '(unknown)');
+        $lines[] = 'X-Github-Event: ' . ($_SERVER['HTTP_X_GITHUB_EVENT'] ?? '(none)');
+        $lines[] = 'X-Hub-Signature-256: ' . (isset($_SERVER['HTTP_X_HUB_SIGNATURE_256']) ? 'present' : 'missing');
+        $lines[] = 'Content-Length: ' . ($_SERVER['CONTENT_LENGTH'] ?? strlen($payloadRaw));
+        $lines[] = 'Headers:';
+        foreach (getallheaders() as $k => $v) {
+            $lines[] = "  $k: $v";
+        }
+        $lines[] = '';
+        $lines[] = 'Raw body:';
+        $lines[] = $payloadRaw;
+        $lines[] = "\n";
+        @file_put_contents($debugFile, implode("\n", $lines), FILE_APPEND | LOCK_EX);
     } catch (Throwable $_) {
-        // ignore
+        // ignore debug failures
     }
-
     verifyGithubSignature($payloadRaw, $secret);
 
     $event = $_SERVER['HTTP_X_GITHUB_EVENT'] ?? '';
