@@ -1,6 +1,6 @@
 # Duo: Übergabe für die Online-Freunde-Beta
 
-Stand: 22.09.2026. Zieladresse: https://autohextd.zlyfer.net/.
+Stand: 22.09.2026. Zieladresse: https://autohextd.autophil.lol/.
 Implementierung und automatisierte lokale Tests sind vom tatsächlichen Live-Betrieb zu unterscheiden. Kein Browser-Test und keine Veröffentlichung wurden in diesem Arbeitsschritt durchgeführt.
 
 ## Implementiert
@@ -18,14 +18,14 @@ Das Profil bleibt ein lokaler, exportierbarer Spielstand. Belege verhindern dopp
 
 `deploy/Dockerfile`, `deploy/compose.yaml` und `deploy/Caddyfile` bauen getrennte Spiel-/Server-Images und einen HTTPS-Einstieg. Nur öffentliche Spieldateien gelangen in das Web-Verzeichnis. Speicherdaten bleiben im privaten Volume. Der Server-Port wird nicht direkt veröffentlicht. Healthcheck und begrenzte Container-Logs sind konfiguriert.
 
-Die Vorlage setzt einen eigenen Linux-Server mit Docker Compose, passende DNS-Einträge und freie Ports 80/443 voraus. Existiert bereits ein Webserver für die Domain, die Vorlage **nicht zusätzlich auf dieselben Ports starten**: Der Betreiber muss die vorhandene Konfiguration erweitern. Folgende Pfade gehen zum dauerhaft laufenden Node-Prozess: `/state`, `/command`, `/session`, `/results`, `/healthz`, `/lobby/*`. Alle anderen Pfade liefern die öffentlichen Spieldateien. `DUO_PUBLIC_ORIGIN=https://autohextd.zlyfer.net` muss gesetzt sein.
+Die Vorlage setzt einen eigenen Linux-Server mit Docker Compose, passende DNS-Einträge und freie Ports 80/443 voraus. Existiert bereits ein Webserver für die Domain, die Vorlage **nicht zusätzlich auf dieselben Ports starten**: Der Betreiber muss die vorhandene Konfiguration erweitern. Folgende Pfade gehen zum dauerhaft laufenden Node-Prozess: `/state`, `/command`, `/session`, `/results`, `/healthz`, `/lobby/*`. Alle anderen Pfade liefern die öffentlichen Spieldateien. `DUO_PUBLIC_ORIGIN=https://autohextd.autophil.lol` muss gesetzt sein.
 
 Auf einem passenden, noch nicht belegten Zielserver:
 
 ```sh
 docker compose -f deploy/compose.yaml build
 docker compose -f deploy/compose.yaml up -d
-node deploy/check-online.cjs https://autohextd.zlyfer.net
+node deploy/check-online.cjs https://autohextd.autophil.lol
 ```
 
 Ohne Docker: Node 24, `npm ci --omit=dev`, `node serve.cjs --write-index`, öffentliche Dateien mit `node deploy/build-public.cjs /neues/leeres/web-verzeichnis` erzeugen. `server/start-duo.cjs` als dauerhaft überwachten Dienst starten, privaten absoluten `DUO_SAVE_FILE` setzen und den vorhandenen HTTPS-Proxy vorschalten. Nicht das komplette Repository öffentlich ausliefern.

@@ -137,7 +137,7 @@ Unter [webhook.php](webhook.php) liegt ein GitHub-Webhook-Endpunkt für Tag-Depl
 - Das Secret kommt entweder aus der Umgebungsvariable `AUTOHEXTD_WEBHOOK_SECRET` oder aus der Datei `.deploy-webhook-secret` im Repo-Root `Philetstuben_Defense/`.
 - Der Webhook bricht absichtlich ab, wenn das Checkout lokale getrackte Änderungen hat oder wenn der PHP-User keine Schreibrechte auf Repo und App-Verzeichnis besitzt.
 
-Für GitHub den Webhook auf `https://autohextd.zlyfer.net/webhook.php` zeigen lassen, Content type `application/json`, Event `Just the push event`, und dasselbe Secret hinterlegen.
+Für GitHub den Webhook auf `https://autohextd.autophil.lol/webhook.php` zeigen lassen, Content type `application/json`, Event `Just the push event`, und dasselbe Secret hinterlegen.
 
 ## Lizenz
 

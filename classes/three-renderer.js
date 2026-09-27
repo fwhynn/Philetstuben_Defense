@@ -28,6 +28,19 @@ function bake(root,skip){
   })(root);
   return [...groups].map(([material,geometries])=>({material,geometry:mergeGeometries(geometries,false)}));
 }
+/** Straßenenden, die höchstens ~0,015 vor oder hinter einer Hexkante liegen, exakt auf die Kante legen. Manche Kurvenmodelle enden schräg (eine Seite 0,870, die andere 0,860 statt 0,866); aneinandergesetzt entstand dadurch ein feiner Keil am Tileübergang. */
+function snapRoadEnds(parts){
+  const H=Math.sqrt(3)/2;
+  for(const {material,geometry} of parts){
+    if(material?.name!=='road'&&material?.name!=='road_verge') continue;
+    const pos=geometry.attributes.position;
+    for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i);
+      for(let e=0;e<6;e++){const nx=Math.cos(e*STEP),nz=-Math.sin(e*STEP),d=x*nx+z*nz,t=z*nx-x*nz;
+        if(Math.abs(d-H)<.015&&Math.abs(t)<.3){pos.setXYZ(i,x+(H-d)*nx,pos.getY(i),z+(H-d)*nz);break;}}}
+    pos.needsUpdate=true;
+  }
+  return parts;
+}
 function worldPosition(node){return node.getWorldPosition(new THREE.Vector3());}
 function boundsOf(parts){const box=new THREE.Box3();for(const part of parts){part.geometry.computeBoundingBox();box.union(part.geometry.boundingBox);}return box;}
 
@@ -54,6 +67,7 @@ function makeTemplate(name,scene,kind){
   const slotNodes=[],padNodes=[];scene.traverse(n=>{if(isSlot(n)) slotNodes.push(n);else if(isPad(n)) padNodes.push(n);});
   const skip=n=>isSlot(n)||isPad(n);
   template.parts=bake(scene,skip);
+  if(kind==='tiles') snapRoadEnds(template.parts);
   if(name==='tile_rescue'||name==='tile_straight'||name.startsWith('tile_base')) template.noRoad=bake(scene,n=>skip(n)||n.name==='road'||n.name==='road_verge');
   template.slots=slotNodes.sort((a,b)=>a.name.localeCompare(b.name)).map(n=>({pos:worldPosition(n),parts:bake(n),top:new THREE.Box3().setFromObject(n).max.y}));
   template.pad=padNodes[0]?{pos:worldPosition(padNodes[0]),parts:bake(padNodes[0])}:null;

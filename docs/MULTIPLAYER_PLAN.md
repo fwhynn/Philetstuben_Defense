@@ -156,7 +156,7 @@ Beim Erstellen legt der Server einen privaten Raum mit zwei Plätzen an und rese
 ### 4.2 Einladung und Beitritt
 
 - Ein Kurzcode, beispielsweise acht gut unterscheidbare zufällige Zeichen, führt zur Lobby.
-- Zusätzlich ein Einladungslink, etwa `https://autohextd.zlyfer.net/#duo=<einladung>`; nur ein geplantes URL-Format, kein heute funktionierender Link.
+- Zusätzlich ein Einladungslink, etwa `https://autohextd.autophil.lol/#duo=<einladung>`; nur ein geplantes URL-Format, kein heute funktionierender Link.
 - Der Link enthält einen zufälligen Einladungsschlüssel, niemals den Eigentümer- oder Reconnect-Schlüssel. Fragment nach erfolgreichem Einlösen aus der Adresszeile entfernen.
 - Einladung verfällt zunächst nach 30 Minuten, kann neu erzeugt oder widerrufen werden und erlaubt nur den freien zweiten Platz. Beitrittsversuche werden begrenzt.
 - Link öffnen → Name prüfen → Lobby beitreten. Ein vorhandener aktiver Solo-Run wird nicht still verworfen; Moduswechsel deutlich bestätigen oder zurückgehen.

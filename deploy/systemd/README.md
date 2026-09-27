@@ -1,6 +1,6 @@
 # Debian 12: Duo-Dienst und Tag-Webhook
 
-Ziel: `https://autohextd.zlyfer.net`, Repository `/var/www/html/net.zlyfer.autohextd`.
+Ziel: `https://autohextd.autophil.lol`, Repository `/var/www/html/net.zlyfer.autohextd`.
 Servercode liegt im gleichen Repo. Installation durch den Serverbetreiber, nicht bereits live ausgeführt.
 
 ## Einmalige Einrichtung
@@ -66,7 +66,7 @@ Vor Rollback Dienst stoppen und **die zum alten Release gehörende Sicherung** s
 
 ## Abnahme durch den Betreiber
 
-- `/usr/local/bin/node deploy/check-duo-health.cjs` im Repo und `/usr/local/bin/node deploy/check-online.cjs https://autohextd.zlyfer.net`.
+- `/usr/local/bin/node deploy/check-duo-health.cjs` im Repo und `/usr/local/bin/node deploy/check-online.cjs https://autohextd.autophil.lol`.
 - Zwei Browser verbinden, laufende Kampfwelle starten, signiertes Tag-Update auslösen. Beide Browser verbinden neu; Gold, Türme, Gegner und Wellenfortschritt bleiben erhalten, keine doppelte Belohnung.
 - Dienststatus/Journal und private Checkpoints prüfen. Testweise Neustart und Wiederherstellung eines Backups durchführen.
 - Lokale Node-Tests laufen ohne Browser; systemd, PHP-FPM und Proxy müssen auf Debian geprüft werden. Eine PHP-Laufzeit und systemd standen in der Windows-Entwicklungsumgebung nicht zur Verfügung.
