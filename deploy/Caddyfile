@@ -4,9 +4,11 @@ autohextd.autophil.lol {
     Referrer-Policy no-referrer
     X-Content-Type-Options nosniff
   }
-  @duo path /state /command /session /results /healthz /lobby/* /socket.io/*
+  @duo path /state /command /session /results /healthz /visit /visits /lobby/* /socket.io/*
   handle @duo {
-    reverse_proxy duo:8090
+    reverse_proxy duo:8090 {
+      header_up X-Real-IP {remote_host}
+    }
   }
   handle {
     root * /srv/site

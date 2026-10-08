@@ -590,6 +590,286 @@ tbody tr:hover {
   margin-top: 28px;
 }
 
+/* Seitenaufrufe: Aufrufe Gold, Besucher Blau, Bots grau (gegen den dunklen Grund auf Farbschwäche geprüft). */
+.visitControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.rangeSwitch {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--ground-deep);
+}
+
+.rangeSwitch button {
+  min-height: 34px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 5px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.rangeSwitch button:hover {
+  color: var(--ink);
+}
+
+.rangeSwitch button[aria-pressed="true"] {
+  background: var(--moss-light);
+  color: var(--gold);
+}
+
+.rangeSwitch button:focus-visible,
+.toggle input:focus-visible {
+  outline: 3px solid rgba(214, 170, 85, .45);
+  outline-offset: 2px;
+}
+
+label.toggle {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.toggle input {
+  width: 16px;
+  min-height: 16px;
+  margin: 0;
+  accent-color: var(--gold);
+}
+
+.visitStats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-block: 1px solid var(--line);
+}
+
+.visitStat {
+  padding: 20px 16px;
+  border-right: 1px solid color-mix(in srgb, var(--line), transparent 25%);
+  text-align: center;
+}
+
+.visitStat:last-child {
+  border-right: 0;
+}
+
+.visitStat span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
+.visitStat strong {
+  display: block;
+  margin-top: 10px;
+  font: 800 clamp(28px, 3.4vw, 42px)/1 Rockwell, Georgia, serif;
+  font-variant-numeric: tabular-nums;
+}
+
+.visitStat small {
+  display: block;
+  min-height: 1.2em;
+  margin-top: 8px;
+  color: var(--leaf);
+}
+
+.chartCard {
+  position: relative;
+  margin: 22px 0 0;
+  padding: 18px 18px 8px;
+  border: 1px solid color-mix(in srgb, var(--line), transparent 30%);
+  border-radius: var(--radius);
+  background: rgba(10, 16, 13, .55);
+}
+
+.chartCard figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.chartCard figcaption strong {
+  font: 800 13px Rockwell, Georgia, serif;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.legend > span {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+}
+
+.legendNote {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+  border-radius: 3px;
+}
+
+.swatch.views {
+  background: #b8862e;
+}
+
+.swatch.visitors {
+  height: 4px;
+  border-radius: 2px;
+  background: #3f8fd4;
+}
+
+.swatch.bots {
+  background: #56635a;
+}
+
+.chart {
+  width: 100%;
+  min-height: 220px;
+}
+
+.chartSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.chartGrid line {
+  stroke: rgba(72, 100, 81, .35);
+  stroke-width: 1;
+}
+
+.chartGrid line.baseline {
+  stroke: var(--line);
+}
+
+.chartGrid text,
+.chartAxis text {
+  fill: var(--muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.chartEmpty {
+  fill: var(--muted);
+  font-size: 14px;
+}
+
+.barViews {
+  fill: #b8862e;
+}
+
+.barBots {
+  fill: #56635a;
+}
+
+.lineVisitors {
+  fill: none;
+  stroke: #3f8fd4;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.dotVisitors {
+  fill: #3f8fd4;
+  stroke: var(--ground);
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.dotVisitors.hidden {
+  display: none;
+}
+
+.chartHighlight {
+  fill: rgba(241, 234, 213, .06);
+  pointer-events: none;
+}
+
+.chartHit {
+  fill: transparent;
+}
+
+.chartTooltip {
+  position: absolute;
+  top: 44px;
+  z-index: 2;
+  min-width: 170px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(10, 16, 13, .96);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .35);
+  pointer-events: none;
+  transform: translateX(calc(-50% + 18px));
+}
+
+.chartTooltip strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.chartTooltip dl {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 16px;
+  margin: 0;
+  font-size: 13px;
+}
+
+.chartTooltip dt {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  color: var(--muted);
+}
+
+.chartTooltip dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.visitNote {
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
 @keyframes rise {
   from {
     opacity: 0;
@@ -649,6 +929,22 @@ tbody tr:hover {
   .adminSection {
     grid-template-columns: 1fr;
   }
+
+  .visitStats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .visitStat {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .visitStat:nth-child(2n) {
+    border-right: 0;
+  }
+
+  .visitControls {
+    justify-content: flex-start;
+  }
 }
 
 @media (max-width: 620px) {
@@ -694,6 +990,14 @@ tbody tr:hover {
 
   .pagination {
     justify-content: space-between;
+  }
+
+  .rangeSwitch button {
+    padding-inline: 9px;
+  }
+
+  .chartCard {
+    padding-inline: 10px;
   }
 
   .pagination .button {

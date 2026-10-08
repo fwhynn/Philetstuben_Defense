@@ -216,6 +216,30 @@
 		return parseJson(response);
 	}
 
+	// Der Besucherzähler läuft im Duo-Server auf der Spiel-Domain, nicht in der Account-API.
+	async function getSiteVisits() {
+		const response = await fetch('/visits', {
+			method: 'GET',
+			headers: {
+				Accept: 'application/json',
+				...authHeaders()
+			},
+			cache: 'no-store'
+		});
+
+		if (response.ok) {
+			return response.json();
+		}
+
+		const messages = {
+			401: 'Besucherstatistik: bitte neu anmelden.',
+			403: 'Kein Zugriff auf die Besucherstatistik.',
+			404: 'Besucherzähler ist auf dem Server noch nicht eingerichtet.',
+			502: 'Besucherzähler: Duo-Server oder Account-API nicht erreichbar.'
+		};
+		throw new Error(messages[response.status] || `Besucherstatistik nicht verfügbar (Status ${response.status}).`);
+	}
+
 	async function getAdminPlayers({ limit = 25, offset = 0, sort = 'runs_played', direction = 'desc' } = {}) {
 		const parameters = new URLSearchParams({ limit, offset, sort, direction });
 		const response = await fetch(`${baseUrl}/admin/players?${parameters}`, {
@@ -243,6 +267,7 @@
 		clearPresence,
 		getAdminStats,
 		getAdminPlayers,
+		getSiteVisits,
 		isLoggedIn: () => !!getToken(),
 	};
 })();

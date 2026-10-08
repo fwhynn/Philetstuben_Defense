@@ -48,6 +48,27 @@ systemctl restart autohextd-duo.service
 
 Den identischen Wert als `DUO_LIVE_SECRET` in der API-`.env` setzen; dort außerdem `DUO_INTERNAL_URL=http://127.0.0.1:8090` konfigurieren. `GET /live` ist ohne dieses Secret nicht verfügbar und darf nicht über Nginx öffentlich weitergereicht werden.
 
+## Besucherzähler für die Admin-Seite
+
+Spiel (`index.html`) und Duo-Lobby melden jeden Seitenaufruf per `POST /visit` an den Duo-Dienst; `admin.html` liest die Auswertung über `GET /visits`. Gespeichert werden nur Summen pro Stunde/Tag in `/var/lib/autohextd/visits.json` (neben dem Checkpoint, keine Einrichtung nötig). IP-Adressen werden nicht gespeichert, nur mit einem täglich wechselnden Salt gehasht gezählt; keine Cookies. Stündliche Werte bleiben 35 Tage, Tageswerte 400 Tage.
+
+Einmalig auf dem Server:
+
+1. Den Block `location ~ ^/visits?$` aus `deploy/systemd/nginx-duo.conf` in den HTTPS-vHost übernehmen (inklusive `proxy_set_header X-Real-IP $remote_addr;`), `nginx -t`, dann `systemctl reload nginx`. Ohne `X-Real-IP` zählt der Dienst alle Besucher als einen einzigen. Steht ein CDN/Proxy (z. B. Cloudflare) vor Nginx, muss `$remote_addr` per `real_ip`-Modul die echte Client-Adresse enthalten.
+2. Der Dienst fragt für `GET /visits` bei der Account-API `/me` nach, ob der angemeldete Account Admin ist. Er muss daher `https://api.autohextd.zlyfer.net` ausgehend erreichen. Abweichende Adresse in `/etc/autohextd/duo.env` als `DUO_ACCOUNT_API_URL=...` setzen.
+3. Normales Update (Tag-Webhook) ausrollen; der Neustart des Dienstes aktiviert den Zähler.
+
+Optionale Variablen in `/etc/autohextd/duo.env`: `DUO_VISITS_FILE` (anderer Speicherort), `DUO_VISITS_TIME_ZONE` (Tagesgrenze, Standard `Europe/Berlin`), `DUO_TRUST_PROXY=1` (nur nötig, wenn der Proxy nicht über Loopback verbindet, z. B. Docker).
+
+Prüfen:
+
+```sh
+curl -i -X POST https://autohextd.autophil.lol/visit -H 'Content-Type: text/plain' -H 'Origin: https://autohextd.autophil.lol' --data '{"kind":"view","page":"game"}'
+curl -i https://autohextd.autophil.lol/visits
+```
+
+Erwartet: `204` (der curl-Aufruf landet als Bot in der Statistik) bzw. `401` mit JSON vom Node-Dienst. Eine HTML-404-Seite bedeutet, dass die Nginx-Location fehlt. Danach `admin.html` mit einem Admin-Account öffnen.
+
 ## Bestehenden Webserver ergänzen
 
 Nginx: `deploy/systemd/nginx-duo.conf` in den bestehenden HTTPS-vHost integrieren, Regeln mit vorhandenen Locations abgleichen, `nginx -t`, dann Nginx neu laden. Für Apache entsprechend `/socket.io/` inklusive WebSocket-Upgrade sowie die HTTP-Endpunkte zum Node-Dienst proxyen. Keinen zweiten Webserver auf Port 443 starten. `deploy/Caddyfile` enthält die entsprechende Caddy-Route.

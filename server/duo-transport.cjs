@@ -2,7 +2,14 @@
 const http = require('node:http'), fs = require('node:fs'), path = require('node:path'), crypto = require('node:crypto'), zlib = require('node:zlib');
 const root = path.resolve(__dirname, '..');
 const assets = new Set(["classes/profile.js", "classes/translations.js", "classes/i18n.js", "duo-lobby.html", "duo-lobby.js", "duo-prototype.html", "classes/duo-prototype.js", "duo-client.js", "classes/random.js", "classes/biomes.js", "classes/data.js", "classes/map.js", "classes/heroes.js", "classes/waves.js", "classes/exploration.js", "classes/placement-commands.js", "classes/run-flow.js", "classes/run-session.js", "classes/buildings.js", "classes/tower-commands.js", "classes/deck.js", "classes/rewards.js", "classes/combat.js", "classes/run-runtime.js", "classes/run-snapshot.js", "classes/duo-session.js", "classes/camera.js", "classes/svg-renderer.js"]);
-function createTransport(room, { browser = false, autoTick = false, publicOrigin = null, liveSecret = null } = {}) {
+// Behind nginx/Caddy the socket address is the proxy; only then is the forwarded client address trustworthy.
+function clientAddress(req, trustProxy) {
+  const socket = req.socket.remoteAddress || '';
+  if (!trustProxy && !/^(127\.|::1$|::ffff:127\.)/.test(socket)) return socket;
+  const real = String(req.headers['x-real-ip'] || '').trim(), forwarded = String(req.headers['x-forwarded-for'] || '').split(',').map(part => part.trim()).filter(Boolean);
+  return real || forwarded[forwarded.length - 1] || socket;
+}
+function createTransport(room, { browser = false, autoTick = false, publicOrigin = null, liveSecret = null, visits = null, verifyAdmin = null, trustProxy = false } = {}) {
   let closing = false; const attempts = new Map();
   const server = http.createServer(async (req, res) => {
     const send = (status, value) => { if (res.writableEnded) return; const body = JSON.stringify(value), headers = { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', Vary: 'Accept-Encoding' }; if (body.length > 1024 && /\bgzip\b/.test(req.headers['accept-encoding'] || '')) { res.writeHead(status, { ...headers, 'Content-Encoding': 'gzip' }); return res.end(zlib.gzipSync(body)); } res.writeHead(status, headers); res.end(body); };
@@ -22,6 +29,18 @@ function createTransport(room, { browser = false, autoTick = false, publicOrigin
       if (expected.length !== actual.length || !crypto.timingSafeEqual(expected, actual)) return send(401, { error: 'unauthorized' });
       if (room.healthy === false) return send(503, { ok: false, error: 'storage-unavailable' });
       return send(200, { ok: true, ...room.live() });
+    }
+    if (visits && req.method === 'POST' && req.url === '/visit') {
+      // Counting is best effort and must never disturb Duo matches.
+      let length = 0; const chunks = [];
+      try { for await (const chunk of req) { length += chunk.length; if (length > 512) { req.resume(); return send(413, { error: 'too-large' }); } chunks.push(chunk); } const packet = JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}'); const result = visits.record({ kind: packet?.kind, page: packet?.page, webdriver: packet?.webdriver === true, ip: clientAddress(req, trustProxy), userAgent: String(req.headers['user-agent'] || '').slice(0, 512), acceptLanguage: String(req.headers['accept-language'] || '') }); if (!result.ok) return send(400, { error: 'invalid-visit' }); res.writeHead(204, { 'Cache-Control': 'no-store' }); return res.end(); }
+      catch { return send(400, { error: 'invalid-json' }); }
+    }
+    if (visits && req.method === 'GET' && req.url === '/visits') {
+      const bearer = req.headers.authorization?.replace(/^Bearer /, '');
+      if (!bearer || typeof verifyAdmin !== 'function') return send(401, { error: 'unauthorized' });
+      let admin; try { admin = await verifyAdmin(bearer); } catch { return send(502, { error: 'account-api-unavailable' }); }
+      return admin ? send(200, { ok: true, ...visits.stats() }) : send(403, { error: 'forbidden' });
     }
     const token = req.headers.authorization?.replace(/^Bearer /, '');
     if (room.healthy === false) return send(503, { error: 'storage-unavailable' });

@@ -8,6 +8,7 @@ services:
     environment:
       DUO_PUBLIC_ORIGIN: https://autohextd.autophil.lol
       DUO_MAINTENANCE: '0'
+      DUO_TRUST_PROXY: '1'
     volumes:
       - duo_data:/data
     healthcheck:

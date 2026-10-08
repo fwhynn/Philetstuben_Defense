@@ -148,7 +148,7 @@
 		setStatus('Daten werden aktualisiert …');
 
 		try {
-			await Promise.all([loadStats(), loadPlayers()]);
+			await Promise.all([loadStats(), loadPlayers(), AdminVisits.refresh()]);
 			setStatus();
 		} catch (error) {
 			setStatus(error.message);
@@ -161,10 +161,12 @@
 		state.user = user;
 		$('signedInAs').textContent = user.username;
 		show('dashboard');
+		AdminVisits.start();
 		await refreshAll();
 	}
 
 	async function logout() {
+		AdminVisits.stop();
 		await HexApi.logout();
 		state.user = null;
 		$('signedInAs').textContent = '';

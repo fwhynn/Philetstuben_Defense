@@ -29,6 +29,8 @@ function apiTarget() {
   return target;
 }
 const localApi = apiTarget();
+// Besucherzähler (/visit, /visits) liegt im Duo-Server; lokal dorthin weiterleiten, sofern er läuft.
+const localDuo = new URL(readEnv(path.join(root, '.env')).DUO_INTERNAL_URL || 'http://127.0.0.1:8090');
 // Liste aller .glb-Modelle unter assets/, damit der Renderer nur vorhandene Dateien lädt (keine 404-Fehler für optionale Modelle).
 function listModels(dir = path.join(root, 'assets'), base = '', out = []) {
   for (const entry of fs.existsSync(dir) ? fs.readdirSync(dir, { withFileTypes: true }) : []) {
@@ -65,10 +67,29 @@ function proxyApi(req, res, url) {
   });
   req.pipe(upstream);
 }
+function proxyDuo(req, res, url) {
+  const headers = { ...req.headers, host: localDuo.host, 'x-real-ip': req.socket.remoteAddress || '' };
+  delete headers.connection; delete headers.origin;
+  const upstream = (localDuo.protocol === 'https:' ? https : http).request({
+    protocol: localDuo.protocol, hostname: localDuo.hostname, port: localDuo.port,
+    method: req.method, path: url.pathname + url.search, headers
+  }, response => {
+    res.writeHead(response.statusCode || 502, { 'Content-Type': response.headers['content-type'] || 'application/json', 'Cache-Control': 'no-store', ...(response.headers['content-encoding'] ? { 'Content-Encoding': response.headers['content-encoding'] } : {}) });
+    response.pipe(res);
+  });
+  upstream.on('error', () => {
+    if (res.headersSent) return res.destroy();
+    if (url.pathname === '/visit') { res.writeHead(204); return res.end(); }
+    res.writeHead(502, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+    res.end(JSON.stringify({ error: 'duo-unavailable' }));
+  });
+  req.pipe(upstream);
+}
 http.createServer((req, res) => {
   const url = new URL(req.url, 'http://x');
   let p; try { p = decodeURIComponent(url.pathname); } catch { res.writeHead(400); return res.end('Bad request'); }
   if (localApi && (p === '/api' || p.startsWith('/api/'))) return proxyApi(req, res, url);
+  if (p === '/visit' || p === '/visits') return proxyDuo(req, res, url);
   if (p === '/runtime-config.js') {
     const config = localApi ? { apiBaseUrl: '/api' } : {};
     res.writeHead(200, { 'Content-Type': 'text/javascript; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });

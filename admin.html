@@ -104,6 +104,52 @@
           </article>
         </section>
 
+        <section class="dataSection" aria-labelledby="visitsTitle">
+          <header class="sectionHeader">
+            <div>
+              <p class="kicker">Besucher</p>
+              <h2 id="visitsTitle">Seitenaufrufe</h2>
+            </div>
+            <div class="visitControls">
+              <div class="rangeSwitch" role="group" aria-label="Zeitraum">
+                <button type="button" data-visit-range="24h" aria-pressed="false">24 Std</button>
+                <button type="button" data-visit-range="7d" aria-pressed="true">7 Tage</button>
+                <button type="button" data-visit-range="30d" aria-pressed="false">30 Tage</button>
+                <button type="button" data-visit-range="90d" aria-pressed="false">90 Tage</button>
+              </div>
+              <label class="toggle"><input id="showBots" type="checkbox" /> Bots anzeigen</label>
+            </div>
+          </header>
+          <div class="visitStats">
+            <article class="visitStat" data-visit="today"><span>Heute</span><strong data-value>—</strong><small data-detail></small></article>
+            <article class="visitStat" data-visit="yesterday"><span>Gestern</span><strong data-value>—</strong><small data-detail></small></article>
+            <article class="visitStat" data-visit="range"><span>Zeitraum</span><strong data-value>—</strong><small data-detail></small></article>
+            <article class="visitStat" data-visit="online"><span>Gerade online</span><strong data-value>—</strong><small data-detail></small></article>
+          </div>
+          <figure class="chartCard">
+            <figcaption>
+              <strong id="visitRangeTitle">Aufrufe pro Tag</strong>
+              <span class="legend">
+                <span><i class="swatch views"></i>Aufrufe</span>
+                <span><i class="swatch visitors"></i>Besucher</span>
+                <span id="legendBots" class="hidden"><i class="swatch bots"></i>Bots</span>
+              </span>
+            </figcaption>
+            <div id="visitChart" class="chart"></div>
+            <div id="visitTooltip" class="chartTooltip hidden"></div>
+          </figure>
+          <figure class="chartCard">
+            <figcaption>
+              <strong>Aufrufe nach Uhrzeit</strong>
+              <span class="legendNote">Summe der letzten 30 Tage</span>
+            </figcaption>
+            <div id="visitProfile" class="chart"></div>
+            <div id="visitProfileTooltip" class="chartTooltip hidden"></div>
+          </figure>
+          <p class="visitNote">Gezählt werden echte Browser-Aufrufe von Spiel und Duo-Lobby. Ohne Cookies und ohne gespeicherte IP-Adressen; Besucher werden pro Tag anonym gezählt. Crawler und Massen-Neuladen erscheinen als Bots.</p>
+          <p id="visitStatus" class="dashboardStatus" role="status" aria-live="polite"></p>
+        </section>
+
         <section class="dataSection" aria-labelledby="playersTitle">
           <header class="sectionHeader">
             <div>
@@ -141,6 +187,7 @@
 
     <script src="runtime-config.js"></script>
     <script src="classes/api.js"></script>
+    <script src="classes/admin-visits.js"></script>
     <script src="classes/admin.js"></script>
   </body>
 
