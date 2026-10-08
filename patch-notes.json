@@ -1,0 +1,15 @@
+[
+  {
+    "version": "next",
+    "date": null,
+    "title": "Ein leichterer Einstieg",
+    "changes": [
+      "Neue Spieler starten direkt mit Bogenschütze und Katapult. Frostturm, Kettenblitz und Minenleger kommen nach Welle 5, 10 und 15 in den laufenden Durchlauf.",
+      "Zunächst gibt es nur Grasland. Nach Welle 20 kann Dünenmeer entdeckt werden. Weniger Event-Felder und Hinweise machen den Einstieg übersichtlicher.",
+      "Nach geschaffter Welle 35 werden Tagesherausforderung und Duo freigeschaltet. Duo-Einladungen funktionieren jederzeit. Bestehende Spielstände behalten ihren Zugang.",
+      "Die Einführung lässt sich überspringen; gelernter Fortschritt wird gespeichert.",
+      "Neue Standarddurchläufe starten mit Grafikstil Normal. Sakura bleibt während des Spiels in den Einstellungen auswählbar.",
+      "Patch Notes sind jetzt im Hauptmenü nachlesbar."
+    ]
+  }
+]

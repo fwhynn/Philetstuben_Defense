@@ -1,4 +1,5 @@
 const HexProfile=(()=>{
+  const profileStorage=globalThis.HexFirstPlayerTest?.active?HexFirstPlayerTest.storage:typeof localStorage!=='undefined'?localStorage:{getItem:()=>null,setItem(){}};
   const STORAGE_KEY='hex-bastion-profile-v1';
   const START_TOWERS=['archer','catapult','chain','freeze','mine'];
   const TOWER_UNLOCKS={ballista:{cost:20},flame:{cost:35},element:{cost:45},necromancer:{cost:55}};
@@ -14,26 +15,30 @@ const HexProfile=(()=>{
   function resetValue(profile){let amount=0;for(const [kind,offers] of [['tower',TOWER_UNLOCKS],['ultimate',ULTIMATE_UNLOCKS],['building',BUILDING_UNLOCKS]])for(const [id,offer] of Object.entries(offers)){const key=kind+':'+id,owned=kind==='tower'?profile.unlockedTowers.includes(id):profile.unlocks.includes(key);if(owned){const paid=profile.unlockCosts?.[key];amount+=Number.isFinite(paid)&&paid>=0?paid:offer.cost;}}for(const key of profile.unlocks){const [kind,type,branch]=key.split(':');if(kind==='ultimate'&&ULTIMATE_BRANCHES[type]?.includes(branch))amount+=profile.unlockCosts?.[key]??ULTIMATE_UNLOCKS[type].cost;}return amount;}
   function resetUnlocks(profile,definitions){const clean=normalize(profile,definitions),refund=resetValue(clean);return {refund,profile:save({...clean,diamonds:clean.diamonds+refund,unlockedTowers:[...START_TOWERS],activeLoadout:[...START_TOWERS],loadoutPresets:defaults().loadoutPresets,unlocks:clean.unlocks.filter(id=>!['tower:','ultimate:','building:'].some(prefix=>id.startsWith(prefix))),unlockCosts:{},activeUltimates:{}},definitions)};}
   function heroUnlocked(profile,id){return id==='standard'||id==='builder'&&profile.milestones?.includes('standard35')||id==='merchant'&&profile.milestones?.includes('dual35')||false;}
-  function defaults(){const loadout=[...START_TOWERS];return {version:1,activeHero:'standard',diamonds:0,unlockedTowers:loadout,activeLoadout:[...loadout],loadoutPresets:Array.from({length:3},(_,i)=>({name:`Preset ${i+1}`,towers:[...loadout]})),unlocks:[],milestones:[],settledRuns:[],records:{highestWave:0,bossesKilled:0,runsPlayed:0},lifetime:{normalKills:0,diamondsEarned:0,towers:{}}};}
+  function defaults(){const loadout=['archer','catapult'];return {version:1,introduction:{version:1,bestWave:0,skipped:false,legacy:false},activeHero:'standard',diamonds:0,unlockedTowers:loadout,activeLoadout:[...loadout],loadoutPresets:Array.from({length:3},(_,i)=>({name:`Preset ${i+1}`,towers:[...loadout]})),unlocks:[],milestones:[],settledRuns:[],records:{highestWave:0,bossesKilled:0,runsPlayed:0},lifetime:{normalKills:0,diamondsEarned:0,towers:{}}};}
   function validIds(ids,definitions){return [...new Set(Array.isArray(ids)?ids:[])].filter(id=>definitions[id]);}
   function normalize(raw,definitions){
     const base=defaults(),source=raw&&typeof raw==='object'?raw:{};
-    let unlocked=validIds(source.unlockedTowers,definitions);
-    for(const id of START_TOWERS) if(definitions[id]&&!unlocked.includes(id)) unlocked.push(id);
+    const introduction=source.introduction?{version:1,bestWave:Math.min(35,Math.max(0,Math.floor(Number(source.introduction.bestWave)||0))),skipped:source.introduction.skipped===true,legacy:source.introduction.legacy===true}:{version:1,bestWave:0,skipped:false,legacy:!!raw};
+    if(source.milestones?.includes('standard35'))introduction.bestWave=35;
+    const learning=!introduction.legacy&&!introduction.skipped&&introduction.bestWave<35;
+    const starters=learning?START_TOWERS.filter(id=>(definitions[id]?.introWave??(['archer','catapult'].includes(id)?0:Infinity))<=introduction.bestWave).sort((a,b)=>(definitions[a]?.introWave||0)-(definitions[b]?.introWave||0)):START_TOWERS;
+    let unlocked=validIds(source.unlockedTowers,definitions).filter(id=>!learning||!START_TOWERS.includes(id)||starters.includes(id));
+    for(const id of starters) if(definitions[id]&&!unlocked.includes(id)) unlocked.push(id);
     let active=validIds(source.activeLoadout,definitions).filter(id=>unlocked.includes(id));
     for(const id of unlocked) if(active.length<5&&!active.includes(id)) active.push(id);
-    active=active.slice(0,5);
+    active=learning?[...starters]:active.slice(0,5);
     const presets=Array.from({length:3},(_,i)=>{const item=source.loadoutPresets?.[i],ids=validIds(item?.towers||item,definitions).filter(id=>unlocked.includes(id));return {name:String(item?.name||`Preset ${i+1}`).slice(0,30),towers:ids.length===5?ids:[...active]};});
-    return {...base,...source,duoSettledRuns:Array.isArray(source.duoSettledRuns)?source.duoSettledRuns.filter(id=>typeof id==='string'&&/^[a-f0-9]{64}$/.test(id)):[],version:1,difficulty:source.difficulty==='dual'&&source.milestones?.includes('standard35')?'dual':'normal',activeHero:heroUnlocked(source,source.activeHero)?source.activeHero:'standard',diamonds:Math.max(0,Number(source.diamonds)||0),unlockedTowers:unlocked,activeLoadout:active,
+    return {...base,...source,introduction,duoSettledRuns:Array.isArray(source.duoSettledRuns)?source.duoSettledRuns.filter(id=>typeof id==='string'&&/^[a-f0-9]{64}$/.test(id)):[],version:1,difficulty:source.difficulty==='dual'&&source.milestones?.includes('standard35')?'dual':'normal',activeHero:heroUnlocked(source,source.activeHero)?source.activeHero:'standard',diamonds:Math.max(0,Number(source.diamonds)||0),unlockedTowers:unlocked,activeLoadout:active,
       loadoutPresets:presets,unlocks:[...new Set(Array.isArray(source.unlocks)?source.unlocks:[])],milestones:Array.isArray(source.milestones)?source.milestones:[],settledRuns:Array.isArray(source.settledRuns)?source.settledRuns.slice(-100):[],
       records:{...base.records,...(source.records||{})},lifetime:{...base.lifetime,...(source.lifetime||{}),towers:{...(source.lifetime?.towers||{})}}};
   }
   function load(definitions){
-    try{return normalize(JSON.parse(localStorage.getItem(STORAGE_KEY)||'null'),definitions);}
+    try{let raw=JSON.parse(profileStorage.getItem(STORAGE_KEY)||'null');if(!raw&&profileStorage.getItem('tutorial-v1')==='done')raw={};const clean=normalize(raw,definitions);try{profileStorage.setItem(STORAGE_KEY,JSON.stringify(clean));}catch{}return clean;}
     catch(error){return normalize(null,definitions);}
   }
   function save(profile,definitions){
-    const clean=normalize(profile,definitions);try{localStorage.setItem(STORAGE_KEY,JSON.stringify(clean));}catch(error){}return clean;
+    const clean=normalize(profile,definitions);try{profileStorage.setItem(STORAGE_KEY,JSON.stringify(clean));}catch(error){}return clean;
   }
   function setLoadout(profile,ids,definitions){
     const selected=validIds(ids,definitions);
@@ -60,7 +65,7 @@ const HexProfile=(()=>{
     const clean=normalize(profile,definitions);
     if(!receipt||!/^[a-f0-9]{64}$/.test(receipt.id)||!Number.isSafeInteger(receipt.diamonds)||receipt.diamonds<0||receipt.diamonds>100000)throw Error('Ungültige Duo-Abrechnung');
     if(clean.duoSettledRuns.includes(receipt.id))return clean;
-    const next=normalize({...clean,diamonds:clean.diamonds+receipt.diamonds,duoSettledRuns:[...clean.duoSettledRuns,receipt.id],lifetime:{...clean.lifetime,diamondsEarned:clean.lifetime.diamondsEarned+receipt.diamonds}},definitions);localStorage.setItem(STORAGE_KEY,JSON.stringify(next));return next;
+    const next=normalize({...clean,diamonds:clean.diamonds+receipt.diamonds,duoSettledRuns:[...clean.duoSettledRuns,receipt.id],lifetime:{...clean.lifetime,diamondsEarned:clean.lifetime.diamondsEarned+receipt.diamonds}},definitions);profileStorage.setItem(STORAGE_KEY,JSON.stringify(next));return next;
   }
   function settleRun(profile,summary,definitions){
     const clean=normalize(profile,definitions),runId=String(summary.runId||'');
@@ -94,6 +99,7 @@ const HexProfile=(()=>{
     check(p);
     const invalid=()=>{throw new Error('Ungültige Profildaten.');},object=v=>v&&typeof v==='object'&&!Array.isArray(v),numbers=v=>{if(!object(v)||Object.values(v).some(n=>!Number.isSafeInteger(n)||n<0))invalid();};
     for(const key of ['unlockedTowers','activeLoadout','unlocks','settledRuns','duoSettledRuns'])if(p[key]!==undefined&&(!Array.isArray(p[key])||p[key].some(id=>typeof id!=='string')))invalid();
+    if(p.introduction!==undefined&&(!object(p.introduction)||p.introduction.version!==1||!Number.isInteger(p.introduction.bestWave)||p.introduction.bestWave<0||p.introduction.bestWave>35||typeof p.introduction.skipped!=='boolean'||typeof p.introduction.legacy!=='boolean'))invalid();
     numbers(p.records);for(const key of ['highestWave','bossesKilled','runsPlayed'])if(!Number.isSafeInteger(p.records[key]))invalid();
     for(const key of ['normalKills','diamondsEarned'])if(!Number.isSafeInteger(p.lifetime[key]))invalid();
     if(!object(p.lifetime.towers))invalid();for(const entry of Object.values(p.lifetime.towers))numbers(entry);
@@ -101,14 +107,18 @@ const HexProfile=(()=>{
     if(p.unlockCosts!==undefined)numbers(p.unlockCosts);
     if(p.loadoutPresets!==undefined&&(!Array.isArray(p.loadoutPresets)||p.loadoutPresets.some(v=>!object(v)||typeof v.name!=='string'||!Array.isArray(v.towers)||v.towers.some(id=>typeof id!=='string'))))invalid();
     if(p.dailyResults!==undefined){if(!object(p.dailyResults))invalid();for(const [day,result] of Object.entries(p.dailyResults))if(!/^\d{4}-\d{2}-\d{2}$/.test(day)||!object(result)||!Number.isSafeInteger(result.best)||result.best<0||typeof result.won!=='boolean')invalid();}
-    const allowed=['version','activeHero','difficulty','diamonds','unlockedTowers','activeLoadout','loadoutPresets','unlocks','milestones','settledRuns','records','lifetime','unlockCosts','dailyResults','duoSettledRuns','activeUltimates'];
+    const allowed=['version','activeHero','difficulty','diamonds','unlockedTowers','activeLoadout','loadoutPresets','unlocks','milestones','settledRuns','records','lifetime','unlockCosts','dailyResults','duoSettledRuns','activeUltimates','introduction'];
     return normalize(Object.fromEntries(allowed.filter(key=>p[key]!==undefined).map(key=>[key,p[key]])),definitions);
   }
   function importFile(text,definitions){
-    const next=readFile(text,definitions),previous=localStorage.getItem(STORAGE_KEY);
+    const next=readFile(text,definitions),previous=profileStorage.getItem(STORAGE_KEY);
     // Fail visibly before replacing the profile if storage or the backup is unavailable.
-    if(previous!==null)localStorage.setItem(STORAGE_KEY+'-before-import',previous);
-    localStorage.setItem(STORAGE_KEY,JSON.stringify(next));return next;
+    if(previous!==null)profileStorage.setItem(STORAGE_KEY+'-before-import',previous);
+    profileStorage.setItem(STORAGE_KEY,JSON.stringify(next));return next;
   }
-  return {ULTIMATE_BRANCHES,ownsUltimate,activeUltimate,runUnlocks,activateUltimate,settleDuo,heroUnlocked,exportFile,readFile,importFile,resetValue,resetUnlocks,affordableUnlocks,BUILDING_UNLOCKS,unlockBuilding,STORAGE_KEY,START_TOWERS,TOWER_UNLOCKS,ULTIMATE_UNLOCKS,defaults,normalize,load,save,setLoadout,renamePreset,savePreset,runReward,settleRun,settleDaily,unlockTower,unlockUltimate};
+  function learning(profile){const intro=profile.introduction;return !!intro&&!intro.legacy&&!intro.skipped&&intro.bestWave<35;}
+  function modesUnlocked(profile){return !!profile.introduction?.legacy||profile.milestones?.includes('standard35')||profile.introduction?.bestWave>=35;}
+  function recordIntroduction(profile,wave,definitions){const clean=normalize(profile,definitions);if(!Number.isInteger(wave)||wave<0)return clean;return save({...clean,introduction:{...clean.introduction,bestWave:Math.max(clean.introduction.bestWave,Math.min(35,wave))}},definitions);}
+  function skipIntroduction(profile,definitions){const clean=normalize(profile,definitions);return save({...clean,introduction:{...clean.introduction,skipped:true}},definitions);}
+  return {learning,modesUnlocked,recordIntroduction,skipIntroduction,ULTIMATE_BRANCHES,ownsUltimate,activeUltimate,runUnlocks,activateUltimate,settleDuo,heroUnlocked,exportFile,readFile,importFile,resetValue,resetUnlocks,affordableUnlocks,BUILDING_UNLOCKS,unlockBuilding,STORAGE_KEY,START_TOWERS,TOWER_UNLOCKS,ULTIMATE_UNLOCKS,defaults,normalize,load,save,setLoadout,renamePreset,savePreset,runReward,settleRun,settleDaily,unlockTower,unlockUltimate};
 })();

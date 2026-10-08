@@ -174,5 +174,7 @@ const HexData=(()=>{
     if(terrain.archerDamage)parts.push('+25 % Archer');
     return parts.join(' · ')||null;
   }
-  return {defaultTargetPriority,upgradeChanges,SPECIALIZATIONS,ultimateAvailable,tileBonusLabel,recordTowerStat,runUpgrades,upgradeStatus,ultimateDefinition,CARD_LIBRARY,TOWERS,UPGRADES,ULTIMATES,BRANCH_VISUALS,towerDefinition,availableUpgrades,towerRefund};
+  const INTRO_TOWERS=[{wave:0,id:"archer"},{wave:0,id:"catapult"},{wave:5,id:"freeze"},{wave:10,id:"chain"},{wave:15,id:"mine"}];
+  for(const {id,wave} of INTRO_TOWERS)TOWERS[id].introWave=wave;
+  return {INTRO_TOWERS,defaultTargetPriority,upgradeChanges,SPECIALIZATIONS,ultimateAvailable,tileBonusLabel,recordTowerStat,runUpgrades,upgradeStatus,ultimateDefinition,CARD_LIBRARY,TOWERS,UPGRADES,ULTIMATES,BRANCH_VISUALS,towerDefinition,availableUpgrades,towerRefund};
 })();

@@ -139,3 +139,7 @@ curl -s $API/saves -H "Authorization: Bearer $TOKEN"
 curl -s -X POST $API/logout -H "Authorization: Bearer $TOKEN" -o /dev/null -w '%{http_code}\n'
 curl -s $API/me -H "Authorization: Bearer $TOKEN" -o /dev/null -w '%{http_code}\n'   # erwartet 401
 ```
+
+## Einführungsfortschritt (08.10.2026)
+
+Das exportierte Profil enthält zusätzlich `introduction: {version: 1, bestWave: 0, skipped: false, legacy: false}`. Das Backend muss dieses Feld im Spielstand unverändert speichern und zurückliefern. bestWave enthält die höchste abgeschlossene Standardwelle (0–35); neue Profile können zunächst nur zwei bis vier Einträge in activeLoadout haben. Ältere Profile ohne introduction bleiben als Bestandsprofile vollständig zugänglich. Siehe [Einführung](INTRODUCTION.md).

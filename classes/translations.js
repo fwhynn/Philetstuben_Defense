@@ -1318,3 +1318,32 @@ Tipp: Mit einem Account wird dein Fortschritt automatisch gesichert.|Tip: With a
 ☁ Gerade offline – wird beim nächsten Mal gesichert.|☁ Offline right now – it will be backed up next time.
 Account schließen (Escape)|Close account (Escape)
 `);
+
+HexTranslations.add(`
+Starte mit Bogenschütze und Katapult. Neue Türme kommen nach Welle 5, 10 und 15 dazu.|Start with Archer and Catapult. New towers join after waves 5, 10 and 15.
+Ich kenne das Spiel – Einführung überspringen|I know the game – skip introduction
+Neuer Turm freigeschaltet:|New tower unlocked:
+Verlangsamt Gegner in seiner Nähe.|Slows nearby enemies.
+Blitze springen zwischen Gegnern und sind besonders stark gegen Magieresistenz.|Lightning jumps between enemies and is especially effective against magic resistance.
+Legt explosive Minen auf die Straße.|Places explosive mines on the road.
+Neues Biom: Dünenmeer. Gegner bewegen sich hier langsamer; Türme haben weniger Reichweite. Tippe auf das Sonnensymbol für Details.|New biome: Dune Sea. Enemies move slower here; towers have reduced range. Tap the sun icon for details.
+Überlebe Welle 35 im Standardspiel, um eigene Lobbys zu erstellen. Einladungen kannst du jederzeit annehmen.|Survive wave 35 in Standard to create your own lobbies. You can accept invitations at any time.
+`);
+
+HexTranslations.add(`
+Einführung überspringen · vollständige Welt ab nächstem Durchlauf|Skip introduction · full world from the next run
+Welle 35 geschafft! Zwei Fronten, Festungsbauer, Tagesherausforderung und Duo sind jetzt freigeschaltet.|Wave 35 survived! Two Fronts, Fortress Builder, Daily Challenge and Duo are now unlocked.
+`);
+
+HexTranslations.add(`
+Patch Notes · Was ist neu?|Patch notes · What's new?
+Erstspieler-Test starten|Start first-player test
+Erstspieler-Test neu starten|Restart first-player test
+Zurück zu meinem Spielstand|Return to my progress
+Erstspieler-Test beenden · zum echten Spielstand|Exit first-player test · return to real progress
+Erstspieler-Test · separater Spielstand|First-player test · separate progress
+Änderungen werden geladen …|Loading changes …
+In Vorbereitung|In preparation
+Noch nicht veröffentlicht|Not yet released
+Patch Notes konnten nicht geladen werden. Bitte später erneut öffnen.|Could not load patch notes. Please try again later.
+`);

@@ -96,7 +96,7 @@ const HexRunFlow=(()=>{
 
   function finish(state){
     if(state.hp<=0||state.wave<1||state.pendingSpawns>0||state.enemies.some(e=>e.alive)||state.lastCompletedWave===state.wave)return null;
-    state.lastCompletedWave=state.wave;state.waveRunning=false;
+    state.lastCompletedWave=state.wave;state.waveRunning=false;HexRunRuntime.advanceIntroduction(state);
     HexCombat.clearConsumables(state);
     if(state.challengeKind!=='garrison')state.gold+=HexWaves.economy.completion+state.income;state.projectiles=[];state.mines=[];
     for(const tile of state.map.values())for(const tower of tile.towers||[])if(tower)tower.souls=[];

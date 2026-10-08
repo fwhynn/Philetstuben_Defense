@@ -1,8 +1,11 @@
 (()=>{
  const $=id=>document.getElementById(id),params=new URLSearchParams(location.hash.slice(1));
  const code=$('code'),status=$('status');code.value=(params.get('join')||'').toUpperCase();let pending=null,client=null,view=null,navigating=false;
+ const canCreate=()=>HexProfile.modesUnlocked(HexProfile.load(HexData.TOWERS));
+ $('create').hidden=!canCreate();
  const reasons={maintenance:'Serverwartung. Bitte später erneut versuchen.',full:'Diese Lobby ist bereits voll.',capacity:'Der Server ist ausgelastet.',invalid:'Bitte einen gültigen Einladungscode eingeben.','not-found':'Lobby nicht gefunden oder abgelaufen.',expired:'Diese Lobby ist abgelaufen.'};
  async function enter(kind){
+   if(kind==='create'&&!canCreate()){status.textContent='Überlebe Welle 35 im Standardspiel, um eigene Lobbys zu erstellen. Einladungen kannst du jederzeit annehmen.';return;}
    const value=code.value.trim().toUpperCase(),key=kind+':'+value;if(!pending||pending.key!==key)pending={key,requestId:crypto.randomUUID()};
    $('create').disabled=true;$('join').querySelector('button').disabled=true;status.textContent='Verbinde …';
    try{const response=await fetch('/lobby/'+kind,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({requestId:pending.requestId,...(kind==='join'?{code:value}:{})}),signal:AbortSignal.timeout(5000)});if(!response.ok)throw Error('Server nicht erreichbar.');const result=await response.json();if(!result.ok){pending=null;throw Error(reasons[result.reason]||'Verbindung fehlgeschlagen.');}localStorage.setItem('autohex-duo-session',result.token);history.replaceState(null,'','#session='+result.token);wait(result.token);}catch(error){status.textContent=error.message;}finally{$('create').disabled=false;$('join').querySelector('button').disabled=false;}

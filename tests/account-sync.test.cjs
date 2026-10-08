@@ -56,3 +56,10 @@ test('without an account nothing is sent and the result screen suggests signing 
   assert.equal(api.puts.length, 0);
   assert.match(elements.get('cloudSaveNote').textContent, /Account/);
 });
+
+test('cloud restore retains higher guest learning milestones without transferring extra currency',async()=>{
+ const introduction={version:1,bestWave:5,skipped:false,legacy:false};const api=fakeApi(serverSave({introduction,diamonds:7}));
+ const {a,storage,document}=load({accountApi:api,initialProfile:{introduction:{...introduction,bestWave:15},diamonds:1},initialStorage:{'tutorial-v1':''}});
+ await submit(document,'login');endRun(a);await flush();const profile=JSON.parse(storage.get('hex-bastion-profile-v1'));
+ assert.equal(profile.introduction.bestWave,15);assert.equal(profile.introduction.legacy,false);assert.equal(profile.activeLoadout.length,5);assert.equal(profile.diamonds,7);assert.equal(api.puts.at(-1).profile.introduction.bestWave,15);
+});

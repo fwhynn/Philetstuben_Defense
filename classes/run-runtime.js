@@ -22,15 +22,17 @@ const HexRunRuntime=(()=>{
     }
     return entry.plan;
   }
-  function create({seed,runId,loadout,unlocks=[],heroId='standard',difficulty='normal',challengeDay=null}){
+  function create({seed,runId,loadout,unlocks=[],heroId='standard',difficulty='normal',challengeDay=null,introduction=null}){
     if(typeof seed!=='string'||!seed||typeof runId!=='string'||!runId)throw new Error('Seed and run ID required');
-    if(!Array.isArray(loadout)||loadout.length!==5||new Set(loadout).size!==5||loadout.some(id=>!Object.hasOwn(HexData.TOWERS,id)))throw new Error('Invalid run loadout');
+    const learning=!!introduction&&!introduction.skipped&&!introduction.legacy&&(introduction.bestWave||0)<35&&!challengeDay;
+    if(!Array.isArray(loadout)||(!learning&&loadout.length!==5)||(learning&&(loadout.length<2||loadout.length>5))||new Set(loadout).size!==loadout.length||loadout.some(id=>!Object.hasOwn(HexData.TOWERS,id)))throw new Error('Invalid run loadout');
     if(challengeDay){difficulty='dual';heroId='standard';}
     const state={hp:20,gold:HexWaves.economy.startGold,wave:0,goldEarned:{kills:0,completion:0,income:0},waveKills:0,map:new Map(),deck:['straight','straight','smallCurve','bigCurve','tee'],drawPile:[],discard:[],hand:[],phase:'place',enemies:[],mines:[],projectiles:[],waveRunning:false,bossRewards:[],towerLoadout:[...loadout],buildingUnlocks:unlocks.filter(id=>id.startsWith('building:')),ultimateUnlocks:unlocks.filter(id=>id.startsWith('ultimate:')),runTowerStats:{},runTowerDetails:{},nextTowerStatId:0,runId,earnedMeta:{normalKills:0,periodicBosses:0,explorationBosses:0},metaSettled:false,income:0,nextEnemyId:1,pendingSpawns:0,elapsedMs:0,spawnQueue:[],seed,challengeDay,biomeLayoutVersion:2,biomeSeed:challengeDay?null:seed};
+    if(learning){state.introduction={bestWave:Math.max(0,introduction.bestWave||0),notices:[],biomeUnlocked:introduction.bestWave>=20};state.towerLoadout=HexData.INTRO_TOWERS.filter(t=>t.wave<=state.introduction.bestWave).map(t=>t.id);}
     if(challengeDay){state.deck=['straight','straight','longRoad','treasury','village'];state.ultimateUnlocks=[];state.buildingUnlocks=[];state.towerLoadout=['archer','ballista','catapult','mine','freeze'];}
     state.difficulty=difficulty==='dual'?'dual':'normal';state.openingRemaining=state.difficulty==='dual'?2:0;
     state.baseExits=state.difficulty==='dual'?HexMap.randomBaseExits(HexRandom.create(seed+'|base-exits')):[0];HexHeroes.initialize(state,heroId);delete state.selectedBase;
-    state.landmarks=HexExploration.create(HexRandom.create(seed+'|exploration'));
+    state.landmarks=HexExploration.create(HexRandom.create(seed+'|exploration'),{sparse:learning});
     state.vision=HexExploration.expand(state.landmarks,new Map([['0,0',{q:0,r:0}]]));
     state.map.set('0,0',{q:0,r:0,type:'base',roads:state.baseExits,slots:0,towers:[],income:0});
     if(challengeDay){state.challengeKind=HexWaves.daily(challengeDay).id;state.challengeTarget=HexWaves.daily(challengeDay).target;}
@@ -122,5 +124,12 @@ const HexRunRuntime=(()=>{
     state.map.set(id,{q:plan.q,r:plan.r,type:'rescueTunnel',roads:state.difficulty==='dual'?[plan.dir,(plan.dir+1)%6]:[plan.dir],rotation:plan.dir,slots:0,towers:[],buildingSlots:0,buildings:[],income:0,tunnels:[plan.source],tunnelLabel:'Tunnel '+number});
     state.vision=HexExploration.expand(state.landmarks,state.map);state.tunnelOffer=null;state.tunnelConfirmed=false;return true;
   }
-  return {rescueTunnel,VERSION,create,schedule,drain,spawnSources,nextSourcePoints,spawnEnemy,advance};
+  function advanceIntroduction(state){
+    const intro=state.introduction;if(!intro||state.challengeDay||state.duoMode)return;
+    const wave=state.lastCompletedWave||0;
+    for(const unlock of HexData.INTRO_TOWERS)if(wave>=unlock.wave&&!state.towerLoadout.includes(unlock.id)){state.towerLoadout.push(unlock.id);intro.notices.push(unlock.id);}
+    if(wave>=20&&!intro.biomeUnlocked){intro.grassCells=new Set(HexBiomes.visibleTiles(state).map(t=>key(t.q,t.r)));intro.biomeUnlocked=true;}
+    intro.bestWave=Math.max(intro.bestWave,wave);
+  }
+  return {advanceIntroduction,rescueTunnel,VERSION,create,schedule,drain,spawnSources,nextSourcePoints,spawnEnemy,advance};
 })();

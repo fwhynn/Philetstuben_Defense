@@ -265,6 +265,8 @@ async function main() {
   if (releaseMode === 'client') {
     const previousVersion = readVersion();
     const nextVersion = bumpDigitCarryVersion(previousVersion);
+    const notesFile = path.join(repo, 'patch-notes.json');
+    const releaseNotes = require('./release-notes.cjs').prepare(notesFile, nextVersion);
     npm(['version', nextVersion, '--no-git-tag-version'], { stdio: 'inherit' });
 
     const version = readVersion();
@@ -283,7 +285,8 @@ async function main() {
       process.exit(1);
     }
 
-    const filesToCommit = [packageJsonGitPath];
+    fs.writeFileSync(notesFile, JSON.stringify(releaseNotes, null, 2) + '\n');
+    const filesToCommit = [packageJsonGitPath, 'patch-notes.json'];
     if (fs.existsSync(packageLockPath)) filesToCommit.push(packageLockGitPath);
 
     git(['add', ...filesToCommit], { stdio: 'inherit' });

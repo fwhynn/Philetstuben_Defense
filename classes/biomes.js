@@ -39,7 +39,11 @@ const HexBiomes=(()=>{
     }
     if(w.cells.size>=8192)w.cells.clear();for(const [x,y] of cells)w.cells.set(x+','+y,result);return result;
   }
-  const forTile=(state,tile)=>state.remoteView?(tile.biome||state.visibleBiomes?.[tile.q+','+tile.r]||'grass'):(state.biomeLayoutVersion===1?legacyAt:at)(state.challengeDay?null:state.biomeSeed,tile.q,tile.r);
+  const regularForTile=(state,tile)=>state.remoteView?(tile.biome||state.visibleBiomes?.[tile.q+','+tile.r]||'grass'):(state.biomeLayoutVersion===1?legacyAt:at)(state.challengeDay?null:state.biomeSeed,tile.q,tile.r);
+  function forTile(state,tile){
+    if(state.introduction){if(!state.introduction.biomeUnlocked||state.introduction.grassCells?.has(tile.q+','+tile.r))return 'grass';return regularForTile(state,tile)==='grass'?'grass':'desert';}
+    return regularForTile(state,tile);
+  }
   function visibleTiles(state){
     const cells=new Map(state.map);if(state.remoteView){for(const [id,biome] of Object.entries(state.visibleBiomes||{})){const [q,r]=id.split(',').map(Number);if(!cells.has(id))cells.set(id,{q,r,biome});}return [...cells.values()];}
     for(const tile of state.map.values())for(let d=0;d<6;d++){const n=HexMap.neighbor(tile.q,tile.r,d),id=HexMap.key(n.q,n.r);if(!cells.has(id)&&(!state.landmarks?.has(id)||state.landmarks.get(id).claimed))cells.set(id,n);}

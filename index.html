@@ -133,6 +133,7 @@
       </header>
       </div>
 
+      <aside id="introductionNotice" class="introductionNotice hidden" role="status" aria-live="polite"><p id="introductionNoticeText"></p><button id="introductionNoticeClose" type="button">Verstanden</button></aside>
       <aside id="hotkeyTip" class="hotkeyTip hidden" role="note"><strong>Praktische Tastenbelegung</strong><p>Mit Hotkeys geht vieles schneller. Öffne die Einstellungen mit Escape und dort die Tastenbelegung.</p><button id="hotkeyTipOpen" type="button">Einstellungen öffnen</button><button id="hotkeyTipClose" type="button">Verstanden</button></aside>
       <!-- Unten Mitte: die drei spielbaren Karten -->
       <section class="handDock" aria-label="Handkarten">
@@ -225,6 +226,8 @@
         <label class="toggle"><input id="slotHints" type="checkbox" checked /> Freie Bauplätze: Weiß = Turm, Türkis =
           Gebäude</label>
         <button id="openMainMenuBtn" class="secondary">Hauptmenü</button>
+        <button id="exitFirstPlayerTestSettings" class="secondary hidden">Erstspieler-Test beenden · zum echten Spielstand</button>
+        <button id="skipIntroductionSettings" class="secondary hidden">Einführung überspringen · vollständige Welt ab nächstem Durchlauf</button>
         <label><input id="onboardingHints" type="checkbox" checked> Einsteigerhinweise anzeigen</label>
         <small>Mini-Tutorial, Tastenbelegungs-Hinweis und Hinweise zu neu entdeckten Biomen. Spielregeln und wichtige Spielmeldungen bleiben verfügbar.</small>
         <button id="restartTutorialBtn" class="secondary">Mini-Tutorial starten</button>
@@ -254,8 +257,12 @@
         <div class="menuButtons">
           <button id="menuContinueBtn" class="primary hidden">Weiterspielen</button>
           <button id="menuPlayBtn" class="primary">Neuer Run</button>
+          <small id="introductionMenuNote">Starte mit Bogenschütze und Katapult. Neue Türme kommen nach Welle 5, 10 und 15 dazu.</small><button id="skipIntroductionBtn" class="secondary hidden">Ich kenne das Spiel – Einführung überspringen</button>
           <button id="menuArsenalBtn" class="secondary">◆ Arsenal</button>
           <label class="menuLanguage">Sprache <select data-language-picker aria-label="Sprache"><option value="de">Deutsch</option><option value="en">English</option></select></label>
+          <button id="menuPatchNotesBtn" class="secondary">Patch Notes · Was ist neu?</button>
+          <button id="firstPlayerTestBtn" class="secondary hidden">Erstspieler-Test starten</button>
+          <button id="exitFirstPlayerTestBtn" class="secondary hidden">Zurück zu meinem Spielstand</button>
           <button id="menuRulesBtn" class="secondary">📜 Spielregeln</button>
           <button id="menuAccountBtn" class="secondary">👤 Anmelden</button>
         </div>
@@ -267,6 +274,8 @@
       </div>
     </div>
 
+    <div id="firstPlayerTestBadge" class="testProfileBadge hidden">Erstspieler-Test · separater Spielstand</div>
+    <div id="patchNotesOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="patchNotesTitle"><section class="modeBox patchNotesBox"><div class="panelHead"><h2 id="patchNotesTitle">Patch Notes</h2><button id="closePatchNotesBtn" class="secondary">Schließen · Esc</button></div><div id="patchNotesContent" aria-live="polite"></div></section></div>
     <div id="saveOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="saveTitle">
       <div class="modeBox">
         <h2 id="saveTitle">Spielstand mitnehmen</h2>
@@ -479,15 +488,17 @@
           .catch(() => { });
       })();
     </script>
+    <script src="classes/first-player-test.js"></script>
     <script src="classes/translations.js"></script>
     <script src="classes/i18n.js"></script>
+    <script src="classes/patch-notes.js"></script>
     <script src="classes/menu-controls.js"></script>
     <script src="classes/compact-controls.js"></script>
     <script src="classes/dialog-focus.js"></script>
     <script src="classes/api.js"></script>
     <script>
       (() => {
-        if (!globalThis.HexApi || typeof globalThis.HexApi.getUserById !== 'function') return;
+        if (globalThis.HexFirstPlayerTest?.active || !globalThis.HexApi || typeof globalThis.HexApi.getUserById !== 'function') return;
         globalThis.HexApi.getUserById(0)
           .then((payload) => {
             console.info('AutoHex TD API test user loaded:', payload);

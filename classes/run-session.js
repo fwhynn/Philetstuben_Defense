@@ -13,8 +13,8 @@ const HexRunSession=(()=>{
     state.celebratedWaves??=[];if(state.celebratedWaves.includes(state.wave))return;
     state.celebratedWaves.push(state.wave);const messages=[];
     if(state.bossRewards.length)messages.push(state.bossRewards.length===1?'Wächter besiegt!':state.bossRewards.length+' Wächter besiegt!');
-    if(state.wave>0&&(state.wave%10===0||state.wave===15))messages.push('Wave '+state.wave+' geschafft!');
-    if(best>0&&state.wave>best&&!state.recordCelebrated){state.recordCelebrated=true;messages.push('Neuer persönlicher Rekord – Wave '+state.wave+' überlebt!');}
+    if(!state.introduction&&state.wave>0&&(state.wave%10===0||state.wave===15))messages.push('Wave '+state.wave+' geschafft!');
+    if(!state.introduction&&best>0&&state.wave>best&&!state.recordCelebrated){state.recordCelebrated=true;messages.push('Neuer persönlicher Rekord – Wave '+state.wave+' überlebt!');}
     if(messages.length)state.pendingCelebration={messages,wave:state.wave,bosses:state.bossRewards.length};
   }
   function waveRewards(state,random){

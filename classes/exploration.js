@@ -2,9 +2,9 @@ const HexExploration=(()=>{
   const clearRadius=2,fogRadius=6;
   const distance=(a,b)=>Math.max(Math.abs(a.q-b.q),Math.abs(a.r-b.r),Math.abs(a.q+a.r-b.q-b.r));
   function treasureReward(position){return 5*distance({q:0,r:0},position);}
-  function create(random){
+  function create(random,{sparse=false}={}){
     const landmarks=new Map();
-    landmarks.seed=Math.floor(random()*4294967296);landmarks.surveyed=new Set();
+    landmarks.sparse=sparse;landmarks.seed=Math.floor(random()*4294967296);landmarks.surveyed=new Set();
     expand(landmarks,new Map([['0,0',{q:0,r:0}]]));
     return landmarks;
   }
@@ -22,19 +22,20 @@ const HexExploration=(()=>{
     for(const [id,cell] of cells){
       if(landmarks.surveyed.has(id)) continue;landmarks.surveyed.add(id);
       const baseDistance=distance(cell,{q:0,r:0});if(baseDistance<3||map.has(id)||landmarks.has(id)) continue;
-      const type=eventType(landmarks.seed||0,cell);
-      if(type) landmarks.set(id,{q:cell.q,r:cell.r,type,claimed:false,prefab:prefab(landmarks.seed||0,cell,type)});
+      const type=eventType(landmarks.seed||0,cell,landmarks.sparse);
+      if(type) landmarks.set(id,{q:cell.q,r:cell.r,type,claimed:false,prefab:prefab(landmarks.seed||0,cell,type,landmarks.sparse)});
     }
     return cells;
   }
   function bossProfile(wave){const hp=240+wave*36;return {type:'boss',name:'Wächter',hp,armorHp:Math.round(hp*.25),magicHp:Math.round(hp*.2),speed:24,baseDamage:5,killGold:50};}
-  function eventType(seed,position){
+  function eventType(seed,position,sparse=false){
     const baseDistance=distance(position,{q:0,r:0});
-    if(baseDistance<3||hash(seed,position.q,position.r)>=.045) return null;
+    if(baseDistance<3||hash(seed,position.q,position.r)>=(sparse?.025:.045)) return null;
+    if(sparse)for(let q=-3;q<=3;q++)for(let r=-3;r<=3;r++){if((!q&&!r)||Math.max(Math.abs(q),Math.abs(r),Math.abs(q+r))>3)continue;const other={q:position.q+q,r:position.r+r};if(distance(other,{q:0,r:0})>=3&&hash(seed,other.q,other.r)<hash(seed,position.q,position.r))return null;}
     const kind=hash(seed^1234567,position.q,position.r),type=kind<.55?'treasure':kind<.85?'shrine':'boss';
     return type==='boss'&&baseDistance<=4?null:type;
   }
-  function prefab(seed,position,type){
+  function prefab(seed,position,type,sparse=false){
     const shapes=[['straight',[0,3]],['smallCurve',[0,1]],['bigCurve',[0,2]],['tee',[0,2,4]],['tJunction',[0,2,3]]];
     const rotation=Math.floor(hash(seed^97531,position.q,position.r)*6),shape=shapes[Math.floor(hash(seed^86420,position.q,position.r)*shapes.length)];
     const make=(shape,rotation)=>({type:shape[0],roads:shape[1].map(d=>(d+rotation)%6),rotation,slots:type==='boss'?0:1});
@@ -42,7 +43,7 @@ const HexExploration=(()=>{
     // Inspect seeded neighbors even outside the surveyed region. Existing fields
     // keep their geometry when exploration later reveals an adjacent event.
     const required=[];
-    for(let d=0;d<6;d++) if(eventType(seed,HexMap.neighbor(position.q,position.r,d))) required.push(d);
+    for(let d=0;d<6;d++) if(eventType(seed,HexMap.neighbor(position.q,position.r,d),sparse)) required.push(d);
     const original=make(shape,rotation);
     if(required.every(d=>original.roads.includes(d))&&(required.length===6||original.roads.some(d=>!required.includes(d)))) return original;
     const candidates=[];

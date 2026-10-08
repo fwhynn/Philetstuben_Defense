@@ -4,21 +4,22 @@ const fs = require('node:fs'), path = require('node:path'), vm = require('node:v
 test('live diamond forecast equals settlement without writing the profile', () => {
   const { profile, definitions, storage } = setup(), data = profile.defaults(); data.records.highestWave = 10;
   const summary = { runId: 'forecast', wave: 21, periodicBosses: 2, explorationBosses: 1 };
-  const before = JSON.stringify(data), reward = profile.runReward(data, summary);
-  assert.equal(reward.total, 25); assert.equal(JSON.stringify(data), before); assert.equal(storage.size, 0);
+  const storageBefore = JSON.stringify([...storage]), before = JSON.stringify(data), reward = profile.runReward(data, summary);
+  assert.equal(reward.total, 25); assert.equal(JSON.stringify(data), before); assert.equal(JSON.stringify([...storage]), storageBefore);
   assert.equal(profile.settleRun(data, summary, definitions).reward.total, reward.total);
 });
-function setup(value) {
+function setup(value = '{}') {
   const storage = new Map(); if (value !== undefined) storage.set('hex-bastion-profile-v1', value);
   const context = { localStorage: { getItem: key => storage.get(key) || null, setItem: (key, item) => storage.set(key, String(item)) } };
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../classes/profile.js'), 'utf8') + ';globalThis.profile=HexProfile;', context);
   const definitions = { archer: {}, catapult: {}, chain: {}, freeze: {}, mine: {}, necro: {}, ballista: {}, flame: {} };
   return { profile: context.profile, definitions, storage };
 }
-test('new profile starts with five unique towers and a complete loadout', () => {
-  const { profile, definitions } = setup(), data = profile.load(definitions);
-  assert.deepEqual(Array.from(data.unlockedTowers), ['archer', 'catapult', 'chain', 'freeze', 'mine']);
-  assert.deepEqual(Array.from(data.activeLoadout), ['archer', 'catapult', 'chain', 'freeze', 'mine']);
+test('new profile starts with two towers and legacy profiles retain five', () => {
+  const { profile, definitions } = setup('null'), data = profile.load(definitions);
+  assert.deepEqual(Array.from(data.unlockedTowers), ['archer', 'catapult']);
+  assert.deepEqual(Array.from(data.activeLoadout), ['archer', 'catapult']);
+  assert.equal(profile.normalize({},definitions).activeLoadout.length,5);
 });
 test('profile repair removes duplicates, unknown towers and fills missing slots safely', () => {
   const raw = JSON.stringify({ diamonds: -9, unlockedTowers: ['archer', 'archer', 'hacker'], activeLoadout: ['hacker', 'archer'] });
@@ -69,7 +70,7 @@ test('building special unlocks persist and reject duplicates or insufficient dia
 });
 
 test('reset refunds purchased meta once, repairs loadouts and preserves records and earnings', () => {
-  const { profile, definitions } = setup(); let p = profile.defaults(); p.diamonds = 200; p.records.highestWave = 25; p.lifetime.diamondsEarned = 200;
+  const { profile, definitions } = setup(); let p = profile.skipIntroduction(profile.defaults(),definitions); p.diamonds = 200; p.records.highestWave = 25; p.lifetime.diamondsEarned = 200;
   p = profile.unlockTower(p, 'ballista', definitions); p = profile.unlockUltimate(p, 'archer', definitions); p = profile.unlockBuilding(p, 'house', definitions); assert.equal(p.diamonds, 120); assert.equal(profile.resetValue(p), 80);
   p.activeLoadout = ['ballista', 'archer', 'catapult', 'chain', 'freeze']; const result = profile.resetUnlocks(p, definitions); assert.equal(result.refund, 80); assert.equal(result.profile.diamonds, 200); assert.equal(result.profile.records.highestWave, 25); assert.equal(result.profile.lifetime.diamondsEarned, 200); assert.ok(!result.profile.unlockedTowers.includes('ballista')); assert.deepEqual(Array.from(result.profile.activeLoadout), Array.from(profile.START_TOWERS)); assert.equal(profile.resetUnlocks(result.profile, definitions).refund, 0);
 });
@@ -93,7 +94,7 @@ test('profile import reports storage failures and keeps previous data when backu
 });
 
 test('preset names persist through saving loadouts and export/import without changing towers',()=>{
- const {profile:p,definitions:d}=setup();const old=p.defaults(),named=p.renamePreset(old,1,'  Meine   Bossjäger  ',d);
+ const {profile:p,definitions:d}=setup();const old=p.skipIntroduction(p.defaults(),d),named=p.renamePreset(old,1,'  Meine   Bossjäger  ',d);
  assert.equal(named.loadoutPresets[1].name,'Meine Bossjäger');assert.equal(old.loadoutPresets[1].name,'Preset 2');assert.deepEqual(Array.from(named.loadoutPresets[1].towers),Array.from(old.loadoutPresets[1].towers));
  const saved=p.savePreset(named,1,[...named.activeLoadout].reverse(),d),imported=p.readFile(p.exportFile(saved,d),d);assert.equal(imported.loadoutPresets[1].name,'Meine Bossjäger');
  assert.equal(p.renamePreset(named,1,'   ',d),null);assert.equal(p.renamePreset(named,-1,'Name',d),null);assert.equal(p.renamePreset(named,3,'Name',d),null);assert.equal(p.renamePreset(named,0,'x'.repeat(50),d).loadoutPresets[0].name.length,30);

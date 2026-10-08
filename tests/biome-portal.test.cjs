@@ -108,7 +108,7 @@ test('non-grass biomes never start before distance four',()=>{
  const c=loadCore();for(let q=-4;q<=4;q++)for(let r=-4;r<=4;r++){const distance=Math.max(Math.abs(q),Math.abs(r),Math.abs(q+r));if(distance<=3)assert.equal(c.biomes.at('rings',q,r),'grass');}
 });
 test('a placed biome triggers the hint even during the tutorial and reward phase',()=>{
- const {a,elements}=load({initialStorage:{'tutorial-v1':'','biome-intro-v1':'done'}});elements.get('mainMenu').classList.add('hidden');a.state.biomeSeed='intro';a.state.phase='reward';a.state.map.set('4,0',{q:4,r:0,type:'straight',roads:[0,3],slots:0,towers:[]});a.renderAll();assert.ok(a.state.biomeIntro);assert.equal(elements.get('biomeIntro').classList.contains('hidden'),false);
+ const {a,elements}=load({initialProfile:{version:1},initialStorage:{'tutorial-v1':'','biome-intro-v1':'done'}});elements.get('mainMenu').classList.add('hidden');a.state.biomeSeed='intro';a.state.phase='reward';a.state.map.set('4,0',{q:4,r:0,type:'straight',roads:[0,3],slots:0,towers:[]});a.renderAll();assert.ok(a.state.biomeIntro);assert.equal(elements.get('biomeIntro').classList.contains('hidden'),false);
 });
 
 test('first hint marks every simultaneously discovered biome and shows hover effects inside itself',()=>{

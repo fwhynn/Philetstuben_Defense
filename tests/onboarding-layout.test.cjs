@@ -105,6 +105,6 @@ test('alternative tutorial tower explains upgrades and can continue without gold
 });
 
 test('tutorial puts Archer first while ordinary runs preserve chosen loadout order',()=>{
- const order=['chain','freeze','mine','catapult','archer'];const tutorial=load({initialStorage:{'tutorial-v1':'new'}});tutorial.a.newRun(order);assert.deepEqual(Array.from(tutorial.a.state.towerLoadout),['archer','chain','freeze','mine','catapult']);assert.deepEqual(order,['chain','freeze','mine','catapult','archer']);
+ const order=['chain','freeze','mine','catapult','archer'];const tutorial=load({initialProfile:{version:1},initialStorage:{'tutorial-v1':'new'}});tutorial.a.newRun(order);assert.deepEqual(Array.from(tutorial.a.state.towerLoadout),['archer','chain','freeze','mine','catapult']);assert.deepEqual(order,['chain','freeze','mine','catapult','archer']);
  const normal=load();normal.a.newRun(order);assert.deepEqual(Array.from(normal.a.state.towerLoadout),order);
 });
