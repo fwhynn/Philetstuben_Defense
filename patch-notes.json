@@ -1,7 +1,7 @@
 [
   {
-    "version": "next",
-    "date": null,
+    "version": "0.9.7",
+    "date": "2026-10-08",
     "title": "Flüssigeres Duo",
     "changes": [
       "Duo: Kämpfe laufen deutlich flüssiger: Gegner gleiten zwischen den Server-Updates, statt zu ruckeln, und Updates kommen gleichmäßiger an.",
