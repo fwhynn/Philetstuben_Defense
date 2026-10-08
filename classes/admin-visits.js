@@ -221,14 +221,15 @@
 	}
 
 	function render() {
-		const data = state.data;
-		if (!data) return;
-
 		const range = state.range;
 		const config = RANGES[range];
+		// Auswahl sofort zeigen, auch solange noch keine Daten geladen sind.
 		for (const button of document.querySelectorAll('[data-visit-range]')) {
 			button.setAttribute('aria-pressed', String(button.dataset.visitRange === range));
 		}
+
+		const data = state.data;
+		if (!data) return;
 
 		const byDate = new Map(data.days.map(entry => [entry.date, entry]));
 		const today = byDate.get(data.today) || empty();
