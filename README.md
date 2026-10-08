@@ -30,6 +30,14 @@ npm start
 
 Danach `http://localhost:8080` im Browser öffnen. Die 3D-Modelle (`.glb`) lassen sich nur über einen Server laden, deshalb reicht ein Doppelklick auf `index.html` für die 3D-Ansicht nicht.
 
+Standardmäßig verwendet auch der lokale Client die Produktiv-API. Wer eine lokale API betreibt, kopiert optional `.env.example` nach `.env`:
+
+```dotenv
+API_BASE_URL=http://127.0.0.1:8081
+```
+
+Die API kann im API-Repository beispielsweise mit `php -S 127.0.0.1:8081 -t public public/index.php` gestartet werden. Nach einem Neustart von `npm start` leitet der Client-Entwicklungsserver Browser-Anfragen unter `/api` an diese URL weiter. Dadurch ist keine lokale CORS-Konfiguration nötig. `.env` wird ignoriert und nie als Client-Datei ausgeliefert. Ohne `.env` oder ohne `API_BASE_URL` bleibt `https://api.autohextd.zlyfer.net` aktiv.
+
 Auf der bereitgestellten Subdomain gilt dasselbe: unter HTTP(S) startet die 3D-Version automatisch, solange `node_modules/three` im Projekt vorhanden ist. Die Ansicht wird automatisch gewählt; die bisherigen URL-Parameter bleiben für Entwicklung und Fehlerdiagnose verfügbar.
 
 | Aufruf                                 | Ergebnis                                                                                |

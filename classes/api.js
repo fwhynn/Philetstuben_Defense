@@ -1,7 +1,11 @@
 (() => {
 	'use strict';
 
-	const baseUrl = 'https://api.autohextd.zlyfer.net';
+	const productionBaseUrl = 'https://api.autohextd.zlyfer.net';
+	const configuredBaseUrl = globalThis.AUTOHEX_CONFIG && globalThis.AUTOHEX_CONFIG.apiBaseUrl;
+	const baseUrl = typeof configuredBaseUrl === 'string' && configuredBaseUrl
+		? configuredBaseUrl.replace(/\/+$/, '')
+		: productionBaseUrl;
 	const TOKEN_KEY = 'hex-bastion-auth-token';
 
 	async function parseJson(response) {
@@ -162,6 +166,70 @@
 		return parseJson(response);
 	}
 
+	async function pulsePresence({ mode = 'solo', wave = 0 } = {}) {
+		if (!getToken()) {
+			return null;
+		}
+
+		const response = await fetch(`${baseUrl}/presence`, {
+			method: 'PUT',
+			headers: {
+				Accept: 'application/json',
+				'Content-Type': 'application/json',
+				...authHeaders()
+			},
+			body: JSON.stringify({ mode, wave }),
+			cache: 'no-store'
+		});
+
+		return parseJson(response);
+	}
+
+	async function clearPresence() {
+		const token = getToken();
+		if (!token) {
+			return;
+		}
+
+		await fetch(`${baseUrl}/presence`, {
+			method: 'DELETE',
+			headers: {
+				Accept: 'application/json',
+				Authorization: `Bearer ${token}`
+			},
+			keepalive: true
+		}).catch(() => {
+			// Presence is best-effort; logout or offline must not break the game.
+		});
+	}
+
+	async function getAdminStats() {
+		const response = await fetch(`${baseUrl}/admin/stats`, {
+			method: 'GET',
+			headers: {
+				Accept: 'application/json',
+				...authHeaders()
+			},
+			cache: 'no-store'
+		});
+
+		return parseJson(response);
+	}
+
+	async function getAdminPlayers({ limit = 25, offset = 0, sort = 'runs_played', direction = 'desc' } = {}) {
+		const parameters = new URLSearchParams({ limit, offset, sort, direction });
+		const response = await fetch(`${baseUrl}/admin/players?${parameters}`, {
+			method: 'GET',
+			headers: {
+				Accept: 'application/json',
+				...authHeaders()
+			},
+			cache: 'no-store'
+		});
+
+		return parseJson(response);
+	}
+
 	globalThis.HexApi = {
 		baseUrl,
 		getUserById,
@@ -171,6 +239,10 @@
 		currentUser,
 		getSave,
 		putSave,
+		pulsePresence,
+		clearPresence,
+		getAdminStats,
+		getAdminPlayers,
 		isLoggedIn: () => !!getToken(),
 	};
 })();

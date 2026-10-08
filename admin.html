@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="de">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>AutoHex TD · Administration</title>
+    <link rel="icon" type="image/png" href="assets/favicon.png" />
+    <link rel="stylesheet" href="admin.css" />
+  </head>
+
+  <body>
+    <div class="terrain" aria-hidden="true"></div>
+    <header class="masthead">
+      <a class="brand" href="index.html" aria-label="Zurück zu AutoHex TD">
+        <span class="brandMark" aria-hidden="true">⬡</span>
+        <span><strong>AUTOHEX TD</strong><small>Serververwaltung</small></span>
+      </a>
+      <nav aria-label="Admin-Navigation">
+        <span id="signedInAs" class="signedIn"></span>
+        <button id="refreshBtn" class="button secondary hidden" type="button">Aktualisieren</button>
+        <button id="logoutBtn" class="button quiet hidden" type="button">Abmelden</button>
+      </nav>
+    </header>
+
+    <main>
+      <section id="loadingView" class="gate" aria-live="polite">
+        <div class="loader" aria-hidden="true"></div>
+        <p>Verbindung zum Kontrollraum …</p>
+      </section>
+
+      <section id="loginView" class="gate hidden" aria-labelledby="loginTitle">
+        <p class="kicker">Geschützter Bereich</p>
+        <h1 id="loginTitle">Admin-Zugang</h1>
+        <form id="loginForm">
+          <label>Benutzername<input id="username" name="username" autocomplete="username" required
+              minlength="3" /></label>
+          <label>Passwort<input id="password" name="password" type="password" autocomplete="current-password" required
+              minlength="8" /></label>
+          <button class="button primary" type="submit">Kontrollraum öffnen</button>
+          <p id="loginStatus" class="formStatus" role="alert"></p>
+        </form>
+      </section>
+
+      <section id="deniedView" class="gate hidden" aria-labelledby="deniedTitle">
+        <p class="kicker">Zugriff verweigert</p>
+        <h1 id="deniedTitle">Kein Admin-Zugang</h1>
+        <p>Der angemeldete Account ist nicht in der Server-Allowlist eingetragen.</p>
+        <button id="deniedLogoutBtn" class="button secondary" type="button">Mit anderem Account anmelden</button>
+      </section>
+
+      <div id="dashboard" class="dashboard hidden">
+        <section class="commandDeck" aria-labelledby="overviewTitle">
+          <div>
+            <p class="kicker">Systemübersicht</p>
+            <h1 id="overviewTitle">Spielbetrieb</h1>
+            <p id="lastUpdated" class="timestamp">Noch nicht synchronisiert</p>
+          </div>
+          <div id="livePanel" class="livePanel" aria-live="polite">
+            <p class="liveTitle">Live</p>
+            <div class="liveRow" data-live="solo">
+              <span class="signal" aria-hidden="true"></span>
+              <div>
+                <strong>Solo</strong>
+                <span data-live-detail>wird geprüft …</span>
+              </div>
+            </div>
+            <div class="liveRow" data-live="duo">
+              <span class="signal" aria-hidden="true"></span>
+              <div>
+                <strong>Duo</strong>
+                <span data-live-detail>wird geprüft …</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="metrics" class="metrics" aria-label="Gesamtstatistiken">
+          <article class="metric" data-metric="accounts">
+            <span>Accounts</span>
+            <strong data-value>—</strong>
+            <small data-detail></small>
+          </article>
+          <article class="metric" data-metric="runs">
+            <span>Runs gesamt</span>
+            <strong data-value>—</strong>
+            <small data-detail>über alle Spieler</small>
+          </article>
+          <article class="metric" data-metric="highestWave">
+            <span>Höchste Wave</span>
+            <strong data-value>—</strong>
+            <small data-detail></small>
+          </article>
+          <article class="metric" data-metric="mostRuns">
+            <span>Meiste Runs</span>
+            <strong data-value>—</strong>
+            <small data-detail></small>
+          </article>
+          <article class="metric" data-metric="kills">
+            <span>Normale Kills</span>
+            <strong data-value>—</strong>
+            <small data-detail></small>
+          </article>
+        </section>
+
+        <section class="dataSection" aria-labelledby="playersTitle">
+          <header class="sectionHeader">
+            <div>
+              <p class="kicker">Fortschritt</p>
+              <h2 id="playersTitle">Spieler</h2>
+            </div>
+            <p id="playerCount">—</p>
+          </header>
+          <div class="tableScroll">
+            <table>
+              <thead>
+                <tr>
+                  <th><button type="button" data-sort="username">Spieler</button></th>
+                  <th><button type="button" data-sort="runs_played">Runs</button></th>
+                  <th><button type="button" data-sort="highest_wave">Bestwave</button></th>
+                  <th><button type="button" data-sort="normal_kills">Kills</button></th>
+                  <th><button type="button" data-sort="bosses_killed">Bosse</button></th>
+                  <th><button type="button" data-sort="diamonds_earned">Diamanten</button></th>
+                  <th><button type="button" data-sort="updated_at">Letzter Save</button></th>
+                </tr>
+              </thead>
+              <tbody id="playerRows"></tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <button id="previousPage" class="button quiet" type="button">← Zurück</button>
+            <span id="pageInfo">Seite 1</span>
+            <button id="nextPage" class="button quiet" type="button">Weiter →</button>
+          </div>
+        </section>
+
+        <p id="dashboardStatus" class="dashboardStatus" role="status" aria-live="polite"></p>
+      </div>
+    </main>
+
+    <script src="runtime-config.js"></script>
+    <script src="classes/api.js"></script>
+    <script src="classes/admin.js"></script>
+  </body>
+
+</html>

@@ -36,6 +36,18 @@ journalctl -u autohextd-duo.service -n 80 --no-pager
 
 `StateDirectory` erzeugt `/var/lib/autohextd` mit privaten Rechten. Port 8090 hört nur auf Loopback. Optionale Umgebungsvariablen gehören nach `/etc/autohextd/duo.env`; bei Portänderung auch Proxy und Healthcheck anpassen.
 
+Für die geschützten Live-Werte der Admin-Seite ein gemeinsames Secret erzeugen:
+
+```sh
+install -d -o root -g root -m 0755 /etc/autohextd
+printf 'DUO_LIVE_SECRET=%s\n' "$(openssl rand -hex 32)" > /etc/autohextd/duo.env
+chown root:root /etc/autohextd/duo.env
+chmod 0600 /etc/autohextd/duo.env
+systemctl restart autohextd-duo.service
+```
+
+Den identischen Wert als `DUO_LIVE_SECRET` in der API-`.env` setzen; dort außerdem `DUO_INTERNAL_URL=http://127.0.0.1:8090` konfigurieren. `GET /live` ist ohne dieses Secret nicht verfügbar und darf nicht über Nginx öffentlich weitergereicht werden.
+
 ## Bestehenden Webserver ergänzen
 
 Nginx: `deploy/systemd/nginx-duo.conf` in den bestehenden HTTPS-vHost integrieren, Regeln mit vorhandenen Locations abgleichen, `nginx -t`, dann Nginx neu laden. Für Apache entsprechend `/socket.io/` inklusive WebSocket-Upgrade sowie die HTTP-Endpunkte zum Node-Dienst proxyen. Keinen zweiten Webserver auf Port 443 starten. `deploy/Caddyfile` enthält die entsprechende Caddy-Route.
