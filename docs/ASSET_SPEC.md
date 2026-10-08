@@ -1,6 +1,6 @@
 # Modellspezifikation für 3D-Assets (glTF/.glb)
 
-Gesamtreferenz für alle Modelle von AutoHex TD: Tiles, Festungs-Basen, Türme, Gegner, Gebäude und Effekte, jeweils in der normalen Edition und der Sakura-Edition. Stand: 25.09.2026. Ersetzt die früheren Einzelspezifikationen v1 bis v4.
+Gesamtreferenz für alle Modelle von AutoHex TD: Tiles, Festungs-Basen, Türme, Gegner, Gebäude, Effekte und Verbrauchshilfen, jeweils in der normalen Edition und der Sakura-Edition. Stand: 08.10.2026. Ersetzt die früheren Einzelspezifikationen v1 bis v4.
 
 Alle Maße sind aus dem Spielcode abgeleitet (`map.js`, `data.js`, `model-map.js`, `three-renderer.js`). Wo „das Spiel“ etwas tut, ist das im Code umgesetzt und muss nicht modelliert werden.
 
@@ -12,7 +12,7 @@ Alle Maße sind aus dem Spielcode abgeleitet (`map.js`, `data.js`, `model-map.js
 4. Festungs-Basen
 5. Türme
 6. Gegner
-7. Gebäude und Effekte
+7. Gebäude, Effekte und Verbrauchshilfen
 8. Sakura-Edition
 9. Prüfung und Lieferung
 
@@ -41,7 +41,7 @@ Alle Maße sind aus dem Spielcode abgeleitet (`map.js`, `data.js`, `model-map.js
 | `assets/towers/` | `tower_<turm>.glb`, `tower_<turm>_<upgradeId>.glb` | Türme und ihre Upgrades |
 | `assets/enemies/` | `enemy_<typ>.glb`, `enemy_boss_<biom>.glb` | Gegner und Bosse |
 | `assets/buildings/` | `building_<house\|forge\|market>.glb` | Gebäude |
-| `assets/effects/` | `mine_pickup.glb` | Mine auf der Straße |
+| `assets/effects/` | `mine_pickup.glb`, `consumable_<spikes\|resin\|overload>.glb` | Mine auf der Straße, Verbrauchshilfen (Abschnitt 7.3) |
 | `assets/sakura/<ordner>/` | gleiche Namen wie oben | Sakura-Edition (Abschnitt 8) |
 
 Dateinamen kleingeschrieben bis auf die Kennungen aus dem Code (`tile_royalBend`, `enemy_elementCarrier` usw.), die exakt so übernommen werden.
@@ -187,7 +187,7 @@ Vor jedem Durchlauf wählt man eine von drei Festungen. Jede hat ihr eigenes Gru
 - **Bewegliche Teile:**
   - `turret` (Pflicht): dreht sich zum Ziel, Pivot in der senkrechten Achse, Schussrichtung +X. Alles andere bleibt fest.
   - `aura` (optional): pulsierendes Teil, z. B. Kristall oder Glut.
-- **Upgrades:** jede Stufe ist eine **vollständige eigene Datei** `tower_<turm>_<upgradeId>.glb` (Basis kopieren, Silhouette und Akzente ändern). Die Änderung muss **von oben** erkennbar sein. Die zwei Zweige eines Turms unterscheiden sich schon in Stufe 1 in Silhouette **und** Farbe. Die Endstufe ist eine größere Version ihres eigenen Zweigs.
+- **Upgrades:** jede Stufe ist eine **vollständige eigene Datei** `tower_<turm>_<upgradeId>.glb` (Basis kopieren, Silhouette und Akzente ändern). Die Änderung muss **von oben** erkennbar sein. Die Zweige eines Turms (beim Elementturm drei) unterscheiden sich schon in Stufe 1 in Silhouette **und** Farbe. Die Endstufe ist eine größere Version ihres eigenen Zweigs.
 - Akzentfarben der Zweige stammen aus dem Spiel (`BRANCH_VISUALS`), damit Modell und Symbol zusammenpassen.
 
 ### 5.2 Übersicht
@@ -202,8 +202,27 @@ Vor jedem Durchlauf wählt man eine von drei Festungen. Jede hat ihr eigenes Gru
 | Balliste | `tower_ballista` | `#d9c08b` | hoher Turm mit Riesenarmbrust | `harpoon` → `dragonSlayer` (schwer, `#e7d39e`) | `repeater` → `boltStorm` (schnell, `#d4b979`) |
 | Flammenturm | `tower_flame` | `#ff754b` | Brennkessel mit Düse, Emissive-Glut | `inferno` → `sunfire` (groß, `#ff7448`) | `wildfire` → `firestorm` (schnell, `#ff9b55`) |
 | Nekromant | `tower_necromancer` | `#a6edb4` | Totempfahl mit Seelenlaterne, grüne Runen | `soulChoir` → `soulLegion` (mehr Geister) | `soulKeeper` → `soulLord` (stärkere Geister, Violett `#c8a3ee`) |
+| Elementturm | `tower_element` | `#b8a0ff` | Runenpfeiler mit schwebendem Kristall, drei Zweige (5.3) | `elementFire` → `elementVolcano` (Feuer, `#ff8654`) | `elementWater` → `elementTide` (Wasser, `#69d8ff`); Zweig C: `elementWind` → `elementTempest` (Wind, `#dbefae`) |
 
 Die Geschosse aller Türme zeichnet das Spiel, sie werden nicht modelliert.
+
+### 5.3 Elementturm
+
+Fehlt eine Datei, zeichnet das Spiel als Ersatz einen sechseckigen Sockel mit schwebendem Oktaeder und flachem Ring, der zwischen den anderen Türmen wie ein Platzhalter wirkt. Die Dateien werden geladen, sobald sie in `assets/towers/` liegen (Sakura: `assets/sakura/towers/`).
+
+- **Basis `tower_element`:** schlanker Stein- bzw. Runenpfeiler (Radius 0,14–0,18, Höhe 0,55–0,65) in Schiefergrau-Violett mit Runen in `#b8a0ff`. Oben ein **schwebender Kristall als `turret`** (Pivot in der Kristallmitte, Fokus nach +X), darunter optional ein Ring aus drei kleinen Steinen als `aura` (pulsiert). Der Kristall ist neutral arkan, noch kein Element.
+- **Zweige:** Jeder Zweig färbt Kristall und Runen in seine Farbe und ändert die Silhouette. Die Endstufe ist dieselbe Idee, größer und reicher.
+
+| Datei | Name im Spiel | Farbe | Silhouette | Wirkung |
+|---|---|---|---|---|
+| `tower_element_elementFire` | Feuerkern | `#ff8654` | Kristall in Glutschale, Lavarisse im Pfeiler, Emissive | Flächenschaden |
+| `tower_element_elementVolcano` | Vulkanherz | `#ff8654` | Pfeiler wird zum kleinen Kegelvulkan, Kristall glüht im Krater | größere Fläche |
+| `tower_element_elementWater` | Wasserkern | `#69d8ff` | tropfenförmiger Kristall über flachem Brunnenbecken | Verlangsamung |
+| `tower_element_elementTide` | Gezeitenherz | `#69d8ff` | Wasserwirbel-Spirale um den Pfeiler, Wellenkrone | stärkere Verlangsamung |
+| `tower_element_elementWind` | Windkern | `#dbefae` | schmaler Kristall zwischen zwei Windflügeln | Durchschlag in einer Linie |
+| `tower_element_elementTempest` | Orkanherz | `#dbefae` | höher, drei gebogene Windschaufeln um den Kristall, Wolkenring | mehr Ziele, mehr Reichweite |
+
+Höhe auch hier **höchstens 0,65**. Die Dateinamen enthalten die Upgrade-IDs aus dem Code, daher die doppelte Silbe (`tower_element_elementFire`).
 
 ---
 
@@ -245,7 +264,9 @@ Die Geschosse aller Türme zeichnet das Spiel, sie werden nicht modelliert.
 
 ---
 
-## 7. Gebäude und Effekte
+## 7. Gebäude, Effekte und Verbrauchshilfen
+
+### 7.1 Gebäude
 
 **Gebäude** stehen auf dem Gebäudeplatz (Ursprung = Mitte des Pads auf Höhe 0):
 
@@ -257,7 +278,45 @@ Die Geschosse aller Türme zeichnet das Spiel, sie werden nicht modelliert.
 
 Grundfläche höchstens 0,32 × 0,32, Höhe bis 0,40, bis etwa 800 Dreiecke, Tür nach **Süden**. Die drei müssen sich an der Silhouette unterscheiden, nicht nur an der Farbe.
 
-**Effekte:** `mine_pickup.glb` in `assets/effects/`: einzelne Mine auf der Straße, flache Scheibe mit Zünder, Durchmesser etwa 0,10, Höhe 0,05, **unter 150 Dreiecke** (erscheint in großer Zahl).
+### 7.2 Effekte
+
+`mine_pickup.glb` in `assets/effects/`: einzelne Mine auf der Straße, flache Scheibe mit Zünder, Durchmesser etwa 0,10, Höhe 0,05, **unter 150 Dreiecke** (erscheint in großer Zahl).
+
+### 7.3 Verbrauchshilfen
+
+Einmalige Hilfen aus dem Menü „Verbrauchshilfen“. Sie gelten nur für die laufende Welle; in der Bauphase gekauft, wirken sie ab der nächsten. Liegt ein Modell vor, zeigt das Spiel es zusätzlich zum Label. Ablage in `assets/effects/`, Sakura-Fassung in `assets/sakura/effects/`.
+
+| Datei | Hilfe | Kosten | Wirkung im Spiel | Wo |
+|---|---|---|---|---|
+| `consumable_spikes` | Krähenfüße | 25 Gold | 20 Spitzen × 5 Schaden; jeder Gegner, der das Feld betritt, verbraucht Spitzen, bis er stirbt oder keine mehr da sind | auf einem Straßenhex |
+| `consumable_resin` | Klebeharz | 30 Gold | die nächsten 12 Gegner auf dem Feld: −35 % Tempo für 4 Sekunden | auf einem Straßenhex |
+| `consumable_overload` | Überladung | 40 Gold | ein angreifender Turm: +50 % Angriffstempo für 12 Sekunden, nicht stapelbar | um einen Turm |
+
+**Gemeinsam für Krähenfüße und Klebeharz**
+
+- Ursprung = Mitte der Grundfläche auf Höhe 0. Das Spiel setzt das Modell **ungedreht** auf die Fahrbahn, und zwar auf die Mitte des Laufwegs im gewählten Hex: bei geraden Straßen und Kreuzungen die Hexmitte, bei Kurven der Scheitel der Kurve. Damit es auf jede Straßenform und Rotation passt, alles **innerhalb Radius 0,15** halten (die Fahrbahn ist 0,33 breit).
+- Flach bleiben, damit Gegner und Minen darauf sichtbar bleiben. Keine Straße, keinen Boden und keinen Sockel mitmodellieren.
+- Auf einem Straßenhex können Krähenfüße und Klebeharz gleichzeitig liegen. Beide müssen übereinander lesbar bleiben: Harz liegt unten, Spitzen obenauf.
+
+**Krähenfüße `consumable_spikes`**
+
+- 10 einzelne Krähenfüße (vier Spitzen, eine zeigt immer nach oben) aus dunklem Eisen `#5b5f66` mit hellen Spitzen, lose gestreut im Radius 0,15, Einzelgröße etwa 0,035, Höhe **unter 0,04**.
+- Jeder Krähenfuß als eigenes Objekt **`spike_01` bis `spike_10`**. Damit kann das Spiel die Restladung zeigen (zwei Ladungen je Objekt).
+- **Unter 300 Dreiecke** insgesamt.
+
+**Klebeharz `consumable_resin`**
+
+- Unregelmäßige, flache Harzlache in Bernstein `#c98a2e` bis Honig `#e0a447`, Durchmesser etwa 0,28, Höhe **unter 0,02**, mit zwei, drei Blasen und leicht erhabenem Rand. Glänzend (geringe Rauheit), nicht emissiv.
+- Lache als Objekt und Material **`resin`**. Das Spiel kann sie mit sinkender Ladung (12 → 0) verkleinern oder ausblenden.
+- **Unter 200 Dreiecke.**
+
+**Überladung `consumable_overload`**
+
+- Ursprung = Mitte des Turmsockels auf Höhe 0, wie bei Türmen. Das Spiel setzt das Modell zusätzlich auf den Turmplatz, der Turm bleibt unverändert. Es muss daher zu **jedem** angreifenden Turm passen (Höhe 0,45 bis 0,90).
+- Ein **Bodenring** um den Turmfuß (Innenradius 0,22, Außenradius etwa 0,27, also außerhalb der Turmgrundfläche) mit drei, vier kleinen Blitzspulen oder Kupferpolen bis etwa 0,10 Höhe, verbunden durch Zickzack-Blitzbögen. Nichts ragt in die Turmgrundfläche (Radius 0,20).
+- Ring und Bögen als Objekt **`overload_ring`** (Pivot in der Turmachse, das Spiel lässt ihn kreisen) mit Emissive-Material **`overload_glow`** in Elektrogelb `#ffd84a`. Spulen und Pole in Kupfer, nicht emissiv.
+- In der Bauphase gekauft, ist die Überladung nur vorgemerkt. Das Spiel zeigt das Modell dann gedimmt und ohne Drehung.
+- **Unter 400 Dreiecke.**
 
 ---
 
@@ -280,6 +339,6 @@ Laternen, Lack, Bambus, Torii und Steine behalten ihre Farbe.
 
 ## 9. Prüfung und Lieferung
 
-- Vor der Lieferung prüfen: Straßenenden an den richtigen Kanten, Turmplätze an den Positionen aus 3.5 und frei von Straße und hoher Deko, benannte Teile vorhanden.
+- Vor der Lieferung prüfen: Straßenenden an den richtigen Kanten, Turmplätze an den Positionen aus 3.5 und frei von Straße und hoher Deko, benannte Teile vorhanden (`turret`, `spike_01` … `spike_10`, `resin`, `overload_ring`/`overload_glow`).
 - Das Projekt prüft automatisch (`tests/tile-models.test.cjs`), ob die Straßen aller Tiles in beiden Editionen die Kanten der Kartendaten treffen, und (`tests/asset-edition.test.cjs`), ob jede Sakura-Datei ein normales Gegenstück hat.
 - Nach dem Ablegen neuer Dateien auf dem Server den Modell-Index neu erzeugen (`npm run generate-assets-index`), sonst lädt das Spiel sie nicht.

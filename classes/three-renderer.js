@@ -5,17 +5,18 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 
 const S=54,STEP=Math.PI/3,TILT=55*Math.PI/180,PITCH_MIN=12*Math.PI/180,PITCH_MAX=88*Math.PI/180,DIST_MIN=220,DIST_MAX=3400,DIST_START=950,SKY='#a9cbd8';
-const PREFIX={tiles:'tile',landmarks:'landmark',towers:'tower',enemies:'enemy',buildings:'building',effects:'mine',bases:'base'};
+const PREFIX={tiles:'tile',landmarks:'landmark',towers:'tower',enemies:'enemy',buildings:'building',effects:'mine',bases:'base',consumables:'consumable'};
+const FOLDER={consumables:'effects'};                                // Ordner unter assets/, falls abweichend von der Modellart
 const LIMBS=['leg_l','leg_r','arm_l','arm_r'];
 const LANDMARK_LABEL={shrine:'Shrine · Bonus unbekannt',boss:'Wächter · inaktiv',treasure:'Schatz'};
 const STATUS_LABEL={ready:'☠ bereit',fighting:'☠ Kampf',defeated:'☠ besiegt',escaped:'☠ entkommen'};
 const ENEMY_COLOR={boss:'#934f9e',armored:'#78818c',warded:'#477da4',swarm:'#b87832',normal:'#8d3c34',splitter:'#889591',shard:'#b3b9aa',healer:'#70c794',elementCarrier:'#d2a965'};
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 
-/** Fasst alle Meshes unterhalb von root je Material zu einem Mesh zusammen (Koordinaten relativ zu root). */
-function bake(root,skip){
+/** Fasst alle Meshes unterhalb von root je Material zu einem Mesh zusammen (Koordinaten relativ zu frame, sonst zu root). */
+function bake(root,skip,frame=root){
   root.updateMatrixWorld(true);
-  const inverse=new THREE.Matrix4().copy(root.matrixWorld).invert(),groups=new Map(),relative=new THREE.Matrix4();
+  const inverse=new THREE.Matrix4().copy(frame.matrixWorld).invert(),groups=new Map(),relative=new THREE.Matrix4();
   (function walk(node){
     if(skip&&skip(node)) return;
     if(node.isMesh){
@@ -42,6 +43,12 @@ function snapRoadEnds(parts){
   return parts;
 }
 function worldPosition(node){return node.getWorldPosition(new THREE.Vector3());}
+/** Höchster Punkt der Fahrbahn (Modelleinheiten); darauf liegen Krähenfüße und Klebeharz. */
+function roadTop(parts){
+  let top=null;
+  for(const {material,geometry} of parts){if(material?.name!=='road')continue;const pos=geometry.attributes.position;for(let i=0;i<pos.count;i++)top=Math.max(top??-1,pos.getY(i));}
+  return top;
+}
 function boundsOf(parts){const box=new THREE.Box3();for(const part of parts){part.geometry.computeBoundingBox();box.union(part.geometry.boundingBox);}return box;}
 
 function makeTemplate(name,scene,kind){
@@ -59,6 +66,13 @@ function makeTemplate(name,scene,kind){
     template.parts=bake(scene,n=>n.name==='turret');
     return template;
   }
+  if(kind==='consumables'){                                         // Verbrauchshilfen: Krähenfüße einzeln (Restladung), Überladungsring dreht sich
+    const spikes=[];let ring=null;scene.traverse(n=>{if(/^spike_\d+$/.test(n.name)) spikes.push(n);else if(n.name==='overload_ring'&&!ring) ring=n;});
+    template.spikes=spikes.sort((a,b)=>a.name.localeCompare(b.name)).map(n=>bake(n,null,scene));
+    template.ring=ring?bake(ring,null,scene):[];
+    template.parts=bake(scene,n=>spikes.includes(n)||n===ring);
+    return template;
+  }
   if(kind==='towers'){
     const part=id=>{let node;scene.traverse(n=>{if(n.name===id&&!node) node=n;});return node?{pos:worldPosition(node),parts:bake(node)}:null;};
     template.turret=part('turret');template.aura=part('aura');template.parts=bake(scene,n=>n.name==='turret'||n.name==='aura');
@@ -67,7 +81,7 @@ function makeTemplate(name,scene,kind){
   const slotNodes=[],padNodes=[];scene.traverse(n=>{if(isSlot(n)) slotNodes.push(n);else if(isPad(n)) padNodes.push(n);});
   const skip=n=>isSlot(n)||isPad(n);
   template.parts=bake(scene,skip);
-  if(kind==='tiles') snapRoadEnds(template.parts);
+  if(kind==='tiles'){snapRoadEnds(template.parts);template.roadTop=roadTop(template.parts);}
   if(name==='tile_rescue'||name==='tile_straight'||name.startsWith('tile_base')) template.noRoad=bake(scene,n=>skip(n)||n.name==='road'||n.name==='road_verge');
   template.slots=slotNodes.sort((a,b)=>a.name.localeCompare(b.name)).map(n=>({pos:worldPosition(n),parts:bake(n),top:new THREE.Box3().setFromObject(n).max.y}));
   template.pad=padNodes[0]?{pos:worldPosition(padNodes[0]),parts:bake(padNodes[0])}:null;
@@ -142,7 +156,7 @@ function create(host0,commands){
     const generation=++modelGeneration,edition=typeof HexAssetEdition!=='undefined'?HexAssetEdition:null;
     return inventory.then(list=>{
       const available=list&&new Set(list),next=new Map();
-      const sources=({kind,id})=>{const rel=`${kind}/${id}.glb`;return (edition?edition.paths(rel,available):[rel]).filter(src=>!available||available.has(src));};
+      const sources=({kind,id})=>{const rel=`${FOLDER[kind]||kind}/${id}.glb`;return (edition?edition.paths(rel,available):[rel]).filter(src=>!available||available.has(src));};
       return Promise.all(wanted.map(item=>new Promise(done=>{
         const queue=sources(item);
         const attempt=()=>{const src=queue.shift();if(!src)return done();
@@ -158,7 +172,7 @@ function create(host0,commands){
     templates.clear();for(const [id,template] of next)templates.set(id,template);
     // Gegner und Minen halten eigene Modellkopien: beim Editionswechsel neu aufbauen.
     for(const obj of enemyObjects.values()){layer.dynamic.remove(obj.group);obj.body?.material.dispose();obj.healGlow?.dispose();}enemyObjects.clear();
-    for(const mesh of mineObjects.values())layer.dynamic.remove(mesh);mineObjects.clear();
+    for(const mesh of mineObjects.values())layer.dynamic.remove(mesh);mineObjects.clear();clearConsumables();
     for(const material of biomeMaterials.values())material?.dispose();biomeMaterials.clear();
     ready=true;loading.remove();rebuildAll();if(state) render(state,targetList);
   }
@@ -621,6 +635,47 @@ function create(host0,commands){
     const alive=new Set();for(const mine of state.mines||[]){alive.add(mine.id);let mesh=mineObjects.get(mine.id);if(!mesh){const model=templates.get('mine_pickup');if(model){mesh=new THREE.Group();const g=new THREE.Group();g.scale.setScalar(S);addParts(g,model.parts);mesh.add(g);}else{mesh=new THREE.Mesh(new THREE.CylinderGeometry(7,7,3,10),std(mine.color||'#e6a75f',{metalness:.25}));mesh.castShadow=true;}layer.dynamic.add(mesh);mineObjects.set(mine.id,mesh);}mesh.position.set(mine.x,model0(mesh)?0:2,mine.y);}
     for(const [id,mesh] of [...mineObjects])if(!alive.has(id)){layer.dynamic.remove(mesh);if(mesh.isMesh){mesh.geometry.dispose();mesh.material.dispose();}mineObjects.delete(id);}
   }
+  // ---- Verbrauchshilfen: Krähenfüße/Klebeharz auf der Straße, Überladung am Turm (ohne Modell bleibt es beim Label) ----
+  const consumableObjects=new Map(),overloadRings=[],dimMaterials=new Map();
+  function clearConsumables(){for(const obj of consumableObjects.values())layer.dynamic.remove(obj.group);consumableObjects.clear();overloadRings.length=0;for(const m of dimMaterials.values())m.dispose();dimMaterials.clear();}
+  function dimMaterial(material){let m=dimMaterials.get(material.uuid);if(!m){m=material.clone();m.color?.multiplyScalar(.55);if('emissiveIntensity' in m)m.emissiveIntensity*=.2;dimMaterials.set(material.uuid,m);}return m;}
+  // Mitte des Laufwegs auf dem Hex (bei Kurven nicht die Hexmitte) und Fahrbahnhöhe: aus dem Tilemodell, bei selbst gezeichneten Straßen die Bandhöhe aus ribbon().
+  function roadSpot(q,r){
+    const tile=state.map.get(key(q,r));if(!tile)return {...axialToWorld(q,r),y:0};
+    const spec=tileSpec(tile),template=spec.kind==='tile'&&modelTemplate(spec.name),hub=HexMap.roadGeometry(tile).hub;
+    return {x:hub.x,y:!template||spec.proceduralRoads?1:(template.roadTop??0)*S,z:hub.y};
+  }
+  function syncConsumables(){
+    const alive=new Set(),resinAt=new Set((state.consumables||[]).filter(c=>c.kind==='resin'&&c.charges>0).map(c=>key(c.q,c.r)));
+    for(const c of state.consumables||[]){
+      const template=c.charges>0&&templates.get('consumable_'+c.kind);if(!template)continue;
+      const id=c.kind+':'+key(c.q,c.r);alive.add(id);let obj=consumableObjects.get(id);
+      if(!obj){
+        const group=new THREE.Group(),model=new THREE.Group();model.scale.setScalar(S);group.add(model);addParts(model,template.parts);
+        const spikes=(template.spikes||[]).map(parts=>{const g=new THREE.Group();addParts(g,parts);model.add(g);return g;});
+        layer.dynamic.add(group);obj={group,model,spikes};consumableObjects.set(id,obj);
+      }
+      const p=roadSpot(c.q,c.r);obj.group.position.set(p.x,p.y+(c.kind==='spikes'&&resinAt.has(key(c.q,c.r))?.6:0),p.z);   // Spitzen liegen auf dem Harz
+      if(c.kind==='spikes')obj.spikes.forEach((g,i)=>{g.visible=i<Math.ceil(c.charges/20*obj.spikes.length);});                  // Restladung: zwei Spitzen je Krähenfuß
+      else{const k=S*(.55+.45*Math.min(1,c.charges/12));obj.model.scale.set(k,S,k);}                                     // Harzlache schrumpft mit der Restladung
+    }
+    for(const [id,obj] of [...consumableObjects])if(!alive.has(id)){layer.dynamic.remove(obj.group);consumableObjects.delete(id);}
+    // Überladung: Ring auf dem Turmplatz; in der Bauphase nur vorgemerkt, dann gedimmt und ruhend.
+    overloadRings.length=0;const template=templates.get('consumable_overload');
+    for(const record of objectRecords.values())for(const obj of record.towers){
+      const tower=state.map.get(key(obj.tile.q,obj.tile.r))?.towers?.[obj.index],active=tower?.overloadUntil>state.elapsedMs;
+      const mode=!template?'':active?'active':tower?.overloadPending?'pending':'';
+      if(obj.overloadMode!==mode){
+        if(obj.overload){obj.holder.remove(obj.overload.group);obj.overload=null;}
+        obj.overloadMode=mode;
+        if(mode){
+          const dim=parts=>mode==='pending'?parts.map(part=>({...part,material:dimMaterial(part.material)})):parts;
+          const group=new THREE.Group(),ring=new THREE.Group();group.scale.setScalar(S);addParts(group,dim(template.parts));addParts(ring,dim(template.ring));group.add(ring);obj.holder.add(group);obj.overload={group,ring};
+        }
+      }
+      if(mode==='active')overloadRings.push(obj.overload.ring);
+    }
+  }
   // ---- Geschosse und Treffereffekte (nur Darstellung; der Schaden ist beim Schuss schon verrechnet) ----
   const seenShots=new Map();                                          // Geschoss-Id -> bereits ausgelöste Effekte (Rückstoß, Trefferpop)
   const rnd=(i,seed)=>{const v=Math.sin(i*127.1+seed*311.7)*43758.5453;return v-Math.floor(v);};
@@ -793,7 +848,7 @@ function create(host0,commands){
   function render(nextState,placementTargets=[]){
     if(state!==nextState){if(state) rebuildAll();state=nextState;}
     targetList=placementTargets;if(!ready) return;
-    syncTileOverlays();syncTiles();syncLandmarks();syncEmpty();syncObjects();syncTargets();syncGhost();syncSelection();syncMines();syncEnemies();syncProjectiles();syncLabels();
+    syncTileOverlays();syncTiles();syncLandmarks();syncEmpty();syncObjects();syncTargets();syncGhost();syncSelection();syncMines();syncConsumables();syncEnemies();syncProjectiles();syncLabels();
     if(pickDirty){pickables=[...objectRecords.values()].flatMap(r=>r.picks).concat(layer.targets.children.map(g=>g.children[1]));pickDirty=false;}
   }
   function project(position,height=30){
@@ -802,7 +857,7 @@ function create(host0,commands){
     const box=host.getBoundingClientRect(),outer=wrap.getBoundingClientRect();
     return {x:(tmp.x+1)/2*box.width+box.left-outer.left,y:(1-tmp.y)/2*box.height+box.top-outer.top,width:outer.width,height:outer.height};
   }
-  function reset(){clearOverlays();hoverBuildingKey=null;seenShots.clear();rebuildAll();for(const obj of enemyObjects.values()) layer.dynamic.remove(obj.group);enemyObjects.clear();for(const mesh of mineObjects.values())layer.dynamic.remove(mesh);mineObjects.clear();state=null;hoverPick=null;resetView(false);}
+  function reset(){clearOverlays();hoverBuildingKey=null;seenShots.clear();rebuildAll();for(const obj of enemyObjects.values()) layer.dynamic.remove(obj.group);enemyObjects.clear();for(const mesh of mineObjects.values())layer.dynamic.remove(mesh);mineObjects.clear();clearConsumables();state=null;hoverPick=null;resetView(false);}
 
   // ---- Animation ----
   let last=performance.now(),raf=0,lastDraw=0,slowFrames=0,renderedFrameCount=0;
@@ -827,6 +882,7 @@ function create(host0,commands){
     const dt=Math.min((now-last)/1000,.1);last=now;
     if(state&&ready){
       const enemies=state.enemies||[];
+      for(const ring of overloadRings)ring.rotation.y=now*.004;
       for(const record of objectRecords.values())for(const obj of record.buildings)if(obj.hint.visible)obj.hint.position.y=50+Math.sin(now/220)*3;
       for(const record of objectRecords.values()) for(const obj of record.towers){
         if(obj.auraModel) obj.auraModel.rotation.y+=dt*.8;
