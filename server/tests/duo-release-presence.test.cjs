@@ -38,3 +38,13 @@ test('board snapshots are compressed over HTTP and Socket.IO',async t=>{
  await new Promise((resolve,reject)=>{socket.once('connect',resolve);socket.once('connect_error',reject);});
  assert.match(socket.io.engine.transport.ws.extensions,/permessage-deflate/);
 });
+
+test('the server pushes changed snapshots without polling and skips unchanged ones',async t=>{
+ const store=createStore(temp(t,'autohex-push-')),url=await listen(t,store),a=store.create({requestId:crypto.randomUUID()});store.join({requestId:crypto.randomUUID(),code:a.code});
+ const socket=await connect(url,{token:a.token,clientId:crypto.randomUUID()});t.after(()=>socket.close());
+ const views=[];socket.on('state',v=>views.push(v));
+ await new Promise(r=>setTimeout(r,450));
+ assert.equal(views.length,1,'An idle lobby is sent once, not ten times per second');assert.equal(views[0].lobby.code,a.code);
+ const v=store.view(a.token);assert.ok(store.receive(a.token,{epoch:v.epoch,sequence:v.next,wave:v.wave,phase:v.boards[0].phase,action:'lobbyReady',payload:{value:true}}).ok);
+ await new Promise(r=>setTimeout(r,250));assert.equal(views.length,2);assert.equal(views[1].lobbyState.ready[0],true);
+});

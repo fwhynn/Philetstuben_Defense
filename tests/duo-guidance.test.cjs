@@ -34,3 +34,14 @@ test('the shared screen shows the team bar and a card click plus field click sen
  const paused=room.view(a.token);paused.connection={...paused.connection,players:['connected','disconnected'],paused:true,remainingSeconds:60};duo.receive(paused);
  assert.equal(el('duoTurn').dataset.tone,'alert');assert.equal(el('startWaveBtn').textContent,'Pausiert · Partner fehlt');
 });
+
+test('enemies glide between server snapshots instead of jumping',()=>{
+ let clock=1000;const duo={real:true,calls:[]};load({duo,now:()=>clock});const {room,seats:[a]}=setup('glide');
+ const view=room.view(a.token),enemy=x=>({id:7,type:'grunt',x,y:10,hp:5,maxHp:5,alive:true});
+ view.boards[0].enemies=[enemy(0)];duo.receive(view);
+ clock+=100;const next=JSON.parse(JSON.stringify(view));next.revision++;next.boards[0].enemies=[enemy(50)];duo.receive(next);
+ const e=()=>duo.api.getState().enemies[0];assert.equal(e().x,0,'the new snapshot starts where the enemy was drawn');
+ clock+=50;assert.equal(duo.bridge.animate(clock),true);assert.ok(e().x>20&&e().x<30,String(e().x));
+ clock+=200;duo.bridge.animate(clock);assert.equal(e().x,50);assert.equal(duo.bridge.animate(clock+10),false);
+ const far=JSON.parse(JSON.stringify(next));far.revision++;far.boards[0].enemies=[enemy(900)];duo.receive(far);assert.equal(e().x,900,'teleports are not smeared across the map');
+});

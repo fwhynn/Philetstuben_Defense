@@ -42,9 +42,15 @@ const HexDuoGame=(()=>{
     return say('wait','Einen Moment','Der nächste Schritt wird vorbereitet.',true);
   }
   function mount(api){
-    const $=id=>document.getElementById(id);let view=null,match=null,board=null,transferKey='',guardianKey='',leaving=false,client,picking=null;
+    const $=id=>document.getElementById(id);let profileChanged=true,view=null,match=null,board=null,transferKey='',guardianKey='',leaving=false,client,picking=null;
     const storageKey='autohex-duo-client:'+api.token;let clientId=sessionStorage.getItem(storageKey);if(!clientId){clientId=crypto.randomUUID();sessionStorage.setItem(storageKey,clientId);}
     const own=()=>view&&board===view.player;
+    // Enemies arrive ~10 times per second; glide between snapshots so combat does not stutter.
+    const motion={from:new Map(),to:new Map(),at:0,span:100};let settledKey='';
+    function track(next,switched){const now=performance.now(),from=new Map();if(!switched)for(const e of api.getState().enemies||[])from.set(e.id,{x:e.x,y:e.y});
+      if(motion.at)motion.span=Math.min(250,Math.max(50,motion.span*.7+(now-motion.at)*.3));motion.at=now;motion.to=new Map();motion.from=new Map();
+      for(const e of next.enemies||[]){const start=from.get(e.id);motion.to.set(e.id,{x:e.x,y:e.y});if(start&&Math.hypot(start.x-e.x,start.y-e.y)<120){motion.from.set(e.id,start);e.x=start.x;e.y=start.y;}}}
+    function animate(now){if(!motion.from.size)return false;const t=Math.min(1,(now-motion.at)/motion.span);for(const e of api.getState().enemies||[]){const a=motion.from.get(e.id),b=motion.to.get(e.id);if(a&&b){e.x=a.x+(b.x-a.x)*t;e.y=a.y+(b.y-a.y)*t;}}if(t>=1)motion.from.clear();return true;}
     async function send(action,payload={}){
       if(!view||!own()){api.setMessage('Partnerkarte · Nur anschauen.');return false;}
       try{await client.send(action,payload);api.commandAccepted?.(action,payload);return true;}catch(error){api.setMessage(error.message);return false;}
@@ -55,7 +61,7 @@ const HexDuoGame=(()=>{
       next.wavePlans??=[];next.rescueCard??=null;next.tunnelOffer??=null;next.drawPile??=[];next.discard??=[];next.runTowerStats??={};next.runTowerDetails??={};next.goldEarned??={kills:0,completion:0,income:0};next.waveKills??=0;next.pendingSpawns??=0;
       next.duoReinforcement=view.reinforcements[board];next.duoMode=true;next.showSlotHints=api.getState().showSlotHints;next.showHexGrid=api.getState().showHexGrid;next.consumablesLocked=!own()||view.ready[view.player]||view.connection.paused;next.challengeDay=null;next.biomeSeed=null;
       if(!switched)mergeBoard(api.getState(),next);
-      api.accept(next,switched);
+      track(next,switched);api.accept(next,switched,profileChanged);profileChanged=false;
       if(!own()){api.reward(null);$('celebration').classList.add('hidden');return;}
       if(view.result){const result=view.result;api.reward({description:(result.outcome==='victory'?'Gemeinsam geschafft!':'Gemeinsam gekämpft.')+' Welle '+result.wave+' · '+result.players[view.player].diamonds+' Diamanten',choices:[{label:view.rematch?.[view.player]?'Neustart-Zustimmung zurücknehmen':'Noch eine gemeinsame Partie'},{label:'Zur Lobby'}]},'result');}
       else if(next.phase==='duoDelivery'){const offer=view.delivery?.offers[view.player];api.reward(offer?.index===null?{...offer,skippable:false}:null,'delivery');}
@@ -69,7 +75,7 @@ const HexDuoGame=(()=>{
       const state=api.getState(),player=view.player,partner=1-player,readonly=!own(),locked=readonly||view.ready[player]||view.connection.paused,help=guide(view,board);
       $('runDiamonds').textContent=view.result?'(+0)':readonly?'':'(+'+(state.duoDiamondEstimate||0)+')';
       for(const id of ['duoHud','duoMapLabel','duoQuickMap','duoTurn'])$(id).classList.remove('hidden');
-      $('duoQuickMap').textContent=readonly?'Meine Karte':'Partnerkarte';
+      $('duoQuickMap').textContent=readonly?'⇄ Zurück zu meiner Karte':'⇄ Partnerkarte ansehen';
       $('duoMapLabel').textContent=readonly?'Partnerkarte · Nur anschauen':'Deine Festung';
       $('duoOwnMap').setAttribute('aria-pressed',String(!readonly));$('duoPartnerMap').setAttribute('aria-pressed',String(readonly));
       // Team bar: both seats, shared wave/lives and the one thing to do next.
@@ -106,7 +112,7 @@ const HexDuoGame=(()=>{
     function pickSupport(kind,slot){if(!picking||picking!==kind)return false;const tile=api.getState().map.get(slot.q+','+slot.r);if(kind==='tower'&&tile?.towers?.[slot.index]?.guestOwner!==undefined){api.setMessage('Wähle einen eigenen Turm, keine Partnerverstärkung.');return true;}picking=null;send(kind==='tower'?'reinforcement':'portal',{slot});return true;}
     function beginSupport(kind){const state=api.getState(),slot=kind==='tower'?state.selectedTower:state.selectedSlot;if(slot){send(kind==='tower'?'reinforcement':'portal',{slot});return;}picking=picking===kind?null:kind;$('duoHud').open=false;globalThis.HexCompact?.open('');api.setMessage(picking?(kind==='tower'?'Verstärkung: Klicke jetzt einen eigenen Turm an. Escape bricht ab.':'Partnerportal: Klicke jetzt einen freien Turmplatz an. Escape bricht ab.'):'Auswahl abgebrochen.');}
     document.addEventListener('keydown',e=>{if(e.key==='Escape')picking=null;});
-    const bridge={pickSupport,render,send,offerKey:null,ready:()=>send('ready',{value:!view?.ready[view.player]}),pause:()=>send('pause',{value:!view?.paused}),async priorities(packets){for(const packet of packets)if(!await send('targetPriority',packet))break;},choose(kind,offer,index){if(kind==='result'){if(index===1)location.assign('/duo-lobby.html');else send('rematch',{value:!view.rematch?.[view.player]});}else send(kind==='delivery'?'delivery':'reward',{offerId:offer.id,index});}};
+    const bridge={animate,pickSupport,render,send,offerKey:null,ready:()=>send('ready',{value:!view?.ready[view.player]}),pause:()=>send('pause',{value:!view?.paused}),async priorities(packets){for(const packet of packets)if(!await send('targetPriority',packet))break;},choose(kind,offer,index){if(kind==='result'){if(index===1)location.assign('/duo-lobby.html');else send('rematch',{value:!view.rematch?.[view.player]});}else send(kind==='delivery'?'delivery':'reward',{offerId:offer.id,index});}};
     $('duoQuickMap').addEventListener('click',()=>switchBoard(own()?1-view.player:view.player));
     $('duoOwnMap').addEventListener('click',()=>switchBoard(view.player));$('duoPartnerMap').addEventListener('click',()=>switchBoard(1-view.player));
     $('duoReservePortal').addEventListener('click',()=>beginSupport('slot'));$('duoSendTower').addEventListener('click',()=>beginSupport('tower'));$('duoClearPortal').addEventListener('click',()=>send('portal',{slot:null}));$('duoClearTower').addEventListener('click',()=>send('reinforcement',{slot:null}));
@@ -117,7 +123,7 @@ const HexDuoGame=(()=>{
     client=HexDuoClient.create({token:api.token,clientId,onStatus:(text,session)=>{if(session?.invalid){forget();location.replace('/duo-lobby.html#session='+api.token);return;}$('duoNetworkStatus').textContent=text;$('duoTakeover').classList.toggle('hidden',!session?.conflict);},onView:next=>{
       if(!next.lobbyState?.started){client.stop();location.replace('/duo-lobby.html#session='+api.token);return;}
       const first=!view;view=next;match=HexDuoClient.presentation(next,match);board??=next.player;
-      try{let profile=HexProfile.load(HexData.TOWERS);for(const receipt of next.settlements||[])profile=HexProfile.settleDuo(profile,receipt,HexData.TOWERS);}catch{api.setMessage('Spielstand konnte noch nicht gespeichert werden.');}
+      const receipts=JSON.stringify((next.settlements||[]).map(r=>r.id));if(receipts!==settledKey)try{let profile=HexProfile.load(HexData.TOWERS);for(const receipt of next.settlements||[])profile=HexProfile.settleDuo(profile,receipt,HexData.TOWERS);settledKey=receipts;profileChanged=true;}catch{api.setMessage('Spielstand konnte noch nicht gespeichert werden.');}
       accept(first);
     }});
     globalThis.addEventListener('pagehide',()=>client.stop());client.start();return bridge;

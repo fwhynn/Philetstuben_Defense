@@ -793,6 +793,8 @@ Pausiert · Partner fehlt|Paused · partner missing
 Bereit ✓ · zurücknehmen|Ready ✓ · withdraw
 Bereit – Partner wartet (Leertaste)|Ready – partner is waiting (Space)
 Karte wechseln|Switch map
+⇄ Partnerkarte ansehen|⇄ View partner map
+⇄ Zurück zu meiner Karte|⇄ Back to my map
 Sitzung & Verbindung|Session & connection
 Code oder Einladungslink einfügen|Paste code or invite link
 Diese Duo-Lobby existiert nicht mehr oder ist abgelaufen.|This Duo lobby no longer exists or has expired.

@@ -1,5 +1,15 @@
 [
   {
+    "version": "next",
+    "date": null,
+    "title": "Flüssigeres Duo",
+    "changes": [
+      "Duo: Kämpfe laufen deutlich flüssiger: Gegner gleiten zwischen den Server-Updates, statt zu ruckeln, und Updates kommen gleichmäßiger an.",
+      "Duo: Schnell hintereinander ausgeführte Aktionen werden nacheinander abgearbeitet, statt mit »Bitte auf die Serverbestätigung warten« abgelehnt zu werden.",
+      "Duo: Der Knopf für die Partnerkarte sitzt jetzt in der Teamleiste und überdeckt das Duo-Menü oben links nicht mehr."
+    ]
+  },
+  {
     "version": "0.9.6",
     "date": "2026-10-08",
     "title": "Ein leichterer Einstieg",
