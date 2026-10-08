@@ -108,4 +108,4 @@ function createRoom({seed=crypto.randomUUID(),loadouts,now=()=>Date.now(),discon
   function checkpoint(){if(ended||expired)return null;return {format:'autohex-room',version:1,ruleset:RULESET,lobby:copy(lobby),epoch,revision,seats:copy(seats),match:core.duo.capture(match)};}
   return {get result(){return publicResult();},setMaintenance,connect,touch,claim,leave,receive,view,checkpoint,tick(){if(!lobby.started||connection().paused)return;for(let i=0;i<(match.speed||1);i++)core.duo.tick(match);revision++;}};
 }
-module.exports={createRoom,payloadValid};
+module.exports={createRoom,payloadValid,RULESET};

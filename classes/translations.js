@@ -695,6 +695,108 @@ Spieler 2|Player 2
 Lobby erstellen|Create lobby
 Lobby beitreten|Join lobby
 Einladungscode|Invite code
+Einladungscode oder -link|Invite code or link
+← Hauptmenü|← Main menu
+DUO · FREUNDE-BETA|DUO · FRIENDS BETA
+DUO · LOBBY|DUO · LOBBY
+Zwei Festungen, ein Team: Jeder verteidigt seine eigene Karte, ihr teilt euch die Leben und helft euch gegenseitig mit Verstärkung und Geschenken.|Two fortresses, one team: each of you defends your own map, you share your lives and help each other with reinforcements and gifts.
+Neue Lobby|New lobby
+Du erstellst die Lobby und schickst deinem Partner den Einladungslink.|You create the lobby and send your partner the invite link.
+Eigene Lobbys schaltest du frei, wenn du im Standardspiel Welle 35 überlebst. Beitreten geht immer.|You unlock your own lobbies by surviving wave 35 in the standard game. Joining always works.
+Einladung annehmen|Accept an invite
+Du hast einen Link oder Code bekommen? Einfach hier einfügen.|Got a link or code? Just paste it here.
+So funktioniert Duo|How Duo works
+Gleichzeitig bauen:|Build at the same time:
+Jeder legt Hexfelder und baut Türme auf seiner eigenen Karte.|Each of you places hex tiles and builds towers on your own map.
+Gemeinsam starten:|Start together:
+Die Welle beginnt erst, wenn ihr beide »Bereit« gedrückt habt.|The wave only begins once you have both pressed »Ready«.
+Geteilte Leben:|Shared lives:
+Beide Karten verlieren Leben aus demselben Vorrat von 40.|Both maps lose lives from the same pool of 40.
+Helfen:|Help:
+Wer eine Welle ohne Lebensverlust schafft, schickt eine Turmkopie auf das Portal des Partners. Alle 5 Wellen beschenkt ihr euch.|Whoever clears a wave without losing lives sends a tower copy to the partner's portal. Every 5 waves you give each other a gift.
+Partner einladen|Invite partner
+Partner tritt bei|Partner joins
+Beide bereit|Both ready
+Noch nicht bereit|Not ready yet
+Ich bin bereit|I'm ready
+Schicke deinem Partner den Link. Sobald er beitritt, könnt ihr euch bereit melden.|Send your partner the link. Once they join, you can both get ready.
+Dein Partner ist gerade nicht verbunden. Warte kurz, bis er zurück ist.|Your partner is not connected right now. Wait a moment until they are back.
+Du bist bereit. Das Spiel startet, sobald dein Partner auch bereit ist.|You are ready. The game starts as soon as your partner is ready too.
+Dein Partner ist bereit und wartet auf dich.|Your partner is ready and waiting for you.
+Das Spiel startet, sobald ihr beide bereit seid.|The game starts as soon as you are both ready.
+Beide bereit – das Spiel startet …|Both ready – the game is starting …
+Einladungslink kopiert – schick ihn jetzt deinem Partner.|Invite link copied – send it to your partner now.
+Kopiert ✓|Copied ✓
+Letzte Duo-Partie öffnen|Open last Duo match
+Duo · Team|Duo · Team
+Partnerhilfe|Partner help
+Dein Portal|Your portal
+Platz wählen|Choose slot
+Aufheben|Clear
+Deine Verstärkung|Your reinforcement
+Turm wählen|Choose tower
+Abwählen|Deselect
+Wächter starten erst, wenn ihr beide zustimmt.|Guardians only start once you both agree.
+Noch nicht gesetzt – ein freier Turmplatz auf deiner Karte|Not set yet – a free tower slot on your map
+Noch nicht gewählt – einer deiner Türme|Not chosen yet – one of your towers
+Schaffst du eine Welle ohne Lebensverlust, fliegt eine Kopie deiner Verstärkung auf das Portal deines Partners und hilft ihm bis zum Wellenende. Umgekehrt landet seine Hilfe auf deinem Portal. Alle 5 Wellen schenkt ihr euch zusätzlich etwas.|If you clear a wave without losing lives, a copy of your reinforcement flies to your partner's portal and helps until the wave ends. Their help lands on your portal the same way. Every 5 waves you also give each other a gift.
+Vorbereitung|Preparation
+Vor Welle|Before wave
+gemeinsam|shared
+nicht verbunden|not connected
+Partie beendet|Match over
+bereit ✓|ready ✓
+bestätigt die Welle|confirms the wave
+Geschenk gewählt|gift chosen
+wählt ein Geschenk|chooses a gift
+wählt eine Belohnung|chooses a reward
+legt ein Hex|places a hex
+wählt eine Karte|chooses a card
+dünnt das Deck aus|thins the deck
+wählt Beute|chooses loot
+wählt einen Segen|chooses a blessing
+Welle geschafft|wave cleared
+Serverwartung|Server maintenance
+Die Partie ist sicher pausiert und geht danach automatisch weiter.|The match is safely paused and continues automatically afterwards.
+Ein Spieler hat die Partie verlassen. Über das Duo-Menü geht es zurück zur Lobby.|A player left the match. Use the Duo menu to return to the lobby.
+Rückkehrfenster abgelaufen|Return window expired
+Diese Partie kann nicht fortgesetzt werden. Erstellt bitte eine neue Lobby.|This match cannot continue. Please create a new lobby.
+Pausiert · Partner nicht verbunden|Paused · partner not connected
+Bis dein Partner zurück ist, ist alles gesperrt|Everything is locked until your partner is back
+er hat noch|they have
+Gemeinsam geschafft!|Victory together!
+Die Festungen sind gefallen|The fortresses have fallen
+Startet eine neue Partie oder geht zurück zur Lobby.|Start a new match or return to the lobby.
+Du siehst die Partnerkarte|You are viewing your partner's map
+Hier kannst du nur zuschauen. Mit »Meine Karte« kommst du zurück.|You can only watch here. »My map« takes you back.
+Gemeinsame Pause|Shared pause
+Einer von euch hat pausiert. Mit P oder »Gemeinsam fortsetzen« geht es für beide weiter.|One of you paused. Press P or »Resume together« to continue for both.
+Bestätige die Meldung, dann geht es weiter.|Confirm the message to continue.
+Wähle Gold oder eine Karte – sie landet direkt bei deinem Partner.|Choose gold or a card – it goes straight to your partner.
+Geschenk verschickt|Gift sent
+Sobald dein Partner auch gewählt hat, geht es weiter.|You continue as soon as your partner has chosen too.
+Wähle deine Belohnung|Choose your reward
+Dein Partner wählt gleichzeitig seine eigene.|Your partner chooses their own at the same time.
+Du bist dran: Hex legen|Your turn: place a hex
+Wähle unten eine Karte und klicke auf ein grünes Feld. R oder Rechtsklick dreht die Karte.|Pick a card below and click a green field. R or right-click rotates the card.
+Du bist bereit|You are ready
+Die Welle startet, sobald dein Partner auch bereit ist. Zum Weiterbauen nimm die Bereitschaft zurück.|The wave starts as soon as your partner is ready too. To keep building, withdraw your readiness.
+Bauphase: Türme bauen|Build phase: build towers
+Dein Partner ist schon bereit und wartet auf dich. Wenn du fertig bist: »Bereit für die Welle« (Leertaste).|Your partner is already ready and waiting for you. When you are done: »Ready for the wave« (Space).
+Baue Türme auf freie Plätze. Wenn du fertig bist: »Bereit für die Welle« (Leertaste). Die Welle startet, sobald ihr beide bereit seid.|Build towers on free slots. When you are done: »Ready for the wave« (Space). The wave starts as soon as you are both ready.
+Eure Türme kämpfen automatisch auf beiden Karten. Du kannst nebenbei weiter bauen.|Your towers fight automatically on both maps. You can keep building meanwhile.
+Deine Welle ist geschafft|Your wave is cleared
+Dein Partner kämpft noch. Danach geht es für euch beide weiter.|Your partner is still fighting. Then you both continue.
+Einen Moment|One moment
+Der nächste Schritt wird vorbereitet.|The next step is being prepared.
+Pausiert · Partner fehlt|Paused · partner missing
+Bereit ✓ · zurücknehmen|Ready ✓ · withdraw
+Bereit – Partner wartet (Leertaste)|Ready – partner is waiting (Space)
+Karte wechseln|Switch map
+Sitzung & Verbindung|Session & connection
+Code oder Einladungslink einfügen|Paste code or invite link
+Diese Duo-Lobby existiert nicht mehr oder ist abgelaufen.|This Duo lobby no longer exists or has expired.
+Diese Duo-Sitzung existiert nicht mehr oder ist abgelaufen.|This Duo session no longer exists or has expired.
 Einladungslink|Invite link
 Einladungslink kopieren|Copy invite link
 Einladungslink kopiert.|Invite link copied.

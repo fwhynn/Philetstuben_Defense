@@ -1,11 +1,11 @@
 'use strict';
-const http=require('node:http'),fs=require('node:fs'),path=require('node:path');
+const http=require('node:http'),fs=require('node:fs'),path=require('node:path'),zlib=require('node:zlib');
 const root=path.resolve(__dirname,'..');
 const assets=new Set(["classes/profile.js","classes/translations.js","classes/i18n.js","duo-lobby.html","duo-lobby.js","duo-prototype.html","classes/duo-prototype.js","duo-client.js","classes/random.js","classes/biomes.js","classes/data.js","classes/map.js","classes/heroes.js","classes/waves.js","classes/exploration.js","classes/placement-commands.js","classes/run-flow.js","classes/run-session.js","classes/buildings.js","classes/tower-commands.js","classes/deck.js","classes/rewards.js","classes/combat.js","classes/run-runtime.js","classes/run-snapshot.js","classes/duo-session.js","classes/camera.js","classes/svg-renderer.js"]);
 function createTransport(room,{browser=false,autoTick=false,publicOrigin=null}={}){
  let closing=false;const attempts=new Map();
  const server=http.createServer(async(req,res)=>{
-  const send=(status,value)=>{if(res.writableEnded)return;res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(value));};
+  const send=(status,value)=>{if(res.writableEnded)return;const body=JSON.stringify(value),headers={'Content-Type':'application/json','Cache-Control':'no-store',Vary:'Accept-Encoding'};if(body.length>1024&&/\bgzip\b/.test(req.headers['accept-encoding']||'')){res.writeHead(status,{...headers,'Content-Encoding':'gzip'});return res.end(zlib.gzipSync(body));}res.writeHead(status,headers);res.end(body);};
   if(closing)return send(503,{error:'server-restarting'});
   const origin=req.headers.origin;
   if(origin&&(!browser||origin!==(publicOrigin||'http://'+req.headers.host)))return send(403,{error:'cross-origin-disabled'});
