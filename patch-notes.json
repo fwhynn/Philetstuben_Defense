@@ -1,10 +1,11 @@
 [
   {
-    "version": "next",
+    "version": "0.9.8",
     "title": "Anonyme Aufrufzählung",
     "changes": [
       "Die Seite zählt Aufrufe von Spiel und Duo-Lobby jetzt anonym, damit wir sehen, wann und wie viel gespielt wird. Dafür werden keine Cookies gesetzt und keine IP-Adressen gespeichert; das Spiel läuft unverändert, auch wenn das Zählen fehlschlägt."
-    ]
+    ],
+    "date": "2026-10-08"
   },
   {
     "version": "0.9.7",
