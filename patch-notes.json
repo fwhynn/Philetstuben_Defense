@@ -1,5 +1,12 @@
 [
   {
+    "version": "next",
+    "title": "Anonyme Aufrufzählung",
+    "changes": [
+      "Die Seite zählt Aufrufe von Spiel und Duo-Lobby jetzt anonym, damit wir sehen, wann und wie viel gespielt wird. Dafür werden keine Cookies gesetzt und keine IP-Adressen gespeichert; das Spiel läuft unverändert, auch wenn das Zählen fehlschlägt."
+    ]
+  },
+  {
     "version": "0.9.7",
     "date": "2026-10-08",
     "title": "Flüssigeres Duo",
