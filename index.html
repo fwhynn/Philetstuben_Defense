@@ -55,35 +55,9 @@
         </section>
       </section>
 
-      <details id="consumableMenu" class="consumableMenu">
-        <summary>Verbrauchshilfen</summary>
-        <p>Nur für diese Welle. In der Bauphase: für die nächste Welle.</p><button id="buySpikes">Krähenfüße · 25
-          Gold</button><small>20 Spitzen × 5 Schaden · Straßenhex wählen</small><button id="buyResin">Klebeharz · 30
-          Gold</button><small>12 Gegner: −35 % Tempo für 4 Sekunden</small><button id="buyOverload">Überladung · 40
-          Gold</button><small>Turm: +50 % Angriffstempo für 12 Sekunden</small><button id="cancelConsumable"
-          class="secondary">Abbrechen</button>
-      </details>
-      <nav class="compactToolbar" aria-label="Spielsteuerung"><button data-compact="menu"
-          aria-expanded="false">Menü</button><button data-compact="stats" aria-expanded="false">Werte</button><button
-          data-compact="towers" aria-expanded="false">Türme</button><button data-compact="biomes"
-          aria-expanded="false">Biome</button><button id="compactConsumables" aria-expanded="false">Hilfen</button>
-      </nav>
-      <details id="duoHud" class="duoHud hidden">
-        <summary id="duoSummary">Duo · Partner</summary>
-        <div class="duoHudBody">
-          <div class="duoMapSwitch"><button id="duoOwnMap">Meine Karte</button><button
-              id="duoPartnerMap">Partnerkarte</button></div>
-          <p id="duoPartnerStatus"></p>
-          <p id="duoNetworkStatus" role="status"></p>
-          <p id="duoSupportInfo"></p><button id="duoReservePortal">Partnerportal reservieren</button><button
-            id="duoSendTower">Verstärkung auswählen</button><button id="duoClearPortal">Portal aufheben</button><button
-            id="duoClearTower">Verstärkung abwählen</button>
-          <div id="duoGuardians"></div><button id="duoTakeover" class="hidden">Sitzung hier übernehmen</button><button
-            id="duoLeave">Partie verlassen</button>
-        </div>
-      </details><button id="duoQuickMap" class="duoQuickMap hidden">Partnerkarte</button>
-      <div id="duoMapLabel" class="duoMapLabel hidden"></div>
-      <div id="duoTransfer" class="duoTransfer hidden" role="status"></div>
+      <details id="consumableMenu" class="consumableMenu"><summary>Verbrauchshilfen</summary><p>Nur für diese Welle. In der Bauphase: für die nächste Welle.</p><button id="buySpikes">Krähenfüße · 25 Gold</button><small>20 Spitzen × 5 Schaden · Straßenhex wählen</small><button id="buyResin">Klebeharz · 30 Gold</button><small>12 Gegner: −35 % Tempo für 4 Sekunden</small><button id="buyOverload">Überladung · 40 Gold</button><small>Turm: +50 % Angriffstempo für 12 Sekunden</small><button id="cancelConsumable" class="secondary">Abbrechen</button></details>
+      <nav class="compactToolbar" aria-label="Spielsteuerung"><button data-compact="menu" aria-expanded="false">Menü</button><button data-compact="stats" aria-expanded="false">Werte</button><button data-compact="towers" aria-expanded="false">Türme</button><button data-compact="biomes" aria-expanded="false">Biome</button><button id="compactConsumables" aria-expanded="false">Hilfen</button></nav>
+      <details id="duoHud" class="duoHud hidden"><summary id="duoSummary">Duo · Team</summary><div class="duoHudBody"><section class="duoHudSection"><h3>Karte wechseln</h3><div class="duoMapSwitch"><button id="duoOwnMap">Meine Karte</button><button id="duoPartnerMap">Partnerkarte</button></div><p id="duoPartnerStatus"></p></section><section class="duoHudSection"><h3>Partnerhilfe</h3><p id="duoSupportInfo" class="duoHelpText"></p><div class="duoSupportRow"><div><strong>Dein Portal</strong><small id="duoPortalState">Noch nicht gesetzt</small></div><button id="duoReservePortal">Platz wählen</button><button id="duoClearPortal" class="secondary">Aufheben</button></div><div class="duoSupportRow"><div><strong>Deine Verstärkung</strong><small id="duoTowerState">Noch nicht gewählt</small></div><button id="duoSendTower">Turm wählen</button><button id="duoClearTower" class="secondary">Abwählen</button></div></section><section id="duoGuardianSection" class="duoHudSection hidden"><h3>Wächter</h3><p class="duoHelpText">Wächter starten erst, wenn ihr beide zustimmt.</p><div id="duoGuardians"></div></section><section class="duoHudSection"><h3>Sitzung &amp; Verbindung</h3><p id="duoNetworkStatus" role="status"></p><button id="duoTakeover" class="hidden">Sitzung hier übernehmen</button><button id="duoLeave" class="duoDanger">Partie verlassen</button></section></div></details><section id="duoTurn" class="duoTurn hidden" data-tone="act" aria-live="polite"><div class="duoSeats"><div id="duoSeatSelf" class="duoSeat" data-state="todo"><span class="duoSeatDot" aria-hidden="true"></span><span class="duoSeatText"><strong>Du</strong><small id="duoSeatSelfText"></small></span></div><div class="duoTeamInfo"><strong id="duoTeamWave">Vorbereitung</strong><small id="duoTeamHp"></small></div><div id="duoSeatPartner" class="duoSeat duoSeatPartner" data-state="waiting"><span class="duoSeatText"><strong>Partner</strong><small id="duoSeatPartnerText"></small></span><span class="duoSeatDot" aria-hidden="true"></span></div></div><div class="duoTurnBody"><span id="duoMapLabel" class="duoMapLabel hidden"></span><strong id="duoTurnTitle"></strong><p id="duoTurnText"></p><button id="duoQuickMap" class="duoQuickMap hidden" type="button">⇄ Partnerkarte ansehen</button></div></section><div id="duoTransfer" class="duoTransfer hidden" role="status"></div>
       <nav id="quickLoadout" class="mapRail loadoutRail" aria-label="Loadout: Turm auf einen freien Platz ziehen"></nav>
       <aside id="biomeIntro" class="biomeIntro hidden" role="status"><strong id="biomeIntroTitle">Neues Biom
           entdeckt</strong>

@@ -80,3 +80,9 @@ Duo-Checkpoints verwenden jetzt Version 3. Die explizite Migration von Version 2
 Gemeinsames Ergebnis bei Niederlage/Welle 35, Turm- und Unterstützungsstatistik, beidseitiger Neustart und dauerhaft gespeicherte Ergebnisbelege sind umgesetzt. Das lokale Profil verbucht jeden Beleg einmal; Export/Import erhält diese Kennungen. HTTPS-/Container-Vorlage, privater Public-Build, Healthcheck, schreibfreier Online-Prüfbefehl und validierte Backup-Kopie sind vorbereitet.
 
 Verbindlicher aktueller Stand, Profilmodell, Betriebsbefehle und verbleibende Aufgaben: [Online-MVP-Übergabe](../docs/ONLINE_MVP_HANDOFF.md). Frühere „noch offen“-Listen oben sind Fortschrittsprotokolle. Live-Installation, TLS und Prüfung auf echten Browsern/Geräten sind noch offen. Die Domain ist bekannt; Hosting/Deployment-Zugang noch nicht. Keine öffentliche Freigabe behauptet.
+
+## Release-Wechsel, Anwesenheit und Kompression (08.10.2026)
+
+- Gespeicherte Partien einer anderen Spielversion (`ruleset` = Version aus package.json) werden beim Start verworfen, statt den Serverstart zu blockieren. Die unveränderte alte Datei liegt danach als `checkpoint.json.incompatible-<Zeitstempel>` daneben; Ergebnisbelege bleiben erhalten. Betroffene Spieler sehen in der Lobby, dass die Partie nicht mehr existiert. Beschädigte oder unbekannte Dateien bleiben weiterhin ein Startfehler.
+- Eine offene Socket.IO-Verbindung zählt als Anwesenheit (Auffrischung jede Sekunde). Gedrosselte Hintergrund-Tabs pausieren die Partie daher nicht mehr. Ping alle 5 s mit 5 s Zeitlimit: eine abgerissene Verbindung wird nach etwa 10 s erkannt, danach greift die bekannte Trennungspause. Die Lobby nutzt jetzt ebenfalls Socket.IO; HTTP bleibt Rückfallweg.
+- Socket.IO-Nachrichten ab 1 KiB werden komprimiert (permessage-deflate), HTTP-JSON-Antworten ab 1 KiB per gzip, sofern der Client es anbietet.

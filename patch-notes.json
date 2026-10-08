@@ -2,6 +2,16 @@
   {
     "version": "next",
     "date": null,
+    "title": "Flüssigeres Duo",
+    "changes": [
+      "Duo: Kämpfe laufen deutlich flüssiger: Gegner gleiten zwischen den Server-Updates, statt zu ruckeln, und Updates kommen gleichmäßiger an.",
+      "Duo: Schnell hintereinander ausgeführte Aktionen werden nacheinander abgearbeitet, statt mit »Bitte auf die Serverbestätigung warten« abgelehnt zu werden.",
+      "Duo: Der Knopf für die Partnerkarte sitzt jetzt in der Teamleiste und überdeckt das Duo-Menü oben links nicht mehr."
+    ]
+  },
+  {
+    "version": "0.9.6",
+    "date": "2026-10-08",
     "title": "Ein leichterer Einstieg",
     "changes": [
       "Neue Spieler starten direkt mit Bogenschütze und Katapult. Frostturm, Kettenblitz und Minenleger kommen nach Welle 5, 10 und 15 in den laufenden Durchlauf.",
@@ -9,7 +19,13 @@
       "Nach geschaffter Welle 35 werden Tagesherausforderung und Duo freigeschaltet. Duo-Einladungen funktionieren jederzeit. Bestehende Spielstände behalten ihren Zugang.",
       "Die Einführung lässt sich überspringen; gelernter Fortschritt wird gespeichert.",
       "Neue Standarddurchläufe starten mit Grafikstil Normal. Sakura bleibt während des Spiels in den Einstellungen auswählbar.",
-      "Patch Notes sind jetzt im Hauptmenü nachlesbar."
+      "Patch Notes sind jetzt im Hauptmenü nachlesbar.",
+      "Duo: Neue Teamleiste im Spiel zeigt jederzeit, was du und dein Partner gerade tun, und sagt dir, was als Nächstes zu tun ist – oder warum gerade nichts geht.",
+      "Duo: Die Lobby wurde neu gestaltet, mit Schritt-für-Schritt-Anzeige, Spielerplätzen und einer kurzen Regelübersicht. Das Duo-Menü im Spiel ist übersichtlicher gegliedert und erklärt Portal und Verstärkung verständlicher.",
+      "Duo: Einladungslinks können jetzt vollständig in das Code-Feld eingefügt werden; zuvor wurde der Link abgeschnitten.",
+      "Duo: Abgelaufene oder verlassene Partien hängen nicht mehr in einer Endlosschleife, sondern führen mit Hinweis zurück zur Lobby.",
+      "Duo: Ein Tab im Hintergrund pausiert die Partie nicht mehr für beide, solange die Verbindung steht. Abgerissene Verbindungen werden schneller erkannt.",
+      "Duo: Deutlich weniger Datenverbrauch während der Partie."
     ]
   }
 ]

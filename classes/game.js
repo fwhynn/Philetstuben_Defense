@@ -1330,7 +1330,7 @@ R dreht die Karte, dann Feld anklicken.`;
   function togglePause() { if (duoToken) { duoBridge?.pause(); return; } advanceClock(performance.now()); paused = !paused; clockDebt = 0; last = performance.now(); document.getElementById('app').classList.toggle('paused', paused); const b = document.getElementById('pauseBtn'); if (b) b.textContent = paused ? '▶ Weiter (P)' : '⏸ Pause (P)'; }
   document.getElementById('pauseBtn')?.addEventListener('click', togglePause);
   function advanceClock(now) {
-    if (duoToken) { last = now; clockDebt = 0; return; }
+    if (duoToken) { last = now; clockDebt = 0; if (state.waveRunning && !document.hidden && duoBridge?.animate?.(now)) renderBoard(); return; }
     const elapsed = Math.max(0, (now - last) / 1000); last = now;
     if (paused || !state.waveRunning) { clockDebt = 0; return; }
     clockDebt += elapsed; const step = .05 / gameSpeed; let count = 0;
@@ -1356,14 +1356,14 @@ R dreht die Karte, dann Feld anklicken.`;
     newRun(); tutorial.active = false; mainMenu.classList.add('hidden'); document.body.classList.add('duoGame');
     duoBridge = HexDuoGame.mount({
       token: duoToken, getState: () => state, render: renderAll, renderer, cardElement, setMessage,
-      accept(next, switched = false) {
+      accept(next, switched = false, profileChanged = true) {
         if (switched) { consumablePick = null; closeSale(); cancelQuickTower(); state.selectedSlot = state.selectedTower = state.selectedBuilding = null; state.selectedSlots = []; state.selectedTowers = []; state.previewUpgrade = state.previewTower = state.previewBuilding = state.buildingTarget = state.hoveredPlacement = null; state.selectedCard = null; state.rotation = 0; towerMenuKey = towerPanelKey = buildingPanelKey = ''; renderer.reset(); }
         const changedHand = state.hand.join('|') !== next.hand.join('|') || state.phase !== next.phase;
         Object.assign(state, next);
         state.selectedSlots = selections('Slot').filter(slot => { const t = state.map.get(key(slot.q, slot.r)); return t && slot.index < t.slots && !t.towers[slot.index]; }); state.selectedSlot = state.selectedSlots.at(-1) || null;
         state.selectedTowers = selections('Tower').filter(slot => state.map.get(key(slot.q, slot.r))?.towers[slot.index]); state.selectedTower = state.selectedTowers.at(-1) || null;
         if (changedHand) { state.selectedCard = null; state.rotation = 0; }
-        profile = HexProfile.load(TOWERS); tutorial.active = false; hasActiveRun = true; mainMenu.classList.add('hidden'); renderAll();
+        if (profileChanged) profile = HexProfile.load(TOWERS); tutorial.active = false; hasActiveRun = true; mainMenu.classList.add('hidden'); renderAll();
       }, commandAccepted(action) { if (['tower', 'upgrade', 'building', 'buildingUpgrade', 'sellTower', 'sellBuilding', 'baseUpgrade'].includes(action)) { state.previewTower = state.previewUpgrade = null; sound.play('build'); renderAll(); } }, reward(offer, kind) {
         const signature = JSON.stringify([offer, kind]); if (duoBridge?.offerKey === signature) return; if (duoBridge) duoBridge.offerKey = signature;
         rewardChoices.innerHTML = ''; rewardChoices.classList.remove('workshopChoices'); if (!offer) { rewardOverlay.classList.add('hidden'); return; }
