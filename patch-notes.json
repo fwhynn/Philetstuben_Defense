@@ -1,7 +1,7 @@
 [
   {
-    "version": "next",
-    "date": null,
+    "version": "0.9.6",
+    "date": "2026-10-08",
     "title": "Ein leichterer Einstieg",
     "changes": [
       "Neue Spieler starten direkt mit Bogenschütze und Katapult. Frostturm, Kettenblitz und Minenleger kommen nach Welle 5, 10 und 15 in den laufenden Durchlauf.",
