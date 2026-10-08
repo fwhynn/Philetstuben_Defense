@@ -56,3 +56,20 @@ test('a connected road tip in a one-cell pocket is not an expandable front',()=>
  for(let d=0;d<6;d++){const n=c.map.neighbor(2,0,d),id=c.map.key(n.q,n.r);if(!map.has(id))map.set(id,{...n,type:'deadEnd',roads:[]});}
  assert.equal(c.map.hasExteriorFront(map),false);
 });
+
+test('a dead end cannot close the last route and old completely closed maps can recover',()=>{
+ const c=loadCore(),{state:s,random}=c.runtime.create({seed:'closed-end',runId:'closed-end',loadout:['archer','catapult','chain','freeze','mine']});
+ s.landmarks.clear();s.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[null]});
+ assert.equal(c.map.canPlace(s.map,2,0,c.data.CARD_LIBRARY.deadEnd,3,s.landmarks),false);
+ s.map.set('2,0',{q:2,r:0,type:'deadEnd',roads:[3],slots:2,towers:[null,null]});s.phase='place';
+ assert.equal(c.map.hasExteriorFront(s.map,s.landmarks),false);assert.equal(c.flow.drawHand(s,random),'tunnel');assert.equal(s.phase,'build');
+ assert.ok(s.tunnelOffer);assert.equal(c.runtime.rescueTunnel(s),true);assert.ok(c.flow.start(s,random));assert.equal(s.waveRunning,true);
+});
+
+test('closing a curved ring with a dead end cannot trap the remaining road in its one-hex hole',()=>{
+ const c=loadCore(),map=new Map();
+ for(const [q,r,type,roads] of [[0,0,'base',[0]],[1,0,'tee',[3,5,0]],[1,1,'bigCurve',[2,0]],[2,1,'bigCurve',[3,1]],[3,0,'bigCurve',[4,2]],[3,-1,'bigCurve',[5,3]]])map.set(`${q},${r}`,{q,r,type,roads});
+ assert.equal(c.map.hasExteriorFront(map),true);
+ assert.equal(c.map.canPlace(map,2,-1,c.data.CARD_LIBRARY.deadEnd,0),false);
+ assert.equal(c.map.canPlace(map,2,-1,c.data.CARD_LIBRARY.straight,0),true);
+});

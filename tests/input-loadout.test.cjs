@@ -211,3 +211,31 @@ test('HUD popups stay below their own button even when the central tutorial is v
  document.querySelectorAll=selector=>selector.includes('.dockTL')?[{getBoundingClientRect:()=>rect(0,14,1912,56)}]:selector==='.statDetails[open]>.statPopup'?[popup]:[];
  a.layoutMenus();assert.equal(popup.style.top,'82px');assert.equal(popup.style.left,'1210px');
 });
+
+test('touching a free slot after choosing a quick tower opens the menu without spending gold',()=>{
+ const {a,elements,selectSlot}=load();a.state.phase='build';a.state.gold=100;
+ const tile={q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[null]};a.state.map.set('1,0',tile);a.renderAll();
+ elements.get('quickLoadout').children[0].listeners.click({detail:0});assert.ok(a.state.dragTower);
+ selectSlot(1,0,0,false,'touch');assert.equal(tile.towers[0],null);assert.equal(a.state.gold,100);assert.equal(a.state.dragTower,null);
+ assert.equal(elements.get('towerDrawer').classList.contains('hidden'),false);assert.equal(a.state.selectedSlot.q,1);
+});
+
+test('acknowledging the hotkey tip preserves an open tower selection',()=>{
+ const {a,elements,documentListeners}=load();a.state.selectedTower={q:1,r:0,index:0};const selected=a.state.selectedTower;
+ documentListeners.pointerdown({button:0,target:{closest:s=>s.includes('#hotkeyTip')?{}:null}});
+ elements.get('hotkeyTipClose').listeners.click();assert.equal(a.state.hotkeyHintDone,true);assert.equal(a.state.selectedTower,selected);
+});
+
+test('the top removal button skips the offer without removing a card',()=>{
+ const {a,elements}=load();const deck=[...a.state.deck];a.showRemoval();assert.equal(elements.get('skipRemovalTopBtn').classList.contains('hidden'),false);
+ elements.get('skipRemovalTopBtn').listeners.click();assert.deepEqual([...a.state.deck],deck);assert.notEqual(a.state.phase,'removal');
+ a.showRewards();assert.equal(elements.get('skipRemovalTopBtn').classList.contains('hidden'),true);
+});
+
+test('hovering another biome replaces the pinned tooltip and leaving restores it',()=>{
+ const {a,elements,documentListeners}=load();a.state.biomeSeed='biome-rail';
+ for(let q=-8;q<=8;q+=4)for(let r=-8;r<=8;r+=4)if(q||r)a.state.map.set(`${q},${r}`,{q,r,type:'straight',roads:[0,3],slots:1,towers:[null]});a.renderAll();
+ const buttons=elements.get('biomeRail').children,[grass,desert]=buttons,visible=()=>buttons.filter(b=>b.classList.contains('showTooltip'));
+ grass.listeners.click();assert.deepEqual(visible(),[grass]);desert.listeners.pointerenter();assert.deepEqual(visible(),[desert]);desert.listeners.pointerleave();assert.deepEqual(visible(),[grass]);
+ documentListeners.pointerdown({button:0,target:{closest:()=>null}});assert.equal(visible().length,0);
+});

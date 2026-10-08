@@ -75,9 +75,9 @@ function create(svg,commands){
         hit.setAttribute('points',hexPoints(c.x,c.y,HEX-2));
         hit.setAttribute('fill','transparent');
         hit.style.cursor=legal?'pointer':'not-allowed';
-        hit.addEventListener('pointerenter',()=>{commands.hoverPlacement(placementKey);preview.style.display='';});
-        hit.addEventListener('pointerleave',()=>{commands.leavePlacement(placementKey);preview.style.display='none';});
-        hit.addEventListener('click',()=>commands.placeTile(s.q,s.r));
+        hit.addEventListener('pointerenter',e=>{if(e?.pointerType==='touch')return;commands.hoverPlacement(placementKey);preview.style.display='';});
+        hit.addEventListener('pointerleave',e=>{if(e?.pointerType==='touch')return;commands.leavePlacement(placementKey);preview.style.display='none';});
+        hit.addEventListener('click',e=>{if(e?.pointerType==='touch'&&state.hoveredPlacement!==placementKey){commands.hoverPlacement(placementKey);render(state,placementTargets);}else commands.placeTile(s.q,s.r);});
         scene.appendChild(hit);
       }
     }
@@ -196,7 +196,7 @@ function create(svg,commands){
       if(tw){drawTower(p,tw,tile,i);} else {
         const selected=state.selectedSlot&&state.selectedSlot.q===tile.q&&state.selectedSlot.r===tile.r&&state.selectedSlot.index===i;
         if(state.showSlotHints!==false&&['place','build','wave'].includes(state.phase)){const marker=document.createElementNS(NS,'g');marker.setAttribute('transform',`translate(${p.x},${p.y-20})`);marker.setAttribute('data-slot-hint','true');marker.style.pointerEvents='none';const floating=document.createElementNS(NS,'g');floating.setAttribute('class','slotDiamondFloat');const gem=document.createElementNS(NS,'polygon');gem.setAttribute('points','0,-7 5,0 0,7 -5,0');gem.setAttribute('fill','#ffffff');gem.setAttribute('stroke','#251130');gem.setAttribute('class','slotDiamondTurn');floating.appendChild(gem);marker.appendChild(floating);scene.appendChild(marker);}
-        const circ=document.createElementNS(NS,'circle');circ.setAttribute('cx',p.x);circ.setAttribute('cy',p.y);circ.setAttribute('r',12);circ.setAttribute('fill',selected?'#f4d36d':'#314d39');circ.setAttribute('stroke','#f1ddb1');circ.setAttribute('stroke-width',2);circ.style.cursor='pointer';circ.addEventListener('click',e=>{e.stopPropagation();commands.selectSlot(tile.q,tile.r,i,e.ctrlKey||e.metaKey);});scene.appendChild(circ);
+        const circ=document.createElementNS(NS,'circle');circ.setAttribute('cx',p.x);circ.setAttribute('cy',p.y);circ.setAttribute('r',12);circ.setAttribute('fill',selected?'#f4d36d':'#314d39');circ.setAttribute('stroke','#f1ddb1');circ.setAttribute('stroke-width',2);circ.style.cursor='pointer';circ.addEventListener('click',e=>{e.stopPropagation();commands.selectSlot(tile.q,tile.r,i,e.ctrlKey||e.metaKey,e.pointerType);});scene.appendChild(circ);
         const plus=text(p.x,p.y+4,'+',14,'#fff','700');plus.style.pointerEvents='none';scene.appendChild(plus);
       }
     });
@@ -211,7 +211,7 @@ function create(svg,commands){
     });
     const base=document.createElementNS(NS,'circle');base.setAttribute('cx',p.x);base.setAttribute('cy',p.y);base.setAttribute('r',14);base.setAttribute('fill','#202821');base.setAttribute('stroke',def.color);base.setAttribute('stroke-width',3);g.appendChild(base);
     const visual=HexData.BRANCH_VISUALS[tw.branch],icon=visual?.icon||(tw.type==='element'?'◆':tw.type==='necromancer'?'☠':tw.type==='archer'?'A':tw.type==='catapult'?'K':tw.type==='freeze'?'❄':tw.type==='mine'?'✹':tw.type==='ballista'?'➶':tw.type==='flame'?'♨':'⚡');
-    if(visual){base.setAttribute('stroke',visual.color);const ring=document.createElementNS(NS,'circle');ring.setAttribute('cx',p.x);ring.setAttribute('cy',p.y);ring.setAttribute('r',tw.ultimate?19:17);ring.setAttribute('fill','none');ring.setAttribute('stroke',tw.ultimate?'#8de8ff':tw.finalUpgrade?'#ffe39a':visual.color);ring.setAttribute('stroke-width',tw.ultimate?3:1.5);g.appendChild(ring);}
+    if(visual)base.setAttribute('stroke',visual.color);
     const tx=text(p.x,p.y+5,icon,14,visual?.color||def.color,'800');g.appendChild(tx);
     if(tw.branch){const badge=document.createElementNS(NS,'circle');badge.setAttribute('cx',p.x+11);badge.setAttribute('cy',p.y+12);badge.setAttribute('r',6);badge.setAttribute('fill','#172019');badge.setAttribute('stroke',visual.color);g.appendChild(badge);g.appendChild(text(p.x+11,p.y+15,String(tw.level),8,'#fff','700'));}
     const title=document.createElementNS(NS,'title');title.textContent=`${def.name} · Stufe ${tw.level}${tw.branch?' · '+HexData.UPGRADES[tw.branch].name:''}`;g.appendChild(title);scene.appendChild(g);

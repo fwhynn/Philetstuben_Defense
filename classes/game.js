@@ -7,7 +7,7 @@
 
   const svg = document.getElementById('board');
   const rendererCommands={
-    placeTile,inspectCaravan(){document.getElementById('waveDropdown').open=true;},selectSlot(q,r,index,multiple){if(!applyBuildingTarget(q,r))selectSlot(q,r,index,multiple);},inspectBiome,
+    placeTile,inspectCaravan(){document.getElementById('waveDropdown').open=true;},selectSlot(q,r,index,multiple,pointerType){if(!applyBuildingTarget(q,r))selectSlot(q,r,index,multiple,pointerType);},inspectBiome,
     fieldClick(){document.getElementById('towerDrawer').classList.add('hidden');if(state?.dragTower){cancelQuickTower();renderAll();}},
     selectBase(){if(applyBuildingTarget(0,0))return;document.getElementById('towerDrawer').classList.add('hidden');state.selectedBase=true;state.selectedTower=null;state.selectedSlot=null;state.selectedBuilding=null;document.getElementById('baseDropdown').open=true;renderAll();},
     hoverBuilding(slot){state.hoverBuilding=slot;renderBoard();},
@@ -166,11 +166,11 @@
     if(at>=0)list.splice(at,1);else list.push(selected);
     state['selected'+kind+'s']=list;state['selected'+kind]=list.at(-1)||null;
   }
-  function selectSlot(q,r,index,multiple=false){
+  function selectSlot(q,r,index,multiple=false,pointerType){
     if(consumeAt(q,r,index))return;
     if(duoBridge?.pickSupport?.('slot',{q,r,index}))return;
     globalThis.HexCompact?.open('');
-    if(state.dragTower){dropQuickTower(state.dragTower,{q,r,index});return;}
+    if(state.dragTower){if(pointerType==='touch')cancelQuickTower();else{dropQuickTower(state.dragTower,{q,r,index});return;}}
     closeBasePanel();
     if(!['place','build','wave'].includes(state.phase)||state.hp<=0) return;
     const tile=state.map.get(key(q,r)); if(!tile||!Number.isInteger(index)||index<0||index>=tile.slots||tile.towers[index]) return;
@@ -179,6 +179,7 @@
   }
 
   function buyTower(type){
+    cancelQuickTower();
     if(duoToken){duoAction('tower',{type,slots:selections('Slot')});return;}
     const result=HexTowerCommands.buy(state,type,selections('Slot'));
     if(!result.ok){if(result.reason==='gold')setMessage('Nicht genug Gold.');return;}
@@ -227,6 +228,7 @@
   }
   let rewardInputOffer=null,rewardInputAfter=0,rewardPointerReady=false;
   function openRewardSelection(){
+    document.getElementById('skipRemovalTopBtn').classList.toggle('hidden',state.phase!=='removal'&&state.rewardOffer?.kind!=='removal');
     if(rewardInputOffer!==state.rewardOffer?.id){rewardInputOffer=state.rewardOffer?.id;rewardInputAfter=performance.now()+350;rewardPointerReady=false;}
     rewardOverlay.classList.remove('hidden');
   }
@@ -391,6 +393,9 @@
     if(state.buildingTarget&&(state.hp<=0||state.phase==='gameover'))state.buildingTarget=null;
     const card=HexPlacementCommands.card(state,state.hand[state.selectedCard]);
     const targets=state.phase==='place'&&!state.waveRunning&&card?placementTargets(card).filter(target=>!state.landmarks.get(key(target.q,target.r))?.prefab).map(target=>({...target,legal:canPlace(target.q,target.r,card,state.rotation)})):[];
+    if(globalThis.HexCompact?.small()&&card&&targets.length&&!targets.some(t=>key(t.q,t.r)===state.hoveredPlacement)){
+      const preview=targets.find(t=>t.legal)||targets[0];state.hoveredPlacement=key(preview.q,preview.r);
+    }
     if(state.buildingTarget){targets.splice(0,targets.length,...[...state.map.values()].map(t=>({q:t.q,r:t.r,legal:HexBuildings.canTarget(state,state.buildingTarget,key(t.q,t.r))})));}
     if(consumablePick&&consumablePick!=='overload')targets.splice(0,targets.length,...[...state.map.values()].filter(t=>t.type!=='base'&&t.roads?.length).map(t=>({q:t.q,r:t.r,legal:true})));
     state.consumablePickUI=consumablePick;
@@ -801,7 +806,7 @@ R dreht die Karte, dann Feld anklicken.`;}
     if(active)detail.textContent=HexBiomes.definitions[active].name+': '+HexBiomes.definitions[active].description;
     else for(const id of ids){const row=document.createElement('span');row.className='biomeIntroName';row.textContent=HexBiomes.definitions[id].name;detail.appendChild(row);}
   }
-  function showBiomeHighlight(id){state.highlightBiome=id;renderBiomeIntroDetails();renderBoard();}
+  function showBiomeHighlight(id){state.highlightBiome=id;for(const [biome,button] of biomeButtons)button.classList.toggle('showTooltip',biome===id);renderBiomeIntroDetails();renderBoard();}
   function renderQuickControls(){
     if(state.dragTower&&(state.hp<=0||state.phase==='gameover'))cancelQuickTower();
     const rail=document.getElementById('quickLoadout'),next=state.towerLoadout.join('|');
@@ -822,9 +827,9 @@ R dreht die Karte, dann Feld anklicken.`;}
     document.getElementById('biomeIntro').classList.toggle('hidden',!state.biomeIntro||!mainMenu.classList.contains('hidden'));renderBiomeIntroDetails();
     if(key!==biomeKey){biomeKey=key;biomes.innerHTML='';biomeButtons.clear();for(const id of ids){const def=HexBiomes.definitions[id],button=document.createElement('button');button.className='biomeIcon';button.style.borderColor=def.color;button.setAttribute('aria-label',def.name+': '+def.description);button.innerHTML='<span aria-hidden="true">'+({grass:'♧',desert:'☀',ash:'♨',storm:'≋'})[id]+'</span><span class="biomeTooltip"><strong>'+def.name+'</strong><small>'+def.description+'</small></span>';
       button.addEventListener('pointerenter',()=>showBiomeHighlight(id));button.addEventListener('pointerleave',()=>showBiomeHighlight(pinnedBiome));button.addEventListener('focus',()=>showBiomeHighlight(id));button.addEventListener('blur',()=>showBiomeHighlight(pinnedBiome));button.addEventListener('click',()=>{pinnedBiome=pinnedBiome===id?null:id;showBiomeHighlight(pinnedBiome);renderQuickControls();});biomes.appendChild(button);biomeButtons.set(id,button);
-    }}for(const [id,button] of biomeButtons){button.classList.toggle('biomeIntroTarget',HexBiomes.introIds(state).includes(id));button.classList.toggle('active',pinnedBiome===id);button.setAttribute('aria-pressed',String(pinnedBiome===id));}
+    }}for(const [id,button] of biomeButtons){button.classList.toggle('biomeIntroTarget',HexBiomes.introIds(state).includes(id));button.classList.toggle('active',pinnedBiome===id);button.classList.toggle('showTooltip',state.highlightBiome===id);button.setAttribute('aria-pressed',String(pinnedBiome===id));}
   }
-  document.addEventListener('pointerdown',e=>{if(e.button!==0)return;dismissTransientPanels(e);if(!state?.dragTower||quickPointer||e.target?.closest?.('#rewardOverlay,#celebration,#campaignVictory'))return;if(e.target?.closest?.('.loadoutRail'))return;if(!quickSlotAt(e)){cancelQuickTower();renderAll();}},true);
+  document.addEventListener('pointerdown',e=>{if(e.button!==0)return;dismissTransientPanels(e);if(!state?.dragTower||quickPointer||e.target?.closest?.('#rewardOverlay,#celebration,#campaignVictory,#hotkeyTip'))return;if(e.target?.closest?.('.loadoutRail'))return;if(!quickSlotAt(e)){cancelQuickTower();renderAll();}},true);
   document.addEventListener('pointermove',e=>{if(!quickPointer||e.pointerId!==quickPointer.id)return;quickPointer.moved ||= Math.hypot(e.clientX-quickPointer.x,e.clientY-quickPointer.y)>5;state.dragSlot=quickSlotAt(e);const ghost=document.getElementById('towerDragGhost');ghost.classList.remove('hidden');ghost.style.left=(e.clientX+18)+'px';ghost.style.top=(e.clientY-22)+'px';const price=HexBuildings.cost(state,state.dragSlot,TOWERS[quickPointer.type].cost);ghost.innerHTML=HexArsenal.icon(quickPointer.type,TOWERS[quickPointer.type].color)+'<small>'+price+' 🪙</small>';renderBoard();});
   document.addEventListener('pointerup',e=>{if(!quickPointer||e.pointerId!==quickPointer.id)return;if(!canQuickBuild()){quickPointer=null;document.getElementById('towerDragGhost').classList.add('hidden');return;}const drag=quickPointer,slot=quickSlotAt(e);quickPointer=null;document.getElementById('towerDragGhost').classList.add('hidden');if(slot)dropQuickTower(drag.type,slot);else if(drag.moved){cancelQuickTower();renderAll();}});
   document.addEventListener('pointercancel',()=>{if(state.dragTower&&!canQuickBuild()&&state.hp>0&&state.phase!=='gameover'){quickPointer=null;document.getElementById('towerDragGhost').classList.add('hidden');}else cancelQuickTower();renderAll();});
@@ -1159,11 +1164,11 @@ R dreht die Karte, dann Feld anklicken.`;}
     document.getElementById('biomeInfoPanel').classList.add('hidden');
     const changed=!!(pinnedBiome||state.highlightBiome);pinnedBiome=null;state.highlightBiome=null;
     if(document.activeElement?.closest?.('.biomeRail'))document.activeElement.blur?.();
-    if(changed){for(const button of biomeButtons.values()){button.classList.remove('active');button.setAttribute('aria-pressed','false');}renderBiomeIntroDetails();renderBoard();}
+    if(changed){for(const button of biomeButtons.values()){button.classList.remove('active','showTooltip');button.setAttribute('aria-pressed','false');}renderBiomeIntroDetails();renderBoard();}
     return changed;
   }
   function dismissTransientPanels(event){
-    const target=event.target;if(!target?.closest||!state||target.closest('#rewardOverlay,#celebration,#campaignVictory'))return;
+    const target=event.target;if(!target?.closest||!state||target.closest('#rewardOverlay,#celebration,#campaignVictory,#hotkeyTip'))return;
     let changed=false;
     if(!target.closest('#consumableMenu,#compactConsumables'))document.getElementById('consumableMenu').open=false;
     if(saleRequest&&!target.closest('#'+(saleRequest.kind==='tower'?'sellTowerBtn':'sellBuildingBtn'))){closeSale();changed=true;}
@@ -1198,6 +1203,7 @@ R dreht die Karte, dann Feld anklicken.`;}
   document.getElementById('rewardDeckBtn').addEventListener('click',()=>inspectReward(rewardView==='deck'?'selection':'deck'));
   document.getElementById('rewardBackBtn').addEventListener('click',()=>{if(state.workshopPicking){state.workshopPicking=false;showShrine();}else inspectReward('selection');});
   document.getElementById('skipRemovalBtn').addEventListener('click',()=>takeReward(state.rewardOffer?.id,null));
+  document.getElementById('skipRemovalTopBtn').addEventListener('click',()=>takeReward(state.rewardOffer?.id,null));
   document.getElementById('closeTowerPanel').addEventListener('click',()=>{state.selectedTower=null;renderAll();});
   document.getElementById('zoomInBtn').addEventListener('click',()=>renderer.zoom(.8));
   document.getElementById('zoomOutBtn').addEventListener('click',()=>renderer.zoom(1.25));

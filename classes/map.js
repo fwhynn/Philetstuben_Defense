@@ -108,7 +108,11 @@ const HexMap=(()=>{
   }
   function tunnelPlan(map,landmarks,allowExterior=false){
     if(!allowExterior&&hasExteriorFront(map,landmarks))return null;
-    const connected=reachable(map),sources=[...map.values()].filter(t=>t.type!=='base'&&connected.has(key(t.q,t.r))&&(t.roads||[]).some(d=>{const n=neighbor(t.q,t.r,d);return !map.has(key(n.q,n.r));}));
+    const connected=reachable(map),roads=[...map.values()].filter(t=>t.type!=='base'&&connected.has(key(t.q,t.r))&&t.roads?.length);
+    const tips=roads.filter(t=>t.roads.some(d=>{const n=neighbor(t.q,t.r,d);return !map.has(key(n.q,n.r));}));
+    // Older saves can already be completely closed by a dead end. They still
+    // need a tunnel entrance, even when no open road tip survives.
+    const sources=tips.length?tips:roads;
     if(!sources.length)return null;
     const outside=exterior(map,landmarks),options=[];
     for(const id of outside){const [q,r]=id.split(',').map(Number);if(Array.from({length:6},(_,d)=>neighbor(q,r,d)).some(n=>map.has(key(n.q,n.r))||landmarks?.get(key(n.q,n.r))?.prefab))continue;

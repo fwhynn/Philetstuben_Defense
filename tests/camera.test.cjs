@@ -23,3 +23,13 @@ test('SVG camera owns its input listeners and reports view changes', () => {
   listeners.wheel({ clientX: 0, clientY: 0, deltaY: -100, preventDefault() { } }); assert.equal(changes, 1); assert.ok(camera.getView().w < 1100);
   camera.reset(); assert.equal(changes, 2); assert.equal(camera.getView().w, 1100); camera.destroy(); assert.equal(Object.keys(listeners).length, 0);
 });
+
+test('pinch zoom follows two fingers and suppresses actions until both are released',()=>{
+ const {camera}=load(),changes=[],gesture=camera.pinch((factor,anchor)=>changes.push({factor,anchor}));
+ const point=(id,x)=>({pointerType:'touch',pointerId:id,clientX:x,clientY:20});
+ assert.equal(gesture.down(point(1,0)),false);assert.equal(gesture.down(point(2,100)),true);
+ assert.equal(gesture.move(point(2,200)),true);assert.equal(changes[0].factor,.5);assert.equal(changes[0].anchor.clientX,100);
+ gesture.move(point(2,100));assert.equal(changes[1].factor,2);
+ assert.equal(gesture.up(point(2,100)),true);assert.equal(gesture.move(point(1,30)),true);assert.equal(changes.length,2);
+ assert.equal(gesture.up(point(1,30)),true);assert.equal(gesture.down(point(3,40)),false);gesture.reset();
+});

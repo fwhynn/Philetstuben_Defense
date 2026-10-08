@@ -212,9 +212,11 @@ function create(host0,commands){
   // ---- Szene ----
   const layer={tiles:new THREE.Group(),landmarks:new THREE.Group(),empty:new THREE.Group(),objects:new THREE.Group(),targets:new THREE.Group(),dynamic:new THREE.Group(),ghost:new THREE.Group(),overlays:new THREE.Group()};
   Object.values(layer).forEach(g=>scene.add(g));
-  // Future tiles form a separate background pass; they never occlude the explored map or its markers.
+  // Only fog and empty future cells belong behind the playable terrain.
+  // Revealed event tiles share its depth buffer, even before they are connected.
+  const fogLandmarks=new THREE.Group();
   const backgroundScene=new THREE.Scene();backgroundScene.background=scene.background;backgroundScene.fog=scene.fog;scene.background=null;
-  const backgroundSun=new THREE.DirectionalLight('#fff1d0',2.5);backgroundScene.add(new THREE.HemisphereLight('#dff0ff','#6b7a4c',1.15),backgroundSun,backgroundSun.target,layer.empty,layer.landmarks);
+  const backgroundSun=new THREE.DirectionalLight('#fff1d0',2.5);backgroundScene.add(new THREE.HemisphereLight('#dff0ff','#6b7a4c',1.15),backgroundSun,backgroundSun.target,layer.empty,fogLandmarks);
   gl.autoClear=false;
   let state,targetList=[],hoverPick=null;
   const tileRecords=new Map(),landmarkRecords=new Map(),objectRecords=new Map(),labels=new Map(),usedLabels=new Set();
@@ -266,7 +268,7 @@ function create(host0,commands){
     windPool.end();mistPool.end();
   }
   function clearGroup(group){for(const child of [...group.children]) group.remove(child);}
-  function rebuildAll(){for(const [map,group] of [[tileRecords,layer.tiles],[landmarkRecords,layer.landmarks],[objectRecords,layer.objects]]){map.clear();clearGroup(group);}emptySig=targetSig=ghostSig='';pickDirty=true;}
+  function rebuildAll(){for(const [map,group] of [[tileRecords,layer.tiles],[landmarkRecords,layer.landmarks],[objectRecords,layer.objects]]){map.clear();clearGroup(group);}clearGroup(fogLandmarks);emptySig=targetSig=ghostSig='';pickDirty=true;}
 
   const gridGeometry=ringGeometry(HEX-.5,HEX-1.7),buffGeometry=new THREE.CircleGeometry(HEX-3,6).rotateZ(Math.PI/6).rotateX(-Math.PI/2);
   const otherBuffMaterial=basic('#b8a5db',.10),otherBuffBorder=basic('#b8a5db',.5);
@@ -434,17 +436,17 @@ function create(host0,commands){
       const sig=[visibility,landmark.type,p?.type,p?.rotation].join('|');seen.add(id);
       let record=landmarkRecords.get(id);
       if(record?.sig!==sig){
-        if(record) layer.landmarks.remove(record.holder);
+        if(record) record.holder.removeFromParent();
         const tile={q:landmark.q,r:landmark.r,type:p?.type,roads:p?.roads||[],slots:p?.slots||0,rotation:p?.rotation||0};
         let holder;
         if(!clear) holder=buildTile({kind:'tile',name:'fog',rotation:0},{...tile,slots:0});
         else if(landmark.type==='boss') holder=buildTile({kind:'landmark',name:'boss',rotation:0},{...tile,slots:0});
         else holder=buildTile({kind:'tile',...HexModelMap.modelFor(tile)},tile,{prop:{name:landmark.type,angle:HexModelMap.propAngle(p.type,HexMap.slotOffsets(p.type,p.slots))}});
-        layer.landmarks.add(holder);record={sig,holder};landmarkRecords.set(id,record);
+        (clear?layer.landmarks:fogLandmarks).add(holder);record={sig,holder};landmarkRecords.set(id,record);
       }
       label(`lm:${id}`,c.x,c.y,clear?(landmark.type==='treasure'?'Schatz +'+HexExploration.treasureReward(landmark)+' Gold · ungesammelt':LANDMARK_LABEL[landmark.type]):'?',clear?'':'big',clear?30:0);
     }
-    for(const [id,record] of [...landmarkRecords]) if(!seen.has(id)){layer.landmarks.remove(record.holder);landmarkRecords.delete(id);}
+    for(const [id,record] of [...landmarkRecords]) if(!seen.has(id)){record.holder.removeFromParent();landmarkRecords.delete(id);}
   }
   function syncEmpty(){
     const landmarkVisible=[...state.landmarks?.values()||[]].filter(l=>!l.claimed&&HexExploration.visibility(state.map,l)!=='hidden').map(l=>key(l.q,l.r));
@@ -474,9 +476,6 @@ function create(host0,commands){
       if(tower.type==='necromancer')for(const x of [-12,12]){const spire=new THREE.Mesh(new THREE.ConeGeometry(4,27,5),std('#c4c8b1'));spire.position.set(x,29,0);holder.add(spire);}
       else{const ring=new THREE.Mesh(torus,basic(def.color));ring.scale.setScalar(16);ring.position.y=27;holder.add(ring);}
     }else{const mesh=new THREE.Mesh(new THREE.CylinderGeometry(12,14,40,8).translate(0,20,0),std(def.color));mesh.castShadow=true;holder.add(mesh);}
-    const visual=HexData.BRANCH_VISUALS[tower.branch];
-    if(visual){const ring=new THREE.Mesh(torus,basic(visual.color));ring.scale.setScalar(20);ring.position.y=2;holder.add(ring);
-      if(tower.finalUpgrade){const gold=new THREE.Mesh(torus,basic(tower.ultimate?'#8de8ff':'#ffe39a'));gold.scale.setScalar(tower.ultimate?28:24);gold.position.y=2;holder.add(gold);}}
     obj.focusObjects=[...holder.children];
     if(def.aura){const fill=new THREE.Mesh(circle,basic(def.color,.06)),edge=new THREE.Mesh(circleRing,basic(def.color,.22));for(const m of [fill,edge]){m.scale.setScalar(def.range);m.position.set(0,1.5,0);holder.add(m);}}
     obj.hint=new THREE.Mesh(hintGeometry,mats.hint);obj.hint.position.y=66;obj.hint.visible=false;holder.add(obj.hint);
@@ -514,7 +513,7 @@ function create(host0,commands){
       if(record) layer.objects.remove(record.group);
       const group=new THREE.Group(),towers=[],buildings=[],picks=[],slotHints=[],slots=slotPositions(tile);
       if(tile.type==='base'){const pick=new THREE.Mesh(buildingPick,invisible);pick.scale.set(2,2,2);pick.userData.pick={kind:'base'};group.add(pick);picks.push(pick);}
-      (tile.towers||[]).forEach((tower,i)=>{
+      slots.forEach((_,i)=>{const tower=tile.towers?.[i];
         if(tower){const obj=towerObject(tile,i,tower);group.add(obj.holder);towers.push(obj);picks.push(obj.pick);}
         else if(slots[i]){const glow=new THREE.Mesh(slotDiamondGeometry,mats.slot);glow.material.depthTest=false;glow.material.depthWrite=false;glow.material.transparent=true;glow.renderOrder=50;glow.position.set(slots[i].x,22+slotLift(tile,i),slots[i].y);group.add(glow);slotHints.push(glow);const pick=new THREE.Mesh(slotPick,invisible);pick.position.set(slots[i].x,0,slots[i].y);pick.userData.pick={kind:'slot',q:tile.q,r:tile.r,index:i};group.add(pick);picks.push(pick);}
       });
@@ -546,7 +545,7 @@ function create(host0,commands){
       }
     }
     for(const g of layer.targets.children) for(const m of g.children) if(m.userData.glow) m.visible=!(show&&m.userData.glow===hovered);
-    if(show){const c=axialToWorld(target.q,target.r),screen=project({x:c.x,y:c.y+HEX+8},0);if(screen){rotateHint.style.display='block';rotateHint.style.left=screen.x+'px';rotateHint.style.top=screen.y+'px';}}
+    if(show){rotateHint.textContent=globalThis.HexCompact?.small()?'Vorschau antippen: setzen · ↻ Drehen':'R / Mausrad-Klick · Drehen';const c=axialToWorld(target.q,target.r),screen=project({x:c.x,y:c.y+HEX+8},0);if(screen){rotateHint.style.display='block';rotateHint.style.left=screen.x+'px';rotateHint.style.top=screen.y+'px';}}
     else rotateHint.style.display='none';
   }
 
@@ -863,6 +862,8 @@ function create(host0,commands){
 
   // ---- Eingabe ----
   let drag=null,press=null,hoverTowerKey=null,hoverBuildingKey=null;
+  const pinch=HexCamera.pinch((factor,anchor)=>zoom(factor,anchor));
+  dom.style.touchAction='none';
   function pick(event){setRay(event);const hit=ray.intersectObjects(pickables,false)[0];return hit?.object.userData.pick||null;}
   function updateHover(event){
     const found=pick(event),id=found?.kind==='target'?key(found.q,found.r):null;
@@ -880,11 +881,14 @@ function create(host0,commands){
     on('contextmenu',e=>e.preventDefault()),
     on('auxclick',e=>{if(e.button===1)e.preventDefault();}),
     on('pointerdown',e=>{
+      if(e.pointerType==='touch')capture(e);
+      if(pinch.down(e)){e.preventDefault();drag=null;press=null;return;}
       if(e.button===1&&commands.rotatePlacement?.()){e.preventDefault();return;}
       if(e.button===2||e.button===1){hoverBuildingKey=null;commands.hoverBuilding?.(null);e.preventDefault();drag={mode:'orbit',id:e.pointerId,x:e.clientX,y:e.clientY};capture(e);dom.style.cursor='grabbing';}
       else if(e.button===0) press={x:e.clientX,y:e.clientY};
     }),
     on('pointermove',e=>{
+      if(pinch.move(e)){e.preventDefault();drag=null;press=null;return;}
       if(drag&&drag.id===e.pointerId){
         if(drag.mode==='orbit'){
           cam.yaw-=(e.clientX-drag.x)*.006;cam.pitch=clamp(cam.pitch+(e.clientY-drag.y)*.005,PITCH_MIN,PITCH_MAX);drag.x=e.clientX;drag.y=e.clientY;
@@ -899,21 +903,25 @@ function create(host0,commands){
           if(hoverPick){commands.leavePlacement(hoverPick);hoverPick=null;if(state&&ready) render(state,targetList);}}
         return;
       }
-      if(state&&ready) updateHover(e);
+      if(state&&ready&&e.pointerType!=='touch') updateHover(e);
     }),
     on('pointerup',e=>{
+      if(pinch.up(e)){drag=null;press=null;return;}
       if(drag&&drag.id===e.pointerId){drag=null;dom.style.cursor='';return;}
       if(e.button!==0||!press) return;const moved=Math.hypot(e.clientX-press.x,e.clientY-press.y);press=null;if(moved>5||!state||!ready) return;
       const hit=pick(e);
       if(!hit) commands.clearSelection();
-      else if(hit.kind==='target') commands.placeTile(hit.q,hit.r);
-      else if(hit.kind==='slot') commands.selectSlot(hit.q,hit.r,hit.index,e.ctrlKey||e.metaKey);
+      else if(hit.kind==='target') {
+        if(e.pointerType==='touch'&&state.phase==='place'&&!state.buildingTarget&&!state.consumablePickUI&&state.hoveredPlacement!==key(hit.q,hit.r)){commands.hoverPlacement(key(hit.q,hit.r));hoverPick=key(hit.q,hit.r);render(state,targetList);}
+        else commands.placeTile(hit.q,hit.r);
+      }
+      else if(hit.kind==='slot') commands.selectSlot(hit.q,hit.r,hit.index,e.ctrlKey||e.metaKey,e.pointerType);
       else if(hit.kind==='tower') commands.selectTower(hit.q,hit.r,hit.index,e.ctrlKey||e.metaKey);
       else if(hit.kind==='base') commands.selectBase?.();
       else if(hit.kind==='building') commands.selectBuilding(hit.q,hit.r,hit.index);
     }),
-    on('pointercancel',()=>{hoverBuildingKey=null;commands.hoverBuilding?.(null);drag=null;press=null;dom.style.cursor='';}),
-    on('pointerleave',()=>{hoverBuildingKey=null;commands.hoverBuilding?.(null);if(hoverPick){commands.leavePlacement(hoverPick);hoverPick=null;if(state&&ready) render(state,targetList);}})
+    on('pointercancel',e=>{pinch.up(e);hoverBuildingKey=null;commands.hoverBuilding?.(null);drag=null;press=null;dom.style.cursor='';}),
+    on('pointerleave',e=>{if(e.pointerType==='touch')return;hoverBuildingKey=null;commands.hoverBuilding?.(null);if(hoverPick){commands.leavePlacement(hoverPick);hoverPick=null;if(state&&ready) render(state,targetList);}})
   ];
   const resize=new ResizeObserver(()=>{const w=Math.max(1,host.clientWidth),h=Math.max(1,host.clientHeight);gl.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();if(state) commands.viewChanged?.();});
   resize.observe(host);applyCamera();raf=requestAnimationFrame(loop);

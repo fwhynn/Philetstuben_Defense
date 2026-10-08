@@ -8,7 +8,17 @@ const HexCamera=(()=>{
       view={x:anchor.x+(view.x-anchor.x)*ratio,y:anchor.y+(view.y-anchor.y)*ratio,w:width,h:view.h*ratio};return {...view};
     }};
   }
-  return {create};
+  function pinch(onZoom){
+    const points=new Map();let distance=0,gesturing=false;
+    function measure(){const [a,b]=[...points.values()];return a&&b?Math.hypot(a.x-b.x,a.y-b.y):0;}
+    return {
+      down(e){if(e.pointerType!=='touch')return false;points.set(e.pointerId,{x:e.clientX,y:e.clientY});if(points.size>=2){gesturing=true;distance=measure();}return gesturing;},
+      move(e){if(!points.has(e.pointerId))return false;points.set(e.pointerId,{x:e.clientX,y:e.clientY});if(!gesturing)return false;const next=measure(),[a,b]=[...points.values()];if(next>0&&distance>0)onZoom(distance/next,{clientX:(a.x+b.x)/2,clientY:(a.y+b.y)/2});distance=next;return true;},
+      up(e){const consumed=gesturing;points.delete(e.pointerId);distance=measure();if(!points.size)gesturing=false;return consumed;},
+      reset(){points.clear();distance=0;gesturing=false;}
+    };
+  }
+  return {create,pinch};
 })();
 /* SVG input/projection adapter. A future 3D camera replaces this adapter. */
 const HexSvgCamera=(()=>{
@@ -19,6 +29,12 @@ const HexSvgCamera=(()=>{
     function point(event){const matrix=board.getScreenCTM?.();if(!matrix||!board.createSVGPoint) return null;const p=board.createSVGPoint();p.x=event.clientX;p.y=event.clientY;return p.matrixTransform(matrix.inverse());}
     function zoom(factor,anchor){model.zoom(factor,anchor);apply();}
     function stop(){drag=null;board.style.cursor='';}
+    const gesture=HexCamera.pinch((factor,event)=>{const anchor=point(event);if(anchor)zoom(factor,anchor);});let suppressClick=false;
+    board.style.touchAction='none';
+    listen('pointerdown',event=>{if(event.pointerType!=='touch')return;if(gesture.down(event)){suppressClick=true;stop();event.preventDefault();}else suppressClick=false;},true);
+    listen('pointermove',event=>{if(gesture.move(event)){suppressClick=true;event.preventDefault();event.stopImmediatePropagation?.();}},true);
+    for(const name of ['pointerup','pointercancel'])listen(name,event=>{if(gesture.up(event)){suppressClick=true;event.preventDefault();}},true);
+    listen('click',event=>{if(suppressClick){event.preventDefault();event.stopImmediatePropagation?.();}},true);
     listen('wheel',event=>{event.preventDefault();const anchor=point(event);if(anchor) zoom(Math.exp(Math.max(-200,Math.min(200,event.deltaY))*.0015),anchor);},{passive:false});
     listen('contextmenu',event=>event.preventDefault());
     listen('auxclick',event=>{if(event.button===1)event.preventDefault();});

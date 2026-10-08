@@ -654,3 +654,8 @@ body:has(#biomeIntro:not(.hidden)) .biomeTooltip{display:none!important}
 .cloudSaveNote{margin:10px 0 0;font-size:13px;color:var(--muted)}
 .cloudSaveNote[data-state="ok"]{color:#9ee0ad}.cloudSaveNote[data-state="error"]{color:#efc76e}
 @media(max-width:480px){#accountOverlay .accountBox{padding:20px 16px 16px}.accountStats{grid-template-columns:1fr 1fr}.accountActions{grid-template-columns:1fr}}
+.rewardHeading{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#1c2921;padding:8px 0}
+.rewardHeading h2{margin:8px 0}.rewardHeading button{flex-shrink:0;min-height:44px}
+.biomeIcon:hover .biomeTooltip,.biomeIcon:focus-visible .biomeTooltip,.biomeIcon.active .biomeTooltip{display:none}
+.biomeIcon.showTooltip .biomeTooltip{display:block}
+@media(max-width:600px){.rewardHeading{flex-wrap:wrap}}
