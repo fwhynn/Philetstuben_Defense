@@ -17,8 +17,13 @@ function fakeApi(serverSave = null) {
     async logout() { this.loggedIn = false; },
     async currentUser() { return this.loggedIn ? { id: 1, username: 'phil' } : null; },
     async getSave() { return this.server; },
-    async putSave(text) { const data = JSON.parse(text); this.puts.push(data); this.server = data; return { updatedAt: 'now' }; } };
+    async putSave(text) { const data = JSON.parse(text); this.puts.push(data); this.server = data; return { updatedAt: 'now' }; },
+    exchanges: [], exchangeUser: { id: 3, username: 'streamer' },
+    async exchangeCode(code) { this.exchanges.push(code); this.loggedIn = true; return this.exchangeUser; },
+    twitchLoginUrl() { return 'https://api.test/auth/twitch'; },
+    async twitchLinkUrl() { return 'https://api.test/auth/twitch?link=einmal'; } };
 }
+const twitchReturn = hash => ({ hash, pathname: '/', search: '', href: 'https://spiel.test/' + hash });
 const flush = () => new Promise(resolve => setImmediate(resolve));
 async function submit(document, mode, username = 'phil', password = 'geheimes-passwort') {
   const el = id => document.getElementById(id);
@@ -55,4 +60,48 @@ test('without an account nothing is sent and the result screen suggests signing 
   endRun(a); await flush();
   assert.equal(api.puts.length, 0);
   assert.match(elements.get('cloudSaveNote').textContent, /Account/);
+});
+
+test('returning from Twitch exchanges the one-time code, strips the hash and signs in', async () => {
+  const api = fakeApi(), location = twitchReturn('#twitch=einmalcode');
+  const { elements } = load({ accountApi: api, location }); await flush(); await flush();
+  assert.deepEqual(api.exchanges, ['einmalcode']);
+  assert.equal(location.hash, '', 'Code bleibt nicht in der Adresse');
+  assert.equal(location.replacedWith, '/');
+  assert.equal(elements.get('accountOverlay').classList.contains('hidden'), false, 'Account-Fenster zeigt das Ergebnis');
+  assert.equal(elements.get('menuAccountBtn').textContent, '👤 streamer');
+  assert.equal(elements.get('accountStatus').dataset.kind, 'success');
+  assert.equal(api.puts.length, 1, 'neuer Twitch-Account ohne Server-Stand bekommt den lokalen Fortschritt');
+});
+
+test('returning from Twitch to the same account reports the link instead of a new sign-in', async () => {
+  const api = fakeApi(); api.loggedIn = true; api.exchangeUser = { id: 1, username: 'phil' };
+  const { elements } = load({ accountApi: api, location: twitchReturn('#twitch=verknuepft') }); await flush(); await flush();
+  assert.deepEqual(api.exchanges, ['verknuepft']);
+  assert.match(elements.get('accountStatus').textContent, /verknüpft/);
+});
+
+test('a Twitch error reason is shown without contacting the server', async () => {
+  const api = fakeApi(), location = twitchReturn('#twitch_error=twitch_in_use');
+  const { elements } = load({ accountApi: api, location }); await flush();
+  assert.equal(api.exchanges.length, 0);
+  assert.equal(location.hash, '');
+  assert.equal(elements.get('accountStatus').dataset.kind, 'error');
+  assert.match(elements.get('accountStatus').textContent, /anderen Account/);
+});
+
+test('leaving for Twitch during a run needs a second click, linking fetches the link address first', async () => {
+  const api = fakeApi(), location = twitchReturn('');
+  const { elements, globalListeners } = load({ accountApi: api, location }); await flush();
+  await elements.get('accountTwitchBtn').listeners.click();
+  assert.equal(location.href, 'https://spiel.test/', 'erster Klick warnt nur');
+  assert.match(elements.get('accountStatus').textContent, /laufende Spiel/);
+  await elements.get('accountTwitchBtn').listeners.click();
+  assert.equal(location.href, 'https://api.test/auth/twitch');
+  assert.equal(elements.get('accountTwitchBtn').disabled, true, 'während der Weiterleitung gesperrt');
+  globalListeners.pageshow({ persisted: true });   // per Zurück-Taste aus dem Cache
+  assert.equal(elements.get('accountTwitchBtn').disabled, false);
+  api.loggedIn = true; elements.get('menuAccountBtn').listeners.click(); await flush();
+  await elements.get('accountTwitchLinkBtn').listeners.click(); await elements.get('accountTwitchLinkBtn').listeners.click();
+  assert.equal(location.href, 'https://api.test/auth/twitch?link=einmal');
 });

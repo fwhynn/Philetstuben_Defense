@@ -127,6 +127,21 @@ saves    (user_id PRIMARY KEY → users, data JSON, updated_at)
 
 Aktuell bedient der Spieler den Abgleich von Hand im Account-Fenster: **„Auf Server speichern“** schickt `PUT /saves`, **„Vom Server laden“** holt `GET /saves` und ersetzt das lokale Profil (nur ohne laufenden Run). Ein automatischer Abgleich ist für später geplant; dafür ist `updatedAt` in den Antworten bereits vorgesehen.
 
+## Login mit Twitch
+
+Die Server-Seite ist im API-Repo beschrieben (README, Abschnitt „Login with Twitch“). Der Client nutzt:
+
+| Methode | Pfad | Im Client |
+|---|---|---|
+| GET | `/auth/twitch` | Button „Mit Twitch anmelden“ setzt `location.href` dorthin (kein `fetch`) |
+| POST | `/auth/exchange` `{code}` | beim Laden, wenn `#twitch=<code>` in der Adresse steht; liefert `{token, user}` wie `/login` |
+| POST | `/auth/twitch/link` | Button „Twitch verknüpfen“ (eingeloggt, Bearer); danach `location.href = url` |
+
+- Beim Laden entfernt der Client den Hash sofort per `history.replaceState`, bevor er den Code einlöst.
+- `#twitch_error=<grund>` zeigt eine deutsche Meldung im Account-Fenster. Gründe: `denied`, `invalid_state`, `twitch_unavailable`, `server_error`, `not_configured`, `link_expired`, `twitch_in_use`, `account_has_twitch`.
+- Liefert der Austausch denselben Account wie vorher, war es eine Verknüpfung. Sonst folgt derselbe Abgleich wie nach `/login`.
+- Ein laufender Run lebt nur im Speicher. Vor dem Wechsel zu Twitch warnt der Client deshalb und leitet erst beim zweiten Klick weiter.
+
 ## Schnelltest mit curl
 
 ```bash

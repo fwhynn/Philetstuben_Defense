@@ -88,6 +88,41 @@
 		return payload.user;
 	}
 
+	// Twitch-Login ist eine Browser-Navigation, kein fetch: der Server leitet zu Twitch und danach mit
+	// #twitch=<einmal-code> oder #twitch_error=<grund> zurück ins Spiel.
+	function twitchLoginUrl() {
+		return `${baseUrl}/auth/twitch`;
+	}
+
+	async function exchangeCode(code) {
+		const response = await fetch(`${baseUrl}/auth/exchange`, {
+			method: 'POST',
+			headers: {
+				Accept: 'application/json',
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ code })
+		});
+
+		const payload = await parseJson(response);
+		setToken(payload.token);
+		return payload.user;
+	}
+
+	// Liefert die Adresse, über die der eingeloggte Account mit Twitch verknüpft wird (kurz gültig).
+	async function twitchLinkUrl() {
+		const response = await fetch(`${baseUrl}/auth/twitch/link`, {
+			method: 'POST',
+			headers: {
+				Accept: 'application/json',
+				...authHeaders()
+			}
+		});
+
+		const payload = await parseJson(response);
+		return payload.url;
+	}
+
 	async function logout() {
 		const token = getToken();
 		clearToken();
@@ -168,6 +203,9 @@
 		register,
 		login,
 		logout,
+		twitchLoginUrl,
+		exchangeCode,
+		twitchLinkUrl,
 		currentUser,
 		getSave,
 		putSave,

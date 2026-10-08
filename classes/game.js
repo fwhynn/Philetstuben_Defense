@@ -1018,7 +1018,26 @@ R dreht die Karte, dann Feld anklicken.`;}
   const CLOUD_DIRTY='hex-cloud-dirty',CLOUD_LAST='hex-cloud-last-sync',PROFILE_BACKUP='hex-bastion-profile-backup';
   const cloudStore={get(key){try{return localStorage.getItem(key);}catch{return null;}},set(key,value){try{if(value==null)localStorage.removeItem(key);else localStorage.setItem(key,value);}catch{/* Speicher nicht verfügbar */}}};
   const accountApi=()=>globalThis.HexApi;
-  let accountUser=null,accountMode='login',accountBusy=false,pendingServerProfile=null,cloudSaveTimer=null;
+  let accountUser=null,accountMode='login',accountBusy=false,pendingServerProfile=null,cloudSaveTimer=null,twitchLeaveArmed=false;
+  const TWITCH_ERRORS={
+    denied:'Die Anmeldung bei Twitch wurde abgebrochen.',
+    invalid_state:'Der Anmelde-Link ist abgelaufen oder wurde in einem anderen Browser geöffnet. Bitte erneut versuchen.',
+    twitch_unavailable:'Twitch ist gerade nicht erreichbar. Bitte später erneut versuchen.',
+    server_error:'Bei der Anmeldung mit Twitch ist ein Serverfehler aufgetreten. Bitte später erneut versuchen.',
+    not_configured:'Die Anmeldung mit Twitch ist auf dem Server noch nicht eingerichtet.',
+    link_expired:'Der Verknüpfungs-Link ist abgelaufen. Bitte erneut auf „Twitch verknüpfen“ klicken.',
+    twitch_in_use:'Dieser Twitch-Account gehört bereits zu einem anderen Account. Melde dich dort mit Twitch an.',
+    account_has_twitch:'Dein Account ist bereits mit einem anderen Twitch-Account verknüpft.'
+  };
+  // Rücksprung vom Twitch-Login: #twitch=<einmal-code> oder #twitch_error=<grund>. Den Hash sofort entfernen,
+  // damit der Code nicht im Verlauf landet und ein Neuladen ihn nicht erneut einlöst.
+  const twitchReturn=(()=>{
+    if(typeof location==='undefined'||!location.hash)return null;
+    const params=new URLSearchParams(location.hash.slice(1)),code=params.get('twitch'),error=params.get('twitch_error');
+    if(!code&&!error)return null;
+    try{history.replaceState(null,'',location.pathname+location.search);}catch{/* ohne History-API bleibt der Hash stehen */}
+    return {code,error};
+  })();
   function setAccountStatus(text,kind='info'){accountStatus.textContent=text;accountStatus.dataset.kind=text?kind:'';}
   function formatSyncTime(iso){
     const time=iso?Date.parse(iso):NaN;if(!Number.isFinite(time))return '–';
@@ -1049,7 +1068,7 @@ R dreht die Karte, dann Feld anklicken.`;}
     document.getElementById('accountHint').textContent=register?'Benutzername 3–20 Zeichen, Passwort mindestens 8 Zeichen. Dein aktueller Fortschritt wird übernommen.':'Nach der Anmeldung wird dein gespeicherter Spielstand automatisch geladen.';
     setAccountStatus('');
   }
-  function setAccountBusy(busy){accountBusy=busy;for(const id of ['accountSubmitBtn','accountSaveServerBtn','accountLoadServerBtn','accountLogoutBtn'])document.getElementById(id).disabled=busy;accountOverlay.classList.toggle('accountBusy',busy);}
+  function setAccountBusy(busy){accountBusy=busy;for(const id of ['accountSubmitBtn','accountSaveServerBtn','accountLoadServerBtn','accountLogoutBtn','accountTwitchBtn','accountTwitchLinkBtn'])document.getElementById(id).disabled=busy;accountOverlay.classList.toggle('accountBusy',busy);}
   async function refreshAccountView(){
     if(accountApi()?.isLoggedIn()){try{accountUser=await accountApi().currentUser();}catch{/* offline: letzten bekannten Stand behalten */}}else accountUser=null;
     renderAccount();
@@ -1081,7 +1100,14 @@ R dreht die Karte, dann Feld anklicken.`;}
     note.dataset.state='saving';note.textContent='☁ Spielstand wird gesichert …';
     const ok=await pushToServer();note.dataset.state=ok?'ok':'error';note.textContent=ok?'☁ Spielstand in deinem Account gesichert.':'☁ Gerade offline – wird beim nächsten Mal gesichert.';
   }
-  function openAccount(){setAccountStatus('');renderAccount();accountOverlay.classList.remove('hidden');refreshAccountView().then(()=>{if(!accountUser)document.getElementById('accountUsername').focus?.();});}
+  // Nach dem Login (Formular oder Twitch): Server-Stand holen, ohne Server-Stand den lokalen Fortschritt hochladen.
+  async function syncAfterLogin(){
+    const result=await pullFromServer();
+    if(result==='empty'){await pushToServer();return 'Willkommen, '+accountUser.username+'! Dein aktueller Fortschritt wurde in deinem Account gesichert.';}
+    if(result==='deferred')return 'Angemeldet. Dein Spielstand wird nach dem laufenden Spiel übernommen.';
+    return 'Willkommen zurück, '+accountUser.username+'! Dein Spielstand wurde geladen.';
+  }
+  function openAccount(){twitchLeaveArmed=false;setAccountStatus('');renderAccount();accountOverlay.classList.remove('hidden');refreshAccountView().then(()=>{if(!accountUser)document.getElementById('accountUsername').focus?.();});}
   function closeAccount(){accountOverlay.classList.add('hidden');document.getElementById('accountPassword').value='';openMainMenu();document.getElementById('menuAccountBtn').focus?.();}
   document.getElementById('menuAccountBtn').addEventListener('click',openAccount);
   document.getElementById('closeAccountBtn').addEventListener('click',closeAccount);
@@ -1097,13 +1123,7 @@ R dreht die Karte, dann Feld anklicken.`;}
       accountUser=register?await accountApi().register(username,password):await accountApi().login(username,password);
       document.getElementById('accountPassword').value='';
       if(register){const ok=await pushToServer();setAccountStatus(ok?'Account erstellt. Dein Fortschritt ist jetzt gesichert.':'Account erstellt. Der Spielstand wird beim nächsten Mal gesichert.','success');}
-      else{
-        setAccountStatus('Angemeldet. Spielstand wird geladen …');
-        const result=await pullFromServer();
-        if(result==='empty'){await pushToServer();setAccountStatus('Willkommen, '+accountUser.username+'! Dein aktueller Fortschritt wurde in deinem Account gesichert.','success');}
-        else if(result==='deferred')setAccountStatus('Angemeldet. Dein Spielstand wird nach dem laufenden Spiel übernommen.','success');
-        else setAccountStatus('Willkommen zurück, '+accountUser.username+'! Dein Spielstand wurde geladen.','success');
-      }
+      else{setAccountStatus('Angemeldet. Spielstand wird geladen …');setAccountStatus(await syncAfterLogin(),'success');}
     }catch(error){setAccountStatus((register?'Registrierung fehlgeschlagen: ':'Anmeldung fehlgeschlagen: ')+error.message,'error');}
     finally{setAccountBusy(false);renderAccount();}
   });
@@ -1118,10 +1138,35 @@ R dreht die Karte, dann Feld anklicken.`;}
     catch(error){setAccountStatus('Laden fehlgeschlagen: '+error.message,'error');}
     finally{setAccountBusy(false);renderAccount();}
   });
+  // Twitch-Login und -Verknüpfung verlassen die Seite. Ein laufendes Spiel lebt nur im Speicher, deshalb erst nach zweitem Klick.
+  async function leaveForTwitch(link){
+    if(accountBusy||!accountApi())return;
+    if(hasActiveRun&&state?.hp>0&&!twitchLeaveArmed){twitchLeaveArmed=true;setAccountStatus('Für Twitch wird die Seite kurz verlassen – das laufende Spiel geht dabei verloren. Zum Fortfahren erneut klicken.','error');return;}
+    twitchLeaveArmed=false;setAccountBusy(true);setAccountStatus('Weiterleitung zu Twitch …');
+    try{location.href=link?await accountApi().twitchLinkUrl():accountApi().twitchLoginUrl();}
+    catch(error){setAccountBusy(false);setAccountStatus('Twitch-Verknüpfung fehlgeschlagen: '+error.message,'error');}
+  }
+  document.getElementById('accountTwitchBtn').addEventListener('click',()=>leaveForTwitch(false));
+  document.getElementById('accountTwitchLinkBtn').addEventListener('click',()=>leaveForTwitch(true));
+  // Per Zurück-Taste von Twitch: Seite kommt eventuell aus dem Cache, noch im Weiterleitungs-Zustand.
+  globalThis.addEventListener('pageshow',event=>{if(event.persisted&&accountBusy){setAccountBusy(false);setAccountStatus('');}});
+  // Rücksprung von Twitch: Code gegen Token tauschen. Gleicher Account wie vorher heißt, Twitch wurde verknüpft.
+  async function finishTwitchReturn({code,error}){
+    if(!code||!accountApi()){setAccountStatus(TWITCH_ERRORS[error]||'Die Anmeldung mit Twitch ist fehlgeschlagen.','error');return false;}
+    const previous=accountUser;setAccountBusy(true);setAccountStatus('Anmeldung mit Twitch …');
+    try{
+      accountUser=await accountApi().exchangeCode(code);
+      if(previous&&previous.id===accountUser.id){setAccountStatus('Twitch ist jetzt mit deinem Account verknüpft. Du kannst dich ab sofort auch mit Twitch anmelden.','success');return false;}
+      setAccountStatus(await syncAfterLogin(),'success');return true;
+    }catch(err){accountUser=previous;setAccountStatus('Anmeldung mit Twitch fehlgeschlagen: '+err.message,'error');return false;}
+    finally{setAccountBusy(false);renderAccount();}
+  }
   // Beim Start: angemeldet bleiben und abgleichen. Nicht übertragene Änderungen zuerst hochladen, sonst den Server-Stand holen.
   (async()=>{
-    if(!accountApi()?.isLoggedIn())return;
-    await refreshAccountView();if(!accountUser)return;
+    if(twitchReturn){renderAccount();accountOverlay.classList.remove('hidden');}
+    if(accountApi()?.isLoggedIn())await refreshAccountView();
+    if(twitchReturn&&await finishTwitchReturn(twitchReturn))return;   // neuer Login: Abgleich ist schon erledigt
+    if(!accountUser)return;
     try{if(cloudStore.get(CLOUD_DIRTY)==='1')await pushToServer();else await pullFromServer();}catch{/* offline: später erneut */}
     renderAccount();
   })();

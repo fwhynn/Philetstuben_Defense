@@ -644,6 +644,15 @@ body:has(#biomeIntro:not(.hidden)) .biomeTooltip{display:none!important}
 .accountActions button{min-height:46px;border-radius:12px;font-size:14px;width:100%}
 .accountLogout{display:block;width:100%;margin-top:10px!important;min-height:40px;border-radius:10px;background:transparent;border:1px solid #6f383466;color:#efb2a8;font-size:14px;cursor:pointer}
 .accountLogout:hover{background:#6f383433}
+.accountDivider{display:flex;align-items:center;gap:10px;margin:14px 0 12px;font-size:12px;color:var(--muted)}
+.accountDivider::before,.accountDivider::after{content:"";flex:1;height:1px;background:#34493b}
+.accountTwitch,.accountTwitchLink{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;cursor:pointer;font-weight:600}
+.accountTwitch svg,.accountTwitchLink svg{width:18px;height:18px;fill:currentColor;flex:0 0 auto}
+.accountTwitch{min-height:46px;border-radius:12px;background:#9146ff;border:1px solid #a970ff;color:#fff;font-size:15px}
+.accountTwitch:hover{background:#772ce8}
+.accountTwitchLink{margin-top:10px!important;min-height:40px;border-radius:10px;background:transparent;border:1px solid #9146ff88;color:#cdb4ff;font-size:14px}
+.accountTwitchLink:hover{background:#9146ff26}
+.accountTwitch:disabled,.accountTwitchLink:disabled{opacity:.6;cursor:progress}
 .accountStatus{min-height:0;margin:14px 0 0;font-size:13px;line-height:1.45}
 .accountStatus:empty{display:none}
 .accountStatus[data-kind]{padding:10px 12px;border-radius:10px;border:1px solid #4d684f;background:#0f1a14}
