@@ -1,5 +1,12 @@
 [
   {
+    "version": "next",
+    "title": "Wartung",
+    "changes": [
+      "Fehlerbehebungen in der Serververwaltung. Am Spiel selbst ändert sich nichts."
+    ]
+  },
+  {
     "version": "0.9.8",
     "title": "Anonyme Aufrufzählung",
     "changes": [
