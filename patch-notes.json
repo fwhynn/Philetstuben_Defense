@@ -1,10 +1,11 @@
 [
   {
-    "version": "next",
+    "version": "0.9.9",
     "title": "Wartung",
     "changes": [
       "Fehlerbehebungen in der Serververwaltung. Am Spiel selbst ändert sich nichts."
-    ]
+    ],
+    "date": "2026-10-09"
   },
   {
     "version": "0.9.8",
