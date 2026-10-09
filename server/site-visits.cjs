@@ -126,17 +126,22 @@ function createVisits(file, { now = () => Date.now(), write = atomicWrite, timeZ
 }
 
 // Admin check for the dashboard: the account API decides who is an admin, the Duo server only asks.
-function createAdminCheck(apiBaseUrl, { fetchImpl = globalThis.fetch, now = () => Date.now(), ttl = 60000 } = {}) {
+function createAdminCheck(apiBaseUrl, { fetchImpl = globalThis.fetch, now = () => Date.now(), ttl = 60000, log = console.warn } = {}) {
 	const base = String(apiBaseUrl).replace(/\/+$/, ''), cache = new Map();
+	// Erklärt im Journal, warum die Statistik abgelehnt wurde (nie mit Token), höchstens einmal pro Minute je Grund.
+	const reported = new Map();
+	const report = (reason, time) => { if (time - (reported.get(reason) ?? -Infinity) < 60000) return; reported.set(reason, time); log(`Besucherstatistik abgelehnt: ${base}/me ${reason}`); };
 	return async token => {
 		if (typeof token !== 'string' || !token || token.length > 4096) return false;
 		const key = crypto.createHash('sha256').update(token).digest('hex'), cached = cache.get(key), time = now();
 		if (cached && time - cached.at < ttl) return cached.admin;
-		const response = await fetchImpl(base + '/me', { headers: { Accept: 'application/json', Authorization: 'Bearer ' + token }, signal: AbortSignal.timeout(5000) });
+		let response;
+		try { response = await fetchImpl(base + '/me', { headers: { Accept: 'application/json', Authorization: 'Bearer ' + token }, signal: AbortSignal.timeout(5000) }); }
+		catch (error) { report('nicht erreichbar (' + (error.cause?.code || error.name) + ')', time); throw error; }
 		let admin;
-		if (response.status === 401 || response.status === 403) admin = false;
-		else if (!response.ok) throw Error('account-api-' + response.status);
-		else { const payload = await response.json().catch(() => null), flag = payload?.user?.isAdmin; admin = flag === true || flag === 1 || flag === '1'; }
+		if (response.status === 401 || response.status === 403) { admin = false; report('antwortete ' + response.status, time); }
+		else if (!response.ok) { report('antwortete ' + response.status, time); throw Error('account-api-' + response.status); }
+		else { const payload = await response.json().catch(() => null), flag = payload?.user?.isAdmin; admin = flag === true || flag === 1 || flag === '1'; if (!admin) report('meldet isAdmin=' + JSON.stringify(flag ?? null), time); }
 		if (cache.size > 200) cache.clear();
 		cache.set(key, { admin, at: time });
 		return admin;

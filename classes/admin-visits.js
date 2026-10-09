@@ -74,7 +74,9 @@
 		const slots = Array.from({ length: 24 }, (_, hour) => ({ ...empty(), axis: String(hour).padStart(2, '0'), title: `${String(hour).padStart(2, '0')}:00–${String((hour + 1) % 24).padStart(2, '0')}:00 Uhr` }));
 		for (const entry of data.hours) {
 			if (entry.start < since) continue;
-			const slot = slots[Number(format.hourOnly.format(entry.start)) % 24];
+			// format() liefert auf Deutsch „17 Uhr“; nur die Stundenzahl verwenden.
+			const hour = Number(format.hourOnly.formatToParts(entry.start).find(part => part.type === 'hour').value) % 24;
+			const slot = slots[hour];
 			slot.views += entry.views;
 			slot.bots += entry.bots;
 		}
@@ -140,7 +142,7 @@
 			label.textContent = entry.axis;
 		});
 
-		const highlight = element('rect', { class: 'chartHighlight', y: margin.top, height: plotHeight, width: slot, x: -slot, rx: 4 }, svg);
+		const highlight = element('rect', { class: 'chartHighlight hidden', y: margin.top, height: plotHeight, width: slot, x: margin.left, rx: 4 }, svg);
 		const bars = element('g', {}, svg);
 		series.forEach((entry, index) => {
 			const x = margin.left + slot * index + (slot - barWidth) / 2;
@@ -173,6 +175,7 @@
 			const hit = element('rect', { x: margin.left + slot * index, y: margin.top, width: slot, height: plotHeight, class: 'chartHit' }, hits);
 			hit.addEventListener('pointerenter', () => {
 				highlight.setAttribute('x', margin.left + slot * index);
+				highlight.classList.remove('hidden');
 				if (marker) {
 					marker.setAttribute('cx', margin.left + slot * index + slot / 2);
 					marker.setAttribute('cy', y(entry.visitors));
@@ -182,7 +185,7 @@
 			});
 		});
 		svg.addEventListener('pointerleave', () => {
-			highlight.setAttribute('x', -slot);
+			highlight.classList.add('hidden');
 			marker?.classList.add('hidden');
 			tooltip.classList.add('hidden');
 		});

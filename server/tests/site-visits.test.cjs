@@ -60,7 +60,7 @@ test('bot detection keeps ordinary browsers', () => {
 test('admin check asks the account API once per token and caches the answer', async () => {
 	const calls = []; let status = 200, user = { isAdmin: true };
 	const fetchImpl = async (url, options) => { calls.push([url, options.headers.Authorization]); return { status, ok: status < 300, json: async () => ({ user }) }; };
-	let time = 0; const check = createAdminCheck('https://api.example.test/', { fetchImpl, now: () => time });
+	let time = 0; const logs = []; const check = createAdminCheck('https://api.example.test/', { fetchImpl, now: () => time, log: line => logs.push(line) });
 	assert.equal(await check('admin-token'), true); assert.equal(await check('admin-token'), true);
 	assert.deepEqual(calls, [['https://api.example.test/me', 'Bearer admin-token']]);
 	user = { isAdmin: false }; assert.equal(await check('player-token'), false);
@@ -68,6 +68,8 @@ test('admin check asks the account API once per token and caches the answer', as
 	status = 500; await assert.rejects(check('other-token'));
 	time = 61000; status = 200; user = { isAdmin: false }; assert.equal(await check('admin-token'), false);
 	assert.equal(await check(''), false);
+	assert.deepEqual(logs, ['Besucherstatistik abgelehnt: https://api.example.test/me meldet isAdmin=false', 'Besucherstatistik abgelehnt: https://api.example.test/me antwortete 401', 'Besucherstatistik abgelehnt: https://api.example.test/me antwortete 500', 'Besucherstatistik abgelehnt: https://api.example.test/me meldet isAdmin=false']);
+	assert.ok(logs.every(line => !line.includes('token')));
 });
 
 test('HTTP endpoints count same-origin beacons and only show statistics to admins', async t => {
