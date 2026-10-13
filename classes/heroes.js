@@ -1,8 +1,8 @@
 /* Run-specific heroes and base upgrades. No DOM or persistence. */
 const HexHeroes=(()=>{
   const definitions={
-    standard:{name:'Standardfestung',hp:20,gold:70,income:0,costFactor:1,maxLevel:2,weaponFactor:1,desc:'20 HP · 70 Gold. Ausgewogener Start; zwei Stufen je Base-Ausbau.'},
-    builder:{name:'Festungsbauer',hp:20,gold:55,income:0,costFactor:.75,maxLevel:3,weaponFactor:1,desc:'20 HP · 55 Gold. Base-Upgrades 25 % günstiger und eine zusätzliche dritte Stufe.'},
+    standard:{name:'Standardfestung',hp:20,gold:70,income:0,costFactor:1,maxLevel:2,weaponFactor:1,desc:'20 HP · 70 Gold. Ausgewogener Start; zwei Stufen je Base-Ausbau; Waffenstufen mit 1/2 Turmplätzen.'},
+    builder:{name:'Festungsbauer',hp:20,gold:55,income:0,costFactor:.75,maxLevel:3,weaponFactor:1,desc:'20 HP · 55 Gold. Base-Upgrades 25 % günstiger; Waffenstufen mit 2/3/4 Turmplätzen.'},
     merchant:{name:'Händlerstadt',hp:15,gold:90,income:2,costFactor:1,maxLevel:2,weaponFactor:.75,desc:'15 HP · 90 Gold · +2 Gold je überlebter Wave. Base-Waffe verursacht 25 % weniger Schaden.'}
   };
   const upgrades={walls:[{cost:35,hp:5},{cost:60,hp:5},{cost:90,hp:10}],weapon:[{cost:45,damage:12,range:150,cooldown:1},{cost:80,damage:24,range:165,cooldown:.9},{cost:120,damage:38,range:180,cooldown:.8}]};
@@ -15,7 +15,7 @@ const HexHeroes=(()=>{
   function offer(state,kind){
     const level=state.baseUpgrades?.[kind],h=hero(state.heroId);
     if(!Number.isInteger(level)||level>=h.maxLevel||!upgrades[kind]?.[level])return null;
-    return {...upgrades[kind][level],level:level+1,cost:Math.ceil(upgrades[kind][level].cost*h.costFactor)};
+    return {...upgrades[kind][level],level:level+1,slots:kind==='weapon'?level+1+(state.heroId==='builder'?1:0):0,cost:Math.ceil(upgrades[kind][level].cost*h.costFactor)};
   }
   function buy(state,kind){
     const next=offer(state,kind);
@@ -23,6 +23,7 @@ const HexHeroes=(()=>{
     state.gold-=next.cost;state.baseUpgrades[kind]++;
     // Strengthening restores only the HP gained by the upgrade, not all damage.
     if(kind==='walls'){state.maxHp+=next.hp;state.hp=Math.min(state.maxHp,state.hp+next.hp);}
+    if(kind==='weapon'){const base=state.map?.get('0,0');if(base)base.slots=next.slots;}
     return true;
   }
   function blockReason(state,kind){

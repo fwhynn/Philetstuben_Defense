@@ -53,6 +53,6 @@ test('all eight supported lobbies advance independently under concurrent polling
  for(const pair of pairs)for(const seat of pair){assert.ok(rooms.receive(seat.token,command(rooms,seat,'place',opening(rooms,seat))).ok);assert.ok(rooms.receive(seat.token,command(rooms,seat,'ready',{value:true})).ok);}
  const url=await start(t,rooms),durations=[];for(let i=0;i<40;i++){const start=performance.now();rooms.tick();durations.push(performance.now()-start);}
  const snapshots=await Promise.all(pairs.flat().map(seat=>fetch(url+'/state',{headers:{Authorization:'Bearer '+seat.token}}).then(r=>r.json())));
- for(let i=0;i<8;i++){const a=snapshots[i*2],b=snapshots[i*2+1];assert.equal(a.epoch,b.epoch);assert.equal(a.wave,1);assert.equal(a.hp,b.hp);assert.ok(a.boards.every(board=>board.elapsedMs===2000));if(i)assert.notEqual(a.epoch,snapshots[(i-1)*2].epoch);}
+ for(let i=0;i<8;i++){const a=snapshots[i*2],b=snapshots[i*2+1];assert.equal(a.epoch,b.epoch);assert.equal(a.wave,1);assert.equal(a.hp,b.hp);assert.ok(a.boards.every(board=>board.elapsedMs===4000));if(i)assert.notEqual(a.epoch,snapshots[(i-1)*2].epoch);}
  durations.sort((a,b)=>a-b);t.diagnostic('8 kleine Maps-Paare, 40 gemeinsame Ticks: p95 '+durations[Math.floor(durations.length*.95)].toFixed(2)+' ms; 16 HTTP-Zustandsabfragen erfolgreich. Kein Langzeit-Lastnachweis.');
 });

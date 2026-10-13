@@ -12,8 +12,17 @@ test('eightfold speed is saved, clamped and F cycles through every speed and wra
 });
 test('elapsed time survives delayed callbacks and is processed in bounded steps; manual pause stops it',()=>{
   const {a,elements}=load();a.state.waveRunning=true;a.state.pendingSpawns=1;
-  a.advanceClock(5000);assert.ok(Math.abs(a.state.elapsedMs-5000)<51);
-  a.advanceClock(35000);const partial=a.state.elapsedMs;assert.ok(partial<35000);
-  for(let i=0;i<4;i++)a.advanceClock(35000);assert.ok(Math.abs(a.state.elapsedMs-35000)<51);
+  a.advanceClock(5000);assert.ok(Math.abs(a.state.elapsedMs-10000)<51);
+  a.advanceClock(35000);const partial=a.state.elapsedMs;assert.ok(partial<70000);
+  for(let i=0;i<6;i++)a.advanceClock(35000);assert.ok(Math.abs(a.state.elapsedMs-70000)<51);
   elements.get('pauseBtn').listeners.click();const paused=a.state.elapsedMs;a.advanceClock(40000);assert.equal(a.state.elapsedMs,paused);
+});
+
+test('displayed 1× through 8× scale from two simulation seconds per real second',()=>{
+  for(let speed=1;speed<=8;speed++){
+    const {a,elements}=load();const slider=elements.get('doubleSpeed');slider.value=String(speed);slider.listeners.input();
+    a.state.waveRunning=true;a.state.pendingSpawns=1;a.advanceClock(500);
+    assert.ok(Math.abs(a.state.elapsedMs-1000*speed)<51,`speed ${speed}: ${a.state.elapsedMs}`);
+    assert.equal(elements.get('speedValue').textContent,speed+'×');
+  }
 });

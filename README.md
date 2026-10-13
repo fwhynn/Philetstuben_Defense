@@ -54,6 +54,16 @@ Die Sprache lässt sich im Hauptmenü und in den Einstellungen zwischen Deutsch 
 
 ## Bedienung
 
+### Lokale Entwicklerszenarien
+
+Das Grundtempo in Solo und Duo ist verdoppelt: Das angezeigte 1× entspricht dem früheren 2×, 2× dem früheren 4× und 8× dem früheren 16×. Die Spielregeln und Simulationsschritte bleiben gleich.
+
+Auf `localhost` und `127.0.0.1` gibt es im Hauptmenü und in den Einstellungen ein **Entwicklermenü · lokale Tests**. Wähle „Tutorial von Anfang“, „Turm verbessern · 200 Gold“ oder „Turm verbessern · kein Gold“ und klicke **Szenario starten**. Die Turmszenarien öffnen einen ausgewählten Bogenschützen in der echten Spieloberfläche.
+
+**Aktuelles Szenario zurücksetzen** lädt dieselbe Ausgangssituation erneut. Start und Zurücksetzen löschen ausschließlich den separaten Erstspieler-Testspielstand; normales Profil und Anmeldung bleiben erhalten. Im Testmodus werden keine Konto-Spielstände oder Solo-Anwesenheit an die API übertragen. **Zurück zu meinem Spielstand** beendet den Testmodus. Die Szenarien sind im Netzwerk-Duo und auf öffentlichen Hosts nicht verfügbar.
+
+Ein direkter lokaler Einstieg ist beispielsweise `http://localhost:8080/?first-player-test=1&dev-scenario=upgrade`. Ein Szenario lädt mit festem Karten-Seed und frischem Testprofil; erneutes Laden beginnt wieder am Szenarioanfang. Die Grafik wird wie bei einem normalen neuen Run auf die Normal-Edition gesetzt.
+
 | Aktion                    | Bedienung                                                                                                                 |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | Karte wählen, Hex legen   | Karte anklicken, dann freies Feld anklicken                                                                               |

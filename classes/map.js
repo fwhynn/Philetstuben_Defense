@@ -51,6 +51,7 @@ const HexMap=(()=>{
   };
   // Unrotierte Turmplatz-Offsets einer Hexart. Unbekannte Arten fallen auf die alte Standardlage zurück.
   function slotOffsets(type,count){
+    if(type==='base')return [[-34,-30],[34,30],[34,-30],[-34,30]].slice(0,count).map(([x,y])=>({x,y}));
     const custom=typeof HexData!=='undefined'&&HexData.CARD_LIBRARY[type]?.slotLayout;
     const layout=custom||SLOT_LAYOUTS[(typeof HexData!=='undefined'&&HexData.CARD_LIBRARY[type]?.model)||type];if(layout) return layout.slice(0,count).map(([x,y])=>({x,y}));
     if(count===1) return [{x:0,y:-21}];

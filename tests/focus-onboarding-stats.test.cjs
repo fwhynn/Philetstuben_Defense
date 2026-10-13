@@ -4,7 +4,7 @@ function combat(){const c=vm.createContext({});for(const name of ['data','waves'
 const enemy=(id,hp=100)=>({id,type:'normal',x:30,y:0,hp,alive:true,index:0,t:0,speed:0,points:[{x:30,y:0},{x:300,y:0}]});
 test('every newly built tower gets its strongest damage-pool priority; manual choices survive upgrades and checkpoints',()=>{
  const c=core(),run=c.runtime.create({seed:'focus',runId:'focus-test',loadout:Object.keys(c.data.TOWERS).slice(0,5)}),s=run.state;s.phase='build';s.gold=10000;s.towerLoadout=Object.keys(c.data.TOWERS);
- const expected={archer:'mostHealth',catapult:'mostArmor',chain:'mostMagic',freeze:'closestBase',mine:'mostArmor',ballista:'mostHealth',flame:'mostHealth',element:'mostMagic',necromancer:'mostMagic'};
+ const expected={archer:'closestBase',catapult:'mostArmor',chain:'mostMagic',freeze:'closestBase',mine:'mostArmor',ballista:'mostHealth',flame:'mostHealth',element:'mostMagic',necromancer:'mostMagic'};
  let q=1;for(const [type,priority] of Object.entries(expected)){const slot={q:q++,r:0,index:0};s.map.set(slot.q+',0',{q:slot.q,r:0,type:'straight',slots:1,towers:[null]});assert.ok(c.towers.buy(s,type,[slot]).ok);const tower=s.map.get(slot.q+',0').towers[0];assert.equal(tower.targetPriority[0],priority,type);tower.targetPriority=['healer','boss','closestBase'];const upgrade=c.data.availableUpgrades(tower)[0][0];assert.ok(c.towers.upgrade(s,slot,upgrade));assert.equal(tower.targetPriority[0],'healer');}
  const restored=c.snapshot.restore(c.snapshot.capture(s,run.random)).state;assert.equal(restored.map.get('1,0').towers[0].targetPriority[0],'healer');
 });

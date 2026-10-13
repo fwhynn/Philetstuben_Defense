@@ -274,7 +274,7 @@ button.card{background:#efe3c2;color:#2b281f}button.card:disabled{opacity:.7}
 .gameHeader{position:fixed;top:max(12px,env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));display:flex;flex-wrap:wrap;align-items:flex-start;gap:12px;z-index:7;pointer-events:none}
 .gameHeader .dockTL{position:static;flex:1 1 260px;min-width:0;pointer-events:auto}.gameHeader .dockTL>div{display:flex;flex-wrap:wrap;gap:6px}
 .gameHeader .hud{position:relative;inset:auto;flex:0 1 auto;max-width:100%;gap:6px;pointer-events:auto}
-.gameHeader .hudStat,.gameHeader summary{min-height:44px}.gameHeader:has(.statDetails[open]){z-index:35}
+.gameHeader .hudStat,.gameHeader summary{min-height:44px;box-sizing:border-box}.gameHeader .hudStat{display:flex;align-items:center;justify-content:center;gap:4px;align-self:flex-start}.gameHeader:has(.statDetails[open]){z-index:35}
 .drawer,.towerPanel{z-index:35}.drawer button,.towerPanel button{min-height:44px}
 .tutorialSpotlight{position:fixed;z-index:20;border:3px solid #ffe198;border-radius:12px;background:transparent;box-shadow:0 0 0 100vmax #0c141166;pointer-events:none}
 .tutorialSpotlight.hidden{display:none}.message.tutorialActive{z-index:30;max-width:min(520px,calc(100vw - 120px));font-size:14px;line-height:1.45}
@@ -664,3 +664,18 @@ body:has(#biomeIntro:not(.hidden)) .biomeTooltip{display:none!important}
 .compactToolbar .newTower{outline:3px solid #e5c366;outline-offset:2px}
 
 .testProfileBadge{position:fixed;top:4px;left:50%;transform:translateX(-50%);z-index:70;background:#402f18;color:#ffe3a0;border:1px solid #c49b53;border-radius:6px;padding:5px 10px;font-size:12px;pointer-events:none}.patchNotesBox{max-height:85dvh;overflow:auto;text-align:left}.patchNotesBox>.panelHead{position:sticky;top:0;background:var(--ui-surface);z-index:1;gap:12px}.patchNotesBox article{border-bottom:1px solid var(--ui-border);padding:14px 0}.patchNotesBox li{margin:8px 0;line-height:1.5}
+.developerTools { text-align: left; padding: 10px; border: 1px solid var(--ui-border); border-radius: 8px; }
+.developerTools summary { cursor: pointer; font-weight: 600; }
+.developerTools p { font-size: 12px; line-height: 1.5; }
+.developerTools select, .developerTools button { display: block; width: 100%; margin-top: 8px; }
+.consumableTargets{position:fixed;z-index:8;pointer-events:none;overflow:hidden}
+.consumableGhost{position:fixed;z-index:90;pointer-events:none;display:grid;grid-template-columns:40px auto;gap:3px 7px;padding:8px 10px;border:2px solid #ff7474;border-radius:12px;background:#251c20ed;color:#ffb0b0;box-shadow:0 4px 18px #0007;font-size:12px}
+.consumableGhost.valid{border-color:#64ed9a;color:#a1ffc2;background:#142c20ed}
+.consumableGhost svg{width:40px;height:40px;grid-row:span 2;stroke:currentColor;fill:currentColor;fill-opacity:.2;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.consumableGhost small{font-size:11px}
+.consumableGhost.hidden,.consumableTargets.hidden{display:none}
+#healthStat #hp{display:inline-flex;align-items:center;justify-content:center;align-self:center;height:20px;line-height:1;margin:0;padding:0}
+.menuButtons .menuLanguage{display:grid;grid-template-columns:1fr 1fr;align-items:center;text-align:center;box-sizing:border-box}
+.menuButtons .menuLanguage>span{text-align:center}
+.menuButtons .menuLanguage select{width:100%;max-width:none;text-align:center;text-align-last:center}
+.consumableGhost.modelPreview{grid-template-columns:auto}

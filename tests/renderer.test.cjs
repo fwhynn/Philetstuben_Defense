@@ -28,6 +28,40 @@ function setup() {
   const renderer = context.adapter.create(svg, commands), state = { map: new Map([['0,0', { q: 0, r: 0, type: 'base', roads: [0], slots: 0, towers: [], income: 0 }]]), landmarks: new Map(), phase: 'place', waveRunning: false, hand: ['straight'], selectedCard: 0, rotation: 0, hoveredPlacement: null, selectedSlot: null, selectedTower: null, selectedBuilding: null, previewTower: null, hp: 20, gold: 70, enemies: [], projectiles: [] };
   return { renderer, svg, calls, state };
 }
+
+test('model picking leaves gaps between nearby objects clickable and excludes effect meshes',async()=>{
+ const THREE=await import('three'),source=fs.readFileSync(path.join(__dirname,'../classes/three-renderer.js'),'utf8');
+ const fn=source.match(/  function modelPicks\(group,payload,exclude=null\)\{[\s\S]*?\n  \}/)[0],context={};vm.runInNewContext(fn+'\nglobalThis.collect=modelPicks;',context);
+ const root=new THREE.Group(),material=new THREE.MeshBasicMaterial(),geometry=new THREE.BoxGeometry(10,30,10),picks=[];
+ for(const [index,x] of [0,20].entries()){
+  const holder=new THREE.Group(),body=new THREE.Mesh(geometry,material),effect=new THREE.Group();
+  body.position.y=15;effect.add(new THREE.Mesh(new THREE.SphereGeometry(40),material));holder.add(body,effect);holder.position.x=x;root.add(holder);
+  picks.push(...context.collect(holder,{kind:index?'building':'tower',index},effect));
+ }
+ root.updateMatrixWorld(true);const ray=new THREE.Raycaster();
+ const at=x=>{ray.set(new THREE.Vector3(x,15,100),new THREE.Vector3(0,0,-1));return ray.intersectObjects(picks,false);};
+ assert.equal(picks.length,2);assert.equal(at(0)[0].object.userData.pick.index,0);assert.equal(at(20)[0].object.userData.pick.index,1);assert.equal(at(10).length,0);assert.equal(at(-10).length,0);
+});
+
+test('depleted armor and magic bars disappear while health remains and active protection compacts',()=>{
+ const {renderer,svg,state}=setup();state.enemies=[{id:1,type:'normal',x:30,y:30,hp:10,maxHp:20,armorHp:5,maxArmorHp:5,magicHp:8,maxMagicHp:8}];
+ const bars=()=>{const all=[];function walk(node){all.push(node);for(const c of node.children||[])walk(c);}walk(svg);return all.filter(n=>['#78b95f','#df8b3a','#69aee8'].includes(n.attributes.fill));};
+ renderer.render(state);assert.equal(bars().length,3);
+ state.enemies[0].armorHp=0;renderer.render(state);assert.equal(bars().length,2);assert.equal(bars().find(n=>n.attributes.fill==='#69aee8').attributes.y,9);
+ state.enemies[0].magicHp=0;renderer.render(state);assert.equal(bars().length,1);assert.equal(bars()[0].attributes.fill,'#78b95f');
+});
+
+test('3D cursor is refreshed by render after legality changes without another pointer move',()=>{
+ const source=fs.readFileSync(path.join(__dirname,'../classes/three-renderer.js'),'utf8');
+ const render=source.match(/  function render\(nextState,placementTargets=\[\]\)\{[\s\S]*?\n  \}/)[0];
+ const refresh=source.match(/  function refreshPointerCursor\(\)\{[\s\S]*?\n  \}/)[0];
+ const state={},dom={style:{}},context={state,dom,ready:true,pickDirty:true,pickables:[],objectRecords:new Map(),targetList:[],pointerPosition:{clientX:20,clientY:20},drag:null,layer:{objects:{updateMatrixWorld(){}},targets:{children:[],updateMatrixWorld(){context.matricesReady=true;}}},pick(){assert.equal(context.matricesReady,true);return {kind:'target',legal:context.targetList[0].legal};}};
+ for(const name of ['syncTileOverlays','syncTiles','syncLandmarks','syncEmpty','syncObjects','syncTargets','syncGhost','syncSelection','syncMines','syncConsumables','syncEnemies','syncProjectiles','syncLabels'])context[name]=()=>{};
+ vm.runInNewContext(render+'\n'+refresh+'\nglobalThis.draw=render;',context);
+ context.draw(state,[{legal:false}]);assert.equal(dom.style.cursor,'not-allowed');
+ context.pickDirty=true;context.matricesReady=false;context.draw(state,[{legal:true}]);assert.equal(dom.style.cursor,'pointer');
+ context.draw(state,[{legal:false}]);assert.equal(dom.style.cursor,'not-allowed');
+});
 test('rendering and picking do not mutate frozen gameplay state and emit logical actions', () => {
   const { renderer, svg, calls, state } = setup(); Object.freeze(state); Object.freeze(state.map.get('0,0')); renderer.render(state, [{ q: 1, r: 0, legal: true }]);
   const hit = svg.children[1].children.find(child => child.listeners.pointerenter); assert.ok(hit);

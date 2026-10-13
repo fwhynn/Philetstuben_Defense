@@ -3,6 +3,7 @@
  */
 const HexRunRuntime=(()=>{
   const VERSION=1;
+  const PLAYBACK_RATE=2; // Simulation seconds per real second at the displayed 1× speed.
   // Derived data stays outside checkpoints and is reclaimed with its map/run.
   const routeCache=new WeakMap(),waveCache=new WeakMap();
   function cachedRoutes(map){
@@ -131,5 +132,5 @@ const HexRunRuntime=(()=>{
     if(wave>=20&&!intro.biomeUnlocked){intro.grassCells=new Set(HexBiomes.visibleTiles(state).map(t=>key(t.q,t.r)));intro.biomeUnlocked=true;}
     intro.bestWave=Math.max(intro.bestWave,wave);
   }
-  return {advanceIntroduction,rescueTunnel,VERSION,create,schedule,drain,spawnSources,nextSourcePoints,spawnEnemy,advance};
+  return {advanceIntroduction,rescueTunnel,VERSION,PLAYBACK_RATE,create,schedule,drain,spawnSources,nextSourcePoints,spawnEnemy,advance};
 })();

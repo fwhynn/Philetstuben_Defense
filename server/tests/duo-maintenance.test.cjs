@@ -10,7 +10,7 @@ test('maintenance freezes both combats and reconnect clocks; duplicate ACK survi
  const paused=l.view(a.token);assert.equal(paused.connection.maintenance,true);assert.equal(paused.connection.paused,true);assert.equal(paused.connection.expired,false);assert.deepEqual(paused.boards,before.boards);
  assert.equal(l.receive(b.token,last).duplicate,true);assert.equal(l.receive(a.token,packet(l,a,'ready',{value:false})).reason,'maintenance');
  assert.equal(l.create({requestId:randomUUID()}).reason,'maintenance');assert.equal(l.join({requestId:randomUUID(),code:a.code}).reason,'maintenance');
- l.setMaintenance(false);assert.equal(l.view(a.token).connection.paused,false);l.tick();assert.equal(l.view(a.token).boards[0].elapsedMs,before.boards[0].elapsedMs+50);
+ l.setMaintenance(false);assert.equal(l.view(a.token).connection.paused,false);l.tick();assert.equal(l.view(a.token).boards[0].elapsedMs,before.boards[0].elapsedMs+100);
 });
 
 test('maintenance keeps existing lobby-request retries idempotent and preserves waiting seats',()=>{
@@ -25,5 +25,5 @@ test('maintenance checkpoints resume through disk restart without elapsed-time c
  let time=0,store=createStore(file,{now:()=>time});const a=store.create({requestId:randomUUID()}),b=store.join({requestId:randomUUID(),code:a.code});start(store,[a,b]);store.tick();store.setMaintenance(true);const before=store.view(a.token);
  time=600000;store=createStore(file,{now:()=>time,maintenance:true});assert.equal(store.create({requestId:randomUUID()}).reason,'maintenance');time+=1000000;store.tick();store.touch(a.token);store.touch(b.token);
  assert.equal(store.view(a.token).connection.maintenance,true);assert.equal(store.view(a.token).connection.expired,false);assert.equal(JSON.stringify(store.view(a.token).boards),JSON.stringify(before.boards));
- store.setMaintenance(false);store.tick();assert.equal(store.view(a.token).boards[0].elapsedMs,before.boards[0].elapsedMs+50);
+ store.setMaintenance(false);store.tick();assert.equal(store.view(a.token).boards[0].elapsedMs,before.boards[0].elapsedMs+100);
 });

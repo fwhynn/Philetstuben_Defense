@@ -20,7 +20,7 @@ function payloadValid(action, p) {
     case 'upgrade': return exact(p, ['slot', 'upgrade']) && slot(p.slot) && word(p.upgrade);
     case 'building': return exact(p, ['slot', 'type']) && slot(p.slot) && ['house', 'forge', 'market', 'portal'].includes(p.type);
     case 'speed': return exact(p, ['value']) && integer(p.value, 1, 8);
-    case 'consumable': return exact(p, ['kind', 'slot']) && ['spikes', 'resin', 'overload'].includes(p.kind) && slot(p.slot);
+    case 'consumable': return exact(p, ['kind', 'slot']) && ['spikes', 'resin', 'overload'].includes(p.kind) && (slot(p.slot) || p.kind!=='overload' && exact(p.slot,['q','r','index','x','y']) && slot({q:p.slot.q,r:p.slot.r,index:p.slot.index}) && Number.isFinite(p.slot.x) && Number.isFinite(p.slot.y));
     case 'baseUpgrade': return exact(p, ['kind']) && ['walls', 'weapon'].includes(p.kind);
     case 'targetPriority': return exact(p, ['slot', 'priorities']) && slot(p.slot) && Array.isArray(p.priorities) && p.priorities.length === 3 && new Set(p.priorities).size === 3 && p.priorities.every(v => ['closestBase', 'furthestBase', 'mostHealth', 'leastHealth', 'mostArmor', 'mostMagic', 'boss', 'healer', 'closestTower', 'furthestTower'].includes(v));
     case 'buildingTarget': return exact(p, ['slot', 'target']) && slot(p.slot) && typeof p.target === 'string' && /^-?\d{1,4},-?\d{1,4}$/.test(p.target);
@@ -107,6 +107,6 @@ function createRoom({ seed = crypto.randomUUID(), loadouts, now = () => Date.now
   }
   function publicResult() { return match.result ? { ...copy(match.result), id: offerId(match.result.id) } : null; }
   function checkpoint() { if (ended || expired) return null; return { format: 'autohex-room', version: 1, ruleset: RULESET, lobby: copy(lobby), epoch, revision, seats: copy(seats), match: core.duo.capture(match) }; }
-  return { get result() { return publicResult(); }, setMaintenance, connect, touch, claim, leave, receive, view, presence() { return connection(); }, checkpoint, tick() { if (!lobby.started || connection().paused) return; for (let i = 0; i < (match.speed || 1); i++)core.duo.tick(match); revision++; } };
+  return { get result() { return publicResult(); }, setMaintenance, connect, touch, claim, leave, receive, view, presence() { return connection(); }, checkpoint, tick() { if (!lobby.started || connection().paused) return; for (let i = 0; i < (match.speed || 1) * core.runtime.PLAYBACK_RATE; i++)core.duo.tick(match); revision++; } };
 }
 module.exports = { createRoom, payloadValid, RULESET };

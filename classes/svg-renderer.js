@@ -2,6 +2,13 @@
 const HexSvgRenderer=(()=>{
 function create(svg,commands){
   const camera=HexSvgCamera.create(svg,()=>commands.viewChanged?.(),()=>commands.rotatePlacement?.());
+  function consumeClick(event){
+    if(!state?.consumablePickUI||state.consumablePickUI==='overload')return;
+    const matrix=svg.getScreenCTM?.();if(!matrix||!svg.createSVGPoint)return;
+    const point=svg.createSVGPoint();point.x=event.clientX;point.y=event.clientY;
+    commands.consumePoint?.(point.matrixTransform(matrix.inverse()));event.stopImmediatePropagation?.();
+  }
+  svg.addEventListener('click',consumeClick,true);
   const NS='http://www.w3.org/2000/svg';
   const {HEX,key,axialToWorld,hexPoints,neighbor,rotatedRoads,slotPositions,buildingPosition}=HexMap;
   const {CARD_LIBRARY,TOWERS}=HexData;
@@ -85,7 +92,16 @@ function create(svg,commands){
     drawFreezeAuras();drawSelectedRange();
     hintLayer.innerHTML='';scene=hintLayer;
     if(state.consumablePickUI&&state.consumablePickUI!=='overload')for(const t of placementTargets){const c=axialToWorld(t.q,t.r),hit=drawPoly(c.x,c.y,HEX-3,'rgba(110,220,200,.25)','#8ff3df',1);hit.style.pointerEvents='all';hit.addEventListener('click',e=>{e.stopPropagation();commands.placeTile(t.q,t.r);});}
-    for(const c of state.consumables||[]){const p=axialToWorld(c.q,c.r);scene.appendChild(text(p.x,p.y,(c.kind==='spikes'?'✦':'●')+' '+c.charges,12,'#fff1ae','700'));}
+    for(const c of state.consumables||[]){
+      const p=Number.isFinite(c.x)&&Number.isFinite(c.y)?c:axialToWorld(c.q,c.r);
+      if(c.kind==='resin'){
+        const patch=document.createElementNS(NS,'circle');
+        for(const [name,value] of Object.entries({cx:p.x,cy:p.y,r:14,fill:'#ba942e',opacity:.8,'pointer-events':'none'}))patch.setAttribute(name,value);
+        scene.appendChild(patch);
+      }else for(const [x,y] of [[-7,-4],[6,-3],[0,6]]){
+        for(const [dx,dy] of [[5,5],[5,-5],[0,6]]){const spike=line(p.x+x-dx,p.y+y-dy,p.x+x+dx,p.y+y+dy,'#ded9c6',2);spike.style.pointerEvents='none';scene.appendChild(spike);}
+      }
+    }
     if(state.buildingTarget)for(const tile of state.map.values()){if(!HexBuildings.canTarget(state,state.buildingTarget,key(tile.q,tile.r)))continue;const c=axialToWorld(tile.q,tile.r),hit=drawPoly(c.x,c.y,HEX-3,'rgba(110,220,200,.25)','#8ff3df',1);hit.style.pointerEvents='all';hit.style.cursor='pointer';hit.addEventListener('click',e=>{e.stopPropagation();commands.placeTile(tile.q,tile.r);});}drawUpgradeHints();drawBuildingUpgradeHints();drawTileOverlays();drawSelectionRings();if(state.duoPortal){const slot=state.duoPortal,tile=state.map.get(key(slot.q,slot.r)),p=tile&&slotPositions(tile)[slot.index];if(p){const ring=document.createElementNS(NS,'circle');for(const [name,value] of Object.entries({cx:p.x,cy:p.y,r:21,fill:'none',stroke:'#7b36fa','stroke-width':4}))ring.setAttribute(name,value);scene.appendChild(ring);scene.appendChild(text(p.x,p.y-27,'Partner-Portal',10,'#30125e','700'));}}scene=worldLayer;
     for(const mine of state.mines||[]) drawMine(mine);
     for(const e of state.enemies) drawEnemy(e);
@@ -172,7 +188,7 @@ function create(svg,commands){
     }
     if(tile.type==='base'){
       const g=document.createElementNS(NS,'g');
-      const base=document.createElementNS(NS,'rect');base.setAttribute('x',c.x-25);base.setAttribute('y',c.y-27);base.setAttribute('width',50);base.setAttribute('height',54);base.setAttribute('rx',8);base.setAttribute('fill','#d8d2c1');base.setAttribute('stroke','#514d44');base.setAttribute('stroke-width',4);g.appendChild(base);
+      const base=document.createElementNS(NS,'circle');base.setAttribute('cx',c.x);base.setAttribute('cy',c.y);base.setAttribute('r',23);base.setAttribute('fill','#d8d2c1');base.setAttribute('stroke','#514d44');base.setAttribute('stroke-width',4);g.appendChild(base);
       g.style.cursor='pointer';g.addEventListener('click',e=>{e.stopPropagation();commands.selectBase?.();});
       const txt=text(c.x,c.y+5,'BASE',13,'#282723','700');g.appendChild(txt);scene.appendChild(g);
     }
@@ -223,7 +239,7 @@ function create(svg,commands){
     if(['splitter','shard','healer','elementCarrier'].includes(e.type))g.appendChild(text(e.x,e.y-32,e.abilityIcon||({splitter:'◆ → ◆◆',shard:'◆',healer:'✚'})[e.type],12,e.color||'#73e49c','700'));
     if(e.bossKind)g.appendChild(text(e.x,e.y-37,e.name,10,'#f8f1d8','700'));
     const c=document.createElementNS(NS,'circle');c.setAttribute('cx',e.x);c.setAttribute('cy',e.y);c.setAttribute('r',e.type==='boss'?15:e.type==='shard'?6:9);c.setAttribute('fill',e.slowFactor<1?'#79cdd9':e.type==='boss'?({iron:'#bd7935',hunter:'#39b8cf',summoner:'#984ee3'}[e.bossKind]||'#934f9e'):e.type==='armored'?'#78818c':e.type==='swarm'?'#b87832':'#8d3c34');c.setAttribute('stroke','#26120f');c.setAttribute('stroke-width',2);g.appendChild(c);
-    const w=24,h=3,pools=[['hp','maxHp','#78b95f'],['armorHp','maxArmorHp','#df8b3a'],['magicHp','maxMagicHp','#69aee8']].filter(([,max])=>e[max]>0);
+    const w=24,h=3,pools=[['hp','maxHp','#78b95f'],['armorHp','maxArmorHp','#df8b3a'],['magicHp','maxMagicHp','#69aee8']].filter(([field,max])=>e[max]>0&&(field==='hp'||e[field]>0));
     pools.forEach(([field,max,color],i)=>{const y=e.y-17-i*4,bg=document.createElementNS(NS,'rect');bg.setAttribute('x',e.x-w/2);bg.setAttribute('y',y);bg.setAttribute('width',w);bg.setAttribute('height',h);bg.setAttribute('fill','#321a18');g.appendChild(bg);const bar=document.createElementNS(NS,'rect');bar.setAttribute('x',e.x-w/2);bar.setAttribute('y',y);bar.setAttribute('width',w*Math.max(0,(e[field]||0)/e[max]));bar.setAttribute('height',h);bar.setAttribute('fill',color);g.appendChild(bar);});scene.appendChild(g);
   }
 
@@ -243,9 +259,16 @@ function create(svg,commands){
 
   function reset(){objectKey='';fogRun=null;fogSize=-1;camera.reset(false);}
   function project(position){return camera.project(position);}
+  function consumableTarget(event){
+    const matrix=svg.getScreenCTM?.();if(!matrix||!svg.createSVGPoint)return {};
+    const p=svg.createSVGPoint();p.x=event.clientX;p.y=event.clientY;const point=p.matrixTransform(matrix.inverse());
+    let slot=null,distance=18;
+    for(const tile of state.map.values())slotPositions(tile).forEach((p,index)=>{const d=Math.hypot(p.x-point.x,p.y-point.y);if(tile.towers[index]&&d<distance){slot={q:tile.q,r:tile.r,index};distance=d;}});
+    return {point,slot};
+  }
   function clearSelection(e){if(!e||e.button===undefined||e.button===0)commands.clearSelection();}
   svg.addEventListener('click',clearSelection);
-  return {render,reset,project,panView:camera.panView,zoom:camera.zoom,resetView:camera.reset,getView:camera.getView,destroy(){camera.destroy();svg.removeEventListener('click',clearSelection);for(const layer of [fogLayer,worldLayer,objectLayer,hintLayer]) layer.remove();}};
+  return {render,reset,project,consumableTarget,panView:camera.panView,zoom:camera.zoom,resetView:camera.reset,getView:camera.getView,destroy(){camera.destroy();svg.removeEventListener('click',consumeClick,true);svg.removeEventListener('click',clearSelection);for(const layer of [fogLayer,worldLayer,objectLayer,hintLayer]) layer.remove();}};
 }
 return {create};
 })();

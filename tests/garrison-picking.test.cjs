@@ -3,7 +3,7 @@ test('3D picking exposes every prebuilt garrison slot even when the tower array 
  const THREE=await import('three');
  const c=core(),{state}=c.runtime.create({seed:'garrison-picks',runId:'g',challengeDay:'2026-09-23',loadout:['archer','catapult','chain','freeze','mine']});assert.equal(state.challengeKind,'garrison');
  const material=new THREE.MeshBasicMaterial(),geometry=new THREE.BoxGeometry(1,1,1);
- const ctx={THREE,state,key:c.map.key,slotPositions:c.map.slotPositions,objectRecords:new Map(),layer:{objects:new THREE.Group()},objectSig:JSON.stringify,slotDiamondGeometry:geometry,slotPick:geometry,buildingPick:geometry,invisible:material,mats:{slot:material},slotLift:()=>0,pickDirty:false};
+ const ctx={THREE,state,key:c.map.key,slotPositions:c.map.slotPositions,objectRecords:new Map(),layer:{objects:new THREE.Group()},objectSig:JSON.stringify,slotDiamondGeometry:geometry,slotPick:geometry,basePick:geometry,invisible:material,mats:{slot:material},slotLift:()=>0,pickDirty:false};
  const source=fs.readFileSync(require.resolve('../classes/three-renderer.js'),'utf8'),start=source.indexOf('  function syncObjects(){'),end=source.indexOf('  // ---- Platzierung:',start);
  vm.runInNewContext(source.slice(start,end)+'\nsyncObjects();',ctx);
  for(const tile of state.map.values()){

@@ -43,9 +43,10 @@ test('wall upgrade HUD contains exactly current and max HP',()=>{
 test('shrine controls match direct blessings, card selection and card removal',()=>{
   for(const effect of ['repair','upgrade','epic','legendary','remove']){
     const {a,elements}=shrine(effect);a.placeTile(2,0);const direct=['repair','upgrade'].includes(effect);
-    assert.equal(elements.get('skipRemovalBtn').classList.contains('hidden'),direct,effect);
+    assert.equal(elements.get('skipRemovalBtn').classList.contains('hidden'),direct||effect==='remove',effect);
     assert.equal(elements.get('rewardInspectActions').classList.contains('hidden'),direct,effect);
-    if(!direct)assert.equal(elements.get('skipRemovalBtn').textContent,effect==='remove'?'Keine Karte entfernen':'Belohnung überspringen');
+    assert.equal(elements.get('skipRemovalTopBtn').classList.contains('hidden'),effect!=='remove',effect);
+    if(!direct&&effect!=='remove')assert.equal(elements.get('skipRemovalBtn').textContent,'Belohnung überspringen');
     if(direct){elements.get('rewardChoices').children[0].listeners.click();a.showRewards();assert.equal(elements.get('rewardInspectActions').classList.contains('hidden'),false);}
   }
 });

@@ -2,16 +2,75 @@ const {test}=require('node:test'),assert=require('node:assert/strict'),load=requ
 const loadout=['archer','ballista','catapult','freeze','mine'];
 function setup(day=null){const c=load(),run=c.session.create({seed:'test',runId:'consumables-test',loadout,challengeDay:day});const s=run.state;s.phase='build';s.openingRemaining=0;s.gold=1200;if(!s.map.has('1,0'))s.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:2,towers:[],income:0});return {c,s,run};}
 function enemy(c,id,hp){const p=c.map.axialToWorld(1,0);return {id,type:'normal',hp,maxHp:hp,armorHp:0,magicHp:0,alive:true,x:p.x,y:p.y,points:[p,{x:0,y:0}],index:0,t:0,speed:1};}
+
+test('consumable hover validation is read-only and agrees with purchases and overload locks',()=>{
+ const {c,s}=setup(),point=c.map.axialToWorld(1,0),slot={q:1,r:0,index:0,...point};
+ for(const kind of ['spikes','resin']){
+  const before=JSON.stringify(s);assert.equal(c.combat.buyConsumable(s,kind,slot,true),true);assert.equal(JSON.stringify(s),before);
+  assert.equal(c.combat.buyConsumable(s,kind,{...slot,y:10000},true),false);
+  const gold=s.gold;s.gold=0;assert.equal(c.combat.buyConsumable(s,kind,slot,true),false);s.gold=gold;
+ }
+ c.towers.buy(s,'archer',[slot]);const before=JSON.stringify(s);
+ assert.equal(c.combat.buyConsumable(s,'overload',slot,true),true);assert.equal(JSON.stringify(s),before);
+ assert.equal(c.combat.buyConsumable(s,'overload',slot),true);assert.equal(c.combat.buyConsumable(s,'overload',slot,true),false);
+});
+
+test('cursor preview changes validity without spending and disappears after placement or cancellation',()=>{
+ const {a,elements,document,documentListeners}=require('./helpers/game.cjs').load();
+ a.state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:2,towers:[]});
+ elements.get('mainMenu').classList.add('hidden');
+ const point={x:0,y:0,matrixTransform(){return this;}},board=elements.get('board');board.parentElement={getBoundingClientRect:()=>({left:0,top:0,width:800,height:600})};board.getScreenCTM=()=>({inverse:()=>({})});board.createSVGPoint=()=>({...point});
+ document.querySelector=selector=>selector==='.boardWrap'?{getBoundingClientRect:()=>({left:0,top:0,width:800,height:600})}:null;
+ const target={closest:s=>s==='.boardWrap'?{}:null},p=a.axialToPixel(1,0),ghost=elements.get('consumableGhost');
+ elements.get('buySpikes').listeners.click();const gold=a.state.gold;
+ assert.match(elements.get('consumableTargets').innerHTML,/<polyline/);
+ documentListeners.pointermove({clientX:p.x,clientY:p.y+100,target});assert.equal(ghost.classList.contains('valid'),false);
+ documentListeners.pointermove({clientX:p.x,clientY:p.y,target});assert.equal(ghost.classList.contains('valid'),true);assert.equal(a.state.gold,gold);
+ a.rendererCommands.consumePoint(p);assert.equal(ghost.classList.contains('hidden'),true);
+ elements.get('buyResin').listeners.click();elements.get('cancelConsumable').listeners.click();assert.equal(ghost.classList.contains('hidden'),true);assert.equal(elements.get('consumableTargets').classList.contains('hidden'),true);
+ a.state.gold=1000;a.state.map.get('1,0').towers=[{type:'archer',level:1,lastShot:0}];a.state.map.set('2,0',{q:2,r:0,type:'straight',roads:[0,3],slots:1,towers:[{type:'freeze',level:1,lastShot:0}]});
+ elements.get('buyOverload').listeners.click();assert.equal((elements.get('consumableTargets').innerHTML.match(/<circle/g)||[]).length,1);
+ a.state.map.get('1,0').towers[0].overloadPending=true;a.renderAll();assert.equal(elements.get('consumableTargets').innerHTML,'');
+});
+
+test('lane placements preserve exact positions, reject off-road input and stack damage at that position',()=>{
+ const {c,s,run}=setup(),tile=s.map.get('1,0'),center=c.map.axialToWorld(1,0),point={x:center.x+35,y:center.y};
+ for(const bad of [{x:NaN,y:0},{x:Infinity,y:0},{x:point.x,y:point.y+80}]){const gold=s.gold;assert.equal(c.combat.buyConsumable(s,'spikes',{q:1,r:0,...bad}),false);assert.equal(s.gold,gold);}
+ for(let i=0;i<2;i++)assert.ok(c.combat.buyConsumable(s,'spikes',{q:1,r:0,...point}));
+ assert.equal(s.consumables.length,2);assert.ok(Math.abs(s.consumables[0].x-point.x)<.01);
+ s.enemies=[enemy(c,1,500)];c.combat.applyConsumables(s,0,()=>{});assert.equal(s.enemies[0].hp,500);
+ const restored=c.snapshot.restore(c.snapshot.capture(s,run.random)).state;assert.equal(restored.consumables[0].x,point.x);
+ s.enemies[0].x=point.x;c.combat.applyConsumables(s,0,()=>{});assert.equal(s.enemies[0].hp,300);assert.equal(s.consumables.length,0);
+ for(let rotation=0;rotation<6;rotation++){const curved={...tile,type:'smallCurve',rotation,roads:c.map.rotatedRoads(c.data.CARD_LIBRARY.smallCurve,rotation)};const leg=[...c.map.roadGeometry(curved).legs.values()][0],p=leg[Math.floor(leg.length/2)],snap=c.combat.lanePoint(curved,p);assert.ok(Math.hypot(snap.x-p.x,snap.y-p.y)<.01);}
+});
+
+test('controller places consumables at a clicked lane point and keeps invalid clicks unspent',()=>{
+ const {a,elements}=require('./helpers/game.cjs').load();a.state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:2,towers:[]});
+ const p=a.axialToPixel(1,0);elements.get('buySpikes').listeners.click();const gold=a.state.gold;
+ assert.equal(a.rendererCommands.consumePoint({x:p.x,y:p.y+100}),true);assert.equal(a.state.gold,gold);
+ a.rendererCommands.consumePoint({x:p.x+25,y:p.y});assert.equal(a.state.gold,gold-25);assert.equal(a.state.consumables[0].x,p.x+25);
+});
+test('right click cancels every consumable selection without spending gold',()=>{
+ const {a,elements,documentListeners}=require('./helpers/game.cjs').load();const gold=a.state.gold;
+ for(const id of ['buySpikes','buyResin','buyOverload']){
+  elements.get(id).listeners.click();assert.ok(a.state.consumablePickUI);
+  let prevented=false;documentListeners.contextmenu({preventDefault(){prevented=true;}});
+  assert.equal(prevented,true);assert.equal(a.state.consumablePickUI,null);assert.equal(a.state.gold,gold);
+  assert.equal(elements.get('consumableGhost').classList.contains('hidden'),true);
+ }
+ let prevented=false;documentListeners.contextmenu({preventDefault(){prevented=true;}});assert.equal(prevented,false);
+});
+
 test('spikes consume only lethal charges and leftovers damage the next enemy',()=>{
  const {c,s}=setup();assert.equal(c.combat.buyConsumable(s,'spikes',{q:1,r:0}),true);s.enemies=[enemy(c,1,50)];c.combat.applyConsumables(s,0,()=>{});
  assert.equal(s.enemies[0].alive,false);assert.equal(s.consumables[0].charges,10);
  s.enemies.push(enemy(c,2,200));c.combat.applyConsumables(s,0,()=>{});assert.equal(s.enemies[1].hp,150);assert.equal(s.consumables.length,0);
 });
-test('resin uses one charge per enemy and cannot stack on the same tile',()=>{
+test('resin stacks on the same lane and each patch uses one charge per enemy',()=>{
  const {c,s}=setup();assert.ok(c.combat.buyConsumable(s,'resin',{q:1,r:0}));const gold=s.gold;
- assert.equal(c.combat.buyConsumable(s,'resin',{q:1,r:0}),false);assert.equal(s.gold,gold);
+ assert.equal(c.combat.buyConsumable(s,'resin',{q:1,r:0}),true);assert.equal(s.gold,gold-30);
  s.enemies=[enemy(c,1,50)];c.combat.applyConsumables(s,100,()=>{});c.combat.applyConsumables(s,200,()=>{});
- assert.equal(s.consumables[0].charges,11);assert.equal(s.enemies[0].slowEffects.length,1);assert.equal(s.enemies[0].slowEffects[0].until,4100);
+ assert.equal(s.consumables[0].charges,11);assert.equal(s.enemies[0].slowEffects.length,2);assert.equal(s.enemies[0].slowEffects[0].until,4100);
 });
 test('overload begins in combat, rejects auras and expires without changing base stats',()=>{
  const {c,s}=setup();assert.ok(c.towers.buy(s,'archer',[{q:1,r:0,index:0}]).ok);assert.ok(c.towers.buy(s,'freeze',[{q:1,r:0,index:1}]).ok);
@@ -51,9 +110,13 @@ test('Duo validates purchases, charges once and restores remaining consumables',
  const {createLobbies}=require('../server/duo-lobbies.cjs'),{randomUUID}=require('node:crypto');let rooms=createLobbies({now:()=>0});const a=rooms.create({requestId:randomUUID()}),b=rooms.join({requestId:randomUUID(),code:a.code});
  const command=(seat,action,payload)=>{const v=rooms.view(seat.token);return rooms.receive(seat.token,{epoch:v.epoch,sequence:v.next,wave:v.wave,phase:v.boards[seat.player].phase,action,payload});};
  command(a,'lobbyReady',{value:true});command(b,'lobbyReady',{value:true});let placement;rooms.view(a.token).boards[0].placements.some((rotations,index)=>rotations.some((cells,rotation)=>{const cell=cells.find(c=>c.legal);if(cell)placement={q:cell.q,r:cell.r,index,rotation};return !!cell;}));assert.ok(command(a,'place',placement).ok);
- const slot={q:placement.q,r:placement.r,index:0},before=rooms.view(a.token).boards[0].gold;
+ const core=load(),tile=rooms.view(a.token).boards[0].map.find(t=>t.q===placement.q&&t.r===placement.r),point=[...core.map.roadGeometry(tile).legs.values()][0][1];
+ const slot={q:placement.q,r:placement.r,index:0,x:point.x,y:point.y},before=rooms.view(a.token).boards[0].gold;
+ assert.equal(command(a,'consumable',{kind:'spikes',slot:{...slot,x:NaN}}).ok,false);
+ assert.equal(command(a,'consumable',{kind:'spikes',slot:{...slot,x:1e6}}).ok,false);
+ assert.equal(rooms.view(a.token).boards[0].gold,before);
  assert.equal(command(a,'consumable',{kind:'spikes',slot:{q:0,r:0,index:0}}).ok,false);
- assert.ok(command(a,'consumable',{kind:'spikes',slot}).ok);assert.equal(rooms.view(a.token).boards[0].gold,before-25);assert.equal(command(a,'consumable',{kind:'spikes',slot}).ok,false);
+ assert.ok(command(a,'consumable',{kind:'spikes',slot}).ok);assert.equal(rooms.view(a.token).boards[0].gold,before-25);assert.equal(command(a,'consumable',{kind:'spikes',slot}).ok,true);
  rooms=createLobbies({now:()=>0,snapshot:JSON.parse(JSON.stringify(rooms.checkpoint()))});rooms.touch(a.token);rooms.touch(b.token);assert.equal(rooms.view(a.token).boards[0].consumables[0].charges,20);assert.equal(rooms.view(b.token).boards[1].consumables?.length||0,0);
  assert.equal(command(a,'consumable',{kind:'__proto__',slot}).ok,false);
 });

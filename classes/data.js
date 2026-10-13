@@ -113,6 +113,7 @@ const HexData=(()=>{
   const BRANCH_VISUALS={marksman:{icon:'◎',color:'#f5d06e'},volley:{icon:'≋',color:'#96d47c'},siege:{icon:'◆',color:'#e99a5c'},barrage:{icon:'⋮',color:'#ffdca1'},storm:{icon:'ϟ',color:'#93a5ff'},overload:{icon:'✦',color:'#e2a1ff'},deepFrost:{icon:'❄',color:'#70d5ff'},frostField:{icon:'❆',color:'#c0f6ea'},demolition:{icon:'✹',color:'#ff9b55'},minefield:{icon:'••',color:'#d9bc72'},harpoon:{icon:'➶',color:'#e7d39e'},repeater:{icon:'»',color:'#d4b979'},inferno:{icon:'☀',color:'#ff7448'},wildfire:{icon:'≋',color:'#ff9b55'}};
   Object.assign(BRANCH_VISUALS,{elementFire:{icon:'♨',color:'#ff8654'},elementWater:{icon:'≈',color:'#69d8ff'},elementWind:{icon:'≋',color:'#dbefae'},soulChoir:{icon:'☽',color:'#a6edb4'},soulKeeper:{icon:'☠',color:'#c8a3ee'}});
   function defaultTargetPriority(tower){
+    if(tower.type==='archer')return ['closestBase','mostHealth','boss'];
     const def=towerDefinition(tower),m=def.damageMultipliers||{},kinds=[['hp','mostHealth'],['armor','mostArmor'],['magic','mostMagic']];
     const ranked=kinds.map(([kind,priority])=>({priority,damage:(def.damage||0)*(m[kind]??1)})).sort((a,b)=>b.damage-a.damage);
     const first=ranked[0].damage>ranked[1].damage?ranked[0].priority:'closestBase';

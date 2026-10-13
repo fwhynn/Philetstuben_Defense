@@ -4,6 +4,20 @@ const loadout=['archer','catapult','chain','freeze','mine'];
 function setup(){const room=createRoom({seed:'private-seed',loadouts:[loadout,loadout]});const seats=[room.connect(0),room.connect(1)];return {room,seats};}
 function packet(room,seat,action,payload){const v=room.view(seat.token);return {epoch:seat.epoch,sequence:v.next,wave:v.wave,phase:v.boards[seat.player].phase,action,payload};}
 function place(room,seat){const v=room.view(seat.token),core=require('../../headless-core.cjs')();for(const [index,id] of v.boards[seat.player].hand.entries())for(let rotation=0;rotation<6;rotation++)if(core.map.rotatedRoads(core.data.CARD_LIBRARY[id],rotation).includes(3))return packet(room,seat,'place',{q:1,r:0,index,rotation});throw Error('No opening');}
+
+test('Duo displayed speeds scale from the doubled base tempo and pause freezes both boards',()=>{
+ for(let speed=1;speed<=8;speed++){
+  const {room,seats:[a,b]}=setup();
+  for(const seat of [a,b])assert.equal(room.receive(seat.token,place(room,seat)).ok,true);
+  for(const seat of [a,b])assert.equal(room.receive(seat.token,packet(room,seat,'ready',{value:true})).ok,true);
+  assert.equal(room.receive(a.token,packet(room,a,'speed',{value:speed})).ok,true);
+  const before=room.view(a.token).boards.map(board=>board.elapsedMs);room.tick();
+  room.view(a.token).boards.forEach((board,i)=>assert.equal(board.elapsedMs-before[i],100*speed));
+  assert.equal(room.receive(a.token,packet(room,a,'pause',{value:true})).ok,true);
+  const paused=room.view(a.token).boards.map(board=>board.elapsedMs);room.tick();
+  assert.deepEqual(room.view(a.token).boards.map(board=>board.elapsedMs),paused);
+ }
+});
 test('binding, malformed payloads, stale phases and sequence retries protect authoritative state',()=>{
  const {room,seats:[a,b]}=setup();assert.throws(()=>room.connect(0));assert.equal(room.receive('wrong',{}).reason,'unauthorized');
  const cmd=place(room,a),before=room.view(a.token);for(const payload of [null,[],{},'x',{slots:'bad'}])assert.equal(room.receive(a.token,{...cmd,action:'tower',payload}).ok,false);
@@ -36,7 +50,7 @@ test('rate limiting and foreign match epochs reject commands without affecting t
  room.tick();const before=room.view(a.token);time=10001;room.touch(a.token);room.tick();const paused=room.view(a.token);
  assert.equal(paused.connection.paused,true);assert.equal(paused.connection.players[1],'disconnected');assert.deepEqual(paused.boards,before.boards);assert.throws(()=>room.connect(1));assert.equal(room.touch('wrong'),false);
  assert.equal(room.receive(a.token,packet(room,a,'ready',{value:false})).reason,'disconnected');
- time=11000;room.touch(b.token);assert.equal(room.view(a.token).connection.paused,false);assert.equal(room.receive(a.token,buy).reason,'sequence');room.tick();assert.equal(room.view(a.token).boards[0].elapsedMs,before.boards[0].elapsedMs+50);assert.equal(room.view(a.token).boards[0].gold,before.boards[0].gold);
+ time=11000;room.touch(b.token);assert.equal(room.view(a.token).connection.paused,false);assert.equal(room.receive(a.token,buy).reason,'sequence');room.tick();assert.equal(room.view(a.token).boards[0].elapsedMs,before.boards[0].elapsedMs+100);assert.equal(room.view(a.token).boards[0].gold,before.boards[0].gold);
  });
 
  test('lost acknowledgement remains idempotent across reconnect; expired grace cannot resurrect a match',()=>{

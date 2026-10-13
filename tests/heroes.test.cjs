@@ -2,6 +2,23 @@ const { test } = require('node:test'), assert = require('node:assert/strict');
 const fs = require('node:fs'), path = require('node:path'), vm = require('node:vm');
 const { load } = require('./helpers/game.cjs');
 function rules() { const c = {}; for (const file of ['heroes.js', 'data.js', 'waves.js', 'combat.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../classes', file), 'utf8'), c); return vm.runInNewContext('({heroes:HexHeroes,combat:HexCombat,data:HexData})', c); }
+
+test('weapon upgrades unlock stable base slots, with extra builder capacity and normal tower commands',()=>{
+ const {heroes}=rules();
+ for(const hero of ['standard','builder','merchant']){
+  const c=require('../headless-core.cjs')(),run=c.runtime.create({seed:'base-slots',runId:'slots',loadout:['archer','catapult','chain','freeze','mine'],heroId:hero}),s=run.state;
+  s.gold=2000;const base=s.map.get('0,0');assert.equal(base.slots,0);
+  assert.equal(c.towers.buy(s,'archer',[{q:0,r:0,index:0}]).ok,false);
+  assert.ok(heroes.buy(s,'weapon'));assert.equal(base.slots,hero==='builder'?2:1);
+  assert.ok(c.towers.buy(s,'archer',[{q:0,r:0,index:0}]).ok);const tower=base.towers[0],position=c.map.slotPositions(base)[0];
+  assert.ok(c.towers.upgrade(s,{q:0,r:0,index:0},'volley'));
+  while(heroes.buy(s,'weapon')){}
+  assert.equal(base.slots,hero==='builder'?4:2);assert.equal(base.towers[0],tower);assert.deepEqual(c.map.slotPositions(base)[0],position);
+  assert.equal(new Set(c.map.slotPositions(base).map(p=>`${p.x},${p.y}`)).size,base.slots);
+  const restored=c.snapshot.restore(c.snapshot.capture(s,run.random)).state.map.get('0,0');
+  assert.equal(restored.slots,base.slots);assert.equal(restored.towers[0].branch,'volley');
+ }
+});
 test('heroes initialize independent runs and invalid profiles fall back to standard', () => {
   const { heroes } = rules(); for (const [id, hp, gold, income] of [['standard', 20, 70, 0], ['builder', 20, 55, 0], ['merchant', 15, 90, 2]]) {
     const state = {}; heroes.initialize(state, id); assert.equal(state.hp, hp); assert.equal(state.maxHp, hp); assert.equal(state.gold, gold); assert.equal(state.income, income); assert.equal(heroes.weapon(state), null);

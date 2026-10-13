@@ -97,6 +97,10 @@ Klick auf die Base oder den Base-Button im HUD öffnet das Ausbaumenü. Käufe s
 
 Tabellenwerte vor Hero-Modifikatoren. Mauern erhöhen maximale und aktuelle HP um den genannten Betrag; bestehender Schaden wird nicht vollständig repariert. Waffenstufen ersetzen die vorherigen Waffenwerte. Die automatische Base-Waffe verursacht Einzelzielschaden gegen Leben, Rüstung und Magieresistenz und nutzt die normale Kill-/Bossabrechnung. Sie belegt keinen Turmplatz im Loadout und erhält keine Turm-Upgrades oder Schmiede-/Marktboni. Eigene Modelle für Ausbauzustände sind noch nicht vorhanden; die Waffe nutzt sichtbare Pfeileffekte.
 
+Zusätzlich schalten Waffenstufen Turmplätze direkt auf der Basis frei: Standardfestung und Händlerstadt erhalten insgesamt 1/2 Plätze, der Festungsbauer 2/3/4 Plätze. Auf diesen Plätzen werden normale Türme aus dem aktuellen Loadout zum normalen Preis gebaut, verbessert und verkauft. Bereits gebaute Türme bleiben beim weiteren Basis-Ausbau erhalten.
+
+Krähenfüße und Klebeharz werden durch einen Klick direkt auf die Straße platziert; die Position rastet am tatsächlichen Straßenverlauf ein. Mehrere Platzierungen auf demselben Hex und an derselben Position sind möglich, jede kostet den normalen Preis und besitzt eigene Ladungen. Ihr Auslöseradius beträgt 16 Welteinheiten. Harz verlangsamt weiterhin um 35 %; überlappende Harzflächen multiplizieren diese Verlangsamung nicht. Überladung bleibt eine nicht stapelbare Hilfe für einen einzelnen angreifenden Turm. Reste verfallen am Wellenende.
+
 ## Deck und Hexkarten
 
 Das Deck enthält ausschließlich Maphex-Karten. Gezogene Belohnungen werden erst nach Auswahl ins Deck und den Ablagestapel aufgenommen. Kartenentfernung löscht genau eine Kopie; bereits platzierte Hexe und Türme bleiben bestehen. Der Deck-Dropdown zeigt Gesamtdeck, Nachzieh- und Ablagestapel, aber keine zukünftige Ziehreihenfolge.

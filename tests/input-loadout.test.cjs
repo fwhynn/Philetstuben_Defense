@@ -227,7 +227,7 @@ test('acknowledging the hotkey tip preserves an open tower selection',()=>{
 });
 
 test('the top removal button skips the offer without removing a card',()=>{
- const {a,elements}=load();const deck=[...a.state.deck];a.showRemoval();assert.equal(elements.get('skipRemovalTopBtn').classList.contains('hidden'),false);
+ const {a,elements}=load();const deck=[...a.state.deck];a.showRemoval();assert.equal(elements.get('skipRemovalTopBtn').classList.contains('hidden'),false);assert.equal(elements.get('skipRemovalBtn').classList.contains('hidden'),true);
  elements.get('skipRemovalTopBtn').listeners.click();assert.deepEqual([...a.state.deck],deck);assert.notEqual(a.state.phase,'removal');
  a.showRewards();assert.equal(elements.get('skipRemovalTopBtn').classList.contains('hidden'),true);
 });

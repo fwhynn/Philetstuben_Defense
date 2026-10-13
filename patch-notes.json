@@ -1,5 +1,22 @@
 [
   {
+    "version": "next",
+    "title": "Mehr Tempo und präzisere Bedienung",
+    "changes": [
+      "Das Grundtempo ist in Solo und Duo verdoppelt: 1× entspricht dem bisherigen 2×; alle weiteren Tempostufen bauen darauf auf.",
+      "Waffen-Upgrades der Basis schalten zusätzlich Turmplätze frei: bis zu zwei bei Standardfestung und Händlerstadt, bis zu vier beim Festungsbauer.",
+      "Krähenfüße und Klebeharz lassen sich frei entlang der Straßen und mehrfach auf demselben Hex platzieren. Ihre Wirkung gilt an der gewählten Position.",
+      "Verbrauchshilfen zeigen beim Platzieren eine Vorschau am Mauszeiger und markieren gültige Ziele. Straßen werden hervorgehoben, bei Überladung geeignete Türme. Rechtsklick bricht die Auswahl wie Escape ab.",
+      "Beschriftungen über platzierten Krähenfüßen und Klebeharz entfallen. Die Turmleiste zeigt die Preise ohne zusätzliches Münzsymbol.",
+      "Bogenschützen zielen standardmäßig zuerst auf Gegner, die der Basis am nächsten sind. Eigene Fokus-Einstellungen bleiben erhalten.",
+      "Präzisere Klickflächen für Türme, Gebäude und Bauplätze erleichtern die Auswahl nah beieinanderliegender Ziele. Die Basis ist nur noch im mittleren Kreis anklickbar.",
+      "Der Mauszeiger zeigt nach dem Drehen einer Hexkarte sofort an, ob sie platziert werden kann. Der Drehen-Knopf zeigt die Taste R an.",
+      "Aufgebrauchte Rüstungs- und Magieschutzleisten verschwinden. Die Lebensanzeige ist kompakter und ihr Text vertikal zentriert; die Sprachauswahl ist gleichmäßiger ausgerichtet.",
+      "Die Konto-Aktionen heißen jetzt Spielstand hochladen und Spielstand herunterladen. Der zusätzliche Spielstand-Knopf im Hauptmenü entfällt.",
+      "Beim Deck-Ausdünnen bleibt nur der fixierte Knopf Keine Karte entfernen oben rechts sichtbar."
+    ]
+  },
+  {
     "version": "0.9.9",
     "title": "Wartung",
     "changes": [

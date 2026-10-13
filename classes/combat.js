@@ -1,22 +1,36 @@
 const HexCombat=(()=>{
   const consumables={spikes:{name:'Krähenfüße',cost:25,description:'20 Spitzen × 5 Schaden. Reste verfallen am Wellenende.'},resin:{name:'Klebeharz',cost:30,description:'Die nächsten 12 Gegner: 35 % langsamer für 4 Sekunden. Bis Wellenende.'},overload:{name:'Überladung',cost:40,description:'+50 % Angriffsgeschwindigkeit für 12 Sekunden. Bis Wellenende; nicht stapelbar.'}};
-  function buyConsumable(state,kind,slot){
+  function buyConsumable(state,kind,slot,preview=false){
     const def=Object.hasOwn(consumables,kind)?consumables[kind]:null;
     if(!def||state.hp<=0||!['place','build','wave'].includes(state.phase)||!Number.isInteger(slot?.q)||!Number.isInteger(slot?.r)||state.gold<def.cost)return false;
-    const tile=state.map.get(slot.q+','+slot.r);if(!tile||tile.type==='base')return false;
+    const tile=state.map.get(slot.q+','+slot.r);if(!tile)return false;
     if(kind==='overload'){
       const tower=Number.isInteger(slot.index)&&tile.towers?.[slot.index];if(!tower||tower.guestOwner!==undefined||!HexData.towerDefinition(tower).cooldown||HexData.towerDefinition(tower).aura||tower.overloadPending||tower.overloadUntil>state.elapsedMs)return false;
-      if(state.waveRunning)tower.overloadUntil=state.elapsedMs+12000;else tower.overloadPending=true;
+      if(!preview){if(state.waveRunning)tower.overloadUntil=state.elapsedMs+12000;else tower.overloadPending=true;}
     }else{
-      if(!tile.roads?.length||(state.consumables||[]).some(c=>c.q===slot.q&&c.r===slot.r&&c.kind===kind&&c.charges>0))return false;
-      (state.consumables??=[]).push({kind,q:slot.q,r:slot.r,charges:kind==='spikes'?20:12,seen:[]});
+      if(tile.type==='base'||!tile.roads?.length)return false;
+      const point=slot.x===undefined&&slot.y===undefined?HexMap.roadGeometry(tile).hub:lanePoint(tile,slot);
+      if(!point)return false;
+      if(!preview)(state.consumables??=[]).push({kind,q:slot.q,r:slot.r,x:point.x,y:point.y,charges:kind==='spikes'?20:12,seen:[]});
     }
-    state.gold-=def.cost;return true;
+    if(!preview)state.gold-=def.cost;return true;
   }
   function clearConsumables(state){state.consumables=[];for(const tile of state.map.values())for(const tower of tile.towers||[])if(tower){delete tower.overloadPending;delete tower.overloadUntil;}for(const e of state.enemies||[])e.slowEffects=(e.slowEffects||[]).filter(s=>s.source!=='resin');}
+  // Snap a nearby click to the actual lane, including curved and model-specific roads.
+  function lanePoint(tile,point){
+    if(!Number.isFinite(point?.x)||!Number.isFinite(point?.y))return null;
+    let best=null,distance=18;
+    for(const points of HexMap.roadGeometry(tile).legs.values())for(let i=1;i<points.length;i++){
+      const a=points[i-1],b=points[i],dx=b.x-a.x,dy=b.y-a.y,length=dx*dx+dy*dy;
+      const t=length?Math.max(0,Math.min(1,((point.x-a.x)*dx+(point.y-a.y)*dy)/length)):0;
+      const p={x:a.x+t*dx,y:a.y+t*dy},d=Math.hypot(point.x-p.x,point.y-p.y);
+      if(d<=distance){distance=d;best=p;}
+    }
+    return best;
+  }
   function applyConsumables(state,time,emit){
-    for(const c of state.consumables||[]){if(c.charges<=0)continue;const center=HexMap.axialToWorld(c.q,c.r);
-      for(const e of state.enemies){if(!e.alive||c.charges<=0||c.seen.includes(e.id)||Math.hypot(e.x-center.x,e.y-center.y)>HexMap.HEX*.9)continue;
+    for(const c of state.consumables||[]){if(c.charges<=0)continue;const positioned=Number.isFinite(c.x)&&Number.isFinite(c.y),center=positioned?c:HexMap.axialToWorld(c.q,c.r);
+      for(const e of state.enemies){if(!e.alive||c.charges<=0||c.seen.includes(e.id)||Math.hypot(e.x-center.x,e.y-center.y)>(positioned?16:HexMap.HEX*.9))continue;
         c.seen.push(e.id);
         if(c.kind==='spikes'){while(c.charges>0&&e.alive){c.charges--;damageEnemy(e,5,{damageType:'physical'},state,emit);}if(!e.alive)state.consumableKills=(state.consumableKills||0)+1;}
         else {c.charges--;e.slowEffects??=[];e.slowEffects.push({factor:.65,until:time+4000,source:'resin'});}
@@ -173,5 +187,5 @@ const HexCombat=(()=>{
     if(state.splitChildren?.length){state.enemies.push(...state.splitChildren);state.splitChildren=[];}
     state.projectiles.forEach(p=>p.ttl-=dt);state.projectiles=state.projectiles.filter(p=>p.ttl>0);state.enemies=state.enemies.filter(e=>e.alive&&durability(e)>0);
   }
-  return {step,durability,remainingDistance,targetByPriority,consumables,buyConsumable,clearConsumables,applyConsumables};
+  return {step,durability,remainingDistance,targetByPriority,consumables,lanePoint,buyConsumable,clearConsumables,applyConsumables};
 })();

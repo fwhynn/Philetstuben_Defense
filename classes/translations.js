@@ -201,6 +201,7 @@ Map verkleinern|Zoom out
 Lade 3D-Modelle …|Loading 3D models …
 Spielstand mitnehmen|Transfer save
 Spielstand herunterladen|Download save
+Spielstand hochladen|Upload save
 Spielstand hochladen (JSON, maximal 2 MB)|Upload save (JSON, maximum 2 MB)
 Vorhandenes Profil ersetzen|Replace existing profile
 Diamanten, Freischaltungen, Loadouts und Profilstatistiken als Datei sichern. Laufende Runs und Geräteeinstellungen sind nicht enthalten.|Export diamonds, unlocks, loadouts and profile statistics. Active runs and device settings are not included.
@@ -372,7 +373,7 @@ Standardfestung|Standard Fortress
 Festungsbauer|Fortress Builder
 Händlerstadt|Merchant City
 15 HP · 90 Gold · +2 Gold je überlebter Wave. Base-Waffe verursacht 25 % weniger Schaden.|15 HP · 90 gold · +2 gold per wave survived. Base weapon deals 25% less damage.
-20 HP · 55 Gold. Base-Upgrades 25 % günstiger und eine zusätzliche dritte Stufe.|20 HP · 55 gold. Base upgrades cost 25% less and gain a third level.
+20 HP · 55 Gold. Base-Upgrades 25 % günstiger; Waffenstufen mit 2/3/4 Turmplätzen.|20 HP · 55 gold. Base upgrades cost 25% less; weapon levels unlock 2/3/4 tower slots.
 Stufe 1 · Standard|Difficulty 1 · Standard
 Stufe 2 · Zwei Fronten|Difficulty 2 · Two Fronts
 Schließe Wave 35 in Stufe 1 ab.|Clear wave 35 on difficulty 1.
@@ -945,7 +946,7 @@ Hinweis:|Note:
 20 HP · 70 Gold. Ausgewogene Festung ohne zusätzliche Boni.|20 HP · 70 gold. Balanced fortress without additional bonuses.
 `);
 HexTranslations.add(`
-20 HP · 70 Gold. Ausgewogener Start; zwei Stufen je Base-Ausbau.|20 HP · 70 gold. Balanced start; two levels per base upgrade.
+20 HP · 70 Gold. Ausgewogener Start; zwei Stufen je Base-Ausbau; Waffenstufen mit 1/2 Turmplätzen.|20 HP · 70 gold. Balanced start; two levels per base upgrade.
 Tatsächlich verursachter Schaden an Leben, Rüstung und Magieresistenz, ohne Overkill; inklusive Minen- und Geisterschaden. Schaden/Gold nutzt die bezahlten Bau- und Verbesserungskosten vor Erstattungen. Rabatte zählen, kostenlose Shrine-Upgrades kosten 0. Freeze unterstützt durch Slow. Base-Waffenschaden separat:|Actual damage dealt to health, armor and magic resistance, excluding overkill; includes mines and spirits. Damage/gold uses paid build and upgrade costs before refunds. Discounts count; free shrine upgrades cost 0. Frost Tower supports through slows. Base weapon damage separately:
 bis zu|up to
 für|for
@@ -1129,7 +1130,7 @@ HexTranslations.add(`
 Wächterbeute · Wähle deine eigene Belohnung.|Guardian loot · Choose your own reward.
 `);
 HexTranslations.add(`
-↻ Drehen|↻ Rotate
+↻ Drehen (R)|↻ Rotate (R)
 Ausgewählte Hexkarte drehen|Rotate selected hex card
 Zuerst Hex legen|Place a hex first
 Lege zuerst dein Hex, bevor du die nächste Welle startest.|Place your hex before starting the next wave.
@@ -1369,7 +1370,7 @@ Object.assign(HexTranslations.en,{
 'Feste Karte · Budget einteilen · drei Angriffe abwehren':'Fixed map · Manage your budget · Survive three assaults',
 'Nur für diese Welle. In der Bauphase: für die nächste Welle.':'For this wave only. During preparation: for the next wave.',
 'Krähenfüße · 25 Gold':'Caltrops · 25 gold','Klebeharz · 30 Gold':'Sticky resin · 30 gold','Überladung · 40 Gold':'Overcharge · 40 gold',
-'20 Spitzen × 5 Schaden · Straßenhex wählen':'20 spikes × 5 damage · Select a road hex','12 Gegner: −35 % Tempo für 4 Sekunden':'12 enemies: −35% speed for 4 seconds','Turm: +50 % Angriffstempo für 12 Sekunden':'Tower: +50% attack speed for 12 seconds',
+'20 Spitzen × 5 Schaden · Position auf der Straße wählen':'20 spikes × 5 damage · Choose a position on the road','12 Gegner: −35 % Tempo für 4 Sekunden':'12 enemies: −35% speed for 4 seconds','Turm: +50 % Angriffstempo für 12 Sekunden':'Tower: +50% attack speed for 12 seconds',
 'Heutige Mission starten':"Start today's mission"
 });
 HexTranslations.add(`

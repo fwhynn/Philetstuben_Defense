@@ -101,7 +101,7 @@
   function frame(now) {
     const elapsed = Math.max(0, Math.min(.25, (now - last) / 1000)); last = now;
     if (remote || !match) { requestAnimationFrame(frame); return; }
-    if (match.phase === 'combat') { debt += elapsed * Number(document.getElementById('speed').value); while (debt >= .05 && match.phase === 'combat') { HexDuoSession.tick(match); debt -= .05; } } else debt = 0;
+    if (match.phase === 'combat') { debt += elapsed * HexRunRuntime.PLAYBACK_RATE * Number(document.getElementById('speed').value); while (debt >= .05 && match.phase === 'combat') { HexDuoSession.tick(match); debt -= .05; } } else debt = 0;
     // Keep controls stable while clicking; map animation updates independently.
     if (match.phase !== frame.phase || match.hp !== frame.hp || match.boards.some((r, i) => r.state.gold !== frame.gold?.[i] || r.state.phase !== frame.boardPhase?.[i])) { render(); frame.phase = match.phase; frame.hp = match.hp; frame.gold = match.boards.map(r => r.state.gold); frame.boardPhase = match.boards.map(r => r.state.phase); } else for (const i of [activeBoard]) renderers[i].render(match.boards[i].state, targets(match.boards[i].state));
     requestAnimationFrame(frame);
