@@ -1,6 +1,6 @@
 [
   {
-    "version": "next",
+    "version": "1.0.0",
     "title": "Mehr Tempo und präzisere Bedienung",
     "changes": [
       "Das Grundtempo ist in Solo und Duo verdoppelt: 1× entspricht dem bisherigen 2×; alle weiteren Tempostufen bauen darauf auf.",
@@ -14,7 +14,8 @@
       "Aufgebrauchte Rüstungs- und Magieschutzleisten verschwinden. Die Lebensanzeige ist kompakter und ihr Text vertikal zentriert; die Sprachauswahl ist gleichmäßiger ausgerichtet.",
       "Die Konto-Aktionen heißen jetzt Spielstand hochladen und Spielstand herunterladen. Der zusätzliche Spielstand-Knopf im Hauptmenü entfällt.",
       "Beim Deck-Ausdünnen bleibt nur der fixierte Knopf Keine Karte entfernen oben rechts sichtbar."
-    ]
+    ],
+    "date": "2026-10-13"
   },
   {
     "version": "0.9.9",
