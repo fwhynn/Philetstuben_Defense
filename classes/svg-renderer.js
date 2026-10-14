@@ -106,7 +106,7 @@ function create(svg,commands){
     for(const mine of state.mines||[]) drawMine(mine);
     for(const e of state.enemies) drawEnemy(e);
     for(const p of state.projectiles) drawProjectile(p);
-    const nextObjectKey=JSON.stringify([[...state.map.values()].map(t=>[t.q,t.r,t.rotation,t.slots,t.income,t.buildings,t.towers.map(tw=>[tw?.type,tw?.branch,tw?.finalUpgrade,tw?.ultimate])]),state.selectedSlot,state.selectedBuilding,state.showSlotHints,state.phase]);
+    const nextObjectKey=JSON.stringify([[...state.map.values()].map(t=>[t.q,t.r,t.rotation,t.slots,t.income,t.buildings,t.towers.map(tw=>[tw?.type,tw?.branch,tw?.finalUpgrade,tw?.ultimate])]),state.selectedSlot,state.selectedBuilding,state.showSlotHints,state.phase,HexHeroes.upgradeAvailable(state)]);
     if(nextObjectKey!==objectKey){
       objectKey=nextObjectKey;objectLayer.innerHTML='';scene=objectLayer;
       for(const tile of state.map.values()) drawTile(tile,'objects');
@@ -191,6 +191,7 @@ function create(svg,commands){
       const base=document.createElementNS(NS,'circle');base.setAttribute('cx',c.x);base.setAttribute('cy',c.y);base.setAttribute('r',23);base.setAttribute('fill','#d8d2c1');base.setAttribute('stroke','#514d44');base.setAttribute('stroke-width',4);g.appendChild(base);
       g.style.cursor='pointer';g.addEventListener('click',e=>{e.stopPropagation();commands.selectBase?.();});
       const txt=text(c.x,c.y+5,'BASE',13,'#282723','700');g.appendChild(txt);scene.appendChild(g);
+      if(HexHeroes.upgradeAvailable(state)){const hint=text(c.x,c.y-35,'↑',13,'#ffffff','800');hint.setAttribute('data-base-upgrade','true');hint.setAttribute('aria-label','Basis ausbaubar');hint.setAttribute('stroke','#172019');hint.setAttribute('stroke-width',1.5);hint.setAttribute('paint-order','stroke');hint.style.pointerEvents='none';scene.appendChild(hint);}
     }
     if(tile.tunnelLabel){const t=text(c.x,c.y-16,tile.tunnelLabel+' ⇄',12,'#8ff3ff','700');t.style.pointerEvents='none';scene.appendChild(t);}
     if(tile.site){const t=text(c.x,c.y+58,HexExploration.siteLabel(tile),9,'#fff4c3','700');t.style.pointerEvents='none';scene.appendChild(t);}

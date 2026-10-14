@@ -3,6 +3,14 @@ const fs = require('node:fs'), path = require('node:path'), vm = require('node:v
 const { load } = require('./helpers/game.cjs');
 function rules() { const c = {}; for (const file of ['heroes.js', 'data.js', 'waves.js', 'combat.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../classes', file), 'utf8'), c); return vm.runInNewContext('({heroes:HexHeroes,combat:HexCombat,data:HexData})', c); }
 
+test('base upgrade hint requires an affordable upgrade in an active phase',()=>{
+ const {heroes}=rules(),s={heroId:'standard',hp:20,gold:70,phase:'build',baseUpgrades:{walls:0,weapon:0}};
+ assert.equal(heroes.upgradeAvailable(s),true);s.gold=0;assert.equal(heroes.upgradeAvailable(s),false);
+ s.gold=1000;s.phase='reward';assert.equal(heroes.upgradeAvailable(s),false);
+ s.phase='build';s.baseUpgrades={walls:2,weapon:2};assert.equal(heroes.upgradeAvailable(s),false);
+ s.baseUpgrades.weapon=1;assert.equal(heroes.upgradeAvailable(s),true);s.hp=0;assert.equal(heroes.upgradeAvailable(s),false);
+});
+
 test('weapon upgrades unlock stable base slots, with extra builder capacity and normal tower commands',()=>{
  const {heroes}=rules();
  for(const hero of ['standard','builder','merchant']){

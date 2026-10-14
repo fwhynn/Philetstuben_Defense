@@ -156,6 +156,10 @@ Kampf|Combat
 Laufende Wave|Current wave
 Wave läuft|Wave in progress
 Wave starten (Leertaste)|Start wave (Space)
+Wave starten|Start wave
+↻ Drehen|↻ Rotate
+Karte wählen · Knopf zum Drehen · Hex antippen|Choose a card · Use the rotate button · Tap a hex
+Vorschau antippen: setzen · Knopf zum Drehen|Tap preview to place · Use the rotate button
 starten (Leertaste)|start (Space)
 Leertaste|Space
 R dreht|R rotates

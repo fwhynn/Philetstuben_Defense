@@ -89,7 +89,7 @@ http.createServer((req, res) => {
   const url = new URL(req.url, 'http://x');
   let p; try { p = decodeURIComponent(url.pathname); } catch { res.writeHead(400); return res.end('Bad request'); }
   if (localApi && (p === '/api' || p.startsWith('/api/'))) return proxyApi(req, res, url);
-  if (p === '/visit' || p === '/visits') return proxyDuo(req, res, url);
+  if (p === '/visit' || p === '/visits' || p === '/rankings' || p.startsWith('/rankings/')) return proxyDuo(req, res, url);
   if (p === '/runtime-config.js') {
     const config = localApi ? { apiBaseUrl: '/api' } : {};
     res.writeHead(200, { 'Content-Type': 'text/javascript; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });

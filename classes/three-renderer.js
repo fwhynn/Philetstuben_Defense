@@ -118,6 +118,7 @@ function create(host0,commands){
   const loading=document.createElement('div');loading.textContent='Lade 3D-Modelle …';loading.style.cssText='position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:10px 16px;border-radius:10px;background:rgba(20,30,24,.85);color:#eee1c2;font:14px Inter,system-ui,sans-serif';
   const rotateHint=document.createElement('div');rotateHint.textContent='R / Mausrad-Klick · Drehen';rotateHint.style.cssText='position:absolute;display:none;transform:translate(-50%,0);padding:2px 9px;border-radius:6px;background:rgba(23,39,30,.95);border:1px solid #718a6c;color:#eee1c2;font:600 11px Inter,system-ui,sans-serif;pointer-events:none;white-space:nowrap';
   labelLayer.append(rotateHint);
+  let rotateAnchor=null;
 
   gl.shadowMap.enabled=true;gl.shadowMap.type=THREE.PCFShadowMap;gl.toneMapping=THREE.ACESFilmicToneMapping;
   host.append(gl.domElement,labelLayer,loading);
@@ -133,6 +134,7 @@ function create(host0,commands){
     const flat=Math.cos(cam.pitch)*cam.dist;
     camera.position.set(cam.x+Math.sin(cam.yaw)*flat,Math.sin(cam.pitch)*cam.dist,cam.z+Math.cos(cam.yaw)*flat);camera.lookAt(cam.x,0,cam.z);camera.updateMatrixWorld();
     sun.target.position.set(cam.x,0,cam.z);sun.position.set(cam.x+650,1100,cam.z+450);
+    if(rotateAnchor)positionRotateHint();
   }
   const ray=new THREE.Raycaster(),ndc=new THREE.Vector2(),ground=new THREE.Plane(new THREE.Vector3(0,1,0),0);
   function setRay(event){const r=dom.getBoundingClientRect();ndc.set((event.clientX-r.left)/r.width*2-1,-((event.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ndc,camera);}
@@ -542,15 +544,15 @@ function create(host0,commands){
       const id=key(tile.q,tile.r),sig=objectSig(tile);seen.add(id);
       const record=objectRecords.get(id);if(record?.sig===sig) continue;
       if(record) layer.objects.remove(record.group);
-      const group=new THREE.Group(),towers=[],buildings=[],picks=[],slotHints=[],slots=slotPositions(tile);
-      if(tile.type==='base'){const pick=new THREE.Mesh(basePick,invisible);pick.userData.pick={kind:'base'};group.add(pick);picks.push(pick);}
+      const group=new THREE.Group(),towers=[],buildings=[],picks=[],slotHints=[],slots=slotPositions(tile);let baseHint=null;
+      if(tile.type==='base'){const pick=new THREE.Mesh(basePick,invisible);pick.userData.pick={kind:'base'};group.add(pick);picks.push(pick);baseHint=new THREE.Mesh(hintGeometry,mats.hint);baseHint.position.set(0,84,0);group.add(baseHint);}
       slots.forEach((_,i)=>{const tower=tile.towers?.[i];
         if(tile.type==='base'&&baseSlotTop(i)===null){const pad=new THREE.Mesh(baseTurretPad,baseTurretMaterial);pad.position.set(slots[i].x,0,slots[i].y);pad.castShadow=true;group.add(pad);}
         if(tower){const obj=towerObject(tile,i,tower);group.add(obj.holder);towers.push(obj);picks.push(...obj.picks);}
         else if(slots[i]){const glow=new THREE.Mesh(slotDiamondGeometry,mats.slot);glow.material.depthTest=false;glow.material.depthWrite=false;glow.material.transparent=true;glow.renderOrder=50;glow.position.set(slots[i].x,22+slotLift(tile,i),slots[i].y);group.add(glow);glow.userData.lift=slotLift(tile,i);slotHints.push(glow);const pick=new THREE.Mesh(slotPick,invisible);pick.position.set(slots[i].x,slotLift(tile,i),slots[i].y);pick.userData.pick={kind:'slot',q:tile.q,r:tile.r,index:i};group.add(pick);picks.push(pick);}
       });
       for(let i=0;i<(tile.buildingSlots||0);i++){const b=buildingObject(tile,i,tile.buildings?.[i]);group.add(b.group);picks.push(...b.picks);if(b.hint)buildings.push(b);if(!tile.buildings?.[i]){const p=buildingPosition(tile,i),gem=new THREE.Mesh(slotDiamondGeometry,tile.type==='deadEnd'?mats.portalSlot:mats.buildingSlot);gem.material.depthTest=false;gem.material.depthWrite=false;gem.material.transparent=true;gem.renderOrder=50;gem.position.set(p.x,22,p.y);group.add(gem);slotHints.push(gem);}}
-      layer.objects.add(group);objectRecords.set(id,{sig,group,towers,buildings,picks,slotHints});pickDirty=true;
+      layer.objects.add(group);objectRecords.set(id,{sig,group,towers,buildings,picks,slotHints,baseHint});pickDirty=true;
     }
     for(const [id,record] of [...objectRecords]) if(!seen.has(id)){layer.objects.remove(record.group);objectRecords.delete(id);pickDirty=true;}
   }
@@ -577,8 +579,18 @@ function create(host0,commands){
       }
     }
     for(const g of layer.targets.children) for(const m of g.children) if(m.userData.glow) m.visible=!(show&&m.userData.glow===hovered);
-    if(show){rotateHint.textContent=globalThis.HexCompact?.small()?'Vorschau antippen: setzen · ↻ Drehen':'R / Mausrad-Klick · Drehen';const c=axialToWorld(target.q,target.r),screen=project({x:c.x,y:c.y+HEX+8},0);if(screen){rotateHint.style.display='block';rotateHint.style.left=screen.x+'px';rotateHint.style.top=screen.y+'px';}}
-    else rotateHint.style.display='none';
+    rotateAnchor=show?axialToWorld(target.q,target.r):null;
+    positionRotateHint();
+  }
+  function positionRotateHint(){
+    rotateHint.style.display='none';if(!rotateAnchor)return;
+    const center=project(rotateAnchor,0),corners=[];
+    for(let i=0;i<6;i++){const angle=(60*i-30)*Math.PI/180;corners.push(project({x:rotateAnchor.x+Math.cos(angle)*HEX,y:rotateAnchor.y+Math.sin(angle)*HEX},0));}
+    if(!center||corners.some(p=>!p))return;
+    const bounds=host.getBoundingClientRect(),outer=wrap.getBoundingClientRect(),left=center.x-(bounds.left-outer.left),top=Math.max(...corners.map(p=>p.y))-(bounds.top-outer.top)+6;
+    if(left<0||left>bounds.width||top<0||top>bounds.height)return;
+    rotateHint.textContent=globalThis.HexCompact?.touch?.()?'Vorschau antippen: setzen · Knopf zum Drehen':'R / Mausrad-Klick · Drehen';
+    rotateHint.style.display='block';rotateHint.style.left=left+'px';rotateHint.style.top=top+'px';
   }
 
   // ---- Auswahl, Reichweite, Upgrade-Hinweise ----
@@ -589,6 +601,7 @@ function create(host0,commands){
     [state.duoPortal,state.duoReinforcement].forEach((slot,i)=>{const tile=slot&&state.map.get(key(slot.q,slot.r)),p=tile&&slotPositions(tile)[slot.index],ring=duoRings[i];ring.visible=!!p;if(p){ring.position.set(p.x,4,p.y);ring.scale.setScalar(i===0?23:28);}});
     previewRangeFill.visible=previewRangeRing.visible=false;
     for(const record of objectRecords.values())for(const hint of record.slotHints||[])hint.visible=state.showSlotHints!==false&&['place','build','wave'].includes(state.phase)&&state.hp>0;
+    for(const record of objectRecords.values())if(record.baseHint)record.baseHint.visible=HexHeroes.upgradeAvailable(state);
     const selected=state.dragTower?state.dragSlot:state.selectedTower||state.hoverTower||(state.previewTower?state.selectedSlot:null);
     const tile=selected&&state.map.get(key(selected.q,selected.r)),tower=tile?.towers[selected.index],type=state.dragTower||tower?.type||state.previewTower;
     if(tile&&type){
@@ -893,7 +906,7 @@ function create(host0,commands){
     const box=host.getBoundingClientRect(),outer=wrap.getBoundingClientRect();
     return {x:(tmp.x+1)/2*box.width+box.left-outer.left,y:(1-tmp.y)/2*box.height+box.top-outer.top,width:outer.width,height:outer.height};
   }
-  function reset(){consumablePreview.visible=false;clearOverlays();hoverBuildingKey=null;seenShots.clear();rebuildAll();for(const obj of enemyObjects.values()) layer.dynamic.remove(obj.group);enemyObjects.clear();for(const mesh of mineObjects.values())layer.dynamic.remove(mesh);mineObjects.clear();clearConsumables();state=null;hoverPick=null;resetView(false);}
+  function reset(){consumablePreview.visible=false;clearOverlays();hoverBuildingKey=null;seenShots.clear();rebuildAll();for(const obj of enemyObjects.values()) layer.dynamic.remove(obj.group);enemyObjects.clear();for(const mesh of mineObjects.values())layer.dynamic.remove(mesh);mineObjects.clear();clearConsumables();state=null;hoverPick=null;rotateAnchor=null;positionRotateHint();resetView(false);}
 
   // ---- Animation ----
   let last=performance.now(),raf=0,lastDraw=0,slowFrames=0,renderedFrameCount=0;
@@ -905,6 +918,7 @@ function create(host0,commands){
     console.info('AutoHex TD: Grafik automatisch auf "niedrig" gestellt (?high in der Adresse stellt sie zurück).');
   }
   function loop(now){
+    for(const record of objectRecords.values())if(record.baseHint?.visible)record.baseHint.position.y=84+Math.sin(now/220)*3;
     for(const record of objectRecords.values())for(const diamond of record.slotHints||[])if(diamond.visible){diamond.rotation.y=now*.0006;diamond.position.y=22+(diamond.userData.lift||0)+Math.sin(now*.0022+diamond.position.x)*3;}
     raf=requestAnimationFrame(loop);
     // Bildrate begrenzen: 60/s während einer Wave, sonst 30/s. Schont vor allem 120/144-Hz-Bildschirme und Laptops.
@@ -1024,7 +1038,7 @@ function create(host0,commands){
     on('pointercancel',e=>{pinch.up(e);hoverBuildingKey=null;commands.hoverBuilding?.(null);drag=null;press=null;dom.style.cursor='';}),
     on('pointerleave',e=>{pointerPosition=null;dom.style.cursor='';if(e.pointerType==='touch')return;hoverBuildingKey=null;commands.hoverBuilding?.(null);if(hoverPick){commands.leavePlacement(hoverPick);hoverPick=null;if(state&&ready) render(state,targetList);}})
   ];
-  const resize=new ResizeObserver(()=>{const w=Math.max(1,host.clientWidth),h=Math.max(1,host.clientHeight);gl.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();if(state) commands.viewChanged?.();});
+  const resize=new ResizeObserver(()=>{const w=Math.max(1,host.clientWidth),h=Math.max(1,host.clientHeight);gl.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();positionRotateHint();if(state) commands.viewChanged?.();});
   resize.observe(host);applyCamera();raf=requestAnimationFrame(loop);
 
   function towerBounds(slot){

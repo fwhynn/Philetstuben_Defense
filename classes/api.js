@@ -254,7 +254,21 @@
 		return parseJson(response);
 	}
 
+	async function rankingRequest(path, { method = 'GET', body, guestToken } = {}) {
+		const response = await fetch('/rankings' + path, {
+			method, cache: 'no-store', signal: AbortSignal.timeout(10000),
+			headers: { Accept: 'application/json', ...authHeaders(), ...(body ? { 'Content-Type': 'application/json' } : {}), ...(guestToken ? { 'X-Run-Token': guestToken } : {}) },
+			...(body ? { body: JSON.stringify(body) } : {})
+		});
+		if (response.status === 404 || response.status === 503) throw Error('Die Bestenliste ist noch nicht verfügbar. Bitte später erneut versuchen.');
+		return parseJson(response);
+	}
 	globalThis.HexApi = {
+		getLeaderboard: (fronts = 1, offset = 0) => rankingRequest('?' + new URLSearchParams({ fronts, offset })),
+		getRankedResult: session => rankingRequest('/results/' + encodeURIComponent(session.runId), { guestToken: session.token }),
+		claimRankedResult: session => rankingRequest('/results/' + encodeURIComponent(session.runId) + '/claim', { method: 'POST', body: {}, guestToken: session.token }),
+		getPendingRankings: (offset = 0) => rankingRequest('/pending?' + new URLSearchParams({ offset })),
+		reviewRanking: (runId, decision, reason) => rankingRequest('/results/' + encodeURIComponent(runId) + '/review', { method: 'POST', body: { decision, reason } }),
 		baseUrl,
 		getUserById,
 		register,

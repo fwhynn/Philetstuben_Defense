@@ -1,11 +1,29 @@
 const { test } = require('node:test'), assert = require('node:assert/strict');
 const fs = require('node:fs'), path = require('node:path'), vm = require('node:vm');
+test('placement hint follows camera movement and hides when its tile leaves the view',()=>{
+ const source=fs.readFileSync(path.join(__dirname,'../classes/three-renderer.js'),'utf8');
+ const cameraFn=source.match(/  function applyCamera\(\)\{[\s\S]*?\n  \}/)[0],hintFn=source.match(/  function positionRotateHint\(\)\{[\s\S]*?\n  \}/)[0];
+ const box={left:0,top:0,width:800,height:600},context={rotateAnchor:{x:200,y:200},HEX:30,rotateHint:{style:{}},HexCompact:{touch:()=>true},cam:{x:0,z:0,dist:100,yaw:0,pitch:.5},camera:{position:{set(){}},lookAt(){},updateMatrixWorld(){}},sun:{target:{position:{set(){}}},position:{set(){}}},host:{getBoundingClientRect:()=>box},wrap:{getBoundingClientRect:()=>box}};
+ context.project=p=>({x:p.x-context.cam.x,y:p.y-context.cam.z});
+ vm.runInNewContext(hintFn+cameraFn+';globalThis.move=applyCamera;',context);
+ context.move();const before=parseFloat(context.rotateHint.style.top);assert.equal(context.rotateHint.style.left,'200px');assert.doesNotMatch(context.rotateHint.textContent,/Mausrad/);
+ context.cam.x=50;context.cam.z=40;context.move();assert.equal(context.rotateHint.style.left,'150px');assert.equal(parseFloat(context.rotateHint.style.top),before-40);
+ context.cam.x=1000;context.move();assert.equal(context.rotateHint.style.display,'none');
+});
 test('free slot hints disappear when disabled or occupied', () => {
   const { renderer, svg, state } = setup(); state.phase = 'build'; state.hand = [];
   const tile = { q: 1, r: 0, type: 'straight', roads: [0, 3], slots: 1, towers: [null] }; state.map.set('1,0', tile);
   const hints = () => svg.children[2].children.filter(p => p.attributes['data-slot-hint']);
   renderer.render(state); assert.equal(hints().length, 1); state.showSlotHints = false; renderer.render(state); assert.equal(hints().length, 0);
   state.showSlotHints = true; tile.towers[0] = { type: 'archer' }; renderer.render(state); assert.equal(hints().length, 0);
+});
+
+test('base marker follows affordability and hint visibility without enlarging the base hit area',()=>{
+ const {renderer,svg,state}=setup();Object.assign(state,{baseUpgrades:{walls:0,weapon:0},heroId:'standard',phase:'build',hand:[]});
+ const markers=()=>svg.children.flatMap(layer=>layer.children||[]).filter(n=>n.attributes['data-base-upgrade']);
+ renderer.render(state);assert.equal(markers().length,1);assert.equal(markers()[0].style.pointerEvents,'none');
+ state.gold=0;renderer.render(state);assert.equal(markers().length,0);
+ state.gold=100;state.showSlotHints=false;renderer.render(state);assert.equal(markers().length,1);assert.equal(markers()[0].textContent,'↑');
 });
 test('grid and building highlights toggle independently and building hover emits commands', () => {
   const { renderer, svg, calls, state } = setup();
@@ -22,7 +40,7 @@ test('grid and building highlights toggle independently and building hover emits
 function setup() {
   function element() { return { attributes: {}, style: {}, children: [], listeners: {}, textContent: '', set innerHTML(value) { this.children = []; }, setAttribute(name, value) { this.attributes[name] = value; }, appendChild(child) { this.children.push(child); child.parent = this; }, addEventListener(name, fn) { this.listeners[name] = fn; }, removeEventListener(name, fn) { if (this.listeners[name] === fn) delete this.listeners[name]; }, remove() { this.parent.children = this.parent.children.filter(child => child !== this); } }; }
   const context = { document: { createElementNS: element } };
-  for (const file of ['biomes.js', 'data.js', 'map.js', 'buildings.js', 'exploration.js', 'camera.js', 'svg-renderer.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../classes', file), 'utf8'), context);
+  for (const file of ['heroes.js', 'biomes.js', 'data.js', 'map.js', 'buildings.js', 'exploration.js', 'camera.js', 'svg-renderer.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../classes', file), 'utf8'), context);
   vm.runInNewContext('globalThis.adapter=HexSvgRenderer;', context);
   const svg = element(), calls = [], commands = {}; for (const name of ['placeTile', 'selectSlot', 'selectTower', 'selectBuilding', 'clearSelection', 'hoverPlacement', 'leavePlacement', 'hoverBuilding']) commands[name] = (...args) => calls.push([name, ...args]);
   const renderer = context.adapter.create(svg, commands), state = { map: new Map([['0,0', { q: 0, r: 0, type: 'base', roads: [0], slots: 0, towers: [], income: 0 }]]), landmarks: new Map(), phase: 'place', waveRunning: false, hand: ['straight'], selectedCard: 0, rotation: 0, hoveredPlacement: null, selectedSlot: null, selectedTower: null, selectedBuilding: null, previewTower: null, hp: 20, gold: 70, enemies: [], projectiles: [] };

@@ -38,5 +38,6 @@ const HexHeroes=(()=>{
     return {...stats,range:Math.round(stats.range*(state.challengeDay?.85:1)),damage:stats.damage*hero(state.heroId).weaponFactor,color:'#f1d477',damageMultipliers:{hp:1,armor:1,magic:1}};
   }
   function combatRef(state){const definition=weapon(state);return definition?{tw:state.baseWeapon,pos:{x:0,y:0},definition}:null;}
-  return {definitions,hero,initialize,offer,buy,blockReason,weapon,combatRef};
+  function upgradeAvailable(state){return ['walls','weapon'].some(kind=>!blockReason(state,kind));}
+  return {definitions,hero,initialize,offer,buy,blockReason,weapon,combatRef,upgradeAvailable};
 })();

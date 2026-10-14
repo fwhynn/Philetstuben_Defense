@@ -410,6 +410,7 @@
           <button id="exitFirstPlayerTestBtn" class="secondary hidden">Zurück zu meinem Spielstand</button>
           <button id="menuRulesBtn" class="secondary">📜 Spielregeln</button>
           <button id="menuAccountBtn" class="secondary">👤 Anmelden</button>
+          <a class="secondary" href="leaderboard.html" target="_blank" rel="noopener">Bestenliste ↗</a>
         </div>
 
         <div class="menuSound"><label class="toggle"><input id="menuSound" type="checkbox" checked /> Sounds
@@ -633,6 +634,7 @@
         <div class="profileTotals"><span>◆ <strong id="gameOverDiamonds">0</strong> Diamanten
             gesamt</span><span>Bestmarke: Wave <strong id="gameOverBest">0</strong></span></div>
         <p id="cloudSaveNote" class="cloudSaveNote hidden" role="status" aria-live="polite"></p>
+        <section id="runRanking" aria-label="Bestenlistenplatzierung" aria-live="polite"></section>
         <section id="runStatistics" aria-label="Statistik des abgeschlossenen Durchlaufs"></section>
         <div class="loadoutActions"><button id="gameOverMapBtn" class="secondary">Map anschauen</button><button
             id="gameOverMenuBtn" class="secondary">Zum Hauptmenü</button><button id="changeLoadoutBtn"
@@ -695,6 +697,7 @@
     <script src="classes/dialog-focus.js"></script>
     <script src="runtime-config.js"></script>
     <script src="classes/api.js"></script>
+    <script src="classes/leaderboard-ui.js"></script>
     <script src="classes/site-visit.js"></script>
     <script src="classes/sound.js"></script>
     <script src="classes/camera.js"></script>
