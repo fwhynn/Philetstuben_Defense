@@ -64,6 +64,9 @@ function makeTemplate(name,scene,kind){
     let turret,muzzle;scene.traverse(n=>{if(n.name==='turret'&&!turret) turret=n;if(n.name==='muzzle'&&!muzzle) muzzle=n;});
     template.turret=turret?{pos:worldPosition(turret),parts:bake(turret)}:null;template.muzzleY=muzzle?worldPosition(muzzle).y:null;
     template.parts=bake(scene,n=>n.name==='turret');
+    // Turmplätze der Waffenstufe: Oberkante der Bastion trägt den Turm.
+    const slots=[];scene.traverse(n=>{if(isSlot(n)) slots.push(n);});
+    template.slotTops=slots.sort((a,b)=>a.name.localeCompare(b.name)).map(n=>new THREE.Box3().setFromObject(n).max.y);
     return template;
   }
   if(kind==='consumables'){                                         // Verbrauchshilfen: Krähenfüße einzeln (Restladung), Überladungsring dreht sich
@@ -403,7 +406,7 @@ function create(host0,commands){
     return /soil/i.test(name)?color.multiplyScalar(.6):/foliage/i.test(name)?color.multiplyScalar(.8):color;
   }
   function slotLift(tile,index){
-    if(tile.type==='base')return 45;
+    if(tile.type==='base'){const top=baseSlotTop(index);return top===null?45:top*S;}
     const spec=tileSpec(tile),template=spec.kind==='tile'&&modelTemplate(spec.name),slot=template&&(template.slots[index]||template.slots[0]);
     return slot?Math.max(0,slot.top-STANDARD_SLOT_TOP)*S:0;
   }
@@ -421,6 +424,8 @@ function create(host0,commands){
     const walls=hero&&part('walls',levels.walls||0),weapon=hero&&part('weapon',levels.weapon||0);
     return {walls,weapon,key:(walls||'-')+'/'+(weapon||'-')};
   }
+  // Höhe eines Basis-Turmplatzes aus dem Waffenmodell; null = kein Modell, dann steht dort die graue Ersatzsäule.
+  function baseSlotTop(index){const weapon=baseUpgradeParts().weapon;return (weapon&&templates.get(weapon)?.slotTops?.[index])??null;}
   function attachBaseUpgrades(holder,tile,{walls,weapon}){
     const model=new THREE.Group();model.scale.setScalar(S);holder.add(model);
     if(walls) addParts(model,templates.get(walls).parts);
@@ -530,7 +535,7 @@ function create(host0,commands){
     if(hint){hint.position.y=50;hint.visible=false;group.add(hint);}
     return {group,picks,hint,tile,index};
   }
-  function objectSig(tile){return JSON.stringify([tile.slots,tile.buildingSlots,tile.type,tile.rotation,(tile.towers||[]).map(t=>t&&[t.type,t.branch,t.finalUpgrade,t.ultimate,t.level,t.tileType]),(tile.buildings||[]).map(b=>b&&b.type)]);}
+  function objectSig(tile){return JSON.stringify([tile.type==='base'?baseUpgradeParts().key:'',tile.slots,tile.buildingSlots,tile.type,tile.rotation,(tile.towers||[]).map(t=>t&&[t.type,t.branch,t.finalUpgrade,t.ultimate,t.level,t.tileType]),(tile.buildings||[]).map(b=>b&&b.type)]);}
   function syncObjects(){
     const seen=new Set();
     for(const tile of state.map.values()){
@@ -540,7 +545,7 @@ function create(host0,commands){
       const group=new THREE.Group(),towers=[],buildings=[],picks=[],slotHints=[],slots=slotPositions(tile);
       if(tile.type==='base'){const pick=new THREE.Mesh(basePick,invisible);pick.userData.pick={kind:'base'};group.add(pick);picks.push(pick);}
       slots.forEach((_,i)=>{const tower=tile.towers?.[i];
-        if(tile.type==='base'){const pad=new THREE.Mesh(baseTurretPad,baseTurretMaterial);pad.position.set(slots[i].x,0,slots[i].y);pad.castShadow=true;group.add(pad);}
+        if(tile.type==='base'&&baseSlotTop(i)===null){const pad=new THREE.Mesh(baseTurretPad,baseTurretMaterial);pad.position.set(slots[i].x,0,slots[i].y);pad.castShadow=true;group.add(pad);}
         if(tower){const obj=towerObject(tile,i,tower);group.add(obj.holder);towers.push(obj);picks.push(...obj.picks);}
         else if(slots[i]){const glow=new THREE.Mesh(slotDiamondGeometry,mats.slot);glow.material.depthTest=false;glow.material.depthWrite=false;glow.material.transparent=true;glow.renderOrder=50;glow.position.set(slots[i].x,22+slotLift(tile,i),slots[i].y);group.add(glow);glow.userData.lift=slotLift(tile,i);slotHints.push(glow);const pick=new THREE.Mesh(slotPick,invisible);pick.position.set(slots[i].x,slotLift(tile,i),slots[i].y);pick.userData.pick={kind:'slot',q:tile.q,r:tile.r,index:i};group.add(pick);picks.push(pick);}
       });

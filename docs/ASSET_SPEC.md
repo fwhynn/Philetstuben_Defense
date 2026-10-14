@@ -175,6 +175,7 @@ Vor jedem Durchlauf wählt man eine von drei Festungen. Jede hat ihr eigenes Gru
 - **Straße:** eine Straße von der Mitte zur Ostkante (Gruppe `road`, Materialien `road`/`road_verge`), Tor nach Osten. Bei „Zwei Fronten“ blendet das Spiel sie aus und zeichnet zwei Straßen in zufällige Richtungen. Deshalb die Festung **kompakt in der Mitte** halten (Kern bis etwa 0,55 Radius, Mauern bis etwa 0,7) und rundherum Fläche frei lassen.
 - **Waffe:** drehbarer Teil als Objekt **`turret`** (Pivot senkrecht in der Mitte, Schussrichtung +X), Mündung als leeres Objekt **`muzzle`**. Oben mittig, etwa 0,45–0,6 hoch. Die Waffe richtet sich im Spiel auf Gegner aus, hat Rückstoß, und Geschosse starten an der Mündung.
 - **Höhe** möglichst unter 0,7. Boden, Erde und Grün mit `grass`/`soil`/`foliage` benennen (Biom-Einfärbung).
+- **Turmplätze:** Jede Waffenstufe enthält die Bastionen aller bis dahin freigeschalteten Plätze als Gruppen `tower_slot_1` … `tower_slot_N` (Standardfestung und Händlerstadt 1/2, Festungsbauer 2/3/4). Positionen (X | Y): 1 (−0,641 | 0,370), 2 (−0,641 | −0,370), 3 (0 | 0,740), 4 (0 | −0,740). Die Oberkante der Gruppe (derzeit 0,32) ist die Standhöhe des Turms; darüber im Radius 0,29 bleibt alles frei. Grundmodell und Mauern lassen diese Plätze frei. Fehlt ein Platz im Modell, zeichnet das Spiel dort eine graue Ersatzsäule.
 
 ---
 
