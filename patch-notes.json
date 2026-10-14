@@ -1,5 +1,19 @@
 [
   {
+    "version": "next",
+    "title": "Übersichtlichere Bedienung auf Handy und Tablet",
+    "changes": [
+      "Die Bedienoberfläche ist auf Handys, Tablets und mittleren Fenstergrößen übersichtlicher gruppiert. Hinweise zu neu entdeckten Biomen überlagern die übrigen Meldungen nicht mehr.",
+      "Die Kartenauswahl beim Erweitern des Decks ist auf kleinen Bildschirmen kompakter. Turm- und Gebäudeplätze werden mit Zahl und Icon angezeigt; Beschriftungen bleiben erhalten, solange sie in die Karte passen.",
+      "Auf kleinen Bildschirmen schließt sich das Turmbaumenü nach erfolgreichem Bau automatisch. Goldgewinne sind auch bei geschlossenem Werte-Tab sofort sichtbar.",
+      "Auf Touch-Geräten entfallen Hinweise auf Leertaste und R bei Wellenstart, Drehen und Kartenplatzierung.",
+      "Der Platzierungshinweis bleibt beim Verschieben und Zoomen der Karte unter dem ausgewählten Hex.",
+      "Die Basis zeigt bei einem bezahlbaren Ausbau denselben Upgrademarker wie Türme.",
+      "Die Angriffsfokus-Auswahl behält ihre Überschrift, verzichtet aber auf den längeren Erklärungstext. Im Turmmenü kennzeichnet ein Icon das Biom.",
+      "Die Bestenlistenseite ist vom Hauptmenü erreichbar. Die automatische Wertung von Durchläufen ist noch nicht freigeschaltet."
+    ]
+  },
+  {
     "version": "1.0.1",
     "title": "Turmplätze auf der Festung",
     "changes": [

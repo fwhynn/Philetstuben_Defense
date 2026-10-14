@@ -1,6 +1,6 @@
 # Accountgebundene Bestenliste – Umsetzung und offene Integration
 
-Stand: 14.10.2026. **Oberflächen vorbereitet, automatische Wertung noch nicht aktiviert oder veröffentlicht.**
+Stand: 14.10.2026. **Oberflächen vorbereitet, automatische Wertung noch nicht aktiviert.**
 
 ## Festgelegtes Verhalten
 
