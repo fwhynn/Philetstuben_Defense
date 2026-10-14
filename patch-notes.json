@@ -1,6 +1,6 @@
 [
   {
-    "version": "next",
+    "version": "1.0.2",
     "title": "Übersichtlichere Bedienung auf Handy und Tablet",
     "changes": [
       "Die Bedienoberfläche ist auf Handys, Tablets und mittleren Fenstergrößen übersichtlicher gruppiert. Hinweise zu neu entdeckten Biomen überlagern die übrigen Meldungen nicht mehr.",
@@ -11,7 +11,8 @@
       "Die Basis zeigt bei einem bezahlbaren Ausbau denselben Upgrademarker wie Türme.",
       "Die Angriffsfokus-Auswahl behält ihre Überschrift, verzichtet aber auf den längeren Erklärungstext. Im Turmmenü kennzeichnet ein Icon das Biom.",
       "Die Bestenlistenseite ist vom Hauptmenü erreichbar. Die automatische Wertung von Durchläufen ist noch nicht freigeschaltet."
-    ]
+    ],
+    "date": "2026-10-14"
   },
   {
     "version": "1.0.1",
