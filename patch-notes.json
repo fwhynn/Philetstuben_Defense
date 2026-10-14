@@ -1,12 +1,13 @@
 [
   {
-    "version": "next",
+    "version": "1.0.1",
     "title": "Turmplätze auf der Festung",
     "changes": [
       "Die Turmplätze auf der Basis haben eigene Bastionen für alle drei Festungen, in der normalen und der Sakura-Edition. Türme stehen jetzt sichtbar auf diesen Bastionen statt auf grauen Platzhaltern.",
       "Die Basis-Turmplätze liegen an neuen Stellen im Nordwesten, Südwesten, Norden und Süden der Festung, abseits der Straße nach Osten.",
       "Die Festungsmodelle wurden überarbeitet: Deko und Mauern des Festungsbauers lassen die Turmplätze frei."
-    ]
+    ],
+    "date": "2026-10-14"
   },
   {
     "version": "1.0.0",
