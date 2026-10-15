@@ -3,7 +3,9 @@
     "version": "next",
     "title": "Öffentliche Bestenliste im Hauptmenü",
     "changes": [
-      "Die Bestenliste öffnet sich jetzt direkt im Hauptmenü und zeigt die Top 100 aller Accounts mit Cloud-Spielstand: beste Welle, Durchläufe, besiegte Gegner, Bosse und Diamanten. Oben lässt sich die Sortierung wechseln; angemeldet ist der eigene Eintrag hervorgehoben. Die Werte stammen aus hochgeladenen Spielständen und sind ungeprüft."
+      "Die Bestenliste öffnet sich jetzt direkt im Hauptmenü und zeigt die Top 100 aller Accounts mit Cloud-Spielstand: beste Welle, Durchläufe, besiegte Gegner, Bosse und Diamanten. Oben lässt sich die Sortierung wechseln; angemeldet ist der eigene Eintrag hervorgehoben. Die Werte stammen aus hochgeladenen Spielständen und sind ungeprüft.",
+      "Die Bastionen der Festung, auf denen die Basis-Türme stehen, sind niedriger. Türme auf der Basis stehen dadurch näher am Boden.",
+      "Auf der Langen Straße liegen die beiden Turmplätze jetzt weiter in der Mitte, in den Buchten der Straße, statt am Rand des Hex-Felds."
     ]
   },
   {

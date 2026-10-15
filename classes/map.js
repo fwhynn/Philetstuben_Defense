@@ -40,7 +40,7 @@ const HexMap=(()=>{
     cross: [[-14,-24],[14,24]],
     village: [[4,-40]],
     empty: [[-14,-24],[-30,24]],
-    longRoad: [[12,-32],[-12,32]],
+    longRoad: [[-13,-20.5],[13,20.5]],   // tower_slot_1/2 im Modell: in den Buchten der Zickzack-Straße
     highGround: [[14,-24]],
     grove: [[2,32]],
     citadel: [[14,-24],[14,24]],

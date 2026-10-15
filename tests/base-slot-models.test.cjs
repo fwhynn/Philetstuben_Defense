@@ -49,3 +49,14 @@ test('base towers stand on the model bastion and the grey placeholder only fills
   context.templates.clear();
   assert.equal(vm.runInContext('slotLift',context)(base,0),45);
 });
+
+test('long road tower slots in code match the model in both editions',()=>{
+  const context={};vm.createContext(context);
+  for(const file of ['data.js','map.js'])vm.runInContext(fs.readFileSync(path.join(__dirname,'../classes',file),'utf8'),context);
+  const expected=vm.runInContext('HexMap',context).slotOffsets('longRoad',2);
+  for(const folder of ['assets/tiles','assets/sakura/tiles']){
+    const file=path.join(__dirname,'..',folder,'tile_longRoad.glb'),slots=modelSlots(file);
+    assert.equal(slots.length,2,file);
+    slots.forEach((slot,i)=>{assert.ok(Math.hypot(slot.x-expected[i].x,slot.y-expected[i].y)<1,`${file} ${slot.name}`);});
+  }
+});
