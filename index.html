@@ -410,7 +410,7 @@
           <button id="exitFirstPlayerTestBtn" class="secondary hidden">Zurück zu meinem Spielstand</button>
           <button id="menuRulesBtn" class="secondary">📜 Spielregeln</button>
           <button id="menuAccountBtn" class="secondary">👤 Anmelden</button>
-          <a class="secondary" href="leaderboard.html" target="_blank" rel="noopener">Bestenliste ↗</a>
+          <button id="menuLeaderboardBtn" class="secondary">🏆 Bestenliste</button>
         </div>
 
         <div class="menuSound"><label class="toggle"><input id="menuSound" type="checkbox" checked /> Sounds
@@ -428,6 +428,26 @@
             Esc</button>
         </div>
         <div id="patchNotesContent" aria-live="polite"></div>
+      </section>
+    </div>
+    <div id="leaderboardOverlay" class="overlay hidden" role="dialog" aria-modal="true"
+      aria-labelledby="leaderboardTitle">
+      <section class="modeBox leaderboardBox">
+        <div class="panelHead">
+          <h2 id="leaderboardTitle">🏆 Bestenliste</h2><button id="closeLeaderboardBtn" class="secondary">Schließen ·
+            Esc</button>
+        </div>
+        <div class="leaderboardSorts" role="group" aria-label="Sortieren nach">
+          <button type="button" data-leaderboard-sort="highest_wave" aria-pressed="true">Beste Welle</button>
+          <button type="button" data-leaderboard-sort="runs_played" aria-pressed="false">Durchläufe</button>
+          <button type="button" data-leaderboard-sort="normal_kills" aria-pressed="false">Gegner</button>
+          <button type="button" data-leaderboard-sort="bosses_killed" aria-pressed="false">Bosse</button>
+          <button type="button" data-leaderboard-sort="diamonds_earned" aria-pressed="false">Diamanten</button>
+        </div>
+        <p id="leaderboardStatus" class="leaderboardStatus" role="status" aria-live="polite"></p>
+        <div id="leaderboardContent" class="leaderboardTable"></div>
+        <small class="leaderboardNote">Top 100 aller Accounts mit Cloud-Spielstand. Ungeprüft: Die Werte stammen aus
+          hochgeladenen Spielständen.</small>
       </section>
     </div>
     <div id="saveOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="saveTitle">
@@ -698,6 +718,7 @@
     <script src="runtime-config.js"></script>
     <script src="classes/api.js"></script>
     <script src="classes/leaderboard-ui.js"></script>
+    <script src="classes/public-leaderboard.js"></script>
     <script src="classes/site-visit.js"></script>
     <script src="classes/sound.js"></script>
     <script src="classes/camera.js"></script>

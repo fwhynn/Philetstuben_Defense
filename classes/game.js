@@ -1397,6 +1397,7 @@ R dreht die Karte, dann Feld anklicken.`;
   document.addEventListener('keydown', e => {
     if (e.ctrlKey && !e.altKey && !e.metaKey && e.key.toLowerCase() === 'f') { e.preventDefault(); if (!e.repeat) toggleFps(); return; }
     if (document.getElementById('patchNotesOverlay')?.classList.contains('hidden') === false) return;
+    if (document.getElementById('leaderboardOverlay')?.classList.contains('hidden') === false) return;
     if (state.phase === 'victory') { if (e.key === 'Escape') { e.preventDefault?.(); inspectCampaign(!document.getElementById('campaignVictory').classList.contains('inspectCampaign')); } return; }
     if (e.key === 'Escape' && document.getElementById('consumableMenu').open) { document.getElementById('consumableMenu').open = false; e.preventDefault?.(); return; }
     if (e.key === 'Escape' && cancelConsumableSelection(e)) return;

@@ -1,5 +1,12 @@
 [
   {
+    "version": "next",
+    "title": "Öffentliche Bestenliste im Hauptmenü",
+    "changes": [
+      "Die Bestenliste öffnet sich jetzt direkt im Hauptmenü und zeigt die Top 100 aller Accounts mit Cloud-Spielstand: beste Welle, Durchläufe, besiegte Gegner, Bosse und Diamanten. Oben lässt sich die Sortierung wechseln; angemeldet ist der eigene Eintrag hervorgehoben. Die Werte stammen aus hochgeladenen Spielständen und sind ungeprüft."
+    ]
+  },
+  {
     "version": "1.0.2",
     "title": "Übersichtlichere Bedienung auf Handy und Tablet",
     "changes": [

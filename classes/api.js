@@ -254,6 +254,18 @@
 		return parseJson(response);
 	}
 
+	// Öffentliche Topliste der Account-API: ohne Token, damit sie für alle gleich ist und gecacht werden darf.
+	async function getPublicLeaderboard(sort = 'highest_wave') {
+		const response = await fetch(`${baseUrl}/leaderboard?${new URLSearchParams({ sort })}`, {
+			method: 'GET',
+			headers: {
+				Accept: 'application/json'
+			}
+		});
+
+		return parseJson(response);
+	}
+
 	async function rankingRequest(path, { method = 'GET', body, guestToken } = {}) {
 		const response = await fetch('/rankings' + path, {
 			method, cache: 'no-store', signal: AbortSignal.timeout(10000),
@@ -281,6 +293,7 @@
 		clearPresence,
 		getAdminStats,
 		getAdminPlayers,
+		getPublicLeaderboard,
 		getSiteVisits,
 		isLoggedIn: () => !!getToken(),
 	};

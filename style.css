@@ -721,3 +721,13 @@ body:has(#biomeIntro:not(.hidden)) .biomeTooltip{display:none!important}
 
 .card .slots,.handDock .hand .card .slots{min-width:0;max-width:100%;white-space:nowrap;overflow-wrap:normal}
 .card .slots.compactSlots .slotLabel{display:none}
+
+.leaderboardBox{max-height:88dvh;text-align:left}.leaderboardBox>.panelHead{position:sticky;top:-28px;margin:-28px -28px 0;padding:20px 28px 12px;background:var(--ui-surface);z-index:2}
+.leaderboardSorts{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}.leaderboardSorts button{flex:1 1 auto;min-height:40px;padding:6px 12px;background:var(--ui-button);border:1px solid #4d684f;border-radius:999px;color:var(--ui-text);font-size:14px}.leaderboardSorts button[aria-pressed="true"]{background:#5b4a22;border-color:var(--accent);color:#fff2c8;font-weight:700}
+.leaderboardStatus{margin:8px 0;color:var(--ui-muted)}.leaderboardStatus:empty{display:none}.leaderboardNote{display:block;margin-top:12px;color:var(--ui-muted);line-height:1.4}
+.leaderboardTable{overflow-x:auto;border:1px solid #33473a;border-radius:12px}.leaderboardTable table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.leaderboardTable th,.leaderboardTable td{padding:9px 10px;text-align:right;white-space:nowrap;border-bottom:1px solid #2c3d31}.leaderboardTable th{position:sticky;top:0;background:#24342a;color:var(--ui-muted);font-size:12px;font-weight:700}
+.leaderboardTable .rank{width:3.5em;text-align:center}.leaderboardTable .name{text-align:left;max-width:14em;overflow:hidden;text-overflow:ellipsis}.leaderboardTable .sorted{color:var(--accent);font-weight:700}.leaderboardTable th.sorted{color:var(--accent)}
+.leaderboardTable tbody tr:nth-child(even){background:#ffffff06}.leaderboardTable tr.top1 .rank{color:#ffd35c;font-weight:800}.leaderboardTable tr.top2 .rank{color:#d9e1e6;font-weight:800}.leaderboardTable tr.top3 .rank{color:#d99a5b;font-weight:800}
+.leaderboardTable tr.own{background:#3b4a24;outline:1px solid var(--accent);outline-offset:-1px}
+@media(max-width:600px){.leaderboardBox{padding:18px}.leaderboardBox>.panelHead{top:-18px;margin:-18px -18px 0;padding:14px 18px 10px}.leaderboardTable th,.leaderboardTable td{padding:8px 7px;font-size:13px}.leaderboardSorts button{font-size:13px;padding:6px 10px}}

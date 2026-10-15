@@ -1456,3 +1456,16 @@ In Vorbereitung|In preparation
 Noch nicht veröffentlicht|Not yet released
 Patch Notes konnten nicht geladen werden. Bitte später erneut öffnen.|Could not load patch notes. Please try again later.
 `);
+
+HexTranslations.add(`
+🏆 Bestenliste|🏆 Leaderboard
+Bestenliste|Leaderboard
+Sortieren nach|Sort by
+Beste Welle|Best wave
+Rang|Rank
+Bestenliste wird geladen …|Loading leaderboard …
+Noch keine Einträge in dieser Kategorie.|No entries in this category yet.
+Bestenliste konnte nicht geladen werden. Bitte später erneut öffnen.|Could not load the leaderboard. Please try again later.
+Top 100 aller Accounts mit Cloud-Spielstand. Ungeprüft: Die Werte stammen aus hochgeladenen Spielständen.|Top 100 of all accounts with a cloud save. Unverified: values come from uploaded saves.
+Schließen · Esc|Close · Esc
+`);
