@@ -143,3 +143,7 @@ curl -s $API/me -H "Authorization: Bearer $TOKEN" -o /dev/null -w '%{http_code}\
 ## Einführungsfortschritt (08.10.2026)
 
 Das exportierte Profil enthält zusätzlich `introduction: {version: 1, bestWave: 0, skipped: false, legacy: false}`. Das Backend muss dieses Feld im Spielstand unverändert speichern und zurückliefern. bestWave enthält die höchste abgeschlossene Standardwelle (0–35); neue Profile können zunächst nur zwei bis vier Einträge in activeLoadout haben. Ältere Profile ohne introduction bleiben als Bestandsprofile vollständig zugänglich. Siehe [Einführung](INTRODUCTION.md).
+
+## Zwischenstände und Audio-Einstellungen
+
+Der Profil-Export kann zusätzlich runAutosave (Snapshot, Tutorialzustand, savedAt) und audioSettings ({enabled, volume: 0–100}) enthalten. runAutosave: null löscht einen beendeten Zwischenstand. Ältere Exporte ohne diese Felder bleiben kompatibel. Der Client sichert nach abgeschlossenen Solo-Wellen zusätzlich lokal und überträgt angemeldet über PUT /saves. Beim Laden wird ein laufender Durchlauf weiterhin nicht ersetzt. Die Live-Unterstützung der zusätzlichen Felder und des bestehenden 2-MB-Limits muss am Account-Backend noch bestätigt werden; lokale Tests verwenden einen API-Testadapter. Keine Ranglistenverifikation durch diese Snapshots.

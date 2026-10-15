@@ -13,6 +13,7 @@
   </head>
 
   <body>
+    <button id="devToggleBtn" class="devToggle hidden" type="button" aria-pressed="false">Dev: aus</button>
     <div id="fpsCounter" class="fpsCounter hidden" data-no-translate aria-label="FPS">FPS: —</div>
     <div id="app">
       <!-- Vollbild-Spielfeld -->
@@ -66,7 +67,7 @@
       <nav class="compactToolbar" aria-label="Spielsteuerung"><button data-compact="menu"
           aria-expanded="false">Menü</button><button data-compact="stats" aria-expanded="false">Werte</button><button
           data-compact="towers" aria-expanded="false">Türme</button><button data-compact="biomes"
-          aria-expanded="false">Biome</button><button id="compactConsumables" aria-expanded="false">Hilfen</button>
+          aria-expanded="false">Biome</button><button id="compactConsumables" aria-controls="consumableMenu" aria-expanded="false">Hilfen</button>
       </nav>
       <details id="duoHud" class="duoHud hidden">
         <summary id="duoSummary">Duo · Team</summary>
@@ -437,17 +438,15 @@
           <h2 id="leaderboardTitle">🏆 Bestenliste</h2><button id="closeLeaderboardBtn" class="secondary">Schließen ·
             Esc</button>
         </div>
-        <div class="leaderboardSorts" role="group" aria-label="Sortieren nach">
-          <button type="button" data-leaderboard-sort="highest_wave" aria-pressed="true">Beste Welle</button>
-          <button type="button" data-leaderboard-sort="runs_played" aria-pressed="false">Durchläufe</button>
-          <button type="button" data-leaderboard-sort="normal_kills" aria-pressed="false">Gegner</button>
-          <button type="button" data-leaderboard-sort="bosses_killed" aria-pressed="false">Bosse</button>
-          <button type="button" data-leaderboard-sort="diamonds_earned" aria-pressed="false">Diamanten</button>
+        <div class="leaderboardModes" role="group" aria-label="Spielmodus">
+          <button type="button" data-leaderboard-mode="single" aria-pressed="true">Eine Front</button>
+          <button type="button" data-leaderboard-mode="dual" aria-pressed="false">Zwei Fronten</button>
+          <button type="button" data-leaderboard-mode="daily" aria-pressed="false">Tägliche Herausforderung</button>
+          <button type="button" data-leaderboard-mode="duo" aria-pressed="false">Duo-Mode</button>
         </div>
         <p id="leaderboardStatus" class="leaderboardStatus" role="status" aria-live="polite"></p>
         <div id="leaderboardContent" class="leaderboardTable"></div>
-        <small class="leaderboardNote">Top 100 aller Accounts mit Cloud-Spielstand. Ungeprüft: Die Werte stammen aus
-          hochgeladenen Spielständen.</small>
+        <small class="leaderboardNote">Eine Front: Top 100 aus gespeicherten Account-Spielständen (ungeprüft). Weitere Modi folgen, sobald deren Daten verfügbar sind.</small>
       </section>
     </div>
     <div id="saveOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="saveTitle">

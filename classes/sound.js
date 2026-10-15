@@ -4,6 +4,17 @@ const HexAudio=(()=>{
   const recent=new Map();
   const toggle=document.getElementById('soundEnabled');
   const volume=document.getElementById('soundVolume');
+  const storage=globalThis.HexFirstPlayerTest?.active?HexFirstPlayerTest.storage:localStorage;
+  const settings=()=>({enabled:toggle.checked,volume:Number(volume.value)});
+  function persist(){try{storage.setItem('autohex-audio-v1',JSON.stringify(settings()));}catch{}}
+  function applySettings(value){
+    if(typeof value?.enabled==='boolean')toggle.checked=value.enabled;
+    if(typeof value?.volume==='number'&&Number.isFinite(value.volume))volume.value=String(Math.max(0,Math.min(100,value.volume)));
+    const menu=document.getElementById('menuSound');if(menu)menu.checked=toggle.checked;
+    if(master)master.gain.value=toggle.checked?Number(volume.value)/100:0;
+    persist();
+  }
+  try{const saved=JSON.parse(storage.getItem('autohex-audio-v1')||'null');if(saved)applySettings(saved);}catch{}
   function unlock(){
     if(!toggle.checked) return;
     try{
@@ -16,8 +27,8 @@ const HexAudio=(()=>{
   }
   document.addEventListener('pointerdown',unlock);
   document.addEventListener('keydown',unlock);
-  toggle.addEventListener('change',()=>{if(master) master.gain.value=toggle.checked?Number(volume.value)/100:0;if(toggle.checked) unlock();});
-  volume.addEventListener('input',()=>{if(master) master.gain.value=toggle.checked?Number(volume.value)/100:0;});
+  toggle.addEventListener('change',()=>{persist();if(master) master.gain.value=toggle.checked?Number(volume.value)/100:0;if(toggle.checked) unlock();});
+  volume.addEventListener('input',()=>{persist();if(master) master.gain.value=toggle.checked?Number(volume.value)/100:0;});
   const effects={
     archer:[900,230,.09,'triangle',.13],catapult:[150,45,.20,'triangle',.28],
     freeze:[1800,850,.16,'sine',.09],
@@ -41,5 +52,5 @@ const HexAudio=(()=>{
     oscillator.onended=()=>{oscillator.disconnect();gain.disconnect();voices--;};
     oscillator.start(now);oscillator.stop(now+duration+.01);
   }
-  return {play};
+  return {play,settings,applySettings};
 })();

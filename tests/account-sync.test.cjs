@@ -14,6 +14,7 @@ function fakeApi(serverSave = null) {
     isLoggedIn() { return this.loggedIn; },
     async login(username) { this.loggedIn = true; return { id: 1, username }; },
     async register(username) { this.loggedIn = true; return { id: 2, username }; },
+    async pulsePresence() {},
     async logout() { this.loggedIn = false; },
     async currentUser() { return this.loggedIn ? { id: 1, username: 'phil' } : null; },
     async getSave() { return this.server; },
@@ -62,4 +63,13 @@ test('cloud restore retains higher guest learning milestones without transferrin
  const {a,storage,document}=load({accountApi:api,initialProfile:{introduction:{...introduction,bestWave:15},diamonds:1},initialStorage:{'tutorial-v1':''}});
  await submit(document,'login');endRun(a);await flush();const profile=JSON.parse(storage.get('hex-bastion-profile-v1'));
  assert.equal(profile.introduction.bestWave,15);assert.equal(profile.introduction.legacy,false);assert.equal(profile.activeLoadout.length,5);assert.equal(profile.diamonds,7);assert.equal(api.puts.at(-1).profile.introduction.bestWave,15);
+});
+
+test('account upload includes completed-wave checkpoint and another browser can resume it',async()=>{
+ const api=fakeApi(),view=load({accountApi:api});await submit(view.document,'register');
+ Object.assign(view.a.state,{wave:2,phase:'wave',waveRunning:true,enemies:[],pendingSpawns:0,spawnQueue:[]});view.a.endWave();
+ await view.elements.get('accountSaveServerBtn').listeners.click();assert.ok(api.server.runAutosave?.checkpoint);assert.equal(api.server.format,'autohex-profile');
+ const remote=fakeApi(api.server),next=load({bootToMenu:true,accountApi:remote});await submit(next.document,'login');
+ assert.equal(next.elements.get('menuContinueBtn').classList.contains('hidden'),false);next.elements.get('menuContinueBtn').listeners.click();
+ assert.equal(next.a.state.runId,view.a.state.runId);assert.equal(next.a.state.lastCompletedWave,2);
 });

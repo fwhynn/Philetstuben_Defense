@@ -36,7 +36,7 @@ test('developer tutorial resets progress and normal gameplay has no scenario acc
 
 test('scenario URLs are allowlisted, local-only, excluded from Duo and removed on exit',()=>{
  for(const hostname of ['localhost','127.0.0.1','[::1]','autohextd.autophil.lol'])for(const duo of [false,true]){
-  const values=new Map([['autohex-first-player-test:profile','test'],['hex-bastion-profile-v1','real']]);let destination=null;
+  const values=new Map([['autohex-dev-enabled','true'],['autohex-first-player-test:profile','test'],['hex-bastion-profile-v1','real']]);let destination=null;
   const href=`http://${hostname}/?svg&first-player-test=1&dev-scenario=upgrade${duo?'#duo=token':''}`;
   const url=new URL(href),context={URL,URLSearchParams,location:{hostname,search:url.search,hash:url.hash,href,assign:value=>destination=value},localStorage:{get length(){return values.size;},key:i=>[...values.keys()][i],getItem:k=>values.get(k),setItem:(k,v)=>values.set(k,v),removeItem:k=>values.delete(k)}};
   vm.runInNewContext(fs.readFileSync('classes/first-player-test.js','utf8'),context);
@@ -49,11 +49,28 @@ test('scenario URLs are allowlisted, local-only, excluded from Duo and removed o
 });
 test('first-player reset clears only its own namespace and is unavailable on the public host',()=>{
  for(const hostname of ['localhost','autohextd.autophil.lol']){
-  const values=new Map([['hex-bastion-profile-v1','real'],['autohex-first-player-test:profile','test'],['hex-bastion-auth-token','private']]);let destination=null;
+  const values=new Map([['autohex-dev-enabled','true'],['hex-bastion-profile-v1','real'],['autohex-first-player-test:profile','test'],['hex-bastion-auth-token','private']]);let destination=null;
   const context={URL,URLSearchParams,location:{hostname,search:'?first-player-test=1',hash:'',href:'http://'+hostname+'/?first-player-test=1',assign:url=>destination=url},localStorage:{get length(){return values.size;},key:i=>[...values.keys()][i],getItem:k=>values.get(k),setItem:(k,v)=>values.set(k,v),removeItem:k=>values.delete(k)}};
   vm.runInNewContext(fs.readFileSync('classes/first-player-test.js','utf8'),context);context.HexFirstPlayerTest.start();assert.equal(values.get('hex-bastion-profile-v1'),'real');assert.equal(values.get('hex-bastion-auth-token'),'private');assert.equal(context.HexFirstPlayerTest.active,hostname==='localhost');assert.equal(values.has('autohex-first-player-test:profile'),hostname!=='localhost');assert.equal(!!destination,hostname==='localhost');
  }
 });
 test('every new Standard run resets a stored Sakura style to Normal',()=>{
  let edition='sakura';const {a}=load({assetEdition:{get:()=>edition,set:value=>edition=value}});assert.equal(edition,'normal');edition='sakura';a.newRun();assert.equal(edition,'normal');
+});
+
+test('Dev is off by default, gates URL scenarios and cannot be enabled on a public host',()=>{
+ for(const hostname of ['localhost','autohextd.autophil.lol']){
+  const values=new Map(),destinations=[],context={URL,URLSearchParams,location:{hostname,search:'?first-player-test=1&dev-scenario=upgrade',hash:'',href:'http://'+hostname+'/?first-player-test=1&dev-scenario=upgrade',assign:url=>destinations.push(url)},localStorage:{getItem:k=>values.get(k),setItem:(k,v)=>values.set(k,v)}};
+  const source=fs.readFileSync('classes/first-player-test.js','utf8');vm.runInNewContext(source,context);
+  assert.equal(context.HexFirstPlayerTest.enabled,false);assert.equal(context.HexFirstPlayerTest.active,false);context.HexFirstPlayerTest.start();assert.equal(destinations.length,0);
+  context.HexFirstPlayerTest.toggle();assert.equal(context.HexFirstPlayerTest.enabled,hostname==='localhost');
+  vm.runInNewContext(source,context);assert.equal(context.HexFirstPlayerTest.active,hostname==='localhost');
+  context.HexFirstPlayerTest.toggle();assert.equal(context.HexFirstPlayerTest.enabled,false);
+  if(hostname==='localhost'){assert.equal(new URL(destinations[0]).searchParams.has('first-player-test'),false);}
+ }
+});
+
+test('first-player start button is hidden when local Dev mode is switched off',()=>{
+ const view=load({firstPlayerTest:true});view.elements.get('openMainMenuBtn').listeners.click();assert.equal(view.elements.get('firstPlayerTestBtn').classList.contains('hidden'),false);
+ view.elements.get('devToggleBtn').listeners.click();assert.equal(view.elements.get('firstPlayerTestBtn').classList.contains('hidden'),true);assert.equal(view.elements.get('menuDeveloperTools').classList.contains('hidden'),true);
 });

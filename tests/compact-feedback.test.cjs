@@ -21,3 +21,19 @@ test('compact gold feedback lives outside the hidden HUD and expires even withou
  let removed=false;floats[0].remove=()=>{removed=true;};for(const fn of [...timers.values()])fn();assert.equal(removed,true);
  a.renderAll();assert.equal(elements.get('app').children.filter(c=>c.className==='goldFloat goldFloatCompact').length,1);
 });
+
+test('disabled onboarding leaves no empty start message',()=>{
+ const {a,elements}=load({initialStorage:{onboardingHints:'false','tutorial-v1':''}});a.newRun();
+ assert.equal(elements.get('messageText').textContent,'');assert.equal(elements.get('message').classList.contains('show'),false);
+});
+test('arsenal is visible after the first lost run while introduction remains active',()=>{
+ const {a,elements,storage}=load({initialStorage:{'tutorial-v1':''}});elements.get('openMainMenuBtn').listeners.click();assert.equal(elements.get('menuArsenalBtn').classList.contains('hidden'),true);
+ a.state.hp=0;a.state.phase="wave";a.state.waveRunning=true;a.update(0,0);elements.get('openMainMenuBtn').listeners.click();
+ assert.equal(elements.get('menuArsenalBtn').classList.contains('hidden'),false);assert.equal(elements.get('skipIntroductionBtn').classList.contains('hidden'),false);
+ const reloaded=load({initialStorage:Object.fromEntries(storage)});reloaded.elements.get('openMainMenuBtn').listeners.click();assert.equal(reloaded.elements.get('menuArsenalBtn').classList.contains('hidden'),false);
+});
+
+test('mobile Hilfen button opens and closes the consumable menu on successive taps',()=>{
+ const {elements}=load({compact:{small:()=>true,open(){}}});const menu=elements.get('consumableMenu'),button=elements.get('compactConsumables');menu.open=false;
+ button.listeners.click();assert.equal(menu.open,true);button.listeners.click();assert.equal(menu.open,false);
+});

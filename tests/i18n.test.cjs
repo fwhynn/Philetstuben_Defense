@@ -63,3 +63,14 @@ test('German full phrases preserve gender and case after terminology replacement
  const {i}=languageContext();assert.equal(i.text('Noch einmal mit diesem Loadout'),'Noch einmal mit dieser Turmauswahl');assert.equal(i.text('75 % Slow in der Killzone.'),'75 % Verlangsamung im Kampfbereich.');assert.equal(i.text('Beenden des Runs'),'Beenden des Durchlaufs');assert.equal(i.text('Ausgewogenes Loadout'),'Ausgewogene Turmauswahl');assert.equal(i.text('pro Kill'),'pro besiegten Gegner');
  assert.equal(i.text('Noch einmal mit dieser Turmauswahl','en'),'Try again with this loadout');assert.equal(i.text('75 % Verlangsamung im Kampfbereich.','en'),'75% slow in the combat zone.');
 });
+
+test('mobile consumable opener is not dismissed before its toggle for touch and keyboard clicks',()=>{
+ const handlers={},panel={id:'consumableMenu',open:true,contains:()=>false};
+ const opener={getAttribute:()=> 'consumableMenu'},target={closest:selector=>selector==='[aria-controls]'?opener:null};
+ vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../classes/menu-controls.js'),'utf8'),{document:{querySelectorAll:selector=>selector==='details[open]'?[panel]:[],addEventListener:(name,fn)=>handlers[name]=fn}});
+ for(const keyboard of [false,true]){
+  panel.open=true;if(!keyboard)handlers.pointerdown({target,button:0});handlers.click({target,detail:keyboard?0:1});
+  assert.equal(panel.open,true);panel.open=!panel.open;assert.equal(panel.open,false);
+ }
+ panel.open=true;handlers.pointerdown({button:0,target:{closest:()=>null}});assert.equal(panel.open,false);
+});

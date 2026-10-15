@@ -1,5 +1,22 @@
 [
   {
+    "version": "next",
+    "title": "Weiterspielen, faire Neustarts und bessere Bedienung",
+    "changes": [
+      "Nach jeder abgeschlossenen Solo-Welle wird ein Zwischenstand lokal gespeichert. Weiterspielen setzt den Durchlauf auch nach einem Neuladen fort, einschließlich offener Belohnungen.",
+      "Vor einem Neustart erscheint eine Bestätigung mit erreichter Welle und genauer Diamantenauszahlung. Bestätigte Abbrüche werden regulär abgerechnet, auch während der Einführung und bei gespeicherten Durchläufen.",
+      "Lautstärke und Stummschaltung bleiben nach dem Schließen des Browsers erhalten. Angemeldet werden Audio-Einstellungen und Zwischenstände zusätzlich zur Account-Sicherung übertragen; die lokale Sicherung bleibt erhalten.",
+      "Das Arsenal ist bereits nach dem ersten beendeten Durchlauf verfügbar, auch nach einer Niederlage.",
+      "Die Bestenliste lässt sich über alle Spaltenüberschriften auf- und absteigend sortieren. Pfeile zeigen die Richtung; Kategorien wechseln ohne kurz eingeblendete Lademeldung oder Zwischenumsortierung.",
+      "Vier Buttons wechseln zwischen Einer Front, Zwei Fronten, Täglicher Herausforderung und Duo. Eine Front öffnet standardmäßig mit den vorhandenen Daten; Modi ohne eigene Daten bleiben leer.",
+      "Krähenfüße, Klebeharz und Überladung bleiben nach dem Einsatz ausgewählt, sodass mehrere Einsätze hintereinander möglich sind. Der Hinweis bleibt bis zum Abbruch sichtbar und nennt Escape sowie Rechtsklick.",
+      "Der Schaden des Flammenturms ist in allen Ausbaustufen um 5 % reduziert.",
+      "Der mobile Hilfen-Tab schließt sich beim zweiten Antippen wieder.",
+      "Bei abgeschalteten Einsteigerhinweisen erscheint beim Start keine leere Hinweisbox mehr.",
+      "Rettungshexe dürfen keine zusätzlichen Straßenenden in eingeschlossene Hohlräume führen."
+    ]
+  },
+  {
     "version": "1.0.3",
     "title": "Öffentliche Bestenliste im Hauptmenü",
     "changes": [

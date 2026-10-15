@@ -730,4 +730,11 @@ body:has(#biomeIntro:not(.hidden)) .biomeTooltip{display:none!important}
 .leaderboardTable .rank{width:3.5em;text-align:center}.leaderboardTable .name{text-align:left;max-width:14em;overflow:hidden;text-overflow:ellipsis}.leaderboardTable .sorted{color:var(--accent);font-weight:700}.leaderboardTable th.sorted{color:var(--accent)}
 .leaderboardTable tbody tr:nth-child(even){background:#ffffff06}.leaderboardTable tr.top1 .rank{color:#ffd35c;font-weight:800}.leaderboardTable tr.top2 .rank{color:#d9e1e6;font-weight:800}.leaderboardTable tr.top3 .rank{color:#d99a5b;font-weight:800}
 .leaderboardTable tr.own{background:#3b4a24;outline:1px solid var(--accent);outline-offset:-1px}
+.leaderboardColumnSort{display:inline-flex;align-items:center;gap:4px;padding:4px 0;border:0;border-radius:3px;background:transparent;color:inherit;font:inherit;cursor:pointer;white-space:nowrap}.leaderboardColumnSort:hover{color:var(--accent);background:transparent}.leaderboardColumnSort:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 @media(max-width:600px){.leaderboardBox{padding:18px}.leaderboardBox>.panelHead{top:-18px;margin:-18px -18px 0;padding:14px 18px 10px}.leaderboardTable th,.leaderboardTable td{padding:8px 7px;font-size:13px}.leaderboardSorts button{font-size:13px;padding:6px 10px}}
+
+.message.consumableActive{opacity:1;animation:none;visibility:visible!important}
+
+.devToggle{position:fixed;right:8px;top:8px;z-index:2000;padding:7px 10px;background:#263b30;border:1px solid #8da880;border-radius:8px;color:#eee4c9}.devToggle[aria-pressed="true"]{background:#53622d;border-color:#f4c86a}body:has(#devToggleBtn:not(.hidden)) .gameHeader{padding-right:90px}.leaderboardMode{display:flex;align-items:center;gap:12px;margin:12px 0}.leaderboardMode select{background:#24342a;color:inherit;padding:8px;border:1px solid #607d65;border-radius:8px;max-width:100%}
+
+.leaderboardModes{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.leaderboardModes button{flex:1 1 auto}.leaderboardModes button[aria-pressed="true"]{background:#53622d;border-color:var(--accent);color:#fff3c4}

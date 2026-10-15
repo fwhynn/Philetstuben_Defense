@@ -15,7 +15,7 @@ test('consumable hover validation is read-only and agrees with purchases and ove
  assert.equal(c.combat.buyConsumable(s,'overload',slot),true);assert.equal(c.combat.buyConsumable(s,'overload',slot,true),false);
 });
 
-test('cursor preview changes validity without spending and disappears after placement or cancellation',()=>{
+test('cursor preview changes validity without spending and persists after placement and disappears on cancellation',()=>{
  const {a,elements,document,documentListeners}=require('./helpers/game.cjs').load();
  a.state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:2,towers:[]});
  elements.get('mainMenu').classList.add('hidden');
@@ -26,7 +26,7 @@ test('cursor preview changes validity without spending and disappears after plac
  assert.match(elements.get('consumableTargets').innerHTML,/<polyline/);
  documentListeners.pointermove({clientX:p.x,clientY:p.y+100,target});assert.equal(ghost.classList.contains('valid'),false);
  documentListeners.pointermove({clientX:p.x,clientY:p.y,target});assert.equal(ghost.classList.contains('valid'),true);assert.equal(a.state.gold,gold);
- a.rendererCommands.consumePoint(p);assert.equal(ghost.classList.contains('hidden'),true);
+ a.rendererCommands.consumePoint(p);assert.equal(ghost.classList.contains('hidden'),false);a.state.gold=100;a.rendererCommands.consumePoint(p);assert.equal(a.state.consumables.length,2);
  elements.get('buyResin').listeners.click();elements.get('cancelConsumable').listeners.click();assert.equal(ghost.classList.contains('hidden'),true);assert.equal(elements.get('consumableTargets').classList.contains('hidden'),true);
  a.state.gold=1000;a.state.map.get('1,0').towers=[{type:'archer',level:1,lastShot:0}];a.state.map.set('2,0',{q:2,r:0,type:'straight',roads:[0,3],slots:1,towers:[{type:'freeze',level:1,lastShot:0}]});
  elements.get('buyOverload').listeners.click();assert.equal((elements.get('consumableTargets').innerHTML.match(/<circle/g)||[]).length,1);
@@ -53,9 +53,9 @@ test('controller places consumables at a clicked lane point and keeps invalid cl
 test('right click cancels every consumable selection without spending gold',()=>{
  const {a,elements,documentListeners}=require('./helpers/game.cjs').load();const gold=a.state.gold;
  for(const id of ['buySpikes','buyResin','buyOverload']){
-  elements.get(id).listeners.click();assert.ok(a.state.consumablePickUI);
+  elements.get(id).listeners.click();assert.ok(a.state.consumablePickUI);assert.match(elements.get('messageText').textContent,/Escape \/ Rechtsklick/);assert.equal(elements.get('message').classList.contains('consumableActive'),true);
   let prevented=false;documentListeners.contextmenu({preventDefault(){prevented=true;}});
-  assert.equal(prevented,true);assert.equal(a.state.consumablePickUI,null);assert.equal(a.state.gold,gold);
+  assert.equal(prevented,true);assert.equal(elements.get('message').classList.contains('consumableActive'),false);assert.equal(a.state.consumablePickUI,null);assert.equal(a.state.gold,gold);
   assert.equal(elements.get('consumableGhost').classList.contains('hidden'),true);
  }
  let prevented=false;documentListeners.contextmenu({preventDefault(){prevented=true;}});assert.equal(prevented,false);

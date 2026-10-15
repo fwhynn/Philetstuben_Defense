@@ -52,7 +52,7 @@ const HexData=(()=>{
     freeze: {name:'Freeze',cost:30,range:145,damage:0,cooldown:1,color:'#a4eef5',aura:true,slow:.5,role:'Support',desc:'Aura: halbiert das Tempo aller Gegner in Reichweite.'},
     mine: {name:'Minenleger',cost:35,range:150,damage:24,cooldown:1.4,color:'#e6a75f',damageMultipliers:{hp:1.1,armor:1.4,magic:.65},mine:true,splash:45,role:'Wegkontrolle',desc:'Legt dauerhaft stapelbare Sprengminen auf Straßen.'},
     ballista: {name:'Balliste',cost:55,range:235,damage:46,cooldown:1.9,color:'#d9c08b',damageMultipliers:{hp:1.45,armor:1.15,magic:.7},bossMultiplier:1.3,role:'Bosskiller',desc:'Extrem weitreichender Einzelschuss gegen Eliten und Bosse.'},
-    flame: {name:'Flammenturm',cost:50,range:115,damage:14,cooldown:.7,splash:48,color:'#ff754b',damageMultipliers:{hp:1.35,armor:.55,magic:.8},role:'Flächenkontrolle',desc:'Kurze Reichweite, aber dauerhafter Schaden gegen dichte Gruppen.'},
+    flame: {name:'Flammenturm',cost:50,range:115,damage:13.3,cooldown:.7,splash:48,color:'#ff754b',damageMultipliers:{hp:1.35,armor:.55,magic:.8},role:'Flächenkontrolle',desc:'Kurze Reichweite, aber dauerhafter Schaden gegen dichte Gruppen.'},
     element:{name:'Elementturm',cost:50,range:155,damage:15,cooldown:1,color:'#b8a0ff',damageMultipliers:{hp:1,armor:.8,magic:1.3},role:'Elementwahl',desc:'Arkaner Angriff. Spezialisierung wählen: Feuer (Fläche), Wasser (Slow) oder Wind (Durchschlag).'},
     necromancer:{name:'Nekromantenturm',cost:60,range:150,damage:10,cooldown:1.2,color:'#a6edb4',damageMultipliers:{hp:1,armor:.7,magic:1.4},soulLimit:3,soulDuration:6,soulDamage:8,role:'Beschwörung',desc:'Tote Gegner in Reichweite werden zu bis zu 3 Geistern: 6 s Lebensdauer, ein Angriff pro Sekunde. Jeder Tod liefert nur eine Seele.'},
   };
@@ -92,10 +92,10 @@ const HexData=(()=>{
     repeater:{tower:'ballista',name:'Repetierwerk',cost:55,damage:30,cooldown:1.05,range:215,desc:'Schnellere Bolzen für verlässlichen Einzelzielschaden.'},
     dragonSlayer:{tower:'ballista',requires:'harpoon',name:'Drachentöter',cost:80,damage:125,cooldown:2.25,range:285,desc:'Finaler Fernschuss mit extremem Einzelschaden.'},
     boltStorm:{tower:'ballista',requires:'repeater',name:'Bolzensturm',cost:80,damage:48,cooldown:.72,range:235,desc:'Finales Repetierwerk mit hoher Feuerrate.'},
-    inferno:{tower:'flame',name:'Inferno',cost:50,damage:25,cooldown:.85,range:125,splash:65,desc:'Größere, schwerere Feuerstöße für dichte Gruppen.'},
-    wildfire:{tower:'flame',name:'Lauffeuer',cost:50,damage:10,cooldown:.38,range:120,splash:42,desc:'Sehr schnelle Flammenstöße halten Schwärme unter Druck.'},
-    sunfire:{tower:'flame',requires:'inferno',name:'Sonnenfeuer',cost:75,damage:43,cooldown:.8,range:140,splash:82,desc:'Finaler großer Feuerbereich mit hohem Schaden.'},
-    firestorm:{tower:'flame',requires:'wildfire',name:'Feuersturm',cost:75,damage:20,cooldown:.25,range:115,splash:52,desc:'Finales Flammenmeer mit kurzer Reichweite und extremer Angriffsdichte.'}
+    inferno:{tower:'flame',name:'Inferno',cost:50,damage:23.75,cooldown:.85,range:125,splash:65,desc:'Größere, schwerere Feuerstöße für dichte Gruppen.'},
+    wildfire:{tower:'flame',name:'Lauffeuer',cost:50,damage:9.5,cooldown:.38,range:120,splash:42,desc:'Sehr schnelle Flammenstöße halten Schwärme unter Druck.'},
+    sunfire:{tower:'flame',requires:'inferno',name:'Sonnenfeuer',cost:75,damage:40.85,cooldown:.8,range:140,splash:82,desc:'Finaler großer Feuerbereich mit hohem Schaden.'},
+    firestorm:{tower:'flame',requires:'wildfire',name:'Feuersturm',cost:75,damage:19,cooldown:.25,range:115,splash:52,desc:'Finales Flammenmeer mit kurzer Reichweite und extremer Angriffsdichte.'}
   };
   const ULTIMATES={
     element:{name:'Urkraft',cost:120,damageFactor:1.3,rangeFactor:1.1,desc:'Verstärkt das gewählte Element: +30 % Schaden und +10 % Reichweite.'},

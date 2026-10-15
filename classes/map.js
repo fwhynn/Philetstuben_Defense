@@ -86,7 +86,17 @@ const HexMap=(()=>{
     if(!connects) return false;
     // Validate the resulting reachable network, without mutating the actual map.
     const candidate=new Map(map);candidate.set(key(q,r),{q,r,roads,type:card.id});
-    if(card.rescue&&card.minExits){const outside=exterior(candidate,landmarks),exits=roads.filter(d=>{const n=neighbor(q,r,d);return outside.has(key(n.q,n.r));}).length;if(card.minExits===2?exits<2:exits!==1)return false;}
+    if(card.rescue){
+      const outside=exterior(candidate,landmarks),exits=roads.filter(d=>{const n=neighbor(q,r,d);return outside.has(key(n.q,n.r));});
+      if(roads.some(d=>{const n=neighbor(q,r,d),id=key(n.q,n.r),fixed=landmarks?.get(id);return !candidate.has(id)&&!(!fixed?.claimed&&fixed?.prefab)&&!outside.has(id);}))return false;
+      if(card.minExits&&(card.minExits===2?exits.length<2:exits.length!==1))return false;
+      // Every rescue exit must itself remain expandable, even if another front is still open.
+      if(!exits.length||exits.some(d=>{
+        const n=neighbor(q,r,d),extended=new Map(candidate);extended.set(key(n.q,n.r),{...n,roads:[]});
+        const beyond=exterior(extended,landmarks);
+        return !Array.from({length:6},(_,exit)=>neighbor(n.q,n.r,exit)).some(next=>beyond.has(key(next.q,next.r)));
+      }))return false;
+    }
     return hasExteriorFront(candidate,landmarks);
   }
   function exterior(map,landmarks){

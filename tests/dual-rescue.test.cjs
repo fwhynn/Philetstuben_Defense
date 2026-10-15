@@ -43,3 +43,11 @@ test('single rescue hand is centered and tower shortcut hint follows the equippe
  const {load}=require('./helpers/game.cjs'),{a,elements}=load();a.state.hand=['rescue'];a.state.rescueCard={id:'rescue',name:'Rettungshex',rarity:'Common',roads:[0,3],slots:0,rescue:true};a.renderAll();assert.equal(elements.get('hand').classList.contains('singleCard'),true);assert.match(elements.get('towerHotkeyHint').textContent,/1–5:/);
  a.state.towerLoadout.push('flame');a.renderAll();assert.match(elements.get('towerHotkeyHint').textContent,/1–6:/);a.state.hand=['straight','straight','straight'];a.renderAll();assert.equal(elements.get('hand').classList.contains('singleCard'),false);
 });
+
+test('rescue cannot point into an enclosed pocket even when another exit leads outside',()=>{
+ const {c,s}=setup();s.difficulty='normal';tile(s,0,0,[0],'base');
+ for(const [q,r]of [[3,0],[3,-1],[2,-1],[1,1],[2,1]])tile(s,q,r,[],'buildingPlot');
+ const rescue={id:'rescue',rescue:true,minExits:1,roads:[3,0,2],slots:0};
+ assert.equal(c.placement.canPlace(s,1,0,rescue,0),false);
+ assert.equal(c.placement.canPlace(s,1,0,{...rescue,roads:[3,2]},0),true);
+});
