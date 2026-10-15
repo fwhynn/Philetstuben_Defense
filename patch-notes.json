@@ -1,6 +1,6 @@
 [
   {
-    "version": "next",
+    "version": "1.0.4",
     "title": "Weiterspielen, faire Neustarts und bessere Bedienung",
     "changes": [
       "Nach jeder abgeschlossenen Solo-Welle wird ein Zwischenstand lokal gespeichert. Weiterspielen setzt den Durchlauf auch nach einem Neuladen fort, einschließlich offener Belohnungen.",
@@ -14,7 +14,8 @@
       "Der mobile Hilfen-Tab schließt sich beim zweiten Antippen wieder.",
       "Bei abgeschalteten Einsteigerhinweisen erscheint beim Start keine leere Hinweisbox mehr.",
       "Rettungshexe dürfen keine zusätzlichen Straßenenden in eingeschlossene Hohlräume führen."
-    ]
+    ],
+    "date": "2026-10-15"
   },
   {
     "version": "1.0.3",
