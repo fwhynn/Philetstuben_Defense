@@ -8,6 +8,12 @@ function fixture(type='archer'){
 }
 const cards=env=>env.elements.get('towerUpgrades').children.filter(n=>n.className==='towerUpgradeCard');
 const button=(node,match)=>walk(node).find(n=>match(n));
+test('variant two keeps other paths and current values visible while switching comparison',()=>{
+ const e=fixture();button(cards(e)[0],n=>n.id==='compare-volley').listeners.click();
+ assert.equal(cards(e).length,2);assert.equal(e.elements.get('selectedTowerInfo').classList.contains('hidden'),false);
+ const other=button(cards(e)[1],n=>n.className?.includes('towerBuy'));other.listeners.pointerenter();assert.equal(e.a.state.previewUpgrade.definition.range,190);other.listeners.pointerleave();assert.equal(e.a.state.previewUpgrade.definition.range,150);
+ button(cards(e)[1],n=>n.id==='compare-marksman').listeners.click();assert.equal(e.a.state.gold,200);assert.match(e.elements.get('towerUpgrades').children.find(n=>n.className==='towerComparisonSheet').innerHTML,/27,5/);assert.equal(cards(e).length,2);
+});
 test('current damage has exact labelled values; comparisons retain unchanged and special metrics',()=>{
  const {data}=load(),archer=data.towerDefinition({type:'archer'}),volley=data.towerDefinition({type:'archer',branch:'volley'});
  const summary=view.summary(archer);for(const s of ['Leben','Rüstung','Magieresistenz','11,25','5,85'])assert.ok(summary.includes(s));
@@ -19,7 +25,7 @@ test('current damage has exact labelled values; comparisons retain unchanged and
 });
 test('compare never purchases, Escape returns to choices, purchase charges exactly once',()=>{
  const e=fixture(),{a,tower,documentListeners}=e;assert.equal(cards(e).length,2);
- button(cards(e)[0],n=>n.id==='compare-volley').listeners.click();assert.equal(a.state.gold,200);assert.equal(tower.branch,undefined);assert.equal(cards(e).length,1);assert.ok(a.state.previewUpgrade);
+ button(cards(e)[0],n=>n.id==='compare-volley').listeners.click();assert.equal(a.state.gold,200);assert.equal(tower.branch,undefined);assert.equal(cards(e).length,2);assert.ok(a.state.previewUpgrade);
  documentListeners.keydown({key:'Escape',preventDefault(){}});assert.equal(cards(e).length,2);assert.ok(a.state.selectedTower);assert.equal(a.state.previewUpgrade,null);
  button(cards(e)[0],n=>n.className?.includes('towerBuy')).listeners.click();assert.equal(a.state.gold,165);assert.equal(tower.branch,'volley');
 });
@@ -34,7 +40,7 @@ test('gold changes preserve controls and update missing amount and live market p
 });
 test('locked ultimates remain comparable without purchase, all three element branches remain available',()=>{
  const e=fixture();Object.assign(e.tower,{branch:'volley',finalUpgrade:'arrowRain',level:3});e.a.renderAll();assert.equal(cards(e).length,1);assert.equal(button(cards(e)[0],n=>n.className?.includes('towerBuy')),undefined);
- button(cards(e)[0],n=>n.id==='compare-ultimate:archer').listeners.click();assert.match(cards(e)[0].children.find(n=>n.innerHTML.includes('towerValueTable')).innerHTML,/Flächenradius/);
+ button(cards(e)[0],n=>n.id==='compare-ultimate:archer').listeners.click();assert.match(e.elements.get('towerUpgrades').children.find(n=>n.className==='towerComparisonSheet').innerHTML,/Flächenradius/);
  const element=fixture('element');assert.equal(cards(element).length,3);
 });
 test('changing selection clears comparison; support effects use effective values',()=>{
@@ -43,6 +49,6 @@ test('changing selection clears comparison; support effects use effective values
 });
 test('temporary overload updates current and compared attack intervals, then expires cleanly',()=>{
  const e=fixture();e.a.state.elapsedMs=100;e.tower.overloadUntil=1000;e.a.renderAll();assert.match(e.elements.get('selectedTowerInfo').innerHTML,/0,37 s/);assert.match(e.elements.get('towerInfluences').innerHTML,/Überladung aktiv/);
- button(cards(e)[0],n=>n.id==='compare-volley').listeners.click();const buy=button(cards(e)[0],n=>n.className?.includes('towerBuy'));buy.listeners.pointerenter();buy.listeners.pointerleave();assert.ok(e.a.state.previewUpgrade);assert.match(cards(e)[0].children.find(n=>n.innerHTML.includes('towerValueTable')).innerHTML,/0,43 s/);
- e.a.state.elapsedMs=1001;e.a.renderAll();assert.match(cards(e)[0].children.find(n=>n.innerHTML.includes('towerValueTable')).innerHTML,/0,65 s/);assert.doesNotMatch(e.elements.get('towerInfluences').innerHTML,/Überladung aktiv/);
+ button(cards(e)[0],n=>n.id==='compare-volley').listeners.click();const buy=button(cards(e)[0],n=>n.className?.includes('towerBuy'));buy.listeners.pointerenter();buy.listeners.pointerleave();assert.ok(e.a.state.previewUpgrade);assert.match(e.elements.get('towerUpgrades').children.find(n=>n.className==='towerComparisonSheet').innerHTML,/0,43 s/);
+ e.a.state.elapsedMs=1001;e.a.renderAll();assert.match(e.elements.get('towerUpgrades').children.find(n=>n.className==='towerComparisonSheet').innerHTML,/0,65 s/);assert.doesNotMatch(e.elements.get('towerInfluences').innerHTML,/Überladung aktiv/);
 });

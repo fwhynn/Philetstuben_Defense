@@ -148,7 +148,7 @@
     return uiWavePlans.get(cacheKey);
   }
   let towerPanelKey = '';
-  let towerComparison = null, towerSelectionKey = '', towerFocusOpen = false, towerComparisonScroll = 0;
+  let towerComparison = null, towerSelectionKey = '', towerFocusOpen = false, towerComparisonScroll = 0, towerComparedPreview = null;
   let buildingPanelKey = ''; const buildingButtons = new Map();
   const upgradeButtons = new Map();
   const sound = typeof HexAudio === 'undefined' ? { play() { } } : HexAudio;
@@ -618,7 +618,7 @@ R dreht die Karte, dann Feld anklicken.`;
   }
   function bindUpgradePreview(button, tower, next) {
     const show = () => { state.previewUpgrade = { tower, definition: next }; renderBoard(); };
-    const clear = () => { if (towerComparison) return; state.previewUpgrade = null; renderBoard(); };
+    const clear = () => { state.previewUpgrade = towerComparison ? towerComparedPreview : null; renderBoard(); };
     button.addEventListener('pointerenter', show); button.addEventListener('pointerleave', clear); button.addEventListener('focus', show); button.addEventListener('blur', clear);
   }
   function renderDeckOverview(target = 'deckOverview') {
@@ -811,19 +811,25 @@ R dreht die Karte, dann Feld anklicken.`;
   }
   function towerUpgradeCard(content, tower, id, upgrade, next, locked = false) {
     const current = towerPanelDefinition(tower), comparing = towerComparison === id;
-    if (towerComparison && !comparing) return;
     const card = document.createElement('section'); card.className = 'towerUpgradeCard'; card.classList.toggle('comparing', comparing);
     const heading = document.createElement('strong'); heading.textContent = upgrade.name; card.appendChild(heading);
     const description = document.createElement('p'); description.className = 'towerUpgradeDescription'; description.textContent = upgrade.desc; card.appendChild(description);
     const tradeoff = HexTowerView.tradeoff(current, next);
     if (tradeoff) { const note = document.createElement('small'); note.className = 'towerTradeoff'; note.textContent = tradeoff; card.appendChild(note); }
-    if (comparing) { state.previewUpgrade = { tower, definition: next }; const table = document.createElement('div'); table.innerHTML = HexTowerView.comparison(current, next); card.appendChild(table); }
+    if (comparing) {
+      state.previewUpgrade = { tower, definition: next };
+      towerComparedPreview = state.previewUpgrade;
+      const table = document.createElement('section'); table.className = 'towerComparisonSheet'; table.setAttribute('aria-label', upgrade.name + ' · Vergleich');
+      table.innerHTML = '<h3>' + HexTowerView.escape(upgrade.name) + '</h3><p class="hint">' + HexTowerView.escape(upgrade.desc) + '</p>' + HexTowerView.comparison(current, next);
+      content.appendChild(table);
+    }
     const actions = document.createElement('div'); actions.className = 'towerUpgradeActions';
     const compare = document.createElement('button'); compare.className = 'secondary'; compare.id = 'compare-' + id;
-    compare.textContent = comparing ? 'Zurück zur Auswahl' : 'Vergleichen'; compare.setAttribute('aria-label', upgrade.name + ' · ' + compare.textContent);
+    compare.textContent = comparing ? 'Vergleich schließen' : 'Vergleichen'; compare.setAttribute('aria-label', upgrade.name + ' · ' + compare.textContent);
+    compare.setAttribute('aria-pressed', String(comparing));
     compare.addEventListener('click', () => {
       if (comparing) { closeTowerComparison(); return; }
-      towerComparisonScroll = document.getElementById('towerPanel').scrollTop || 0;
+      if (!towerComparison) towerComparisonScroll = document.getElementById('towerPanel').scrollTop || 0;
       towerComparison = id; state.previewUpgrade = { tower, definition: next }; renderAll(); document.getElementById('compare-' + id)?.focus?.();
     }); actions.appendChild(compare);
     if (locked) { const hint = document.createElement('p'); hint.className = 'ultimateLocked'; hint.textContent = HexBuildings.cost(state, state.selectedTower, upgrade.cost) + ' Gold · Im Arsenal freischalten und für den nächsten Run aktivieren.'; card.appendChild(hint); }
@@ -845,7 +851,7 @@ R dreht die Karte, dann Feld anklicken.`;
     const definition = towerPanelDefinition(tower);
     const validChoices = tower.ultimate ? [] : tower.finalUpgrade ? ['ultimate:' + tower.type] : HexData.availableUpgrades(tower).map(([id]) => id);
     if (towerComparison && !validChoices.includes(towerComparison)) towerComparison = null;
-    document.getElementById('selectedTowerInfo').classList.toggle('hidden', !!towerComparison);
+    document.getElementById('selectedTowerInfo').classList.remove('hidden');
     document.getElementById('towerExtraDetails').classList.toggle('hidden', group);
     const panelKey = JSON.stringify([selections('Tower'), definition, tower.biome, tower.tileType, tower.overloadPending, selectedTowers.map(t => t.targetPriority), state.buildingVersion, towerComparison, uiLanguageRevision]);
     if (towerPanelKey !== panelKey) {
@@ -872,7 +878,7 @@ R dreht die Karte, dann Feld anklicken.`;
       document.getElementById('towerInfluences').innerHTML = influences.map(text => '<p>' + HexTowerView.escape(text) + '</p>').join('');
       let focusSection = null;
       const targetable = selectedTowers.filter(t => { const d = HexData.towerDefinition(t); return !d.aura && !d.mine; });
-      if (targetable.length && !towerComparison) {
+      if (targetable.length) {
         const tower = targetable[0];
         const labels = { closestBase: 'Nächste an der Base', furthestBase: 'Weiteste von der Base', mostHealth: 'Meistes Leben', leastHealth: 'Wenigstes Leben', mostArmor: 'Meiste Rüstung', mostMagic: 'Meiste Magieresistenz', boss: 'Bosse', healer: 'Heiler', closestTower: 'Nächste am Turm', furthestTower: 'Weiteste vom Turm' }, defaults = HexData.defaultTargetPriority(tower);
         tower.targetPriority = [...new Set(tower.targetPriority || defaults)]; for (const value of defaults) if (tower.targetPriority.length < 3 && !tower.targetPriority.includes(value)) tower.targetPriority.push(value); tower.targetPriority = tower.targetPriority.slice(0, 3);
