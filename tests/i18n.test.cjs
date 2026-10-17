@@ -74,3 +74,14 @@ test('mobile consumable opener is not dismissed before its toggle for touch and 
  }
  panel.open=true;handlers.pointerdown({button:0,target:{closest:()=>null}});assert.equal(panel.open,false);
 });
+
+test('leaderboard modes and every published patch note have full English translations',()=>{
+ const {i,catalog}=languageContext();
+ assert.equal(i.text('Eine Front','en'),'One Front');assert.equal(i.text('Zwei Fronten','en'),'Two Fronts');
+ const releases=JSON.parse(fs.readFileSync(path.join(__dirname,'../patch-notes.json'),'utf8'));
+ for(const release of releases)for(const source of [release.title,...release.changes]){
+  assert.ok(catalog.en[source],source);
+  assert.equal(i.text(source,'en'),catalog.en[source],source);
+  assert.equal(i.text(i.text(source,'de'),'en'),catalog.en[source],'German terminology normalization preserves the translation');
+ }
+});

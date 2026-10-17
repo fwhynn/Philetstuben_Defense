@@ -22,6 +22,8 @@ const HexRunFlow=(()=>{
     if(state.drawPile.length===0){state.drawPile=shuffle(state.discard);state.discard=[];}
   }
   function draw(){
+    HexDeck.recoverMissing(state);
+    state.discard.push(...state.hand.filter(id=>id!=='rescue'));
     state.hand=[];
     let guard=0;
     while(state.hand.length<(state.openingRemaining===2?5:3) && guard<30){

@@ -457,9 +457,9 @@
   function buildRescueTunnel() {
     if (duoToken) { duoAction('tunnel'); return; }
     if (!state.tunnelOffer || state.phase !== 'build' || state.waveRunning || state.hp <= 0) return;
-    const plan = HexMap.tunnelPlan(state.map, state.landmarks, state.difficulty === 'dual'); if (!plan) return;
+    const plan = HexMap.tunnelPlan(state.map, state.landmarks, !!state.tunnelOffer); if (!plan) { setMessage('Kein gültiger Rettungstunnel verfügbar.'); return; }
     if (!state.tunnelConfirmed) { state.tunnelConfirmed = true; setMessage('Rettungstunnel von Hex ' + plan.source + ' nach ' + plan.q + ',' + plan.r + '. Kostenlos, keine Gebäude werden entfernt.'); renderAll(); return; }
-    HexRunRuntime.rescueTunnel(state); renderAll(); setMessage('Rettungstunnel geöffnet. Erweitere die neue Straße in der nächsten Runde.');
+    const built = HexRunRuntime.rescueTunnel(state); renderAll(); setMessage(built ? 'Rettungstunnel geöffnet. Erweitere die neue Straße in der nächsten Runde.' : 'Kein gültiger Rettungstunnel verfügbar.');
   }
   document.getElementById('tunnelRescueBtn').addEventListener('click', buildRescueTunnel);
   function renderBoard() {
@@ -1008,7 +1008,7 @@ R dreht die Karte, dann Feld anklicken.`;
     return true;
   }
   function restoreRunCheckpoint(checkpoint) {
-    const restored = HexRunSnapshot.restore(checkpoint); closeSale();
+    const restored = HexRunSnapshot.restore(checkpoint); HexDeck.recoverMissing(restored.state); closeSale();
     cancelQuickTower(); clearRunTimers(); resetCameraKeys(); inspectReward('selection');
     state = restored.state; random = restored.random;
     Object.assign(state, { selectedCard: null, rotation: 0, selectedSlots: [], selectedTowers: [], showHexGrid, showSlotHints });

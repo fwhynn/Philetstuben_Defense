@@ -43,6 +43,7 @@ const HexDuoGame=(()=>{
   }
   function mount(api){
     const $=id=>document.getElementById(id);let profileChanged=true,view=null,match=null,board=null,transferKey='',guardianKey='',leaving=false,client,picking=null;
+    let guideKey='',guideUntil=0,guideTimer=null;
     const storageKey='autohex-duo-client:'+api.token;let clientId=sessionStorage.getItem(storageKey);if(!clientId){clientId=crypto.randomUUID();sessionStorage.setItem(storageKey,clientId);}
     const own=()=>view&&board===view.player;
     // Enemies arrive ~10 times per second; glide between snapshots so combat does not stutter.
@@ -84,6 +85,13 @@ const HexDuoGame=(()=>{
       $('duoSeatPartner').dataset.state=help.partner.state;$('duoSeatPartnerText').textContent=help.partner.text;
       $('duoTeamWave').textContent=view.phase==='combat'?'Welle '+view.wave:view.wave?'Vor Welle '+(view.wave+1):'Vorbereitung';$('duoTeamHp').textContent='♥ '+view.hp+'/'+view.maxHp+' gemeinsam';
       $('duoTurnTitle').textContent=help.title;$('duoTurnText').textContent=help.text;
+      // Repeated network snapshots must not restart the instruction's lifetime.
+      const nextGuideKey=JSON.stringify([board,view.wave,help.title]);
+      if(nextGuideKey!==guideKey){
+        guideKey=nextGuideKey;guideUntil=performance.now()+6000;clearTimeout(guideTimer);
+        guideTimer=setTimeout(()=>{if(help.tone!=='alert')$('duoTurn').classList.add('duoTurnCompact');},6000);
+      }
+      $('duoTurn').classList.toggle('duoTurnCompact',help.tone!=='alert'&&performance.now()>=guideUntil);
       document.body.classList.toggle('duoLocked',locked);
       const status='Partner '+help.partner.text;$('duoSummary').textContent='Duo · '+status;$('duoPartnerStatus').textContent=status;
       const portal=view.portals[player],tower=view.reinforcements[player];

@@ -45,3 +45,15 @@ test('enemies glide between server snapshots instead of jumping',()=>{
  clock+=200;duo.bridge.animate(clock);assert.equal(e().x,50);assert.equal(duo.bridge.animate(clock+10),false);
  const far=JSON.parse(JSON.stringify(next));far.revision++;far.boards[0].enemies=[enemy(900)];duo.receive(far);assert.equal(e().x,900,'teleports are not smeared across the map');
 });
+
+test('Duo instructions collapse after six seconds without snapshots restarting the timer',()=>{
+ let clock=1000;const duo={real:true,calls:[]},ui=load({duo,now:()=>clock}),{room,seats:[a]}=setup('collapse-guide');
+ const compact=()=>ui.elements.get('duoTurn').classList.contains('duoTurnCompact');
+ duo.receive(room.view(a.token));assert.equal(compact(),false);
+ clock+=5000;duo.receive(room.view(a.token));assert.equal(compact(),false);
+ clock+=1100;duo.receive(room.view(a.token));assert.equal(compact(),true);
+ assert.ok(send(room,a,'place',opening(room,a)).ok);duo.receive(room.view(a.token));assert.equal(compact(),false,'new instruction expands');
+ clock+=6100;duo.receive(room.view(a.token));assert.equal(compact(),true);
+ const paused=room.view(a.token);paused.connection={...paused.connection,paused:true,remainingSeconds:60};duo.receive(paused);
+ clock+=7000;duo.receive(paused);assert.equal(compact(),false,'connection warnings remain visible');
+});

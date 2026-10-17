@@ -88,7 +88,7 @@ test('game over pays accumulated run progress once', () => {
 
 test('a deck with no legal placement advances to building without losing cards', () => {
   const { a } = load(); a.state.map.get('0,0').roads = []; const before = a.state.drawPile.length + a.state.discard.length + a.state.hand.length;
-  a.state.discard.push(...a.state.hand); a.drawHand();
+  a.drawHand();
   assert.equal(a.state.phase, 'build'); assert.equal(a.state.drawPile.length + a.state.discard.length + a.state.hand.length, before);
 });
 

@@ -73,3 +73,40 @@ test('closing a curved ring with a dead end cannot trap the remaining road in it
  assert.equal(c.map.canPlace(map,2,-1,c.data.CARD_LIBRARY.deadEnd,0),false);
  assert.equal(c.map.canPlace(map,2,-1,c.data.CARD_LIBRARY.straight,0),true);
 });
+
+test('single-front tunnel offers can be confirmed even while an exterior front exists',()=>{
+ const {a,elements}=load(),c=loadCore(),s=a.state;
+ s.map.clear();s.landmarks.clear();s.difficulty='normal';s.openingRemaining=0;s.phase='build';
+ s.map.set('0,0',{q:0,r:0,type:'base',roads:[0],towers:[],slots:0});
+ s.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],towers:[],slots:0});
+ assert.equal(c.map.hasExteriorFront(s.map,s.landmarks),true);
+ s.tunnelOffer=c.map.tunnelPlan(s.map,s.landmarks,true);assert.ok(s.tunnelOffer);
+ const size=s.map.size,button=elements.get('tunnelRescueBtn');button.listeners.click();assert.equal(s.tunnelConfirmed,true);
+ button.listeners.click();assert.equal(s.map.size,size+1);assert.equal(s.tunnelOffer,null);
+});
+
+test('repeated blocked turns retain every deck copy and never recycle rescue cards',()=>{
+ const c=loadCore(),{state:s,random}=c.runtime.create({seed:'blocked-deck',runId:'blocked-deck',loadout:['archer','catapult','chain','freeze','mine']});trap(s);
+ s.drawPile=[...s.deck];s.discard=[];s.hand=[];
+ const expected=JSON.stringify([...s.deck].sort());
+ for(let turn=0;turn<15;turn++){
+  s.phase='place';assert.equal(c.flow.drawHand(s,random),'tunnel');
+  assert.equal(JSON.stringify([...s.hand,...s.drawPile,...s.discard].sort()),expected);
+ }
+ s.hand=['rescue'];s.drawPile=[...s.deck];s.discard=[];c.flow.drawHand(s,random);
+ assert.equal([...s.hand,...s.drawPile,...s.discard].includes('rescue'),false);
+ assert.equal(JSON.stringify([...s.hand,...s.drawPile,...s.discard].sort()),expected);
+});
+
+test('continuing a damaged checkpoint recovers missing cards once and allows deck removal',()=>{
+ const c=loadCore(),{state:s,random}=c.runtime.create({seed:'recover-deck',runId:'recover-deck',loadout:['archer','catapult','chain','freeze','mine']});
+ s.deck.push('bigCurve');s.hand=['straight'];s.drawPile=[];s.discard=[];
+ const restored=c.snapshot.restore(JSON.parse(JSON.stringify(c.snapshot.capture(s,random))));
+ c.flow.drawHand(restored.state,restored.random);
+ const cards=s=>JSON.stringify([...s.hand,...s.drawPile,...s.discard].sort());
+ assert.equal(cards(restored.state),JSON.stringify([...s.deck].sort()));
+ const again=c.snapshot.restore(JSON.parse(JSON.stringify(c.snapshot.capture(restored.state,restored.random))));
+ assert.equal(cards(again.state),cards(restored.state));
+ again.state.phase='removal';const offer=c.rewards.offer(again.state,'removal',again.random);
+ assert.equal(c.rewards.choose(again.state,offer.id,offer.choices.findIndex(choice=>choice.cardId==='bigCurve')),true);
+});
