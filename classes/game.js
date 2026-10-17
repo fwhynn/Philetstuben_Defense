@@ -769,7 +769,7 @@ R dreht die Karte, dann Feld anklicken.`;
   function positionTowerPanel() {
     if (!state.selectedTower && !state.selectedBuilding) return;
     const panel = document.getElementById(state.selectedTower ? 'towerPanel' : 'buildingPanel'), area = menuArea();
-    if (area) { const narrow = document.documentElement.clientWidth <= 700; fitMenu(panel, area, area.left, narrow ? area.bottom - panel.getBoundingClientRect().height : area.top); }
+    if (area) { const narrow = document.documentElement.clientWidth <= 700; fitMenu(panel, area, state.selectedTower && !narrow ? area.right - panel.getBoundingClientRect().width : area.left, narrow ? area.bottom - panel.getBoundingClientRect().height : area.top); }
   }
   function renderBuildingPanel() {
     const panel = document.getElementById('buildingPanel'), selected = state.selectedBuilding, tile = selected ? state.map.get(key(selected.q, selected.r)) : null;
@@ -807,20 +807,23 @@ R dreht die Karte, dann Feld anklicken.`;
   function closeTowerComparison() {
     if (!towerComparison) return false;
     const previous = towerComparison; towerComparison = null; state.previewUpgrade = null;
-    renderAll(); document.getElementById('compare-' + previous)?.focus?.({preventScroll:true}); document.getElementById('towerPanel').scrollTop = towerComparisonScroll; return true;
+    renderAll(); document.getElementById('compare-' + previous)?.focus?.({preventScroll:true}); document.getElementById('towerPanelScroll').scrollTop = towerComparisonScroll; return true;
   }
   function towerUpgradeCard(content, tower, id, upgrade, next, locked = false) {
     const current = towerPanelDefinition(tower), comparing = towerComparison === id;
     const card = document.createElement('section'); card.className = 'towerUpgradeCard'; card.classList.toggle('comparing', comparing);
+    const icon = document.createElement('span'); icon.className = 'towerPathIcon'; icon.setAttribute('aria-hidden', 'true'); icon.innerHTML = HexArsenal.icon(tower.type, next.color); card.appendChild(icon);
     const heading = document.createElement('strong'); heading.textContent = upgrade.name; card.appendChild(heading);
+    const progress = document.createElement('div'); progress.className = 'towerPathProgress'; progress.innerHTML = HexTowerView.pathProgress(tower); card.appendChild(progress);
     const description = document.createElement('p'); description.className = 'towerUpgradeDescription'; description.textContent = upgrade.desc; card.appendChild(description);
     const tradeoff = HexTowerView.tradeoff(current, next);
     if (tradeoff) { const note = document.createElement('small'); note.className = 'towerTradeoff'; note.textContent = tradeoff; card.appendChild(note); }
     if (comparing) {
       state.previewUpgrade = { tower, definition: next };
       towerComparedPreview = state.previewUpgrade;
-      const table = document.createElement('section'); table.className = 'towerComparisonSheet'; table.setAttribute('aria-label', upgrade.name + ' · Vergleich');
+      const table = document.createElement('section'); table.id = 'towerComparisonSheet'; table.className = 'towerComparisonSheet'; table.setAttribute('aria-label', upgrade.name + ' · Vergleich');
       table.innerHTML = '<h3>' + HexTowerView.escape(upgrade.name) + '</h3><p class="hint">' + HexTowerView.escape(upgrade.desc) + '</p>' + HexTowerView.comparison(current, next);
+      const back = document.createElement('button'); back.className = 'secondary'; back.textContent = 'Vergleich schließen'; back.addEventListener('click', closeTowerComparison); table.appendChild(back);
       content.appendChild(table);
     }
     const actions = document.createElement('div'); actions.className = 'towerUpgradeActions';
@@ -829,8 +832,9 @@ R dreht die Karte, dann Feld anklicken.`;
     compare.setAttribute('aria-pressed', String(comparing));
     compare.addEventListener('click', () => {
       if (comparing) { closeTowerComparison(); return; }
-      if (!towerComparison) towerComparisonScroll = document.getElementById('towerPanel').scrollTop || 0;
+      if (!towerComparison) towerComparisonScroll = document.getElementById('towerPanelScroll').scrollTop || 0;
       towerComparison = id; state.previewUpgrade = { tower, definition: next }; renderAll(); document.getElementById('compare-' + id)?.focus?.();
+      document.getElementById('towerComparisonSheet')?.scrollIntoView?.({block:'nearest'});
     }); actions.appendChild(compare);
     if (locked) { const hint = document.createElement('p'); hint.className = 'ultimateLocked'; hint.textContent = HexBuildings.cost(state, state.selectedTower, upgrade.cost) + ' Gold · Im Arsenal freischalten und für den nächsten Run aktivieren.'; card.appendChild(hint); }
     else {

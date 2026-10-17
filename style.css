@@ -780,35 +780,50 @@ body:has(#biomeIntro:not(.hidden)) .biomeTooltip{display:none!important}
 .towerUpgradeCard:not(.comparing)>.towerUpgradeActions button{flex:auto}
 @media(max-width:380px){.towerUpgradeCard:not(.comparing){grid-template-columns:minmax(0,1fr) 118px;column-gap:7px}}
 
-/* Variant 2: persistent tower overview and parallel upgrade paths. */
-#towerPanel{width:min(810px,calc(100vw - 24px))}
-.towerPanelBody{display:grid;grid-template-columns:215px minmax(0,1fr);gap:16px;align-items:start}
-.towerOverview{min-width:0;padding-right:15px;border-right:1px solid #52654e;position:sticky;top:55px;align-self:start}
-.towerDevelopment{min-width:0}
-.towerSectionLabel{margin:0 0 8px;color:#c9cbb6;text-transform:uppercase;letter-spacing:.08em;font-size:10px;font-weight:700}
-#towerPanel .towerDamageGrid{grid-template-columns:1fr;gap:5px}
-#towerPanel .towerDamageGrid>div{flex-direction:row;justify-content:space-between;align-items:center;gap:8px}
-#towerPanel .towerDamageGrid strong{font-size:19px}
-#towerPanel .towerCoreStats{flex-direction:column;gap:7px}
-#towerPanel .towerCoreStats>span{display:flex;justify-content:space-between;gap:6px}
-#towerPanel .towerStatCaption{font-size:11px;margin-bottom:9px}
-#towerPanel .towerUpgrades{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;margin-top:0;gap:9px}
-#towerPanel .towerUpgradeCard{display:flex;flex-direction:column;align-items:stretch;gap:5px;padding:12px;border-color:#657557;background:#233629;min-width:0}
-#towerPanel .towerUpgradeCard.comparing{border-color:#f1ce79;box-shadow:inset 0 3px #f1ce79}
-#towerPanel .towerUpgradeCard>strong{font-size:17px;line-height:1.3}
-#towerPanel .towerUpgradeDescription{margin:0;font-size:12px;line-height:1.45}
-#towerPanel .towerTradeoff{margin:0;font-size:11px;line-height:1.4}
-#towerPanel .towerUpgradeActions{display:flex;flex-direction:column;gap:6px;margin-top:auto;padding-top:6px}
-#towerPanel .towerUpgradeActions .towerBuy{order:-1}
-#towerPanel .towerUpgradeActions button{flex:none;width:100%;min-height:40px}
-#towerPanel .towerUpgradeActions .secondary{background:#1b2d22;border-color:#647455}
-#towerPanel .towerUpgrades>.targetPriorities{grid-column:1 / -1;order:3;margin:0}
-#towerPanel .towerUpgrades>.hint{grid-column:1 / -1}
-.towerComparisonSheet{grid-column:1 / -1;order:2;border:1px solid #9d8b55;background:#192a20;border-radius:9px;padding:12px}
-.towerComparisonSheet h3{font-size:16px;color:#f1ce79;margin:0 0 4px}
-.towerComparisonSheet>.hint{margin:4px 0;font-size:12px}
-.towerComparisonSheet .towerValueTable{margin:8px 0}
-#towerPanel .towerOverview #sellTowerBtn{font-size:11px;padding:8px;line-height:1.4}
-@media(max-width:900px){#towerPanel{width:min(620px,calc(100vw - 24px))}.towerPanelBody{grid-template-columns:1fr;gap:12px}.towerOverview{border:0;padding:0}#towerPanel .towerDamageGrid{grid-template-columns:repeat(3,minmax(0,1fr))}#towerPanel .towerDamageGrid>div{flex-direction:column;align-items:flex-start}#towerPanel .towerCoreStats{flex-direction:row;justify-content:space-between}.towerOverview{display:grid;grid-template-columns:minmax(0,1fr) 155px;gap:8px}.towerOverview>.towerSectionLabel{grid-column:1 / -1;margin:0}.towerOverview>.towerCurrentStats{grid-column:1;grid-row:2 / span 2}.towerOverview>.towerDisclosure{margin:0}.towerOverview>#sellTowerBtn{margin:0!important}.towerOverview:has(details[open]){display:block}.towerOverview:has(details[open])>.towerSectionLabel{margin-bottom:8px}}
-@media(max-width:460px){#towerPanel .towerUpgrades{grid-template-columns:1fr}.towerOverview{display:block}.towerOverview>.towerDisclosure{margin-top:8px}.towerOverview>#sellTowerBtn{margin-top:8px!important}.towerSectionLabel{margin-bottom:8px!important}}
-@media(max-width:900px){.towerOverview{position:static}}
+/* Variant 3: a Bloons-inspired dock, using our own tower assets and mechanics. */
+#towerPanel{width:min(370px,calc(100vw - 24px));height:690px;padding:0;display:flex;flex-direction:column;overflow:hidden;background:#d8e3ce;border:2px solid #72896b;border-radius:16px;color:#172c21;box-shadow:0 7px 24px #0005}
+#towerPanel.hidden{display:none}
+#towerPanel>.panelHead{position:static;flex:none;margin:0;padding:8px 12px;background:#315944;border-bottom:3px solid #e9c66d;color:#fff5da;min-height:54px}
+#towerPanel>.panelHead h2{font-size:17px}
+.towerPanelScroll{overflow-y:auto;min-height:0;flex:1;overscroll-behavior:contain;scrollbar-gutter:stable;padding:10px}
+.towerPanelBody{display:flex;flex-direction:column;gap:10px}
+.towerOverview,.towerDevelopment{min-width:0;position:static;padding:0;border:0;display:block}
+.towerSectionLabel{font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;margin:0 0 5px;color:#405b43}
+#towerPanel .towerCurrentStats{background:#f6f3de;border:1px solid #9fa883;padding:8px;border-radius:9px;color:#1f3827}
+#towerPanel .towerStatCaption{color:#536348;font-size:10px;margin-bottom:5px}
+#towerPanel .towerDamageGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+#towerPanel .towerDamageGrid>div{display:flex;flex-direction:column;align-items:flex-start;gap:1px}
+#towerPanel .towerDamageGrid span{font-size:11px;color:#42513b}
+#towerPanel .towerDamageGrid strong{font-size:22px;line-height:1.2;color:#183c2c}
+#towerPanel .towerCoreStats{display:flex;flex-direction:row;gap:5px 12px;font-size:11px;border-color:#c4c8ae;margin-top:6px;padding-top:6px}
+#towerPanel .towerDisclosure{background:#c2d1b7;border-color:#8c9f7e;padding:7px 9px;margin-top:6px;color:#203b2a}
+#towerPanel .towerDisclosure summary{font-size:12px;color:#254330;min-height:28px}
+#towerPanel .towerUpgrades{display:flex;flex-direction:column;gap:8px;margin:0}
+#towerPanel .towerUpgradeCard{display:grid;grid-template-columns:46px minmax(0,1fr);gap:3px 8px;align-items:start;background:#f7f2da;border:2px solid #9caa80;border-radius:11px;padding:8px;color:#253b22;box-shadow:0 3px 0 #81956d}
+#towerPanel .towerUpgradeCard.comparing{border-color:#3d7d51;box-shadow:0 0 0 2px #a4c48e}
+.towerPathIcon{grid-column:1;grid-row:1 / span 3;background:#d5dfb9;border:1px solid #a3b384;border-radius:9px;padding:3px;align-self:start}
+.towerPathIcon svg{display:block;width:100%;height:auto}
+#towerPanel .towerUpgradeCard>strong{grid-column:2;font-size:16px;line-height:1.2;color:#203d2b}
+.towerPathProgress{grid-column:2;display:flex;justify-content:space-between;align-items:center;gap:7px;margin:2px 0}
+.towerPathLabel{font-size:10px;font-weight:700;color:#566443}
+.towerPathSteps{display:flex;gap:4px}.towerPathSteps>span{width:17px;height:17px;display:grid;place-items:center;font-size:10px;font-weight:800;background:#d4d6c1;border:1px solid #a1aa88;border-radius:4px;color:#68735c}.towerPathSteps>.owned{background:#4b8051;color:white;border-color:#386a40}.towerPathSteps>.next{background:#f0cd72;color:#3d401f;border-color:#aa904b}
+#towerPanel .towerUpgradeDescription{grid-column:2;margin:0;font-size:11px;line-height:1.35;color:#465039}
+#towerPanel .towerTradeoff{grid-column:1 / -1;font-size:10px;line-height:1.3;color:#785020;margin:2px 0}
+#towerPanel .towerUpgradeActions{grid-column:1 / -1;grid-row:auto;display:grid;grid-template-columns:1fr 1.2fr;gap:7px;flex-direction:row;margin:3px 0 0;padding:0}
+#towerPanel .towerUpgradeActions button{min-height:38px;width:100%;font-size:12px;padding:7px 5px;text-align:center;line-height:1.2;border-radius:8px}
+#towerPanel .towerUpgradeActions .secondary{background:#e0e7cb;color:#304c30;border:1px solid #97aa7e}
+#towerPanel .towerUpgradeActions .towerBuy{background:#568c3e;border:1px solid #336728;border-bottom-width:3px;color:#fffde3;font-weight:800;order:0}
+#towerPanel .towerBuy:disabled{background:#d5d4bf;color:#686852;border-color:#a9aa93;opacity:1}
+#towerPanel .targetPriorities{order:3;margin-top:3px}
+#towerPanel .targetPriorities select{background:#f6f3de;color:#233c27;border-color:#8d9f7b}
+#towerPanel .towerComparisonSheet{order:2;background:#faf6e5;border:1px solid #9caa80;border-radius:9px;padding:10px;color:#233a25}
+#towerPanel .towerComparisonSheet h3{font-size:15px;margin:0 0 4px;color:#2c5938}
+#towerPanel .towerComparisonSheet .hint,#towerPanel .hint{color:#46563d;font-size:11px}
+#towerPanel .towerValueTable{font-size:11px}#towerPanel .towerValueTable :is(th,td){border-color:#cbd0b7;padding:5px 2px}#towerPanel .towerValueTable .better{color:#226734}#towerPanel .towerValueTable .worse{color:#9b3f20}
+#towerPanel .towerValueList>div{border-color:#a8b79a}#towerPanel .ultimateLocked{grid-column:1 / -1;color:#684d25;font-size:11px}
+.towerPanelFooter{flex:none;background:#315944;padding:9px 10px;border-top:1px solid #72896b}
+#towerPanel .towerPanelFooter #sellTowerBtn{margin:0;background:#b97639;color:#fff8e7;border:1px solid #805125;border-bottom-width:3px;font-weight:700;min-height:40px}
+#towerPanel :is(button,summary,select):focus-visible{outline:3px solid #246ab2;outline-offset:1px}
+@media(max-width:460px){#towerPanel{width:calc(100vw - 24px)}#towerPanel .towerDamageGrid span{font-size:10px}}
+#towerPanel{scrollbar-gutter:auto}#towerPanel>.panelHead{min-height:50px;padding:5px 10px}#towerPanel .towerOverview>.towerSectionLabel{display:none}#towerPanel .towerComparisonSheet>.secondary{width:100%;background:#d9e4ca;color:#2b4b30;border-color:#8fa67d}
+

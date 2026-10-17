@@ -38,5 +38,9 @@ const HexTowerView = (() => {
     if (after.slow > before.slow) hints.push('Schwächere Verlangsamung');
     return hints.join(' · ');
   }
-  return {escape, number, rows, summary, comparison, details, tradeoff};
+  function pathProgress(tower) {
+    const level = tower.ultimate ? 4 : tower.finalUpgrade ? 3 : tower.branch ? 2 : 1;
+    return '<span class="towerPathLabel">Stufe ' + level + ' → ' + Math.min(4, level + 1) + '</span><span class="towerPathSteps" aria-hidden="true">' + [1,2,3,4].map(n => '<span class="' + (n <= level ? 'owned' : n === level + 1 ? 'next' : '') + '">' + n + '</span>').join('') + '</span>';
+  }
+  return {escape, number, rows, summary, comparison, details, tradeoff, pathProgress};
 })();

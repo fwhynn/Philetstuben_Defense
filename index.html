@@ -40,23 +40,26 @@
             <h2 id="towerPanelTitle">Turm</h2><button id="closeTowerPanel" class="secondary"
               aria-label="Turminfos schließen" title="Schließen (Escape)"><small>Esc</small> ×</button>
           </div>
+          <div id="towerPanelScroll" class="towerPanelScroll">
           <div class="towerPanelBody">
           <div class="towerOverview">
           <p class="towerSectionLabel">Aktueller Turm</p>
           <div id="selectedTowerInfo" class="towerCurrentStats"></div>
-          <details id="towerExtraDetails" class="towerDisclosure">
-            <summary>Werte &amp; Einflüsse</summary>
-            <div id="towerExtraValues"></div>
-            <div id="towerInfluences" class="hint"></div>
-            <button id="towerBiomeInfo" class="secondary">Biom-Effekte ⓘ</button>
-          </details>
-          <button id="sellTowerBtn" class="secondary" disabled>Bau rückgängig</button>
+
           </div>
           <div class="towerDevelopment">
           <p class="towerSectionLabel">Ausbau wählen</p>
           <div id="towerUpgrades" class="towerUpgrades"></div>
           </div>
           </div>
+          <details id="towerExtraDetails" class="towerDisclosure">
+            <summary>Werte &amp; Einflüsse</summary>
+            <div id="towerExtraValues"></div>
+            <div id="towerInfluences" class="hint"></div>
+            <button id="towerBiomeInfo" class="secondary">Biom-Effekte ⓘ</button>
+          </details>
+          </div>
+          <div class="towerPanelFooter"><button id="sellTowerBtn" class="secondary" disabled>Bau rückgängig</button></div>
         </section>
         <section id="buildingPanel" class="towerPanel hidden" aria-label="Gebäudeslot">
           <div class="panelHead">
