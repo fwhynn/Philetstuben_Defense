@@ -245,8 +245,8 @@ test('buying a tower leaves its menu closed; clicking the placed tower selects i
 
 test('tower panel exposes three ordered target priorities and swaps duplicate choices', () => {
   const { a, elements, selectSlot, buyTower } = load(); const tile = { q: 1, r: 0, type: 'straight', roads: [0, 3], slots: 1, towers: [null] }; a.state.map.set('1,0', tile); a.state.phase = 'build'; selectSlot(1, 0, 0); buyTower('archer'); a.state.selectedTower = { q: 1, r: 0, index: 0 }; a.renderAll();
-  const targeting = elements.get('towerUpgrades').children[0]; assert.equal(targeting.className, 'targetPriorities'); assert.equal(targeting.children.length, 3);
-  const first = targeting.children[0].children[0]; first.value = 'mostHealth'; first.listeners.change(); assert.deepEqual(Array.from(tile.towers[0].targetPriority), ['mostHealth', 'closestBase', 'boss']);
+  const targeting = elements.get('towerUpgrades').children.find(node => node.className.includes('targetPriorities')); assert.ok(targeting); assert.equal(targeting.children.length, 4); assert.equal(targeting.open, false);
+  const first = targeting.children[1].children[0]; first.value = 'mostHealth'; first.listeners.change(); assert.deepEqual(Array.from(tile.towers[0].targetPriority), ['mostHealth', 'closestBase', 'boss']);
 });
 
 test('final upgrade requires the chosen branch, charges once and prevents further upgrades', () => {

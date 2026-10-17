@@ -147,7 +147,7 @@ test('multi tower focus edits all eligible turrets, preserves unique priorities,
   const tile = { q: 1, r: 0, type: 'cross', roads: [0, 1, 3, 4], slots: 2, towers: [null, null] }, support = { q: 2, r: 0, type: 'straight', roads: [0, 3], slots: 1, towers: [null] }; a.state.map.set('1,0', tile); a.state.map.set('2,0', support);
   selectSlot(1, 0, 0); selectSlot(1, 0, 1, true); buyTower('archer'); selectSlot(2, 0, 0); buyTower('freeze'); tile.towers[1].targetPriority = ['boss', 'mostArmor', 'closestBase'];
   a.rendererCommands.selectTower(1, 0, 0); a.rendererCommands.selectTower(1, 0, 1, true); a.rendererCommands.selectTower(2, 0, 0, true);
-  const section = elements.get('towerUpgrades').children[0], select = section.children[0].children[0]; assert.equal(select.children[0].textContent, 'Unterschiedliche Einstellungen'); select.value = 'boss'; select.listeners.change();
+  const section = elements.get('towerUpgrades').children.find(n => n.className?.includes('targetPriorities')), select = section.children[1].children[0]; assert.equal(select.children[0].textContent, 'Unterschiedliche Einstellungen'); select.value = 'boss'; select.listeners.change();
   for (const tower of tile.towers) { assert.equal(tower.targetPriority[0], 'boss'); assert.equal(new Set(tower.targetPriority).size, 3); } assert.equal(support.towers[0].targetPriority[0], 'closestBase'); assert.equal(elements.get('sellTowerBtn').disabled, true); sellSelectedTower(); assert.ok(support.towers[0]);
   a.rendererCommands.selectTower(2, 0, 0, true); assert.equal(a.state.selectedTowers.length, 2); a.rendererCommands.selectTower(1, 0, 0); assert.equal(a.state.selectedTowers.length, 1);
 });

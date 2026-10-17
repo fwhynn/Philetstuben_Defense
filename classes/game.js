@@ -148,6 +148,7 @@
     return uiWavePlans.get(cacheKey);
   }
   let towerPanelKey = '';
+  let towerComparison = null, towerSelectionKey = '', towerFocusOpen = false, towerComparisonScroll = 0;
   let buildingPanelKey = ''; const buildingButtons = new Map();
   const upgradeButtons = new Map();
   const sound = typeof HexAudio === 'undefined' ? { play() { } } : HexAudio;
@@ -606,7 +607,7 @@ R dreht die Karte, dann Feld anklicken.`;
     const info = document.getElementById('selectedTowerInfo'), sell = document.getElementById('sellTowerBtn');
     const selected = state.selectedTower, tower = selected ? state.map.get(key(selected.q, selected.r))?.towers[selected.index] : null;
     document.getElementById('towerBiomeInfo').title = tower ? HexBiomes.definitions[tower.biome || 'grass'].description : '';
-    info.innerHTML = tower ? towerStatsMarkup(HexData.towerDefinition(tower)) + `<span class="statChip" title="Biom"><span aria-hidden="true">${({ grass: '♧', desert: '☀', ash: '♨', storm: '≋' })[tower.biome || 'grass']}</span> ${HexBiomes.definitions[tower.biome || 'grass'].name}</span>` + (CARD_LIBRARY[tower.tileType]?.towerBonus || CARD_LIBRARY[tower.tileType]?.towerRange || CARD_LIBRARY[tower.tileType]?.archerDamage || CARD_LIBRARY[tower.tileType]?.towerDamage ? ` · ${CARD_LIBRARY[tower.tileType].name}: Hexbonus eingerechnet` : '') : '';
+    info.innerHTML = tower ? HexTowerView.summary(towerPanelDefinition(tower)) : '';
     renderTowerPanel();
     const refund = HexData.towerRefund(state, tower); sell.disabled = !refund || selections('Tower').length > 1;
     sell.textContent = selections('Tower').length > 1 ? 'Zum Verkaufen einen einzelnen Turm wählen' : refund ? `${refund.percent === 100 ? 'Bau rückgängig' : 'Verkaufen'} · ${refund.percent} % (+${refund.amount} Gold)` : 'Turm verkaufen';
@@ -617,7 +618,7 @@ R dreht die Karte, dann Feld anklicken.`;
   }
   function bindUpgradePreview(button, tower, next) {
     const show = () => { state.previewUpgrade = { tower, definition: next }; renderBoard(); };
-    const clear = () => { state.previewUpgrade = null; renderBoard(); };
+    const clear = () => { if (towerComparison) return; state.previewUpgrade = null; renderBoard(); };
     button.addEventListener('pointerenter', show); button.addEventListener('pointerleave', clear); button.addEventListener('focus', show); button.addEventListener('blur', clear);
   }
   function renderDeckOverview(target = 'deckOverview') {
@@ -798,40 +799,106 @@ R dreht die Karte, dann Feld anklicken.`;
     const sell = document.getElementById('sellBuildingBtn'), refund = HexBuildings.refund(state, building); sell.disabled = !refund; sell.textContent = refund ? `Verkaufen · ${refund.percent} % (+${refund.amount} Gold)` : 'Gebäude verkaufen';
     positionTowerPanel();
   }
+  function towerPanelDefinition(tower) {
+    const definition = HexData.towerDefinition(tower);
+    if (tower.overloadUntil > state.elapsedMs) definition.cooldown /= 1.5;
+    return definition;
+  }
+  function closeTowerComparison() {
+    if (!towerComparison) return false;
+    const previous = towerComparison; towerComparison = null; state.previewUpgrade = null;
+    renderAll(); document.getElementById('compare-' + previous)?.focus?.({preventScroll:true}); document.getElementById('towerPanel').scrollTop = towerComparisonScroll; return true;
+  }
+  function towerUpgradeCard(content, tower, id, upgrade, next, locked = false) {
+    const current = towerPanelDefinition(tower), comparing = towerComparison === id;
+    if (towerComparison && !comparing) return;
+    const card = document.createElement('section'); card.className = 'towerUpgradeCard'; card.classList.toggle('comparing', comparing);
+    const heading = document.createElement('strong'); heading.textContent = upgrade.name; card.appendChild(heading);
+    const description = document.createElement('p'); description.className = 'towerUpgradeDescription'; description.textContent = upgrade.desc; card.appendChild(description);
+    const tradeoff = HexTowerView.tradeoff(current, next);
+    if (tradeoff) { const note = document.createElement('small'); note.className = 'towerTradeoff'; note.textContent = tradeoff; card.appendChild(note); }
+    if (comparing) { state.previewUpgrade = { tower, definition: next }; const table = document.createElement('div'); table.innerHTML = HexTowerView.comparison(current, next); card.appendChild(table); }
+    const actions = document.createElement('div'); actions.className = 'towerUpgradeActions';
+    const compare = document.createElement('button'); compare.className = 'secondary'; compare.id = 'compare-' + id;
+    compare.textContent = comparing ? 'Zurück zur Auswahl' : 'Vergleichen'; compare.setAttribute('aria-label', upgrade.name + ' · ' + compare.textContent);
+    compare.addEventListener('click', () => {
+      if (comparing) { closeTowerComparison(); return; }
+      towerComparisonScroll = document.getElementById('towerPanel').scrollTop || 0;
+      towerComparison = id; state.previewUpgrade = { tower, definition: next }; renderAll(); document.getElementById('compare-' + id)?.focus?.();
+    }); actions.appendChild(compare);
+    if (locked) { const hint = document.createElement('p'); hint.className = 'ultimateLocked'; hint.textContent = HexBuildings.cost(state, state.selectedTower, upgrade.cost) + ' Gold · Im Arsenal freischalten und für den nächsten Run aktivieren.'; card.appendChild(hint); }
+    else {
+      const buy = document.createElement('button'); buy.className = 'upgradeOption towerBuy'; buy._baseCost = upgrade.cost;
+      buy._upgradeName = upgrade.name; buy.addEventListener('click', () => { towerComparison = null; upgradeSelectedTower(id); });
+      bindUpgradePreview(buy, tower, next); actions.appendChild(buy); upgradeButtons.set(id, buy);
+    }
+    card.appendChild(actions); content.appendChild(card);
+  }
   function renderTowerPanel() {
     const panel = document.getElementById('towerPanel'), selected = state.selectedTower, tower = selected ? state.map.get(key(selected.q, selected.r))?.towers[selected.index] : null;
-    if (!tower) { panel.classList.add('hidden'); towerPanelKey = ''; return; }
+    if (!tower) { panel.classList.add('hidden'); towerPanelKey = ''; towerSelectionKey = ''; towerComparison = null; state.previewUpgrade = null; return; }
+    const selectionKey = JSON.stringify(selections('Tower'));
+    if (towerSelectionKey !== selectionKey) { towerSelectionKey = selectionKey; towerComparison = null; towerFocusOpen = false; document.getElementById('towerExtraDetails').open = false; }
     panel.classList.remove('hidden'); document.getElementById('towerPanelTitle').textContent = `${HexData.towerDefinition(tower).name} · Stufe ${tower.level}`;
     const selectedTowers = selections('Tower').map(s => state.map.get(key(s.q, s.r))?.towers[s.index]).filter(Boolean), group = selectedTowers.length > 1;
     if (group) { document.getElementById('towerPanelTitle').textContent = selectedTowers.length + ' Türme ausgewählt'; document.getElementById('selectedTowerInfo').textContent = 'Angriffsfokus gemeinsam einstellen · Strg + Klick: Auswahl ändern'; }
-    const panelKey = JSON.stringify([selections('Tower'), tower.branch, tower.finalUpgrade, tower.ultimate, tower.supportDamage, state.buildingVersion]);
+    const definition = towerPanelDefinition(tower);
+    const validChoices = tower.ultimate ? [] : tower.finalUpgrade ? ['ultimate:' + tower.type] : HexData.availableUpgrades(tower).map(([id]) => id);
+    if (towerComparison && !validChoices.includes(towerComparison)) towerComparison = null;
+    document.getElementById('selectedTowerInfo').classList.toggle('hidden', !!towerComparison);
+    document.getElementById('towerExtraDetails').classList.toggle('hidden', group);
+    const panelKey = JSON.stringify([selections('Tower'), definition, tower.biome, tower.tileType, tower.overloadPending, selectedTowers.map(t => t.targetPriority), state.buildingVersion, towerComparison, uiLanguageRevision]);
     if (towerPanelKey !== panelKey) {
       towerPanelKey = panelKey; upgradeButtons.clear(); const content = document.getElementById('towerUpgrades'); content.innerHTML = '';
-      const definition = HexData.towerDefinition(tower);
+      document.getElementById('towerExtraValues').innerHTML = '<p>' + HexTowerView.escape(definition.desc) + '</p>' + HexTowerView.details(definition);
+      const biome = HexBiomes.definitions[tower.biome || 'grass'], terrain = CARD_LIBRARY[tower.tileType], influences = [biome.name + ': ' + biome.description];
+      const bonus = HexData.tileBonusLabel(terrain); if (bonus) influences.push(terrain.name + ': ' + bonus);
+      const selectedTile = state.map.get(key(selected.q, selected.r));
+      if (selectedTile?.site === 'guardian' && selected.index === selectedTile.siteSlot) influences.push('Wächter-Bauplatz: +20 % Reichweite.');
+      for (const tile of state.map.values()) {
+        const distance = Math.max(Math.abs(tile.q - selected.q), Math.abs(tile.r - selected.r), Math.abs(tile.q + tile.r - selected.q - selected.r));
+        if (distance <= 1 && tile.siteEffect) influences.push('Schrein (' + tile.q + ', ' + tile.r + '): ' + (tile.siteEffect === 'damage' ? '+10 % Schaden' : '+15 % Reichweite'));
+        for (const building of tile.buildings || []) if (building && ['forge', 'market'].includes(building.type)) {
+          const effect = HexBuildings.definition(building);
+          if (distance <= effect.radius || building.special && building.target === key(selected.q, selected.r)) influences.push(effect.name + ' (' + tile.q + ', ' + tile.r + '): ' + effect.desc);
+        }
+      }
+      if (tower.overloadPending) influences.push('Überladung: für die nächste Welle vorgemerkt.');
+      if (tower.overloadUntil > state.elapsedMs) influences.push('Überladung aktiv: +50 % Angriffstempo.');
+      if (tower.supportDamage && tower.supportDamage !== 1) influences.push('Unterstützung · Schaden ×' + HexTowerView.number(tower.supportDamage));
+      if (tower.supportRange && tower.supportRange !== 1) influences.push('Unterstützung · Reichweite ×' + HexTowerView.number(tower.supportRange));
+      if (tower.rangeFactor && tower.rangeFactor !== 1) influences.push('Durchlauf · Reichweite ×' + HexTowerView.number(tower.rangeFactor));
+      const discount = HexBuildings.cost(state, selected, 100); if (discount !== 100) influences.push('Standort-Rabatt: ' + (100 - discount) + ' %');
+      document.getElementById('towerInfluences').innerHTML = influences.map(text => '<p>' + HexTowerView.escape(text) + '</p>').join('');
+      let focusSection = null;
       const targetable = selectedTowers.filter(t => { const d = HexData.towerDefinition(t); return !d.aura && !d.mine; });
-      if (targetable.length) {
+      if (targetable.length && !towerComparison) {
         const tower = targetable[0];
         const labels = { closestBase: 'Nächste an der Base', furthestBase: 'Weiteste von der Base', mostHealth: 'Meistes Leben', leastHealth: 'Wenigstes Leben', mostArmor: 'Meiste Rüstung', mostMagic: 'Meiste Magieresistenz', boss: 'Bosse', healer: 'Heiler', closestTower: 'Nächste am Turm', furthestTower: 'Weiteste vom Turm' }, defaults = HexData.defaultTargetPriority(tower);
         tower.targetPriority = [...new Set(tower.targetPriority || defaults)]; for (const value of defaults) if (tower.targetPriority.length < 3 && !tower.targetPriority.includes(value)) tower.targetPriority.push(value); tower.targetPriority = tower.targetPriority.slice(0, 3);
-        const targeting = document.createElement('section'); targeting.className = 'targetPriorities'; targeting.setAttribute('aria-label', 'Angriffsfokus'); targeting.innerHTML = '<strong>Angriffsfokus</strong>';
-        tower.targetPriority.forEach((value, index) => { const row = document.createElement('label'); row.textContent = `${index + 1}.`; const select = document.createElement('select'); select.setAttribute('aria-label', 'Angriffsfokus Priorität ' + (index + 1)); const mixed = targetable.some(t => (t.targetPriority || defaults)[index] !== value); if (mixed) { const option = document.createElement('option'); option.value = ''; option.textContent = 'Unterschiedliche Einstellungen'; option.disabled = true; option.selected = true; select.appendChild(option); } for (const [id, label] of Object.entries(labels)) { const option = document.createElement('option'); option.value = id; option.textContent = label; option.selected = !mixed && id === value; select.appendChild(option); } select.addEventListener('change', () => { if (duoToken) { const packets = selections('Tower').map(slot => { const target = state.map.get(key(slot.q, slot.r))?.towers[slot.index], priorities = [...(target.targetPriority || defaults)], old = priorities[index], other = priorities.indexOf(select.value); priorities[index] = select.value; if (other >= 0 && other !== index) priorities[other] = old; return { slot, priorities }; }); duoBridge?.priorities(packets); return; } for (const target of targetable) { target.targetPriority = [...(target.targetPriority || defaults)]; const old = target.targetPriority[index], other = target.targetPriority.indexOf(select.value); target.targetPriority[index] = select.value; if (other >= 0 && other !== index) target.targetPriority[other] = old; } towerPanelKey = ''; renderAll(); }); row.appendChild(select); targeting.appendChild(row); }); content.appendChild(targeting);
+        const targeting = document.createElement('details'); targeting.className = 'targetPriorities towerDisclosure'; targeting.setAttribute('aria-label', 'Angriffsfokus'); targeting.open = group || towerFocusOpen;
+        const summary = document.createElement('summary'); summary.textContent = 'Angriffsfokus · ' + (targetable.some(t => (t.targetPriority || defaults)[0] !== tower.targetPriority[0]) ? 'Unterschiedliche Einstellungen' : labels[tower.targetPriority[0]]); targeting.appendChild(summary);
+        targeting.addEventListener('toggle', () => { towerFocusOpen = targeting.open; }); focusSection = targeting;
+        tower.targetPriority.forEach((value, index) => { const row = document.createElement('label'); row.textContent = `${index + 1}.`; const select = document.createElement('select'); select.setAttribute('aria-label', 'Angriffsfokus Priorität ' + (index + 1)); const mixed = targetable.some(t => (t.targetPriority || defaults)[index] !== value); if (mixed) { const option = document.createElement('option'); option.value = ''; option.textContent = 'Unterschiedliche Einstellungen'; option.disabled = true; option.selected = true; select.appendChild(option); } for (const [id, label] of Object.entries(labels)) { const option = document.createElement('option'); option.value = id; option.textContent = label; option.selected = !mixed && id === value; select.appendChild(option); } select.addEventListener('change', () => { if (duoToken) { const packets = selections('Tower').map(slot => { const target = state.map.get(key(slot.q, slot.r))?.towers[slot.index], priorities = [...(target.targetPriority || defaults)], old = priorities[index], other = priorities.indexOf(select.value); priorities[index] = select.value; if (other >= 0 && other !== index) priorities[other] = old; return { slot, priorities }; }); duoBridge?.priorities(packets); return; } for (const target of targetable) { target.targetPriority = [...(target.targetPriority || defaults)]; const old = target.targetPriority[index], other = target.targetPriority.indexOf(select.value); target.targetPriority[index] = select.value; if (other >= 0 && other !== index) target.targetPriority[other] = old; } towerPanelKey = ''; renderAll(); }); row.appendChild(select); targeting.appendChild(row); });
       }
       if (group) { const hint = document.createElement('p'); hint.className = 'hint'; hint.textContent = 'Änderungen gelten für ' + targetable.length + ' Türme mit Angriffsfokus. Unterschiedliche bisherige Einstellungen werden durch die Auswahl je Zeile angepasst. Support und Minenleger bleiben unverändert. Upgrades und Verkauf: einzelnen Turm auswählen.'; content.appendChild(hint); }
       else if (tower.ultimate) { const hint = document.createElement('p'); hint.className = 'hint'; hint.textContent = 'Meta-Stufe 4 erreicht.'; content.appendChild(hint); }
       else if (tower.finalUpgrade) {
         const id = 'ultimate:' + tower.type, upgrade = HexData.ultimateDefinition(tower), unlocked = HexData.ultimateAvailable(state, tower);
-        if (!unlocked) { const hint = document.createElement('p'); hint.className = 'ultimateLocked'; hint.textContent = `🔒 ${upgrade.name}: im Arsenal freischalten und für den nächsten Run aktivieren.`; content.appendChild(hint); }
-        else { const current = HexData.towerDefinition(tower), next = HexData.towerDefinition({ ...tower, ultimate: tower.type }), button = document.createElement('button'), price = HexBuildings.cost(state, selected, upgrade.cost); button.className = 'upgradeOption ultimateOption'; button.innerHTML = `<strong>◆ ${upgrade.name} · ${price} Gold</strong><small>${upgrade.desc}</small><small>${towerStatsMarkup(current)}</small><small>Danach: ${towerStatsMarkup(next)}</small>`; bindUpgradePreview(button, tower, next); button.addEventListener('click', () => upgradeSelectedTower(id)); button._baseCost = upgrade.cost; content.appendChild(button); upgradeButtons.set(id, button); }
+        towerUpgradeCard(content, tower, id, upgrade, towerPanelDefinition({ ...tower, ultimate: tower.type }), !unlocked);
       } else for (const [branch, upgrade] of HexData.availableUpgrades(tower)) {
-        const current = HexData.towerDefinition(tower), next = HexData.towerDefinition({ ...tower, ...(upgrade.requires ? { finalUpgrade: branch } : { branch }) }), button = document.createElement('button');
-        button.className = 'upgradeOption';
-        const price = HexBuildings.cost(state, selected, upgrade.cost);
-        button.innerHTML = `<strong>${upgrade.name} · ${price} Gold</strong><small>${upgrade.desc}</small><small>${towerStatsMarkup(current)}</small><small>Danach: ${towerStatsMarkup(next)}</small>`;
-        if (current.aura) button.innerHTML = `<strong>${upgrade.name} · ${price} Gold</strong><small>${upgrade.desc}</small><small>Slow ${Math.round((1 - current.slow) * 100)} → ${Math.round((1 - next.slow) * 100)} % · Radius ${current.range} → ${next.range}</small>`;
-        bindUpgradePreview(button, tower, next); button.addEventListener('click', () => upgradeSelectedTower(branch)); button._baseCost = upgrade.cost; content.appendChild(button); upgradeButtons.set(branch, button);
+        const next = towerPanelDefinition({ ...tower, ...(upgrade.requires ? { finalUpgrade: branch } : { branch }) });
+        towerUpgradeCard(content, tower, branch, upgrade, next);
       }
+      if (focusSection) content.appendChild(focusSection);
     }
-    for (const [, button] of upgradeButtons) button.disabled = !['place', 'build', 'wave'].includes(state.phase) || state.gold < HexBuildings.cost(state, selected, button._baseCost) || state.hp <= 0;
+    for (const [, button] of upgradeButtons) {
+      const price = HexBuildings.cost(state, selected, button._baseCost), unavailable = !['place', 'build', 'wave'].includes(state.phase) || state.hp <= 0;
+      button.disabled = unavailable || state.gold < price;
+      const text = unavailable ? 'Zurzeit nicht ausbaubar' : state.gold < price ? price + ' Gold · ' + (price - state.gold) + ' fehlen' : 'Ausbauen · ' + price + ' Gold';
+      if (button.textContent !== text) button.textContent = text;
+      button.setAttribute('aria-label', button._upgradeName + ' · ' + text);
+    }
     positionTowerPanel();
   }
   function setMessage(s, notice = false) { if(consumablePick) s=(consumablePick==='overload'?'Überladung: eigenen angreifenden Turm anklicken.':'Position auf der Straße für '+HexCombat.consumables[consumablePick].name+' anklicken.')+' Escape / Rechtsklick: abbrechen.'; const feedback = document.getElementById('tutorialFeedback'); feedback.textContent = notice ? s : ''; feedback.classList.toggle('hidden', !notice || !tutorial.active); document.getElementById('messageText').textContent = s; messageEl.classList.remove('show'); if (!s.trim()) return; void messageEl.offsetWidth; messageEl.classList.add('show'); }
@@ -1463,6 +1530,7 @@ R dreht die Karte, dann Feld anklicken.`;
     if (e.key === 'Escape' && state.inspectEndMap) { e.preventDefault?.(); inspectEndMap(false); return; }
     if (e.key === 'Escape' && !arsenalOverlay.classList.contains('hidden')) { e.preventDefault?.(); closeArsenal(); return; }
     if (state.celebrationActive) { if (e.key === 'Escape') { closeCelebration(); e.preventDefault?.(); } else if (e.code === 'Space') e.preventDefault?.(); return; }
+    if (e.key === 'Escape' && towerComparison) { e.preventDefault?.(); closeTowerComparison(); return; }
     if (e.key === 'Escape') {
       e.preventDefault?.(); if (e.repeat) return;
       const hadPanel = state.selectedTower || state.selectedBuilding || state.selectedSlot || document.querySelector?.('.drawer:not(.hidden),.statDetails[open],#biomeInfoPanel:not(.hidden)');

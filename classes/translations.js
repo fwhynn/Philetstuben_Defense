@@ -5,6 +5,38 @@ Archer:'Bogenschütze',Freeze:'Frostturm',Waveplanung:'Wellenplanung',Waves:'Wel
 // One source phrase and its English equivalent per line; dynamic fragments may compose.
 globalThis.HexTranslations.add=function(rows){for(const line of rows.trim().split('\n')){const at=line.indexOf('|');if(at>0)this.en[line.slice(0,at)]=line.slice(at+1);}};
 HexTranslations.add(`
+Schaden pro Treffer · aktuelle Werte|Damage per hit · current values
+Überladung: für die nächste Welle vorgemerkt.|Overload: queued for the next wave.
+Überladung aktiv: +50 % Angriffstempo.|Overload active: +50% attack speed.
+Wächter-Bauplatz: +20 % Reichweite.|Guardian tower slot: +20% range.
+Schaden pro Mine · aktuelle Werte|Damage per mine · current values
+Aura · kein Schaden|Aura · no damage
+Werte & Einflüsse|Stats & modifiers
+Alle Werte im Vergleich|Compare all stats
+Zurück zur Auswahl|Back to choices
+Vergleichen|Compare
+Zurzeit nicht ausbaubar|Cannot upgrade right now
+Weniger Schaden je Ziel|Less damage per target
+Langsamere Minenproduktion|Slower mine production
+Langsamere Angriffe|Slower attacks
+Kleinere Reichweite|Shorter range
+Weniger Blitzziele|Fewer lightning targets
+Schwächere Verlangsamung|Weaker slow
+Schussabstand: kleiner ist schneller. Aktive Einflüsse sind eingerechnet.|Attack interval: lower is faster. Active modifiers are included.
+Im Arsenal freischalten und für den nächsten Run aktivieren.|Unlock in the Arsenal and activate for the next run.
+Standort-Rabatt|Local discount
+Boss-Schadensfaktor|Boss damage multiplier
+Treffer-Verlangsamung|On-hit slow
+Verlangsamungsdauer|Slow duration
+Schussabstand|Attack interval
+Flächenradius|Area radius
+Blitzziele|Lightning targets
+Sprungweite|Jump range
+Wirkungsradius|Effect radius
+Aktuell|Current
+Danach|After
+Wert|Stat
+fehlen|missing
 Sprache|Language
 Deutsch|German
 Bogenschütze|Archer

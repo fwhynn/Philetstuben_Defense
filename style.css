@@ -14,7 +14,7 @@
 .upgradeChoices{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}.upgradeChoices button{font-size:12px}
 .towerPanel{position:absolute;left:12px;top:60px;width:min(335px,calc(100% - 24px));max-height:calc(100% - 80px);overflow:auto;z-index:5;background:#1d2922f5;border:1px solid #607d65;border-radius:12px;padding:14px;box-shadow:0 8px 24px #0008}
 .towerPanel h2{font-size:16px;margin:0}.towerUpgrades{display:grid;gap:8px;margin-top:12px}
-.targetPriorities{display:grid;gap:7px;padding:10px;background:#17231c;border:1px solid #526c56;border-radius:8px}.targetPriorities>small{color:#b9c4b8;line-height:1.4}.targetPriorities label{display:grid;grid-template-columns:22px 1fr;gap:6px;align-items:center;font-size:12px}.targetPriorities select{width:100%;background:#293a30;color:#f1f4ea;border:1px solid #607d65;border-radius:6px;padding:6px}
+.targetPriorities{padding:10px;background:#17231c;border:1px solid #526c56;border-radius:8px}.targetPriorities>small{color:#b9c4b8;line-height:1.4}.targetPriorities label{display:grid;grid-template-columns:22px 1fr;gap:6px;align-items:center;font-size:12px;margin-top:7px}.targetPriorities select{width:100%;background:#293a30;color:#f1f4ea;border:1px solid #607d65;border-radius:6px;padding:6px}
 .upgradeOption{display:grid;gap:6px;text-align:left;background:#293a30;border:1px solid #526c56;padding:10px}.upgradeOption small{font-size:11px;color:#d6ddcf;line-height:1.5}
 .rewardBox{max-height:90vh;overflow:auto}#skipRemovalBtn{margin-top:14px}
 @media(max-width:700px){.stats .statPopup{position:fixed;left:5vw;right:auto;top:150px;max-height:65vh;overflow:auto}}
@@ -738,3 +738,44 @@ body:has(#biomeIntro:not(.hidden)) .biomeTooltip{display:none!important}
 .devToggle{position:fixed;right:8px;top:8px;z-index:2000;padding:7px 10px;background:#263b30;border:1px solid #8da880;border-radius:8px;color:#eee4c9}.devToggle[aria-pressed="true"]{background:#53622d;border-color:#f4c86a}body:has(#devToggleBtn:not(.hidden)) .gameHeader{padding-right:90px}.leaderboardMode{display:flex;align-items:center;gap:12px;margin:12px 0}.leaderboardMode select{background:#24342a;color:inherit;padding:8px;border:1px solid #607d65;border-radius:8px;max-width:100%}
 
 .leaderboardModes{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.leaderboardModes button{flex:1 1 auto}.leaderboardModes button[aria-pressed="true"]{background:#53622d;border-color:var(--accent);color:#fff3c4}
+
+/* Selected tower: decisions first, complete information in explicit disclosures. */
+#towerPanel{width:min(440px,calc(100vw - 24px));padding:12px;color:#f4f0df}
+#towerPanel>.panelHead{top:-12px;margin:-12px -12px 10px;padding:10px 12px}
+#towerPanel .towerCurrentStats{border:1px solid #8e8655;border-radius:9px;padding:9px 10px;background:#18291f}
+.towerStatCaption{font-size:12px;color:#c8d2c0;margin-bottom:5px}
+.towerDamageGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.towerDamageGrid>div{display:flex;flex-direction:column;min-width:0}
+.towerDamageGrid span{font-size:12px;overflow-wrap:anywhere;color:#d4dece}
+.towerDamageGrid strong{font-size:21px;font-variant-numeric:tabular-nums;line-height:1.3}
+.towerCoreStats{display:flex;gap:4px 14px;flex-wrap:wrap;border-top:1px solid #41543e;margin-top:7px;padding-top:6px;font-size:12px}
+#towerPanel .towerUpgrades{gap:7px;margin-top:9px}
+.towerUpgradeCard{border:1px solid #8f8454;border-radius:9px;background:#263a2b;padding:9px 10px;min-width:0}
+.towerUpgradeCard>strong{font-size:16px;color:#ffe3a0}
+#towerPanel .towerUpgradeDescription{font-size:12px;line-height:1.4;margin:3px 0 5px;color:#e0e5d7}
+#towerPanel .towerTradeoff{display:block;font-size:11px;line-height:1.4;color:#efc6a1;margin-bottom:5px}
+.towerUpgradeActions{display:flex;gap:7px;align-items:stretch}
+#towerPanel .towerUpgradeActions button{flex:1;min-width:0;padding:7px 9px;font-size:13px;line-height:1.3;text-align:center}
+#towerPanel .towerBuy{display:block;background:#6e5824;border-color:#cfad58;color:#fff4d8;font-weight:700}
+#towerPanel .towerBuy:disabled{opacity:1;background:#354034;border-color:#63705d;color:#c3c9bb}
+.towerDisclosure{margin-top:8px;border:1px solid #50644e;border-radius:8px;background:#1b2b21;padding:9px 10px}
+.towerDisclosure summary{cursor:pointer;font-size:13px;font-weight:600;color:#ece6ce;min-height:24px;align-content:center}
+.towerDisclosure[open]>summary{margin-bottom:8px}
+#towerPanel :is(button,summary,select):focus-visible{outline:3px solid #ffe198;outline-offset:2px}
+.towerValueTable{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0;font-variant-numeric:tabular-nums}
+.towerValueTable caption{text-align:left;font-weight:600;margin-bottom:7px}
+.towerValueTable :is(th,td){text-align:right;padding:6px 3px;border-bottom:1px solid #52604b}
+.towerValueTable th:first-child{text-align:left;font-weight:400;width:48%}
+.towerValueTable .better{color:#a7e5ae}.towerValueTable .worse{color:#ffc4ae}
+.towerValueList{margin:10px 0;font-size:13px}.towerValueList>div{display:flex;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid #40503d}.towerValueList dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
+#towerExtraValues>p,#towerInfluences p{font-size:12px;line-height:1.5;margin:8px 0}
+#towerPanel #sellTowerBtn{margin-top:10px;border-top:1px solid #657257;background:#25362a;font-size:12px}
+@media(max-width:480px){#towerPanel{padding:10px}.towerDamageGrid{gap:5px}.towerDamageGrid span{font-size:11px}.towerDamageGrid strong{font-size:19px}}
+#towerPanel>.panelHead{padding-top:5px;padding-bottom:5px;margin-bottom:8px}
+.towerStatCaption,.towerDamageGrid span,.towerCoreStats{line-height:1.3}
+.towerDamageGrid strong{padding:0;margin:0}
+.towerUpgradeCard:not(.comparing){display:grid;grid-template-columns:minmax(0,1fr) 145px;column-gap:10px;align-items:start}
+.towerUpgradeCard:not(.comparing)>strong,.towerUpgradeCard:not(.comparing)>p,.towerUpgradeCard:not(.comparing)>.towerTradeoff{grid-column:1}
+.towerUpgradeCard:not(.comparing)>.towerUpgradeActions{grid-column:2;grid-row:1 / span 4;flex-direction:column}
+.towerUpgradeCard:not(.comparing)>.towerUpgradeActions button{flex:auto}
+@media(max-width:380px){.towerUpgradeCard:not(.comparing){grid-template-columns:minmax(0,1fr) 118px;column-gap:7px}}
