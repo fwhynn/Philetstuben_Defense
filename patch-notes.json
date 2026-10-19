@@ -1,6 +1,6 @@
 [
   {
-    "version": "next",
+    "version": "1.0.5",
     "title": "Neue Gegner, Turmausbau und zuverlässige Kartenrettung",
     "changes": [
       "Sechs neue Gegner mit animierten 3D-Modellen bereichern die Wellen: Schildknecht ab Welle 6, Donnerkröte ab 13, Häutungskäfer ab 17, Pechschnecke ab 21, Pilzkoloss ab 28 und Rammbockkäfer ab 38.",
@@ -13,7 +13,8 @@
       "Fehlende Karten im Nachzieh- und Ablagestapel werden wiederhergestellt, damit das bestehende Deck weiter nutzbar bleibt.",
       "Die Rettungstunnel-Aktion bleibt während der Bauphase erreichbar und verschwindet nicht mehr zusammen mit dem Hinweis. Ein gebauter Tunnel wird direkt im Zwischenstand gesichert.",
       "Die große Duo-Anleitung wird nach einigen Sekunden eingeklappt; wichtige Warnungen bleiben sichtbar. Englische Bestenlisten-Beschriftungen und Patchnotes wurden ergänzt."
-    ]
+    ],
+    "date": "2026-10-19"
   },
   {
     "version": "1.0.4",
