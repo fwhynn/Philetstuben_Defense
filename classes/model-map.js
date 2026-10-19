@@ -16,7 +16,7 @@ const HexModelMap=(()=>{
     bases:BASE_PARTS,                                       // optional: Mauer- und Waffenstufen der Festungs-Basen
     landmarks:['boss','shrine','treasure'],
     towers:['archer','catapult','chain','freeze','mine','ballista','flame','necromancer','element',...Object.entries(TOWER_UPGRADES).flatMap(([type,ids])=>ids.map(id=>`${type}_${id}`))],
-    enemies:['normal','armored','warded','swarm','splitter','shard','healer','elementCarrier','boss','boss_ash','boss_storm','boss_desert'],   // optional: ohne Datei zeichnet der Renderer Kugeln
+    enemies:['normal','armored','warded','swarm','splitter','shard','healer','elementCarrier','boss','boss_ash','boss_storm','boss_desert','shieldbearer','thornToad','moltingBeetle','tarSnail','mushroomColossus','ramBeetle'],
     buildings:['house','forge','market'],                   // optional: ohne Datei Platzhalter
     effects:['pickup'],                                     // optional: assets/effects/mine_pickup.glb (Mine auf der Straße)
     consumables:['spikes','resin','overload']               // optional: assets/effects/consumable_<…>.glb (Verbrauchshilfen); ohne Datei nur Label

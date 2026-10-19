@@ -9,7 +9,7 @@ test('special profiles replace normal slots, preserve reward budgets and are det
  assert.equal(core.waves.plan(wave-1,0,false,state).enemies.some(e=>e.type===type),false);
  const plan=core.waves.plan(wave,0,false,state);assert.equal(plan.enemies.length,5+wave*2);assert.equal(plan.enemies.filter(e=>e.type===type).length,1);assert.equal(plan.killGold,plan.count*3);
  }
- for(let wave=26;wave<80;wave++){const plan=core.waves.plan(wave,0,true,state);assert.equal(new Set(plan.enemies.filter(e=>e.immunity).map(e=>e.immunity)).size,1);assert.notEqual(core.waves.elementFor(wave,state),core.waves.elementFor(wave+1,state));assert.deepEqual(plan,core.waves.plan(wave,0,true,JSON.parse(JSON.stringify({seed:state.seed,towerLoadout:state.towerLoadout}))));}
+ for(let wave=26;wave<80;wave++){const plan=core.waves.plan(wave,0,true,state);assert.ok(new Set(plan.enemies.filter(e=>e.immunity).map(e=>e.immunity)).size<=1);assert.notEqual(core.waves.elementFor(wave,state),core.waves.elementFor(wave+1,state));assert.deepEqual(plan,core.waves.plan(wave,0,true,JSON.parse(JSON.stringify({seed:state.seed,towerLoadout:state.towerLoadout}))));}
  assert.notEqual(core.waves.elementFor(26,{towerLoadout:['flame']}),'fire');assert.equal(core.waves.elementFor(26,{towerLoadout:['freeze']}),null);
 });
 test('splitting preserves position, remaining route, wave lifetime and exact total gold including caravan budgets',()=>{

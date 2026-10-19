@@ -26,7 +26,7 @@
           <span>Mausrad: Zoom · rechte Maustaste ziehen: verschieben</span>
         </div>
         <div id="message" class="message"><span id="messageText">Wähle eine Hexkarte und lege sie an die offene Straße
-            der Base.</span><button id="tunnelRescueBtn" class="secondary hidden">Rettungstunnel ansehen</button>
+            der Base.</span>
           <section id="tutorialPanel" class="tutorialPanel hidden" aria-label="Mini-Tutorial"><button
               id="skipTutorialBtn" class="secondary">Tutorial überspringen</button><strong id="tutorialTitle"></strong>
             <p id="tutorialText" aria-live="polite"></p>
@@ -56,7 +56,6 @@
             <summary>Werte &amp; Einflüsse</summary>
             <div id="towerExtraValues"></div>
             <div id="towerInfluences" class="hint"></div>
-            <button id="towerBiomeInfo" class="secondary">Biom-Effekte ⓘ</button>
           </details>
           </div>
           <div class="towerPanelFooter"><button id="sellTowerBtn" class="secondary" disabled>Bau rückgängig</button></div>
@@ -254,6 +253,10 @@
 
       <!-- Unten rechts: Wave starten -->
       <div class="dockBR">
+        <section id="tunnelRescuePanel" class="tunnelRescuePanel hidden" aria-label="Rettungstunnel">
+          <p id="tunnelRescueText" aria-live="polite">Keine passende Straße? Öffne kostenlos eine neue Front.</p>
+          <button id="tunnelRescueBtn" class="secondary" type="button">Rettungstunnel ansehen</button>
+        </section>
         <label class="speedControl" for="doubleSpeed">Tempo <output id="speedValue" for="doubleSpeed">1×</output>
           <small>F: nächstes Tempo</small><input id="doubleSpeed" type="range" min="1" max="8" step="1" value="1"
             aria-label="Spielgeschwindigkeit" /></label>
@@ -369,6 +372,16 @@
           </select>
           <button id="settingsDeveloperStart" class="secondary">Szenario starten</button>
           <button id="settingsDeveloperReset" class="secondary">Aktuelles Szenario zurücksetzen</button>
+          <fieldset>
+            <legend>Gegner für die nächste Welle</legend>
+            <p>Nur im isolierten Testprofil. Die Auswahl ersetzt einmalig die nächste normale Welle. Reihenfolge = Spawn-Reihenfolge. Normale Gegner skalieren mit der Welle; Bosse behalten ihre Stärke.</p>
+            <button id="devEnemyTestStart" class="secondary">Gegnertest starten · separate Teststrecke</button>
+            <label for="devEnemyType">Gegner</label><select id="devEnemyType"></select>
+            <label for="devEnemyCount">Anzahl (1–20)</label><input id="devEnemyCount" type="number" min="1" max="20" value="1">
+            <button id="devEnemyAdd" class="secondary">Für nächste Welle hinzufügen</button>
+            <p id="devEnemyQueue" aria-live="polite"></p>
+            <button id="devEnemyClear" class="secondary">Auswahl leeren · normale Welle</button>
+          </fieldset>
         </details>
         <label class="toggle"><input id="hexGrid" type="checkbox" /> Hex-Grid anzeigen (G)</label>
         <label class="toggle"><input id="autoStart" type="checkbox" /> Wave nach Platzierung automatisch starten</label>
@@ -757,6 +770,7 @@
     <script src="classes/run-runtime.js"></script>
     <script src="classes/run-snapshot.js"></script>
     <script src="classes/waves.js"></script>
+    <script src="classes/dev-enemies.js"></script>
     <script src="classes/combat.js"></script>
     <script src="classes/rewards.js"></script>
     <script src="classes/deck.js"></script>

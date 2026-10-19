@@ -40,7 +40,7 @@ test('grid and building highlights toggle independently and building hover emits
 function setup() {
   function element() { return { attributes: {}, style: {}, children: [], listeners: {}, textContent: '', set innerHTML(value) { this.children = []; }, setAttribute(name, value) { this.attributes[name] = value; }, appendChild(child) { this.children.push(child); child.parent = this; }, addEventListener(name, fn) { this.listeners[name] = fn; }, removeEventListener(name, fn) { if (this.listeners[name] === fn) delete this.listeners[name]; }, remove() { this.parent.children = this.parent.children.filter(child => child !== this); } }; }
   const context = { document: { createElementNS: element } };
-  for (const file of ['heroes.js', 'biomes.js', 'data.js', 'map.js', 'buildings.js', 'exploration.js', 'camera.js', 'svg-renderer.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../classes', file), 'utf8'), context);
+  for (const file of ['heroes.js', 'biomes.js', 'data.js', 'waves.js', 'map.js', 'buildings.js', 'exploration.js', 'camera.js', 'svg-renderer.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../classes', file), 'utf8'), context);
   vm.runInNewContext('globalThis.adapter=HexSvgRenderer;', context);
   const svg = element(), calls = [], commands = {}; for (const name of ['placeTile', 'selectSlot', 'selectTower', 'selectBuilding', 'clearSelection', 'hoverPlacement', 'leavePlacement', 'hoverBuilding']) commands[name] = (...args) => calls.push([name, ...args]);
   const renderer = context.adapter.create(svg, commands), state = { map: new Map([['0,0', { q: 0, r: 0, type: 'base', roads: [0], slots: 0, towers: [], income: 0 }]]), landmarks: new Map(), phase: 'place', waveRunning: false, hand: ['straight'], selectedCard: 0, rotation: 0, hoveredPlacement: null, selectedSlot: null, selectedTower: null, selectedBuilding: null, previewTower: null, hp: 20, gold: 70, enemies: [], projectiles: [] };
@@ -118,4 +118,10 @@ test('range preview keeps current and prospective circles with different opacity
  const {renderer,svg,state}=setup(),tower={type:'archer'};state.phase='build';state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[tower]});state.selectedTower={q:1,r:0,index:0};
  for(const range of [190,100]){state.previewUpgrade={tower,definition:{range,color:'#fff'}};renderer.render(state);const nodes=svg.children.flatMap(n=>n.children),preview=nodes.find(n=>n.attributes['data-upgrade-range']==='preview'),current=nodes.find(n=>n.attributes.r===150&&n.attributes['stroke-opacity']==='.85');assert.ok(current);assert.equal(preview.attributes.r,range);assert.ok(Number(current.attributes['fill-opacity'])>Number(preview.attributes['fill-opacity']));}
  state.previewUpgrade=null;renderer.render(state);assert.equal(svg.children.flatMap(n=>n.children).some(n=>n.attributes['data-upgrade-range']==='preview'),false);
+});
+
+test('new enemy art is rendered as an image with the real asset path and readable tooltip',()=>{
+ const {renderer,svg,state}=setup();state.enemies=[{id:1,type:'shieldbearer',name:'Schildknecht',description:'Drei Treffer',abilityIcon:'▣',x:30,y:30,hp:10,maxHp:20}];renderer.render(state);
+ const all=[];function walk(n){all.push(n);for(const c of n.children||[])walk(c);}walk(svg);
+ const image=all.find(n=>n.attributes.href==='assets/enemies-concepts/shieldbearer.png');assert.ok(image);assert.ok(image.children.some(n=>n.textContent==='Schildknecht · Drei Treffer'));
 });

@@ -15,7 +15,7 @@ const HexCombat=(()=>{
     }
     if(!preview)state.gold-=def.cost;return true;
   }
-  function clearConsumables(state){state.consumables=[];for(const tile of state.map.values())for(const tower of tile.towers||[])if(tower){delete tower.overloadPending;delete tower.overloadUntil;}for(const e of state.enemies||[])e.slowEffects=(e.slowEffects||[]).filter(s=>s.source!=='resin');}
+  function clearConsumables(state){state.enemyZones=[];state.consumables=[];for(const tile of state.map.values())for(const tower of tile.towers||[])if(tower){delete tower.overloadPending;delete tower.overloadUntil;}for(const e of state.enemies||[])e.slowEffects=(e.slowEffects||[]).filter(s=>s.source!=='resin');}
   // Snap a nearby click to the actual lane, including curved and model-specific roads.
   function lanePoint(tile,point){
     if(!Number.isFinite(point?.x)||!Number.isFinite(point?.y))return null;
@@ -39,6 +39,26 @@ const HexCombat=(()=>{
     state.consumables=(state.consumables||[]).filter(c=>c.charges>0);
   }
   const DEFAULT_PRIORITY=['closestBase','mostHealth','boss'];
+  function straightSegment(e){
+    const p=e.points,i=e.index,a=p[i],b=p[i+1];if(!a||!b||a.tunnel||b.tunnel)return false;
+    const aligned=(u,v,w)=>{const x=v.x-u.x,y=v.y-u.y,xx=w.x-v.x,yy=w.y-v.y,l=Math.hypot(x,y)*Math.hypot(xx,yy);return l>0&&(x*xx+y*yy)/l>.99999;};
+    return (!p[i-1]||aligned(p[i-1],a,b))&&(!p[i+2]||aligned(a,b,p[i+2]));
+  }
+  function nearbyTile(state,p){let best=null,d=HexMap.HEX;for(const t of state.map.values()){const c=HexMap.axialToWorld(t.q,t.r),n=Math.hypot(p.x-c.x,p.y-c.y);if(n<d){best=t;d=n;}}return best;}
+  function toadShortcut(state,e,range){
+    const from=nearbyTile(state,e);if(!from)return;
+    const currentDistance=remainingDistance(e);let best=currentDistance-20,route=null;
+    const consider=path=>{const p=path[0],direct=Math.hypot(p.x-e.x,p.y-e.y);if(direct<8||direct>range)return;const to=nearbyTile(state,p);if(!to||to.type==='base'||!to.roads?.length)return;const dq=to.q-from.q,dr=to.r-from.r;if(Math.max(Math.abs(dq),Math.abs(dr),Math.abs(dq+dr))!==1)return;const cost=direct+HexMap.length(path);if(cost<best){best=cost;route=path;}};
+    for(let j=e.index+1;j<e.points.length-1;j++){
+      if(e.points[j].tunnel)break;consider(e.points.slice(j));
+    }
+    // Also search connected roads outside this enemy's originally chosen lane.
+    const {graph,geometry,distances}=HexMap.routeGraph(state.map);
+    function home(id){const path=[geometry.get(id).hub],seen=new Set();while(id!=='0,0'){if(seen.has(id))return null;seen.add(id);const edge=(graph.get(id)||[]).filter(x=>distances.has(x.next)&&!seen.has(x.next)).sort((a,b)=>(a.cost+distances.get(a.next))-(b.cost+distances.get(b.next)))[0];if(!edge)return null;path.push(...edge.points.slice(1));id=edge.next;}return path;}
+    for(const [id,tile] of state.map){if(id==='0,0'||!tile.roads?.length||!distances.has(id))continue;const dq=tile.q-from.q,dr=tile.r-from.r;if(Math.max(Math.abs(dq),Math.abs(dr),Math.abs(dq+dr))!==1)continue;const tail=home(id);if(!tail)continue;consider(tail);for(const leg of geometry.get(id).legs.values())for(let i=1;i<leg.length;i++)consider([...leg.slice(0,i+1).reverse(),...tail.slice(1)]);}
+    if(route){e.points=[{x:e.x,y:e.y},...route.map(p=>({...p}))];e.index=0;e.t=0;e.shortcutJump=true;e.shortcutFlight={start:state.elapsedMs,from:{x:e.x,y:e.y},to:{...route[0]}};}
+  }
+  const hiddenBySpores=(state,e)=> (state.enemyZones||[]).some(z=>z.kind==='spores'&&z.until>(state.elapsedMs||0)&&Math.hypot(e.x-z.x,e.y-z.y)<=z.r);
   const pool=(e,name)=>Math.max(0,Number(e[name])||0);
   const durability=e=>pool(e,'hp')+pool(e,'armorHp')+pool(e,'magicHp');
   function remainingDistance(e){let value=0;if(!e.points?.length)return Infinity;if(e.index<e.points.length-1){const a=e.points[e.index],b=e.points[e.index+1];value+=(b.tunnel?0:Math.hypot(b.x-a.x,b.y-a.y))*(1-(e.t||0));}for(let i=e.index+1;i<e.points.length-1;i++)value+=e.points[i+1].tunnel?0:Math.hypot(e.points[i+1].x-e.points[i].x,e.points[i+1].y-e.points[i].y);return value;}
@@ -54,10 +74,10 @@ const HexCombat=(()=>{
     }
     return candidates[0];
   }
-  function nextChainTarget(enemies,hit,last,range,damageType){
+  function nextChainTarget(enemies,hit,last,range,damageType,state){
     let best=null,bestDistance=Infinity;
     for(const enemy of enemies){
-      if(!enemy.alive||durability(enemy)<=0||hit.includes(enemy)||(enemy.immunity&&enemy.immunity===damageType))continue;
+      if(!enemy.alive||durability(enemy)<=0||hiddenBySpores(state,enemy)||hit.includes(enemy)||(enemy.immunity&&enemy.immunity===damageType))continue;
       const distance=Math.hypot(enemy.x-last.x,enemy.y-last.y);
       // Strict comparison preserves the stable-sort winner for equal distances.
       if(distance<=range&&(!best||distance<bestDistance)){best=enemy;bestDistance=distance;}
@@ -65,13 +85,19 @@ const HexCombat=(()=>{
     return best;
   }
   function damageEnemy(e,raw,def,state,emit=()=>{},source=null){
-    if(e.immunity&&e.immunity===def.damageType)return;
+    if(!e.alive||raw<=0)return;
+    const time=state.elapsedMs||0,kind=def.damageType||'physical';
+    if(kind==='fire')for(const zone of state.enemyZones||[])if(zone.kind==='tar'&&!zone.burning&&zone.until>time&&Math.hypot(e.x-zone.x,e.y-zone.y)<=zone.r){zone.burning=true;zone.until=time+3000;}
+    if(e.immunity&&e.immunity===kind)return;
+    if(e.shieldHits>0&&!def.splash&&!def.area){e.shieldHits--;return;}
     const before=durability(e);
     const resistance=Math.max(0,Math.min(.95,e.resistances?.[def.damageType]||0));
     let budget=raw*(1-resistance)*(e.type==='boss'?(def.bossMultiplier||1):1);
     for(const [field,kind] of [['armorHp','armor'],['magicHp','magic'],['hp','hp']]){if(budget<=0||pool(e,field)<=0)continue;const multiplier=def.damageMultipliers?.[kind]??1,amount=Math.min(pool(e,field),budget*multiplier);e[field]=pool(e,field)-amount;budget-=amount/multiplier;}
+    if(e.type==='moltingBeetle'&&!e.molted&&pool(e,'armorHp')===0){e.molted=true;e.speed*=1.4;}
     HexData.recordTowerStat(state,source,'damage',Math.max(0,before-durability(e)));
     if(durability(e)<=1e-8&&e.alive){e.hp=e.armorHp=e.magicHp=0;e.alive=false;HexData.recordTowerStat(state,source,'kills',1);(state.soulDeaths??=[]).push({x:e.x,y:e.y});let gold=e.killGold??HexWaves.economy.kill;
+      if(e.type==='mushroomColossus')(state.enemyZones??=[]).push({kind:'spores',x:e.x,y:e.y,r:65,until:time+4000});
       if(e.splitOnDeath){const childGold=Math.floor(gold/3);gold-=childGold*2;const hp=Math.max(1,Math.round(e.maxHp*.25));for(let i=0;i<2;i++)(state.splitChildren??=[]).push({id:state.nextEnemyId++,type:'shard',name:'Golemsplitter',hp,maxHp:hp,armorHp:0,magicHp:0,maxArmorHp:0,maxMagicHp:0,speed:e.speed,killGold:childGold,baseDamage:1,alive:true,points:e.points,index:e.index,t:e.t,x:e.x,y:e.y});}
       if(state.challengeKind==='garrison')gold=0;state.gold+=gold;if(e.type==='boss'){state.goldEarned.boss=(state.goldEarned.boss||0)+gold;const landmark=state.landmarks?.get(e.landmarkId);if(landmark){landmark.status='defeated';if(typeof HexExploration!=='undefined')HexExploration.defeatGuardian(state,e.landmarkId);}(state.bossRewards??=[]).push(e.landmarkId);if(state.earnedMeta){if(String(e.landmarkId).startsWith('wave:'))state.earnedMeta.periodicBosses++;else state.earnedMeta.explorationBosses++;}emit('collect');}else{state.goldEarned.kills+=gold;state.waveKills++;if(state.earnedMeta)state.earnedMeta.normalKills++;emit('kill');}}
   }
@@ -135,12 +161,16 @@ const HexCombat=(()=>{
     // Capture every trigger before dealing damage: stacked mines all fire even
     // when the first one kills their shared triggering enemy.
     const triggered=new Set(grid?state.mines.filter(triggeredByEnemy):state.mines.filter(mine=>state.enemies.some(e=>e.alive&&durability(e)>0&&Math.hypot(e.x-mine.x,e.y-mine.y)<=14))),remaining=[];
-    for(const mine of state.mines){const trigger=triggered.has(mine);if(!trigger){remaining.push(mine);continue;}const def={damageMultipliers:mine.damageMultipliers};state.enemies.filter(e=>e.alive&&Math.hypot(e.x-mine.x,e.y-mine.y)<=mine.splash).forEach(e=>damageEnemy(e,mine.damage,def,state,emit,mine.source||{type:'mine'}));state.projectiles.push({kind:'blast',x:mine.x,y:mine.y,r:mine.splash,ttl:.22,color:mine.color});emit('mine');}state.mines=remaining;
+    for(const mine of state.mines){const trigger=triggered.has(mine);if(!trigger){remaining.push(mine);continue;}const def={damageType:'physical',area:true,damageMultipliers:mine.damageMultipliers};state.enemies.filter(e=>e.alive&&Math.hypot(e.x-mine.x,e.y-mine.y)<=mine.splash).forEach(e=>damageEnemy(e,mine.damage,def,state,emit,mine.source||{type:'mine'}));state.projectiles.push({kind:'blast',x:mine.x,y:mine.y,r:mine.splash,ttl:.22,color:mine.color});emit('mine');}state.mines=remaining;
   }
   // Nur für die Darstellung: Kennung, Turmtyp, Trefferpositionen und Lebensdauer eines Geschosses. Der Schaden wird sofort beim Schuss verrechnet.
   const nextProjectileId=state=>state.nextProjectileId=(state.nextProjectileId||0)+1;
   const FLIGHT_TTL={archer:.24,ballista:.3,flame:.3,element:.32,necromancer:.34};   // sichtbare Flugzeit je Geschossart (Sekunden)
   function step(state,towerRefs,definitions,dt,time,emit=()=>{}){
+    state.enemyZones=(state.enemyZones||[]).filter(zone=>zone.until>time);
+    for(const zone of state.enemyZones){
+      state.projectiles.push({kind:zone.kind==='spores'?'enemySpores':'enemyTar',x:zone.x,y:zone.y,r:zone.r,ttl:dt+.001,max:dt+.001,fade:Math.min(1,(zone.until-time)/1000),color:zone.burning?'#e78235':'#30291f'});
+    }
     // Tick-local values: upgrades and support/biome changes apply on the next step.
     towerRefs=towerRefs.map(ref=>{if(ref.tw.overloadPending){delete ref.tw.overloadPending;ref.tw.overloadUntil=time+12000;}const definition={...(ref.definition||HexData.towerDefinition(ref.tw,definitions))};if(ref.tw.overloadUntil>time)definition.cooldown/=1.5;return {...ref,definition};});
     applyConsumables(state,time,emit);
@@ -149,9 +179,30 @@ const HexCombat=(()=>{
     // armor and magic values must stay live between consecutive tower hits.
     const pathDistances=new Map();
     const targetDistance=e=>{if(!pathDistances.has(e))pathDistances.set(e,remainingDistance(e));return pathDistances.get(e);};
-    const TOWERS=definitions;state.mines??=[];state.soulDeaths=[];const arrive=e=>{e.alive=false;state.hp-=e.baseDamage??1;if(e.goldLoss)state.gold=Math.max(0,state.gold-e.goldLoss);const landmark=state.landmarks?.get(e.landmarkId);if(landmark)landmark.status='escaped';emit('hit');};
+    const TOWERS=definitions;state.mines??=[];state.soulDeaths=[];const arrive=e=>{e.alive=false;state.hp-=e.type==='ramBeetle'&&e.charge>=.95?3:(e.baseDamage??1);if(e.goldLoss)state.gold=Math.max(0,state.gold-e.goldLoss);const landmark=state.landmarks?.get(e.landmarkId);if(landmark)landmark.status='escaped';emit('hit');};
     applyConsumables(state,time,emit);
-    for(const e of state.enemies){if(!e.alive)continue;if(e.index>=e.points.length-1){arrive(e);continue;}e.slowEffects=(e.slowEffects||[]).filter(effect=>effect.until>time);e.slowFactor=Math.min(1,...e.slowEffects.map(effect=>effect.factor));for(const ref of auraRefs){const def=ref.definition;if(Math.hypot(e.x-ref.pos.x,e.y-ref.pos.y)<=def.range)e.slowFactor=Math.min(e.slowFactor,def.slow);}e.slowFactor=Math.max(e.minSpeedFactor||0,e.slowFactor);const terrainSpeed=typeof HexBiomes!=='undefined'&&state.biomeSeed!=null&&HexBiomes.atWorld(state,e.x,e.y)==='desert'?.85:1;const slowResistance=Math.max(0,Math.min(1,e.slowResistance||0));let distance=e.speed*dt*(1-(1-e.slowFactor*terrainSpeed)*(1-slowResistance));while(e.index<e.points.length-1){const a=e.points[e.index],b=e.points[e.index+1],length=b.tunnel?0:Math.hypot(b.x-a.x,b.y-a.y),remaining=length*(1-e.t);if(length>0&&distance<remaining){e.t+=distance/length;break;}distance-=remaining;e.t=0;e.index++;if(e.index>=e.points.length-1){arrive(e);break;}}if(e.alive){const a=e.points[e.index],b=e.points[e.index+1];e.x=a.x+(b.x-a.x)*e.t;e.y=a.y+(b.y-a.y)*e.t;}}
+    for(const e of state.enemies){if(!e.alive)continue;if(e.index>=e.points.length-1){arrive(e);continue;}e.slowEffects=(e.slowEffects||[]).filter(effect=>effect.until>time);e.slowFactor=Math.min(1,...e.slowEffects.map(effect=>effect.factor));for(const ref of auraRefs){const def=ref.definition;if(Math.hypot(e.x-ref.pos.x,e.y-ref.pos.y)<=def.range)e.slowFactor=Math.min(e.slowFactor,def.slow);}e.slowFactor=Math.max(e.minSpeedFactor||0,e.slowFactor);const terrainSpeed=typeof HexBiomes!=='undefined'&&state.biomeSeed!=null&&HexBiomes.atWorld(state,e.x,e.y)==='desert'?.85:1;const tar=state.enemyZones.some(z=>z.kind==='tar'&&!z.burning&&Math.hypot(e.x-z.x,e.y-z.y)<=z.r);
+      if(tar&&state.enemyZones.some(z=>z.kind==='tar'&&!z.burning&&z.ownerId!==e.id&&Math.hypot(e.x-z.x,e.y-z.y)<=z.r))e.slowFactor=Math.min(e.slowFactor,.55);
+      const slowResistance=Math.max(0,Math.min(1,e.slowResistance||0));
+      e.spawnedAt??=time;const age=Math.max(0,time-e.spawnedAt),cycle=age%4000;let motion=1;
+      if(e.type==='thornToad'){
+        const hopCycle=age%1600,hop=Math.floor(age/1600);e.leaping=hopCycle>=900;e.crouching=hopCycle>=650&&!e.leaping;e.leapProgress=e.leaping?(hopCycle-900)/700:0;motion=e.leaping?1600/700:0;
+        if(!e.shortcutFlight&&e.leaping&&e.lastHop!==hop){e.lastHop=hop;e.shortcutJump=false;if(hop%4===3)toadShortcut(state,e,HexMap.HEX*Math.sqrt(3)*e.slowFactor);}
+      }
+      if(e.type==='ramBeetle'){e.charge=straightSegment(e)&&e.slowFactor>=.95?Math.min(1,(e.charge||0)+dt/4):0;motion=1+e.charge;}
+      if(e.shortcutFlight){const f=e.shortcutFlight,u=Math.min(1,Math.max(0,(time-f.start)/700));e.leaping=u<1;e.crouching=false;e.leapProgress=u;e.x=f.from.x+(f.to.x-f.from.x)*u;e.y=f.from.y+(f.to.y-f.from.y)*u;e.t=u;if(u===1){e.index=1;e.t=0;delete e.shortcutFlight;}continue;}
+      if(motion===0)continue;
+      let distance=e.speed*dt*motion*(1-(1-e.slowFactor*terrainSpeed)*(1-slowResistance));while(e.index<e.points.length-1){const a=e.points[e.index],b=e.points[e.index+1],length=b.tunnel?0:Math.hypot(b.x-a.x,b.y-a.y),remaining=length*(1-e.t);if(length>0&&distance<remaining){e.t+=distance/length;break;}distance-=remaining;e.t=0;
+        if(e.type==='ramBeetle'&&e.points[e.index+2]&&!straightSegment({...e,index:e.index+1})){distance/=1+(e.charge||0);e.charge=0;}
+        e.index++;if(e.index>=e.points.length-1){arrive(e);break;}}if(e.alive){const a=e.points[e.index],b=e.points[e.index+1];e.x=a.x+(b.x-a.x)*e.t;e.y=a.y+(b.y-a.y)*e.t;}}
+    for(const e of state.enemies){
+      if(!e.alive)continue;
+      if(e.type==='tarSnail'&&(!e.lastTar||Math.hypot(e.x-e.lastTar.x,e.y-e.lastTar.y)>=18)){
+        e.lastTar={x:e.x,y:e.y};state.enemyZones.push({kind:'tar',ownerId:e.id,x:e.x,y:e.y,r:12,until:time+5000,damage:e.maxHp*.007});
+      }
+      const burning=state.enemyZones.filter(z=>z.kind==='tar'&&z.burning&&Math.hypot(e.x-z.x,e.y-z.y)<=z.r);
+      if(burning.length)damageEnemy(e,Math.max(...burning.map(z=>z.damage))*dt,{damageType:'fire',area:true},state,emit);
+    }
     for(const healer of state.enemies){
       if(!healer.alive||!healer.healInterval)continue;
       healer.nextHealAt??=time+healer.healInterval;if(time<healer.nextHealAt)continue;healer.nextHealAt=time+healer.healInterval;
@@ -159,8 +210,8 @@ const HexCombat=(()=>{
       if(healed)state.projectiles.push({kind:'blast',x:healer.x,y:healer.y,r:healer.healRadius,ttl:.4,max:.4,color:'#73e49c'});
     }
     triggerMines(state,emit);state.enemies=state.enemies.filter(e=>e.alive&&durability(e)>0);
-    for(const ref of towerRefs){const def=ref.definition||HexData.towerDefinition(ref.tw,TOWERS);if(def.aura)continue;if(def.mine){layMine(state,ref,def,time);continue;}if(time-ref.tw.lastShot<def.cooldown*1000)continue;const inRange=state.enemies.filter(e=>e.alive&&durability(e)>0&&(!e.immunity||e.immunity!==def.damageType)&&Math.hypot(e.x-ref.pos.x,e.y-ref.pos.y)<=def.range);if(!inRange.length)continue;const primary=targetByPriority(inRange,ref.tw,ref.pos,targetDistance);ref.tw.lastShot=time;emit(ref.tw.type);
-      if(def.chain){const hit=[primary];while(hit.length<def.chain){const last=hit.at(-1),next=nextChainTarget(state.enemies,hit,last,def.jumpRange,def.damageType);if(!next)break;hit.push(next);}hit.forEach((e,i)=>damageEnemy(e,def.damage*Math.max(.25,1-i*.18),def,state,emit,ref.tw));state.projectiles.push({kind:'chain',pts:[ref.pos,...hit.map(e=>({x:e.x,y:e.y}))],ttl:.24,max:.24,color:def.color,tower:ref.tw.type,id:nextProjectileId(state),hits:hit.map(e=>e.id),hitAt:hit.map(e=>({x:e.x,y:e.y}))});}
+    for(const ref of towerRefs){const def=ref.definition||HexData.towerDefinition(ref.tw,TOWERS);if(def.aura)continue;if(def.mine){layMine(state,ref,def,time);continue;}if(time-ref.tw.lastShot<def.cooldown*1000)continue;const inRange=state.enemies.filter(e=>e.alive&&durability(e)>0&&!hiddenBySpores(state,e)&&(!e.immunity||e.immunity!==def.damageType)&&Math.hypot(e.x-ref.pos.x,e.y-ref.pos.y)<=def.range);if(!inRange.length)continue;const primary=targetByPriority(inRange,ref.tw,ref.pos,targetDistance);ref.tw.lastShot=time;emit(ref.tw.type);
+      if(def.chain){const hit=[primary];while(hit.length<def.chain){const last=hit.at(-1),next=nextChainTarget(state.enemies,hit,last,def.jumpRange,def.damageType,state);if(!next)break;hit.push(next);}hit.forEach((e,i)=>damageEnemy(e,def.damage*Math.max(.25,1-i*.18),def,state,emit,ref.tw));state.projectiles.push({kind:'chain',pts:[ref.pos,...hit.map(e=>({x:e.x,y:e.y}))],ttl:.24,max:.24,color:def.color,tower:ref.tw.type,id:nextProjectileId(state),hits:hit.map(e=>e.id),hitAt:hit.map(e=>({x:e.x,y:e.y}))});}
       else if(def.pierce){const vx=primary.x-ref.pos.x,vy=primary.y-ref.pos.y,mag=Math.hypot(vx,vy)||1,ux=vx/mag,uy=vy/mag,hit=[];for(const e of state.enemies){if(!e.alive||durability(e)<=0||(e.immunity&&e.immunity===def.damageType))continue;const ex=e.x-ref.pos.x,ey=e.y-ref.pos.y,along=ex*ux+ey*uy,perp=Math.abs(ex*uy-ey*ux);if(along>0&&along<def.range&&perp<20)hit.push({enemy:e,along});}const struck=hit.sort((a,b)=>a.along-b.along).slice(0,def.pierceTargets||3);struck.forEach(({enemy})=>damageEnemy(enemy,def.damage,def,state,emit,ref.tw));state.projectiles.push({kind:'line',x1:ref.pos.x,y1:ref.pos.y,x2:ref.pos.x+ux*def.range,y2:ref.pos.y+uy*def.range,ttl:.38,max:.38,color:def.color,tower:ref.tw.type,variant:ref.tw.branch,id:nextProjectileId(state),hits:struck.map(h=>h.enemy.id),hitAt:struck.map(h=>({x:h.enemy.x,y:h.enemy.y,along:h.along/def.range}))});}
       else{const hit=def.splash?state.enemies.filter(e=>e.alive&&Math.hypot(e.x-primary.x,e.y-primary.y)<=def.splash):[primary];const life=FLIGHT_TTL[ref.tw.type]||.1;hit.forEach(e=>{damageEnemy(e,def.damage,def,state,emit,ref.tw);if(e.alive&&def.hitSlow&&e.immunity!==def.damageType){e.slowEffects??=[];const effect=e.slowEffects.find(item=>item.factor===def.hitSlow);if(effect)effect.until=time+def.slowDuration*1000;else e.slowEffects.push({factor:def.hitSlow,until:time+def.slowDuration*1000});}});state.projectiles.push({kind:'line',x1:ref.pos.x,y1:ref.pos.y,x2:primary.x,y2:primary.y,ttl:life,max:life,color:def.color,tower:ref.tw.type,variant:ref.tw.branch,splash:def.splash,id:nextProjectileId(state),hits:hit.map(e=>e.id),hitAt:[{x:primary.x,y:primary.y}]});}
     }
@@ -172,7 +223,7 @@ const HexCombat=(()=>{
         const angle=time*.001+index*Math.PI*2/ref.tw.souls.length,pos={x:ref.pos.x+Math.cos(angle)*22,y:ref.pos.y+Math.sin(angle)*22};
         state.projectiles.push({kind:'spirit',x:pos.x,y:pos.y,r:5,ttl:dt+.01,color:ref.def.color});
         if(time-soul.lastShot<1000)continue;
-        const targets=state.enemies.filter(e=>e.alive&&durability(e)>0&&(!e.immunity||e.immunity!==ref.def.damageType)&&Math.hypot(e.x-ref.pos.x,e.y-ref.pos.y)<=ref.def.range);
+        const targets=state.enemies.filter(e=>e.alive&&durability(e)>0&&!hiddenBySpores(state,e)&&(!e.immunity||e.immunity!==ref.def.damageType)&&Math.hypot(e.x-ref.pos.x,e.y-ref.pos.y)<=ref.def.range);
         if(!targets.length)continue;const target=targetByPriority(targets,ref.tw,ref.pos,targetDistance);soul.lastShot=time;
         damageEnemy(target,ref.def.soulDamage,ref.def,state,emit,ref.tw);
         state.projectiles.push({kind:'line',x1:pos.x,y1:pos.y,x2:target.x,y2:target.y,ttl:.2,max:.2,color:ref.def.color,tower:'necromancer',id:nextProjectileId(state),hits:[target.id],hitAt:[{x:target.x,y:target.y}]});
@@ -182,6 +233,7 @@ const HexCombat=(()=>{
       const owner=necromancers.filter(ref=>ref.tw.souls.length<ref.def.soulLimit&&Math.hypot(death.x-ref.pos.x,death.y-ref.pos.y)<=ref.def.range).sort((a,b)=>Math.hypot(death.x-a.pos.x,death.y-a.pos.y)-Math.hypot(death.x-b.pos.x,death.y-b.pos.y))[0];
       if(owner)owner.tw.souls.push({until:time+owner.def.soulDuration*1000,lastShot:time});
     }
+    for(const e of state.enemies)e.sporeHidden=hiddenBySpores(state,e);
     state.soulDeaths=[];
     // Spawn after every attack: the killing splash cannot also hit the children.
     if(state.splitChildren?.length){state.enemies.push(...state.splitChildren);state.splitChildren=[];}

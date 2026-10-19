@@ -3,6 +3,7 @@
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
+import {MODEL_ENEMIES,isEnemyJoint,enemyPose,applyEnemyPose} from './enemy-motion.mjs';
 
 const S=54,STEP=Math.PI/3,TILT=55*Math.PI/180,PITCH_MIN=12*Math.PI/180,PITCH_MAX=88*Math.PI/180,DIST_MIN=220,DIST_MAX=3400,DIST_START=950,SKY='#a9cbd8';
 const PREFIX={tiles:'tile',landmarks:'landmark',towers:'tower',enemies:'enemy',buildings:'building',effects:'mine',bases:'base',consumables:'consumable'};
@@ -55,9 +56,10 @@ function makeTemplate(name,scene,kind){
   scene.updateMatrixWorld(true);
   const isSlot=n=>/^tower_slot_\d+$/.test(n.name),isPad=n=>n.name==='building_pad',template={name};
   if(kind==='enemies'){                                              // Gliedmaßen (optional) als eigene Teile für die Laufanimation
-    const limbs=[];scene.traverse(n=>{if(LIMBS.includes(n.name)) limbs.push({name:n.name,pos:worldPosition(n),parts:bake(n)});});
-    template.parts=bake(scene,n=>LIMBS.includes(n.name));template.limbs=limbs;
-    template.height=boundsOf([...template.parts,...limbs.flatMap(l=>l.parts)]).max.y;
+    const joint=n=>LIMBS.includes(n.name)||isEnemyJoint(n.name);
+    const limbs=[];scene.traverse(n=>{if(joint(n)) limbs.push({name:n.name,pos:worldPosition(n),parts:bake(n)});});
+    template.parts=bake(scene,joint);template.limbs=limbs;
+    template.height=new THREE.Box3().setFromObject(scene).max.y;
     return template;
   }
   if(kind==='bases'){                                                // Mauer-/Waffenstufe einer Festung: Waffe dreht sich wie ein Turm
@@ -176,7 +178,7 @@ function create(host0,commands){
     for(const template of templates.values())for(const part of [...(template.parts||[]),...(template.slots||[]).flatMap(s=>s.parts),...(template.limbs||[]).flatMap(l=>l.parts)])part.geometry?.dispose();
     templates.clear();for(const [id,template] of next)templates.set(id,template);
     // Gegner und Minen halten eigene Modellkopien: beim Editionswechsel neu aufbauen.
-    for(const obj of enemyObjects.values()){layer.dynamic.remove(obj.group);obj.body?.material.dispose();obj.healGlow?.dispose();}enemyObjects.clear();
+    for(const obj of enemyObjects.values()){layer.dynamic.remove(obj.group);obj.body?.material.dispose();obj.sprite?.material.dispose();obj.healGlow?.dispose();}enemyObjects.clear();
     for(const mesh of mineObjects.values())layer.dynamic.remove(mesh);mineObjects.clear();clearConsumables();
     for(const material of biomeMaterials.values())material?.dispose();biomeMaterials.clear();
     ready=true;loading.remove();rebuildAll();if(state) render(state,targetList);
@@ -217,7 +219,9 @@ function create(host0,commands){
     tips:makePool(new THREE.ConeGeometry(1,1,6).translate(0,-.5,0),160,new THREE.MeshBasicMaterial({color:'#ffffff'})),   // Spitze zeigt in +Y, Ursprung an der Spitze
     flash:makePool(new THREE.SphereGeometry(1,10,8),420,additive()),
     orbs:makePool(new THREE.SphereGeometry(1,8,6),260,new THREE.MeshBasicMaterial({color:'#ffffff'})),   // feste Kerne (Tropfen, Glutkern, Irrwisch)
-    rocks:makePool(new THREE.IcosahedronGeometry(1,0),48,new THREE.MeshStandardMaterial({color:'#ffffff',roughness:.95,metalness:0}))};
+    rocks:makePool(new THREE.IcosahedronGeometry(1,0),48,new THREE.MeshStandardMaterial({color:'#ffffff',roughness:.95,metalness:0})),
+    tar:makePool(new THREE.CircleGeometry(1,14).rotateX(-Math.PI/2),400,new THREE.MeshStandardMaterial({color:'#ffffff',roughness:.22,polygonOffset:true,polygonOffsetFactor:-2})),
+    smoke:makePool(new THREE.SphereGeometry(1,8,6),180,new THREE.MeshStandardMaterial({color:'#ffffff',transparent:true,opacity:.18,depthWrite:false,roughness:1}))};
   const mats={empty:std('#ffffff',{transparent:true,opacity:.6}),legal:basic('#7fcf6a',.25),illegal:basic('#c0594c',.16),outlineLegal:basic('#a9dc93'),outlineIllegal:basic('#ba6b60'),
     portalSlot:basic('#c991ff'),hint:basic('#ffffff'),buildingSlot:basic('#59e0d2',.9),slot:basic('#ffffff',1),select:basic('#f4d36d',.9),bar:basic('#321a18'),hp:basic('#78b95f'),armor:basic('#df8b3a'),magic:basic('#69aee8')};
   const enemyGeometry={small:new THREE.SphereGeometry(9,14,10),boss:new THREE.SphereGeometry(15,16,12)},barGeometry=new THREE.PlaneGeometry(1,1);
@@ -627,20 +631,21 @@ function create(host0,commands){
   const elementCoreMaterials=new Map();
   function elementCoreMaterial(base,color){const id=base.uuid+'|'+color;let material=elementCoreMaterials.get(id);if(!material){material=base.clone();material.color.set(color);if(material.emissive){material.emissive.set(color);material.emissiveIntensity=Math.max(.6,material.emissiveIntensity||0);}elementCoreMaterials.set(id,material);}return material;}
   function makeEnemy(e){
-    const type=ENEMY_COLOR[e.type]?e.type:'normal',boss=type==='boss';
+    const type=ENEMY_COLOR[e.type]||MODEL_ENEMIES.includes(e.type)?e.type:'normal',boss=type==='boss';
     const baseType=({splitter:'armored',shard:'armored',healer:'warded',elementCarrier:'warded'}[type]||type);
     const own=templates.get('enemy_'+type),template=(boss&&e.originBiome&&templates.get('enemy_boss_'+e.originBiome))||own||templates.get('enemy_'+baseType),group=new THREE.Group(),bar=new THREE.Group();
     const shrink=type==='shard'&&!own?.6:1;   // Ersatzmodell für Golemsplitter verkleinert, eigenes Modell hat Zielgröße
     const obj={group,bar,radius:boss?15:type==='shard'?6:9,phase:0,angle:0,targetAngle:0,last:null,slowed:false,limbs:[],barY:0};
     if(template){
       obj.pivot=new THREE.Group();const model=new THREE.Group();model.scale.setScalar(S*shrink);obj.pivot.add(model);addParts(model,template.parts);
-      for(const limb of template.limbs){const g=new THREE.Group();g.position.copy(limb.pos);addParts(g,limb.parts);model.add(g);obj.limbs.push({name:limb.name,g});}
+      for(const limb of template.limbs){const g=new THREE.Group();g.position.copy(limb.pos);addParts(g,limb.parts);model.add(g);obj.limbs.push({name:limb.name,g,base:limb.pos.clone()});}
+      obj.articulated=MODEL_ENEMIES.includes(type);obj.enemy=e;
       obj.ice=new THREE.Mesh(torus,basic('#79cdd9'));obj.ice.scale.setScalar(obj.radius+4);obj.ice.position.y=2;obj.ice.visible=false;
       group.add(obj.pivot,obj.ice);obj.barY=template.height*S*shrink+12;obj.baseY=0;
       if(type==='healer') obj.pivot.traverse(mesh=>{if(mesh.isMesh&&mesh.material.name==='heal_glow'){if(!obj.healGlow){obj.healGlow=mesh.material.clone();obj.healBase=obj.healGlow.emissiveIntensity||1;obj.healFlash=0;}mesh.material=obj.healGlow;}});   // Heilkugel pulsiert
       if(e.color&&type==='elementCarrier') obj.pivot.traverse(mesh=>{if(mesh.isMesh&&mesh.material.name==='element_core'){mesh.material=elementCoreMaterial(mesh.material,e.color);}});   // Gefäß in Elementfarbe
     }else{                                                             // Fallback ohne Modell: farbige Kugel
-      obj.body=new THREE.Mesh(boss?enemyGeometry.boss:enemyGeometry.small,std(ENEMY_COLOR[type]));obj.body.castShadow=true;obj.color=ENEMY_COLOR[type];
+      obj.body=new THREE.Mesh(boss?enemyGeometry.boss:enemyGeometry.small,std(ENEMY_COLOR[type]||'#82735b'));obj.body.castShadow=true;obj.color=ENEMY_COLOR[type]||'#82735b';
       group.add(obj.body);obj.barY=obj.radius*2+14;obj.baseY=obj.radius+3;
     }
     obj.fgs={};obj.barBgs={};[['hp',mats.hp,0],['armorHp',mats.armor,5],['magicHp',mats.magic,10]].forEach(([field,material,offset])=>{const bg=new THREE.Mesh(barGeometry,mats.bar),fg=new THREE.Mesh(barGeometry,material);bg.scale.set(26,3,1);fg.scale.set(26,3,1);fg.position.z=.1;bg.position.y=fg.position.y=offset;bar.add(bg,fg);obj.fgs[field]=fg;obj.barBgs[field]=bg;});bar.position.y=obj.barY;group.add(bar);
@@ -650,6 +655,8 @@ function create(host0,commands){
     const alive=new Set();
     for(const e of state.enemies){
       alive.add(e.id);let obj=enemyObjects.get(e.id);if(!obj){obj=makeEnemy(e);enemyObjects.set(e.id,obj);}
+      obj.enemy=e;
+      if(obj.articulated)for(const limb of obj.limbs)applyEnemyPose(limb.g,limb.base,enemyPose(e.type,limb.name,obj.phase,e));
       const slowed=e.slowFactor<1;
       if(slowed!==obj.slowed){obj.slowed=slowed;if(obj.body) obj.body.material.color.set(slowed?'#79cdd9':obj.color);if(obj.ice) obj.ice.visible=slowed;}
       if(obj.last){const dx=e.x-obj.last.x,dy=e.y-obj.last.y,moved=Math.hypot(dx,dy);   // Laufrichtung und Schrittphase aus der Bewegung
@@ -660,7 +667,7 @@ function create(host0,commands){
       obj.last={x:e.x,y:e.y};
       if(!state.remoteView||!obj.remoteMotion)obj.group.position.set(e.x,obj.baseY,e.y);let barRow=0;for(const [field,max] of [['hp','maxHp'],['armorHp','maxArmorHp'],['magicHp','maxMagicHp']]){const fg=obj.fgs[field],visible=e[max]>0&&(field==='hp'||e[field]>0),ratio=visible?clamp((e[field]||0)/e[max],0,1):0;fg.visible=obj.barBgs[field].visible=visible;if(visible){fg.position.y=obj.barBgs[field].position.y=barRow++*5;}fg.scale.x=Math.max(.001,26*ratio);fg.position.x=-13*(1-ratio);}
     }
-    for(const [id,obj] of [...enemyObjects]) if(!alive.has(id)){layer.dynamic.remove(obj.group);obj.body?.material.dispose();obj.healGlow?.dispose();enemyObjects.delete(id);}
+    for(const [id,obj] of [...enemyObjects]) if(!alive.has(id)){layer.dynamic.remove(obj.group);obj.body?.material.dispose();obj.sprite?.material.dispose();obj.healGlow?.dispose();enemyObjects.delete(id);}
   }
   function syncMines(){
     const alive=new Set();for(const mine of state.mines||[]){alive.add(mine.id);let mesh=mineObjects.get(mine.id);if(!mesh){const model=templates.get('mine_pickup');if(model){mesh=new THREE.Group();const g=new THREE.Group();g.scale.setScalar(S);addParts(g,model.parts);mesh.add(g);}else{mesh=new THREE.Mesh(new THREE.CylinderGeometry(7,7,3,10),std(mine.color||'#e6a75f',{metalness:.25}));mesh.castShadow=true;}layer.dynamic.add(mesh);mineObjects.set(mine.id,mesh);}mesh.position.set(mine.x,model0(mesh)?0:2,mine.y);}
@@ -758,6 +765,18 @@ function create(host0,commands){
     for(const pool of Object.values(fx)) pool.begin();
     const live=new Set();
     for(const p of state.projectiles){
+      if(p.kind==='enemyTar'){
+        let tile=null,best=Infinity;for(const t of state.map.values()){const c=axialToWorld(t.q,t.r),d=Math.hypot(c.x-p.x,c.y-p.y);if(d<best){best=d;tile=t;}}
+        const h=tile?roadSpot(tile.q,tile.r).y+.18:.3;
+        for(let i=0;i<3;i++){const a=i*2.4;fx.tar.ball(p.x+Math.cos(a)*3,h+i*.015,p.y+Math.sin(a)*3,p.r*(i?.65:.85),'#30291f');}
+        if(p.color==='#e78235')for(let i=0;i<4;i++)fx.flash.ball(p.x+Math.sin(i*3)*7,h+3+Math.sin(now*.01+i)*2,p.y+Math.cos(i*3)*7,3,'#ee8b35',.6);
+        continue;
+      }
+      if(p.kind==='enemySpores'){
+        const t=(state.elapsedMs||0)*.001,fade=p.fade??1;
+        for(let i=0;i<(high?14:7);i++){const a=i*2.4+t*.15,r=p.r*(.2+(i%4)*.16),rise=(t*.35+i*.17)%1;fx.smoke.ball(p.x+Math.cos(a)*r,5+rise*24,p.y+Math.sin(a)*r,(10+(i%3)*4)*fade,'#b6b884');fx.orbs.ball(p.x+Math.cos(a+.4)*r,8+rise*29,p.y+Math.sin(a+.4)*r,.7*fade,'#d9d49a');}
+        continue;
+      }
       if(p.kind==='spirit'){fx.flash.ball(p.x,32,p.y,p.r,p.color,.7);fx.solid.ball(p.x,32,p.y,2,p.color,1);continue;}
       if(p.kind==='blast'){                                            // Explosionsring wie bisher
         for(let i=0;i<12;i++){const a=i*Math.PI/6,b=(i+1)*Math.PI/6;fx.solid.segment(p.x+Math.cos(a)*p.r,34,p.y+Math.sin(a)*p.r,p.x+Math.cos(b)*p.r,34,p.y+Math.sin(b)*p.r,1.6,p.color||'#ffffff');}
@@ -867,7 +886,7 @@ function create(host0,commands){
     for(const tile of state.map.values())(tile.towers||[]).forEach((t,i)=>{if(t&&(t.overloadPending||t.overloadUntil>state.elapsedMs)){const p=slotPositions(tile)[i];label('overload:'+key(tile.q,tile.r)+':'+i,p.x,p.y,'ϟ Überladung','',95);}});
     for(const [id,slot,text] of [['duo:portal',state.duoPortal,'Partner-Portal'],['duo:reinforcement',state.duoReinforcement,'Verstärkung']]){const tile=slot&&state.map.get(key(slot.q,slot.r)),p=tile&&slotPositions(tile)[slot.index];if(p)label(id,p.x,p.y,text,'',id==='duo:portal'?30:85);}
     for(const tile of state.map.values())(tile.towers||[]).forEach((t,i)=>{if(t?.guestOwner!==undefined){const p=slotPositions(tile)[i];label('duo:guest:'+key(tile.q,tile.r)+':'+i,p.x,p.y,'Partnerhilfe','',85);}});
-    for(const e of state.enemies)if(e.alive&&['splitter','shard','healer','elementCarrier'].includes(e.type)){const entry=label('enemy-ability:'+e.id,e.x,e.y,e.abilityIcon||({splitter:'◆ → ◆◆',shard:'◆',healer:'✚'})[e.type],'',38);entry.el.title=e.name+(e.description?' · '+e.description:'');entry.el.style.color=e.color||(e.type==='healer'?'#73e49c':'#e5e8de');}
+    for(const e of state.enemies)if(e.alive&&(['splitter','shard','healer','elementCarrier'].includes(e.type)||HexWaves.enemyAssets[e.type])){const entry=label('enemy-ability:'+e.id,e.x,e.y,(e.type==='shieldbearer'?'▣ '+(e.shieldHits||0):e.type==='ramBeetle'?'» '+Math.round((e.charge||0)*100)+'%':e.abilityIcon)||({splitter:'◆ → ◆◆',shard:'◆',healer:'✚'})[e.type],'',38);entry.el.title=e.name+(e.description?' · '+e.description:'');entry.el.style.color=e.color||(e.type==='healer'?'#73e49c':'#e5e8de');}
     for(const e of state.enemies)if(e.alive&&e.bossKind)label('boss-name:'+e.id,e.x,e.y,e.name+' · '+({iron:'Rüstung',hunter:'Tempo',summoner:'MR · Beschwörung'})[e.bossKind],'',85);
     if(state.tunnelOffer&&state.tunnelConfirmed){const p=state.tunnelOffer,[q,r]=p.source.split(',').map(Number);for(const [name,t] of [['Eingang',{q,r}],['Ausgang',p]]){const c=axialToWorld(t.q,t.r);label('tunnel-preview:'+name,c.x,c.y,'Tunnel '+name+' · Vorschau','',30);}}
 
@@ -906,7 +925,7 @@ function create(host0,commands){
     const box=host.getBoundingClientRect(),outer=wrap.getBoundingClientRect();
     return {x:(tmp.x+1)/2*box.width+box.left-outer.left,y:(1-tmp.y)/2*box.height+box.top-outer.top,width:outer.width,height:outer.height};
   }
-  function reset(){consumablePreview.visible=false;clearOverlays();hoverBuildingKey=null;seenShots.clear();rebuildAll();for(const obj of enemyObjects.values()) layer.dynamic.remove(obj.group);enemyObjects.clear();for(const mesh of mineObjects.values())layer.dynamic.remove(mesh);mineObjects.clear();clearConsumables();state=null;hoverPick=null;rotateAnchor=null;positionRotateHint();resetView(false);}
+  function reset(){consumablePreview.visible=false;clearOverlays();hoverBuildingKey=null;seenShots.clear();rebuildAll();for(const obj of enemyObjects.values()){layer.dynamic.remove(obj.group);obj.sprite?.material.dispose();}enemyObjects.clear();for(const mesh of mineObjects.values())layer.dynamic.remove(mesh);mineObjects.clear();clearConsumables();state=null;hoverPick=null;rotateAnchor=null;positionRotateHint();resetView(false);}
 
   // ---- Animation ----
   let last=performance.now(),raf=0,lastDraw=0,slowFrames=0,renderedFrameCount=0;
@@ -939,13 +958,13 @@ function create(host0,commands){
         if(obj.hint.visible) obj.hint.position.y=66+Math.sin(now/220)*3;
         if(!obj.turret||obj.def.aura) continue;
         let best=null,bestDistance=obj.def.range;
-        for(const e of enemies){const d=Math.hypot(e.x-obj.pos.x,e.y-obj.pos.y);if(d<=bestDistance){best=e;bestDistance=d;}}
+        for(const e of enemies){if(e.sporeHidden)continue;const d=Math.hypot(e.x-obj.pos.x,e.y-obj.pos.y);if(d<=bestDistance){best=e;bestDistance=d;}}
         if(best){const wanted=Math.atan2(-(best.y-obj.pos.y),best.x-obj.pos.x),diff=Math.atan2(Math.sin(wanted-obj.angle),Math.cos(wanted-obj.angle));obj.angle+=diff*Math.min(1,dt*10);obj.turret.rotation.y=obj.angle;}
         if(obj.kick>0){obj.kick=Math.max(0,obj.kick-dt*9);const k=obj.kick*obj.kick*.045;obj.turret.position.set(obj.turretBase.x-Math.cos(obj.angle)*k,obj.turretBase.y,obj.turretBase.z+Math.sin(obj.angle)*k);}   // Rückstoß entgegen der Schussrichtung
       }
       const baseRange=(typeof HexHeroes!=='undefined'&&HexHeroes.weapon(state)?.range)||0;
       for(const record of tileRecords.values()){const obj=record.weapon;if(!obj?.turret) continue;
-        let best=null,bestDistance=baseRange;for(const e of enemies){const d=Math.hypot(e.x-obj.pos.x,e.y-obj.pos.y);if(d<=bestDistance){best=e;bestDistance=d;}}
+        let best=null,bestDistance=baseRange;for(const e of enemies){if(e.sporeHidden)continue;const d=Math.hypot(e.x-obj.pos.x,e.y-obj.pos.y);if(d<=bestDistance){best=e;bestDistance=d;}}
         if(best){const wanted=Math.atan2(-(best.y-obj.pos.y),best.x-obj.pos.x),diff=Math.atan2(Math.sin(wanted-obj.angle),Math.cos(wanted-obj.angle));obj.angle+=diff*Math.min(1,dt*10);obj.turret.rotation.y=obj.angle;}
         if(obj.kick>0){obj.kick=Math.max(0,obj.kick-dt*9);const k=obj.kick*obj.kick*.045;obj.turret.position.set(obj.turretBase.x-Math.cos(obj.angle)*k,obj.turretBase.y,obj.turretBase.z+Math.sin(obj.angle)*k);}
       }
@@ -958,8 +977,13 @@ function create(host0,commands){
         if(!obj.pivot) continue;
         const diff=Math.atan2(Math.sin(obj.targetAngle-obj.angle),Math.cos(obj.targetAngle-obj.angle));obj.angle+=diff*Math.min(1,dt*10);obj.pivot.rotation.y=obj.angle;
         if(obj.pop>0){obj.pop=Math.max(0,obj.pop-dt*7);obj.pivot.scale.setScalar(1+.2*obj.pop);}else if(obj.pivot.scale.x!==1) obj.pivot.scale.setScalar(1);   // kurzes Aufplustern beim Treffer
-        const swing=Math.sin(obj.phase)*.7;obj.pivot.position.y=Math.abs(Math.sin(obj.phase))*1.6;
-        for(const limb of obj.limbs) limb.g.rotation.z=limb.name==='leg_l'?swing:limb.name==='leg_r'?-swing:limb.name==='arm_l'?-swing*.8:swing*.8;
+        if(obj.articulated){
+          obj.pivot.position.y=obj.enemy.leaping?Math.sin(Math.PI*(obj.enemy.leapProgress??.5))*12:0;
+          for(const limb of obj.limbs)applyEnemyPose(limb.g,limb.base,enemyPose(obj.enemy.type,limb.name,obj.phase,obj.enemy));
+        }else{
+          const swing=Math.sin(obj.phase)*.7;obj.pivot.position.y=Math.abs(Math.sin(obj.phase))*1.6;
+          for(const limb of obj.limbs) limb.g.rotation.z=limb.name==='leg_l'?swing:limb.name==='leg_r'?-swing:limb.name==='arm_l'?-swing*.8:swing*.8;
+        }
       }
     }
     animateBiomeWind(now);animateSakuraAmbient(now);placeLabels();backgroundSun.position.copy(sun.position);backgroundSun.target.position.copy(sun.target.position);

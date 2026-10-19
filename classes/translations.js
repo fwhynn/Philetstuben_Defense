@@ -5,6 +5,8 @@ Archer:'Bogenschütze',Freeze:'Frostturm',Waveplanung:'Wellenplanung',Waves:'Wel
 // One source phrase and its English equivalent per line; dynamic fragments may compose.
 globalThis.HexTranslations.add=function(rows){for(const line of rows.trim().split('\n')){const at=line.indexOf('|');if(at>0)this.en[line.slice(0,at)]=line.slice(at+1);}};
 HexTranslations.add(`
+Bist du dir sicher?|Are you sure?
+Erneut antippen, um 1 Kopie zu entfernen.|Tap again to remove 1 copy.
 Aktueller Turm|Current tower
 Vergleich schließen|Close comparison
 Ausbau wählen|Choose an upgrade
@@ -1577,4 +1579,34 @@ Duo: Deutlich weniger Datenverbrauch während der Partie.|Duo: Significantly les
 `);
 HexTranslations.add(`
 Kein gültiger Rettungstunnel verfügbar.|No valid rescue tunnel is available.
+`);
+HexTranslations.add(`
+Schildknecht|Shieldbearer
+Maskenläufer|Masked Runner
+Donnerkröte|Thunder Toad
+Häutungskäfer|Molting Beetle
+Pechschnecke|Tar Snail
+Pilzkoloss|Mushroom Colossus
+Rammbockkäfer|Ram Beetle
+Drei direkte Treffer brechen den Schild. Flächenschaden umgeht ihn.|Three direct hits break the shield. Area damage bypasses it.
+Schleicht drei Sekunden und sprintet danach eine Sekunde.|Sneaks for three seconds, then sprints for one second.
+Bewegt sich nur springend. Kann gelegentlich auf eine nahe Straße im Nachbarhex abkürzen. Verlangsamung verkürzt die Sprünge.|Moves only by hopping. Occasionally shortcuts to a nearby road on an adjacent hex. Slows shorten its jumps.
+Nach dem Panzerbruch dauerhaft 40 % schneller.|Permanently 40% faster after its armor breaks.
+Extrem zäh und langsam. Ihre Pechspur verlangsamt nachfolgende Gegner um 45 %. Feuer entzündet das Pech.|Extremely tough and slow. Its tar trail slows following enemies by 45%. Fire ignites the tar.
+Hinterlässt beim Tod vier Sekunden Sporen. Gegner darin können von Türmen nicht anvisiert werden.|Leaves spores for four seconds on death. Towers cannot target enemies inside.
+Beschleunigt auf Geraden; Kurven und Verlangsamungen bremsen. Bei vollem Tempo drei Basisschaden.|Accelerates on straights; turns and slows reduce momentum. Deals three base damage at full speed.
+`);
+
+HexTranslations.add(`
+Neue Gegner, Turmausbau und zuverlässige Kartenrettung|New enemies, tower upgrades and reliable map rescue
+Sechs neue Gegner mit animierten 3D-Modellen bereichern die Wellen: Schildknecht ab Welle 6, Donnerkröte ab 13, Häutungskäfer ab 17, Pechschnecke ab 21, Pilzkoloss ab 28 und Rammbockkäfer ab 38.|Six new enemies with animated 3D models join the waves: Shieldbearer from wave 6, Thunder Toad from 13, Molting Beetle from 17, Tar Snail from 21, Mushroom Colossus from 28 and Ram Beetle from 38.
+Der Schildknecht blockiert drei direkte Treffer und zeigt den Zustand seines Schilds. Der Häutungskäfer wird nach dem Verlust seiner Rüstung schneller.|The Shieldbearer blocks three direct hits and visibly shows shield damage. The Molting Beetle speeds up after losing its armor.
+Die Donnerkröte bewegt sich durch Sprünge und kann gelegentlich eine Abkürzung auf eine nahe Straße im Nachbarhex nehmen. Der Rammbockkäfer beschleunigt nur auf geraden Strecken.|The Thunder Toad moves by hopping and occasionally shortcuts to a nearby road on an adjacent hex. The Ram Beetle only accelerates on straight roads.
+Die Pechschnecke ist besonders langsam und widerstandsfähig. Ihre Pechspur liegt auf der Straße und verlangsamt andere Gegner um 45 %. Feuer kann die Spur entzünden.|The Tar Snail is extremely slow and durable. Its ground-level tar trail slows other enemies by 45%. Fire can ignite the trail.
+Der Pilzkoloss hinterlässt beim Tod vier Sekunden lang eine Sporenwolke. Türme können Gegner darin nicht anvisieren; außerhalb sind sie sofort wieder sichtbar. Flächenschaden und Fallen wirken weiterhin.|The Mushroom Colossus leaves a spore cloud for four seconds on death. Towers cannot target enemies inside; they become visible again immediately after leaving. Area damage and traps still work.
+Der Turmausbau zeigt die Upgrade-Wege übersichtlich nebeneinander. Aktuelle Werte, nächste Verbesserungen und Vergleiche sind leichter zugänglich.|Tower upgrades show upgrade paths side by side. Current stats, next upgrades and comparisons are easier to access.
+Beim Entfernen einer Deckkarte wird zunächst eine Bestätigung direkt auf der unscharfen Karte angezeigt. Erst ein zweiter Klick entfernt eine Kopie; die Auswahl einer anderen Karte setzt die Bestätigung zurück.|Removing a deck card first displays a confirmation over the blurred card. A second click removes one copy; selecting another card resets confirmation.
+Fehlende Karten im Nachzieh- und Ablagestapel werden wiederhergestellt, damit das bestehende Deck weiter nutzbar bleibt.|Missing cards in the draw and discard piles are restored so the existing deck remains usable.
+Die Rettungstunnel-Aktion bleibt während der Bauphase erreichbar und verschwindet nicht mehr zusammen mit dem Hinweis. Ein gebauter Tunnel wird direkt im Zwischenstand gesichert.|The rescue tunnel action remains available during the build phase instead of disappearing with the notification. A built tunnel is saved immediately in the checkpoint.
+Die große Duo-Anleitung wird nach einigen Sekunden eingeklappt; wichtige Warnungen bleiben sichtbar. Englische Bestenlisten-Beschriftungen und Patchnotes wurden ergänzt.|The large Duo guidance panel collapses after a few seconds; important warnings remain visible. English leaderboard labels and patch notes have been added.
 `);

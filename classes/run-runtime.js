@@ -100,7 +100,7 @@ const HexRunRuntime=(()=>{
     if(state.hp<=0) return;
     const plan=spawnPlan(state),profile=plan.enemies[idx||0],hp=profile.hp;
     const start=points[0];
-    state.enemies.push({id:state.nextEnemyId++,...profile,points,index:0,t:0,hp,maxHp:hp,maxArmorHp:profile.armorHp||0,maxMagicHp:profile.magicHp||0,alive:true,x:start.x,y:start.y});
+    state.enemies.push({id:state.nextEnemyId++,...profile,spawnedAt:state.elapsedMs,points,index:0,t:0,hp,maxHp:hp,maxArmorHp:profile.armorHp||0,maxMagicHp:profile.magicHp||0,alive:true,x:start.x,y:start.y});
   }
 
   function advance(state,random,dt,emit=()=>{}){

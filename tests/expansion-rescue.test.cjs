@@ -25,6 +25,28 @@ test('existing blocked runs offer a confirmed tunnel and field clicks close the 
   button.listeners.click();assert.equal(a.state.map.size,size+1);assert.equal(a.state.tunnelOffer,null);
   a.rendererCommands.fieldClick();elements.get('towerDrawer').classList.remove('hidden');a.rendererCommands.clearSelection();assert.equal(elements.get('towerDrawer').classList.contains('hidden'),true);
 });
+
+test('rescue action survives notification expiry, checkpoint restore and confirmation',()=>{
+ const {a,elements}=load();trap(a.state);a.state.phase='place';a.drawHand();a.renderAll();
+ const panel=elements.get('tunnelRescuePanel'),button=elements.get('tunnelRescueBtn');
+ assert.equal(panel.classList.contains('hidden'),false);
+ // The fading notification can disappear without hiding the separate rescue action.
+ elements.get('message').classList.remove('show');a.renderAll();assert.equal(panel.classList.contains('hidden'),false);
+ const checkpoint=a.captureRunCheckpoint();a.restoreRunCheckpoint(checkpoint);assert.equal(panel.classList.contains('hidden'),false);
+ button.listeners.click();assert.equal(panel.classList.contains('hidden'),false);assert.equal(button.textContent,'Tunnel kostenlos bauen');
+ button.listeners.click();assert.equal(panel.classList.contains('hidden'),true);assert.equal(a.state.tunnelOffer,null);
+});
+
+test('legacy blocked checkpoint recovers its missing rescue offer without changing the deck',()=>{
+ const {a,elements}=load();trap(a.state);a.state.phase='build';a.state.drawResult='tunnel';a.state.tunnelOffer=null;
+ const deck=JSON.stringify(a.state.deck);a.restoreRunCheckpoint(a.captureRunCheckpoint());
+ assert.ok(a.state.tunnelOffer);assert.equal(elements.get('tunnelRescuePanel').classList.contains('hidden'),false);assert.equal(JSON.stringify(a.state.deck),deck);
+});
+
+test('rescue button belongs to the persistent wave controls rather than the fading message',()=>{
+ const html=require('node:fs').readFileSync('index.html','utf8'),dock=html.indexOf('<div class="dockBR">'),button=html.indexOf('id="tunnelRescueBtn"');
+ assert.ok(button>dock&&button<html.indexOf('id="startWaveBtn"'));assert.equal(html.match(/id="tunnelRescueBtn"/g).length,1);
+});
 test('headless placement applies a hand card once and rejects malformed or duplicate commands',()=>{
   const c=loadCore(),{state:s}=c.runtime.create({seed:'place',runId:'p',loadout:['archer','catapult','chain','freeze','mine']});s.hand=['straight'];
   assert.equal(c.placement.place(s,{q:1,r:0,index:0,rotation:.5}),null);assert.equal(s.map.size,1);

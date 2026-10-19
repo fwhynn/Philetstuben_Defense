@@ -38,7 +38,7 @@ test('shrine card, healing, upgrade and removal menus resume from saved offers',
     a.restoreRunCheckpoint(checkpoint);assert.deepEqual(json(a.state.rewardOffer),offered,effect);
     const cards=elements.get('rewardChoices').children;
     if(['epic','legendary'].includes(effect))assert.match(cards[0].children.at(-1).textContent,/× bereits im Deck/);
-    cards[0].listeners.click();assert.equal(a.state.phase,'build',effect);assert.equal(a.state.rewardOffer,null,effect);
+    cards[0].listeners.click();if(effect==='remove'){assert.equal(a.state.phase,'removal');cards[0].listeners.click();}assert.equal(a.state.phase,'build',effect);assert.equal(a.state.rewardOffer,null,effect);
   }
 });
 

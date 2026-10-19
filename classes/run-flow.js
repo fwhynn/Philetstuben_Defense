@@ -71,7 +71,7 @@ const HexRunFlow=(()=>{
     state.waveKills=0;
     state.pendingSpawns=count;
     HexRunRuntime.schedule(state,sources,wavePlan.enemies,20);
-    const bosses=spawnReadyBosses(state,random);
+    const bosses=wavePlan.dev?0:spawnReadyBosses(state,random);
     const waveBoss=HexWaves.plan(state.wave,state.income,!!state.challengeDay,state).boss;
     if(waveBoss){
       // Separate seeded stream: choosing an entrance must not alter card rewards.

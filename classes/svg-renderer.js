@@ -237,9 +237,11 @@ function create(svg,commands){
   function drawEnemy(e){
     if(e.caravan){const marker=text(e.x,e.y-34,'🪙',14,'#ffe08a','700'),tip=document.createElementNS(NS,'title');tip.textContent=e.splitOnDeath?'Geldtransport: 18 Gold verteilt auf Golem und Splitter. Erreicht der Golem die Basis, verlierst du 10 Gold.':'Geldtransport: Besiegen bringt 15 Gold extra. Erreicht er die Basis, verlierst du 10 Gold.';marker.appendChild(tip);marker.setAttribute('role','button');marker.setAttribute('tabindex','0');marker.setAttribute('aria-label',tip.textContent);marker.style.pointerEvents='auto';marker.addEventListener('pointerdown',event=>event.stopPropagation());marker.addEventListener('click',event=>{event.stopPropagation();commands.inspectCaravan?.();});marker.addEventListener('keydown',event=>{if(['Enter',' '].includes(event.key)){event.preventDefault();event.stopPropagation();commands.inspectCaravan?.();}});scene.appendChild(marker);}
     const g=document.createElementNS(NS,'g');
-    if(['splitter','shard','healer','elementCarrier'].includes(e.type))g.appendChild(text(e.x,e.y-32,e.abilityIcon||({splitter:'◆ → ◆◆',shard:'◆',healer:'✚'})[e.type],12,e.color||'#73e49c','700'));
+    if(e.abilityIcon||['splitter','shard','healer','elementCarrier'].includes(e.type))g.appendChild(text(e.x,e.y-32,e.abilityIcon||({splitter:'◆ → ◆◆',shard:'◆',healer:'✚'})[e.type],12,e.color||'#73e49c','700'));
     if(e.bossKind)g.appendChild(text(e.x,e.y-37,e.name,10,'#f8f1d8','700'));
-    const c=document.createElementNS(NS,'circle');c.setAttribute('cx',e.x);c.setAttribute('cy',e.y);c.setAttribute('r',e.type==='boss'?15:e.type==='shard'?6:9);c.setAttribute('fill',e.slowFactor<1?'#79cdd9':e.type==='boss'?({iron:'#bd7935',hunter:'#39b8cf',summoner:'#984ee3'}[e.bossKind]||'#934f9e'):e.type==='armored'?'#78818c':e.type==='swarm'?'#b87832':'#8d3c34');c.setAttribute('stroke','#26120f');c.setAttribute('stroke-width',2);g.appendChild(c);
+    const asset=HexWaves.enemyAssets[e.type];
+    if(asset){const image=document.createElementNS(NS,'image');image.setAttribute('href',asset);image.setAttribute('x',e.x-22);image.setAttribute('y',e.y-32-(e.leaping?8:0));image.setAttribute('width',44);image.setAttribute('height',44);const tip=document.createElementNS(NS,'title');tip.textContent=e.name+' · '+e.description;image.appendChild(tip);g.appendChild(image);}
+    const c=document.createElementNS(NS,'circle');if(asset)c.setAttribute('visibility','hidden');c.setAttribute('cx',e.x);c.setAttribute('cy',e.y);c.setAttribute('r',e.type==='boss'?15:e.type==='shard'?6:9);c.setAttribute('fill',e.slowFactor<1?'#79cdd9':e.type==='boss'?({iron:'#bd7935',hunter:'#39b8cf',summoner:'#984ee3'}[e.bossKind]||'#934f9e'):e.type==='armored'?'#78818c':e.type==='swarm'?'#b87832':'#8d3c34');c.setAttribute('stroke','#26120f');c.setAttribute('stroke-width',2);g.appendChild(c);
     const w=24,h=3,pools=[['hp','maxHp','#78b95f'],['armorHp','maxArmorHp','#df8b3a'],['magicHp','maxMagicHp','#69aee8']].filter(([field,max])=>e[max]>0&&(field==='hp'||e[field]>0));
     pools.forEach(([field,max,color],i)=>{const y=e.y-17-i*4,bg=document.createElementNS(NS,'rect');bg.setAttribute('x',e.x-w/2);bg.setAttribute('y',y);bg.setAttribute('width',w);bg.setAttribute('height',h);bg.setAttribute('fill','#321a18');g.appendChild(bg);const bar=document.createElementNS(NS,'rect');bar.setAttribute('x',e.x-w/2);bar.setAttribute('y',y);bar.setAttribute('width',w*Math.max(0,(e[field]||0)/e[max]));bar.setAttribute('height',h);bar.setAttribute('fill',color);g.appendChild(bar);});scene.appendChild(g);
   }
@@ -248,6 +250,8 @@ function create(svg,commands){
 
   function drawProjectile(p){
     if(p.kind==='spirit'){const c=document.createElementNS(NS,'circle');c.setAttribute('cx',p.x);c.setAttribute('cy',p.y);c.setAttribute('r',p.r);c.setAttribute('fill',p.color);c.setAttribute('fill-opacity','.75');scene.appendChild(c);
+    }else if(p.kind==='enemyTar'||p.kind==='enemySpores'){
+      const c=document.createElementNS(NS,'circle');c.setAttribute('cx',p.x);c.setAttribute('cy',p.y);c.setAttribute('r',p.r);c.setAttribute('fill',p.kind==='enemyTar'?p.color:'#b6b884');c.setAttribute('fill-opacity',p.kind==='enemyTar'?'.8':'.25');scene.appendChild(c);
     }else if(p.kind==='blast'){
       const c=document.createElementNS(NS,'circle');c.setAttribute('cx',p.x);c.setAttribute('cy',p.y);c.setAttribute('r',p.r);c.setAttribute('fill',p.color);c.setAttribute('fill-opacity','.18');c.setAttribute('stroke',p.color);c.setAttribute('stroke-width','3');scene.appendChild(c);
     }else if(p.kind==='chain'){

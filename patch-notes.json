@@ -1,5 +1,21 @@
 [
   {
+    "version": "next",
+    "title": "Neue Gegner, Turmausbau und zuverlässige Kartenrettung",
+    "changes": [
+      "Sechs neue Gegner mit animierten 3D-Modellen bereichern die Wellen: Schildknecht ab Welle 6, Donnerkröte ab 13, Häutungskäfer ab 17, Pechschnecke ab 21, Pilzkoloss ab 28 und Rammbockkäfer ab 38.",
+      "Der Schildknecht blockiert drei direkte Treffer und zeigt den Zustand seines Schilds. Der Häutungskäfer wird nach dem Verlust seiner Rüstung schneller.",
+      "Die Donnerkröte bewegt sich durch Sprünge und kann gelegentlich eine Abkürzung auf eine nahe Straße im Nachbarhex nehmen. Der Rammbockkäfer beschleunigt nur auf geraden Strecken.",
+      "Die Pechschnecke ist besonders langsam und widerstandsfähig. Ihre Pechspur liegt auf der Straße und verlangsamt andere Gegner um 45 %. Feuer kann die Spur entzünden.",
+      "Der Pilzkoloss hinterlässt beim Tod vier Sekunden lang eine Sporenwolke. Türme können Gegner darin nicht anvisieren; außerhalb sind sie sofort wieder sichtbar. Flächenschaden und Fallen wirken weiterhin.",
+      "Der Turmausbau zeigt die Upgrade-Wege übersichtlich nebeneinander. Aktuelle Werte, nächste Verbesserungen und Vergleiche sind leichter zugänglich.",
+      "Beim Entfernen einer Deckkarte wird zunächst eine Bestätigung direkt auf der unscharfen Karte angezeigt. Erst ein zweiter Klick entfernt eine Kopie; die Auswahl einer anderen Karte setzt die Bestätigung zurück.",
+      "Fehlende Karten im Nachzieh- und Ablagestapel werden wiederhergestellt, damit das bestehende Deck weiter nutzbar bleibt.",
+      "Die Rettungstunnel-Aktion bleibt während der Bauphase erreichbar und verschwindet nicht mehr zusammen mit dem Hinweis. Ein gebauter Tunnel wird direkt im Zwischenstand gesichert.",
+      "Die große Duo-Anleitung wird nach einigen Sekunden eingeklappt; wichtige Warnungen bleiben sichtbar. Englische Bestenlisten-Beschriftungen und Patchnotes wurden ergänzt."
+    ]
+  },
+  {
     "version": "1.0.4",
     "title": "Weiterspielen, faire Neustarts und bessere Bedienung",
     "changes": [

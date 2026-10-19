@@ -283,6 +283,7 @@ test('towers offer two branches (three elements) and each branch exactly one fin
 test('sixth wave reward offers optional removal before drawing and preserves map and deck accounting', () => {
   const { a, elements } = load(); a.state.discard.push(...a.state.hand); a.state.hand = []; a.state.wave = 6; a.showRewards();
   elements.get('rewardChoices').children.at(-1).listeners.click(); assert.equal(a.state.phase, 'removal'); assert.equal(a.state.deck.length, 6);
+  elements.get('rewardChoices').children.at(-1).listeners.click(); assert.equal(a.state.phase, 'removal');
   elements.get('rewardChoices').children.at(-1).listeners.click(); assert.equal(a.state.phase, 'place'); assert.equal(a.state.deck.length, 5); assert.equal(a.state.map.size, 1);
   assert.equal(a.state.hand.length + a.state.drawPile.length + a.state.discard.length, 5);
 });
@@ -325,7 +326,7 @@ test('connecting a shrine pauses auto-start and returns to building without draw
 test('shrine removal deletes one copy and preserves the placed hex and build phase', () => {
   const { a, elements } = load(); a.state.map.clear(); a.state.map.set('0,0', { q: 0, r: 0, type: 'base', roads: [0], towers: [], slots: 0 });
   a.state.landmarks = new Map([['1,0', { q: 1, r: 0, type: 'shrine', shrineEffect: 'remove', claimed: false }]]); a.state.deck = ['straight', 'straight', 'smallCurve', 'bigCurve', 'tee', 'cross']; a.state.drawPile = ['straight', 'smallCurve', 'bigCurve', 'tee', 'cross']; a.state.discard = []; a.state.hand = ['straight']; a.state.selectedCard = 0; a.state.rotation = 0; a.state.phase = 'place';
-  a.placeTile(1, 0); const choices = elements.get('rewardChoices').children; choices.at(-5).listeners.click();
+  a.placeTile(1, 0); const choices = elements.get('rewardChoices').children; choices.at(-5).listeners.click(); assert.equal(a.state.deck.length, 6); choices.at(-5).listeners.click();
   assert.equal(a.state.deck.length, 5); assert.equal(a.state.deck.filter(id => id === 'straight').length, 1); assert.equal(a.state.phase, 'build'); assert.equal(a.state.map.has('1,0'), true); assert.equal(a.state.drawPile.length + a.state.discard.length + a.state.hand.length, 5);
 });
 
