@@ -98,7 +98,7 @@ const HexCombat=(()=>{
     const before=durability(e);
     const resistance=Math.max(0,Math.min(.95,e.resistances?.[def.damageType]||0));
     let budget=raw*(1-resistance)*(e.type==='boss'?(def.bossMultiplier||1):1);
-    for(const [field,kind] of [['armorHp','armor'],['magicHp','magic'],['hp','hp']]){if(budget<=0||pool(e,field)<=0)continue;const multiplier=def.damageMultipliers?.[kind]??1,amount=Math.min(pool(e,field),budget*multiplier);e[field]=pool(e,field)-amount;budget-=amount/multiplier;}
+    for(const [field,kind] of [['magicHp','magic'],['armorHp','armor'],['hp','hp']]){if(budget<=0||pool(e,field)<=0)continue;const multiplier=def.damageMultipliers?.[kind]??1,amount=Math.min(pool(e,field),budget*multiplier);e[field]=pool(e,field)-amount;budget-=amount/multiplier;}
     if(e.type==='moltingBeetle'&&!e.molted&&pool(e,'armorHp')===0){e.molted=true;e.speed*=1.4;}
     HexData.recordTowerStat(state,source,'damage',Math.max(0,before-durability(e)));
     if(durability(e)<=1e-8&&e.alive){e.hp=e.armorHp=e.magicHp=0;e.alive=false;HexData.recordTowerStat(state,source,'kills',1);(state.soulDeaths??=[]).push({x:e.x,y:e.y});let gold=e.killGold??HexWaves.economy.kill;

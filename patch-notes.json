@@ -1,5 +1,14 @@
 [
   {
+    "version": "next",
+    "title": "Klare Schutzschichten und sichtbare Upgrades",
+    "changes": [
+      "Angriffe bauen zuerst Magieresistenz, dann Rüstung und zuletzt Leben ab. Überschüssiger Schaden trifft die jeweils nächste Schicht.",
+      "Eisenkoloss, Sturmjäger und Seelenmatriarchin behalten in allen Biomen ihre Bossgestalt und erhalten passende Aufsätze. Biom-Wächter behalten ihre eigenen Modelle.",
+      "Die beiden Endausbauten des Flammenturms sind deutlicher unterscheidbar. Die ultimative Stufe zeigt zusätzlich einen leuchtenden Phönixkern mit Flügelaufsätzen."
+    ]
+  },
+  {
     "version": "1.0.6",
     "title": "Gespeicherte Einstellungen und bessere Touch-Bedienung",
     "changes": [

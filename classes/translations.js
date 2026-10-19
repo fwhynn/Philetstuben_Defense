@@ -1620,3 +1620,10 @@ Auf Touch-Geräten kann der Tipp auf einen Bauplatz nicht gleichzeitig einen Tur
 Die Zusatzhex-Auswahl von Fernschmiede und Handelsnetz wird beim Wellenende geschlossen, damit sie die folgende Kartenplatzierung nicht mehr überlagert. Bereits zugewiesene Gebäude-Ziele bleiben erhalten.|Remote Forge and Trade Network target selection closes at the end of a wave so it no longer interferes with the next card placement. Previously assigned building targets are retained.
 Die Sound-Umschaltung und Spielregeln entfallen im Hauptmenü. Sound-Einstellungen und Regeln bleiben im Spiel erreichbar.|The sound toggle and game rules have been removed from the main menu. Sound settings and rules remain accessible in-game.
 `);
+
+HexTranslations.add(`
+Klare Schutzschichten und sichtbare Upgrades|Clear protection layers and visible upgrades
+Angriffe bauen zuerst Magieresistenz, dann Rüstung und zuletzt Leben ab. Überschüssiger Schaden trifft die jeweils nächste Schicht.|Attacks deplete magic protection first, then armor, then health. Excess damage carries over to the next layer.
+Eisenkoloss, Sturmjäger und Seelenmatriarchin behalten in allen Biomen ihre Bossgestalt und erhalten passende Aufsätze. Biom-Wächter behalten ihre eigenen Modelle.|Iron Colossus, Storm Hunter and Soul Matriarch retain their boss shape in every biome and receive matching details. Biome guardians retain their own models.
+Die beiden Endausbauten des Flammenturms sind deutlicher unterscheidbar. Die ultimative Stufe zeigt zusätzlich einen leuchtenden Phönixkern mit Flügelaufsätzen.|The Flame Tower’s two final upgrade paths are easier to distinguish. The ultimate upgrade adds a glowing Phoenix Core with wing details.
+`);
