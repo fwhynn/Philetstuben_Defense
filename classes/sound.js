@@ -10,7 +10,6 @@ const HexAudio=(()=>{
   function applySettings(value){
     if(typeof value?.enabled==='boolean')toggle.checked=value.enabled;
     if(typeof value?.volume==='number'&&Number.isFinite(value.volume))volume.value=String(Math.max(0,Math.min(100,value.volume)));
-    const menu=document.getElementById('menuSound');if(menu)menu.checked=toggle.checked;
     if(master)master.gain.value=toggle.checked?Number(volume.value)/100:0;
     persist();
   }

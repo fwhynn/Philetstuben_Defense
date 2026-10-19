@@ -1,21 +1,26 @@
 const HexCombat=(()=>{
   const consumables={spikes:{name:'Krähenfüße',cost:25,description:'20 Spitzen × 5 Schaden. Reste verfallen am Wellenende.'},resin:{name:'Klebeharz',cost:30,description:'Die nächsten 12 Gegner: 35 % langsamer für 4 Sekunden. Bis Wellenende.'},overload:{name:'Überladung',cost:40,description:'+50 % Angriffsgeschwindigkeit für 12 Sekunden. Bis Wellenende; nicht stapelbar.'}};
+  function consumableStats(state) {
+    const wave=Math.max(1,Math.floor(Number(state.wave)||0)+(state.waveRunning?0:1));
+    const hp=Math.round((28+wave*7)*Math.pow(1.10,Math.max(0,wave-3)));
+    return {wave,spikeDamage:Math.max(5,Math.round(hp/7)),resinCharges:12+3*Math.floor((wave-1)/5),resinDuration:4+Math.min(4,Math.floor((wave-1)/10)),overloadDuration:12+Math.min(12,2*Math.floor((wave-1)/5))};
+  }
   function buyConsumable(state,kind,slot,preview=false){
     const def=Object.hasOwn(consumables,kind)?consumables[kind]:null;
     if(!def||state.hp<=0||!['place','build','wave'].includes(state.phase)||!Number.isInteger(slot?.q)||!Number.isInteger(slot?.r)||state.gold<def.cost)return false;
     const tile=state.map.get(slot.q+','+slot.r);if(!tile)return false;
     if(kind==='overload'){
       const tower=Number.isInteger(slot.index)&&tile.towers?.[slot.index];if(!tower||tower.guestOwner!==undefined||!HexData.towerDefinition(tower).cooldown||HexData.towerDefinition(tower).aura||tower.overloadPending||tower.overloadUntil>state.elapsedMs)return false;
-      if(!preview){if(state.waveRunning)tower.overloadUntil=state.elapsedMs+12000;else tower.overloadPending=true;}
+      if(!preview){tower.overloadDuration=consumableStats(state).overloadDuration*1000;if(state.waveRunning)tower.overloadUntil=state.elapsedMs+tower.overloadDuration;else tower.overloadPending=true;}
     }else{
       if(tile.type==='base'||!tile.roads?.length)return false;
       const point=slot.x===undefined&&slot.y===undefined?HexMap.roadGeometry(tile).hub:lanePoint(tile,slot);
       if(!point)return false;
-      if(!preview)(state.consumables??=[]).push({kind,q:slot.q,r:slot.r,x:point.x,y:point.y,charges:kind==='spikes'?20:12,seen:[]});
+      if(!preview)(state.consumables??=[]).push({kind,q:slot.q,r:slot.r,x:point.x,y:point.y,charges:kind==='spikes'?20:consumableStats(state).resinCharges,damage:consumableStats(state).spikeDamage,duration:consumableStats(state).resinDuration*1000,seen:[]});
     }
     if(!preview)state.gold-=def.cost;return true;
   }
-  function clearConsumables(state){state.enemyZones=[];state.consumables=[];for(const tile of state.map.values())for(const tower of tile.towers||[])if(tower){delete tower.overloadPending;delete tower.overloadUntil;}for(const e of state.enemies||[])e.slowEffects=(e.slowEffects||[]).filter(s=>s.source!=='resin');}
+  function clearConsumables(state){state.enemyZones=[];state.consumables=[];for(const tile of state.map.values())for(const tower of tile.towers||[])if(tower){delete tower.overloadPending;delete tower.overloadUntil;delete tower.overloadDuration;}for(const e of state.enemies||[])e.slowEffects=(e.slowEffects||[]).filter(s=>s.source!=='resin');}
   // Snap a nearby click to the actual lane, including curved and model-specific roads.
   function lanePoint(tile,point){
     if(!Number.isFinite(point?.x)||!Number.isFinite(point?.y))return null;
@@ -32,8 +37,8 @@ const HexCombat=(()=>{
     for(const c of state.consumables||[]){if(c.charges<=0)continue;const positioned=Number.isFinite(c.x)&&Number.isFinite(c.y),center=positioned?c:HexMap.axialToWorld(c.q,c.r);
       for(const e of state.enemies){if(!e.alive||c.charges<=0||c.seen.includes(e.id)||Math.hypot(e.x-center.x,e.y-center.y)>(positioned?16:HexMap.HEX*.9))continue;
         c.seen.push(e.id);
-        if(c.kind==='spikes'){while(c.charges>0&&e.alive){c.charges--;damageEnemy(e,5,{damageType:'physical'},state,emit);}if(!e.alive)state.consumableKills=(state.consumableKills||0)+1;}
-        else {c.charges--;e.slowEffects??=[];e.slowEffects.push({factor:.65,until:time+4000,source:'resin'});}
+        if(c.kind==='spikes'){while(c.charges>0&&e.alive){c.charges--;damageEnemy(e,c.damage??5,{damageType:'physical'},state,emit);}if(!e.alive)state.consumableKills=(state.consumableKills||0)+1;}
+        else {c.charges--;e.slowEffects??=[];e.slowEffects.push({factor:.65,until:time+(c.duration??4000),source:'resin'});}
       }
     }
     state.consumables=(state.consumables||[]).filter(c=>c.charges>0);
@@ -172,7 +177,7 @@ const HexCombat=(()=>{
       state.projectiles.push({kind:zone.kind==='spores'?'enemySpores':'enemyTar',x:zone.x,y:zone.y,r:zone.r,ttl:dt+.001,max:dt+.001,fade:Math.min(1,(zone.until-time)/1000),color:zone.burning?'#e78235':'#30291f'});
     }
     // Tick-local values: upgrades and support/biome changes apply on the next step.
-    towerRefs=towerRefs.map(ref=>{if(ref.tw.overloadPending){delete ref.tw.overloadPending;ref.tw.overloadUntil=time+12000;}const definition={...(ref.definition||HexData.towerDefinition(ref.tw,definitions))};if(ref.tw.overloadUntil>time)definition.cooldown/=1.5;return {...ref,definition};});
+    towerRefs=towerRefs.map(ref=>{if(ref.tw.overloadPending){delete ref.tw.overloadPending;ref.tw.overloadUntil=time+(ref.tw.overloadDuration??12000);}const definition={...(ref.definition||HexData.towerDefinition(ref.tw,definitions))};if(ref.tw.overloadUntil>time)definition.cooldown/=1.5;return {...ref,definition};});
     applyConsumables(state,time,emit);
     const auraRefs=towerRefs.filter(ref=>ref.definition.aura);
     // Movement finishes before targeting. Only path distance is shared: health,
@@ -239,5 +244,5 @@ const HexCombat=(()=>{
     if(state.splitChildren?.length){state.enemies.push(...state.splitChildren);state.splitChildren=[];}
     state.projectiles.forEach(p=>p.ttl-=dt);state.projectiles=state.projectiles.filter(p=>p.ttl>0);state.enemies=state.enemies.filter(e=>e.alive&&durability(e)>0);
   }
-  return {step,durability,remainingDistance,targetByPriority,consumables,lanePoint,buyConsumable,clearConsumables,applyConsumables};
+  return {step,durability,remainingDistance,targetByPriority,consumables,lanePoint,buyConsumable,clearConsumables,applyConsumables,consumableStats};
 })();

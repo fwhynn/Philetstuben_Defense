@@ -43,3 +43,12 @@ test('selected construction slots use singular only for exactly one slot',()=>{
  selectSlot(1,0,0);assert.match(elements.get('towerSelectionHint').textContent,/^1 Bauplatz gewählt/);
  selectSlot(1,0,1,true);assert.match(elements.get('towerSelectionHint').textContent,/^2 Bauplätze gewählt/);
 });
+
+
+test('the touch that opens a construction menu cannot also buy a tower',()=>{
+ const {a,elements}=load();a.state.phase='build';a.state.gold=200;a.state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[]});
+ a.rendererCommands.selectSlot(1,0,0,false,'touch');const menu=elements.get('towerMenu'),button=menu.children[0];let stopped=false;
+ const click=()=>{stopped=false;menu.captureListeners.click({detail:1,preventDefault(){},stopImmediatePropagation(){stopped=true;}});if(!stopped)button.listeners.click();};
+ click();assert.equal(stopped,true);assert.equal(a.state.gold,200);assert.ok(!a.state.map.get('1,0').towers[0]);
+ menu.captureListeners.pointerdown({pointerType:'touch'});click();assert.equal(stopped,false);assert.ok(a.state.map.get('1,0').towers[0]);assert.ok(a.state.gold<200);
+});

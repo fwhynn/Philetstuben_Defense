@@ -120,3 +120,13 @@ test('Duo validates purchases, charges once and restores remaining consumables',
  rooms=createLobbies({now:()=>0,snapshot:JSON.parse(JSON.stringify(rooms.checkpoint()))});rooms.touch(a.token);rooms.touch(b.token);assert.equal(rooms.view(a.token).boards[0].consumables[0].charges,20);assert.equal(rooms.view(b.token).boards[1].consumables?.length||0,0);
  assert.equal(command(a,'consumable',{kind:'__proto__',slot}).ok,false);
 });
+
+
+test('consumables scale for the upcoming wave and retain purchased values through checkpoints',()=>{
+ const {c,s,run}=setup();const early=c.combat.consumableStats(s);s.wave=34;const late=c.combat.consumableStats(s);assert.equal(late.wave,35);assert.ok(late.spikeDamage>early.spikeDamage*30);assert.equal(late.resinCharges,30);assert.equal(late.resinDuration,7);assert.equal(late.overloadDuration,24);
+ const slot={q:1,r:0,index:0};c.combat.buyConsumable(s,'spikes',slot);c.combat.buyConsumable(s,'resin',slot);c.towers.buy(s,'archer',[slot]);c.combat.buyConsumable(s,'overload',slot);
+ const restored=c.snapshot.restore(JSON.parse(JSON.stringify(c.snapshot.capture(s,run.random)))).state;
+ assert.equal(restored.consumables[0].damage,late.spikeDamage);assert.equal(restored.consumables[1].duration,7000);assert.equal(restored.map.get('1,0').towers[0].overloadDuration,24000);
+ s.wave=35;s.waveRunning=true;assert.deepEqual(c.combat.consumableStats(s),late);
+ const e=enemy(c,1,late.spikeDamage*2);s.enemies=[e];c.combat.applyConsumables(s,0);assert.equal(e.alive,false);assert.equal(s.consumables[0].charges,18);
+});

@@ -55,9 +55,14 @@
   const speedToggle = document.getElementById('doubleSpeed');
   let gameSpeed = 1; try { gameSpeed = Math.max(1, Math.min(8, Math.round(Number(gameStorage.getItem('gameSpeed')) || 1))); } catch { }
   speedToggle.value = String(gameSpeed); document.getElementById('speedValue').textContent = gameSpeed + '×';
-  function changeSpeed(value) { if (duoToken) { duoAction('speed', { value: Number(value) }); return; } advanceClock(performance.now()); gameSpeed = Math.max(1, Math.min(8, Math.round(Number(value) || 1))); speedToggle.value = String(gameSpeed); document.getElementById('speedValue').textContent = gameSpeed + '×'; try { gameStorage.setItem('gameSpeed', String(gameSpeed)); } catch { } }
+  function changeSpeed(value) { if (duoToken) { duoAction('speed', { value: Number(value) }); return; } advanceClock(performance.now()); gameSpeed = Math.max(1, Math.min(8, Math.round(Number(value) || 1))); speedToggle.value = String(gameSpeed); document.getElementById('speedValue').textContent = gameSpeed + '×'; try { gameStorage.setItem('gameSpeed', String(gameSpeed)); } catch { } saveGameSettings(); }
   speedToggle.addEventListener('input', () => changeSpeed(speedToggle.value));
   const towerMenu = document.getElementById('towerMenu');
+  let towerMenuNeedsFreshTouch = false;
+  towerMenu.addEventListener('pointerdown', () => { towerMenuNeedsFreshTouch = false; }, true);
+  towerMenu.addEventListener('click', event => {
+    if (towerMenuNeedsFreshTouch && event.detail !== 0) { event.preventDefault(); event.stopImmediatePropagation(); }
+  }, true);
   const rewardOverlay = document.getElementById('rewardOverlay');
   const rewardChoices = document.getElementById('rewardChoices');
   const loadoutOverlay = document.getElementById('loadoutOverlay');
@@ -245,6 +250,7 @@
     state['selected' + kind + 's'] = list; state['selected' + kind] = list.at(-1) || null;
   }
   function selectSlot(q, r, index, multiple = false, pointerType) {
+    towerMenuNeedsFreshTouch = pointerType === 'touch';
     if (consumeAt(q, r, index)) return;
     if (duoBridge?.pickSupport?.('slot', { q, r, index })) return;
     globalThis.HexCompact?.open('');
@@ -321,9 +327,16 @@
   function endWave() {
     const best = state.challengeDay ? (profile.dailyResults?.[state.challengeDay]?.best || 0) : profile.records.highestWave || 0;
     const result = HexRunSession.finish(state, random, best); if (!result) return;
+    clearBuildingInteraction();
     if (!state.challengeDay && !state.duoMode) { profile = HexProfile.recordIntroduction(profile, state.lastCompletedWave, TOWERS); scheduleCloudSave(); }
     if (result.campaignVictory) { showCampaignVictory(); saveRunAutosave(); return; }
     if (result.victory) { showCampaignVictory(); saveRunAutosave(); return; } sound.play('complete'); renderSessionPhase(); saveRunAutosave();
+  }
+  function clearBuildingInteraction() {
+    if (state.buildingTarget) { messageEl.classList.remove('show'); document.getElementById('messageText').textContent = ''; }
+    state.buildingTarget = state.selectedBuilding = state.previewBuilding = state.hoverBuilding = null;
+    buildingPanelKey = '';
+    document.getElementById('buildingPanel').classList.add('hidden');
   }
   function finishBossReward() { if (state.phase === 'bossReward') takeReward(state.rewardOffer?.id, null); }
   function finishRemoval() { if (['removal', 'shrineReward'].includes(state.phase)) takeReward(state.rewardOffer?.id, null); }
@@ -576,6 +589,10 @@ R dreht die Karte, dann Feld anklicken.`;
   document.getElementById('cancelConsumable').addEventListener('click', () => { consumablePick = null; document.getElementById('consumableMenu').open = false; renderAll(); });
   function renderUI() {
     renderDevEnemies();
+    const consumableValues=HexCombat.consumableStats(state);
+    document.getElementById('spikesStats').textContent='20 × '+consumableValues.spikeDamage+' Schaden';
+    document.getElementById('resinStats').textContent=consumableValues.resinCharges+' Gegner · −35 % · '+consumableValues.resinDuration+' s';
+    document.getElementById('overloadStats').textContent='+50 % · '+consumableValues.overloadDuration+' s';
     const canConsume = state.hp > 0 && ['place', 'build', 'wave'].includes(state.phase) && (!duoToken || !state.consumablesLocked);
     document.getElementById('consumableMenu').classList.toggle('hidden', !canConsume); document.getElementById('compactConsumables').disabled = !canConsume;
     for (const [id, kind] of [['buySpikes', 'spikes'], ['buyResin', 'resin'], ['buyOverload', 'overload']]) document.getElementById(id).disabled = !canConsume || state.gold < HexCombat.consumables[kind].cost;
@@ -1061,7 +1078,7 @@ R dreht die Karte, dann Feld anklicken.`;
     const introduction = !duoToken && !challengeDay && HexProfile.learning(profile) ? profile.introduction : null;
     const chosen = [...new Set(loadout)].filter(id => TOWERS[id] && profile.unlockedTowers.includes(id));
     const run = HexRunRuntime.create({ seed, runId: HexRandom.freshSeed(), loadout: chosen.length === 5 ? chosen : introduction || profile.activeLoadout.length === 5 ? profile.activeLoadout : [...HexProfile.START_TOWERS], unlocks: HexProfile.runUnlocks(profile), heroId, difficulty, challengeDay, introduction });
-    state = run.state; random = run.random; if (!duoToken && !challengeDay && typeof HexAssetEdition !== 'undefined') HexAssetEdition.set('normal'); if (onboardingHints && !tutorialSeen && state.towerLoadout.includes('archer')) state.towerLoadout = ['archer', ...state.towerLoadout.filter(id => id !== 'archer')]; Object.assign(state, { selectedCard: null, rotation: 0, showHexGrid, showSlotHints, selectedSlots: [], selectedTowers: [] });
+    state = run.state; random = run.random; if (testProfile && typeof HexAssetEdition !== 'undefined') HexAssetEdition.set('normal'); if (onboardingHints && !tutorialSeen && state.towerLoadout.includes('archer')) state.towerLoadout = ['archer', ...state.towerLoadout.filter(id => id !== 'archer')]; Object.assign(state, { selectedCard: null, rotation: 0, showHexGrid, showSlotHints, showUpgradeStatus: document.getElementById('upgradeStatus').checked, selectedSlots: [], selectedTowers: [] });
     document.getElementById('baseDropdown').open = false;
     document.getElementById('activeSeed').textContent = seed; document.getElementById('dailyRunStatus').textContent = challengeDay ? HexWaves.daily(challengeDay).name + ' · ' + challengeDay + ' · Ziel: Welle ' + state.challengeTarget + (state.challengeKind === 'garrison' ? ' · 1.200 Gold · keine Einnahmen' : ' · Sandsturm −15 % Tempo/Reichweite') : '';
     state.drawPile = shuffle(state.deck); drawHand(); tutorial = challengeDay || tutorialSeen || !onboardingHints ? { active: false, step: 0 } : HexTutorial.begin(state); hasActiveRun = true; startSoloPresence(); setMessage(state.challengeKind === 'garrison' ? 'Verteidige drei Angriffe. 1.200 Gold für die gesamte Mission – keine Einnahmen, keine Verkäufe.' : onboardingHints ? (state.openingRemaining ? 'Zwei Fronten: Wähle zwei der fünf Handkarten und erweitere beide Base-Ausgänge.' : 'Wähle eine Hexkarte und lege sie an die offene Straße der Base.') : ''); renderAll();
@@ -1121,7 +1138,7 @@ R dreht die Karte, dann Feld anklicken.`;
     if(!duoToken&&state.hp>0&&!state.waveRunning&&state.phase==='build'&&!state.tunnelOffer&&['tunnel','blocked'].includes(state.drawResult)){
       state.tunnelOffer=HexMap.tunnelPlan(state.map,state.landmarks,true);state.tunnelConfirmed=false;
     }
-    Object.assign(state, { selectedCard: null, rotation: 0, selectedSlots: [], selectedTowers: [], showHexGrid, showSlotHints });
+    Object.assign(state, { selectedCard: null, rotation: 0, selectedSlots: [], selectedTowers: [], showHexGrid, showSlotHints, showUpgradeStatus: document.getElementById('upgradeStatus').checked });
     handRenderKey = forecastRenderKey = ''; deckRenderKeys.clear(); uiWavePlans.clear();
     towerMenuKey = ''; towerPanelKey = ''; buildingPanelKey = ''; pinnedBiome = null; hasActiveRun = true; startSoloPresence();
     last = performance.now(); clockDebt = 0; renderer.reset();
@@ -1267,21 +1284,21 @@ R dreht die Karte, dann Feld anklicken.`;
   document.getElementById('resetDiamondsBtn').addEventListener('click', () => { if (!resetArsenalPending) { resetArsenalPending = true; renderArsenal('Alle Turm- und Meta-Freischaltungen werden entfernt; Loadouts werden auf die fünf Starttürme zurückgesetzt. Ein bereits laufender Run behält seine Startauswahl. Erneut klicken zum Bestätigen.'); return; } const result = HexProfile.resetUnlocks(profile, TOWERS); profile = result.profile; scheduleCloudSave(); pendingLoadout = [...profile.activeLoadout]; resetArsenalPending = false; renderLoadout(); renderArsenal(result.refund + ' Diamanten erstattet. Du kannst dich neu entscheiden.'); renderUI(); });
   function openArsenal() { resetArsenalPending = false; renderArsenal(); arsenalOverlay.classList.remove('hidden'); }
 
-  function toggleUpgradeStatus(value = !state.showUpgradeStatus) { state.showUpgradeStatus = value; document.getElementById('upgradeStatus').checked = value; renderBoard(); }
+  function toggleUpgradeStatus(value = !state.showUpgradeStatus) { state.showUpgradeStatus = value; document.getElementById('upgradeStatus').checked = value; saveGameSettings(); renderBoard(); }
   document.getElementById('upgradeStatus').addEventListener('change', e => toggleUpgradeStatus(e.target.checked));
-  const slotToggle = document.getElementById('slotHints'); slotToggle.checked = showSlotHints; slotToggle.addEventListener('change', () => { showSlotHints = slotToggle.checked; state.showSlotHints = showSlotHints; try { gameStorage.setItem('slotHints', String(showSlotHints)); } catch { } renderBoard(); });
+  const slotToggle = document.getElementById('slotHints'); slotToggle.checked = showSlotHints; slotToggle.addEventListener('change', () => { showSlotHints = slotToggle.checked; state.showSlotHints = showSlotHints; try { gameStorage.setItem('slotHints', String(showSlotHints)); } catch { } saveGameSettings(); renderBoard(); });
   document.getElementById('skipTutorialBtn').addEventListener('click', () => { finishTutorial(); renderAll(); });
   document.getElementById('tutorialNextBtn').addEventListener('click', () => { tutorialEvent(tutorial.step === 4 ? 'skipUpgrade' : 'health'); renderAll(); });
   const hintsToggle = document.getElementById('onboardingHints'); hintsToggle.checked = onboardingHints; document.getElementById('restartTutorialBtn').disabled = !onboardingHints;
-  hintsToggle.addEventListener('change', () => { onboardingHints = hintsToggle.checked; try { gameStorage.setItem('onboardingHints', String(onboardingHints)); } catch { } if (!onboardingHints) { tutorial.active = false; state.biomeIntro = null; } document.getElementById('restartTutorialBtn').disabled = !onboardingHints; renderAll(); });
+  hintsToggle.addEventListener('change', () => { onboardingHints = hintsToggle.checked; try { gameStorage.setItem('onboardingHints', String(onboardingHints)); } catch { } if (!onboardingHints) { tutorial.active = false; state.biomeIntro = null; } document.getElementById('restartTutorialBtn').disabled = !onboardingHints; saveGameSettings(); renderAll(); });
   document.getElementById('restartTutorialBtn').addEventListener('click', () => { if (!onboardingHints) return; tutorial = HexTutorial.begin(state); document.getElementById('settingsDrawer').classList.add('hidden'); renderAll(); });
   const gridToggle = document.getElementById('hexGrid'); gridToggle.checked = showHexGrid;
-  function setHexGrid(enabled) { showHexGrid = enabled; gridToggle.checked = enabled; state.showHexGrid = enabled; try { gameStorage.setItem('hexGrid', String(enabled)); } catch { } renderBoard(); }
+  function setHexGrid(enabled) { showHexGrid = enabled; gridToggle.checked = enabled; state.showHexGrid = enabled; try { gameStorage.setItem('hexGrid', String(enabled)); } catch { } saveGameSettings(); renderBoard(); }
   gridToggle.addEventListener('change', () => setHexGrid(gridToggle.checked));
   document.getElementById('baseDropdown').addEventListener('toggle', () => { state.selectedBase = document.getElementById('baseDropdown').open; renderBoard(); });
   for (const [kind, id] of [['walls', 'baseWallsBtn'], ['weapon', 'baseWeaponBtn']]) document.getElementById(id).addEventListener('click', () => { if (duoToken) { duoAction('baseUpgrade', { kind }); return; } if (HexHeroes.buy(state, kind)) { sound.play('build'); renderAll(); } });
   if (typeof ResizeObserver !== 'undefined') { const observer = new ResizeObserver(() => requestAnimationFrame(layoutMenus)); for (const node of document.querySelectorAll('.gameHeader,.dockBR,.handDock,.mapControls,.dockBL')) observer.observe(node); }
-  globalThis.addEventListener?.('hexlanguagechange', () => { uiLanguageRevision++; if (state) { renderRunStatistics(); renderUI(); } }); globalThis.addEventListener?.('hexinputchange', () => { if (state) renderAll(); }); globalThis.addEventListener?.('resize', layoutMenus); document.addEventListener('toggle', layoutMenus, true); document.addEventListener('click', () => requestAnimationFrame(layoutMenus));
+  globalThis.addEventListener?.('hexlanguagechange', () => { uiLanguageRevision++; saveGameSettings(); if (state) { renderRunStatistics(); renderUI(); } }); globalThis.addEventListener?.('hexinputchange', () => { if (state) renderAll(); }); globalThis.addEventListener?.('resize', layoutMenus); document.addEventListener('toggle', layoutMenus, true); document.addEventListener('click', () => requestAnimationFrame(layoutMenus));
   document.getElementById('hotkeyTipOpen').addEventListener('click', openHotkeySettings);
   document.getElementById('hotkeyTipClose').addEventListener('click', () => { state.hotkeyHintDone = true; renderHotkeyTip(); });
   document.getElementById('hotkeyHelp').addEventListener('toggle', renderHotkeyTip);
@@ -1289,7 +1306,7 @@ R dreht die Karte, dann Feld anklicken.`;
   document.getElementById('rotateHexBtn').addEventListener('click', () => rotateSelected());
   startWaveBtn.addEventListener('click', startWave);
   // ---- Hauptmenü ----
-  const mainMenu = document.getElementById('mainMenu'), menuRules = document.getElementById('menuRules');
+  const mainMenu = document.getElementById('mainMenu');
   const saveOverlay = document.getElementById('saveOverlay'), saveStatus = document.getElementById('saveStatus'), confirmImport = document.getElementById('confirmImportBtn');
   let pendingImport = null, importReadId = 0;
   function closeSave() { pendingImport = null; importReadId++; saveOverlay.classList.add('hidden'); openMainMenu(); document.getElementById('menuAccountBtn')?.focus?.(); }
@@ -1307,6 +1324,36 @@ R dreht die Karte, dann Feld anklicken.`;
   const cloudStore = { get(key) { try { return gameStorage.getItem(key); } catch { return null; } }, set(key, value) { try { if (value == null) gameStorage.removeItem(key); else gameStorage.setItem(key, value); } catch {/* Speicher nicht verfügbar */ } } };
   const accountApi = () => testProfile ? null : globalThis.HexApi;
   let accountUser = null, accountMode = 'login', accountBusy = false, pendingServerProfile = null, cloudSaveTimer = null;
+  let applyingGameSettings = false;
+  const gameSettingChecks = ['slotHints','onboardingHints','hexGrid','upgradeStatus','autoStart','multiTowerSelection'];
+  function readGameSettings() {
+    const settings = Object.fromEntries(gameSettingChecks.map(id => [id, !!document.getElementById(id).checked]));
+    return {...settings, gameSpeed, language: globalThis.HexI18n?.getLanguage(), assetEdition: typeof HexAssetEdition === 'undefined' ? undefined : HexAssetEdition.get()};
+  }
+  function saveGameSettings() {
+    if (applyingGameSettings) return;
+    const settings = readGameSettings();
+    try { gameStorage.setItem('hex-game-settings-v1', JSON.stringify(settings)); } catch {}
+    if (pendingServerProfile) pendingServerProfile.gameSettings = settings;
+    scheduleCloudSave();
+  }
+  function applyGameSettings(settings) {
+    if (!settings || typeof settings !== 'object' || Array.isArray(settings)) return;
+    applyingGameSettings = true;
+    try {
+      for (const id of gameSettingChecks) if (typeof settings[id] === 'boolean') document.getElementById(id).checked = settings[id];
+      showSlotHints = slotToggle.checked; showHexGrid = gridToggle.checked; onboardingHints = hintsToggle.checked;
+      if (state) { Object.assign(state, {showSlotHints, showHexGrid, showUpgradeStatus: document.getElementById('upgradeStatus').checked}); if (!onboardingHints) { tutorial.active = false; state.biomeIntro = null; } }
+      document.getElementById('restartTutorialBtn').disabled = !onboardingHints;
+      if (Number.isInteger(settings.gameSpeed) && settings.gameSpeed >= 1 && settings.gameSpeed <= 8 && !duoToken) { gameSpeed = settings.gameSpeed; speedToggle.value = String(gameSpeed); document.getElementById('speedValue').textContent = gameSpeed + '×'; }
+      if (!testProfile) { if (['de','en'].includes(settings.language)) globalThis.HexI18n?.setLanguage(settings.language); if (['normal','sakura'].includes(settings.assetEdition) && typeof HexAssetEdition !== 'undefined') HexAssetEdition.set(settings.assetEdition); }
+      try { for (const [key,value] of Object.entries({slotHints:showSlotHints,hexGrid:showHexGrid,onboardingHints,gameSpeed})) gameStorage.setItem(key,String(value)); gameStorage.setItem('hex-game-settings-v1', JSON.stringify(readGameSettings())); } catch {}
+      if (state) renderAll();
+    } finally { applyingGameSettings = false; }
+  }
+  try { applyGameSettings(JSON.parse(gameStorage.getItem('hex-game-settings-v1') || 'null')); } catch {}
+  for (const id of ['autoStart','multiTowerSelection']) document.getElementById(id).addEventListener('change', saveGameSettings);
+  if (typeof HexAssetEdition !== 'undefined') HexAssetEdition.onChange?.(saveGameSettings);
   function setAccountStatus(text, kind = 'info') { accountStatus.textContent = text; accountStatus.dataset.kind = text ? kind : ''; }
   function formatSyncTime(iso) {
     const time = iso ? Date.parse(iso) : NaN; if (!Number.isFinite(time)) return '–';
@@ -1349,6 +1396,7 @@ R dreht die Karte, dann Feld anklicken.`;
     profile = HexProfile.save({ ...profile, introduction: { ...profile.introduction, bestWave: Math.max(previousIntro.bestWave, profile.introduction.bestWave), skipped: previousIntro.skipped || profile.introduction.skipped, legacy: previousIntro.legacy || profile.introduction.legacy } }, TOWERS);
     tutorialSeen ||= profile.introduction.skipped || profile.introduction.bestWave > 0; renderIntroductionMenu();
     if (data.audioSettings) sound.applySettings?.(data.audioSettings);
+    applyGameSettings(data.gameSettings);
     if (Object.prototype.hasOwnProperty.call(data, 'runAutosave')) {
       try { if (data.runAutosave) HexRunSnapshot.restore(data.runAutosave.checkpoint); gameStorage.setItem(RUN_AUTOSAVE_KEY, data.runAutosave ? JSON.stringify(data.runAutosave) : ''); } catch {}
     }
@@ -1359,13 +1407,14 @@ R dreht die Karte, dann Feld anklicken.`;
   // Server-Stand holen: 'loaded', 'deferred' (Spiel läuft) oder 'empty' (noch nichts gespeichert).
   async function pullFromServer() {
     const data = await accountApi().getSave(); if (!data) return 'empty';
+    applyGameSettings(data.gameSettings);
     cloudStore.set(CLOUD_DIRTY, null); cloudStore.set(CLOUD_LAST, new Date().toISOString());
     if (hasActiveRun && state?.hp > 0) { pendingServerProfile = data; return 'deferred'; }
     applyServerProfile(data); if (!mainMenu.classList.contains('hidden')) openMainMenu(); return 'loaded';
   }
   async function pushToServer() {
     if (!accountApi()?.isLoggedIn()) return false; clearTimeout(cloudSaveTimer);
-    try { const payload=JSON.parse(HexProfile.exportFile(profile, TOWERS)); payload.runAutosave=readRunAutosave(); payload.audioSettings=sound.settings?.() || null; await accountApi().putSave(JSON.stringify(payload)); cloudStore.set(CLOUD_DIRTY, null); cloudStore.set(CLOUD_LAST, new Date().toISOString()); renderAccount(); return true; }
+    try { const payload=pendingServerProfile ? JSON.parse(JSON.stringify(pendingServerProfile)) : JSON.parse(HexProfile.exportFile(profile, TOWERS)); if (!pendingServerProfile) payload.runAutosave=readRunAutosave(); payload.gameSettings=readGameSettings(); payload.audioSettings=sound.settings?.() || null; await accountApi().putSave(JSON.stringify(payload)); cloudStore.set(CLOUD_DIRTY, null); cloudStore.set(CLOUD_LAST, new Date().toISOString()); renderAccount(); return true; }
     catch { cloudStore.set(CLOUD_DIRTY, '1'); renderAccount(); return false; }
   }
   function scheduleCloudSave() { if (!accountApi()?.isLoggedIn()) return; cloudStore.set(CLOUD_DIRTY, '1'); clearTimeout(cloudSaveTimer); cloudSaveTimer = setTimeout(pushToServer, 800); }
@@ -1486,7 +1535,6 @@ R dreht die Karte, dann Feld anklicken.`;
   document.getElementById('standardModeBtn').addEventListener('click', () => { document.getElementById('playModeOverlay').classList.add('hidden'); openLoadout(); });
   document.getElementById('dailyModeBtn').addEventListener('click', () => { if (!HexProfile.modesUnlocked(profile)) return; renderDailyMission(); document.getElementById('playModeChoices').classList.add('hidden'); document.getElementById('dailyModeDetails').classList.remove('hidden'); });
   document.getElementById('playModeBackBtn').addEventListener('click', () => { document.getElementById('playModeOverlay').classList.add('hidden'); openMainMenu(); });
-  document.getElementById('menuRulesBackBtn').addEventListener('click', () => { document.getElementById('menuRulesOverlay').classList.add('hidden'); openMainMenu(); });
   document.getElementById('menuContinueBtn').addEventListener('click', () => {
     if (!hasActiveRun) {
       const saved = readRunAutosave(); if (!saved) { openMainMenu(); return; }
@@ -1498,13 +1546,10 @@ R dreht die Karte, dann Feld anklicken.`;
     mainMenu.classList.add('hidden');
   });
   document.getElementById('menuArsenalBtn').addEventListener('click', openArsenal);
-  document.getElementById('menuRulesBtn').addEventListener('click', () => { if (!menuRules.innerHTML) { const source = document.getElementById('rulesDrawer').querySelector('ul'); menuRules.innerHTML = globalThis.HexI18n ? HexI18n.sourceHTML(source) : source.outerHTML; } mainMenu.classList.add('hidden'); document.getElementById('menuRulesOverlay').classList.remove('hidden'); });
   document.getElementById('openMainMenuBtn').addEventListener('click', () => { document.getElementById('settingsDrawer').classList.add('hidden'); openMainMenu(); });
-  const menuSound = document.getElementById('menuSound'), soundToggle = document.getElementById('soundEnabled');
-  menuSound.checked = soundToggle.checked;
-  soundToggle.addEventListener('change', () => { menuSound.checked = soundToggle.checked; scheduleCloudSave(); });
+  const soundToggle = document.getElementById('soundEnabled');
+  soundToggle.addEventListener('change', scheduleCloudSave);
   document.getElementById('soundVolume').addEventListener('change', scheduleCloudSave);
-  menuSound.addEventListener('change', () => { soundToggle.checked = menuSound.checked; soundToggle.dispatchEvent(new Event('change')); });
   newRunBtn.addEventListener('click', openLoadout);
   document.getElementById('confirmLoadoutBtn').addEventListener('click', confirmLoadout);
   document.getElementById('cancelLoadoutBtn').addEventListener('click', () => { loadoutOverlay.classList.add('hidden'); if (!hasActiveRun || loadoutEdit) openMainMenu(); loadoutEdit = false; });
@@ -1659,8 +1704,9 @@ R dreht die Karte, dann Feld anklicken.`;
       token: duoToken, getState: () => state, render: renderAll, renderer, cardElement, setMessage,
       accept(next, switched = false, profileChanged = true) {
         if (switched) { consumablePick = null; closeSale(); cancelQuickTower(); state.selectedSlot = state.selectedTower = state.selectedBuilding = null; state.selectedSlots = []; state.selectedTowers = []; state.previewUpgrade = state.previewTower = state.previewBuilding = state.buildingTarget = state.hoveredPlacement = null; state.selectedCard = null; state.rotation = 0; towerMenuKey = towerPanelKey = buildingPanelKey = ''; renderer.reset(); }
+        if (state.waveRunning && !next.waveRunning || state.phase !== next.phase) clearBuildingInteraction();
         const changedHand = state.hand.join('|') !== next.hand.join('|') || state.phase !== next.phase;
-        Object.assign(state, next);
+        Object.assign(state, next, {showHexGrid, showSlotHints, showUpgradeStatus: document.getElementById('upgradeStatus').checked});
         state.selectedSlots = selections('Slot').filter(slot => { const t = state.map.get(key(slot.q, slot.r)); return t && slot.index < t.slots && !t.towers[slot.index]; }); state.selectedSlot = state.selectedSlots.at(-1) || null;
         state.selectedTowers = selections('Tower').filter(slot => state.map.get(key(slot.q, slot.r))?.towers[slot.index]); state.selectedTower = state.selectedTowers.at(-1) || null;
         if (changedHand) { state.selectedCard = null; state.rotation = 0; }

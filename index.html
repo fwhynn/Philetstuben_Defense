@@ -74,9 +74,9 @@
       <details id="consumableMenu" class="consumableMenu">
         <summary>Verbrauchshilfen</summary>
         <p>Nur für diese Welle. In der Bauphase: für die nächste Welle. Krähenfüße und Harz: frei auf der Straße platzieren, auch mehrfach.</p><button id="buySpikes">Krähenfüße · 25
-          Gold</button><small>20 Spitzen × 5 Schaden · Position auf der Straße wählen</small><button id="buyResin">Klebeharz · 30
-          Gold</button><small>12 Gegner: −35 % Tempo für 4 Sekunden</small><button id="buyOverload">Überladung · 40
-          Gold</button><small>Turm: +50 % Angriffstempo für 12 Sekunden</small><button id="cancelConsumable"
+          Gold</button><small id="spikesStats">20 Spitzen × 5 Schaden · Position auf der Straße wählen</small><button id="buyResin">Klebeharz · 30
+          Gold</button><small id="resinStats">12 Gegner: −35 % Tempo für 4 Sekunden</small><button id="buyOverload">Überladung · 40
+          Gold</button><small id="overloadStats">Turm: +50 % Angriffstempo für 12 Sekunden</small><button id="cancelConsumable"
           class="secondary">Abbrechen</button>
       </details>
       <nav class="compactToolbar" aria-label="Spielsteuerung"><button data-compact="menu"
@@ -438,13 +438,10 @@
             <button id="menuDeveloperReset" class="secondary">Aktuelles Szenario zurücksetzen</button>
           </details>
           <button id="exitFirstPlayerTestBtn" class="secondary hidden">Zurück zu meinem Spielstand</button>
-          <button id="menuRulesBtn" class="secondary">📜 Spielregeln</button>
           <button id="menuAccountBtn" class="secondary">👤 Anmelden</button>
           <button id="menuLeaderboardBtn" class="secondary">Bestenliste</button>
         </div>
 
-        <div class="menuSound"><label class="toggle"><input id="menuSound" type="checkbox" checked /> Sounds
-            aktiv</label></div>
         <small class="menuVersion" data-app-version></small>
       </div>
     </div>
@@ -596,12 +593,6 @@
           </section>
         </div>
         <button id="playModeBackBtn" class="secondary">Zurück</button>
-      </div>
-    </div>
-    <div id="menuRulesOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-label="Spielregeln">
-      <div class="modeBox">
-        <h2>Spielregeln</h2>
-        <div id="menuRules" class="menuRules"></div><button id="menuRulesBackBtn" class="secondary">Zurück</button>
       </div>
     </div>
 

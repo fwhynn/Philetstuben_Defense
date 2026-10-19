@@ -1,5 +1,17 @@
 [
   {
+    "version": "next",
+    "title": "Gespeicherte Einstellungen und bessere Touch-Bedienung",
+    "changes": [
+      "Freie Bauplätze, Einsteigerhinweise, Raster, Upgrade-Markierungen, automatischer Wellenstart und Mehrfachauswahl bleiben nach einem Neuladen erhalten. Zusammen mit Tempo, Sprache und Grafikstil werden sie in die Account-Sicherung aufgenommen und beim Laden übernommen.",
+      "Der gewählte Grafikstil bleibt auch beim Start eines neuen normalen Durchlaufs erhalten.",
+      "Krähenfüße skalieren ihren Schaden mit der Welle. Klebeharz erfasst später mehr Gegner und wirkt länger; Überladung hält bis zu 24 Sekunden. Die Preise bleiben gleich und das Menü zeigt die aktuellen Werte.",
+      "Auf Touch-Geräten kann der Tipp auf einen Bauplatz nicht gleichzeitig einen Turm kaufen. Die Turmauswahl benötigt einen eigenen neuen Tipp.",
+      "Die Zusatzhex-Auswahl von Fernschmiede und Handelsnetz wird beim Wellenende geschlossen, damit sie die folgende Kartenplatzierung nicht mehr überlagert. Bereits zugewiesene Gebäude-Ziele bleiben erhalten.",
+      "Die Sound-Umschaltung und Spielregeln entfallen im Hauptmenü. Sound-Einstellungen und Regeln bleiben im Spiel erreichbar."
+    ]
+  },
+  {
     "version": "1.0.5",
     "title": "Neue Gegner, Turmausbau und zuverlässige Kartenrettung",
     "changes": [

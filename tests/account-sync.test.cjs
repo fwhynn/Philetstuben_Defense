@@ -73,3 +73,48 @@ test('account upload includes completed-wave checkpoint and another browser can 
  assert.equal(next.elements.get('menuContinueBtn').classList.contains('hidden'),false);next.elements.get('menuContinueBtn').listeners.click();
  assert.equal(next.a.state.runId,view.a.state.runId);assert.equal(next.a.state.lastCompletedWave,2);
 });
+
+
+test('game preferences persist locally, upload to the account and restore in another browser', async()=>{
+ const api=fakeApi(), first=load({accountApi:api});
+ const set=(id,value)=>{const el=first.elements.get(id);el.checked=value;el.listeners.change({target:el});};
+ set('slotHints',false);set('onboardingHints',false);set('hexGrid',true);set('upgradeStatus',true);set('autoStart',true);set('multiTowerSelection',true);
+ await submit(first.document,'register');
+ assert.deepEqual(api.server.gameSettings,{slotHints:false,onboardingHints:false,hexGrid:true,upgradeStatus:true,autoStart:true,multiTowerSelection:true,gameSpeed:1});
+ const reload=load({initialStorage:Object.fromEntries(first.storage)});
+ for(const [key,value] of Object.entries(api.server.gameSettings))if(typeof value==='boolean')assert.equal(reload.elements.get(key).checked,value,key);
+ const second=load({accountApi:api});await flush();await flush();
+ assert.equal(second.a.state.showHexGrid,true);assert.equal(second.a.state.showSlotHints,false);assert.equal(second.elements.get('autoStart').checked,true);
+ second.a.newRun();assert.equal(second.a.state.showUpgradeStatus,true);assert.equal(second.a.state.showHexGrid,true);
+});
+
+test('settings changed during a deferred account restore do not overwrite cloud progress or revert at game end',async()=>{
+ const api=fakeApi({...serverSave({diamonds:77}),gameSettings:{slotHints:false,hexGrid:true}}),r=load({accountApi:api,initialProfile:{diamonds:5}});
+ await submit(r.document,'login');assert.equal(r.a.state.showSlotHints,false);
+ const el=r.elements.get('slotHints');el.checked=true;el.listeners.change();
+ await r.elements.get('accountSaveServerBtn').listeners.click();assert.equal(api.server.profile.diamonds,77);assert.equal(api.server.gameSettings.slotHints,true);
+ endRun(r.a);await flush();assert.equal(r.a.state.showSlotHints,true);assert.equal(api.puts.at(-1).gameSettings.slotHints,true);
+});
+
+test('legacy and malformed cloud settings preserve existing preferences; dev settings stay isolated',async()=>{
+ const api=fakeApi({...serverSave({}),gameSettings:{slotHints:'false',hexGrid:null,gameSpeed:999,autoStart:true}}),r=load({accountApi:api,initialStorage:{slotHints:'false',hexGrid:'true'}});
+ await submit(r.document,'login');assert.equal(r.a.state.showSlotHints,false);assert.equal(r.a.state.showHexGrid,true);assert.equal(r.elements.get('doubleSpeed').value,'1');
+ const testApi=fakeApi();testApi.loggedIn=true;const isolated=load({accountApi:testApi,firstPlayerTest:true});const e=isolated.elements.get('slotHints');e.checked=false;e.listeners.change();await flush();
+ assert.equal(testApi.puts.length,0);assert.equal(isolated.storage.has('hex-game-settings-v1'),false);assert.ok(isolated.storage.has('autohex-first-player-test:hex-game-settings-v1'));
+});
+
+
+test('registration after defeat, archer unlock and reload retain the account upgrade and usable main menu',async()=>{
+ const api=fakeApi(),r=load({accountApi:api,initialProfile:{diamonds:40,introduction:{version:1,bestWave:25,skipped:false,legacy:false}}});
+ r.a.state.wave=26;endRun(r.a);await flush();r.elements.get('gameOverMenuBtn').listeners.click();
+ await submit(r.document,'register');r.elements.get('menuArsenalBtn').listeners.click();
+ const find=(el)=>el.attributes?.['data-unlock']==='ultimate:archer:volley'?el:(el.children||[]).map(find).find(Boolean);
+ const button=find(r.elements.get('arsenalChoices'));assert.ok(button);button.listeners.click();
+ await r.elements.get('accountSaveServerBtn').listeners.click();
+ const before=JSON.parse(r.storage.get('hex-bastion-profile-v1'));assert.ok(before.unlocks.includes('ultimate:archer:volley'));
+ const reboot=load({accountApi:api,bootToMenu:true,initialStorage:Object.fromEntries(r.storage)});await flush();await flush();
+ assert.equal(reboot.elements.get('mainMenu').classList.contains('hidden'),false);
+ assert.ok(reboot.a.state.map.size>0);
+ assert.ok(JSON.parse(reboot.storage.get('hex-bastion-profile-v1')).unlocks.includes('ultimate:archer:volley'));
+ reboot.elements.get('menuArsenalBtn').listeners.click();assert.equal(reboot.elements.get('arsenalOverlay').classList.contains('hidden'),false);
+});

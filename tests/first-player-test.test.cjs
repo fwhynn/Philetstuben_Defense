@@ -54,8 +54,8 @@ test('first-player reset clears only its own namespace and is unavailable on the
   vm.runInNewContext(fs.readFileSync('classes/first-player-test.js','utf8'),context);context.HexFirstPlayerTest.start();assert.equal(values.get('hex-bastion-profile-v1'),'real');assert.equal(values.get('hex-bastion-auth-token'),'private');assert.equal(context.HexFirstPlayerTest.active,hostname==='localhost');assert.equal(values.has('autohex-first-player-test:profile'),hostname!=='localhost');assert.equal(!!destination,hostname==='localhost');
  }
 });
-test('every new Standard run resets a stored Sakura style to Normal',()=>{
- let edition='sakura';const {a}=load({assetEdition:{get:()=>edition,set:value=>edition=value}});assert.equal(edition,'normal');edition='sakura';a.newRun();assert.equal(edition,'normal');
+test('new Standard runs preserve the chosen graphics style',()=>{
+ let edition='sakura';const {a}=load({assetEdition:{get:()=>edition,set:value=>edition=value}});assert.equal(edition,'sakura');a.newRun();assert.equal(edition,'sakura');
 });
 
 test('Dev is off by default, gates URL scenarios and cannot be enabled on a public host',()=>{

@@ -19,6 +19,6 @@ test('audio persists volume and mute across reload and accepts bounded account s
  const storage=new Map();function boot(){const nodes=new Map();const document={getElementById(id){if(!nodes.has(id))nodes.set(id,{checked:true,value:'35',listeners:{},addEventListener(name,fn){this.listeners[name]=fn;}});return nodes.get(id);},addEventListener(){}};
  const context={document,localStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v)}};vm.runInNewContext(fs.readFileSync(require.resolve('../classes/sound.js'),'utf8')+'\nglobalThis.audio=HexAudio;',context);return {nodes,audio:context.audio};}
  const first=boot();first.nodes.get('soundVolume').value='12';first.nodes.get('soundVolume').listeners.input();first.nodes.get('soundEnabled').checked=false;first.nodes.get('soundEnabled').listeners.change();
- const next=boot();assert.equal(next.nodes.get('soundVolume').value,'12');assert.equal(next.nodes.get('soundEnabled').checked,false);assert.equal(next.nodes.get('menuSound').checked,false);
+ const next=boot();assert.equal(next.nodes.get('soundVolume').value,'12');assert.equal(next.nodes.get('soundEnabled').checked,false);
  next.audio.applySettings({volume:200,enabled:false});assert.equal(next.audio.settings().volume,100);
 });

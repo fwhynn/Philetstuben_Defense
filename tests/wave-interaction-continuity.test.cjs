@@ -5,13 +5,13 @@ test('wave completion retains selected slot, multi-selection and the same purcha
  a.endWave();assert.equal(a.state.selectedSlot,slot);assert.equal(a.state.selectedSlots,slots);assert.equal(elements.get('towerMenu').children[0],button);assert.equal(button.disabled,false);
  buyTower('archer');assert.equal(a.state.map.get('1,0').towers[0].type,'archer');
 });
-test('reward interactions retain building targeting, armed quick build and construction selection',()=>{
+test('reward interactions cancel building targeting but retain quick build and construction selection',()=>{
  const {a,elements,documentListeners}=setup(2),slot=a.state.selectedSlot;a.state.dragTower='archer';a.state.buildingTarget={q:1,r:0,index:0};const target=a.state.buildingTarget;
- a.endWave();assert.equal(a.state.phase,'reward');assert.equal(a.state.selectedSlot,slot);assert.equal(a.state.buildingTarget,target);assert.equal(a.state.dragTower,'archer');
+ a.endWave();assert.equal(a.state.phase,'reward');assert.equal(a.state.selectedSlot,slot);assert.equal(a.state.buildingTarget,null);assert.equal(a.state.dragTower,'archer');
  documentListeners.pointercancel();assert.equal(a.state.dragTower,'archer');
  const event={button:0,target:{closest(selector){return selector.includes('#rewardOverlay')?{}:null;}}};documentListeners.pointerdown(event);
  assert.equal(a.state.selectedSlot,slot);assert.equal(a.state.dragTower,'archer');
- elements.get('rewardChoices').children[0].listeners.click();assert.equal(a.state.phase,'place');assert.equal(a.state.selectedSlot,slot);assert.equal(a.state.buildingTarget,target);assert.equal(a.state.dragTower,'archer');
+ elements.get('rewardChoices').children[0].listeners.click();assert.equal(a.state.phase,'place');assert.equal(a.state.selectedSlot,slot);assert.equal(a.state.buildingTarget,null);assert.equal(a.state.dragTower,'archer');
 });
 test('preparation shows explicit lock reasons for difficulty and both locked fortresses',()=>{
  const {elements}=load();elements.get('standardModeBtn').listeners.click();
