@@ -1588,11 +1588,11 @@ Häutungskäfer|Molting Beetle
 Pechschnecke|Tar Snail
 Pilzkoloss|Mushroom Colossus
 Rammbockkäfer|Ram Beetle
-Drei direkte Treffer brechen den Schild. Flächenschaden umgeht ihn.|Three direct hits break the shield. Area damage bypasses it.
+Der Schild blockiert drei Treffer vollständig, auch Flächenschaden. Jeder Treffer entfernt nur einen Schildstack.|The shield completely blocks three hits, including area damage. Each hit removes only one shield stack.
 Schleicht drei Sekunden und sprintet danach eine Sekunde.|Sneaks for three seconds, then sprints for one second.
 Bewegt sich nur springend. Kann gelegentlich auf eine nahe Straße im Nachbarhex abkürzen. Verlangsamung verkürzt die Sprünge.|Moves only by hopping. Occasionally shortcuts to a nearby road on an adjacent hex. Slows shorten its jumps.
 Nach dem Panzerbruch dauerhaft 40 % schneller.|Permanently 40% faster after its armor breaks.
-Extrem zäh und langsam. Ihre Pechspur verlangsamt nachfolgende Gegner um 45 %. Feuer entzündet das Pech.|Extremely tough and slow. Its tar trail slows following enemies by 45%. Fire ignites the tar.
+Ihre Pechspur schützt andere Gegner: 20 % weniger Schaden, ohne Verlangsamung. Feuer entzündet das Pech.|Its tar trail protects other enemies: 20% less damage, without slowing them. Fire ignites the tar.
 Hinterlässt beim Tod vier Sekunden Sporen. Gegner darin können von Türmen nicht anvisiert werden.|Leaves spores for four seconds on death. Towers cannot target enemies inside.
 Beschleunigt auf Geraden; Kurven und Verlangsamungen bremsen. Bei vollem Tempo drei Basisschaden.|Accelerates on straights; turns and slows reduce momentum. Deals three base damage at full speed.
 `);
@@ -1626,4 +1626,52 @@ Klare Schutzschichten und sichtbare Upgrades|Clear protection layers and visible
 Angriffe bauen zuerst Magieresistenz, dann Rüstung und zuletzt Leben ab. Überschüssiger Schaden trifft die jeweils nächste Schicht.|Attacks deplete magic protection first, then armor, then health. Excess damage carries over to the next layer.
 Eisenkoloss, Sturmjäger und Seelenmatriarchin behalten in allen Biomen ihre Bossgestalt und erhalten passende Aufsätze. Biom-Wächter behalten ihre eigenen Modelle.|Iron Colossus, Storm Hunter and Soul Matriarch retain their boss shape in every biome and receive matching details. Biome guardians retain their own models.
 Die beiden Endausbauten des Flammenturms sind deutlicher unterscheidbar. Die ultimative Stufe zeigt zusätzlich einen leuchtenden Phönixkern mit Flügelaufsätzen.|The Flame Tower’s two final upgrade paths are easier to distinguish. The ultimate upgrade adds a glowing Phoenix Core with wing details.
+`);
+
+HexTranslations.add(`
+Gesamtwerte|Overall totals
+Kills|Kills
+Runs prüfen|Review runs
+Prüfliste wird geladen …|Loading pending runs …
+Keine offenen Prüfungen.|No pending reviews.
+Begründung der Entscheidung|Reason for this decision
+Annehmen|Accept
+Ablehnen|Reject
+Account erstellen und Run übernehmen|Create an account and claim this run
+Erneut versuchen|Try again
+Platzierung momentan nicht verfügbar|Ranking is currently unavailable
+Dein Run wird überprüft und später angenommen oder abgelehnt.|Your run is under review and will later be accepted or rejected.
+Dein Run wurde angenommen.|Your run was accepted.
+Dein Run wurde abgelehnt.|Your run was rejected.
+Der Run konnte noch nicht eingereicht werden. Bitte erneut versuchen.|Your run could not be submitted yet. Please try again.
+Freigegebene Bestwerte pro Account · Welle, danach Kills.|Approved best scores per account · Wave, then kills.
+Ungeprüfte Account-Gesamtwerte, keine getrennte Run-Wertung.|Unverified account totals, not scores separated by run mode.
+Vorläufiger Vergleich mit freigegebenen Bestwerten. Welle zählt zuerst, danach Kills. Die Platzierung kann sich ändern.|Provisional comparison with approved best scores. Wave comes first, followed by kills. Rankings may change.
+Erstelle einen Account oder melde dich an, um diesen Run zur Prüfung einzureichen. Er bleibt dafür in diesem Browser gespeichert.|Create an account or sign in to submit this run for review. It is saved in this browser for that purpose.
+Speichern & Hauptmenü|Save & main menu
+Duo-Lobby|Duo lobby
+Zusatz-Hex festgelegt · keine Änderung mehr möglich|Extra hex locked · no changes remaining
+Speichern fehlgeschlagen. Bitte diesen Tab geöffnet lassen.|Saving failed. Please keep this tab open.
+`);
+
+HexTranslations.add(`
+Zuverlässiger weiterspielen und klarere Rückmeldungen|Resume reliably with clearer feedback
+Ein laufender Solo-Durchlauf lässt sich über „Speichern & Hauptmenü“ unterbrechen und später fortsetzen, auch wenn zwischendurch Duo gespielt wird.|A solo run can be suspended with Save & Main Menu and resumed later, including after playing Duo.
+Die Wellenplanung zeigt während des Kampfes die laufende Welle und erst nach ihrem Abschluss die nächste.|Wave planning shows the current wave during combat and switches to the next wave only after completion.
+Angesehene bezahlbare Arsenal-Freischaltungen leuchten nicht mehr dauerhaft. Der Gesehen-Status wird mit dem Account synchronisiert; Gäste behalten ihn im Browser. Neu bezahlbare Angebote werden wieder hervorgehoben.|Affordable Arsenal unlocks stop glowing after you view them. Viewed status syncs with your account; guests retain it in their browser. Newly affordable offers are highlighted again.
+Der Schildknecht blockiert die ersten drei Treffer vollständig, auch Flammenwerfer und Explosionen. Jeder Treffer entfernt höchstens einen Schildstack.|The Shieldbearer fully blocks the first three hits, including flamethrowers and explosions. Each hit removes at most one shield stack.
+Die Pechschnecke bewegt sich deutlich schneller und hat weniger Leben. Ihre Pechspur schützt andere Gegner mit 20 % Schadensreduktion, statt sie zu verlangsamen. Feuer hebt diesen Schutz auf.|The Tar Snail moves much faster and has less health. Its tar trail protects other enemies with 20% damage reduction instead of slowing them. Fire removes this protection.
+Die Sporenwolke des Pilzkolosses bleibt sechs statt vier Sekunden bestehen.|The Mushroom Colossus spore cloud lasts six seconds instead of four.
+Krähenfüße skalieren in späteren Wellen schwächer. Gegner, die durch Krähenfüße sterben, geben kein Gold.|Caltrops scale less strongly in later waves. Enemies killed by caltrops grant no gold.
+Viele Minen werden effizienter verarbeitet und dargestellt. Anzahl, Platzierung und Wirkung bleiben erhalten.|Large minefields are processed and rendered more efficiently without changing mine count, placement or effects.
+Bei Turm-Upgrades stehen die Flächenpfade oben und die Einzelzielpfade unten.|Tower upgrades list area-effect paths above single-target paths.
+Das Zusatzfeld eines verbesserten Marktes kann einmal gesetzt und einmal korrigiert werden. Weitere Verschiebungen sind nicht mehr möglich.|An upgraded market extra tile can be assigned once and corrected once. Further moves are no longer possible.
+Hinweise für Verbrauchshilfen liegen über hervorgehobenen Straßen. Freie Flächen im oberen Header blockieren die Kartenbedienung nicht mehr.|Consumable hints appear above highlighted roads. Empty header areas no longer block map interaction.
+Nach Updates werden zusammengehörige Spieldateien zuverlässiger gemeinsam geladen, um Startprobleme durch veraltete Dateien zu vermeiden.|After updates, matching game files load together more reliably to prevent startup problems caused by outdated files.
+Die bisherigen Bestenlistenwerte bleiben unter Gesamtwerte erreichbar. Solange getrennte Run-Bestenlisten nicht verfügbar sind, öffnet sich diese Liste als klar gekennzeichneter Ersatz.|Existing leaderboard values remain available under Overall stats. Until separate run leaderboards are available, this list opens as a clearly labelled fallback.
+Getrennte Run-Bestenlisten sind noch nicht verfügbar. Angezeigt werden die bisherigen Gesamtwerte.|Separate run leaderboards are not yet available. Showing the existing overall stats.
+`);
+
+HexTranslations.add(`
+Getrennte Run-Wertungen zeigen freigegebene Ergebnisse. Gesamtwerte stammen aus gespeicherten Account-Spielständen und sind ungeprüft.|Separate run rankings show approved results. Overall stats come from saved account profiles and are unverified.
 `);

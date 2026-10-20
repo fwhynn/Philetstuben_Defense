@@ -38,6 +38,43 @@ API_BASE_URL=http://127.0.0.1:8081
 
 Die API kann im API-Repository beispielsweise mit `php -S 127.0.0.1:8081 -t public public/index.php` gestartet werden. Nach einem Neustart von `npm start` leitet der Client-Entwicklungsserver Browser-Anfragen unter `/api` an diese URL weiter. Dadurch ist keine lokale CORS-Konfiguration nötig. `.env` wird ignoriert und nie als Client-Datei ausgeliefert. Ohne `.env` oder ohne `API_BASE_URL` bleibt `https://api.autohextd.zlyfer.net` aktiv.
 
+### Lokale API mit entfernter Testdatenbank (Windows)
+
+Die Datenbank-Zugangsdaten gehören ausschließlich in `../api.autohextd/.env`,
+niemals in die Frontend-Konfiguration. Ein lokaler Datenbankserver ist nicht nötig.
+Die API benötigt PHP 8.4+ mit `pdo_mysql`, `mbstring` und ihre Composer-Abhängigkeiten.
+Die eingerichteten portablen Werkzeuge liegen im ignorierten API-Verzeichnis `.local/`.
+
+Zwei PowerShell-Fenster öffnen:
+
+```powershell
+# Fenster 1: PHP-API, Port 8081
+cd D:\Codex\api.autohextd
+npm.cmd run check:local
+npm.cmd start
+```
+
+```powershell
+# Fenster 2: Spiel, Port 8080
+cd D:\Codex\AutoHacks-TD
+npm.cmd start
+```
+
+Dann `http://localhost:8080` öffnen. `check:local` prüft die Datenbank nur lesend;
+es legt keine Tabellen oder Accounts an. Nach Änderungen an `composer.lock`
+im API-Repo `npm.cmd run deps` ausführen. PHP-Dateien werden beim nächsten
+Request neu geladen.
+
+Für die Rückkehr zur Live-API die Zeile `API_BASE_URL` aus der **Frontend-`.env`**
+entfernen oder auskommentieren und den Frontend-Server neu starten.
+Eine nicht erreichbare lokale API erzeugt einen Fehler; es gibt keinen automatischen
+Rückfall auf die Live-API. Login-Tokens sind zwischen beiden APIs getrennt.
+
+Beim Deployment bleibt `runtime-config.js` unverändert auf dem Live-Standard.
+Beide `.env`-Dateien und die portablen PHP-Werkzeuge sind nicht versioniert.
+Die API auf dem Liveserver lädt weiterhin ihre dort vorhandene `.env`;
+die lokale Einrichtung ändert weder deren Ladeweise noch den Deployment-Webhook.
+
 Auf der bereitgestellten Subdomain gilt dasselbe: unter HTTP(S) startet die 3D-Version automatisch, solange `node_modules/three` im Projekt vorhanden ist. Die Ansicht wird automatisch gewählt; die bisherigen URL-Parameter bleiben für Entwicklung und Fehlerdiagnose verfügbar.
 
 | Aufruf                                 | Ergebnis                                                                                |

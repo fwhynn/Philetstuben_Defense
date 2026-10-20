@@ -23,3 +23,30 @@ test('sparse mine field performs fewer exact distance tests',()=>{
   const before=load(true),after=load();before.trigger(fixture(),()=>{});after.trigger(fixture(),()=>{});
   assert.ok(after.checks<before.checks/2,`${after.checks} vs ${before.checks}`);
 });
+test('cached mine index handles repeated ticks, appends, removals and restored arrays identically',()=>{
+  const current=load(),reference=load(true),a=fixture(),b=JSON.parse(JSON.stringify(a));
+  for(const s of [a,b])s.enemies.forEach(e=>{e.x+=10000;});
+  for(let tick=0;tick<6;tick++){
+    for(const s of [a,b]){
+      if(tick===1)s.mines.push({...s.mines[0],id:900,x:s.enemies[0].x,y:s.enemies[0].y});
+      if(tick===2)s.mines=s.mines.filter((_,i)=>i%2);
+      if(tick===3)s.mines=JSON.parse(JSON.stringify(s.mines));
+      if(tick===4)s.enemies[0].x=s.mines[0].x,s.enemies[0].y=s.mines[0].y;
+    }
+    const events=[],expected=[];current.trigger(a,e=>events.push(e));reference.trigger(b,e=>expected.push(e));
+    assert.deepEqual(JSON.parse(JSON.stringify(a)),JSON.parse(JSON.stringify(b)));assert.deepEqual(events,expected);
+  }
+});
+test('repeated explosions preserve ordered damage and new mine triggers across retained index buckets',()=>{
+  const current=load(),reference=load(true),a=fixture('mixed');
+  a.enemies.forEach(e=>e.hp=100000);
+  const b=JSON.parse(JSON.stringify(a));
+  for(let tick=0;tick<15;tick++){
+    for(const s of [a,b]){
+      s.enemies.forEach(e=>e.x+=9);
+      s.mines.push({...s.mines[0],id:1000+tick,x:s.enemies[0].x,y:s.enemies[0].y});
+    }
+    const events=[],expected=[];current.trigger(a,e=>events.push(e));reference.trigger(b,e=>expected.push(e));
+    assert.deepEqual(JSON.parse(JSON.stringify(a)),JSON.parse(JSON.stringify(b)));assert.deepEqual(events,expected);
+  }
+});

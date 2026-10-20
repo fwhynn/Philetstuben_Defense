@@ -35,6 +35,6 @@ test('Arsenal has actual before/after values for every tower branch and ultimate
  const c=vm.createContext({});for(const name of ['biomes','data','heroes','profile','buildings','arsenal'])vm.runInContext(fs.readFileSync('classes/'+name+'.js','utf8'),c);
  const trees=vm.runInContext('HexArsenal.trees(HexProfile.normalize({},HexData.TOWERS))',c);
  for(const tree of trees)for(const path of tree.paths){for(const step of [...path.steps,path.meta])assert.ok(step.changes?.length,tree.type+' '+step.name);}
- const frost=trees.find(t=>t.type==='freeze');assert.ok(frost.paths[0].steps[0].changes.includes('Aura-Reichweite: 138 → 119'));assert.ok(frost.paths[1].steps[1].changes.includes('Aura-Reichweite: 190 → 238'));
+ const frost=trees.find(t=>t.type==='freeze');assert.ok(frost.paths.find(p=>p.steps[0].name==='Tiefenfrost').steps[0].changes.includes('Aura-Reichweite: 138 → 119'));assert.ok(frost.paths.find(p=>p.steps[0].name==='Frostfeld').steps[1].changes.includes('Aura-Reichweite: 190 → 238'));
  const volley=trees.find(t=>t.type==='archer').paths[0].steps[0];assert.ok(volley.changes.some(s=>s.startsWith('Schaden gegen Leben: 11,25 → 8,75')),'downgrades are explicit too');
 });

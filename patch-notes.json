@@ -1,5 +1,24 @@
 [
   {
+    "version": "next",
+    "title": "Zuverlässiger weiterspielen und klarere Rückmeldungen",
+    "changes": [
+      "Ein laufender Solo-Durchlauf lässt sich über „Speichern & Hauptmenü“ unterbrechen und später fortsetzen, auch wenn zwischendurch Duo gespielt wird.",
+      "Die Wellenplanung zeigt während des Kampfes die laufende Welle und erst nach ihrem Abschluss die nächste.",
+      "Angesehene bezahlbare Arsenal-Freischaltungen leuchten nicht mehr dauerhaft. Der Gesehen-Status wird mit dem Account synchronisiert; Gäste behalten ihn im Browser. Neu bezahlbare Angebote werden wieder hervorgehoben.",
+      "Der Schildknecht blockiert die ersten drei Treffer vollständig, auch Flammenwerfer und Explosionen. Jeder Treffer entfernt höchstens einen Schildstack.",
+      "Die Pechschnecke bewegt sich deutlich schneller und hat weniger Leben. Ihre Pechspur schützt andere Gegner mit 20 % Schadensreduktion, statt sie zu verlangsamen. Feuer hebt diesen Schutz auf.",
+      "Die Sporenwolke des Pilzkolosses bleibt sechs statt vier Sekunden bestehen.",
+      "Krähenfüße skalieren in späteren Wellen schwächer. Gegner, die durch Krähenfüße sterben, geben kein Gold.",
+      "Viele Minen werden effizienter verarbeitet und dargestellt. Anzahl, Platzierung und Wirkung bleiben erhalten.",
+      "Bei Turm-Upgrades stehen die Flächenpfade oben und die Einzelzielpfade unten.",
+      "Das Zusatzfeld eines verbesserten Marktes kann einmal gesetzt und einmal korrigiert werden. Weitere Verschiebungen sind nicht mehr möglich.",
+      "Hinweise für Verbrauchshilfen liegen über hervorgehobenen Straßen. Freie Flächen im oberen Header blockieren die Kartenbedienung nicht mehr.",
+      "Nach Updates werden zusammengehörige Spieldateien zuverlässiger gemeinsam geladen, um Startprobleme durch veraltete Dateien zu vermeiden.",
+      "Die bisherigen Bestenlistenwerte bleiben unter Gesamtwerte erreichbar. Solange getrennte Run-Bestenlisten nicht verfügbar sind, öffnet sich diese Liste als klar gekennzeichneter Ersatz."
+    ]
+  },
+  {
     "version": "1.0.7",
     "title": "Klare Schutzschichten und sichtbare Upgrades",
     "changes": [

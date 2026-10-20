@@ -5,6 +5,7 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 import {MODEL_ENEMIES,isEnemyJoint,enemyPose,applyEnemyPose} from './enemy-motion.mjs';
 import {flameDetails,bossDetails} from './model-details.mjs';
+import {MineBatches} from './mine-batches.mjs';
 
 const S=54,STEP=Math.PI/3,TILT=55*Math.PI/180,PITCH_MIN=12*Math.PI/180,PITCH_MAX=88*Math.PI/180,DIST_MIN=220,DIST_MAX=3400,DIST_START=950,SKY='#a9cbd8';
 const PREFIX={tiles:'tile',landmarks:'landmark',towers:'tower',enemies:'enemy',buildings:'building',effects:'mine',bases:'base',consumables:'consumable'};
@@ -181,7 +182,7 @@ function create(host0,commands){
     templates.clear();for(const [id,template] of next)templates.set(id,template);
     // Gegner und Minen halten eigene Modellkopien: beim Editionswechsel neu aufbauen.
     for(const obj of enemyObjects.values()){layer.dynamic.remove(obj.group);obj.body?.material.dispose();obj.sprite?.material.dispose();obj.healGlow?.dispose();}enemyObjects.clear();
-    for(const mesh of mineObjects.values())layer.dynamic.remove(mesh);mineObjects.clear();clearConsumables();
+    mineBatches.clear();clearConsumables();
     for(const material of biomeMaterials.values())material?.dispose();biomeMaterials.clear();
     ready=true;loading.remove();rebuildAll();if(state) render(state,targetList);
   }
@@ -247,7 +248,8 @@ function create(host0,commands){
   let state,targetList=[],hoverPick=null;
   const tileRecords=new Map(),landmarkRecords=new Map(),objectRecords=new Map(),labels=new Map(),usedLabels=new Set();
   let emptySig='',targetSig='',ghostSig='',pickables=[],pickDirty=true,runToken=null;
-  const enemyObjects=new Map(),mineObjects=new Map(),rangeFill=new THREE.Mesh(circle,basic('#ffffff',.18)),rangeRing=new THREE.Mesh(circleRing,basic('#ffffff',.85)),previewRangeFill=new THREE.Mesh(circle,basic('#ffffff',.045)),previewRangeRing=new THREE.Mesh(circleRing,basic('#ffffff',.35)),selectRing=new THREE.Mesh(torus,mats.select);
+  const mineBatches=new MineBatches(THREE,layer.dynamic,S);
+  const enemyObjects=new Map(),rangeFill=new THREE.Mesh(circle,basic('#ffffff',.18)),rangeRing=new THREE.Mesh(circleRing,basic('#ffffff',.85)),previewRangeFill=new THREE.Mesh(circle,basic('#ffffff',.045)),previewRangeRing=new THREE.Mesh(circleRing,basic('#ffffff',.35)),selectRing=new THREE.Mesh(torus,mats.select);
   for(const mesh of [rangeFill,rangeRing,previewRangeFill,previewRangeRing]){mesh.material.depthTest=false;mesh.material.depthWrite=false;mesh.renderOrder=20;}
   rangeFill.visible=rangeRing.visible=previewRangeFill.visible=previewRangeRing.visible=selectRing.visible=false;layer.dynamic.add(rangeFill,rangeRing,previewRangeFill,previewRangeRing,selectRing,...Object.values(fx).map(pool=>pool.mesh));
 
@@ -673,10 +675,7 @@ function create(host0,commands){
     }
     for(const [id,obj] of [...enemyObjects]) if(!alive.has(id)){layer.dynamic.remove(obj.group);obj.body?.material.dispose();obj.sprite?.material.dispose();obj.healGlow?.dispose();enemyObjects.delete(id);}
   }
-  function syncMines(){
-    const alive=new Set();for(const mine of state.mines||[]){alive.add(mine.id);let mesh=mineObjects.get(mine.id);if(!mesh){const model=templates.get('mine_pickup');if(model){mesh=new THREE.Group();const g=new THREE.Group();g.scale.setScalar(S);addParts(g,model.parts);mesh.add(g);}else{mesh=new THREE.Mesh(new THREE.CylinderGeometry(7,7,3,10),std(mine.color||'#e6a75f',{metalness:.25}));mesh.castShadow=true;}layer.dynamic.add(mesh);mineObjects.set(mine.id,mesh);}mesh.position.set(mine.x,model0(mesh)?0:2,mine.y);}
-    for(const [id,mesh] of [...mineObjects])if(!alive.has(id)){layer.dynamic.remove(mesh);if(mesh.isMesh){mesh.geometry.dispose();mesh.material.dispose();}mineObjects.delete(id);}
-  }
+  function syncMines(){mineBatches.sync(state.mines||[],templates.get('mine_pickup'));}
   // ---- Verbrauchshilfen: Krähenfüße/Klebeharz auf der Straße, Überladung am Turm (ohne Modell bleibt es beim Label) ----
   const consumableObjects=new Map(),overloadRings=[],dimMaterials=new Map();
   const consumablePreview=new THREE.Group();layer.dynamic.add(consumablePreview);consumablePreview.visible=false;
@@ -929,7 +928,7 @@ function create(host0,commands){
     const box=host.getBoundingClientRect(),outer=wrap.getBoundingClientRect();
     return {x:(tmp.x+1)/2*box.width+box.left-outer.left,y:(1-tmp.y)/2*box.height+box.top-outer.top,width:outer.width,height:outer.height};
   }
-  function reset(){consumablePreview.visible=false;clearOverlays();hoverBuildingKey=null;seenShots.clear();rebuildAll();for(const obj of enemyObjects.values()){layer.dynamic.remove(obj.group);obj.sprite?.material.dispose();}enemyObjects.clear();for(const mesh of mineObjects.values())layer.dynamic.remove(mesh);mineObjects.clear();clearConsumables();state=null;hoverPick=null;rotateAnchor=null;positionRotateHint();resetView(false);}
+  function reset(){consumablePreview.visible=false;clearOverlays();hoverBuildingKey=null;seenShots.clear();rebuildAll();for(const obj of enemyObjects.values()){layer.dynamic.remove(obj.group);obj.sprite?.material.dispose();}enemyObjects.clear();mineBatches.clear();clearConsumables();state=null;hoverPick=null;rotateAnchor=null;positionRotateHint();resetView(false);}
 
   // ---- Animation ----
   let last=performance.now(),raf=0,lastDraw=0,slowFrames=0,renderedFrameCount=0;
@@ -1088,7 +1087,7 @@ function create(host0,commands){
       for(const materials of Object.values(biomeOverlayMaterials)){materials.fill.dispose();materials.border.dispose();}
       clearOverlays();for(const material of previewMaterials)material.dispose();basePick.dispose();slotPick.dispose();baseTurretPad.dispose();baseTurretMaterial.dispose();buildingPadGeometry.dispose();buildingPadMaterial.dispose();slotDiamondGeometry.dispose();gridGeometry.dispose();buffGeometry.dispose();gridMaterial.dispose();otherBuffMaterial.dispose();otherBuffBorder.dispose();buffMaterial.dispose();buffBorderMaterial.dispose();
       for(const material of biomeMaterials.values())material?.dispose();biomeMaterials.clear();
-      gl.dispose();host.remove();wrap.classList.remove('is3d');if(hintText) hintText.textContent=oldHint;host0.style.display='';
+      mineBatches.clear();gl.dispose();host.remove();wrap.classList.remove('is3d');if(hintText) hintText.textContent=oldHint;host0.style.display='';
     }};
 }
 

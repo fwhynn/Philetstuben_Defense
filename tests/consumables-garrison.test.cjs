@@ -62,7 +62,8 @@ test('right click cancels every consumable selection without spending gold',()=>
 });
 
 test('spikes consume only lethal charges and leftovers damage the next enemy',()=>{
- const {c,s}=setup();assert.equal(c.combat.buyConsumable(s,'spikes',{q:1,r:0}),true);s.enemies=[enemy(c,1,50)];c.combat.applyConsumables(s,0,()=>{});
+ const {c,s}=setup();assert.equal(c.combat.buyConsumable(s,'spikes',{q:1,r:0}),true);const gold=s.gold;s.enemies=[enemy(c,1,50)];c.combat.applyConsumables(s,0,()=>{});
+ assert.equal(s.gold,gold);assert.equal(s.goldEarned.kills,0);assert.equal(s.waveKills,1);
  assert.equal(s.enemies[0].alive,false);assert.equal(s.consumables[0].charges,10);
  s.enemies.push(enemy(c,2,200));c.combat.applyConsumables(s,0,()=>{});assert.equal(s.enemies[1].hp,150);assert.equal(s.consumables.length,0);
 });
@@ -123,10 +124,19 @@ test('Duo validates purchases, charges once and restores remaining consumables',
 
 
 test('consumables scale for the upcoming wave and retain purchased values through checkpoints',()=>{
- const {c,s,run}=setup();const early=c.combat.consumableStats(s);s.wave=34;const late=c.combat.consumableStats(s);assert.equal(late.wave,35);assert.ok(late.spikeDamage>early.spikeDamage*30);assert.equal(late.resinCharges,30);assert.equal(late.resinDuration,7);assert.equal(late.overloadDuration,24);
+ const {c,s,run}=setup();const early=c.combat.consumableStats(s);s.wave=34;const late=c.combat.consumableStats(s);assert.equal(late.wave,35);assert.equal(early.spikeDamage,5);assert.equal(late.spikeDamage,137);assert.equal(late.resinCharges,30);assert.equal(late.resinDuration,7);assert.equal(late.overloadDuration,24);
  const slot={q:1,r:0,index:0};c.combat.buyConsumable(s,'spikes',slot);c.combat.buyConsumable(s,'resin',slot);c.towers.buy(s,'archer',[slot]);c.combat.buyConsumable(s,'overload',slot);
  const restored=c.snapshot.restore(JSON.parse(JSON.stringify(c.snapshot.capture(s,run.random)))).state;
  assert.equal(restored.consumables[0].damage,late.spikeDamage);assert.equal(restored.consumables[1].duration,7000);assert.equal(restored.map.get('1,0').towers[0].overloadDuration,24000);
  s.wave=35;s.waveRunning=true;assert.deepEqual(c.combat.consumableStats(s),late);
  const e=enemy(c,1,late.spikeDamage*2);s.enemies=[e];c.combat.applyConsumables(s,0);assert.equal(e.alive,false);assert.equal(s.consumables[0].charges,18);
+});
+test('spikes remain supplemental instead of matching exponential enemy health',()=>{
+ const {c}=setup();let previousShare=Infinity;
+ for(const [wave,damage] of [[1,5],[10,18],[25,69],[35,137],[60,599]]){
+   const stats=c.combat.consumableStats({wave,waveRunning:true});
+   assert.equal(stats.spikeDamage,damage);
+   const normalHp=Math.round((28+wave*7)*Math.pow(1.1,Math.max(0,wave-3))),share=20*damage/normalHp;
+   assert.ok(share<previousShare);previousShare=share;
+ }
 });

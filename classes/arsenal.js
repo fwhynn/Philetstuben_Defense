@@ -32,12 +32,34 @@ const HexArsenal=(()=>{
         paths:[{steps,meta:{tier:'Spezial',name:special.name,desc:special.desc,changes:type==='house'?buildingChanges({type,level:3},{type,level:3,special:true}):['Zusätzlich versorgbare Wunschhexe: 0 → 1'],cost:special.cost,state:owned?'active':'locked',status:owned?'✓ Dauerhaft freigeschaltet':'Meta-Freischaltung',action:owned?null:{kind:'building',cost:HexProfile.BUILDING_UNLOCKS[type].cost}}}],
         summary:owned?'✓ Spezial freigeschaltet':'Spezial gesperrt',action:null,hint:'Gebäude sind immer verfügbar. Der Spezialausbau wird dauerhaft freigeschaltet.'});
     }
-    for(const tree of list)tree.affordable=[tree.action,...tree.paths.map(p=>p.meta.action)].some(a=>a&&a.kind!=='activateUltimate'&&!a.blocked&&profile.diamonds>=a.cost);
+    for(const tree of list){
+      tree.offers=[tree.action,...tree.paths.map(p=>p.meta.action)].filter(a=>a&&a.kind!=='activateUltimate'&&!a.blocked&&profile.diamonds>=a.cost).map(a=>a.kind+':'+(a.id||tree.type));
+      tree.affordable=tree.offers.length>0;
+    }
     return list;
+  }
+  function notifications(storage){
+    const key='hex-arsenal-seen-v1';let seen=new Set(),profileKey='',offers=[];
+    try{const saved=JSON.parse(storage.getItem(key)||'[]');if(Array.isArray(saved))seen=new Set(saved.filter(id=>typeof id==='string'));}catch{}
+    return {
+      snapshot:()=>[...seen],
+      restore(ids){
+        if(!Array.isArray(ids))return;
+        seen=new Set(ids.filter(id=>typeof id==='string'&&/^(tower|ultimate|building):[a-zA-Z]+(?::[a-zA-Z]+)?$/.test(id)));
+        try{storage.setItem(key,JSON.stringify([...seen]));}catch{}
+      },
+      pending(profile){
+        const next=JSON.stringify([profile.diamonds,profile.unlockedTowers,profile.unlocks]);
+        if(next!==profileKey){offers=trees(profile).flatMap(tree=>tree.offers);profileKey=next;}
+        return offers.some(id=>!seen.has(id));
+      },
+      unseen:tree=>tree.offers.some(id=>!seen.has(id)),
+      acknowledge(tree){for(const id of tree.offers)seen.add(id);try{storage.setItem(key,JSON.stringify([...seen]));}catch{}}
+    };
   }
   const statIcons={'Schaden gegen Leben':'♥','Schaden gegen Rüstung':'⬟','Schaden gegen Magieresistenz':'✦','Reichweite':'◎','Aura-Reichweite':'◎','Nachladezeit':'◷','Zeit je Mine':'◷','Explosionsradius':'✹','Blitzziele':'ϟ','Blitz-Sprungweite':'ϟ↔','Durchschlagsziele':'➶','Aura-Verlangsamung':'❄','Treffer-Verlangsamung':'❄','Verlangsamungsdauer':'❄⌛','Maximale Geister':'☽','Geisterschaden pro Sekunde':'⚔','Geisterlebensdauer':'⌛','Bossschaden-Multiplikator':'♛'};
   const changes=rows=>rows?.length?'<div class="statChips arsenalChanges">'+rows.map(row=>{const i=row.indexOf(': '),label=row.slice(0,i),value=row.slice(i+2);return '<span class="statChip" title="'+label+'" aria-label="'+row+'"><span aria-hidden="true">'+(statIcons[label]||label)+'</span> '+value+'</span>';}).join('')+'</div>':'';
-  function render(host,profile,onUnlock,rail=document.getElementById('arsenalTabs')){
+  function render(host,profile,onUnlock,rail=document.getElementById('arsenalTabs'),notice=null,onSeen=()=>{}){
     const list=trees(profile);
     if(!list.some(t=>t.type===current))current=(list.find(t=>t.affordable)||list[0]).type;
     host.innerHTML='';rail.innerHTML='';
@@ -46,14 +68,20 @@ const HexArsenal=(()=>{
       button.textContent=action.kind==='activateUltimate'?'Für den nächsten Run aktivieren':'◆ '+action.cost+' freischalten';
       button.setAttribute('data-unlock',action.kind+':'+(action.id||fallbackId));button.disabled=!affordable;button.addEventListener('click',()=>onUnlock(action.kind,action.id||fallbackId));return button;
     }
-    function select(type){current=type;for(const [t,{tab,panel}] of views){const on=t===type;panel.hidden=!on;tab.classList.toggle('active',on);tab.setAttribute('aria-selected',String(on));tab.tabIndex=on?0:-1;}}
+    function select(type,acknowledge=false){
+      current=type;
+      if(acknowledge&&notice){notice.acknowledge(list.find(t=>t.type===type));onSeen();}
+      for(const [t,{tab,panel}] of views){const on=t===type;panel.hidden=!on;tab.classList.toggle('active',on);tab.setAttribute('aria-selected',String(on));tab.tabIndex=on?0:-1;
+        if(notice)tab.classList.toggle('affordable',notice.unseen(list.find(tree=>tree.type===t)));
+      }
+    }
     const views=new Map();let group='';
     for(const tree of list){
       if(tree.kind!==group){group=tree.kind;rail.appendChild(el('h3','arsenalRailGroup',group==='tower'?'Türme':'Gebäude'));}
-      const tab=el('button','arsenalTab'+(tree.owned?'':' locked')+(tree.affordable?' affordable':''),`${icon(tree.type,tree.color)}<span class="arsenalTabText"><strong>${tree.name}</strong><small>${tree.summary}</small></span>${tree.affordable?'<span class="arsenalTabDot" aria-label="Freischaltung bezahlbar">◆</span>':''}`);
+      const tab=el('button','arsenalTab'+(tree.owned?'':' locked')+((notice?notice.unseen(tree):tree.affordable)?' affordable':''),`${icon(tree.type,tree.color)}<span class="arsenalTabText"><strong>${tree.name}</strong><small>${tree.summary}</small></span>${tree.affordable?'<span class="arsenalTabDot" aria-label="Freischaltung bezahlbar">◆</span>':''}`);
       tab.style.cssText='--tree-color:'+tree.color;tab.setAttribute('role','tab');tab.setAttribute('aria-controls','research-'+tree.type);
-      tab.addEventListener('click',()=>select(tree.type));
-      tab.addEventListener('keydown',e=>{const step={ArrowDown:1,ArrowRight:1,ArrowUp:-1,ArrowLeft:-1}[e.key];if(!step)return;e.preventDefault?.();const i=(list.findIndex(t=>t.type===current)+step+list.length)%list.length;select(list[i].type);views.get(list[i].type).tab.focus?.();});
+      tab.addEventListener('click',()=>select(tree.type,true));
+      tab.addEventListener('keydown',e=>{const step={ArrowDown:1,ArrowRight:1,ArrowUp:-1,ArrowLeft:-1}[e.key];if(!step)return;e.preventDefault?.();const i=(list.findIndex(t=>t.type===current)+step+list.length)%list.length;select(list[i].type,true);views.get(list[i].type).tab.focus?.();});
       rail.appendChild(tab);
       const panel=el('section','arsenalTree '+(tree.owned?'treeOwned':'treeLocked'));panel.id='research-'+tree.type;panel.style.cssText='--tree-color:'+tree.color;panel.setAttribute('role','tabpanel');panel.setAttribute('aria-label',tree.name+' Forschungsbaum');
       const hero=el('header','arsenalHero',`<div class="arsenalHeroIcon">${icon(tree.type,tree.color)}</div><div class="arsenalHeroText"><span class="arsenalKicker">${tree.kind==='tower'?'Turm':'Gebäude'}</span><h3>${tree.name}</h3><p>${tree.desc}</p><div class="arsenalChips"><span class="arsenalChip">Bau: ${tree.cost} 🪙</span><span class="arsenalChip ${tree.owned?'good':'muted'}">${tree.owned?(tree.kind==='tower'?'✓ Turm verfügbar':'✓ Immer verfügbar'):'🔒 Turm gesperrt'}</span></div></div>`);
@@ -72,5 +100,5 @@ const HexArsenal=(()=>{
     }
     select(current);
   }
-  return {render,icon,trees};
+  return {render,icon,trees,notifications};
 })();

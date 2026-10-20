@@ -2,6 +2,16 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const {load}=require('./helpers/game.cjs');
 
+test('wave planning stays on the running wave until completion, including pending spawns',()=>{
+  const {a,elements}=load(),s=a.state;
+  s.wave=2;s.waveRunning=true;s.phase='wave';s.pendingSpawns=2;s.enemies=[];a.renderAll();
+  assert.match(elements.get('waveForecast').textContent,/^Wave 2:/);
+  s.pendingSpawns=0;s.enemies=[{alive:true,hp:20,type:'normal'}];a.renderAll();
+  assert.match(elements.get('waveForecast').textContent,/^Wave 2:/);
+  s.enemies=[];s.waveRunning=false;s.lastCompletedWave=2;s.phase='build';a.renderAll();
+  assert.match(elements.get('waveForecast').textContent,/^Wave 3:/);
+});
+
 test('unchanged renders preserve hand buttons, forecast text and cached wave plans',()=>{
   const {a,elements,waves}=load(),hand=elements.get('hand'),cards=[...hand.children];
   const forecast=elements.get('waveForecast');let value=forecast.textContent,writes=0,calls=0;

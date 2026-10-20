@@ -8,6 +8,7 @@
     document.getElementById('devEnemyQueue').textContent=!allowed?'Starte zuerst den separaten Gegnertest.':devEnemyQueue.length?devEnemyQueue.map(row=>row.count+' × '+HexDevEnemies.entries.find(e=>e[0]===row.id)[1]).join(' → '):'Keine Auswahl: Die nächste Welle ist normal.';
   }
   const gameStorage = testProfile ? HexFirstPlayerTest.storage : localStorage;
+  const arsenalNotifications = HexArsenal.notifications(gameStorage);
   const duoToken = typeof location === 'undefined' ? null : new URLSearchParams(location.hash.slice(1)).get('duo');
   let duoBridge = null;
   function duoAction(action, payload = {}) { return duoBridge?.send(action, payload); }
@@ -695,7 +696,7 @@ R dreht die Karte, dann Feld anklicken.`;
     forecastRenderKey = forecastKey;
     const fullPlan = document.getElementById('garrisonForecast'); fullPlan.classList.toggle('hidden', state.challengeKind !== 'garrison');
     if (state.challengeKind === 'garrison') fullPlan.innerHTML = [1, 2, 3].map(w => { const p = uiWavePlan(w), groups = new Map(); for (const e of p.enemies) { const entry = groups.get(e.type) || { e, n: 0 }; entry.n++; groups.set(e.type, entry); } return '<details><summary>Angriff ' + w + ' · ' + p.count + ' Gegner</summary><ul>' + [...groups.values()].map(({ e, n }) => '<li>' + n + ' × ' + e.name + ' · ' + e.hp + ' LP' + (e.armorHp ? ' + ' + e.armorHp + ' Rüstung' : '') + (e.magicHp ? ' + ' + e.magicHp + ' Magieresistenz' : '') + '</li>').join('') + '</ul></details>'; }).join('');
-    const plan = uiWavePlan(state.wave + 1);
+    const plan = uiWavePlan(state.waveRunning ? state.wave : state.wave + 1);
     const boss = HexExploration.bossProfile(plan.wave), bossGold = readyBossCount * boss.killGold;
     const groups = new Map();
     plan.enemies.forEach(enemy => { const entry = groups.get(enemy.type) || { count: 0, profile: enemy }; entry.count++; groups.set(enemy.type, entry); });
@@ -835,9 +836,9 @@ R dreht die Karte, dann Feld anklicken.`;
       const content = document.getElementById('buildingOptions'); content.innerHTML = ''; const next = HexBuildings.nextUpgrade(state, building);
       if (next) { const button = document.createElement('button'); button.className = 'upgradeOption'; button._cost = next.cost; buildingButtons.set('upgrade', button); const after = HexBuildings.definition({ ...building, level: (building.level || 1) + 1 }); button.textContent = (next.name || 'Ausbauen') + ' · ' + next.cost + ' Gold · ' + (next.desc || after.desc); button.disabled = state.gold < next.cost || state.hp <= 0 || !['place', 'build', 'wave'].includes(state.phase); button.addEventListener('click', () => { if (duoToken) { duoAction('buildingUpgrade', { slot: state.selectedBuilding }); return; } if (HexBuildings.upgrade(state, state.selectedBuilding)) renderAll(); }); content.appendChild(button); }
       else if ((building.level || 1) === 3 && !building.special && HexBuildings.specials[building.type]) { const hint = document.createElement('p'); hint.textContent = 'Spezialausbau im Arsenal für 40 Diamanten freischalten. Ab dem nächsten Run verfügbar.'; content.appendChild(hint); }
-      if (building.special && building.type !== 'house') { const choose = document.createElement('button'); panel._targetButton = choose; choose.textContent = state.buildingTarget ? 'Hex auf der Map anklicken · Abbrechen' : (building.target ? 'Zusatz-Hex ändern' : 'Zusatz-Hex auf der Map auswählen'); choose.title = building.target ? 'Aktuelles Zusatzhex: ' + building.target + ' · kräftig markiert' : 'Zusatzhex auswählen'; choose.addEventListener('pointerenter', () => renderBoard()); choose.addEventListener('focus', () => renderBoard()); choose.disabled = state.hp <= 0 || !['place', 'build', 'wave'].includes(state.phase); choose.addEventListener('click', () => { state.buildingTarget = state.buildingTarget ? null : { ...state.selectedBuilding }; state.selectedBuilding = null; setMessage('Zusatzwirkung: ein erkundetes Hex anklicken · Escape: abbrechen'); renderAll(); }); content.appendChild(choose); }
+      if (building.special && building.type !== 'house') { const choose = document.createElement('button'); panel._targetButton = choose; choose.textContent = HexBuildings.targetRemaining(building)===0 ? 'Zusatz-Hex festgelegt · keine Änderung mehr möglich' : state.buildingTarget ? 'Hex auf der Map anklicken · Abbrechen' : (building.target ? 'Zusatz-Hex ändern' : 'Zusatz-Hex auf der Map auswählen'); choose.title = building.type==='market' ? 'Zusatz-Hex: einmal wählen, einmal korrigieren. Noch '+HexBuildings.targetRemaining(building)+' Platzierungen.' : building.target ? 'Aktuelles Zusatzhex: ' + building.target + ' · kräftig markiert' : 'Zusatzhex auswählen'; choose.addEventListener('pointerenter', () => renderBoard()); choose.addEventListener('focus', () => renderBoard()); choose.disabled = state.hp <= 0 || !['place', 'build', 'wave'].includes(state.phase); choose.addEventListener('click', () => { state.buildingTarget = state.buildingTarget ? null : { ...state.selectedBuilding }; state.selectedBuilding = null; setMessage('Zusatzwirkung: ein erkundetes Hex anklicken · Escape: abbrechen'); renderAll(); }); content.appendChild(choose); }
     }
-    if (panel._targetButton) panel._targetButton.disabled = state.hp <= 0 || !['place', 'build', 'wave'].includes(state.phase);
+    if (panel._targetButton) panel._targetButton.disabled = HexBuildings.targetRemaining(building)<=0 || state.hp <= 0 || !['place', 'build', 'wave'].includes(state.phase);
     for (const [type, button] of buildingButtons) button.disabled = !!HexBuildings.buildBlockReason(tile, type) || (type === 'portal' && (!['place', 'build'].includes(state.phase) || state.waveRunning)) || !['place', 'build', 'wave'].includes(state.phase) || state.hp <= 0 || state.gold < (button._cost || HexBuildings.definitions[type].cost);
     const sell = document.getElementById('sellBuildingBtn'), refund = HexBuildings.refund(state, building); sell.disabled = !refund; sell.textContent = refund ? `Verkaufen · ${refund.percent} % (+${refund.amount} Gold)` : 'Gebäude verkaufen';
     positionTowerPanel();
@@ -1086,19 +1087,29 @@ R dreht die Karte, dann Feld anklicken.`;
 
   const RUN_AUTOSAVE_KEY = 'autohex-solo-autosave-v1';
   function clearRunAutosave() { if (!duoToken) { try { gameStorage.setItem(RUN_AUTOSAVE_KEY, ''); } catch {} } }
-  function saveRunAutosave() {
-    if (duoToken || state?.duoMode || state?.hp <= 0 || !state?.lastCompletedWave) return;
-    try { gameStorage.setItem(RUN_AUTOSAVE_KEY, JSON.stringify({ checkpoint: captureRunCheckpoint(), tutorial, savedAt: Date.now() })); scheduleCloudSave(); }
-    catch { setMessage('Automatisches Speichern fehlgeschlagen. Bitte diesen Tab geöffnet lassen.'); }
+  function saveRunAutosave(manual = false) {
+    if (duoToken || state?.duoMode || state?.hp <= 0 || (!manual && !state?.lastCompletedWave)) return false;
+    try { gameStorage.setItem(RUN_AUTOSAVE_KEY, JSON.stringify({ checkpoint: captureRunCheckpoint(), tutorial, manual, savedAt: Date.now() })); scheduleCloudSave(); return true; }
+    catch { setMessage('Speichern fehlgeschlagen. Bitte diesen Tab geöffnet lassen.'); return false; }
   }
   function readRunAutosave() {
-    if (duoToken) return null;
     try {
       const raw = gameStorage.getItem(RUN_AUTOSAVE_KEY); if (!raw) return null;
       const saved = JSON.parse(raw), restored = HexRunSnapshot.restore(saved.checkpoint);
-      if (restored.state.duoMode || restored.state.hp <= 0 || restored.state.phase === 'gameover' || restored.state.waveRunning || !restored.state.lastCompletedWave || profile.settledRuns.includes(restored.state.runId)) return null;
+      if (restored.state.duoMode || restored.state.hp <= 0 || restored.state.phase === 'gameover' || (!saved.manual && (restored.state.waveRunning || !restored.state.lastCompletedWave)) || profile.settledRuns.includes(restored.state.runId)) return null;
       return saved;
     } catch { return null; }
+  }
+  function suspendSoloRun() {
+    if (duoToken) return false;
+    if (hasActiveRun && state.hp>0 && state.phase!=='gameover') {
+      if (!saveRunAutosave(true)) return false;
+      hasActiveRun=false;clearRunTimers();stopSoloPresence();clockDebt=0;
+    }
+    consumablePick=null;clearBuildingInteraction();
+    document.getElementById('settingsDrawer').classList.add('hidden');
+    rewardOverlay.classList.add('hidden');document.getElementById('campaignVictory').classList.add('hidden');
+    openMainMenu();return true;
   }
   function captureRunCheckpoint() { return HexRunSnapshot.capture(state, random); }
   function applyDeveloperScenario() {
@@ -1249,21 +1260,22 @@ R dreht die Karte, dann Feld anklicken.`;
       document.getElementById('campaignVictoryText').textContent = state.difficulty === 'normal' ? 'Welle 35 geschafft! Zwei Fronten, Festungsbauer, Tagesherausforderung und Duo sind jetzt freigeschaltet.' : 'Zwei Fronten gemeistert! Händlerstadt ist jetzt freigeschaltet.';
       note.textContent = 'Deine Map und Türme bleiben im Endless-Modus erhalten. Diamanten werden beim Beenden des Durchlaufs abgerechnet.';
     }
+    showRunRanking(document.getElementById('victoryRanking'));
     document.getElementById('campaignVictory').classList.remove('hidden'); renderAll(); scheduleCloudSave();
   }
   document.getElementById('endlessBtn').addEventListener('click', () => { if (!HexRunSession.endless(state, random)) return; document.getElementById('campaignVictory').classList.add('hidden'); renderSessionPhase(); });
   document.getElementById('victoryMenuBtn').addEventListener('click', () => { if (state.phase !== 'victory') return; document.getElementById('campaignVictory').classList.add('hidden'); state.phase = 'gameover'; showGameOver(); gameOverOverlay.classList.add('hidden'); openMainMenu(); });
+  function showRunRanking(host, run = null) {
+    if (!host) return;
+    host.classList.toggle('hidden', !!state.challengeDay || testProfile || !!state.devEnemyRoster);
+    if (state.challengeDay || testProfile || state.devEnemyRoster) return;
+    const mode=duoToken?'duo':state.difficulty==='dual'?'dual':'single';
+    globalThis.HexRunRanking?.show(host,run||globalThis.HexRunRanking.score(state,mode),{onAccount(mode){setAccountMode(mode);openAccount();}});
+  }
   function showGameOver() {
     clearRunAutosave();
     const ranking = document.getElementById('runRanking');
-    if (ranking) {
-      ranking.classList.toggle('hidden', !!state.challengeDay || !!duoToken || testProfile);
-      if (!state.challengeDay && !duoToken && !testProfile) globalThis.HexLeaderboardUI?.showResult(ranking, {
-        api: globalThis.HexApi,
-        session: globalThis.HexRankedSession?.credentialsForRun?.(state.runId) || null,
-        onAccount(mode) { setAccountMode(mode); openAccount(); }
-      });
-    }
+    showRunRanking(ranking);
     hasActiveRun = false; stopSoloPresence(); resetCameraKeys(); inspectEndMap(false); renderRunStatistics(); applyPendingServerProfile();
     if (state.challengeDay) { const result = HexProfile.settleDaily(profile, state.challengeDay, Math.max(state.challengeWon ? (state.challengeTarget || 20) : 0, state.lastCompletedWave || Math.max(0, state.wave - 1)), TOWERS, state.challengeTarget || 20); profile = result.profile; state.metaSettled = true; document.getElementById('gameOverTitle').textContent = state.challengeKind === 'garrison' ? (state.challengeWon ? 'DIE GARNISON HÄLT STAND!' : 'Die Garnison ist gefallen') : (state.challengeWon ? 'DIE KARAWANE IST GERETTET!' : 'Die Karawane ist gefallen'); document.getElementById('gameOverResult').textContent = (state.challengeKind === 'garrison' ? 'Die letzte Garnison' : 'Die letzte Karawane') + ' · ' + state.challengeDay + ' · ' + (state.challengeWon ? (state.endless ? 'Endlosmodus · Wave ' + state.wave + ' erreicht' : 'Welle ' + (state.challengeTarget || 20) + ' überlebt!') : 'Wave ' + state.wave + ' erreicht'); document.getElementById('diamondBreakdown').textContent = result.reward ? 'Tagessieg: +10 Diamanten' : state.challengeWon ? 'Tagesbelohnung bereits erhalten.' : 'Keine Tagesbelohnung – versuche es erneut!'; document.getElementById('gameOverDiamonds').textContent = profile.diamonds; document.getElementById('gameOverBest').textContent = profile.dailyResults[state.challengeDay].best; gameOverOverlay.classList.remove('hidden'); return; }
     document.getElementById('gameOverTitle').textContent = 'Die Bastion ist gefallen';
@@ -1277,7 +1289,7 @@ R dreht die Karte, dann Feld anklicken.`;
   let resetArsenalPending = false;
   function renderArsenal(message = '') {
     document.getElementById('arsenalDiamonds').textContent = profile.diamonds;
-    HexArsenal.render(document.getElementById('arsenalChoices'), profile, (kind, id) => { const method = { activateUltimate: HexProfile.activateUltimate, tower: HexProfile.unlockTower, ultimate: HexProfile.unlockUltimate, building: HexProfile.unlockBuilding }[kind], next = method(profile, id, TOWERS); if (!next) return; profile = next; resetArsenalPending = false; scheduleCloudSave(); renderLoadout(); renderArsenal('Freigeschaltet. Ab dem nächsten Run verfügbar.'); renderUI(); });
+    HexArsenal.render(document.getElementById('arsenalChoices'), profile, (kind, id) => { const method = { activateUltimate: HexProfile.activateUltimate, tower: HexProfile.unlockTower, ultimate: HexProfile.unlockUltimate, building: HexProfile.unlockBuilding }[kind], next = method(profile, id, TOWERS); if (!next) return; profile = next; resetArsenalPending = false; scheduleCloudSave(); renderLoadout(); renderArsenal('Freigeschaltet. Ab dem nächsten Run verfügbar.'); renderUI(); }, document.getElementById('arsenalTabs'), arsenalNotifications, () => { updateArsenalHint(); saveGameSettings(); });
     const refund = HexProfile.resetValue(profile), button = document.getElementById('resetDiamondsBtn'); button.disabled = refund === 0; button.textContent = resetArsenalPending ? 'Bestätigen: alle Freischaltungen zurücksetzen · +' + refund + ' ◆' : 'Reset · +' + refund + ' ◆';
     document.getElementById('arsenalMessage').textContent = message || '';
   }
@@ -1328,7 +1340,7 @@ R dreht die Karte, dann Feld anklicken.`;
   const gameSettingChecks = ['slotHints','onboardingHints','hexGrid','upgradeStatus','autoStart','multiTowerSelection'];
   function readGameSettings() {
     const settings = Object.fromEntries(gameSettingChecks.map(id => [id, !!document.getElementById(id).checked]));
-    return {...settings, gameSpeed, language: globalThis.HexI18n?.getLanguage(), assetEdition: typeof HexAssetEdition === 'undefined' ? undefined : HexAssetEdition.get()};
+    return {...settings, arsenalSeen: arsenalNotifications.snapshot(), gameSpeed, language: globalThis.HexI18n?.getLanguage(), assetEdition: typeof HexAssetEdition === 'undefined' ? undefined : HexAssetEdition.get()};
   }
   function saveGameSettings() {
     if (applyingGameSettings) return;
@@ -1341,6 +1353,7 @@ R dreht die Karte, dann Feld anklicken.`;
     if (!settings || typeof settings !== 'object' || Array.isArray(settings)) return;
     applyingGameSettings = true;
     try {
+      arsenalNotifications.restore(settings.arsenalSeen);
       for (const id of gameSettingChecks) if (typeof settings[id] === 'boolean') document.getElementById(id).checked = settings[id];
       showSlotHints = slotToggle.checked; showHexGrid = gridToggle.checked; onboardingHints = hintsToggle.checked;
       if (state) { Object.assign(state, {showSlotHints, showHexGrid, showUpgradeStatus: document.getElementById('upgradeStatus').checked}); if (!onboardingHints) { tutorial.active = false; state.biomeIntro = null; } }
@@ -1407,6 +1420,7 @@ R dreht die Karte, dann Feld anklicken.`;
   // Server-Stand holen: 'loaded', 'deferred' (Spiel läuft) oder 'empty' (noch nichts gespeichert).
   async function pullFromServer() {
     const data = await accountApi().getSave(); if (!data) return 'empty';
+    data.gameSettings = {...data.gameSettings, arsenalSeen: Array.isArray(data.gameSettings?.arsenalSeen) ? data.gameSettings.arsenalSeen : []};
     applyGameSettings(data.gameSettings);
     cloudStore.set(CLOUD_DIRTY, null); cloudStore.set(CLOUD_LAST, new Date().toISOString());
     if (hasActiveRun && state?.hp > 0) { pendingServerProfile = data; return 'deferred'; }
@@ -1449,7 +1463,7 @@ R dreht die Karte, dann Feld anklicken.`;
         else setAccountStatus('Willkommen zurück, ' + accountUser.username + '! Dein Spielstand wurde geladen.', 'success');
       }
     } catch (error) { setAccountStatus((register ? 'Registrierung fehlgeschlagen: ' : 'Anmeldung fehlgeschlagen: ') + error.message, 'error'); }
-    finally { setAccountBusy(false); renderAccount(); globalThis.HexLeaderboardUI?.refreshResult(); }
+    finally { setAccountBusy(false); renderAccount(); globalThis.HexLeaderboardUI?.refreshResult(); globalThis.HexRunRanking?.refresh(); }
   });
   document.getElementById('accountLogoutBtn').addEventListener('click', async () => { setAccountBusy(true); await accountApi()?.logout(); accountUser = null; pendingServerProfile = null; cloudStore.set(CLOUD_DIRTY, null); setAccountBusy(false); setAccountMode('login'); renderAccount(); setAccountStatus('Abgemeldet. Dein Spielstand bleibt auf diesem Gerät erhalten.', 'success'); });
   document.getElementById('accountSaveServerBtn').addEventListener('click', async () => {
@@ -1469,7 +1483,7 @@ R dreht die Karte, dann Feld anklicken.`;
     try { if (cloudStore.get(CLOUD_DIRTY) === '1') await pushToServer(); else await pullFromServer(); } catch {/* offline: später erneut */ }
     renderAccount();
   })();
-  function updateArsenalHint() { const count = HexProfile.affordableUnlocks(profile), button = document.getElementById('menuArsenalBtn'); button.classList.toggle('upgradeAvailable', count > 0); button.textContent = count ? '◆ Arsenal · Upgrade verfügbar' : '◆ Arsenal'; button.title = count ? count + ' Freischaltungen bezahlbar' : 'Arsenal'; }
+  function updateArsenalHint() { const count = HexProfile.affordableUnlocks(profile), button = document.getElementById('menuArsenalBtn'); button.classList.toggle('upgradeAvailable', arsenalNotifications.pending(profile));  button.textContent = count ? '◆ Arsenal · Upgrade verfügbar' : '◆ Arsenal'; button.title = count ? count + ' Freischaltungen bezahlbar' : 'Arsenal'; }
   function renderIntroductionMenu() {
     const devButton=document.getElementById('devToggleBtn'),dev=globalThis.HexFirstPlayerTest;
     devButton.classList.toggle('hidden',!dev?.available || !!duoToken);devButton.setAttribute('aria-pressed',String(!!dev?.enabled));devButton.textContent=dev?.enabled?'Dev: an':'Dev: aus';
@@ -1530,8 +1544,8 @@ R dreht die Karte, dann Feld anklicken.`;
   function renderDailyMission() { const day = new Date().toISOString().slice(0, 10), mission = HexWaves.daily(day), garrison = mission.id === 'garrison'; document.getElementById('dailyMissionName').textContent = mission.name; document.getElementById('dailyMissionShort').textContent = 'Ziel: ' + mission.target + ' Wellen · Wechsel um 00:00 UTC'; document.getElementById('dailyMissionTitle').textContent = mission.name + ' · Tägliche Herausforderung'; document.getElementById('dailyCaravanRules').classList.toggle('hidden', garrison); document.getElementById('dailyGarrisonRules').classList.toggle('hidden', !garrison); document.getElementById('dailyStartBtn').textContent = 'Heutige Mission starten'; }
   function openMainMenu() { renderIntroductionMenu(); renderDailyMission(); if (duoToken) { location.assign('/duo-lobby.html'); return; } document.getElementById('biomeIntro').classList.add('hidden'); cancelQuickTower(); resetCameraKeys(); updateArsenalHint(); const today = new Date().toISOString().slice(0, 10), daily = profile.dailyResults?.[today]; document.getElementById('dailyProgress').textContent = today + ' (UTC) · ' + (daily?.won ? 'Heute geschafft · Belohnung erhalten' : 'Tagesbestmarke: ' + (daily?.best || 0) + '/' + HexWaves.daily(today).target + ' Wellen'); document.getElementById('menuContinueBtn').classList.toggle('hidden', (!hasActiveRun || state.hp <= 0) && !readRunAutosave()); document.getElementById('menuPlayBtn').textContent = hasActiveRun ? 'Neuer Run' : 'Spielen'; mainMenu.classList.remove('hidden'); }
   document.getElementById('dailyStartBtn').addEventListener('click', () => { if (!HexProfile.modesUnlocked(profile) || !confirmRunRestart()) return; mainMenu.classList.add('hidden'); document.getElementById('playModeOverlay').classList.add('hidden'); newRun(undefined, 'standard', 'dual', new Date().toISOString().slice(0, 10)); });
-  document.getElementById('menuPlayBtn').addEventListener('click', () => { if (!confirmRunRestart()) return; mainMenu.classList.add('hidden'); if (!HexProfile.modesUnlocked(profile)) { if (HexProfile.learning(profile)) newRun(); else openLoadout(); return; } document.getElementById('playModeChoices').classList.remove('hidden'); document.getElementById('dailyModeDetails').classList.add('hidden'); document.getElementById('playModeOverlay').classList.remove('hidden'); });
-  document.getElementById('duoModeBtn').addEventListener('click', () => { if (!HexProfile.modesUnlocked(profile)) return; location.href = 'duo-lobby.html'; });
+  document.getElementById('menuPlayBtn').addEventListener('click', () => { if (!HexProfile.modesUnlocked(profile) && !confirmRunRestart()) return; mainMenu.classList.add('hidden'); if (!HexProfile.modesUnlocked(profile)) { if (HexProfile.learning(profile)) newRun(); else openLoadout(); return; } document.getElementById('playModeChoices').classList.remove('hidden'); document.getElementById('dailyModeDetails').classList.add('hidden'); document.getElementById('playModeOverlay').classList.remove('hidden'); });
+  document.getElementById('duoModeBtn').addEventListener('click', () => { if (!HexProfile.modesUnlocked(profile) || !suspendSoloRun()) return; location.href = 'duo-lobby.html'; });
   document.getElementById('standardModeBtn').addEventListener('click', () => { document.getElementById('playModeOverlay').classList.add('hidden'); openLoadout(); });
   document.getElementById('dailyModeBtn').addEventListener('click', () => { if (!HexProfile.modesUnlocked(profile)) return; renderDailyMission(); document.getElementById('playModeChoices').classList.add('hidden'); document.getElementById('dailyModeDetails').classList.remove('hidden'); });
   document.getElementById('playModeBackBtn').addEventListener('click', () => { document.getElementById('playModeOverlay').classList.add('hidden'); openMainMenu(); });
@@ -1546,7 +1560,7 @@ R dreht die Karte, dann Feld anklicken.`;
     mainMenu.classList.add('hidden');
   });
   document.getElementById('menuArsenalBtn').addEventListener('click', openArsenal);
-  document.getElementById('openMainMenuBtn').addEventListener('click', () => { document.getElementById('settingsDrawer').classList.add('hidden'); openMainMenu(); });
+  document.getElementById('openMainMenuBtn').addEventListener('click', () => { if (!duoToken) { suspendSoloRun(); return; } document.getElementById('settingsDrawer').classList.add('hidden'); openMainMenu(); });
   const soundToggle = document.getElementById('soundEnabled');
   soundToggle.addEventListener('change', scheduleCloudSave);
   document.getElementById('soundVolume').addEventListener('change', scheduleCloudSave);
@@ -1678,7 +1692,7 @@ R dreht die Karte, dann Feld anklicken.`;
   function advanceClock(now) {
     if (duoToken) { last = now; clockDebt = 0; if (state.waveRunning && !document.hidden && duoBridge?.animate?.(now)) renderBoard(); return; }
     const elapsed = Math.max(0, (now - last) / 1000); last = now;
-    if (paused || !state.waveRunning) { clockDebt = 0; return; }
+    if (paused || !hasActiveRun || !state.waveRunning) { clockDebt = 0; return; }
     clockDebt += elapsed * HexRunRuntime.PLAYBACK_RATE; const step = .05 / gameSpeed; let count = 0;
     while (clockDebt >= step && state.waveRunning && count++ < 200) { clockDebt -= step; update(step, now, false); }
     if (!state.waveRunning) clockDebt = 0;
@@ -1699,6 +1713,7 @@ R dreht die Karte, dann Feld anklicken.`;
   globalThis.setInterval?.(() => { if (document.hidden) advanceClock(performance.now()); }, 250);
   document.addEventListener('visibilitychange', () => { fpsStart = null; if (fpsVisible) fpsEl.textContent = 'FPS: —'; cancelQuickTower(); resetCameraKeys(); advanceClock(performance.now()); });
   if (duoToken) {
+    document.getElementById('openMainMenuBtn').textContent='Duo-Lobby';
     newRun(); tutorial.active = false; mainMenu.classList.add('hidden'); document.body.classList.add('duoGame');
     duoBridge = HexDuoGame.mount({
       token: duoToken, getState: () => state, render: renderAll, renderer, cardElement, setMessage,
@@ -1720,7 +1735,7 @@ R dreht die Karte, dann Feld anklicken.`;
         document.getElementById('skipRemovalBtn').classList.toggle('hidden', !offer.skippable || offer.kind === 'removal'); document.getElementById('rewardInspectActions').classList.add('hidden');
         for (const [index, choice] of offer.choices.entries()) { const button = choice.cardId ? cardElement(choice.cardId, false) : document.createElement('button'); if (!choice.cardId) { button.className = 'upgradeOption'; button.textContent = (choice.label ? choice.label + (choice.kind === 'site' ? ' · ' + choice.desc : '') : '') || choice.choice?.name || ({ bastion: '+5 Team-Leben', income: '+2 Einkommen', repair: 'Heilquelle', supplies: '+30 Gold' })[choice.blessing] || '+' + choice.amount + ' Gold'; } if (offer.kind === 'removal' && choice.cardId) bindRemovalConfirmation(button, () => duoBridge.choose(kind, offer, index)); else button.addEventListener('click', () => duoBridge.choose(kind, offer, index)); rewardChoices.appendChild(button); }
         if (offer.choices.some(c => c.kind === 'upgrade')) { rewardChoices.classList.add('workshopChoices'); rewardAction('Turm auf der Karte wählen', 'Klicke einen eigenen Turm an, um sein kostenloses Upgrade zu wählen.', () => startWorkshop(offer)); }
-        if (kind === 'result') { renderRunStatistics(); const stats = document.createElement('section'); stats.className = 'duoResultStats'; stats.innerHTML = document.getElementById('runStatistics').innerHTML; rewardChoices.appendChild(stats); } state.rewardOffer = kind === 'result' ? null : offer; openRewardSelection();
+        if (kind === 'result') { renderRunStatistics(); const stats = document.createElement('section'); stats.className = 'duoResultStats'; stats.innerHTML = document.getElementById('runStatistics').innerHTML; rewardChoices.appendChild(stats); const ranking=document.createElement('section');rewardChoices.appendChild(ranking);showRunRanking(ranking,offer.ranking); } state.rewardOffer = kind === 'result' ? null : offer; openRewardSelection();
       }
     });
     requestAnimationFrame(frame);

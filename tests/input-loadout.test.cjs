@@ -85,6 +85,24 @@ test('arsenal menu highlights affordable unlocks and the ingame arsenal action i
   const poor = load(); assert.equal(poor.elements.get('menuArsenalBtn').classList.contains('upgradeAvailable'), false);
 });
 
+test('seen arsenal offers stop glowing across reloads, while newly affordable offers glow',()=>{
+  const r=load({initialProfile:{diamonds:20}});
+  r.elements.get('menuArsenalBtn').listeners.click();
+  const tabs=r.elements.get('arsenalTabs').children.filter(e=>e.attributes.role==='tab');
+  for(const tab of tabs){tab.listeners.click();assert.equal(tab.classList.contains('affordable'),false);}
+  assert.equal(r.elements.get('menuArsenalBtn').classList.contains('upgradeAvailable'),false);
+  assert.match(r.elements.get('menuArsenalBtn').textContent,/Upgrade verfügbar/);
+  const seen=r.storage.get('hex-arsenal-seen-v1');assert.ok(JSON.parse(seen).length>0);
+  const reboot=load({initialProfile:{diamonds:20},initialStorage:{'hex-arsenal-seen-v1':seen}});
+  assert.equal(reboot.elements.get('menuArsenalBtn').classList.contains('upgradeAvailable'),false);
+  const richer=load({initialProfile:{diamonds:100},initialStorage:{'hex-arsenal-seen-v1':seen}});
+  assert.equal(richer.elements.get('menuArsenalBtn').classList.contains('upgradeAvailable'),true);
+  const isolated=load({firstPlayerTest:true,initialStorage:{'hex-arsenal-seen-v1':seen}});
+  isolated.elements.get('menuArsenalBtn').listeners.click();
+  for(const tab of isolated.elements.get('arsenalTabs').children.filter(e=>e.attributes.role==='tab'))tab.listeners.click();
+  assert.equal(isolated.storage.get('hex-arsenal-seen-v1'),seen);
+});
+
 test('element ultimate names follow the chosen branch and keep their bonuses', () => {
   const { data } = load(); for (const [branch, name] of [['elementFire', 'Weltenbrand'], ['elementWater', 'Ozeanherz'], ['elementWind', 'Himmelssturm']]) { const before = data.towerDefinition({ type: 'element', branch }), after = data.towerDefinition({ type: 'element', branch, ultimate: 'element' }); assert.equal(after.name, name); assert.equal(after.damage, Number((before.damage * 1.3).toFixed(2))); }
 });

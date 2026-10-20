@@ -1,0 +1,141 @@
+<h1>UI &amp; Branding Guide<br>Der aktuelle Stand</h1>
+<p>Arbeitsgrundlage für das nächste Redesign von AutoHex TD. Dokumentiert werden die vorhandenen Gestaltungsentscheidungen, ihre Implementierung und die Stellen, an denen noch kein einheitlicher Standard existiert.</p>
+<div class="note"><strong>Leseschlüssel:</strong> „Bestand“ bezeichnet Werte aus dem aktuellen lokalen Quellcode. „Einordnung“ ist eine Interpretation der Gestaltung. „Für das Redesign“ sind Vorschläge, keine bereits geltenden Regeln. Es wurden keine Browseransichten aufgenommen oder vermessen. Die kleinen Muster unten sind illustrative Nachbildungen einzelner Styles, keine Screenshots des Spiels.</div>
+<nav><a href="#brand">Marke</a><a href="#type">Typografie</a><a href="#color">Farben</a><a href="#controls">Buttons</a><a href="#screens">Menüs</a><a href="#cards">Karten</a><a href="#effects">Effekte</a><a href="#responsive">Responsive</a><a href="#behavior">Zustände</a><a href="#scope">Quellen</a><a href="#handoff">Redesign-Übergabe</a><a href="#tokens">Tokens</a><a href="#inventory">Alle Regeln</a></nav>
+
+<section id="brand"><h2>01 · Marke und Bildsprache</h2>
+<p><strong>Bestand:</strong> Der sichtbare Name ist „AutoHex TD“. Die Produktbeschreibung in der README bezeichnet es als Tower-Defense-Roguelite mit selbst gebauter Hex-Karte und stilisierter 3D-Darstellung. Der interne Paketname „hex-bastion“ ist kein zusätzlicher sichtbarer Markenname.</p>
+<p><strong>Einordnung:</strong> Dunkles Waldgrün, warme Pergamentflächen, Gold und Serifentitel bilden die visuelle Klammer. Die Welt wirkt durch Low-Poly-Modelle und Hex-Geometrie spielerisch; Menüs kombinieren Fantasy-Anmutung mit funktionalen Sans-Serif-Beschriftungen.</p>
+<ul><li>Wortmarke: textbasiert mit Georgia/Serif, heller Cremefarbe und Schatten; Größen sind kontextabhängig.</li><li>Menütitel: <code>.menuBox h1</code>, Größe <code>clamp(40px,8vw,68px)</code>, Laufweite <code>.02em</code>, Farbe <code>#f5ecd0</code>, Schatten <code>0 4px 24px #000c</code>.</li><li>Menülogo-Element: im Hauptmenü <code>clamp(48px,12vh,104px)</code> breit/hoch, Drop-Shadow <code>0 6px 14px #000a</code>. Kleine Bildschirmhöhen überschreiben diese Maße.</li><li>Icons: gemischt aus Emoji/Unicode, inline SVG und Spielmodellen. Beispiele sind Herz, Diamant, Wellenzeichen sowie die SVG-Turmicons aus <code>classes/arsenal.js</code>. Emoji-Aussehen ist betriebssystemabhängig.</li><li>Vorhandenes Favicon: <code>assets/favicon.png</code>. Kein vollständiges separates Markenpaket mit Schutzraum, monochromer Wortmarke und verbindlichen Exportgrößen wurde in dieser Bestandsaufnahme identifiziert.</li><li>Normal-/Sakura-Auswahl und Modellvarianten sind zusätzliche Welt-/Asset-Stile. Ein neuer UI-Style muss deren Lesbarkeit mitprüfen; Weltfarben sind nicht automatisch UI-Tokens.</li></ul>
+<p>Quellen: README.md, index.html, style.css, classes/arsenal.js, classes/asset-edition.js (sofern im jeweiligen Stand vorhanden). Unbekannt: verbindliche Markenwerte, Logo-Mindestgröße, externe Fontlizenzen, finale Tonalität. Hierfür werden keine Regeln erfunden.</p></section>
+
+<section id="type"><h2>02 · Typografie</h2>
+<p>Es gibt mehrere Schriftstacks. <code>Inter</code> wird genannt, aber die erfassten Styles enthalten keine <code>@font-face</code>-Einbindung; eine vorhandene Schrift auf dem Gerät ist daher relevant. Ein benannter Font ist keine Garantie, dass er tatsächlich gerendert wird.</p>
+<div class="table"><table><tr><th>Verwendung</th><th>Bestand</th><th>Quelle / Einschränkung</th></tr>
+<tr><td>Spiel-UI</td><td>Inter, system-ui, Segoe UI, Arial, sans-serif</td><td>style.css: body; Buttons erben die Schrift.</td></tr>
+<tr><td>Titel / Karten / Forschung</td><td>Georgia, serif; überwiegend Gewicht 700</td><td>h1, .card h3, .loadoutBox h2, .arsenalHero h3</td></tr>
+<tr><td>Grundgrößen-Tokens</td><td>Body 16px; Controls 14px; Meta 12px</td><td>--ui-font-body / control / meta; nicht überall verwendet. Der Body-Token ist keine globale Durchsetzung.</td></tr>
+<tr><td>Große Dialogtitel</td><td>Loadout 30px; Ergebnis 31px; Arsenal-Toolbar 24px; Account 22px</td><td>Kontextspezifische Serifentitel.</td></tr>
+<tr><td>Arsenal</td><td>Hero 26px, Beschreibung 14px/1.5; Stufenname 16px Serif; Tabs 14px/600; Unterzeile 11px</td><td>Mobil: Hero 21px, Beschreibung 13px, Tabs 13px.</td></tr>
+<tr><td>Turmpanel, später CSS-Block</td><td>Titel 17px; Schadenswert 22px/1.2; Statistiklabel 11px; Beschreibung 11px/1.35; Pfadname 16px/1.2</td><td>#towerPanel; frühere Panel-Varianten werden teilweise überschrieben.</td></tr>
+<tr><td>Karten</td><td>Grundtitel 15px Georgia; Handtitel 14px/17px; Handbeschreibung 10.5px/13px</td><td>Mehrere kompakte Überschreibungen; siehe Karten und Regelverzeichnis.</td></tr>
+<tr><td>Meta / Eyebrow</td><td>Typisch 10–12px, uppercase, Laufweite .04–.16em, Gewicht 700–800</td><td>Kein einheitlicher Wert: .eyebrow .16em, .arsenalKicker .12em, .arsenalTier .07em.</td></tr>
+<tr><td>Tabellen / Zahlen</td><td>tabular-nums für Bestenliste und Account-Zahlen; Tabellenkopf 12px im Spiel</td><td>Eigenständige Bestenlistenseite hat andere Werte.</td></tr>
+<tr><td>Separate Seiten</td><td>Bestenliste: system-ui/sans-serif. Admin: Trebuchet MS, Candara, sans-serif. Viewer: 14px Inter/system-ui.</td><td>Eigenständige Styles; nicht als Spiel-Standard übernehmen.</td></tr></table></div>
+<p><strong>Für das Redesign:</strong> Fontdateien, Fallbacks und Gewichtsschnitte explizit entscheiden. Alle kleinen 9–12px-Texte insbesondere auf Mobilgeräten prüfen. Deutsch und Englisch benötigen eigene Umbruchkontrollen.</p></section>
+
+<section id="color"><h2>03 · Farben und semantische Bedeutung</h2>
+<p>Die folgenden Werte sind echte CSS-Tokens. Daneben existieren viele lokale Hexfarben. Das vollständige Verzeichnis weiter unten enthält auch Duo- und Admin-Tokens.</p>
+<div class="chips">
+<div class="chip"><i class="swatch" style="background:#111714"></i>Hintergrund #111714</div>
+<div class="chip"><i class="swatch" style="background:#1d2922"></i>Panel #1d2922</div>
+<div class="chip"><i class="swatch" style="background:#24342a"></i>Panel 2 #24342a</div>
+<div class="chip"><i class="swatch" style="background:#e2b857"></i>Akzent #e2b857</div>
+<div class="chip"><i class="swatch" style="background:#6fa77b"></i>Akzent 2 #6fa77b</div>
+<div class="chip"><i class="swatch" style="background:#f5f0df"></i>Text #f5f0df</div>
+<div class="chip"><i class="swatch" style="background:#b9c3b7"></i>Muted #b9c3b7</div>
+</div>
+<div class="table"><table><tr><th>Rolle</th><th>Werte / Rezept</th><th>Wichtige Abweichung</th></tr>
+<tr><td>Neuere UI-Texte</td><td>--ui-text #f4ecd6; --ui-muted #c8d4c9</td><td>Nicht identisch mit --text / --muted.</td></tr>
+<tr><td>Controls</td><td>--ui-button #293f32; --ui-primary #326345; --ui-confirm #246c41; --ui-border #73917b</td><td>Sekundär meist #384b3e, viele Panels nutzen #4d684f.</td></tr>
+<tr><td>Gefahr</td><td>--danger #a95146; danger-Button tatsächlich #6f3834</td><td>Token und Komponente weichen ab.</td></tr>
+<tr><td>Pergamentkarte</td><td>Fläche #efe3c2; Text #2b281f; Standardrand #7f6a3b</td><td>Rarität ersetzt die Randfarbe.</td></tr>
+<tr><td>Goldener Kauf / Account-Anmeldung</td><td>Verlauf 180deg #e9c86a → #b88f2e; Text #2a1e08</td><td>Eine .primary-Aktion ist hier gold, sonst grün.</td></tr>
+<tr><td>Positiv / Warnung / Fehler</td><td>Account: #b8ecc4 auf #1c3324; Pending #efc76e; Fehler #f3c1b9 auf #3a1f1c</td><td>Separate Zustandsklassen, nicht global vereinheitlicht.</td></tr>
+<tr><td>Duo-Semantik</td><td>Aufgabe #e2b857; bereit #7fcf8e; Kampf #e07a5f; warten #9fb3a6; offline #c0594c</td><td>--duo-* in duo.css.</td></tr>
+<tr><td>Welt / Grundtokens</td><td>Straße #d0aa6d; Gras #6e8f58; Hexkante #2f4536; Nebel #252c2a</td><td>3D-Materialien und Biome besitzen weitere Farben außerhalb dieser UI-Palette.</td></tr></table></div>
+<h3>Raritäten</h3>
+<div class="table"><table><tr><th>Rarität</th><th>Rand / Badge</th><th>Glow</th></tr><tr><td>Gewöhnlich</td><td>#737b86</td><td>#a7afb733</td></tr><tr><td>Ungewöhnlich</td><td>#2d885c</td><td>#4fcd8a44</td></tr><tr><td>Selten</td><td>#286dc4</td><td>#599eff44</td></tr><tr><td>Episch</td><td>#8a40c0</td><td>#b16cff66</td></tr><tr><td>Legendär</td><td>#d76c12</td><td>#ff981c88</td></tr></table></div>
+<p>Die letzten zwei Stellen achtstelliger Hexfarben sind Alpha, keine zusätzliche Farbe. Bei neuen Tokens Transparenz beibehalten oder ausdrücklich neu definieren.</p></section>
+
+<section id="controls"><h2>04 · Buttons, Eingaben und Maße</h2>
+<p>Es existiert keine universelle feste Buttonbreite oder -höhe. Viele Controls wachsen mit Inhalt, Padding und Layout. <strong>min-height ist eine Untergrenze</strong>, keine garantierte Endhöhe. Alle Maße sind CSS-Pixel. Global gilt box-sizing:border-box.</p>
+<div class="table"><table><tr><th>Komponente</th><th>Maße / Typografie</th><th>Form / Farbe</th></tr>
+<tr><td>Basisbutton</td><td>min-height 44px; padding 10px 12px; line-height 1.35; font:inherit</td><td>Radius 9px; border 0; --ui-button / --ui-text</td></tr>
+<tr><td>Primär / Sekundär</td><td>Primär: 16px, 700, padding 13px, width 100%. Sekundär: 12px.</td><td>Grün #326345 / sekundär #384b3e; Kontext kann alles überschreiben.</td></tr>
+<tr><td>Hauptmenü</td><td>Spalte min(460px,94vw); Buttons 100%, 17px, padding 14px, Abstand 10px</td><td>Sekundärfläche #2c3f33, Rand 1px #4d684f. Bei Höhe ≤700px: 15px, padding 9px, gap 6px.</td></tr>
+<tr><td>Sprachauswahl</td><td>min-height 48px; padding 10px 14px; 17px; zwei gleich breite Spalten</td><td>Text und Auswahl jeweils zentriert; bei Höhe ≤700px: min-height 44px, 15px.</td></tr>
+<tr><td>HUD / Header</td><td>Statistiken und Summary min-height 44px; Lücken 6px</td><td>Hintergrund und Rand aus HUD-Regeln, Zahlen zentriert; keine pauschale fixe Breite.</td></tr>
+<tr><td>Turm-/Biom-Rail</td><td>54px Breite, min-height 48px, padding 4px, Icon 33px; kompakt 48px breit</td><td>Radius 12px, Rand #789180, Fläche #1c302bed; aktiv weißer Rand + 2px Ring #c2f4d3.</td></tr>
+<tr><td>Mobile obere Tabs</td><td>5 gleiche Spalten, min-height 44px, 12px, padding 6px 3px, gap 4px</td><td>Aktiv: --ui-primary und 2px Outline #ffe198.</td></tr>
+<tr><td>Mobiler Wellenstart / Tempo</td><td>min-height 64px; 14px; padding 8px; Spalten minmax(100px,1fr) / minmax(130px,1.4fr)</td><td>Footer folgt Safe-Area; Breiten sind viewportabhängig.</td></tr>
+<tr><td>Arsenal-Kauf</td><td>100%; min-height 42px; 14px/700; Radius 10px. Hero-Aktion min-width 190px, 15px, padding 12px 20px.</td><td>Goldverlauf; Hover brightness(1.1); gedrückt translateY(1px).</td></tr>
+<tr><td>Account</td><td>Submit min-height 48px / 16px / Radius 12px; Upload/Download min-height 46px / 14px; Tabs min-height 38px</td><td>Schließen 36×36px; Passwortanzeige 38×36px. Bewusste Ist-Ausnahmen zu 44px.</td></tr>
+<tr><td>Account-Inputs</td><td>min-height 44px; 15px; padding 10px 12px; Radius 10px</td><td>#0f1a14; Rand #4d684f; Fokus goldener Rand und 3px #e2b85733 Ring.</td></tr>
+<tr><td>Turmupgrade / Verkaufen</td><td>Aktionen min-height 38px; 12px; padding 7px 5px; Radius 8px. Verkauf min-height 40px.</td><td>Kauf #6e5824, Rand #cfad58, unterer Rand 3px; eigener Disabled-Stil.</td></tr>
+<tr><td>Bestenlistenmodi</td><td>Flexreihe, Umbruch erlaubt, gap 8px; Buttons flex:1 1 auto</td><td>Aktiv #53622d / Text #fff3c4; Sortierbuttons im Tabellenkopf transparent.</td></tr></table></div>
+<div class="samples"><span class="sampleButton">Grüne Hauptaktion</span><span class="sampleButton sampleGold">Goldene Freischaltung</span><span class="sampleButton sampleFocus">Tastaturfokus</span><span class="sampleCard">Epische Karte</span></div>
+<p class="muted">Illustrative Rezeptmuster, nicht interaktive Spielkomponenten und keine Pixelgenauigkeitsprüfung.</p></section>
+
+<section id="screens"><h2>05 · Menüs, Panels und Overlays</h2>
+<div class="table"><table><tr><th>Bereich</th><th>Container und Layout</th><th>Oberfläche</th></tr>
+<tr><td>Standardoverlay</td><td>fixed inset:0; display:grid; place-items:center; padding 20px</td><td>rgba(5,8,6,.8); Grund-z-index später 50.</td></tr>
+<tr><td>Hauptmenü</td><td>menuBox min(460px,94vw); Hauptmenü padding 16px, overflow hidden</td><td>Radialverlauf #2f4a36 → #0b110d bei 75%; optionaler 3D-Hintergrundcanvas opacity .32.</td></tr>
+<tr><td>Loadout / Modus</td><td>Loadout min(980px,96vw), max-height 92vh, padding 26px; kontextspezifische kompakte Regeln</td><td>145deg #213027 → #17221c; Rand #59745e; Radius 20px; Schatten 0 20px 70px #000b.</td></tr>
+<tr><td>Ergebnis</td><td>min(620px,95vw), padding 28px; Diamantenstatistik drei Spalten, ≤550px eine</td><td>145deg #2c251d → #171c18; Rand #8b744b; Radius 20px.</td></tr>
+<tr><td>Belohnung / Deck ausdünnen</td><td>rewardBox bis min(900px,95vw), padding 22px; max-height 90vh und Scrollen; sticky Überschrift</td><td>#1d2922; Rand #4d684f; Radius 18px. Mobile Abweichungen unten.</td></tr>
+<tr><td>Arsenal</td><td>min(1240px,100%); Höhe min(880px,100dvh − 32px); Rail 250px + Detailspalte; außen 16px</td><td>Radius 20px; #1b2a21f7 → #111b15fa; Border #4d684f; getrennte Scrollbereiche.</td></tr>
+<tr><td>Account</td><td>min(440px,94vw); max-height 92dvh; padding 26px 26px 20px</td><td>Radius 20px; #223329f7 → #16221bfa; Rand #5d7a63; Schatten 0 22px 60px #000b + inset.</td></tr>
+<tr><td>Turmpanel, letzte Variante</td><td>min(370px,100vw − 24px); deklarierte Höhe 690px; flex column; scrollender Inhalt; JS begrenzt/positioniert</td><td>#1d2922; 2px #607d65; Radius 16px; 0 7px 24px #0005. ≤460px: Breite 100vw − 24px.</td></tr>
+<tr><td>Einstellungen / Bau-Drawer</td><td>Bis 400px; padding 14px; sticky Header; verfügbaren Platz misst JavaScript</td><td>#1d2922f7; 1px #4d684f; Radius 14px; 0 12px 32px #000a.</td></tr>
+<tr><td>HUD-Popup</td><td>Bis min(380px,90vw); padding 16px; max-height 65vh als CSS-Ausgangswert</td><td>Radius 12px; Panel dunkel; JavaScript verankert unter dem zugehörigen HUD-Element.</td></tr>
+<tr><td>Verbrauchshilfen</td><td>Bis 310px; padding 10px; Radius 12px; kompakt oben unter Toolbar</td><td>#20332b; Rand #6d8468; Auswahlmeldung bleibt sichtbar und liegt über Straßenhervorhebungen.</td></tr>
+<tr><td>Bestenliste / Patchnotes</td><td>Bestenliste max-height 88dvh; Patchnotes 85dvh; scrollend, sticky Header</td><td>Bestehende Dialogbasis plus Tabellen-/Artikelstile. Seitenvariante besitzt eigenes Stylesheet.</td></tr>
+<tr><td>Duo</td><td>Teamleiste bis 540px, Standard top 96px; Sitzstatus + gemeinsamer Wellenstatus; kompakte Variante blendet Erklärung aus</td><td>--duo-card #1b2620f2; Radius 14px; oben 3px Statusfarbe; .duoTurn pointer-events:none, Aktionsbutton auto.</td></tr></table></div>
+<p>Wichtig: Diese Tabelle enthält Layoutrezepte, keine garantierten Endrechtecke. Weitere Regeln für Duo, Landscape, eingeblendete Tutorials, Auswahlzustände und direkte JS-Styles stehen im Inventar.</p></section>
+
+<section id="cards"><h2>06 · Karten, Icons und Informationsdichte</h2>
+<ul><li>Grundkarte: 3px Rand, Radius 10px, Pergamentfläche, zentrierte Inhalte. Gemeinsam ausgerichtete Zeilen für Rarität, Straßensymbol, Titel, Beschreibung und Plätze.</li><li>Allgemeines Kartenraster im Stylesheet: <code>24px 64px 42px 88px 44px</code>; min-height 284px. <strong>Hand- und Belohnungskontexte überschreiben dieses Raster.</strong></li><li>Mini-Straße: SVG, allgemeines Maß 58×58px, Hand 44×44px; Polygon #d8c99d, Kontur #8c7542/2px; Straße #5f4b27/7px.</li><li>Raritätsbadge: weißer Text auf Raritätsfarbe, kleine Versalien, meist 10px/700, Radius 5px, padding 3px 6px. Spätere Kartenkontexte überschreiben Schrift/Farbe.</li><li>Slotinformationen: Zahl + Icon + Beschriftung. JavaScript testet tatsächlichen Überlauf und setzt <code>.compactSlots</code>; erst dann verschwindet das Textlabel. Kein ausschließlich breitenbasierter Icon-Wechsel.</li><li>Kartenentfernung: erster Klick setzt <code>.removalPending</code>; übriger Karteninhalt blur(4px), opacity .4. Bestätigung überlagert die Karte mit #f1e5c3c9, Text #302712; zweiter Klick bestätigt.</li><li>Arsenal-Icons: parametrische SVGs und Baumfarbe <code>--tree-color</code>. Aktiver Tab zeigt farbige linke Markierung, auf Mobil unten. Aktiv, gesperrt, bereits gesehen und bezahlbar sind unterschiedliche Zustände.</li><li>Turmupgrade: zwei Pfade untereinander; Flächenpfad oben, Einzelzielpfad unten gemäß <code>HexData.availableUpgrades</code>. UI-Sortierung nicht durch ein rein optisches Redesign ändern.</li></ul></section>
+
+<section id="effects"><h2>07 · Glow, Schatten und Animation</h2>
+<div class="table"><table><tr><th>Effekt</th><th>Bestandsrezept</th><th>Bedeutung</th></tr>
+<tr><td>Raritätsglow</td><td>0 0 10px var(--rarity-glow); Legendary 18px; Hover/Selected zusätzlich 2px Ring und 18px Glow</td><td>Rarität / Auswahl; kontextspezifische spätere Hover-Regeln beachten.</td></tr>
+<tr><td>Aktives Arsenal-Ultimate</td><td>0 0 0 1px #e2b857, 0 0 24px #e2b85740</td><td>Aktiviert, nicht bloß bezahlbar.</td></tr>
+<tr><td>Arsenal-Verfügbarkeitspunkt</td><td>22×22px, #e2b85726, #f0d78c, 0 0 10px #e2b85744; kompakt 18px</td><td>Nach Ansehen ausgeblendet; verfügbarer Kauf bleibt möglich.</td></tr>
+<tr><td>Wellenstart-Puls</td><td>1.4s ease-in-out infinite; bei 50% 8px #6fd08a33 Ring + 24px #6fd08a88 Glow</td><td>Welle kann gestartet werden.</td></tr>
+<tr><td>Normale Meldung</td><td>msgFade 7s ease forwards: 0 → sichtbar bei 5%, bis 85%, dann aus</td><td>Tutorial und aktive Verbrauchshilfe überschreiben mit dauerhafter Sichtbarkeit.</td></tr>
+<tr><td>Gold</td><td>floatUp 1.3s ease-out, 34px nach oben, ausblenden</td><td>Ertrag; kompakte Goldmeldung ist fixed mit z-index 80.</td></tr>
+<tr><td>Basistreffer</td><td>Inset-Schatten 0 0 120px 30px #d0362a; .7s ease-out</td><td>Vollbild-Schadensfeedback, pointer-events:none.</td></tr>
+<tr><td>Arsenalwechsel</td><td>arsenalFade .2s ease-out; opacity 0→1; translateY(4px)→0</td><td>Detailpanelwechsel.</td></tr>
+<tr><td>Allgemeine kleine Übergänge</td><td>Oft .15s; Arsenal-Press .1s; Dropdown-Pfeil .15s; Wellenbalken .3s</td><td>Kein zentraler Motion-Token-Satz.</td></tr>
+<tr><td>Duo</td><td>Todo-Puls 1.6s; Server-online-Puls 2s</td><td>Aktive Aufgabe / Serverstatus; nicht austauschbar.</td></tr></table></div>
+<p><code>prefers-reduced-motion:reduce</code> wird in mehreren Blöcken berücksichtigt, z. B. Arsenal, Karten, Biomwind, Slotmarker und Duo-Serverpuls. Es ist keine pauschal nachgewiesene Abdeckung sämtlicher CSS- und WebGL-Animationen.</p>
+<h3>Layer / Z-Index</h3><p>Grundorientierung: Rails/Header etwa 7; Toolbar 38 im Kompaktlayout; Verbrauchshilfenmenü 24; aktive Verbrauchshilfenmeldung 30; Standardoverlays 50; Loadout/Modus/Arsenal 60; Account/Save 65; Testbadge 70; kompaktes Goldfeedback 80; Dev-Toggle 2000. Diese Zahlen sind wegen lokaler Stacking Contexts keine globale Garantie. Die aktuelle Meldung steht außerhalb des Board-Containers, damit Straßenhervorhebungen sie nicht überdecken.</p></section>
+
+<section id="responsive"><h2>08 · Responsive Regeln und Eingabegeräte</h2>
+<p>Der Hauptwechsel ist <code>(max-width:1100px), (max-height:600px)</code>: <strong>ODER</strong>, nicht UND. Auch ein breites, niedriges Fenster verwendet kompakte Bedienelemente.</p>
+<div class="table"><table><tr><th>Bedingung</th><th>Wesentliche Wirkung</th></tr>
+<tr><td>≤1100px Breite ODER ≤600px Höhe</td><td>Fünf obere Kategorien; permanente Rails/Teile des Headers verborgen; geöffnete Kategorie unter der Leiste; zweispaltiger Aktionsfooter; kleinere Handkarten; kompakter Rewarddialog.</td></tr>
+<tr><td>Arsenal ≤760px</td><td>Vollbild 100dvh, ohne Außenradius/Rand; horizontale scrollbar-fähige Rail; eine Pfadspalte; kleinere Icons und Texte.</td></tr>
+<tr><td>Reward ≤600px Breite</td><td>Zwei Kartenspalten, 34px MiniPath, Titel 13px. Bei ≤500px Höhe wieder drei Spalten.</td></tr>
+<tr><td>Landscape ≥650px Breite UND ≤600px Höhe</td><td>Hand und Footer rechts mit 42vw; Tutorial maximal 44vw; weitere Anpassungen bei ≤560px Höhe.</td></tr>
+<tr><td>Menü ≤700px / ≤500px Höhe</td><td>Erst kleinere Schrift/Abstände; bei ≤500px Logo, Tagline, Eyebrow und Version aus, Buttons zweispaltig.</td></tr>
+<tr><td>Account ≤480px</td><td>Padding 20px 16px 16px; Stats zweispaltig; Aktionen untereinander.</td></tr>
+<tr><td>Touch / Hover</td><td>Tastaturkürzel nur für geeignete Eingabekontexte; Hoveranimationen teilweise über (hover:hover). Eingabemodus und Gerätegröße sind nicht gleichbedeutend.</td></tr></table></div>
+<p>Historische und komponentenspezifische Queries bei 380, 450, 460, 480, 550, 600, 650, 700, 760, 850, 1000, 1050, 1100 und 1150px sind nicht zu einer sauberen globalen Skala zusammengeführt. Das Regelverzeichnis enthält die exakten Bedingungen.</p>
+<p><strong>JavaScript ist Teil des Layoutsystems:</strong> <code>classes/ui-layout.js</code> berechnet freie Bildschirmbereiche, Standardabstand 12px. <code>layoutMenus()</code> in game.js positioniert Meldungen, Drawer, Turmpanel und HUD-Popups anhand der tatsächlich belegten Fläche. <code>ResizeObserver</code>, Sprachwechsel und Eingabewechsel lösen Neuvermessung aus. Safe-Area-Inset-Werte werden verwendet. Diese Logik muss beim Redesign erhalten oder bewusst ersetzt werden.</p></section>
+
+<section id="behavior"><h2>09 · Zustände, Interaktion und Text</h2>
+<ul><li>Jede Komponente braucht getrennte Varianten für normal, hover, focus-visible, pressed/selected, disabled und gegebenenfalls loading/error/success. Aktuell sind diese Varianten nicht überall gleich gestaltet.</li><li>Globaler Tastaturfokus: 3px #ffe198, offset 3px. Arsenal-Tabs haben 2px Gold/offset 1px; Turmpanel offset 1px. Account-Inputs besitzen eigenen Fokusglow.</li><li>Disabled ist nicht überall reduzierte Deckkraft: spätere Standardregeln setzen opacity 1 mit dunkler Fläche und gedämpftem Text; Karten .7; Account .55; Arsenal-Kauf .5. Keine pauschale .45-Regel als Endzustand übernehmen.</li><li>Arsenal „gesehen“: Anklicken eines Turm-/Gebäudeeintrags bestätigt aktuell bezahlbare Angebote. Hauptmenühinweis bleibt, Glow verschwindet nach Bestätigung aller bezahlbaren Angebote. Neu bezahlbare Angebote dürfen wieder markieren. Lokaler Stand synchronisiert dies mit Account-Einstellungen, Gäste im Browser.</li><li>Bestenliste: Modusbuttons nebeneinander mit Umbruch; Sortierung per Spaltenkopf inklusive Richtungspfeil; eigene Zeile und Top-3 haben separate Stile. Keine Ladeblende nur für einen lokalen Sortierwechsel entwerfen.</li><li>Verbrauchshilfen: Platzierungsvorschau und gültig/ungültig-Farben, wiederholte Platzierung, dauerhaftes Auswahlfeedback, Abbruch über Escape/Rechtsklick bzw. Touch-Aktion. Vorschau darf keine Dialoge überdecken.</li><li>Karteninteraktion: Touchvorschau bleibt an der Weltposition des Tiles, keine Tastaturhinweise für reine Touchbedienung. Header-Leerflächen lassen Karteninteraktion durch und sollen keine Textauswahl auslösen.</li><li>Dev-Elemente gehören zum lokalen Dev-Modus und sind keine regulären Spieleraktionen.</li><li>Deutsch und Englisch sind vorhanden. Die Bestandsbeschriftung mischt teilweise „Wave/Welle“, „Run/Durchlauf“ und „Upgrade/Verbesserung“. Dies ist eine Bestandsabweichung, keine verbindliche Sprachregel.</li></ul>
+<p>Eine vollständige Accessibility-Zertifizierung liegt damit nicht vor: Kontrastmessungen, Screenreader-Navigation, Zoom und Touch-Zielgrößen wurden für diesen Guide nicht im Browser geprüft.</p></section>
+
+<section id="scope"><h2>10 · Quellenkarte und Abgrenzung</h2>
+<div class="table"><table><tr><th>Quelle</th><th>Verantwortung</th></tr>
+<tr><td>style.css + index.html</td><td>Spiel, HUD, Hauptmenü, Dialoge, Karten, Account, Arsenal, integrierte Bestenliste, Dev-UI.</td></tr>
+<tr><td>duo.css + duo-lobby.html</td><td>Duo-Lobby und Ingame-Teamleiste; wird auch nach style.css in index.html geladen.</td></tr>
+<tr><td>leaderboard.css + leaderboard.html</td><td>Eigenständige Bestenlisten-/Review-Seite, eigenes Erscheinungsbild.</td></tr>
+<tr><td>admin.css + admin.html</td><td>Admin-Oberfläche mit eigenen Tokens/Schriften; getrennte Produktfläche.</td></tr>
+<tr><td>viewer.html / duo-prototype.html</td><td>Hilfs-/Prototypflächen mit Inline-CSS; im Inventar separat, kein Vorbild für Spieler-UI.</td></tr>
+<tr><td>classes/arsenal.js / game.js / duo-game.js / public-leaderboard.js</td><td>Markup, Zustände, dynamische Farben, Sichtbarkeit und Interaktion.</td></tr>
+<tr><td>classes/ui-layout.js / Eingabe- und Kompaktlogik</td><td>Verfügbarer Bildschirmraum, automatische Positionierung, Textkürzung und Touch/Keyboard-Verhalten.</td></tr>
+<tr><td>classes/data.js / biomes.js / three-renderer.js / svg-renderer.js</td><td>Semantische Turm-/Biomfarben, Weltlabel und Renderstile. WebGL-Materialien sind nicht vollständig im CSS-Katalog abgebildet.</td></tr>
+<tr><td>docs/ux-audit-2026-10-17 und docs/ux-design-plan-2026-10-17</td><td>Ältere Audit-/Entwurfsartefakte. Nicht als aktuelle Implementierung behandeln; ihre eigenen Styles sind absichtlich nicht Teil des Spielinventars.</td></tr></table></div>
+<p>Das CSS-Verzeichnis erfasst sämtliche Deklarationsblöcke der vier Root-Stylesheets und style-Blöcke der sechs genannten Root-HTML-Dateien. Die zusätzliche dynamische Liste ist eine Suchhilfe, kein Beweis, dass jede JS-erzeugte CSS-Zeichenkette oder jedes Modellmaterial erkannt wurde. Einträge werden nicht als „ungenutzt“ markiert, nur weil sie im statischen HTML fehlen: zahlreiche Komponenten entstehen erst per JavaScript.</p></section>
+
+<section id="handoff"><h2>11 · Vorbereitung des Redesigns</h2>
+<h3>Festgestellte Uneinheitlichkeiten</h3>
+<ol><li>Zwei parallele UI-Tokenfamilien und viele direkt eingetragene Farben.</li><li>Mehrere Generationen von Turmpanel-, Karten- und Responsive-Regeln in derselben Datei. Selektorspezifität kann wichtiger als die letzte Zeile sein.</li><li>Gold und Grün bedeuten je nach Kontext primäre Aktion, Freischaltung, Auswahl oder Hinweis.</li><li>Schriften variieren zwischen Spiel, öffentlicher Bestenliste und Admin; Inter ist nicht als selbst gehostete Schrift garantiert.</li><li>44px Basis-Zielgröße wird durch kleinere Close-, Tab- und Upgradebuttons unterschritten.</li><li>Icons stammen nicht aus einer einheitlichen Familie; Emojis verändern sich je nach Plattform.</li><li>CSS und JavaScript teilen sich Positionierung, Maße und Sichtbarkeit. Reine CSS-Ersetzung reicht für ein vollständiges Redesign nicht.</li></ol>
+<h3>Empfohlene Übergabe an Design und Entwicklung</h3>
+<ol><li>Markenrichtung, Wortmarke und Fontlizenz festlegen; bestehende Motive bewusst beibehalten oder ersetzen.</li><li>Semantische Tokens definieren: surface, text, border, action, focus, danger, rarity, spacing, radius, elevation, motion. Alte Werte mit neuen Tokens tabellarisch abbilden.</li><li>Komponenten entwerfen: Buttonfamilien, Input/Select/Slider, Tab, Badge, Karte, Dialog, Drawer, Tooltip, Toast, Stat-Chip und Tabelle. Für jede Komponente alle Zustände und DE/EN berücksichtigen.</li><li>Danach komplette Screens zusammensetzen: Hauptmenü, Moduswahl, Loadout, Account, Arsenal, Ingame-Bauen/Kampf, Verbrauchshilfen, Rewards/Entfernen, Victory/Niederlage, Bestenliste, Duo-Lobby/Teamleiste.</li><li>CSS konsolidieren und Inline-Styles gezielt reduzieren; Interaktionslogik und gespeicherte UI-Einstellungen bewahren.</li><li>Mit dem Nutzer visuell prüfen: 390×844 und 844×390, 768×1024, 1024×768, 1440×900 sowie knapp um 1100px Breite und 600px Höhe. Diese Größen sind eine vorgeschlagene Prüfliste, keine bereits getesteten Ansichten.</li></ol>
+<p><strong>Offene Designentscheidungen für die nächste Phase:</strong> Soll die dunkle Grün-/Gold-/Pergamentwelt erhalten bleiben? Soll die öffentliche Bestenliste exakt zum Spiel passen? Sollen Admin und Viewer ebenfalls umgestaltet werden? Welche Geräte und minimale Schriftgröße sollen priorisiert werden? Die Bestandsaufnahme ist ohne diese Entscheidungen nutzbar.</p>
+<p><strong>Prüfstatus dieses Guides:</strong> Quellen gelesen und inventarisiert; Generator und Ausgabe strukturell geprüft. Keine Änderungen am Spielverhalten, keine externen Dienste, keine sensiblen Konfigurationen eingelesen, keine Browserprüfung, kein Push/Release.</p></section>

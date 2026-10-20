@@ -11,7 +11,7 @@ test('introduction restart confirms exact reward, cancels without mutation and p
 test('saved run is also confirmed and paid before starting again after reload',()=>{
  const original=load();Object.assign(original.a.state,{wave:25,phase:'wave',waveRunning:true,enemies:[],pendingSpawns:0,spawnQueue:[]});original.a.endWave();
  const prompts=[],view=load({bootToMenu:true,initialStorage:Object.fromEntries(original.storage),confirm:text=>{prompts.push(text);return true;}});
- view.elements.get('menuPlayBtn').listeners.click();assert.match(prompts[0],/Welle 25/);
+ view.elements.get('menuPlayBtn').listeners.click();assert.equal(prompts.length,0);view.elements.get('standardModeBtn').listeners.click();assert.match(prompts[0],/Welle 25/);
  assert.ok(JSON.parse(view.storage.get('hex-bastion-profile-v1')).settledRuns.includes(original.a.state.runId));
  assert.equal(view.storage.get('autohex-solo-autosave-v1'),'');
 });

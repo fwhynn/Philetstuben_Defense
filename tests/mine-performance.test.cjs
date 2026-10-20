@@ -5,11 +5,11 @@ test('unchanged mine ranges reuse geometry while range and map changes refresh i
   const {core,state,random}=fixture(),geometry=core.map.roadGeometry;let calls=0;
   core.map.roadGeometry=(...args)=>{calls++;return geometry(...args);};
   const advance=()=>core.runtime.advance(state,random,2);
-  advance();assert.equal(calls,410);advance();assert.equal(calls,410);
-  state.map.get('4,0').towers[0].rangeFactor=1.5;advance();assert.equal(calls,451);
-  state.map.get('2,0').roads=[1,3];advance();assert.equal(calls,861);
-  state.map.get('2,0').type='smallCurve';advance();assert.equal(calls,1271);
-  state.map.get('4,0').towers[0]={type:'mine',lastShot:0};advance();assert.equal(calls,1312);
+  advance();assert.equal(calls,41);advance();assert.equal(calls,41);
+  state.map.get('4,0').towers[0].rangeFactor=1.5;advance();assert.equal(calls,82);
+  state.map.get('2,0').roads=[1,3];advance();assert.equal(calls,123);
+  state.map.get('2,0').type='smallCurve';advance();assert.equal(calls,164);
+  state.map.get('4,0').towers[0]={type:'mine',lastShot:0};advance();assert.equal(calls,205);
 });
 test('cached and freshly rebuilt mine ranges produce exact positions and RNG through changes',()=>{
   const a=fixture(),b=fixture();

@@ -31,12 +31,12 @@ const HexWaves=(()=>{
     // A deterministic rotating roster; special enemies replace ordinary spawn slots.
     const boss=bossProfile(wave),immunity=elementFor(wave,context);
     const catalog=[
-      [6,'shieldbearer',{name:'Schildknecht',shieldHits:3,speed:speed*.85,abilityIcon:'▣',description:'Drei direkte Treffer brechen den Schild. Flächenschaden umgeht ihn.'}],
+      [6,'shieldbearer',{name:'Schildknecht',shieldHits:3,speed:speed*.85,abilityIcon:'▣',description:'Der Schild blockiert drei Treffer vollständig, auch Flächenschaden. Jeder Treffer entfernt nur einen Schildstack.'}],
       [12,'splitter',{name:'Splittergolem',speed:speed*.75,armorHp:Math.round(hp*.35),splitOnDeath:true,description:'Zerfällt in zwei kleine Golems. Das Gold verteilt sich auf alle drei.'}],
       [13,'thornToad',{name:'Donnerkröte',abilityIcon:'↟',description:'Bewegt sich nur springend. Kann gelegentlich auf eine nahe Straße im Nachbarhex abkürzen. Verlangsamung verkürzt die Sprünge.'}],
       [17,'moltingBeetle',{name:'Häutungskäfer',speed:speed*.7,armorHp:Math.round(hp*.4),abilityIcon:'⬡',description:'Nach dem Panzerbruch dauerhaft 40 % schneller.'}],
       [18,'healer',{name:'Feldheiler',hp:Math.round(hp*.8),speed:speed*.9,healRadius:50,healInterval:3000,description:'Heilt andere Gegner im kleinen Umkreis alle 3 Sekunden um 5 %. Heiler heilen einander nicht.'}],
-      [21,'tarSnail',{name:'Pechschnecke',hp:hp*8,speed:speed*.22,abilityIcon:'≈',description:'Extrem zäh und langsam. Ihre Pechspur verlangsamt nachfolgende Gegner um 45 %. Feuer entzündet das Pech.'}],
+      [21,'tarSnail',{name:'Pechschnecke',hp:hp*2,speed:speed*.8,abilityIcon:'≈',description:'Ihre Pechspur schützt andere Gegner: 20 % weniger Schaden, ohne Verlangsamung. Feuer entzündet das Pech.'}],
       [26,'elementCarrier',{name:'Elementträger · '+({fire:'Feuer',water:'Wasser',lightning:'Blitz'})[immunity],immunity,abilityIcon:({fire:'🔥',water:'💧',lightning:'ϟ'})[immunity],color:({fire:'#ef7449',water:'#56c5ef',lightning:'#efd557'})[immunity],description:'Immun gegen '+({fire:'Feuer',water:'Wasser',lightning:'Blitz'})[immunity]+'. Andere Schadensarten wirken normal.'+(immunity==='water'?' Wasserverlangsamung wirkt nicht; Frost-Auren wirken weiterhin.':'')}],
       [28,'mushroomColossus',{name:'Pilzkoloss',hp:Math.round(hp*1.5),speed:speed*.65,abilityIcon:'♣',description:'Hinterlässt beim Tod vier Sekunden Sporen. Gegner darin können von Türmen nicht anvisiert werden.'}],
       [38,'ramBeetle',{name:'Rammbockkäfer',hp:Math.round(hp*1.25),speed:speed*.8,abilityIcon:'»',description:'Beschleunigt auf Geraden; Kurven und Verlangsamungen bremsen. Bei vollem Tempo drei Basisschaden.'}]

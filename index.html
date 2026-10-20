@@ -16,15 +16,6 @@
     <button id="devToggleBtn" class="devToggle hidden" type="button" aria-pressed="false">Dev: aus</button>
     <div id="fpsCounter" class="fpsCounter hidden" data-no-translate aria-label="FPS">FPS: —</div>
     <div id="app">
-      <!-- Vollbild-Spielfeld -->
-      <section class="boardWrap">
-        <svg id="board" viewBox="-545 -375 1100 760" aria-label="Hex-Karte"></svg>
-        <div class="mapControls">
-          <button id="zoomInBtn" class="secondary" aria-label="Map vergrößern">+</button>
-          <button id="zoomOutBtn" class="secondary" aria-label="Map verkleinern">−</button>
-          <button id="resetViewBtn" class="secondary">Zur Base</button>
-          <span>Mausrad: Zoom · rechte Maustaste ziehen: verschieben</span>
-        </div>
         <div id="message" class="message"><span id="messageText">Wähle eine Hexkarte und lege sie an die offene Straße
             der Base.</span>
           <section id="tutorialPanel" class="tutorialPanel hidden" aria-label="Mini-Tutorial"><button
@@ -34,6 +25,15 @@
                 Weiter</button></div>
           </section>
           <p id="tutorialFeedback" class="tutorialFeedback hidden" role="alert"></p>
+        </div>
+      <!-- Vollbild-Spielfeld -->
+      <section class="boardWrap">
+        <svg id="board" viewBox="-545 -375 1100 760" aria-label="Hex-Karte"></svg>
+        <div class="mapControls">
+          <button id="zoomInBtn" class="secondary" aria-label="Map vergrößern">+</button>
+          <button id="zoomOutBtn" class="secondary" aria-label="Map verkleinern">−</button>
+          <button id="resetViewBtn" class="secondary">Zur Base</button>
+          <span>Mausrad: Zoom · rechte Maustaste ziehen: verschieben</span>
         </div>
         <section id="towerPanel" class="towerPanel hidden" aria-label="Ausgewählter Turm">
           <div class="panelHead">
@@ -352,7 +352,7 @@
           (unabhängig vom Gold)</label>
         <label class="toggle"><input id="slotHints" type="checkbox" checked /> Freie Bauplätze: Weiß = Turm, Türkis =
           Gebäude</label>
-        <button id="openMainMenuBtn" class="secondary">Hauptmenü</button>
+        <button id="openMainMenuBtn" class="secondary">Speichern &amp; Hauptmenü</button>
         <button id="exitFirstPlayerTestSettings" class="secondary hidden">Erstspieler-Test beenden · zum echten
           Spielstand</button>
         <button id="skipIntroductionSettings" class="secondary hidden">Einführung überspringen · vollständige Welt ab
@@ -469,10 +469,12 @@
           <button type="button" data-leaderboard-mode="dual" aria-pressed="false">Zwei Fronten</button>
           <button type="button" data-leaderboard-mode="daily" aria-pressed="false">Tägliche Herausforderung</button>
           <button type="button" data-leaderboard-mode="duo" aria-pressed="false">Duo-Mode</button>
+          <button type="button" data-leaderboard-mode="legacy" aria-pressed="false">Gesamtwerte</button>
         </div>
         <p id="leaderboardStatus" class="leaderboardStatus" role="status" aria-live="polite"></p>
+        <details id="runReview" hidden><summary>Runs prüfen</summary><div id="runReviewEntries"></div></details>
         <div id="leaderboardContent" class="leaderboardTable"></div>
-        <small class="leaderboardNote">Eine Front: Top 100 aus gespeicherten Account-Spielständen (ungeprüft). Weitere Modi folgen, sobald deren Daten verfügbar sind.</small>
+        <small class="leaderboardNote">Getrennte Run-Wertungen zeigen freigegebene Ergebnisse. Gesamtwerte stammen aus gespeicherten Account-Spielständen und sind ungeprüft.</small>
       </section>
     </div>
     <div id="saveOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="saveTitle">
@@ -656,6 +658,7 @@
           <summary>Turmstatistik</summary>
           <div id="dailyVictoryStatsContent"></div>
         </details>
+        <section id="victoryRanking"></section>
         <p id="campaignVictoryNote">Deine Map und Türme bleiben im Endless-Modus erhalten. Diamanten werden beim Beenden
           des Durchlaufs abgerechnet.
         </p>
@@ -717,6 +720,7 @@
       (() => {
         const applyVersion = (version) => {
           if (!version) return;
+          globalThis.AUTOHEX_VERSION=String(version).replace(/^v/,'');
           const label = `v${String(version).replace(/^v/, '')}`;
           document.title = `AutoHex TD ${label}`;
           document.querySelectorAll('[data-app-version]').forEach(node => { node.textContent = label; });
@@ -737,7 +741,9 @@
     <script src="runtime-config.js"></script>
     <script src="classes/api.js"></script>
     <script src="classes/leaderboard-ui.js"></script>
+    <script src="classes/run-ranking.js"></script>
     <script src="classes/public-leaderboard.js"></script>
+    <script src="classes/run-review.js"></script>
     <script src="classes/site-visit.js"></script>
     <script src="classes/sound.js"></script>
     <script src="classes/camera.js"></script>

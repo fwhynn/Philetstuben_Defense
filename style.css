@@ -521,6 +521,7 @@ body:has(#biomeIntro:not(.hidden)) .biomeTooltip{display:none!important}
 .arsenalTab.locked .researchIcon{opacity:.55;filter:grayscale(.6)}
 .arsenalTab.locked .arsenalTabText strong{color:#c3c9bf}
 .arsenalTabDot{flex:0 0 auto;display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#e2b85726;color:#f0d78c;font-size:11px;box-shadow:0 0 10px #e2b85744}
+.arsenalTab:not(.affordable) .arsenalTabDot{display:none}
 
 .arsenalDetail{overflow:auto;padding:22px 26px 70px;overscroll-behavior:contain}
 .arsenalTree[hidden]{display:none}
@@ -837,3 +838,9 @@ body:has(#biomeIntro:not(.hidden)) .biomeTooltip{display:none!important}
 .tunnelRescuePanel p{margin:0 0 8px;font-size:13px;line-height:1.35}
 .tunnelRescuePanel button{width:100%;min-height:44px}
 
+
+/* Map hints must stay above the projected road highlights. */
+.message.consumableActive{position:fixed;z-index:30;background:#1d2922}
+/* Only visible header controls intercept map gestures, not their flex spacers. */
+.gameHeader,.gameHeader .dockTL,.gameHeader .dockTL>div,.gameHeader .hud{pointer-events:none;user-select:none;-webkit-user-select:none}
+.gameHeader button,.gameHeader a,.gameHeader .hud>*,.gameHeader [data-app-version]{pointer-events:auto}

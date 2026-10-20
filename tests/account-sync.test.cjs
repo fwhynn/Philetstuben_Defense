@@ -21,6 +21,46 @@ function fakeApi(serverSave = null) {
     async putSave(text) { const data = JSON.parse(text); this.puts.push(data); this.server = data; return { updatedAt: 'now' }; } };
 }
 const flush = () => new Promise(resolve => setImmediate(resolve));
+function acknowledgeArsenal(r){
+ r.elements.get('menuArsenalBtn').listeners.click();
+ for(const tab of r.elements.get('arsenalTabs').children.filter(e=>e.attributes.role==='tab'))tab.listeners.click();
+}
+test('arsenal acknowledgements upload automatically and follow the account to another browser',async()=>{
+ const api=fakeApi(),first=load({accountApi:api,initialProfile:{diamonds:100}});
+ await submit(first.document,'register');acknowledgeArsenal(first);
+ assert.equal(first.elements.get('menuArsenalBtn').classList.contains('upgradeAvailable'),false);
+ // Execute the debounced save like the browser timer.
+ for(const callback of [...first.timers.values()])await callback();
+ assert.ok(api.server.gameSettings.arsenalSeen.length>0);
+ const remote=fakeApi(api.server),second=load({accountApi:remote,bootToMenu:true});
+ await submit(second.document,'login');
+ assert.equal(second.elements.get('menuArsenalBtn').classList.contains('upgradeAvailable'),false);
+ assert.match(second.elements.get('menuArsenalBtn').textContent,/Upgrade verfügbar/);
+ assert.deepEqual(JSON.parse(second.storage.get('hex-arsenal-seen-v1')),api.server.gameSettings.arsenalSeen);
+});
+test('arsenal acknowledgement survives deferred restore and remains local for guests',async()=>{
+ const api=fakeApi(serverSave({diamonds:100})),r=load({accountApi:api,initialProfile:{diamonds:100}});
+ await submit(r.document,'login');acknowledgeArsenal(r);
+ const seen=JSON.parse(r.storage.get('hex-arsenal-seen-v1'));
+ endRun(r.a);await flush();
+ assert.deepEqual(api.server.gameSettings.arsenalSeen,seen);
+ const guestApi=fakeApi(),guest=load({accountApi:guestApi,initialProfile:{diamonds:100}});
+ acknowledgeArsenal(guest);await flush();assert.equal(guestApi.puts.length,0);
+ const reload=load({initialProfile:{diamonds:100},initialStorage:Object.fromEntries(guest.storage)});
+ assert.equal(reload.elements.get('menuArsenalBtn').classList.contains('upgradeAvailable'),false);
+});
+test('another account without acknowledgements does not inherit the browser seen list',async()=>{
+ const guest=load({initialProfile:{diamonds:100}});acknowledgeArsenal(guest);
+ const api=fakeApi(serverSave({diamonds:100})),r=load({accountApi:api,bootToMenu:true,initialStorage:Object.fromEntries(guest.storage)});
+ await submit(r.document,'login');
+ assert.equal(r.elements.get('menuArsenalBtn').classList.contains('upgradeAvailable'),true);
+});
+test('Duo account saves retain a suspended solo checkpoint',async()=>{
+ const solo=load();solo.elements.get('openMainMenuBtn').listeners.click();const raw=solo.storage.get('autohex-solo-autosave-v1');assert.ok(raw);
+ const api=fakeApi();api.loggedIn=true;const duo=load({duo:{},accountApi:api,initialStorage:Object.fromEntries(solo.storage)});
+ await flush();await duo.elements.get('accountSaveServerBtn').listeners.click();
+ assert.deepEqual(api.server.runAutosave,JSON.parse(raw));assert.equal(duo.storage.get('autohex-solo-autosave-v1'),raw);
+});
 async function submit(document, mode, username = 'phil', password = 'geheimes-passwort') {
   const el = id => document.getElementById(id);
   el(mode === 'register' ? 'accountTabRegister' : 'accountTabLogin').listeners.click();
@@ -80,7 +120,7 @@ test('game preferences persist locally, upload to the account and restore in ano
  const set=(id,value)=>{const el=first.elements.get(id);el.checked=value;el.listeners.change({target:el});};
  set('slotHints',false);set('onboardingHints',false);set('hexGrid',true);set('upgradeStatus',true);set('autoStart',true);set('multiTowerSelection',true);
  await submit(first.document,'register');
- assert.deepEqual(api.server.gameSettings,{slotHints:false,onboardingHints:false,hexGrid:true,upgradeStatus:true,autoStart:true,multiTowerSelection:true,gameSpeed:1});
+ assert.deepEqual(api.server.gameSettings,{slotHints:false,onboardingHints:false,hexGrid:true,upgradeStatus:true,autoStart:true,multiTowerSelection:true,arsenalSeen:[],gameSpeed:1});
  const reload=load({initialStorage:Object.fromEntries(first.storage)});
  for(const [key,value] of Object.entries(api.server.gameSettings))if(typeof value==='boolean')assert.equal(reload.elements.get(key).checked,value,key);
  const second=load({accountApi:api});await flush();await flush();

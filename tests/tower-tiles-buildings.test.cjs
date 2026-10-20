@@ -2,6 +2,17 @@ const { test } = require('node:test'), assert = require('node:assert/strict');
 const fs = require('node:fs'), path = require('node:path'), vm = require('node:vm');
 const { load } = require('./helpers/game.cjs');
 function rules() { const c = {}; for (const f of ['data.js', 'deck.js', 'buildings.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../classes', f), 'utf8'), c); return vm.runInNewContext('({data:HexData,deck:HexDeck,buildings:HexBuildings})', c); }
+test('remote market allows an initial placement and one correction, preserved through checkpoint reload',()=>{
+ const c=require('../headless-core.cjs')(),run=c.runtime.create({seed:'market-limit',runId:'market-limit',loadout:['archer','catapult','chain','freeze','mine']}),s=run.state,slot={q:0,r:0,index:0};
+ const building={type:'market',special:true,level:3};s.map.get('0,0').buildings=[building];
+ for(const q of [4,5,6])s.map.set(q+',0',{q,r:0,type:'straight',roads:[0,3],slots:0,towers:[]});
+ assert.equal(c.buildings.setTarget(s,slot,'missing'),false);assert.equal(c.buildings.targetRemaining(building),2);
+ assert.ok(c.buildings.setTarget(s,slot,'4,0'));assert.equal(c.buildings.setTarget(s,slot,'4,0'),false);assert.equal(c.buildings.targetRemaining(building),1);
+ const restored=c.snapshot.restore(JSON.parse(JSON.stringify(c.snapshot.capture(s,run.random)))).state;
+ assert.ok(c.buildings.setTarget(restored,slot,'5,0'));assert.equal(c.buildings.setTarget(restored,slot,'6,0'),false);assert.equal(c.buildings.cost(restored,{q:5,r:0},100),75);
+ assert.equal(c.buildings.cost(restored,{q:4,r:0},100),100);
+ delete building.targetUses;assert.equal(c.buildings.targetRemaining(building),1,'legacy targets count as the first placement');
+});
 test('every tower has exactly one exclusive tile; only validated run loadout tiles enter rewards', () => {
   const { data, deck } = rules(); for (const type of Object.keys(data.TOWERS)) {
     const cards = Object.values(data.CARD_LIBRARY).filter(c => c.requiredTower === type); assert.equal(cards.length, 1, type);

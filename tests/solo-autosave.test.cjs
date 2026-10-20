@@ -49,3 +49,19 @@ test('isolated first-player runs never overwrite the normal browser autosave',()
  Object.assign(view.a.state,{wave:1,waveRunning:true,phase:'wave',enemies:[],pendingSpawns:0,spawnQueue:[]});view.a.endWave();
  assert.equal(view.storage.get(key),raw);assert.ok(view.a.readRunAutosave());
 });
+test('save and menu suspends a running wave without settling it and resumes the exact checkpoint after reload',()=>{
+ const view=completed();Object.assign(view.a.state,{wave:2,waveRunning:true,phase:'wave',elapsedMs:12345,spawnQueue:[],pendingSpawns:0});
+ const gold=view.a.state.gold,runId=view.a.state.runId;
+ view.elements.get('openMainMenuBtn').listeners.click();
+ const saved=view.a.readRunAutosave();assert.equal(saved.manual,true);assert.equal(view.elements.get('mainMenu').classList.contains('hidden'),false);
+ view.a.advanceClock(100000);assert.equal(view.a.state.elapsedMs,12345);assert.equal(view.a.state.gold,gold);assert.ok(!view.a.state.metaSettled);
+ const next=load({bootToMenu:true,initialStorage:Object.fromEntries(view.storage)});next.elements.get('menuContinueBtn').listeners.click();
+ assert.equal(next.a.state.runId,runId);assert.equal(next.a.state.waveRunning,true);assert.equal(next.a.state.elapsedMs,12345);assert.equal(next.a.state.gold,gold);
+ assert.deepEqual(JSON.parse(JSON.stringify(next.a.captureRunCheckpoint())),JSON.parse(JSON.stringify(saved.checkpoint)));
+});
+test('mode selection does not end the saved solo run before choosing Duo',()=>{
+ let prompts=0;const view=load({initialProfile:{introduction:{version:1,bestWave:35}},confirm:()=>{prompts++;return true;}});
+ view.elements.get('openMainMenuBtn').listeners.click();const saved=view.storage.get(key);
+ assert.ok(saved);view.elements.get('menuPlayBtn').listeners.click();assert.equal(prompts,0);assert.equal(view.storage.get(key),saved);
+ view.elements.get('standardModeBtn').listeners.click();assert.equal(prompts,1);assert.equal(view.storage.get(key),'');
+});

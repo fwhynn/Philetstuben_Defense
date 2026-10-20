@@ -160,7 +160,10 @@ const HexData=(()=>{
     def.damageType=({elementFire:'fire',elementWater:'water',elementWind:'wind'})[tower.branch]||({flame:'fire',chain:'lightning',necromancer:'spirit',element:'arcane'})[tower.type]||'physical';
     return def;
   }
-  function availableUpgrades(tower){return Object.entries(UPGRADES).filter(([,upgrade])=>upgrade.tower===tower.type&&!tower.finalUpgrade&&(tower.branch?upgrade.requires===tower.branch:!upgrade.requires));}
+  // Broad/group effects first, focused damage/control below. Pure single-target
+  // towers retain their order; this changes presentation, never upgrade stats.
+  const UPGRADE_ORDER={archer:['volley','marksman'],catapult:['barrage','siege'],chain:['storm','overload'],freeze:['frostField','deepFrost'],mine:['minefield','demolition'],flame:['inferno','wildfire'],necromancer:['soulChoir','soulKeeper'],element:['elementFire','elementWind','elementWater']};
+  function availableUpgrades(tower){return Object.entries(UPGRADES).filter(([,upgrade])=>upgrade.tower===tower.type&&!tower.finalUpgrade&&(tower.branch?upgrade.requires===tower.branch:!upgrade.requires)).sort(([a],[b])=>{const order=UPGRADE_ORDER[tower.type]||[];return order.indexOf(a)-order.indexOf(b);});}
   function towerRefund(state,tower){
     if(state.challengeKind==='garrison'||!tower||tower.guestOwner!==undefined||state.hp<=0||state.phase==='gameover') return null;
     const full=['place','build'].includes(state.phase)&&!state.waveRunning&&tower.builtOnWave===state.wave;

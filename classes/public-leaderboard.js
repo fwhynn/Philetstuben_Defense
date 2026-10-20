@@ -1,15 +1,16 @@
 /* Existing account leaderboard for one front; other modes wait for their own data. */
 (()=>{
  const $=id=>document.getElementById(id),overlay=$('leaderboardOverlay'),content=$('leaderboardContent'),status=$('leaderboardStatus');
- const columns=[['highestWave','highest_wave','Beste Welle'],['runsPlayed','runs_played','Durchläufe'],['normalKills','normal_kills','Gegner'],['bossesKilled','bosses_killed','Bosse'],['diamondsEarned','diamonds_earned','Diamanten']];
+ const legacyColumns=[['highestWave','highest_wave','Beste Welle'],['runsPlayed','runs_played','Durchläufe'],['normalKills','normal_kills','Gegner'],['bossesKilled','bosses_killed','Bosse'],['diamondsEarned','diamonds_earned','Diamanten']];
+ let columns=[['highestWave','highest_wave','Beste Welle'],['normalKills','normal_kills','Kills']];
  let sort='highest_wave',orderBy='highest_wave',direction='descending',generation=0,players=null,ownName='',loading=false;
- let mode='single',loadedSort=null;
+ let mode='single',loadedSort=null,fallbackNotice='';
  const modeButtons=[...document.querySelectorAll('[data-leaderboard-mode]')];
- const fields=[['rank','rank','Rang'],['username','name','Name'],...columns];
+ let fields=[['rank','rank','Rang'],['username','name','Name'],...columns];
  function chooseOrder(key){
   direction=orderBy===key?(direction==='ascending'?'descending':'ascending'):(key==='name'||key==='rank'?'ascending':'descending');
   orderBy=key;
-  if(mode==='single'&&columns.some(([,category])=>category===key)&&loadedSort!==key){sort=key;load();}
+  if(mode==='legacy'&&columns.some(([,category])=>category===key)&&loadedSort!==key){sort=key;load();}
   else {generation++;loading=false;sort=loadedSort||'highest_wave';render();}
  }
  function node(tag,text,className){const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(className)el.className=className;return el;}
@@ -41,19 +42,19 @@
  async function load(){
   const current=++generation;loading=false;
   for(const button of modeButtons)button.setAttribute('aria-pressed',String(button.dataset.leaderboardMode===mode));
-  if(mode!=='single'){players=[];render();status.textContent='Für diesen Modus sind noch keine Bestenlistendaten verfügbar.';return;}
+  if(mode==='daily'){players=[];render();status.textContent='Für diesen Modus sind noch keine Bestenlistendaten verfügbar.';return;}
   loading=true;if(!players)status.textContent='Bestenliste wird geladen …';
   const requestedSort=sort;
-  try{const data=await HexApi.getPublicLeaderboard(requestedSort);if(current!==generation)return;if(!Array.isArray(data?.players))throw Error();players=data.players;loadedSort=requestedSort;loading=false;render();status.textContent=players.length?'':'Noch keine Einträge in dieser Kategorie.';}
-  catch{if(current===generation){loading=false;status.textContent='Bestenliste konnte nicht geladen werden. Bitte später erneut öffnen.';}}
+  try{const data=mode==='legacy'?await HexApi.getPublicLeaderboard(requestedSort):await HexApi.getRunLeaderboard(mode);if(mode!=='legacy'){if(data.mode!==mode||!Array.isArray(data.entries))throw Error();data.players=data.entries.map(r=>({...r,highestWave:r.wave,normalKills:r.kills}));}if(current!==generation)return;if(!Array.isArray(data?.players))throw Error();players=data.players;loadedSort=requestedSort;loading=false;render();status.textContent=fallbackNotice+(players.length?(mode==='legacy'?'Ungeprüfte Account-Gesamtwerte, keine getrennte Run-Wertung.':'Freigegebene Bestwerte pro Account · Welle, danach Kills.'):'Noch keine Einträge in dieser Kategorie.');}
+  catch{if(current===generation){loading=false;if(mode==='single'){mode='legacy';columns=legacyColumns;fields=[['rank','rank','Rang'],['username','name','Name'],...columns];fallbackNotice='Getrennte Run-Bestenlisten sind noch nicht verfügbar. Angezeigt werden die bisherigen Gesamtwerte. ';return load();}status.textContent='Bestenliste konnte nicht geladen werden. Bitte später erneut öffnen.';}}
  }
  for(const button of modeButtons)button.addEventListener('click',()=>{
   if(mode===button.dataset.leaderboardMode)return;
-  mode=button.dataset.leaderboardMode;sort=orderBy='highest_wave';direction='descending';loadedSort=null;players=null;content.replaceChildren();load();
+  fallbackNotice='';mode=button.dataset.leaderboardMode;columns=mode==='legacy'?legacyColumns:[['highestWave','highest_wave','Beste Welle'],['normalKills','normal_kills','Kills']];fields=[['rank','rank','Rang'],['username','name','Name'],...columns];sort=orderBy='highest_wave';direction='descending';loadedSort=null;players=null;content.replaceChildren();load();
  });
  function close(){overlay.classList.add('hidden');$('menuLeaderboardBtn').focus?.();}
  function open(){
-  mode='single';sort=orderBy='highest_wave';direction='descending';players=null;loadedSort=null;content.replaceChildren();
+  fallbackNotice='';mode='single';columns=[['highestWave','highest_wave','Beste Welle'],['normalKills','normal_kills','Kills']];fields=[['rank','rank','Rang'],['username','name','Name'],...columns];sort=orderBy='highest_wave';direction='descending';players=null;loadedSort=null;content.replaceChildren();
   overlay.classList.remove('hidden');load();
   ownName='';if(HexApi.isLoggedIn())HexApi.currentUser().then(user=>{ownName=user?.username||'';render();}).catch(()=>{});
  }

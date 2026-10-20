@@ -6,7 +6,10 @@
 	const baseUrl = typeof configuredBaseUrl === 'string' && configuredBaseUrl
 		? configuredBaseUrl.replace(/\/+$/, '')
 		: productionBaseUrl;
-	const TOKEN_KEY = 'hex-bastion-auth-token';
+	// Never send a production login token to a separately configured test API.
+	const TOKEN_KEY = baseUrl === productionBaseUrl
+		? 'hex-bastion-auth-token'
+		: 'hex-bastion-auth-token:' + baseUrl;
 
 	async function parseJson(response) {
 		const payload = await response.json().catch(() => null);
@@ -275,7 +278,16 @@
 		if (response.status === 404 || response.status === 503) throw Error('Die Bestenliste ist noch nicht verfügbar. Bitte später erneut versuchen.');
 		return parseJson(response);
 	}
-	globalThis.HexApi = {
+	async function runRankingRequest(path, body) {
+ const response=await fetch(baseUrl+'/run-leaderboard'+path,{method:body?'POST':'GET',cache:'no-store',signal:AbortSignal.timeout(10000),headers:{Accept:'application/json',...authHeaders(),...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});
+ return parseJson(response);
+ }
+ globalThis.HexApi = {
+ getRunLeaderboard:mode=>runRankingRequest('?'+new URLSearchParams({mode})),
+ previewRunRanking:run=>runRankingRequest('/preview?'+new URLSearchParams({mode:run.mode,wave:run.wave,kills:run.kills})),
+ submitRunRanking:run=>runRankingRequest('',run),
+ getPendingRunRankings:()=>runRankingRequest('/pending'),
+ reviewRunRanking:(id,revision,decision,reason)=>runRankingRequest('/'+encodeURIComponent(id)+'/review',{revision,decision,reason}),
 		getLeaderboard: (fronts = 1, offset = 0) => rankingRequest('?' + new URLSearchParams({ fronts, offset })),
 		getRankedResult: session => rankingRequest('/results/' + encodeURIComponent(session.runId), { guestToken: session.token }),
 		claimRankedResult: session => rankingRequest('/results/' + encodeURIComponent(session.runId) + '/claim', { method: 'POST', body: {}, guestToken: session.token }),
