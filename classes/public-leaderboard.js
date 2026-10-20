@@ -1,4 +1,4 @@
-/* Existing account leaderboard for one front; other modes wait for their own data. */
+/* Per-mode run boards with server-authorized moderation controls. */
 (()=>{
  const $=id=>document.getElementById(id),overlay=$('leaderboardOverlay'),content=$('leaderboardContent'),status=$('leaderboardStatus');
  const legacyColumns=[['highestWave','highest_wave','Beste Welle'],['runsPlayed','runs_played','Durchläufe'],['normalKills','normal_kills','Gegner'],['bossesKilled','bosses_killed','Bosse'],['diamondsEarned','diamonds_earned','Diamanten']];
@@ -24,6 +24,8 @@
    if(active){const arrow=node('span',direction==='ascending'?' ↑':' ↓');arrow.setAttribute('aria-hidden','true');button.appendChild(arrow);}
    button.addEventListener('click',()=>chooseOrder(key));th.appendChild(button);head.appendChild(th);
   }
+  const canDelete=mode!=='legacy'&&players.some(player=>player.id!==undefined);
+  if(canDelete)head.appendChild(node('th','Verwaltung'));
   thead.appendChild(head);table.appendChild(thead);
   const field=fields.find(([,key])=>key===orderBy)[0],collator=new Intl.Collator(globalThis.HexI18n?.getLanguage?.()==='en'?'en':'de',{sensitivity:'base',numeric:true});
   const ordered=[...players].sort((a,b)=>{
@@ -35,6 +37,19 @@
    if(ownName&&player.username===ownName)row.classList.add('own');
    row.appendChild(node('td',String(player.rank),'rank'));row.appendChild(name);
    for(const [field,key]of columns)row.appendChild(node('td',number.format(Number(player[field])||0),key===orderBy?'sorted':''));
+   if(canDelete){
+    const cell=node('td');
+    if(player.id!==undefined){
+     const button=node('button','Löschen');button.type='button';let confirmed=false;
+     button.addEventListener('click',async()=>{
+      if(!confirmed){confirmed=true;button.textContent='Löschen bestätigen';return;}
+      button.disabled=true;
+      try{await HexApi.deleteRunRanking(player.id,player.revision);await load();}
+      catch(error){button.disabled=false;confirmed=false;button.textContent='Löschen';status.textContent=error.message||'Eintrag konnte nicht gelöscht werden.';}
+     });cell.appendChild(button);
+    }
+    row.appendChild(cell);
+   }
    body.appendChild(row);
   }
   table.appendChild(body);content.appendChild(table);

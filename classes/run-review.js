@@ -9,6 +9,7 @@
    for(const row of data.entries){
     const item=el('section',''),label=el('p',`${row.username} · ${row.mode} · Welle ${row.wave} · ${row.kills} Kills · ${row.ruleset}`);
     label.setAttribute('data-no-translate','');item.appendChild(label);
+    item.appendChild(el('p',row.suspicion||'Vorhandene Meldung ohne automatischen Prüfgrund.'));
     const reason=el('textarea','');reason.placeholder='Begründung der Entscheidung';reason.setAttribute('aria-label','Begründung der Entscheidung');item.appendChild(reason);
     for(const [decision,text]of [['accepted','Annehmen'],['rejected','Ablehnen']]){
      const button=el('button',text);button.type='button';button.addEventListener('click',async()=>{
@@ -17,6 +18,13 @@
       catch(error){button.disabled=false;item.appendChild(el('p',error.message));}
      });item.appendChild(button);
     }
+    const remove=el('button','Löschen');remove.type='button';let confirmed=false;
+    remove.addEventListener('click',async()=>{
+     if(!confirmed){confirmed=true;remove.textContent='Löschen bestätigen';return;}
+     remove.disabled=true;
+     try{await HexApi.deleteRunRanking(row.id,row.revision);await load();}
+     catch(error){remove.disabled=false;confirmed=false;remove.textContent='Löschen';item.appendChild(el('p',error.message));}
+    });item.appendChild(remove);
     list.appendChild(item);
    }
   }catch(error){list.replaceChildren(el('p',error.message));}

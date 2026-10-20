@@ -1647,7 +1647,15 @@ Der Run konnte noch nicht eingereicht werden. Bitte erneut versuchen.|Your run c
 Freigegebene Bestwerte pro Account · Welle, danach Kills.|Approved best scores per account · Wave, then kills.
 Ungeprüfte Account-Gesamtwerte, keine getrennte Run-Wertung.|Unverified account totals, not scores separated by run mode.
 Vorläufiger Vergleich mit freigegebenen Bestwerten. Welle zählt zuerst, danach Kills. Die Platzierung kann sich ändern.|Provisional comparison with approved best scores. Wave comes first, followed by kills. Rankings may change.
-Erstelle einen Account oder melde dich an, um diesen Run zur Prüfung einzureichen. Er bleibt dafür in diesem Browser gespeichert.|Create an account or sign in to submit this run for review. It is saved in this browser for that purpose.
+Erstelle einen Account oder melde dich an, um diesen Run einzureichen. Unauffällige Ergebnisse werden automatisch angenommen. Er bleibt dafür in diesem Browser gespeichert.|Create an account or sign in to submit this run. Results without suspicious indicators are accepted automatically. It is saved in this browser for that purpose.
+Verwaltung|Management
+Bestenlisten ohne Wartezeit|Leaderboards without the wait
+Unauffällige Runs werden automatisch in die Bestenliste aufgenommen. Hohe Wellen oder viele Kills allein führen nicht zu einer manuellen Prüfung.|Runs without suspicious indicators are automatically added to the leaderboard. High waves or many kills alone do not trigger a manual review.
+Widersprüchliche Meldungen desselben Runs werden zur Prüfung markiert, beispielsweise ein wechselnder Startmodus oder steigende Wellen bei sinkenden Gesamtkills.|Contradictory reports of the same run are flagged for review, such as a changing starting mode or increasing waves with decreasing total kills.
+Administratoren können Einträge direkt in der Bestenliste und in der Prüfliste löschen. Gelöschte Runs erscheinen durch erneutes Einreichen nicht wieder; ein anderer gültiger persönlicher Bestwert kann nachrücken.|Administrators can delete entries directly from the leaderboard and review queue. Resubmitting a deleted run does not restore it; another valid personal best can take its place.
+Löschen|Delete
+Löschen bestätigen|Confirm deletion
+Eintrag konnte nicht gelöscht werden.|Could not delete the entry.
 Speichern & Hauptmenü|Save & main menu
 Duo-Lobby|Duo lobby
 Zusatz-Hex festgelegt · keine Änderung mehr möglich|Extra hex locked · no changes remaining

@@ -1,5 +1,14 @@
 [
   {
+    "version": "next",
+    "title": "Bestenlisten ohne Wartezeit",
+    "changes": [
+      "Unauffällige Runs werden automatisch in die Bestenliste aufgenommen. Hohe Wellen oder viele Kills allein führen nicht zu einer manuellen Prüfung.",
+      "Widersprüchliche Meldungen desselben Runs werden zur Prüfung markiert, beispielsweise ein wechselnder Startmodus oder steigende Wellen bei sinkenden Gesamtkills.",
+      "Administratoren können Einträge direkt in der Bestenliste und in der Prüfliste löschen. Gelöschte Runs erscheinen durch erneutes Einreichen nicht wieder; ein anderer gültiger persönlicher Bestwert kann nachrücken."
+    ]
+  },
+  {
     "version": "1.0.8",
     "title": "Zuverlässiger weiterspielen und klarere Rückmeldungen",
     "changes": [

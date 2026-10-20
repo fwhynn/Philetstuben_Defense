@@ -1,4 +1,4 @@
-/* Provisional run comparison; client submissions never approve themselves. */
+/* Provisional run comparison; the API decides acceptance or review. */
 (function(root){
  const KEY='autohex-guest-ranking-v1';let current=null,generation=0;
  function score(state,mode='single'){
@@ -18,7 +18,7 @@
   host.replaceChildren(title,detail,note);detail.textContent=`${label} · Welle ${run.wave} abgeschlossen · ${run.kills} Kills`;
   title.textContent='Platzierung wird ermittelt …';
   if(!api?.isLoggedIn()){
-   note.textContent='Erstelle einen Account oder melde dich an, um diesen Run zur Prüfung einzureichen. Er bleibt dafür in diesem Browser gespeichert.';
+   note.textContent='Erstelle einen Account oder melde dich an, um diesen Run einzureichen. Unauffällige Ergebnisse werden automatisch angenommen. Er bleibt dafür in diesem Browser gespeichert.';
    for(const [text,mode] of [['Account erstellen und Run übernehmen','register'],['Ich habe bereits einen Account','login']]){
     const button=el('button',text);button.type='button';button.addEventListener('click',()=>onAccount(mode));host.appendChild(button);
    }

@@ -288,6 +288,7 @@
  submitRunRanking:run=>runRankingRequest('',run),
  getPendingRunRankings:()=>runRankingRequest('/pending'),
  reviewRunRanking:(id,revision,decision,reason)=>runRankingRequest('/'+encodeURIComponent(id)+'/review',{revision,decision,reason}),
+ deleteRunRanking:(id,revision)=>runRankingRequest('/'+encodeURIComponent(id)+'/delete',{revision}),
 		getLeaderboard: (fronts = 1, offset = 0) => rankingRequest('?' + new URLSearchParams({ fronts, offset })),
 		getRankedResult: session => rankingRequest('/results/' + encodeURIComponent(session.runId), { guestToken: session.token }),
 		claimRankedResult: session => rankingRequest('/results/' + encodeURIComponent(session.runId) + '/claim', { method: 'POST', body: {}, guestToken: session.token }),

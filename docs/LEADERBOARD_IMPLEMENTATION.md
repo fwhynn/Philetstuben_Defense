@@ -1,6 +1,44 @@
 # Accountgebundene Bestenliste – Umsetzung und offene Integration
 
-Stand: 14.10.2026. **Oberflächen vorbereitet, automatische Wertung noch nicht aktiviert.**
+## Aktueller lokaler Stand: 20.10.2026
+
+Die Hauptmenü-Bestenliste verwendet inzwischen die PHP-API `/run-leaderboard`.
+Sie trennt `single` (eine Front), `dual` (zwei Fronten) und `duo`. Die benötigte
+Tabelle ist in der konfigurierten Testdatenbank angelegt; alle drei Listen und
+die Rangvorschau antworten über den lokalen `/api`-Proxy erfolgreich.
+
+`classes/run-ranking.js` reicht angemeldete Ergebnisse ein und
+merkt Gast-Ergebnisse für die spätere Anmeldung. `classes/run-review.js`
+stellt die manuelle Prüfung auffälliger Ergebnisse mit Prüfgrund im Hauptmenü
+bereit. Ergebnisse nimmt die API unabhängig von ihrer Höhe automatisch an.
+Nur widersprüchliche Meldungen desselben Runs werden markiert: wechselnder
+Startmodus oder steigende Wellen bei sinkenden kumulierten Kills (bzw. umgekehrt).
+Verspätete ältere Stände mit beiden Zahlen niedriger werden ignoriert;
+ein Versionswechsel allein ist kein Verdachtsgrund.
+Vorherige offene Prüfungen und Ablehnungen lassen sich durch erneutes Einreichen
+nicht umgehen. Die API veröffentlicht nur angenommene Bestwerte je Account
+und Kategorie. Für manuelle Entscheidungen muss `ADMIN_USERNAMES` in der
+API-Konfiguration den gewünschten Testaccount enthalten.
+
+Admins können öffentliche Einträge und offene Prüfungen über „Löschen“ und
+„Löschen bestätigen“ entfernen. Die API prüft Adminrechte und die Eintragsrevision.
+Der Run bleibt intern als abgelehnt gespeichert, damit Wiederholungen ihn nicht
+neu veröffentlichen. Der nächste gültige Bestwert des Accounts kann nachrücken.
+Andere Runs, Profile und die alten Gesamtstatistiken bleiben erhalten.
+
+Diese Ergebnisse werden vom Client gemeldet und sind **keine serververifizierten
+Runs**. Die unten beschriebene autoritative `/rankings`-Architektur ist ein
+separater, weiterhin unvollständig integrierter Ansatz. Die alten Gesamtwerte
+bleiben separat erreichbar; Daily-Bestenlisten sind noch nicht implementiert.
+Das Anlegen der Tabelle übernimmt keine historischen Gesamtwerte als Runs.
+
+Die API-Integration wird mit temporären Tabellen geprüft:
+`php scripts/test-run-leaderboard.php --configured-test-db` im API-Repository.
+Eine Browserabnahme steht weiterhin aus und erfolgt durch den Nutzer.
+
+## Historischer Plan: servergeführte Wertung
+
+Stand: 14.10.2026. **Dieser Abschnitt beschreibt den früheren Plan und dessen offene Integration.**
 
 ## Festgelegtes Verhalten
 
