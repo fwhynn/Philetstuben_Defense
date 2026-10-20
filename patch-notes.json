@@ -1,6 +1,6 @@
 [
   {
-    "version": "next",
+    "version": "1.0.8",
     "title": "Zuverlässiger weiterspielen und klarere Rückmeldungen",
     "changes": [
       "Ein laufender Solo-Durchlauf lässt sich über „Speichern & Hauptmenü“ unterbrechen und später fortsetzen, auch wenn zwischendurch Duo gespielt wird.",
@@ -16,7 +16,8 @@
       "Hinweise für Verbrauchshilfen liegen über hervorgehobenen Straßen. Freie Flächen im oberen Header blockieren die Kartenbedienung nicht mehr.",
       "Nach Updates werden zusammengehörige Spieldateien zuverlässiger gemeinsam geladen, um Startprobleme durch veraltete Dateien zu vermeiden.",
       "Die bisherigen Bestenlistenwerte bleiben unter Gesamtwerte erreichbar. Solange getrennte Run-Bestenlisten nicht verfügbar sind, öffnet sich diese Liste als klar gekennzeichneter Ersatz."
-    ]
+    ],
+    "date": "2026-10-20"
   },
   {
     "version": "1.0.7",
