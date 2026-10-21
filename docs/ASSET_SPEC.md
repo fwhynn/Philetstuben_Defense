@@ -86,7 +86,7 @@ Dateinamen kleingeschrieben bis auf die Kennungen aus dem Code (`tile_royalBend`
 
 ### 3.2 Boden und Biome
 
-- Einheitliche Wiese: Material `grass_meadow` (oder `grass`), 0,366 / 0,521 / 0,133, Rauheit 1. Seitenkante `grass_side` 0,228 / 0,355 / 0,083. Ausnahme: `tile_empty` mit bewusst trockenem `grass_dry`.
+- Einheitliche Wiese: Material `grass_meadow` (oder `grass`), 0,366 / 0,521 / 0,133, Rauheit 1. Seitenkante `grass_side` 0,228 / 0,355 / 0,083. Das gilt auch für `tile_empty` (Weites Land), das seit dem 21.10.2026 kein eigenes trockenes `grass_dry` mehr nutzt.
 - **Biom-Einfärbung:** Jedes Material, dessen Name `grass`, `soil` oder `foliage` enthält, färbt das Spiel im Dünenmeer, Sturmhochland und in den Aschelanden automatisch um. Wiese, Erde und Büsche also so benennen, Stein, Holz, Dächer und Metall **nicht**.
 
 ### 3.3 Turm- und Gebäudeplätze

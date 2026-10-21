@@ -1694,3 +1694,8 @@ Eisenkoloss, Sturmjäger und Seelenmatriarchin haben eigene Bossgestalten. Die A
 Viele Hex-Felder wurden überarbeitet: Bäume, Mauern, Steine und Deko stehen nicht mehr auf Turmplätzen, und Turmsockel liegen dort, wo Türme gebaut werden. Auf dem Königsbogen schwebt der Turm in der Sakura-Edition nicht mehr.|Many hex tiles have been reworked: trees, walls, rocks and decorations no longer stand on tower slots, and tower bases sit where towers are built. On the Royal Bend, the tower no longer floats in the Sakura Edition.
 Schrein, Schatz und Boss-Sonderfeld sind neu gestaltet und haben in der Sakura-Edition eigene Fassungen. Unerkundete Felder zeigen einen neuen Nebel.|The shrine, treasure and boss special tiles have been redesigned and have their own versions in the Sakura Edition. Unexplored tiles show new fog.
 `);
+
+HexTranslations.add(`
+Einheitliche Wiese|Uniform meadow
+Weites Land hat jetzt dieselbe grüne Wiese wie die übrigen Hex-Felder statt eines trockenen Gelbtons, in der normalen, der Sakura- und der Halloween-Edition.|Open Land now has the same green meadow as the other hex tiles instead of a dry yellow tone, in the Normal, Sakura and Halloween Editions.
+`);
