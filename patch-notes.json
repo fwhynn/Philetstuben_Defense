@@ -1,6 +1,6 @@
 [
   {
-    "version": "next",
+    "version": "1.1.0",
     "title": "Neue Modelle und Halloween-Edition",
     "changes": [
       "Neuer Grafikstil Halloween-Edition: in den Einstellungen unter Grafikstil wählbar. Die Wahl bleibt wie bei Normal und Sakura nach dem Neuladen erhalten und wird in die Account-Sicherung übernommen.",
@@ -9,7 +9,8 @@
       "Eisenkoloss, Sturmjäger und Seelenmatriarchin haben eigene Bossgestalten. Die Akzente der Biome bleiben erhalten.",
       "Viele Hex-Felder wurden überarbeitet: Bäume, Mauern, Steine und Deko stehen nicht mehr auf Turmplätzen, und Turmsockel liegen dort, wo Türme gebaut werden. Auf dem Königsbogen schwebt der Turm in der Sakura-Edition nicht mehr.",
       "Schrein, Schatz und Boss-Sonderfeld sind neu gestaltet und haben in der Sakura-Edition eigene Fassungen. Unerkundete Felder zeigen einen neuen Nebel."
-    ]
+    ],
+    "date": "2026-10-21"
   },
   {
     "version": "1.0.9",
