@@ -14,9 +14,11 @@ export function flameDetails(tower,height=.5){
   }
   return g;
 }
-export function bossDetails(kind,biome,height){
+// identity:false, wenn ein eigenes Bossmodell (enemy_boss_<kind>) die Gestalt schon zeigt; dann nur die Biom-Akzente.
+export function bossDetails(kind,biome,height,{identity=true}={}){
   const g=new T.Group();g.name='boss-identity-'+kind;
   const h=height||.6,color={iron:'#78838d',hunter:'#627875',summoner:'#9468ad'}[kind]||'#78838d';
+  if(identity){
   if(kind==='iron')for(const sign of [-1,1]){
     part(g,'iron-shoulder',new T.BoxGeometry(h*.42,h*.25,h*.45),[0,h*.72,sign*h*.28],color);
     part(g,'iron-rivet',new T.ConeGeometry(h*.08,h*.16,4),[0,h*.92,sign*h*.28],'#c6cbd0');
@@ -28,6 +30,7 @@ export function bossDetails(kind,biome,height){
   if(kind==='summoner'){
     part(g,'soul-mantle',new T.ConeGeometry(h*.35,h*.66,8),[0,h*.34,0],color);
     for(let i=0;i<5;i++){const a=i*Math.PI*2/5;part(g,'soul-crown',new T.ConeGeometry(h*.035,h*.23,4),[Math.cos(a)*h*.13,h,Math.sin(a)*h*.13],'#d0a9ec',true);}
+  }
   }
   // Biome details supplement every identity, never replace it with a guardian.
   const accent={storm:'#abeced',ash:'#ed763e',desert:'#e6bd68'}[biome];

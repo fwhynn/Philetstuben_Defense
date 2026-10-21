@@ -1,5 +1,17 @@
 [
   {
+    "version": "next",
+    "title": "Neue Modelle und Halloween-Edition",
+    "changes": [
+      "Neuer Grafikstil Halloween-Edition: in den Einstellungen unter Grafikstil wählbar. Die Wahl bleibt wie bei Normal und Sakura nach dem Neuladen erhalten und wird in die Account-Sicherung übernommen.",
+      "Schildknecht, Donnerkröte, Häutungskäfer, Pechschnecke, Pilzkoloss und Rammbockkäfer haben neu gestaltete Modelle, auch in der Sakura-Edition. Schildzustand, Sprünge, Panzerverlust und Anlauf bleiben sichtbar.",
+      "Die Ultimate-Stufen aller Türme haben eigene Modelle und heben sich sichtbar von der Endstufe ab. Beim Flammenturm ersetzt das neue Modell den bisherigen Phönix-Aufsatz.",
+      "Eisenkoloss, Sturmjäger und Seelenmatriarchin haben eigene Bossgestalten. Die Akzente der Biome bleiben erhalten.",
+      "Viele Hex-Felder wurden überarbeitet: Bäume, Mauern, Steine und Deko stehen nicht mehr auf Turmplätzen, und Turmsockel liegen dort, wo Türme gebaut werden. Auf dem Königsbogen schwebt der Turm in der Sakura-Edition nicht mehr.",
+      "Schrein, Schatz und Boss-Sonderfeld sind neu gestaltet und haben in der Sakura-Edition eigene Fassungen. Unerkundete Felder zeigen einen neuen Nebel."
+    ]
+  },
+  {
     "version": "1.0.9",
     "title": "Bestenlisten ohne Wartezeit",
     "changes": [

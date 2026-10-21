@@ -17,12 +17,28 @@ test('asset edition defaults to normal and prefers sakura models with fallback o
   assert.equal(load(storage).get(),'sakura','Wahl bleibt nach dem Neuladen erhalten');
 });
 
-test('every sakura model replaces an existing normal model of the same name',()=>{
+test('halloween edition loads its own models with fallback and survives a reload',()=>{
+  const storage=new Map(),edition=load(storage);
+  assert.deepEqual([...edition.EDITIONS],['normal','sakura','halloween']);
+  edition.set('halloween');assert.equal(edition.get(),'halloween');assert.equal(storage.get('hexAssetEdition'),'halloween');
+  const available=new Set(['tiles/tile_straight.glb','tiles/tile_royalBend.glb','sakura/tiles/tile_straight.glb','halloween/tiles/tile_royalBend.glb']);
+  assert.deepEqual([...edition.paths('tiles/tile_royalBend.glb',available)],['halloween/tiles/tile_royalBend.glb','tiles/tile_royalBend.glb']);
+  assert.deepEqual([...edition.paths('tiles/tile_straight.glb',available)],['tiles/tile_straight.glb'],'keine Sakura-Datei in der Halloween-Edition');
+  assert.equal(load(storage).get(),'halloween');
+  storage.set('hexAssetEdition','unbekannt');assert.equal(load(storage).get(),'normal','unbekannte gespeicherte Werte fallen auf normal zurück');
+});
+
+test('every edition model replaces an existing normal model of the same name',()=>{
   const root=path.join(__dirname,'../assets');
-  for(const kind of ['tiles','towers','enemies','buildings','bases']){
-    const dir=path.join(root,'sakura',kind);if(!fs.existsSync(dir))continue;
-    for(const file of fs.readdirSync(dir).filter(f=>f.endsWith('.glb')))assert.ok(fs.existsSync(path.join(root,kind,file)),'sakura/'+kind+'/'+file+' hat kein normales Gegenstück');
+  for(const edition of ['sakura','halloween'])for(const kind of ['tiles','towers','enemies','buildings','bases','landmarks','effects']){
+    const dir=path.join(root,edition,kind);if(!fs.existsSync(dir))continue;
+    for(const file of fs.readdirSync(dir).filter(f=>f.endsWith('.glb')))assert.ok(fs.existsSync(path.join(root,kind,file)),edition+'/'+kind+'/'+file+' hat kein normales Gegenstück');
   }
+});
+
+test('settings menu offers every edition',()=>{
+  const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8'),select=html.match(/<select data-asset-edition[\s\S]*?<\/select>/)[0];
+  assert.deepEqual([...select.matchAll(/value="([a-z]+)"/g)].map(m=>m[1]),[...load().EDITIONS]);
 });
 
 test('renderer and menu backdrop reach the edition by name, since const globals are not on globalThis',()=>{

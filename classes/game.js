@@ -1124,7 +1124,8 @@ R dreht die Karte, dann Feld anklicken.`;
     document.getElementById('restartTutorialBtn').disabled = !onboardingHints;
     autoStart.checked = false; changeSpeed(1);
     newRun();
-    if (scenario !== 'tutorial') {
+    if (scenario === 'showcase') applyShowcaseScenario();
+    else if (scenario !== 'tutorial') {
       state.hand = ['straight'];
       const slot = { ...neighbor(0, 0, 0), index: 0 };
       if (!HexPlacementCommands.place(state, { ...slot, rotation: 0 })) throw new Error('Developer scenario placement failed');
@@ -1139,8 +1140,39 @@ R dreht die Karte, dann Feld anklicken.`;
     }
     mainMenu.classList.add('hidden'); hasActiveRun = true;
     renderIntroductionMenu(); renderAll();
-    setMessage(scenario === 'enemies'?'Gegnertest: Gegner unter Einstellungen → Entwicklermenü auswählen, dann Welle starten.':scenario === 'tutorial' ? 'Testszenario: Tutorial von Anfang.' : 'Testszenario: Bogenschütze verbessern · ' + state.gold + ' Gold.');
+    setMessage(scenario === 'showcase'?'Designer-Lieferung: Flammenturm ausgewählt, Ultimate kaufbar. Erste Welle bringt Eisenkoloss, Sturmjäger und Seelenmatriarchin; weitere Bosse unter Einstellungen → Entwicklermenü.':scenario === 'enemies'?'Gegnertest: Gegner unter Einstellungen → Entwicklermenü auswählen, dann Welle starten.':scenario === 'tutorial' ? 'Testszenario: Tutorial von Anfang.' : 'Testszenario: Bogenschütze verbessern · ' + state.gold + ' Gold.');
     return true;
+  }
+  // Temporäre Abnahme der Designer-Lieferung (docs/ASSET_SPEC.md, Abschnitt 0): korrigierte Tiles, Ultimate-Türme, Bossgestalten.
+  const SHOWCASE_TILES = ['royalBend', 'bigCurve', 'watchtower', 'mirrorJunction', 'fanJunction', 'sideCross', 'deadEnd'];
+  // [Turm, Zweig, Endstufe, schon Ultimate]; der erste Turm bleibt auf der Endstufe, damit der Ultimate-Kauf testbar ist.
+  const SHOWCASE_TOWERS = [['flame', 'inferno', 'sunfire', false], ['flame', 'wildfire', 'firestorm', true], ['archer', 'volley', 'arrowRain', true], ['archer', 'marksman', 'eagleEye', true],
+    ['ballista', 'harpoon', 'dragonSlayer', true], ['ballista', 'repeater', 'boltStorm', true], ['element', 'elementFire', 'elementVolcano', true], ['element', 'elementWater', 'elementTide', true],
+    ['necromancer', 'soulKeeper', 'soulLord', true], ['freeze', 'deepFrost', 'absoluteZero', true], ['chain', 'storm', 'tempest', true], ['catapult', 'siege', 'fortressBreaker', true]];
+  function applyShowcaseScenario() {
+    const distance = ({ q, r }) => (Math.abs(q) + Math.abs(r) + Math.abs(q + r)) / 2;
+    state.openingRemaining = 0; state.towerLoadout = Object.keys(TOWERS);
+    state.ultimateUnlocks = Object.keys(TOWERS).map(type => 'ultimate:' + type);
+    for (const type of SHOWCASE_TILES) {
+      const spots = [];
+      for (const tile of state.map.values()) for (let d = 0; d < 6; d++) {
+        const n = neighbor(tile.q, tile.r, d);
+        for (let rotation = 0; rotation < 6; rotation++) if (HexPlacementCommands.canPlace(state, n.q, n.r, CARD_LIBRARY[type], rotation)) spots.push({ q: n.q, r: n.r, rotation });
+      }
+      spots.sort((a, b) => distance(a) - distance(b) || a.q - b.q || a.r - b.r || a.rotation - b.rotation);
+      state.phase = 'place'; state.hand = [type];
+      if (!spots.length || !HexPlacementCommands.place(state, { ...spots[0], index: 0 })) throw new Error('Developer showcase placement failed: ' + type);
+    }
+    state.gold = 1e6;
+    const slots = [...state.map.values()].filter(tile => tile.type !== 'base').flatMap(tile => Array.from({ length: tile.slots || 0 }, (_, index) => ({ q: tile.q, r: tile.r, index })));
+    SHOWCASE_TOWERS.slice(0, slots.length).forEach(([type, branch, final, ultimate], i) => {
+      const slot = slots[i], built = HexTowerCommands.buy(state, type, [slot]).ok && HexTowerCommands.upgrade(state, slot, branch) && HexTowerCommands.upgrade(state, slot, final);
+      if (!built || (ultimate && !HexTowerCommands.upgrade(state, slot, 'ultimate:' + type))) throw new Error('Developer showcase tower failed: ' + type);
+    });
+    state.hp = state.maxHp = 999; state.gold = 1000;
+    state.selectedTower = slots[0]; state.selectedTowers = [slots[0]];
+    devEnemyQueue = ['iron', 'hunter', 'summoner'].map(id => ({ id, count: 1 })); renderDevEnemies();
+    state.hotkeyHintDone = true; tutorial.active = false;
   }
   function restoreRunCheckpoint(checkpoint) {
     const restored = HexRunSnapshot.restore(checkpoint); HexDeck.recoverMissing(restored.state); closeSale();
@@ -1359,7 +1391,7 @@ R dreht die Karte, dann Feld anklicken.`;
       if (state) { Object.assign(state, {showSlotHints, showHexGrid, showUpgradeStatus: document.getElementById('upgradeStatus').checked}); if (!onboardingHints) { tutorial.active = false; state.biomeIntro = null; } }
       document.getElementById('restartTutorialBtn').disabled = !onboardingHints;
       if (Number.isInteger(settings.gameSpeed) && settings.gameSpeed >= 1 && settings.gameSpeed <= 8 && !duoToken) { gameSpeed = settings.gameSpeed; speedToggle.value = String(gameSpeed); document.getElementById('speedValue').textContent = gameSpeed + '×'; }
-      if (!testProfile) { if (['de','en'].includes(settings.language)) globalThis.HexI18n?.setLanguage(settings.language); if (['normal','sakura'].includes(settings.assetEdition) && typeof HexAssetEdition !== 'undefined') HexAssetEdition.set(settings.assetEdition); }
+      if (!testProfile) { if (['de','en'].includes(settings.language)) globalThis.HexI18n?.setLanguage(settings.language); if (typeof HexAssetEdition !== 'undefined' && (HexAssetEdition.EDITIONS || ['normal','sakura']).includes(settings.assetEdition)) HexAssetEdition.set(settings.assetEdition); }
       try { for (const [key,value] of Object.entries({slotHints:showSlotHints,hexGrid:showHexGrid,onboardingHints,gameSpeed})) gameStorage.setItem(key,String(value)); gameStorage.setItem('hex-game-settings-v1', JSON.stringify(readGameSettings())); } catch {}
       if (state) renderAll();
     } finally { applyingGameSettings = false; }

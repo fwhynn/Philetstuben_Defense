@@ -33,10 +33,10 @@ test('named tiles with baked roads match their card road edges',()=>{
   const types=[...NAMED_TILES.filter(t=>!PROCEDURAL_ROAD_TILES.includes(t)),...TILE_MODELS.filter(t=>context.HexData.CARD_LIBRARY[t]?.roads)];
   for(const type of types){
     const expected=[...context.HexData.CARD_LIBRARY[type].roads].sort((a,b)=>a-b);
-    // Normale Edition und, falls vorhanden, Sakura-Edition (assets/sakura/) müssen dieselben Straßen haben.
-    for(const dir of ['../assets/tiles/','../assets/sakura/tiles/']){
+    // Normale Edition und, falls vorhanden, Sakura- und Halloween-Edition müssen dieselben Straßen haben.
+    for(const dir of ['../assets/tiles/','../assets/sakura/tiles/','../assets/halloween/tiles/']){
       const file=path.join(__dirname,dir+'tile_'+type+'.glb');
-      if(dir.includes('sakura')&&!fs.existsSync(file))continue;
+      if(dir!=='../assets/tiles/'&&!fs.existsSync(file))continue;
       assert.deepEqual(bakedRoadEdges(file),expected,dir+type);
     }
   }

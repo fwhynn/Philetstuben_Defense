@@ -160,7 +160,7 @@ Gestaltungsregeln, Bestandsprüfung und Verbesserungsvorschläge: [Design-System
 
 ## Eigene Modelle
 
-Alle 3D-Modelle sind von Hand gebaut. Maße, Ursprung, Kantennummerierung, Turmplätze und benannte Objekte (`turret`, `leg_l`, `aura`) beschreibt [docs/ASSET_SPEC.md](docs/ASSET_SPEC.md). Dort stehen alle Vorgaben für Tiles, Festungs-Basen, Türme, Gegner, Gebäude und die Sakura-Edition. Neue Modelle als `.glb` in den passenden Ordner unter `assets/` legen.
+Alle 3D-Modelle sind von Hand gebaut. Maße, Ursprung, Kantennummerierung, Turmplätze und benannte Objekte (`turret`, `leg_l`, `aura`) beschreibt [docs/ASSET_SPEC.md](docs/ASSET_SPEC.md). Dort stehen alle Vorgaben für Tiles, Festungs-Basen, Türme, Gegner, Gebäude sowie die Sakura- und Halloween-Edition. Neue Modelle als `.glb` in den passenden Ordner unter `assets/` legen.
 
 Vorhanden sind Tiles, Sonderfelder, alle sieben Türme, alle fünf Gegner, die drei Gebäude und die Straßenmine. Noch fehlend: die Upgrade-Varianten der Türme. Fehlende Modelle ersetzt das Spiel durch einfache Platzhalter.
 

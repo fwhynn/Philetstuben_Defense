@@ -1,24 +1,34 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const root=path.join(__dirname,'..');
-test('all six enemies ship real GLB geometry, articulated joints and looping walk animations',async()=>{
+// Pflicht-Gelenke laut docs/ASSET_SPEC.md 6.4; das Spiel posiert sie selbst, eingebettete Animationen werden nicht genutzt.
+const LEGS=n=>['l','r'].flatMap(side=>Array.from({length:n},(_,i)=>`rig_leg_${side}${i}`));
+const REQUIRED_JOINTS={
+  shieldbearer:['rig_body','rig_leg_l','rig_leg_r','rig_arm_l','rig_arm_r','rig_shield_1','rig_shield_2','rig_shield_3'],
+  thornToad:['rig_body',...LEGS(2)],
+  moltingBeetle:['rig_body',...LEGS(3),'rig_shell_l','rig_shell_r'],
+  tarSnail:['rig_body','rig_shell','rig_antenna_l','rig_antenna_r'],
+  mushroomColossus:['rig_body','rig_leg_l','rig_leg_r','rig_arm_l','rig_arm_r'],
+  ramBeetle:['rig_body',...LEGS(3)]
+};
+test('all six enemies ship real GLB geometry with the spec joints in every edition',async()=>{
   const THREE=await import('three'),{GLTFLoader}=await import('three/addons/loaders/GLTFLoader.js');
   const {MODEL_ENEMIES,isEnemyJoint}=await import('../classes/enemy-motion.mjs');
   const ctx={};vm.createContext(ctx);vm.runInContext(fs.readFileSync(path.join(root,'classes/model-map.js'),'utf8')+';globalThis.models=HexModelMap.ALL_MODELS;',ctx);
-  for(const type of MODEL_ENEMIES){
+  assert.deepEqual(Object.keys(REQUIRED_JOINTS).sort(),[...MODEL_ENEMIES].sort());
+  for(const type of MODEL_ENEMIES)for(const folder of ['assets/enemies','assets/sakura/enemies','assets/halloween/enemies']){
     assert.ok(ctx.models.enemies.includes(type),type+' registered');
-    const b=fs.readFileSync(path.join(root,'assets/enemies/enemy_'+type+'.glb'));
-    const json=JSON.parse(b.subarray(20,20+b.readUInt32LE(12)).toString());assert.equal(json.images,undefined,type+' has no PNG billboards');
-    const {scene,animations}=await new GLTFLoader().parseAsync(b.buffer.slice(b.byteOffset,b.byteOffset+b.byteLength),'');
+    const file=path.join(root,folder,'enemy_'+type+'.glb'),label=folder+'/'+type;
+    if(folder!=='assets/enemies'&&!fs.existsSync(file))continue;
+    const b=fs.readFileSync(file);
+    const json=JSON.parse(b.subarray(20,20+b.readUInt32LE(12)).toString());assert.equal(json.images,undefined,label+' has no PNG billboards');
+    const {scene}=await new GLTFLoader().parseAsync(b.buffer.slice(b.byteOffset,b.byteOffset+b.byteLength),'');
     const joints=[],meshes=[];scene.traverse(n=>{if(isEnemyJoint(n.name))joints.push(n);if(n.isMesh)meshes.push(n);});
-    assert.ok(joints.length>=4,type+' joints');assert.ok(meshes.length>=10,type+' volumetric parts');
+    assert.deepEqual(joints.map(n=>n.name).sort(),[...REQUIRED_JOINTS[type]].sort(),label+' joints');
+    for(const joint of joints){for(let p=joint.parent;p;p=p.parent)assert.ok(!isEnemyJoint(p.name),label+' '+joint.name+' nested in '+p.name);let parts=0;joint.traverse(n=>{if(n.isMesh)parts++;});assert.ok(parts>0,label+' '+joint.name+' has geometry');}
+    assert.ok(meshes.length>=10,label+' volumetric parts');
     scene.updateMatrixWorld(true);const box=new THREE.Box3().setFromObject(scene),size=box.getSize(new THREE.Vector3());
-    assert.ok(size.x>.1&&size.y>.1&&size.z>.1,type+' volume');assert.ok(Math.max(size.x,size.y,size.z)<.55,type+' game scale');assert.ok(box.min.y>-.02,type+' on ground');
+    assert.ok(size.x>.1&&size.y>.1&&size.z>.1,label+' volume');assert.ok(Math.max(size.x,size.y,size.z)<.55,label+' game scale');assert.ok(box.min.y>-.02,label+' on ground');
     for(const m of meshes){const p=m.geometry.attributes.position;assert.ok([...p.array].every(Number.isFinite));}
-    const walk=animations.find(a=>a.name==='Walk');assert.ok(walk,type+' walk clip');
-    const mixer=new THREE.AnimationMixer(scene),action=mixer.clipAction(walk);action.play();mixer.setTime(0);
-    const pose=()=>joints.flatMap(n=>[...n.position,...n.quaternion,...n.scale]);const start=pose();mixer.setTime(.25);assert.notDeepEqual(pose(),start,type+' moving joints');mixer.setTime(1);
-    pose().forEach((v,i)=>assert.ok(Math.abs(v-start[i])<1e-5,type+' seamless loop'));
-    for(const [t,clip] of [['thornToad','Jump'],['maskRunner','Sprint'],['ramBeetle','Charge']])if(t===type)assert.ok(animations.some(a=>a.name===clip));
   }
 });
 test('ability poses show lost shield, molted armor, crouch, leap and charge without changing gameplay state',async()=>{

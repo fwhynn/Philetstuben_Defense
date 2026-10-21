@@ -1,11 +1,14 @@
 # Modellspezifikation für 3D-Assets (glTF/.glb)
 
-Gesamtreferenz für alle Modelle von AutoHex TD: Tiles, Festungs-Basen, Türme, Gegner, Gebäude, Effekte und Verbrauchshilfen, jeweils in der normalen Edition und der Sakura-Edition. Stand: 08.10.2026. Ersetzt die früheren Einzelspezifikationen v1 bis v4.
+Gesamtreferenz für alle Modelle von AutoHex TD: Tiles, Festungs-Basen, Türme, Gegner, Gebäude, Effekte und Verbrauchshilfen, jeweils in der normalen Edition, der Sakura- und der Halloween-Edition. Stand: 20.10.2026 (Spielversion 1.0.9). Ersetzt die früheren Einzelspezifikationen v1 bis v4.
 
-Alle Maße sind aus dem Spielcode abgeleitet (`map.js`, `data.js`, `model-map.js`, `three-renderer.js`). Wo „das Spiel“ etwas tut, ist das im Code umgesetzt und muss nicht modelliert werden.
+Alle Maße sind aus dem Spielcode abgeleitet (`map.js`, `data.js`, `model-map.js`, `three-renderer.js`, `enemy-motion.mjs`). Wo „das Spiel“ etwas tut, ist das im Code umgesetzt und muss nicht modelliert werden.
+
+**Abschnitt 0** zeigt den Stand der Lieferungen.
 
 ## Inhalt
 
+0. Stand der Lieferungen
 1. Allgemeine Regeln
 2. Ablage und Dateinamen
 3. Tiles
@@ -13,8 +16,23 @@ Alle Maße sind aus dem Spielcode abgeleitet (`map.js`, `data.js`, `model-map.js
 5. Türme
 6. Gegner
 7. Gebäude, Effekte und Verbrauchshilfen
-8. Sakura-Edition
+8. Sakura- und Halloween-Edition
 9. Prüfung und Lieferung
+
+---
+
+## 0. Stand der Lieferungen
+
+Stand 21.10.2026. **Es ist kein Designauftrag offen.** In allen drei Editionen (normal, Sakura, Halloween) liegen alle 154 Modelle vor, die das Spiel lädt. Einzige Ausnahme ist `tile_base` in Halloween, das nur als Ersatz für ein fehlendes Festungsmodell dient und nicht gebraucht wird.
+
+| Lieferung | Inhalt |
+|---|---|
+| `modpack_assets.zip`, 20.10.2026 | sechs neue Gegner mit `rig_…`-Gelenken (6.4) statt der Platzhalter, fehlende Sakura-Gegner und -Sonderfelder, überarbeitete normale Tiles mit freien Turmplätzen, Halloween-Edition (Abschnitt 8) |
+| `modpack_assets (1).zip`, 21.10.2026 | Nacharbeit: Turmplätze und Deko von `tile_royalBend`, `tile_bigCurve`, `tile_watchtower`, `tile_mirrorJunction`, `tile_fanJunction`, `tile_sideCross` und `tile_deadEnd` sowie neues normales `tile_fog`, jeweils in allen Editionen; dazu 19 Ultimate-Türme (5.4) und 3 eigene Bossgestalten (6.5) in allen Editionen |
+
+Die Lieferungen wurden automatisch geprüft: Straßenkanten, Turmplatz-Positionen aus 3.5, freie Turmplätze (keine Deko über 0,07 Höhe im Radius 0,17 um die Turmmitte), Gelenke, Höhen und Grundflächen. Die Tests in Abschnitt 9 sichern das für künftige Lieferungen ab.
+
+`maskRunner.png` und `mirrorGuardian.png` in `assets/enemies-concepts/` sind Konzepte für Gegner, die es im Spiel noch nicht gibt. Sie sind nicht beauftragt.
 
 ---
 
@@ -38,11 +56,13 @@ Alle Maße sind aus dem Spielcode abgeleitet (`map.js`, `data.js`, `model-map.js
 | `assets/tiles/` | `tile_<kartenId>.glb`, `tile_base_<festung>.glb`, `tile_fog.glb`, `tile_rescue.glb`, `tile_base.glb` | Hex-Tiles und Festungs-Grundmodelle |
 | `assets/bases/` | `base_<festung>_<walls\|weapon>_<stufe>.glb` | Ausbaustufen der Festungen (Aufsatzteile) |
 | `assets/landmarks/` | `landmark_<boss\|shrine\|treasure>.glb` | Sonderfelder |
-| `assets/towers/` | `tower_<turm>.glb`, `tower_<turm>_<upgradeId>.glb` | Türme und ihre Upgrades |
-| `assets/enemies/` | `enemy_<typ>.glb`, `enemy_boss_<biom>.glb` | Gegner und Bosse |
+| `assets/towers/` | `tower_<turm>.glb`, `tower_<turm>_<upgradeId>.glb`, `tower_<turm>_<endstufe>_ultimate.glb` | Türme, ihre Upgrades und Ultimate-Stufen (5.4) |
+| `assets/enemies/` | `enemy_<typ>.glb`, `enemy_boss_<biom>.glb`, `enemy_boss_<iron\|hunter\|summoner>.glb` | Gegner, Biom-Wächter und Bossgestalten (6.5) |
+| `assets/enemies-concepts/` | `<typ>.png` | Konzeptbilder der neuen Gegner (nur Vorlage, lädt das Spiel nicht als Modell) |
 | `assets/buildings/` | `building_<house\|forge\|market>.glb` | Gebäude |
 | `assets/effects/` | `mine_pickup.glb`, `consumable_<spikes\|resin\|overload>.glb` | Mine auf der Straße, Verbrauchshilfen (Abschnitt 7.3) |
 | `assets/sakura/<ordner>/` | gleiche Namen wie oben | Sakura-Edition (Abschnitt 8) |
+| `assets/halloween/<ordner>/` | gleiche Namen wie oben | Halloween-Edition (Abschnitt 8) |
 
 Dateinamen kleingeschrieben bis auf die Kennungen aus dem Code (`tile_royalBend`, `enemy_elementCarrier` usw.), die exakt so übernommen werden.
 
@@ -101,7 +121,7 @@ Turmplätze in Blender-Koordinaten (X | Y), bei Rotation 0, in der Reihenfolge `
 | `cross` | Kreuzung | Rare | 0, 1, 3, 4 | 2 | (−0,26 \| 0,44) · (0,26 \| −0,44) | `tile_cross` |
 | `fullCross` | Sechserkreuzung | Rare | 0–5 | 2 | (0 \| 0,78) · (0 \| −0,78) | `tile_fullCross` |
 | `empty` | Weites Land | Uncommon | 0, 3 | 2 | (−0,26 \| 0,44) · (−0,56 \| −0,44) | `tile_empty` |
-| `longRoad` | Lange Straße | Uncommon | 0, 3 | 2 | (0,22 \| 0,59) · (−0,22 \| −0,59) | `tile_longRoad` |
+| `longRoad` | Lange Straße | Uncommon | 0, 3 | 2 | (−0,24 \| 0,38) · (0,24 \| −0,38) | `tile_longRoad` |
 | `village` | Dorfstraße | Rare | 0, 2 | 1 + Gebäude | (0,07 \| 0,74) | `tile_village` |
 | `grove` | Waldkurve | Rare | 0, 2 | 1 | (0,04 \| −0,59) | `tile_grove` |
 | `treasury` | Handelsstraße | Rare | 0, 3 | 0 | – | `tile_treasury` |
@@ -147,7 +167,7 @@ Turmplätze in Blender-Koordinaten (X | Y), bei Rotation 0, in der Reihenfolge `
 ### 3.6 Sonderfelder und System-Tiles
 
 - `landmark_boss`: Boss-Feld, sechs Straßenöffnungen, keine Turmplätze (Obsidian-Spitzen, Glutkern).
-- `landmark_shrine`, `landmark_treasure`: Hauptobjekt (Schrein bzw. Schatztruhe) plus Kisten. Das Spiel setzt sie als Deko auf das jeweilige Straßen-Tile.
+- `landmark_shrine`, `landmark_treasure`: kompaktes Deko-Objekt **ohne Boden, Straße und Turmplätze**. Das Spiel setzt es auf das jeweilige Straßen-Tile. Das Hauptobjekt ist ein direktes Kind des Wurzelobjekts und heißt `shrine…` bzw. `treasure…` oder `chest…`. Beigaben (Kisten, Münzen, Säcke, Kerzen …) bleiben erhalten, wenn ihre Mitte höchstens 0,45 von der Mitte des Hauptobjekts entfernt ist. Weiter entfernte Teile und Teile namens `ground…`, `road…`, `tower_slot…` oder `grass…` lässt das Spiel weg.
 - `tile_fog`: nebliges, dunkles Hex ohne Straße für unerkundete Felder.
 - `tile_rescue`: schlichtes Hex ohne Turmplätze (Rettungshex, Straße als Gruppe `road`).
 - `tile_base`: neutrale Festung, nur Ersatz, falls ein Festungsmodell fehlt.
@@ -225,6 +245,32 @@ Fehlt eine Datei, zeichnet das Spiel als Ersatz einen sechseckigen Sockel mit sc
 
 Höhe auch hier **höchstens 0,65**. Die Dateinamen enthalten die Upgrade-IDs aus dem Code, daher die doppelte Silbe (`tower_element_elementFire`).
 
+### 5.4 Ultimate-Stufen
+
+Jeder Zweig hat nach seiner Endstufe eine im Arsenal freischaltbare vierte Stufe, die „Ultimate“. Ihr Modell ist eine vollständige Datei je Zweig, `tower_<turm>_<endstufe>_ultimate.glb`, als Weiterentwicklung der Endstufe. Es gelten dieselben Regeln wie in 5.1 (`turret`, optional `aura`, Höhe höchstens 0,65, Balliste 0,90). Von oben muss klar erkennbar sein, dass es die höchste Stufe ist, z. B. durch eine leuchtende Krone, einen Kern in der Zweigfarbe oder Gold- und Edelmetallakzente. Fehlt die Datei, zeigt das Spiel das Modell der Endstufe, beim Flammenturm zusätzlich einen Phönix-Aufsatz aus Grundkörpern. Ein eigenes Ultimate-Modell ersetzt diesen Aufsatz.
+
+| Turm | Endstufe → Ultimate | Datei |
+|---|---|---|
+| Bogenschütze | `arrowRain` → Pfeilhagel | `tower_archer_arrowRain_ultimate` |
+| Bogenschütze | `eagleEye` → Meisterschütze | `tower_archer_eagleEye_ultimate` |
+| Katapult | `fortressBreaker` → Belagerungstitan | `tower_catapult_fortressBreaker_ultimate` |
+| Katapult | `rockStorm` → Steinlawine | `tower_catapult_rockStorm_ultimate` |
+| Kettenblitz | `tempest` → Gewitterfront | `tower_chain_tempest_ultimate` |
+| Kettenblitz | `thunder` → Donnerschlag | `tower_chain_thunder_ultimate` |
+| Freeze | `absoluteZero` → Ewiges Eis | `tower_freeze_absoluteZero_ultimate` |
+| Freeze | `winter` → Polarweite | `tower_freeze_winter_ultimate` |
+| Minenleger | `earthquake` → Weltenbrecher | `tower_mine_earthquake_ultimate` |
+| Minenleger | `carpet` → Minenmeer | `tower_mine_carpet_ultimate` |
+| Balliste | `dragonSlayer` → Drachentod | `tower_ballista_dragonSlayer_ultimate` |
+| Balliste | `boltStorm` → Bolzenorkan | `tower_ballista_boltStorm_ultimate` |
+| Flammenturm | `sunfire` → Sonnenkern | `tower_flame_sunfire_ultimate` (ersetzt den Phönix-Aufsatz) |
+| Flammenturm | `firestorm` → Feuerwalze | `tower_flame_firestorm_ultimate` (ersetzt den Phönix-Aufsatz) |
+| Elementturm | `elementVolcano` → Weltenbrand | `tower_element_elementVolcano_ultimate` |
+| Elementturm | `elementTide` → Ozeanherz | `tower_element_elementTide_ultimate` |
+| Elementturm | `elementTempest` → Himmelssturm | `tower_element_elementTempest_ultimate` |
+| Nekromant | `soulLegion` → Seelenheer | `tower_necromancer_soulLegion_ultimate` |
+| Nekromant | `soulLord` → Seelenherrscher | `tower_necromancer_soulLord_ultimate` |
+
 ---
 
 ## 6. Gegner
@@ -233,7 +279,7 @@ Höhe auch hier **höchstens 0,65**. Die Dateinamen enthalten die Upgrade-IDs au
 
 - Blickrichtung +X, Ursprung Mitte der Füße. Das Spiel dreht den Gegner in Laufrichtung.
 - Die Straße ist 0,33 breit. Alle Gegner außer Bossen passen bequem darauf.
-- **Laufanimation:** Objekte `leg_l`, `leg_r`, `arm_l`, `arm_r` mit Pivot in Hüfte bzw. Schulter. Gehaltene Waffen, Schilde und Stäbe gehören zum Arm-Objekt.
+- **Laufanimation:** Objekte `leg_l`, `leg_r`, `arm_l`, `arm_r` mit Pivot in Hüfte bzw. Schulter. Gehaltene Waffen, Schilde und Stäbe gehören zum Arm-Objekt. **Ausnahme:** Die sechs Gegner ab Version 1.0.5 nutzen stattdessen eigene Gelenke `rig_…` (Abschnitt 6.4).
 - **Nicht modellieren:** Lebensbalken, Symbole über dem Kopf, Freeze-Ring, Heilkreis, Treffer-Effekte.
 - Die Lebensbalken sind **Gelb** (Leben), **Grau** (Rüstung), **Blau** (Magieresistenz). Körperfarben nicht exakt in diesen Tönen halten.
 - Große, klare Silhouetten: Gegner werden in Gruppen von 5 bis 40 aus der Höhe gesehen. Die Fähigkeit soll an der Form ablesbar sein.
@@ -254,6 +300,14 @@ Höhe auch hier **höchstens 0,65**. Die Dateinamen enthalten die Upgrade-IDs au
 | `enemy_boss_ash` | Boss Aschelande | geschmolzene Platten, weiße Glut | −50 % Feuerschaden | 0,70 | 0,55 | 1 500 |
 | `enemy_boss_storm` | Boss Sturmhochland | schlank, Kristallzacken, blauweiß | −50 % Blitz-/Windschaden | 0,70 | 0,55 | 1 500 |
 | `enemy_boss_desert` | Boss Dünenmeer | Sandstein und Glasgestein, bernstein | halbe Verlangsamung | 0,70 | 0,55 | 1 500 |
+| `enemy_shieldbearer` | Schildknecht (ab Welle 6) | Fußsoldat mit Helm, großem Plankenschild links vorn und Speer rechts | Schild blockiert die ersten drei Treffer vollständig; Schild zeigt drei Zustände | 0,36 | 0,30 | 900 |
+| `enemy_thornToad` | Donnerkröte (ab Welle 13) | gedrungene olivgrüne Kröte, gelbe Kehle, Stachelkamm auf dem Rücken | bewegt sich nur springend, kürzt gelegentlich auf eine Nachbarstraße ab | 0,20 | 0,28 | 700 |
+| `enemy_moltingBeetle` | Häutungskäfer (ab Welle 17) | sechsbeiniger Käfer, zweiteiliger Panzer über weichem Bernsteinleib, Mandibeln | Rüstung; nach dem Panzerbruch fällt der Panzer ab, dauerhaft 40 % schneller | 0,20 | 0,34 (Länge bis 0,40) | 900 |
+| `enemy_tarSnail` | Pechschnecke (ab Welle 21) | Schnecke mit dunklem Eisen-Spiralhaus und Goldakzenten, zwei Fühler | Unterstützer: Pechspur (zeichnet das Spiel) gibt anderen Gegnern 20 % Schadensreduktion | 0,22 | 0,18 (Länge bis 0,32) | 700 |
+| `enemy_mushroomColossus` | Pilzkoloss (ab Welle 28) | schwerer zweibeiniger Pilzriese, breiter roter Hut mit cremefarbenen Tupfen, Baumpilze an der Seite | viel Leben, langsam; beim Tod Sporenwolke (zeichnet das Spiel) | 0,48 | 0,36 | 1 000 |
+| `enemy_ramBeetle` | Rammbockkäfer (ab Welle 38) | massiger sechsbeiniger Nashornkäfer, roter Panzer mit Goldbändern, großes Elfenbeinhorn nach vorn | beschleunigt auf Geraden; bei vollem Tempo 3 Basisschaden | 0,24 | 0,34 (Länge bis 0,48) | 900 |
+
+Die Fähigkeiten der sechs neuen Gegner sollen an der Silhouette ablesbar sein: Schild, Sprungbeine, Panzer, Schneckenhaus, Pilzhut, Horn. Das Spiel zeigt zusätzlich ein Symbol mit Restladung über dem Kopf (z. B. Schildstacks). Das gehört nicht ins Modell.
 
 ### 6.3 Besondere Teile
 
@@ -262,6 +316,39 @@ Höhe auch hier **höchstens 0,65**. Die Dateinamen enthalten die Upgrade-IDs au
 - **Elementträger:** Gefäßinhalt als Objekt und Material **`element_core`** in neutralem Hellgrau/Weiß. Das Spiel färbt es je Welle in Feuer `#ef7449`, Wasser `#56c5ef` oder Blitz `#efd557`. Keine Farbe fest einmodellieren.
 - **Splittergolem und Golemsplitter:** gleiche Steinfarbe (grünlich oder bläulich grau, nicht Balkengrau) und Rissfarbe. Die Risse teilen den Golem erkennbar in zwei Hälften, der Splitter ist eine dieser Hälften in Zielgröße.
 - **Bosse:** optional `core` für den Glutkern.
+
+### 6.4 Gelenke der neuen Gegner (`rig_…`)
+
+Schildknecht, Donnerkröte, Häutungskäfer, Pechschnecke, Pilzkoloss und Rammbockkäfer bewegt das Spiel über benannte Gelenkgruppen. Das Spiel dreht, hebt, staucht oder blendet jede Gruppe selbst aus, abhängig von Laufphase und Zustand.
+
+- Jedes Gelenk ist ein **leeres Objekt (Empty)** mit dem exakten Namen aus der Tabelle. Der **Pivot liegt im Gelenk** (Hüfte, Schulter, Beinansatz, Fühlerwurzel, Ansatz der Panzerhälfte). Die zugehörigen Meshes sind starre Kinder.
+- **Keine Bones, kein Skinning, keine Shape Keys.** In der Datei enthaltene Animationen ignoriert das Spiel. Sie sind höchstens für die eigene Vorschau nützlich.
+- `rig_…`-Gruppen **nicht ineinander verschachteln**, alle hängen direkt am Wurzelobjekt. Was in keiner `rig_…`-Gruppe liegt, bleibt starr.
+- Seiten: `_l` liegt links in Blickrichtung, also bei **+Y (Norden)**, `_r` bei −Y. Mehrere Beine sind von vorn nach hinten nummeriert (`0` = vorn).
+- Beine schwingen im Spiel um die Querachse (Blender Y), Insektenbeine zusätzlich seitlich. Die Gelenke daher so legen, dass ein Pendeln um den Pivot natürlich aussieht und nichts durch den Körper schneidet.
+
+| Gegner | Pflicht-Gelenke | Was das Spiel damit macht |
+|---|---|---|
+| `enemy_shieldbearer` | `rig_body`, `rig_leg_l`, `rig_leg_r`, `rig_arm_l`, `rig_arm_r`, `rig_shield_3`, `rig_shield_2`, `rig_shield_1` | Gehen wie ein Mensch; der Speer gehört in `rig_arm_r`. Die drei Schildgruppen sind **drei Fassungen desselben Schilds**: `3` intakt, `2` mit Rissen, `1` stark beschädigt mit fehlenden Planken. Das Spiel zeigt genau die Fassung zur Restladung, bei 0 keine. Alle drei liegen deckungsgleich links vor dem Körper. |
+| `enemy_thornToad` | `rig_body`, `rig_leg_l0`, `rig_leg_l1`, `rig_leg_r0`, `rig_leg_r1` | Das Spiel lässt die Kröte springen: vor dem Sprung staucht es `rig_body` auf 85 % Höhe, im Sprung hebt es die ganze Figur an und streckt die Beine. Die Beine also in Hockstellung modellieren. `0` = Vorderbeine, `1` = kräftige Hinterbeine. |
+| `enemy_moltingBeetle` | `rig_body`, `rig_leg_l0`–`rig_leg_l2`, `rig_leg_r0`–`rig_leg_r2`, `rig_shell_l`, `rig_shell_r` | Sechs Beine im Wechselschritt. Die zwei Panzerhälften blendet das Spiel nach dem Panzerbruch aus. Darunter muss ein **vollständiger, weicher Leib** sichtbar sein, ohne Löcher. |
+| `enemy_tarSnail` | `rig_body`, `rig_shell`, `rig_antenna_l`, `rig_antenna_r` | `rig_body` (Fuß und Kopf) wird beim Kriechen leicht gedehnt und gestaucht, das Haus wiegt sanft, die Fühler pendeln. Die Pechspur auf der Straße zeichnet das Spiel. |
+| `enemy_mushroomColossus` | `rig_body`, `rig_leg_l`, `rig_leg_r`, `rig_arm_l`, `rig_arm_r` | Schwere, langsame Schritte mit leichtem Vorwippen des Körpers; Hut, Gesicht und Baumpilze gehören zu `rig_body`. |
+| `enemy_ramBeetle` | `rig_body`, `rig_leg_l0`–`rig_leg_l2`, `rig_leg_r0`–`rig_leg_r2` | Sechs Beine im Wechselschritt. Beim Anlauf auf Geraden kippt das Spiel `rig_body` nach vorn (Kopf und Horn senken sich). Das Horn gehört zu `rig_body`. |
+
+Die gelieferten Modelle in `assets/enemies/` zeigen Gelenkaufbau und Pivot-Lage. Sie lassen sich in Blender importieren und als Vorlage nutzen.
+
+### 6.5 Bossgestalten
+
+Ab Welle 15 kommt alle zehn Wellen ein Boss, abwechselnd in drei Ausprägungen. Jede hat ein eigenes Modell mit Maßen und Teilen wie `enemy_boss` (6.2/6.3, Gliedmaßen `leg_l`, `leg_r`, `arm_l`, `arm_r`, optional `core`). In Dünenmeer, Sturmhochland und Aschelanden setzt das Spiel zwei kleine Biom-Akzente an die Schultern. Die gehören nicht ins Modell. Fehlt eine Datei, zeigt das Spiel `enemy_boss` mit Aufsätzen aus Grundkörpern. Biom-Wächter auf Sonderfeldern nutzen weiterhin `enemy_boss_<biom>`.
+
+| Datei | Boss | Spielwerte | Figur |
+|---|---|---|---|
+| `enemy_boss_iron` | Eisenkoloss | viel Rüstung, langsam, 7 Basisschaden | gepanzerter Belagerer mit massigen Schulterplatten und Nieten, Stahlgrau `#78838d` |
+| `enemy_boss_hunter` | Sturmjäger | schnell, widersteht Verlangsamung | schlanker Jäger mit zwei Hörnern und Klingen an den Seiten, Graugrün `#627875`, Klingen `#b4ddd2` |
+| `enemy_boss_summoner` | Seelenmatriarchin | hohe Magieresistenz, ruft Seelendiener | Gestalt im weiten Seelenmantel mit leuchtender Fünferkrone, Violett `#9468ad`, Krone `#d0a9ec` emissiv |
+
+Die Seelendiener der Seelenmatriarchin nutzen das Modell `enemy_swarm` und brauchen kein eigenes.
 
 ---
 
@@ -321,9 +408,13 @@ Einmalige Hilfen aus dem Menü „Verbrauchshilfen“. Sie gelten nur für die l
 
 ---
 
-## 8. Sakura-Edition
+## 8. Sakura- und Halloween-Edition
 
-Das Spiel hat eine umschaltbare **Sakura-Edition** (Einstellungen → Grafikstil). Jedes Modell kann zusätzlich im Sakura-Stil unter `assets/sakura/<ordner>/` liegen, mit **gleichem Dateinamen, gleichen Objekt- und Materialnamen für benannte Teile und gleichen Maßen**. Nur der Stil ändert sich. Fehlt eine Sakura-Datei, nutzt das Spiel die normale.
+Das Spiel hat zwei umschaltbare Sonder-Editionen (Einstellungen → Grafikstil): **Sakura** und **Halloween**. Für beide gilt: Jedes Modell kann zusätzlich unter `assets/sakura/<ordner>/` bzw. `assets/halloween/<ordner>/` liegen, mit **gleichem Dateinamen, gleichen Objekt- und Materialnamen für benannte Teile und gleichen Maßen**. Fehlt eine Datei der Edition, nutzt das Spiel die normale. Eine Datei ohne normales Gegenstück lädt das Spiel nicht.
+
+**Halloween** nutzt die Biom-Einfärbung der normalen Edition (Abschnitt 3.2: Materialnamen mit `grass`, `soil`, `foliage`). Jahreszeiten-Einfärbung und Partikel gibt es nur in Sakura.
+
+### 8.1 Sakura
 
 Für Sakura-Tiles und -Basen gelten feste Materialnamen, damit das Spiel die Biome als Jahreszeiten einfärben kann:
 
@@ -340,6 +431,7 @@ Laternen, Lack, Bambus, Torii und Steine behalten ihre Farbe.
 
 ## 9. Prüfung und Lieferung
 
-- Vor der Lieferung prüfen: Straßenenden an den richtigen Kanten, Turmplätze an den Positionen aus 3.5 und frei von Straße und hoher Deko, benannte Teile vorhanden (`turret`, `spike_01` … `spike_10`, `resin`, `overload_ring`/`overload_glow`).
-- Das Projekt prüft automatisch (`tests/tile-models.test.cjs`), ob die Straßen aller Tiles in beiden Editionen die Kanten der Kartendaten treffen, und (`tests/asset-edition.test.cjs`), ob jede Sakura-Datei ein normales Gegenstück hat.
+- Vor der Lieferung prüfen: Straßenenden an den richtigen Kanten, Turmplätze an den Positionen aus 3.5 und frei von Straße und hoher Deko, benannte Teile vorhanden (`turret`, `spike_01` … `spike_10`, `resin`, `overload_ring`/`overload_glow`, bei den neuen Gegnern alle `rig_…`-Gelenke aus 6.4).
+- `scripts/generate-enemy-models.mjs` erzeugt die früheren Platzhalter der neuen Gegner und **überschreibt** dabei `assets/enemies/enemy_<typ>.glb`. Seit der Lieferung vom 20.10.2026 darf es nicht mehr ausgeführt werden.
+- Das Projekt prüft automatisch, ob die Straßen aller Tiles in allen Editionen die Kanten der Kartendaten treffen (`tests/tile-models.test.cjs`), ob jede Sakura- und Halloween-Datei ein normales Gegenstück hat (`tests/asset-edition.test.cjs`), ob Basis-Bastionen und Lange Straße an den Code-Positionen liegen (`tests/base-slot-models.test.cjs`) ob die neuen Gegner genau die Gelenke aus 6.4 ohne Verschachtelung haben (`tests/enemy-models.test.cjs`) und ob alle Tiles ihre Turmplätze an den Positionen aus 3.5 tragen, Ultimate-Türme `turret` und die Größenlimits einhalten und Bossgestalten die Gliedmaßen des Standardbosses haben (`tests/designer-models.test.cjs`).
 - Nach dem Ablegen neuer Dateien auf dem Server den Modell-Index neu erzeugen (`npm run generate-assets-index`), sonst lädt das Spiel sie nicht.

@@ -96,10 +96,11 @@ function makeTemplate(name,scene,kind){
   if(kind==='landmarks'&&name!=='landmark_boss'){                    // Deko separat, damit sie auf jede Straßenform passt
     // Hauptobjekt (Schatztruhe bzw. Shrine) plus nahe Kisten. Bezugspunkt ist die Mitte des Hauptobjekts, nicht die aller Deko,
     // sonst rutscht die Truhe bei weit verstreuten Kisten aus dem Hex. Weit entfernte Kisten (auf der anderen Straßenseite) entfallen.
-    const root=scene.children[0]||scene,main=/^(shrine|treasure)/;
+    const root=scene.children[0]||scene,main=/^(shrine|treasure|chest)/,tileParts=/^(ground|road|tower_slot|grass)/;
     const mainNode=root.children.find(n=>main.test(n.name)),mainCenter=mainNode?new THREE.Box3().setFromObject(mainNode).getCenter(new THREE.Vector3()):new THREE.Vector3();
     const near=n=>{const c=new THREE.Box3().setFromObject(n).getCenter(new THREE.Vector3());return Math.hypot(c.x-mainCenter.x,c.z-mainCenter.z)<=.45;};
-    template.props=bake(root,n=>n.parent===root&&!(main.test(n.name)||(/^crate/.test(n.name)&&near(n))));
+    // Nahe Beigaben (Kisten, Münzen, Säcke, Kerzen …) bleiben, Boden, Straße und Turmplätze eines vollständigen Tiles nicht.
+    template.props=bake(root,n=>n.parent===root&&!(main.test(n.name)||(!tileParts.test(n.name)&&near(n))));
     template.propCenter=mainCenter;
   }
   return template;
@@ -502,7 +503,8 @@ function create(host0,commands){
   }
   function towerObject(tile,index,tower){
     const variant=tower.finalUpgrade||tower.branch;
-    const template=(variant&&modelTemplate(`${tower.type}_${variant}`,'tower'))||modelTemplate(tower.type,'tower');
+    const ultimateTemplate=tower.ultimate&&tower.finalUpgrade?modelTemplate(`${tower.type}_${tower.finalUpgrade}_ultimate`,'tower'):null;   // ohne Datei: Modell der Endstufe
+    const template=ultimateTemplate||(variant&&modelTemplate(`${tower.type}_${variant}`,'tower'))||modelTemplate(tower.type,'tower');
     const def=HexData.towerDefinition(tower),p=slotPositions(tile)[index],holder=new THREE.Group(),obj={holder,def,tower,tile,index,pos:p,angle:0};
     holder.position.set(p.x,slotLift(tile,index),p.y);
     const model=new THREE.Group();model.scale.setScalar(S);holder.add(model);
@@ -516,7 +518,7 @@ function create(host0,commands){
       if(tower.type==='necromancer')for(const x of [-12,12]){const spire=new THREE.Mesh(new THREE.ConeGeometry(4,27,5),std('#c4c8b1'));spire.position.set(x,29,0);holder.add(spire);}
       else{const ring=new THREE.Mesh(torus,basic(def.color));ring.scale.setScalar(16);ring.position.y=27;holder.add(ring);}
     }else{const mesh=new THREE.Mesh(new THREE.CylinderGeometry(12,14,40,8).translate(0,20,0),std(def.color));mesh.castShadow=true;holder.add(mesh);}
-    if(tower.type==='flame')model.add(flameDetails(tower,template?.height||.5));
+    if(tower.type==='flame'&&!ultimateTemplate)model.add(flameDetails(tower,template?.height||.5));   // eigenes Ultimate-Modell ersetzt den Phönix-Aufsatz
     obj.focusObjects=[...holder.children];
     obj.picks=modelPicks(holder,{kind:'tower',q:tile.q,r:tile.r,index},obj.auraModel);
     if(def.aura){const fill=new THREE.Mesh(circle,basic(def.color,.06)),edge=new THREE.Mesh(circleRing,basic(def.color,.22));for(const m of [fill,edge]){m.scale.setScalar(def.range);m.position.set(0,1.5,0);holder.add(m);}}
@@ -638,16 +640,17 @@ function create(host0,commands){
   function makeEnemy(e){
     const type=ENEMY_COLOR[e.type]||MODEL_ENEMIES.includes(e.type)?e.type:'normal',boss=type==='boss';
     const baseType=({splitter:'armored',shard:'armored',healer:'warded',elementCarrier:'warded'}[type]||type);
-    const own=templates.get('enemy_'+type),template=(boss&&!e.bossKind&&e.originBiome&&templates.get('enemy_boss_'+e.originBiome))||own||templates.get('enemy_'+baseType),group=new THREE.Group(),bar=new THREE.Group();
+    const identity=boss&&e.bossKind?templates.get('enemy_boss_'+e.bossKind):null;   // eigene Bossgestalt (Eisenkoloss, Sturmjäger, Seelenmatriarchin)
+    const own=templates.get('enemy_'+type),template=identity||(boss&&!e.bossKind&&e.originBiome&&templates.get('enemy_boss_'+e.originBiome))||own||templates.get('enemy_'+baseType),group=new THREE.Group(),bar=new THREE.Group();
     const shrink=type==='shard'&&!own?.6:1;   // Ersatzmodell für Golemsplitter verkleinert, eigenes Modell hat Zielgröße
     const obj={group,bar,radius:boss?15:type==='shard'?6:9,phase:0,angle:0,targetAngle:0,last:null,slowed:false,limbs:[],barY:0};
     if(template){
       obj.pivot=new THREE.Group();const model=new THREE.Group();model.scale.setScalar(S*shrink);obj.pivot.add(model);addParts(model,template.parts);
       for(const limb of template.limbs){const g=new THREE.Group();g.position.copy(limb.pos);addParts(g,limb.parts);model.add(g);obj.limbs.push({name:limb.name,g,base:limb.pos.clone()});}
-      if(boss&&e.bossKind)model.add(bossDetails(e.bossKind,e.originBiome,template.height));
+      if(boss&&e.bossKind)model.add(bossDetails(e.bossKind,e.originBiome,template.height,{identity:!identity}));
       obj.articulated=MODEL_ENEMIES.includes(type);obj.enemy=e;
       obj.ice=new THREE.Mesh(torus,basic('#79cdd9'));obj.ice.scale.setScalar(obj.radius+4);obj.ice.position.y=2;obj.ice.visible=false;
-      group.add(obj.pivot,obj.ice);obj.barY=template.height*S*shrink*(boss&&e.bossKind?1.25:1)+12;obj.baseY=0;
+      group.add(obj.pivot,obj.ice);obj.barY=template.height*S*shrink*(boss&&e.bossKind&&!identity?1.25:1)+12;obj.baseY=0;
       if(type==='healer') obj.pivot.traverse(mesh=>{if(mesh.isMesh&&mesh.material.name==='heal_glow'){if(!obj.healGlow){obj.healGlow=mesh.material.clone();obj.healBase=obj.healGlow.emissiveIntensity||1;obj.healFlash=0;}mesh.material=obj.healGlow;}});   // Heilkugel pulsiert
       if(e.color&&type==='elementCarrier') obj.pivot.traverse(mesh=>{if(mesh.isMesh&&mesh.material.name==='element_core'){mesh.material=elementCoreMaterial(mesh.material,e.color);}});   // Gefäß in Elementfarbe
     }else{                                                             // Fallback ohne Modell: farbige Kugel
