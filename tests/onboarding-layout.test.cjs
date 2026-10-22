@@ -93,7 +93,7 @@ test('camera changes immediately reproject tutorial targets without waiting for 
 
 test('tutorial highlights only Archer in build menu, then its upgrades, and clears highlighting after upgrade',()=>{
  const {a,elements,selectSlot,buyTower,upgradeSelectedTower}=load({initialStorage:{'tutorial-v1':'new'}});a.state.phase='build';a.state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[null]});selectSlot(1,0,0);
- const offers=elements.get('towerMenu').children;assert.ok(offers.every(b=>b.innerHTML.includes('towerBuildIcon')&&b.innerHTML.includes('<svg')));assert.equal(offers.filter(b=>b.classList.contains('tutorialChoice')).length,1);assert.ok(offers[0].classList.contains('tutorialChoice'));
+ const offers=elements.get('towerMenu').children;assert.ok(offers.every(b=>b.innerHTML.includes('towerBuildIcon')&&b.innerHTML.includes('hxTowerIcon')));assert.equal(offers.filter(b=>b.classList.contains('tutorialChoice')).length,1);assert.ok(offers[0].classList.contains('tutorialChoice'));
  buyTower('archer');a.rendererCommands.selectTower(1,0,0);const descendants=node=>[node,...node.children.flatMap(descendants)];const upgrades=descendants(elements.get('towerUpgrades')).filter(b=>b.className?.includes('towerBuy'));assert.ok(upgrades.length);assert.equal(upgrades.filter(b=>b.classList.contains('tutorialChoice')).length,1);assert.match(upgrades.find(b=>b.classList.contains('tutorialChoice')).attributes['aria-label'],/Salve/);assert.match(elements.get('tutorialText').textContent,/Salve/);assert.equal(elements.get('towerMenu').children.some(b=>b.classList.contains('tutorialChoice')),false);
  upgradeSelectedTower('volley');assert.equal(elements.get('towerPanel').classList.contains('hidden'),true);
 });

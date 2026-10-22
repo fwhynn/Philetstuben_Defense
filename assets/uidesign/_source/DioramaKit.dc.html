@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Menü-Diorama – Deko-Set und Editionen</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&amp;family=Inter:wght@500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 1800px; height: 1240px; box-sizing: border-box; padding: 36px 44px; background: #0f1a15; font-family: Inter, system-ui, sans-serif; color: #f6f2e4; display: flex; flex-direction: column; gap: 20px">
+  <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 24px">
+    <h2 style="margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 800; font-size: 32px; color: #f3d58a">#5 Menü-Diorama · Deko-Set, Wasser, Editionen</h2>
+    <p style="margin: 0; font-size: 14px; color: #bfd0c6">Einzel-GLBs, frei zwischen Kacheln platzierbar · Low-Poly, weiche Farbflächen, keine Fototexturen</p>
+  </div>
+
+  <dc-import name="Island" mode="catalog" cols="{{ 10 }}" cat-w="{{ 1712 }}" hint-size="1712px,350px"></dc-import>
+
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px">
+    <figure style="margin: 0; display: flex; flex-direction: column; gap: 8px">
+      <div style="width: 844px; height: 475px; border-radius: 14px; overflow: hidden; outline: 1px solid #41594a">
+        <dc-import name="Backdrop" w="{{ 844 }}" h="{{ 475 }}" edition="sakura" hint-size="844px,475px"></dc-import>
+      </div>
+      <figcaption style="font-size: 14px; line-height: 1.45; color: #dfe8e2"><b style="color: #f6f2e4">Sakura</b> – Laubbäume werden Kirschbäume, Büsche und Blumen rosa, Papierlaterne, helles Banner mit rotem Wappen.</figcaption>
+    </figure>
+    <figure style="margin: 0; display: flex; flex-direction: column; gap: 8px">
+      <div style="width: 844px; height: 475px; border-radius: 14px; overflow: hidden; outline: 1px solid #41594a">
+        <dc-import name="Backdrop" w="{{ 844 }}" h="{{ 475 }}" edition="halloween" hint-size="844px,475px"></dc-import>
+      </div>
+      <figcaption style="font-size: 14px; line-height: 1.45; color: #dfe8e2"><b style="color: #f6f2e4">Halloween</b> – kahle Bäume, Kürbisse statt Büsche und Blumen, Kürbislaterne, grünes Fackelfeuer, violettes Banner.</figcaption>
+    </figure>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+    <div style="padding: 14px 16px; border-radius: 14px; background: #1a2d24; border: 1px solid #41594a">
+      <h3 style="margin: 0 0 6px; font-family: Fraunces, Georgia, serif; font-size: 18px; color: #f3d58a">Wasser</h3>
+      <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #dfe8e2">tile_river_straight, tile_river_curve und Wasserfall-Abschluss an der Inselkante. Oberfläche per UV-Scroll oder Shapekey, dazu eine ruhige Fassung ohne Bewegung.</p>
+    </div>
+    <div style="padding: 14px 16px; border-radius: 14px; background: #1a2d24; border: 1px solid #41594a">
+      <h3 style="margin: 0 0 6px; font-family: Fraunces, Georgia, serif; font-size: 18px; color: #f3d58a">Editionen</h3>
+      <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #dfe8e2">Gleiche Dateinamen im Editionsordner (z. B. sakura/deco_tree_a.glb). Fehlt eine Variante, lädt das Spiel die Grundfassung.</p>
+    </div>
+    <div style="padding: 14px 16px; border-radius: 14px; background: #1a2d24; border: 1px solid #41594a">
+      <h3 style="margin: 0 0 6px; font-family: Fraunces, Georgia, serif; font-size: 18px; color: #f3d58a">Dateinamen</h3>
+      <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #dfe8e2">deco_*.glb und tile_river_*.glb sind Vorschläge für die Lieferung; Türme und Gebäude kommen aus den vorhandenen Spielmodellen.</p>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1800,"height":1240}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

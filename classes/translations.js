@@ -1699,3 +1699,51 @@ HexTranslations.add(`
 Einheitliche Wiese|Uniform meadow
 Weites Land hat jetzt dieselbe grüne Wiese wie die übrigen Hex-Felder statt eines trockenen Gelbtons, in der normalen, der Sakura- und der Halloween-Edition.|Open Land now has the same green meadow as the other hex tiles instead of a dry yellow tone, in the Normal, Sakura and Halloween Editions.
 `);
+HexTranslations.add(`
+Fortsetzen · Welle|Continue · Wave
+ab Welle 35|from wave 35
+Zurück · Esc|Back · Esc
+Impressum|Legal notice
+Datenschutz|Privacy
+Rechtliches|Legal
+Patch Notes|Patch notes
+Welle läuft|Wave in progress
+Niederlage|Defeat
+Sieg|Victory
+Base-Ausbau öffnen|Open base upgrades
+Verbrauchshilfen|Consumables
+Drehen (R)|Rotate (R)
+Drehen|Rotate
+Basisstufe|Base level
+Stufe 2 · Spezialisierung|Level 2 · Specialization
+Stufe 3 · Zweigfinale|Level 3 · Branch finale
+Gemeinsam einstellen|Set together
+Upgrades|Upgrades
+Zurück zu Upgrades|Back to upgrades
+Aktuelle Werte|Current stats
+Aktive Einflüsse|Active influences
+Schadensfaktoren|Damage factors
+Gegen Leben|Against health
+Gegen Rüstung|Against armor
+Gegen Magieresistenz|Against magic resistance
+Fläche|Area
+Kette|Chain
+Aura|Aura
+Minen|Mines
+Durchschlag|Pierce
+Frost|Frost
+Radius|Radius
+Tastenbelegung, Hex-Grid und Spielhilfen findest du im Spiel unter Einstellungen (Escape).|Key bindings, hex grid and gameplay aids are in the in-game settings (Escape).
+`);
+HexTranslations.add(`
+Neue Hex-Oberfläche|New hex interface
+Neues Hauptmenü im Hex-Stil: ein großer goldener Spielen-Knopf in der Mitte, darum Arsenal, Bestenliste, Einstellungen, Duo, Tägliche Herausforderung und Account. Duo und die Tägliche Herausforderung sind direkt erreichbar und zeigen vor der Freischaltung „ab Welle 35“.|New hex-style main menu: a large golden Play button in the centre, surrounded by Arsenal, Leaderboard, Settings, Duo, Daily challenge and Account. Duo and the daily challenge are directly accessible and show “from wave 35” until unlocked.
+Mit gespeichertem Durchlauf zeigt „Spielen“ die aktuelle Welle und öffnet die Spielauswahl: „Fortsetzen“ steht an erster Stelle, darunter lässt sich ein neuer Run starten.|With a saved run, “Play” shows the current wave and opens the play selection: “Continue” comes first, and a new run can be started below it.
+Im Hintergrund des Hauptmenüs liegen Spielkarten mit Festung, Türmen und Gegnern, die zur Festung laufen.|The main menu background shows game maps with a fortress, towers and enemies walking towards the fortress.
+Einstellungen direkt im Hauptmenü: Sprache, Grafikstil, Ton und Einsteigerhinweise. Die Sprachwahl steht unten links, die Patch Notes unten rechts.|Settings directly in the main menu: language, graphics style, sound and beginner tips. The language picker sits bottom left, patch notes bottom right.
+Neue Spieloberfläche: Pause, Einstellungen, Regeln, Zoom und Bauen als Hex-Knöpfe; Leben, Gold, Deck, Diamanten und Base als Anzeigen oben rechts; ein Phasenschild oben zeigt Bauphase oder laufende Welle. Turmleiste mit Preisschildern, Tempo-Regler und Wellenstart sind neu gestaltet. Der Knopf „Zur Base“ entfällt.|New game interface: pause, settings, rules, zoom and build as hex buttons; health, gold, deck, diamonds and base as displays at the top right; a phase sign at the top shows the build phase or the running wave. The tower bar with price tags, the speed slider and the wave start are redesigned. The “Back to base” button has been removed.
+Handkarten mit Rahmen in der Seltenheitsfarbe und einem Kachelbild, das die aktuelle Drehung zeigt.|Hand cards with a frame in the rarity colour and a tile image that shows the current rotation.
+Die Turmauswahl zeigt Werte mit Symbolen und den Preis als Knopf; bei zu wenig Gold ist der Preis rot.|The tower selection shows stats with icons and the price as a button; with too little gold the price turns red.
+Neues Turmfenster: Bild des Turms in seiner Ausbaustufe, die wichtigsten Werte auf einen Blick, Angriffsfokus und Upgrades mit Vorschaubild, Typ und Preis. „Werte & Einflüsse“ öffnet eine eigene Ansicht mit allen Werten, aktiven Einflüssen und Schadensfaktoren.|New tower window: an image of the tower at its upgrade level, the key stats at a glance, targeting and upgrades with preview image, type and price. “Stats & modifiers” opens its own view with all stats, active modifiers and damage factors.
+Neue Schriften für Titel und Bedienelemente, und das Spielfeld liegt vor einem kräftigeren Blau.|New fonts for titles and controls, and the board sits in front of a stronger blue.
+`);

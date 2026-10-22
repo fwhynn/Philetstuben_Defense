@@ -1,0 +1,589 @@
+/* ===== Hexwerk: Oberfläche aus dem Designer-Export (assets/uidesign) =====
+   Reihenfolge: style.css → assets/uidesign/tokens.css → hexwerk.css. Nur Darstellung; IDs, Texte und Spiellogik bleiben.
+   Bausteine: Hex-Knöpfe (SVG-Rahmen aus hex/ und hud/), Kapseln für Werte, Paneele mit Goldkante, cremefarbene Handkarten.
+   Layout am Desktop (> 1100 × 600 px) nach _source/GameScreen.dc.html; kompakte Ansichten behalten ihre Anordnung und erhalten nur den Stil. */
+
+/* --- Schriften (SIL OFL 1.1). WOFF2-Dateien gehören nach assets/fonts/; bis dahin greift die Ersatzschrift. --- */
+/* Titelschrift Tektur Black (SIL OFL 1.1, assets/fonts/OFL-Tektur.txt): Latin und Latin-Ext getrennt, der Browser lädt nur, was gebraucht wird. */
+@font-face{font-family:'Tektur';font-weight:900;font-style:normal;font-display:swap;src:url("assets/fonts/Tektur-Black.woff2") format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Tektur';font-weight:900;font-style:normal;font-display:swap;src:url("assets/fonts/Tektur-Black-LatinExt.woff2") format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C4,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Fraunces';font-weight:900;font-style:normal;font-display:swap;src:local('Fraunces Black'),local('Fraunces-Black'),url("assets/fonts/Fraunces-Black.woff2") format('woff2')}
+@font-face{font-family:'Barlow Semi Condensed';font-weight:600;font-style:normal;font-display:swap;src:local('Barlow Semi Condensed SemiBold'),local('BarlowSemiCondensed-SemiBold'),url("assets/fonts/BarlowSemiCondensed-SemiBold.woff2") format('woff2')}
+@font-face{font-family:'Barlow Semi Condensed';font-weight:700;font-style:normal;font-display:swap;src:local('Barlow Semi Condensed Bold'),local('BarlowSemiCondensed-Bold'),url("assets/fonts/BarlowSemiCondensed-Bold.woff2") format('woff2')}
+:root{--hx-font-ui:'Barlow Semi Condensed',Inter,system-ui,'Segoe UI',Arial,sans-serif;--hx-font-title:'Tektur','Fraunces',Georgia,sans-serif;
+  --hx-asset:"assets/uidesign";--hx-hs:56px;--hx-edge-w:2px}
+body{font-family:var(--hx-font-ui)}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* --- Icons: einfarbige Masken aus icons/ und towers/, Farbe über currentColor --- */
+.hxi{display:inline-block;flex:none;width:1.15em;height:1.15em;vertical-align:-.2em;background:currentColor;-webkit-mask:var(--i) center/contain no-repeat;mask:var(--i) center/contain no-repeat}
+.hxi-account{--i:url("assets/uidesign/icons/icon_account.svg")}
+.hxi-area{--i:url("assets/uidesign/icons/icon_area.svg")}
+.hxi-arsenal{--i:url("assets/uidesign/icons/icon_arsenal.svg")}
+.hxi-attackSpeed{--i:url("assets/uidesign/icons/icon_attackSpeed.svg")}
+.hxi-back{--i:url("assets/uidesign/icons/icon_back.svg")}
+.hxi-biome_ash{--i:url("assets/uidesign/icons/icon_biome_ash.svg")}
+.hxi-biome_desert{--i:url("assets/uidesign/icons/icon_biome_desert.svg")}
+.hxi-biome_grass{--i:url("assets/uidesign/icons/icon_biome_grass.svg")}
+.hxi-biome_storm{--i:url("assets/uidesign/icons/icon_biome_storm.svg")}
+.hxi-biome_water{--i:url("assets/uidesign/icons/icon_biome_water.svg")}
+.hxi-build{--i:url("assets/uidesign/icons/icon_build.svg")}
+.hxi-chevronDown{--i:url("assets/uidesign/icons/icon_chevronDown.svg")}
+.hxi-chevronLeft{--i:url("assets/uidesign/icons/icon_chevronLeft.svg")}
+.hxi-chevronRight{--i:url("assets/uidesign/icons/icon_chevronRight.svg")}
+.hxi-close{--i:url("assets/uidesign/icons/icon_close.svg")}
+.hxi-coin{--i:url("assets/uidesign/icons/icon_coin.svg")}
+.hxi-consumables{--i:url("assets/uidesign/icons/icon_consumables.svg")}
+.hxi-cooldown{--i:url("assets/uidesign/icons/icon_cooldown.svg")}
+.hxi-daily{--i:url("assets/uidesign/icons/icon_daily.svg")}
+.hxi-damage{--i:url("assets/uidesign/icons/icon_damage.svg")}
+.hxi-deck{--i:url("assets/uidesign/icons/icon_deck.svg")}
+.hxi-duo{--i:url("assets/uidesign/icons/icon_duo.svg")}
+.hxi-gem{--i:url("assets/uidesign/icons/icon_gem.svg")}
+.hxi-heart{--i:url("assets/uidesign/icons/icon_heart.svg")}
+.hxi-language{--i:url("assets/uidesign/icons/icon_language.svg")}
+.hxi-leaderboard{--i:url("assets/uidesign/icons/icon_leaderboard.svg")}
+.hxi-lock{--i:url("assets/uidesign/icons/icon_lock.svg")}
+.hxi-menu{--i:url("assets/uidesign/icons/icon_menu.svg")}
+.hxi-newRun{--i:url("assets/uidesign/icons/icon_newRun.svg")}
+.hxi-patchNotes{--i:url("assets/uidesign/icons/icon_patchNotes.svg")}
+.hxi-pause{--i:url("assets/uidesign/icons/icon_pause.svg")}
+.hxi-play{--i:url("assets/uidesign/icons/icon_play.svg")}
+.hxi-range{--i:url("assets/uidesign/icons/icon_range.svg")}
+.hxi-rotate{--i:url("assets/uidesign/icons/icon_rotate.svg")}
+.hxi-sell{--i:url("assets/uidesign/icons/icon_sell.svg")}
+.hxi-settings{--i:url("assets/uidesign/icons/icon_settings.svg")}
+.hxi-single{--i:url("assets/uidesign/icons/icon_single.svg")}
+.hxi-speed1{--i:url("assets/uidesign/icons/icon_speed1.svg")}
+.hxi-speed2{--i:url("assets/uidesign/icons/icon_speed2.svg")}
+.hxi-speed3{--i:url("assets/uidesign/icons/icon_speed3.svg")}
+.hxi-stats{--i:url("assets/uidesign/icons/icon_stats.svg")}
+.hxi-towerSlot{--i:url("assets/uidesign/icons/icon_towerSlot.svg")}
+.hxi-trash{--i:url("assets/uidesign/icons/icon_trash.svg")}
+.hxi-upgrade{--i:url("assets/uidesign/icons/icon_upgrade.svg")}
+.hxi-upgradeBadge{--i:url("assets/uidesign/icons/icon_upgradeBadge.svg")}
+.hxi-vsArmor{--i:url("assets/uidesign/icons/icon_vsArmor.svg")}
+.hxi-vsHealth{--i:url("assets/uidesign/icons/icon_vsHealth.svg")}
+.hxi-vsMagic{--i:url("assets/uidesign/icons/icon_vsMagic.svg")}
+.hxi-wave{--i:url("assets/uidesign/icons/icon_wave.svg")}
+.hxi-waveStart{--i:url("assets/uidesign/icons/icon_waveStart.svg")}
+.hxi-zoomIn{--i:url("assets/uidesign/icons/icon_zoomIn.svg")}
+.hxi-zoomOut{--i:url("assets/uidesign/icons/icon_zoomOut.svg")}
+.hxi-building_forge{--i:url("assets/uidesign/towers/icon_building_forge.svg")}
+.hxi-building_house{--i:url("assets/uidesign/towers/icon_building_house.svg")}
+.hxi-building_market{--i:url("assets/uidesign/towers/icon_building_market.svg")}
+.hxi-path_sniper{--i:url("assets/uidesign/towers/icon_path_sniper.svg")}
+.hxi-path_volley{--i:url("assets/uidesign/towers/icon_path_volley.svg")}
+.hxi-tower_archer{--i:url("assets/uidesign/towers/icon_tower_archer.svg")}
+.hxi-tower_ballista{--i:url("assets/uidesign/towers/icon_tower_ballista.svg")}
+.hxi-tower_catapult{--i:url("assets/uidesign/towers/icon_tower_catapult.svg")}
+.hxi-tower_chain{--i:url("assets/uidesign/towers/icon_tower_chain.svg")}
+.hxi-tower_element{--i:url("assets/uidesign/towers/icon_tower_element.svg")}
+.hxi-tower_flame{--i:url("assets/uidesign/towers/icon_tower_flame.svg")}
+.hxi-tower_freeze{--i:url("assets/uidesign/towers/icon_tower_freeze.svg")}
+.hxi-tower_mine{--i:url("assets/uidesign/towers/icon_tower_mine.svg")}
+.hxi-tower_necromancer{--i:url("assets/uidesign/towers/icon_tower_necromancer.svg")}
+/* ===== Hauptmenü: Hex-Blüte =====
+   Mitte = Hauptaktion (Gold), sechs Ring-Hexe Kante an Kante um die Mitte, im Uhrzeigersinn ab oben links.
+   Positionen in Einheiten --u (Höhe eines Ring-Hex): Ring-Mittelpunkte liegen bei 0°, 60° … im Abstand --d.
+   --hc = Höhe des Mittel-Hex. Fuge Mitte↔Ring = d − 0,433·(hc+1), Fuge Ring↔Ring = d − 0,866.
+   Clusterbox: Breite 2·(d+0,433)·u, Höhe 2·(0,866·d+0,5)·u.
+   Rahmen, Icons und Wortmarke stammen aus assets/uidesign (Designer-Export), Farben aus assets/uidesign/tokens.css. */
+:root{--hex-bar-h:64px}
+.mainMenu{overflow-x:hidden;overflow-y:auto;padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) calc(var(--hex-bar-h) + max(8px,env(safe-area-inset-bottom))) max(12px,env(safe-area-inset-left))}
+/* Wabenraster und leichte Abdunklung oben/unten über dem 3D-Diorama; die Inseln an den Seiten bleiben hell. */
+.mainMenu::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse 38% 46% at 50% 52%,#06100b8c,#06100b00),linear-gradient(#050a0780,#0000 22%,#0000 78%,#050a0799),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97' viewBox='0 0 56 97'%3E%3Cpath d='M28 0L56 16.2V48.5L28 64.7L0 48.5V16.2ZM28 64.7V97' fill='none' stroke='%23a9c98f' stroke-opacity='.07' stroke-width='1.5'/%3E%3C/svg%3E")}
+#menuBackdrop.vivid canvas{opacity:1}
+.hexMenu{--d:1.16;--hc:1.34;--span-w:calc(2*(var(--d) + .433));--span-h:calc(2*(.866*var(--d) + .5));--reserve:170px;
+  --u:max(56px,min(200px,calc((100vh - var(--reserve))/var(--span-h)),calc((100vw - 32px)/var(--span-w))));
+  display:flex;flex-direction:column;align-items:center;gap:clamp(12px,3vh,32px);width:100%;max-width:980px;text-align:center}
+@supports(height:100dvh){.hexMenu{--u:max(56px,min(200px,calc((100dvh - var(--reserve))/var(--span-h)),calc((100vw - 32px)/var(--span-w))))}}
+/* Wortmarke: Aufbau aus brand/wordmark_full.svg inline, Text in Tektur Black (Titelschrift). */
+.hexMenuBrand h1{margin:0;line-height:0}
+.hexMenuBrand .wordmark{display:block;width:min(calc(var(--u)*4.6),88vw,760px);height:auto;overflow:visible;filter:drop-shadow(0 8px 18px #000c)}
+
+.hexCluster{position:relative;flex:none;width:calc(var(--span-w)*var(--u));height:calc(var(--span-h)*var(--u));filter:drop-shadow(0 calc(var(--u)*.06) calc(var(--u)*.07) #000b)}
+.hexCluster::before{content:'';position:absolute;left:50%;top:50%;width:calc(var(--u)*2.4);height:calc(var(--u)*2.4);translate:-50% -50%;border-radius:50%;background:radial-gradient(closest-side,#f6c95a3d,#f6c95a00);pointer-events:none}
+.hexCluster>.hexFog,.hexCluster>.hexBtn{position:absolute;left:calc(50% + var(--x,0)*var(--d)*var(--u));top:calc(50% + var(--y,0)*var(--d)*var(--u));width:calc(var(--h,1)*.866*var(--u));height:calc(var(--h,1)*var(--u));translate:-50% -50%;clip-path:var(--hx-shape);box-sizing:border-box}
+.hexCluster [data-slot=center]{--h:var(--hc)}
+.hexCluster [data-slot=ul]{--x:-.5;--y:-.866}.hexCluster [data-slot=ur]{--x:.5;--y:-.866}.hexCluster [data-slot=r]{--x:1;--y:0}
+.hexCluster [data-slot=lr]{--x:.5;--y:.866}.hexCluster [data-slot=ll]{--x:-.5;--y:.866}.hexCluster [data-slot=l]{--x:-1;--y:0}
+
+/* Hex-Rahmen aus hex/hex_{familie}.svg; für den Fokus werden Rille, Füllung und Glanz einzeln gelegt und der Rand per Maske gelb. */
+.hexCluster .hexBtn{--fam:green;--hexbg:url("assets/uidesign/hex/hex_green.svg");--hexparts:url("assets/uidesign/hex/hex_green_shine.svg"),url("assets/uidesign/hex/hex_green_fill.svg"),url("assets/uidesign/hex/hex_green_groove.svg");--ink:var(--hx-green-ink,#f4ecd6);
+  isolation:isolate;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--u)*.035);
+  min-height:0;margin:0;padding:calc(var(--h,1)*var(--u)*.18) calc(var(--u)*.05);border:0;border-radius:0;outline:none;
+  background:var(--hexbg) center/100% 100% no-repeat;color:var(--ink);font:700 clamp(12px,calc(var(--u)*.105),19px)/1.15 var(--hx-font-ui);
+  hyphens:auto;overflow-wrap:break-word;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .16s ease,filter .16s ease}
+.hexCluster .hexBtn::before{content:'';position:absolute;inset:0;z-index:-1;display:none;background:var(--hx-focus,#ffe198);-webkit-mask:url("assets/uidesign/hex/hex_rim_mono.svg") center/100% 100% no-repeat;mask:url("assets/uidesign/hex/hex_rim_mono.svg") center/100% 100% no-repeat;pointer-events:none}
+.hexCluster .hexBtn:not(:disabled):hover{transform:translateY(calc(var(--u)*-.03)) scale(1.03);filter:brightness(1.08)}
+.hexCluster .hexBtn:not(:disabled):active{transform:translateY(1px) scale(.98);filter:brightness(.96)}
+.hexCluster .hexBtn:focus-visible{background:var(--hexparts);background-size:100% 100%;background-repeat:no-repeat;transform:scale(1.04)}
+.hexCluster .hexBtn:focus-visible::before{display:block}
+.hexIcon.hxi{width:calc(var(--u)*var(--h,1)*.3);height:calc(var(--u)*var(--h,1)*.3);flex:none;filter:drop-shadow(0 2px 0 #0004)}
+.hexLabel{display:block;max-width:100%;text-shadow:0 1px 0 #0006}
+#menuDailyBtn .hexLabel{font-size:.9em}
+.hexDetail{display:block;max-width:100%;font-size:clamp(12px,calc(var(--u)*.1),14px);font-weight:600;line-height:1.2;color:#eadca9}
+.hexDetail:empty{display:none}
+
+.hexCluster .hexPrimary{--hexbg:url("assets/uidesign/hex/hex_gold.svg");--hexparts:url("assets/uidesign/hex/hex_gold_shine.svg"),url("assets/uidesign/hex/hex_gold_fill.svg"),url("assets/uidesign/hex/hex_gold_groove.svg");--ink:var(--hx-gold-ink,#2a1f10);font-family:var(--hx-font-title);font-weight:900;font-size:clamp(20px,calc(var(--u)*.2),40px);animation:hexGlow 3.2s ease-in-out infinite}
+.hexCluster .hexPrimary .hexLabel{text-shadow:0 1px 0 #fff6}
+.hexCluster .hexPrimary{padding-inline:calc(var(--u)*.08);hyphens:manual}
+.hexCluster .hexPrimary .hexLabel{max-width:none;white-space:nowrap;hyphens:manual;font-size:clamp(20px,calc(var(--u)*.2),40px);line-height:1}
+.hexCluster .hexPrimary .hexDetail{max-width:80%;white-space:normal;text-align:center}
+.hexCluster .hexPrimary .hexDetail{color:#4a3510;font-size:clamp(12px,calc(var(--u)*.085),15px);line-height:1.15}
+.hexCluster .hexPrimary .hexDetail{font-family:var(--hx-font-ui)}
+.hexIconNew{display:none}
+@keyframes hexGlow{50%{filter:brightness(1.07) saturate(1.05)}}
+@media(prefers-reduced-motion:reduce){.hexCluster .hexPrimary{animation:none}.hexCluster .hexBtn{transition:none}}
+
+.hexCluster .hexBtn.upgradeAvailable{filter:drop-shadow(0 0 8px #f6c95acc)}
+.hexDetail .hxi-upgradeBadge{width:1em;height:1em;color:#ffe198;vertical-align:-.12em}
+.hexCluster .hexBtn.upgradeAvailable .hexDetail{color:#ffe198}
+/* Gesperrt: Nebel-Optik, Bedingung bleibt lesbar (keine reine Hover-Info). */
+.hexLockNote{display:none}
+.hexCluster .hexBtn.locked{--hexbg:url("assets/uidesign/hex/hex_fog.svg");--hexparts:url("assets/uidesign/hex/hex_fog_shine.svg"),url("assets/uidesign/hex/hex_fog_fill.svg"),url("assets/uidesign/hex/hex_fog_groove.svg");background:var(--hexbg) center/100% 100% no-repeat;color:var(--hx-fog-ink,#c9d2cc);opacity:1;cursor:not-allowed}
+.hexCluster .hexBtn.locked .hexLockNote::before{content:'';display:inline-block;width:1em;height:1em;margin-right:4px;vertical-align:-.12em;background:currentColor;-webkit-mask:url("assets/uidesign/icons/icon_lock.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_lock.svg") center/contain no-repeat}
+.hexCluster .hexBtn.locked .hexIcon{opacity:.55}
+.hexCluster .hexBtn.locked .hexLockNote{display:block;color:#e2d6ae}
+.hexCluster .hexFog{display:grid;place-items:center;background:url("assets/uidesign/hex/hex_fog.svg") center/100% 100% no-repeat;opacity:.72;pointer-events:none}
+.hexCluster .hexFog::before{content:'?';font:900 calc(var(--u)*.34)/1 var(--hx-font-title);color:#8f9a94}
+
+/* Feste Fußleiste: links Sprache, Mitte Rechtliches, rechts Version und Patch Notes. */
+.hexMenuBar{position:fixed;left:0;right:0;bottom:0;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:8px 16px;padding:8px max(16px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));pointer-events:none}
+.hexMenuBar>*{pointer-events:auto}
+.hexMenuBar .menuLanguage,.hexMenuBar #menuPatchNotesBtn{display:inline-flex;align-items:center;gap:8px;min-height:44px;margin:0;padding:4px 16px;border:1.5px solid var(--hx-capsule-line,#46634f);border-radius:999px;background:var(--hx-capsule-fill,#0f1a14);box-shadow:inset 0 1px 0 #ffffff14,0 3px 8px #00000059;color:var(--hx-green-ink,#f4ecd6);font:700 16px/1.2 var(--hx-font-ui)}
+.hexMenuBar .hxi{width:20px;height:20px;color:#e9dcb8}
+.hexMenuBar .menuLanguage select{min-height:34px;padding:2px 6px;border:0;border-radius:6px;background:transparent;color:var(--ui-text);font:inherit;cursor:pointer}
+.hexMenuBar .menuLanguage select option{background:#1d2922;color:var(--ui-text)}
+.menuBarEnd{display:inline-flex;align-items:center;gap:12px}
+.hexMenuBar .menuVersion{color:#8fa092;font-size:12px}
+.menuLegal{display:inline-flex;align-items:center;gap:8px;margin:0;font-size:13px}
+.menuLegal a{display:inline-flex;align-items:center;min-height:44px;padding:0 4px;color:#c8d4c9;text-decoration:underline;text-decoration-color:#c8d4c966;text-underline-offset:3px}
+.menuLegal a:hover{color:#ffe198}.menuLegal a:focus-visible{outline:3px solid #ffe198;outline-offset:2px;border-radius:4px}
+@media(max-width:640px){
+  :root{--hex-bar-h:104px}
+  .hexMenuBar{flex-wrap:wrap;row-gap:0}.hexMenuBar .menuLegal{order:-1;flex-basis:100%;justify-content:center}
+  .hexMenuBar .menuVersion{display:none}
+}
+.hexMenuExtras{display:flex;flex-direction:column;align-items:center;gap:8px;width:min(460px,100%)}
+.hexMenuExtras>button{width:100%;font-size:14px}
+#introductionMenuNote{color:var(--ui-muted);font-size:13px;line-height:1.45}
+
+/* Einstellungen aus dem Hauptmenü */
+.menuSettingsBox{width:min(520px,94vw);text-align:left;display:flex;flex-direction:column;gap:6px}
+.menuSettingsBox .panelHead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px}
+.menuSettingsBox h2{margin:0}
+.settingRow{display:flex;justify-content:space-between;align-items:center;gap:16px;min-height:48px;padding:4px 0;border-bottom:1px solid #2c3d31;font-size:15px}
+.settingRow select{min-height:38px;padding:4px 10px;border:1px solid #718a6c;border-radius:8px;background:#283d31;color:var(--ui-text);font:inherit}
+.settingRow input[type=checkbox]{width:24px;height:24px;accent-color:#e9b949}
+.settingRow input[type=range]{width:min(220px,50%);accent-color:#e9b949}
+.menuSettingsBox .menuLegal{margin-top:8px}
+
+@media(max-height:640px){.hexMenu{--reserve:150px}}
+/* Kurzes Querformat: Titel links, Blüte rechts. */
+@media(max-height:520px) and (orientation:landscape){
+  :root{--hex-bar-h:60px}
+  .hexMenu{--u:max(52px,min(130px,calc((100vh - 84px)/var(--span-h)),calc((100vw - 300px)/var(--span-w))));
+    display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"brand cluster" "extras cluster";align-content:center;justify-items:center;column-gap:24px;row-gap:12px}
+  .hexMenuBrand{grid-area:brand;align-self:end}.hexCluster{grid-area:cluster}.hexMenuExtras{grid-area:extras;align-self:start}
+  .hexMenuBrand h1{font-size:clamp(28px,8vh,44px)}
+}
+@supports(height:100dvh){@media(max-height:520px) and (orientation:landscape){.hexMenu{--u:max(52px,min(130px,calc((100dvh - 84px)/var(--span-h)),calc((100vw - 300px)/var(--span-w))))}}}
+
+/* --- Grundbausteine (Werte und Formen aus assets/uidesign/tokens.css und _source/HudKit, TowerPanel, Card) --- */
+:root{--hx-chamfer-10:polygon(10px 0,calc(100% - 10px) 0,100% 10px,100% calc(100% - 10px),calc(100% - 10px) 100%,10px 100%,0 calc(100% - 10px),0 10px);
+  --hx-chamfer-9:polygon(9px 0,calc(100% - 9px) 0,100% 9px,100% calc(100% - 9px),calc(100% - 9px) 100%,9px 100%,0 calc(100% - 9px),0 9px)}
+
+/* Paneel mit Goldkante für scrollende Fenster: Kante als Rahmen-Hintergrund, damit Scrollbalken und Schatten erhalten bleiben. */
+.modeBox,.rewardBox,.loadoutBox,.drawer,.statPopup,.towerPanel,.consumableMenu[open],.biomeTooltip,.hotkeyTip,.introductionNotice,.biomeIntro,.tunnelRescuePanel{
+  border:2px solid transparent!important;border-radius:10px!important;color:var(--hx-text);
+  background:linear-gradient(180deg,#17301f,#0f2219) padding-box,var(--hx-panel-edge) border-box!important;box-shadow:0 12px 28px #000a}
+.rewardBox,.hotkeyTip,.introductionNotice,.biomeIntro{background:linear-gradient(180deg,#17301f,#0f2219) padding-box,linear-gradient(170deg,#fff3c4,#e9b949 50%,#f3d58a) border-box!important;box-shadow:0 0 18px #f6c95a55,0 12px 28px #000a}
+.towerPanel .panelHead,.drawer .panelHead,.modeBox .panelHead,.patchNotesBox>.panelHead,.leaderboardBox>.panelHead{background:#17301f!important;border-bottom-color:#41594a!important}
+.modeBox h2,.rewardBox h2,.loadoutBox h2,.drawer h2,.towerPanel h2,.statPopup h2{font-family:var(--hx-font-title);font-weight:900;color:#f3d58a;letter-spacing:.01em}
+.statPopup h3,.drawer h3{color:var(--hx-gold-text)}
+.statPopup,.drawer,.towerPanel{font-family:var(--hx-font-ui);font-size:15px}
+
+/* Knöpfe: Gold = Hauptaktion, Grün = alles andere, Rot = gefährlich (wie .hx-price / .hx-sell) */
+button.primary{border:2px solid #9c6a17;border-radius:8px;background:linear-gradient(180deg,#ffe48a,#e8ac38);color:#2a1f10;font-family:var(--hx-font-ui);font-weight:700;box-shadow:inset 0 2px 0 #fff6,0 3px 0 #7a5414}
+button.primary:not(:disabled):hover{filter:brightness(1.06)}
+button.primary:not(:disabled):active{transform:translateY(2px);box-shadow:inset 0 2px 0 #fff6,0 1px 0 #7a5414}
+button.primary:disabled{border-color:#56625b;background:linear-gradient(180deg,#3a4440,#2c3430);color:#c9d2cc;box-shadow:0 3px 0 #1a201d}
+button.secondary{border:1.5px solid var(--hx-capsule-line);border-radius:8px;background:var(--hx-capsule-fill);color:var(--hx-green-ink);font-family:var(--hx-font-ui);font-weight:600;box-shadow:inset 0 1px 0 #ffffff14}
+button.secondary:not(:disabled):hover{border-color:#c9a24a;color:#fff6d6}
+button.danger{border:2px solid var(--hx-danger-line);border-radius:8px;background:var(--hx-danger-fill);color:#fff3ec;box-shadow:0 3px 0 #3d120c}
+button:focus-visible,summary:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--hx-focus);outline-offset:3px}
+
+/* --- Kleiner Hex-Knopf (hud/hex_small_*.svg) --- */
+/* Icon über --i als absolut zentrierte Maske; sichtbarer Text ist ausgeblendet, aria-label/title bleiben. */
+button.hxHex,summary.hxHex{--hs:var(--hx-hs);position:relative;display:block;flex:none;box-sizing:border-box;width:calc(var(--hs)*.866);height:var(--hs);min-width:0;min-height:0;
+  margin:0;padding:0;border:0!important;border-radius:0;box-shadow:none!important;outline:none;color:#f4ecd6;font-size:0;line-height:0;list-style:none;cursor:pointer;
+  background:url("assets/uidesign/hud/hex_small_normal.svg") center/100% 100% no-repeat!important;filter:drop-shadow(0 3px 4px #0009);transition:transform .14s ease,filter .14s ease}
+summary.hxHex::-webkit-details-marker{display:none}
+button.hxHex::before,summary.hxHex::before{content:'';position:absolute;left:50%;top:50%;width:44%;height:44%;translate:-50% -50%;background:currentColor;
+  -webkit-mask:var(--i) center/contain no-repeat;mask:var(--i) center/contain no-repeat;filter:drop-shadow(0 2px 0 #0006)}
+button.hxHex:not(.quickTower):not(.biomeIcon)>*,summary.hxHex>*{display:none!important}
+button.hxHex:not(:disabled):hover,summary.hxHex:hover{background-image:url("assets/uidesign/hud/hex_small_hover.svg")!important;transform:translateY(-2px)}
+button.hxHex:not(:disabled):active,summary.hxHex:active{background-image:url("assets/uidesign/hud/hex_small_pressed.svg")!important;transform:translateY(1px)}
+button.hxHex.active,button.hxHex[aria-pressed=true],button.hxHex[aria-expanded=true],details[open]>summary.hxHex{background-image:url("assets/uidesign/hud/hex_small_selected.svg")!important}
+button.hxHex:disabled{background-image:url("assets/uidesign/hud/hex_small_disabled.svg")!important;color:#9aa39e;opacity:1;cursor:not-allowed}
+button.hxHex:focus-visible,summary.hxHex:focus-visible{outline:none;filter:drop-shadow(0 0 2px #ffe198) drop-shadow(0 0 6px #ffe198)}
+#pauseBtn{--i:url("assets/uidesign/icons/icon_pause.svg")}#app.paused #pauseBtn{--i:url("assets/uidesign/icons/icon_play.svg")}
+#settingsOpenBtn{--i:url("assets/uidesign/icons/icon_settings.svg")}.dockButtons [data-drawer=rulesDrawer]{--i:url("assets/uidesign/icons/icon_patchNotes.svg")}
+#zoomInBtn{--i:url("assets/uidesign/icons/icon_zoomIn.svg")}#zoomOutBtn{--i:url("assets/uidesign/icons/icon_zoomOut.svg")}
+.dockBL .drawerBtn{--i:url("assets/uidesign/icons/icon_build.svg")}
+#consumableMenu>summary{--i:url("assets/uidesign/icons/icon_consumables.svg")}
+.panelHead>button.hxHex{--hs:44px;--i:url("assets/uidesign/icons/icon_close.svg");margin-left:auto}
+
+/* --- Turmleiste (wie GameScreen „rail“): grüner Hex, Turm-Icon in Turmfarbe, Preisplakette darunter --- */
+.mapRail{gap:22px}
+.mapRail button.quickTower{--hs:var(--hx-rail-h,64px);cursor:grab;touch-action:none}
+.mapRail button.quickTower::before,.mapRail button.biomeIcon::before{display:none}
+.mapRail button.quickTower:disabled{background-image:url("assets/uidesign/hud/hex_small_normal.svg")!important;cursor:default;filter:drop-shadow(0 3px 4px #0009)}
+.mapRail button.quickTower .researchIcon{position:absolute!important;left:50%;top:47%;width:60%!important;height:auto!important;margin:0!important;float:none!important;translate:-50% -50%;background:none!important;aspect-ratio:1}
+.mapRail button.quickTower .researchIcon .hxi{width:100%;height:100%;filter:drop-shadow(0 2px 0 #0007)}
+.mapRail button.quickTower.unaffordable .researchIcon{opacity:.45}
+.mapRail button.quickTower small{position:absolute;left:50%;bottom:-12px;translate:-50% 0;display:inline-flex;align-items:center;gap:4px;height:24px;box-sizing:border-box;padding:0 9px 0 5px;
+  border:1.5px solid #c9a24a;border-radius:999px;background:#0e1d16;color:var(--hx-gold-text);font:700 15px/1 var(--hx-font-ui);white-space:nowrap}
+.mapRail button.quickTower small::before{content:'';width:15px;height:15px;flex:none;background:#f3c94c;-webkit-mask:url("assets/uidesign/icons/icon_coin.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_coin.svg") center/contain no-repeat}
+.mapRail button.quickTower.unaffordable small{border-color:#6e766f;color:#f0aaa0}.mapRail button.quickTower.unaffordable small::before{background:#9aa39e}
+.mapRail button.quickTower.active{background-image:url("assets/uidesign/hud/hex_small_selected.svg")!important;filter:drop-shadow(0 0 6px #f6c95a)}
+/* Biomleiste */
+.mapRail button.biomeIcon{--hs:var(--hx-rail-h,64px)}
+.mapRail button.biomeIcon>.hxi{position:absolute;left:50%;top:50%;width:44%;height:44%;translate:-50% -50%;color:var(--biome,#f4ecd6)}
+.mapRail button.biomeIcon[data-biome=grass]{--biome:#9be08a}.mapRail button.biomeIcon[data-biome=desert]{--biome:#ffd36a}.mapRail button.biomeIcon[data-biome=storm]{--biome:#8fd3ff}.mapRail button.biomeIcon[data-biome=ash]{--biome:#ff8f6a}
+.mapRail button.biomeIcon .biomeTooltip{font-size:14px;line-height:1.4}
+
+/* Turm- und Gebäude-Icons (towers/*.svg) auf kleinem Hex; Gebäude auf Creme */
+.researchIcon.hxTowerIcon{display:inline-grid;place-items:center;aspect-ratio:.866;height:auto;background:url("assets/uidesign/hud/hex_small_normal.svg") center/100% 100% no-repeat}
+.researchIcon.hxTowerIcon .hxi{width:58%;height:58%}
+.researchIcon.hxTowerIcon:has(.hxi-building_house,.hxi-building_forge,.hxi-building_market){background-image:url("assets/uidesign/hex/hex_cream.svg")}
+.researchIcon.hxTowerIcon:has(.hxi-building_house,.hxi-building_forge,.hxi-building_market) .hxi{background:#5b4316}
+.arsenalTab.locked .researchIcon.hxTowerIcon{background-image:url("assets/uidesign/hud/hex_small_disabled.svg")}
+
+/* --- Kapseln oben rechts (.hx-capsule) --- */
+.hud .hudStat,.hud .statDetails>summary{display:inline-flex;align-items:center;gap:8px;box-sizing:border-box;height:var(--hx-cap-h,48px);margin:0;padding:0 16px;list-style:none;
+  border:1.5px solid var(--hx-capsule-line);border-radius:999px;background:var(--hx-capsule-fill);box-shadow:inset 0 1px 0 #ffffff14,0 3px 8px #00000059;
+  color:var(--hx-green-ink);font:700 var(--hx-cap-fs,21px)/1 var(--hx-font-ui);font-variant-numeric:tabular-nums;white-space:nowrap;cursor:pointer}
+.hud .hudStat{cursor:default}
+.hud .statDetails>summary::-webkit-details-marker{display:none}
+.hud .statDetails[open]>summary,.hud .statDetails>summary:hover{border-color:#c9a24a}
+.hud .statDetails>summary .dropdownArrow{display:inline-block;width:14px;height:14px;font-size:0;background:#e9dcb8;-webkit-mask:url("assets/uidesign/icons/icon_chevronDown.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_chevronDown.svg") center/contain no-repeat}
+.hud .hxi{width:1.15em;height:1.15em}
+.hud .hxi-heart{color:#ef5a62}.hud .hxi-coin{color:#f3c94c}.hud .hxi-deck{color:#4f9fe8}.hud .hxi-gem{color:#e9f3ff}.hud .hxi-build{color:#d9c08a}
+#bonusIncome,#runDiamonds{color:var(--hx-gold-text);font-size:.75em;font-weight:700}
+
+/* --- Phasenschild oben Mitte = Wellenplanung (#waveDropdown), Form wie hud/phase_*.svg --- */
+.hud #waveDropdown>summary{position:relative;isolation:isolate;height:var(--hx-phase-h,56px);padding:0 24px;gap:10px;border:0;border-radius:0;box-shadow:none;
+  background:var(--hx-panel-edge);clip-path:var(--hx-chamfer-10);font:700 var(--hx-phase-fs,26px)/1 var(--hx-font-ui)}
+.hud #waveDropdown>summary::before{content:'';position:absolute;inset:2px;z-index:-1;background:var(--hx-panel-fill);clip-path:var(--hx-chamfer-9)}
+.hud #waveDropdown[data-phase=boss]>summary{background:linear-gradient(170deg,#ff9a7a,#8a2a1c 60%,#d0574a)}
+.hud #waveDropdown[data-phase=boss]>summary::before{background:linear-gradient(180deg,#3a1a16,#22100d)}
+.hud #waveDropdown>summary .phaseDot{color:#c9a24a}
+.hud #waveDropdown>summary .phaseWave{color:var(--hx-gold-text)}
+.hud #waveDropdown[data-phase=wave]>summary .phaseName{color:#9fe0a8}
+.hud #waveDropdown[data-phase=boss]>summary .phaseName{color:#ffb3a0}
+.hud #waveDropdown .waveBarWrap{position:absolute;left:18px;right:18px;bottom:6px;width:auto;height:4px;margin:0;border-radius:999px;background:#0a1510}
+.hud #waveDropdown .waveBarWrap i{background:linear-gradient(90deg,#f3c94c,#e8ac38)}
+.hud #waveDropdown:not([data-phase=wave]):not([data-phase=boss]) .waveBarWrap{display:none}
+
+/* --- Fest geformte Paneele (Aktionsleiste, Tempo, Wellenstart): Goldkante als Fläche, Füllung als ::before, beide abgeschrägt --- */
+.handHead,.speedControl,#app #startWaveBtn[data-state]{position:relative;isolation:isolate;border:0!important;border-radius:0!important;box-shadow:none!important;clip-path:var(--hx-chamfer-10);background:var(--hx-panel-edge)!important}
+.handHead::before,.speedControl::before,#app #startWaveBtn[data-state]::after{content:'';position:absolute;inset:2px;z-index:-1;background:var(--hx-panel-fill);clip-path:var(--hx-chamfer-9)}
+.handDock{filter:drop-shadow(0 8px 14px #0008)}
+.dockBR{filter:drop-shadow(0 8px 14px #0008)}
+
+/* Aktionsleiste „Hex platzieren · Drehen (R)“ */
+.handHead{display:flex!important;align-items:center!important;gap:0!important;min-height:var(--hx-ab-h,54px);padding:0 8px 0 0!important}
+.handHead #phaseLabel{padding:0 20px;color:var(--hx-gold-text);font:700 var(--hx-ab-fs,22px)/1 var(--hx-font-ui);white-space:nowrap}
+.handHead #handHint{padding:0 14px;border-left:1px solid #c9a24a99;color:#cfd9cf;font-size:14px}
+.handHead #rotateHexBtn{display:inline-flex;align-items:center;gap:8px;height:calc(var(--hx-ab-h,54px) - 10px);min-height:0;min-width:0;margin:0;padding:0 14px 0 10px;border:0;border-left:1px solid #c9a24a99;border-radius:0;background:none;box-shadow:none;color:#f4ecd6;font:700 var(--hx-ab-fs,22px)/1 var(--hx-font-ui)}
+.handHead #rotateHexBtn::before{content:'';width:calc(var(--hx-ab-h,54px)*.66);aspect-ratio:.866;flex:none;background:url("assets/uidesign/hud/hex_small_normal.svg") center/100% 100% no-repeat}
+.handHead #rotateHexBtn::after{content:'';position:absolute;left:calc(10px + var(--hx-ab-h,54px)*.33);top:50%;width:calc(var(--hx-ab-h,54px)*.3);height:calc(var(--hx-ab-h,54px)*.3);translate:-50% -50%;background:#f4ecd6;-webkit-mask:url("assets/uidesign/icons/icon_rotate.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_rotate.svg") center/contain no-repeat}
+.handHead #rotateHexBtn{position:relative}
+.handHead #rotateHexBtn:disabled{color:#8f9a94}.handHead #rotateHexBtn:disabled::after{background:#8f9a94}
+.handHead #rotateHexBtn:not(:disabled):hover{color:#fff6d6}
+
+/* Tempo */
+.speedControl{display:grid!important;grid-template-columns:auto auto 1fr;grid-template-areas:"label value hint" "range range range";align-items:center;gap:8px 10px;padding:12px 20px!important;margin:0;color:#f4ecd6;font:700 var(--hx-t-fs,22px)/1 var(--hx-font-ui)}
+.speedControl #speedValue{grid-area:value;color:var(--hx-gold-text)}
+.speedControl small{grid-area:hint;justify-self:end;font-size:12px;font-weight:600;color:#cfd9cf}
+.speedControl input[type=range]{grid-area:range;width:100%;height:28px;min-height:0;margin:0;background:none;-webkit-appearance:none;appearance:none;cursor:pointer}
+.speedControl input[type=range]::-webkit-slider-runnable-track{height:12px;border-radius:999px;background:linear-gradient(90deg,#f3c94c,#e8ac38) 0 0/var(--fill,0%) 100% no-repeat,#0a1510;box-shadow:inset 0 1px 2px #0009,0 0 0 1px #46634f}
+.speedControl input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;margin-top:-8px;border:0;border-radius:50%;background:url("assets/uidesign/hud/speed_knob.svg") center/100% 100% no-repeat;box-shadow:0 2px 4px #0008}
+.speedControl input[type=range]::-moz-range-track{height:12px;border-radius:999px;background:#0a1510;box-shadow:inset 0 1px 2px #0009,0 0 0 1px #46634f}
+.speedControl input[type=range]::-moz-range-progress{height:12px;border-radius:999px;background:linear-gradient(90deg,#f3c94c,#e8ac38)}
+.speedControl input[type=range]::-moz-range-thumb{width:28px;height:28px;border:0;border-radius:50%;background:url("assets/uidesign/hud/speed_knob.svg") center/100% 100% no-repeat;box-shadow:0 2px 4px #0008}
+
+/* Wellenstart (.hx-wave): gesperrt grau, bereit gold, läuft grün */
+#app #startWaveBtn[data-state]{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:var(--hx-w-h,76px);padding:0 12px;animation:none!important;font:700 var(--hx-w-fs,24px)/1.05 var(--hx-font-ui);color:#2a1f10}
+#app #startWaveBtn[data-state]::before{content:'';width:1.15em;height:1.15em;flex:none;background:currentColor;-webkit-mask:url("assets/uidesign/icons/icon_waveStart.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_waveStart.svg") center/contain no-repeat}
+#app #startWaveBtn[data-state=ready]{background:#9c6a17!important;animation:hxReady 2.4s ease-in-out infinite!important}
+#app #startWaveBtn[data-state=ready]::after{background:linear-gradient(180deg,#ffe48a,#e8ac38)}
+#app #startWaveBtn[data-state=locked]{background:#56625b!important;color:#c9d2cc;cursor:not-allowed}
+#app #startWaveBtn[data-state=locked]::after{background:linear-gradient(180deg,#3a4440,#2c3430)}
+#app #startWaveBtn[data-state=running]{color:#d8f5d8}
+#app #startWaveBtn[data-state=running]::after{background:linear-gradient(180deg,#2b5638,#1d3d28)}
+@keyframes hxReady{50%{filter:brightness(1.12)}}
+
+/* --- Handkarten (.hx-card, cards/card_frame_*.svg) --- */
+.card{--rar:var(--hx-epic);--badge:var(--hx-epic-badge);position:relative;border:4px solid var(--rar)!important;border-radius:12px!important;
+  background:linear-gradient(180deg,#fffaf0,#f6ecd3 55%,#eadbb4)!important;box-shadow:inset 0 0 0 3px #fff8,0 6px 14px #0007!important;color:#2b281f;font-family:var(--hx-font-ui);grid-template-rows:none!important;grid-auto-rows:auto!important;align-content:start}
+.card.rarity-common{--rar:var(--hx-common);--badge:var(--hx-common-badge)}.card.rarity-uncommon{--rar:#3fae9c;--badge:#237a6c}.card.rarity-rare{--rar:var(--hx-rare);--badge:var(--hx-rare-badge)}
+.card.rarity-epic{--rar:var(--hx-epic);--badge:var(--hx-epic-badge)}.card.rarity-legendary{--rar:var(--hx-legendary);--badge:var(--hx-legendary-badge)}
+.card.rarity-legendary{box-shadow:inset 0 0 0 3px #fff8,0 0 16px #ef9a3a77,0 6px 14px #0007!important}
+.card .rarity{justify-self:center;display:inline-block;padding:2px 8px;border-radius:5px;background:var(--badge)!important;color:#fff;font:700 12px/1.3 var(--hx-font-ui);letter-spacing:.06em;text-transform:uppercase}
+.card h3{font:700 17px/1.15 var(--hx-font-ui);color:#2b281f;margin:4px 0 2px}
+.card p{font-size:13px;line-height:1.3;color:#4a4232;margin:0}
+.card .slots{font:700 14px/1.2 var(--hx-font-ui);color:#2b281f}.card .slots .hxi{color:#8a6a26;width:16px;height:16px;vertical-align:-3px}
+.card[data-key]::before{content:attr(data-key);position:absolute;left:9px;top:7px;font:700 16px/1 var(--hx-font-ui);color:#2b281f}
+.card:not(:disabled):hover{transform:translateY(-6px)}
+.card.selected{transform:translateY(-16px)!important;outline:3px solid var(--hx-focus);outline-offset:2px;box-shadow:inset 0 0 0 3px #fff8,0 0 18px #f6c95a88,0 10px 18px #0008!important}
+.card svg.hxCardArt{display:block;width:min(86%,152px);height:auto;aspect-ratio:866/740;overflow:visible;margin:4px auto 2px}
+.deckHexCard svg.hxCardArt{width:56px;height:auto}
+
+/* --- Turmfenster (#towerPanel) nach _source/TowerPanel.dc.html --- */
+.towerPanel .panelHead{align-items:center;gap:10px}
+.towerPanel .panelHead h2{font-size:24px;line-height:1.1;margin:0}
+#towerPanel .towerSectionLabel{color:var(--hx-gold-text)!important;font:700 18px/1.2 var(--hx-font-ui)!important;letter-spacing:0!important;text-transform:none!important;border-bottom:1px solid #41594a;padding-bottom:4px}
+#towerPanel .towerUpgradeCard{border:0!important;border-bottom:1px solid #41594a!important;border-radius:0!important;background:none!important;padding:10px 0!important}
+#towerPanel .towerUpgradeCard>strong{font:700 18px/1.2 var(--hx-font-ui);color:#f6f2e4}
+.towerPathIcon .researchIcon.hxTowerIcon{width:46px!important;height:auto!important}
+.towerUpgradeDescription{color:#cfd9cf}.towerTradeoff{color:#ffb38a}
+#towerPanel .towerUpgradeActions .towerBuy{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:76px;padding:0 12px;border:2px solid #9c6a17;border-radius:8px;background:linear-gradient(180deg,#ffe48a,#e8ac38);color:#2a1f10;font:700 17px var(--hx-font-ui);box-shadow:inset 0 2px 0 #fff6,0 3px 0 #7a5414}
+#towerPanel .towerUpgradeActions .towerBuy::before{content:'';width:18px;height:18px;flex:none;background:currentColor;-webkit-mask:url("assets/uidesign/icons/icon_upgrade.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_upgrade.svg") center/contain no-repeat}
+#towerPanel .towerUpgradeActions .towerBuy:disabled{border-color:#6e766f;background:linear-gradient(180deg,#4a524e,#343b37);color:#e6ebe7;box-shadow:0 3px 0 #222826;opacity:1}
+#towerPanel .towerUpgradeActions .towerBuy:disabled[data-locked]{border-color:#56625b;background:linear-gradient(180deg,#3a4440,#2c3430);color:#c9d2cc;box-shadow:0 3px 0 #1a201d}
+#towerPanel .ultimateLocked{color:#c9d2cc}#towerPanel .ultimateLocked::before{content:'';display:inline-block;width:14px;height:14px;margin-right:6px;vertical-align:-2px;background:currentColor;-webkit-mask:url("assets/uidesign/icons/icon_lock.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_lock.svg") center/contain no-repeat}
+.towerDisclosure>summary{display:flex;align-items:center;gap:10px;min-height:48px;padding:0 12px;border:1.5px solid #46634f;border-radius:8px;background:#0e1d16;font:700 16px var(--hx-font-ui);list-style:none;cursor:pointer}
+.towerDisclosure>summary::-webkit-details-marker{display:none}
+.towerDisclosure>summary::after{content:'';margin-left:auto;width:16px;height:16px;background:#e9dcb8;-webkit-mask:url("assets/uidesign/icons/icon_chevronRight.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_chevronRight.svg") center/contain no-repeat;transition:transform .15s}
+.towerDisclosure[open]>summary::after{transform:rotate(90deg)}
+#towerExtraDetails>summary::before{content:'';width:20px;height:20px;background:#e9dcb8;-webkit-mask:url("assets/uidesign/icons/icon_stats.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_stats.svg") center/contain no-repeat}
+#sellTowerBtn,#sellBuildingBtn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;border:2px solid var(--hx-danger-line);border-radius:8px;background:var(--hx-danger-fill);color:#fff3ec;font:700 18px var(--hx-font-ui);box-shadow:0 3px 0 #3d120c}
+#sellTowerBtn::before,#sellBuildingBtn::before{content:'';width:20px;height:20px;background:currentColor;-webkit-mask:url("assets/uidesign/icons/icon_trash.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_trash.svg") center/contain no-repeat}
+#sellBuildingBtn::before{-webkit-mask-image:url("assets/uidesign/icons/icon_sell.svg");mask-image:url("assets/uidesign/icons/icon_sell.svg")}
+#sellTowerBtn:disabled,#sellBuildingBtn:disabled{border-color:#56625b;background:linear-gradient(180deg,#3a4440,#2c3430);color:#c9d2cc;box-shadow:none}
+#sellTowerBtn.confirmSale,#sellBuildingBtn.confirmSale{border-color:#ffb3a0;background:linear-gradient(180deg,#a3302a,#6e1c17);box-shadow:0 0 12px #ff786473,0 3px 0 #3d120c}
+.towerValueTable td,.towerValueTable th{border-bottom:1px solid #41594a}
+.towerComparisonSheet>button.secondary::before{content:'';display:inline-block;width:16px;height:16px;margin-right:6px;vertical-align:-3px;background:currentColor;-webkit-mask:url("assets/uidesign/icons/icon_chevronLeft.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_chevronLeft.svg") center/contain no-repeat}
+/* Werte-Icons (data-stat aus tower-view.js) */
+.towerPanel [data-stat]::before{content:'';display:inline-block;width:18px;height:18px;margin-right:6px;vertical-align:-3px;background:#e9dcb8;-webkit-mask:var(--si) center/contain no-repeat;mask:var(--si) center/contain no-repeat}
+.towerPanel [data-stat=hp]{--si:url("assets/uidesign/icons/icon_vsHealth.svg")}.towerPanel [data-stat=hp]::before{background:#ef5a62}
+.towerPanel [data-stat=armor]{--si:url("assets/uidesign/icons/icon_vsArmor.svg")}.towerPanel [data-stat=armor]::before{background:#6fb2ff}
+.towerPanel [data-stat=magic]{--si:url("assets/uidesign/icons/icon_vsMagic.svg")}.towerPanel [data-stat=magic]::before{background:#c58cff}
+.towerPanel [data-stat=range],.towerPanel [data-stat=jumpRange]{--si:url("assets/uidesign/icons/icon_range.svg")}
+.towerPanel [data-stat=cooldown],.towerPanel [data-stat=slowDuration],.towerPanel [data-stat=soulDuration]{--si:url("assets/uidesign/icons/icon_cooldown.svg")}
+.towerPanel [data-stat=splash]{--si:url("assets/uidesign/icons/icon_area.svg")}
+.towerPanel [data-stat=chain],.towerPanel [data-stat=pierceTargets]{--si:url("assets/uidesign/icons/icon_single.svg")}
+.towerPanel [data-stat=slow],.towerPanel [data-stat=hitSlow]{--si:url("assets/uidesign/icons/icon_attackSpeed.svg")}
+.towerPanel [data-stat=soulLimit],.towerPanel [data-stat=soulDamage],.towerPanel [data-stat=bossMultiplier]{--si:url("assets/uidesign/icons/icon_damage.svg")}
+#towerPanel .towerDamageGrid>div{border:1.5px solid #46634f;border-radius:8px;background:#0e1d16}
+#towerPanel .towerDamageGrid strong{color:#f6f2e4;font-variant-numeric:tabular-nums}
+#towerPanel .towerCoreStats b{color:var(--hx-gold-text)}
+
+/* Spielauswahl-Karten mit Hex-Icon */
+.modeChoice{border:2px solid transparent!important;background:linear-gradient(180deg,#17301f,#0f2219) padding-box,var(--hx-panel-edge) border-box!important;border-radius:12px!important}
+.modeChoice strong{display:flex;align-items:center;gap:10px;font-family:var(--hx-font-title);font-weight:900;color:#f3d58a}
+.modeChoice strong::before{content:'';width:40px;aspect-ratio:.866;flex:none;background:var(--mi) center/48% no-repeat,url("assets/uidesign/hex/hex_green.svg") center/100% 100% no-repeat}
+#standardModeBtn{--mi:url("assets/uidesign/icons/icon_play.svg")}#dailyModeBtn{--mi:url("assets/uidesign/icons/icon_daily.svg")}#duoModeBtn{--mi:url("assets/uidesign/icons/icon_duo.svg")}
+
+/* Hilfen-Menü: geschlossen nur der Beutel-Hex */
+.consumableMenu:not([open]){padding:0;border:0;background:none;box-shadow:none}
+.consumableMenu[open]{padding:12px}
+.consumableMenu[open]>summary{margin-bottom:8px}
+/* Kompakte Navigation */
+.compactToolbar button{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1.5px solid var(--hx-capsule-line);border-radius:999px;background:var(--hx-capsule-fill);color:var(--hx-green-ink);font-family:var(--hx-font-ui);font-weight:700}
+.compactToolbar button[aria-expanded=true]{border-color:#c9a24a;color:var(--hx-gold-text)}
+.compactToolbar button::before{content:'';width:18px;height:18px;flex:none;background:currentColor;-webkit-mask:var(--ci) center/contain no-repeat;mask:var(--ci) center/contain no-repeat}
+.compactToolbar [data-compact=menu]{--ci:url("assets/uidesign/icons/icon_menu.svg")}.compactToolbar [data-compact=stats]{--ci:url("assets/uidesign/icons/icon_stats.svg")}
+.compactToolbar [data-compact=towers]{--ci:url("assets/uidesign/towers/icon_tower_archer.svg")}.compactToolbar [data-compact=biomes]{--ci:url("assets/uidesign/icons/icon_biome_grass.svg")}
+.compactToolbar #compactConsumables{--ci:url("assets/uidesign/icons/icon_consumables.svg")}
+
+/* ===== Desktop-Anordnung (wie GameScreen „desktop“ 1920 × 1080 und „deck“ 1280 × 800) ===== */
+@media(min-width:1101px) and (min-height:601px){
+  :root{--hx-m:clamp(16px,1.25vw,24px);--hx-top:clamp(12px,1.7vh,18px);--hx-hs:clamp(52px,5.9vh,64px);--hx-rail-h:clamp(54px,6.4vh,70px);--hx-cap-h:clamp(42px,4.8vh,52px);--hx-cap-fs:clamp(18px,2.1vh,24px);
+    --hx-phase-h:clamp(48px,5.5vh,60px);--hx-phase-fs:clamp(20px,2.5vh,28px);--hx-cw:clamp(116px,9.2vw,178px);--hx-br-w:clamp(220px,17.5vw,340px);--hx-ab-h:clamp(46px,5.4vh,58px);--hx-ab-fs:clamp(18px,2.2vh,24px);
+    --hx-t-fs:clamp(17px,2vh,22px);--hx-w-h:clamp(60px,7.4vh,82px);--hx-w-fs:clamp(18px,2.3vh,26px)}
+  .gameHeader{top:var(--hx-top);left:var(--hx-m);right:var(--hx-m);align-items:flex-start}
+  .gameHeader .dockTL{flex:0 0 auto}
+  .gameHeader .dockTL h1{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .gameHeader .dockButtons{display:flex;gap:8px}
+  .gameHeader .hud{gap:10px;margin-left:auto;align-items:center}
+  .hud #waveDropdown{position:fixed;left:50%;top:var(--hx-top);translate:-50% 0;z-index:8}
+  .hud #waveDropdown .statPopup{left:50%;right:auto;translate:-50% 0}
+  #quickLoadout{left:var(--hx-m);top:calc(var(--hx-top) + var(--hx-hs) + 26px);transform:none}
+  #biomeRail{right:var(--hx-m);top:34vh;transform:none}
+  .consumableMenu{left:var(--hx-m);bottom:calc(var(--hx-m) + var(--hx-hs) + 14px);max-width:none}
+  .consumableMenu[open]{width:min(330px,calc(100vw - 48px))}
+  .dockBL{left:var(--hx-m);bottom:var(--hx-m);top:auto}
+  .boardWrap .mapControls{left:calc(var(--hx-m) + var(--hx-hs)*.866 + 10px);bottom:var(--hx-m);top:auto;gap:8px;align-items:center}
+  .mapControls>span{display:none}
+  .mapControls #resetViewBtn{min-height:40px;padding:0 16px;border-radius:999px;font:700 15px var(--hx-font-ui)}
+  .handDock{bottom:16px;width:auto;max-width:calc(100vw - 2*(var(--hx-br-w) + var(--hx-m) + 24px));gap:22px}
+  .handHead #handHint{display:none}
+  #hand,.hand{display:flex!important;gap:12px;align-items:flex-end;justify-content:center}
+  .handDock .card{width:var(--hx-cw);flex:0 0 var(--hx-cw);min-height:calc(var(--hx-cw)*1.3);display:grid;gap:2px;padding:26px 8px 8px}
+  .handDock .card p{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .handDock .card .slotLabel{display:none}
+  .dockBR{right:var(--hx-m);bottom:var(--hx-m);width:var(--hx-br-w);gap:10px}
+  .boardWrap .towerPanel{left:var(--hx-m);right:auto;top:calc(var(--hx-top) + var(--hx-hs) + 18px);width:clamp(340px,22vw,430px);max-height:calc(100% - var(--hx-hs) - 60px);padding:16px 18px}
+  .drawer{left:var(--hx-m);top:calc(var(--hx-top) + var(--hx-hs) + 18px);bottom:auto;max-height:calc(100vh - var(--hx-hs) - 220px)}
+}
+/* Kompakt: gleiche Bausteine, kleinere Maße; Anordnung bleibt bei compact-controls.js */
+@media(max-width:1100px),(max-height:600px){
+  :root{--hx-hs:46px;--hx-rail-h:48px;--hx-cap-h:40px;--hx-cap-fs:16px;--hx-phase-h:40px;--hx-phase-fs:16px;--hx-ab-h:40px;--hx-ab-fs:15px;--hx-t-fs:15px;--hx-w-h:56px;--hx-w-fs:16px}
+  .handHead #handHint{display:none}
+  .mapRail{gap:16px}
+  .mapRail button.quickTower small{bottom:-9px;height:20px;font-size:13px}
+  /* Im kompakten Menü-Tray bleiben die Menüknöpfe beschriftete Kapseln. */
+  .gameHeader .dockButtons button.hxHex{display:inline-flex;align-items:center;gap:6px;width:auto;height:auto;min-height:44px;padding:8px 12px;border:1.5px solid var(--hx-capsule-line)!important;border-radius:999px;
+    background:var(--hx-capsule-fill)!important;filter:none;font:700 14px/1.2 var(--hx-font-ui)}
+  .gameHeader .dockButtons button.hxHex::before{position:static;translate:none;width:18px;height:18px;flex:none}
+}
+@media(prefers-reduced-motion:reduce){#app #startWaveBtn[data-state=ready]{animation:none}.card,button.hxHex,summary.hxHex{transition:none}}
+
+/* ===== Turmauswahl (#towerMenu im Fenster „Türme“), Aufbau wie die Upgrade-Zeilen in _source/TowerPanel ===== */
+#towerMenu{display:grid;gap:8px}
+#towerMenu .towerBtn{display:grid;grid-template-columns:52px minmax(0,1fr) auto;grid-template-areas:"icon offer price";align-items:center;gap:4px 12px;min-height:0;height:auto;margin:0;padding:10px 12px;
+  border:1.5px solid #46634f;border-radius:10px;background:linear-gradient(180deg,#1b3324,#122419);box-shadow:inset 0 1px 0 #ffffff12;color:#f4ecd6;text-align:left;font-family:var(--hx-font-ui);cursor:pointer;transition:border-color .14s,background .14s}
+#towerMenu .towerBtn:not(:disabled):hover,#towerMenu .towerBtn:focus-visible{border-color:#c9a24a;background:linear-gradient(180deg,#22402c,#16291d)}
+#towerMenu .towerBtn:disabled{opacity:1;color:#f4ecd6;background:linear-gradient(180deg,#172a1f,#101e16);cursor:not-allowed}
+#towerMenu .towerBtn.unaffordable{opacity:1}
+#towerMenu .towerBtn.unaffordable .towerBuildIcon{opacity:.55}
+#towerMenu .towerBuildIcon{grid-area:icon;width:52px}
+#towerMenu .towerBuildIcon .researchIcon.hxTowerIcon{width:50px!important;height:auto!important}
+#towerMenu .towerOffer{grid-area:offer;display:grid;grid-template-rows:none;gap:4px;min-width:0}
+#towerMenu .towerOfferName{font:700 18px/1.15 var(--hx-font-ui);color:#f6f2e4}
+#towerMenu .towerOfferDescription{font-size:13px;line-height:1.3;color:#cfd9cf}
+#towerMenu .towerOfferStats{display:flex;flex-wrap:wrap;gap:4px 6px;line-height:1}
+#towerMenu .towerOfferPrice{grid-area:price;display:flex;flex-direction:column;align-items:flex-end;align-self:start;gap:6px;color:inherit;text-align:right}
+.towerPriceTag{display:inline-flex;align-items:center;gap:5px;min-height:38px;padding:0 12px;border:2px solid #9c6a17;border-radius:8px;background:linear-gradient(180deg,#ffe48a,#e8ac38);color:#2a1f10;font:700 18px/1 var(--hx-font-ui);box-shadow:inset 0 2px 0 #fff6,0 3px 0 #7a5414;white-space:nowrap}
+.towerPriceTag .hxi{width:18px;height:18px;color:#7a5414}
+#towerMenu .towerBtn.unaffordable .towerPriceTag{border-color:#6e766f;background:linear-gradient(180deg,#4a524e,#343b37);color:#ffb3a8;box-shadow:0 3px 0 #222826}
+#towerMenu .towerBtn.unaffordable .towerPriceTag .hxi{color:#9aa39e}
+#towerMenu .towerOfferPrice small{font-size:12px;font-weight:600;color:#cfd9cf}
+#towerMenu .towerOfferPrice kbd{margin:0;padding:1px 7px;border:1px solid #46634f;border-radius:4px;background:#0e1d16;color:#cfd9cf;font:700 12px/1.4 var(--hx-font-ui)}
+@media(max-width:600px){#towerMenu .towerBtn{grid-template-columns:40px minmax(0,1fr) auto;gap:4px 8px;padding:8px}#towerMenu .towerBuildIcon,#towerMenu .towerBuildIcon .researchIcon.hxTowerIcon{width:38px!important}}
+/* Werte-Chips (überall, wo towerStatsMarkup erscheint) und Legende */
+.statChip{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border:1px solid #2f4a39;border-radius:999px;background:#0e1d16;color:#f4ecd6;font:700 13px/1 var(--hx-font-ui);font-variant-numeric:tabular-nums;white-space:nowrap}
+.statChip .hxi,.statLegendList .hxi{width:14px;height:14px;color:#e9dcb8}
+[data-stat=vsHealth] .hxi{color:#ef5a62}[data-stat=vsArmor] .hxi{color:#6fb2ff}[data-stat=vsMagic] .hxi{color:#c58cff}[data-stat=range] .hxi{color:#9fe0a8}
+[data-stat=tower_freeze] .hxi{color:#8fd3ff}[data-stat=area] .hxi{color:#ffb35c}[data-stat=tower_chain] .hxi{color:#ffe066}[data-stat=tower_necromancer] .hxi{color:#c58cff}[data-stat=damage] .hxi{color:#ffb38a}
+.statLegend>summary{font:700 14px var(--hx-font-ui);color:#e9dcb8;cursor:pointer}
+.statLegendList{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px 12px;margin:8px 0 0;padding:0;list-style:none;font-size:13px;color:#cfd9cf}
+.statLegendList li{display:flex;align-items:center;gap:6px}
+
+/* ===== Titelschrift für Überschriften ===== */
+h1,h2,.loadoutBox h2,.gameOverBox h2,.arsenalToolbar h2,.accountHeader h2,.celebrationCard h2,.patchNotesBox h2,.leaderboardBox h2{font-family:var(--hx-font-title);font-weight:900;letter-spacing:.01em}
+
+/* ===== Hauptmenü-Entwürfe (classes/menu-variant.js) ===== */
+.menuVariantSwitch{position:fixed;left:50%;top:max(10px,env(safe-area-inset-top));translate:-50% 0;z-index:3;display:flex;align-items:center;gap:4px;padding:4px;border:1.5px solid var(--hx-capsule-line);border-radius:999px;background:#0e1d16e6;font:700 13px/1 var(--hx-font-ui);box-shadow:0 4px 12px #0008}
+.menuVariantSwitch>span{padding:0 8px;color:#8fa092;text-transform:uppercase;letter-spacing:.08em;font-size:11px}
+.menuVariantSwitch a{padding:8px 12px;border-radius:999px;color:#e9dcb8;text-decoration:none}
+.menuVariantSwitch a:hover{color:#fff6d6;background:#1d3d28}
+.menuVariantSwitch a[aria-current]{background:linear-gradient(180deg,#ffe48a,#e8ac38);color:#2a1f10}
+/* 2 · Menü links, Karte rechts: Menü sitzt in der linken Hälfte, die rechte gehört der sich drehenden Spielkarte. */
+@media(min-width:900px) and (orientation:landscape){
+  html[data-menu-variant=seite] .mainMenu{justify-items:start}
+  html[data-menu-variant=seite] .hexMenu{--u:max(56px,min(170px,calc((100vh - var(--reserve))/var(--span-h)),calc((50vw - 64px)/var(--span-w))));width:50vw;max-width:none;margin-left:max(24px,3vw)}
+  html[data-menu-variant=gespiegelt] .mainMenu{justify-items:end}
+  html[data-menu-variant=gespiegelt] .hexMenu{--u:max(56px,min(170px,calc((100vh - var(--reserve))/var(--span-h)),calc((50vw - 64px)/var(--span-w))));width:50vw;max-width:none;margin-right:max(24px,3vw)}
+  html[data-menu-variant=gespiegelt] .mainMenu::before{background:linear-gradient(270deg,#050a07d9 0,#050a0799 38%,#0000 58%),linear-gradient(#050a0780,#0000 22%,#0000 78%,#050a0799),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97' viewBox='0 0 56 97'%3E%3Cpath d='M28 0L56 16.2V48.5L28 64.7L0 48.5V16.2ZM28 64.7V97' fill='none' stroke='%23a9c98f' stroke-opacity='.07' stroke-width='1.5'/%3E%3C/svg%3E")}
+  html[data-menu-variant=seite] .mainMenu::before{background:linear-gradient(90deg,#050a07d9 0,#050a0799 38%,#0000 58%),linear-gradient(#050a0780,#0000 22%,#0000 78%,#050a0799),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97' viewBox='0 0 56 97'%3E%3Cpath d='M28 0L56 16.2V48.5L28 64.7L0 48.5V16.2ZM28 64.7V97' fill='none' stroke='%23a9c98f' stroke-opacity='.07' stroke-width='1.5'/%3E%3C/svg%3E")}
+}
+
+/* Ausgeblendet auf Wunsch: „Zur Basis“ neben dem Zoom. */
+.mapControls #resetViewBtn{display:none!important}
+
+/* Spielauswahl: „Fortsetzen“ als goldene Karte an erster Stelle, über die ganze Breite */
+#playModeChoices .continueChoice{grid-column:1/-1;min-height:0;border:2px solid transparent!important;background:linear-gradient(180deg,#ffe48a,#e8ac38) padding-box,linear-gradient(170deg,#fff3c4,#9c6a17) border-box!important;color:#2a1f10;box-shadow:inset 0 2px 0 #fff6,0 4px 0 #7a5414}
+#playModeChoices .continueChoice strong{color:#2a1f10}#playModeChoices .continueChoice small,#playModeChoices .continueChoice span{color:#4a3510}
+#playModeChoices .continueChoice strong::before{background:url("assets/uidesign/icons/icon_play.svg") center/48% no-repeat,url("assets/uidesign/hex/hex_gold.svg") center/100% 100% no-repeat}
+
+/* Handkarten wie Referenz: kräftiger Seltenheitsrand, dunkle Außenkontur, heller Innenrand, Abzeichen als Pille */
+.card{border-width:5px!important;border-radius:14px!important;box-shadow:0 0 0 2px #2b281f66,inset 0 0 0 2px #fffc,0 8px 16px #0008!important}
+.card.rarity-epic{box-shadow:0 0 0 2px #2b281f66,inset 0 0 0 2px #fffc,0 0 14px #9b4fe055,0 8px 16px #0008!important}
+.card.rarity-legendary{box-shadow:0 0 0 2px #2b281f66,inset 0 0 0 2px #fffc,0 0 16px #ef9a3a77,0 8px 16px #0008!important}
+.card.selected{box-shadow:0 0 0 2px #2b281f66,inset 0 0 0 2px #fffc,0 0 20px #f6c95a99,0 12px 20px #0009!important}
+.card .rarity{padding:3px 10px!important;border-radius:6px!important;font-size:13px!important;letter-spacing:.07em;box-shadow:inset 0 -2px 0 #0003}
+.card[data-key]::before{left:10px;top:8px;font-size:18px;font-weight:800}
+.card h3{font-size:18px}
+
+/* ===== Turmfenster nach Referenz: Porträt-Kopf, drei Kernwerte, Angriffsfokus, Upgrade-Zeilen, Unteransicht „Werte & Einflüsse“ ===== */
+.towerPanel .panelHead{display:grid!important;grid-template-columns:76px minmax(0,1fr) auto;align-items:center;gap:12px}
+.towerPortrait{position:relative;width:76px;height:76px;flex:none;border-radius:10px}
+.towerPortrait.hasPortrait{background:var(--portrait) center/contain no-repeat;filter:drop-shadow(0 4px 6px #0008)}
+.towerTitle{min-width:0}
+.towerPanel .towerTitle h2{margin:0;font-size:26px;line-height:1.05;color:#f6f2e4}
+.towerStage{display:block;margin-top:4px;color:var(--hx-gold-text);font:600 16px var(--hx-font-ui)}
+/* Kernwerte */
+#towerPanel .towerHeadline{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px;margin:6px 0 4px}
+#towerPanel .towerHeadline>div{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;column-gap:8px;align-items:center}
+#towerPanel .towerHeadline>div::before{grid-row:1/3;width:28px;height:28px;margin:0;background:#e9dcb8}
+#towerPanel .towerHeadline strong{font:700 20px/1.1 var(--hx-font-ui);color:#f6f2e4;font-variant-numeric:tabular-nums}
+#towerPanel .towerHeadline small{font-size:13px;color:#cfd9cf}
+.towerPanel [data-stat=damage]{--si:url("assets/uidesign/icons/icon_damage.svg")}
+.towerPanel [data-stat=slow]{--si:url("assets/uidesign/towers/icon_tower_freeze.svg")}
+/* Upgrades-Bereich: Angriffsfokus steht über der Überschrift */
+#towerPanel .towerDevelopment{display:flex;flex-direction:column;gap:8px}
+#towerPanel .towerDevelopment>.towerUpgrades{display:contents}
+#towerPanel .towerDevelopment .targetPriorities{order:-2}
+#towerPanel .towerDevelopment>.towerSectionLabel{order:-1;margin:6px 0 0;font:900 22px/1.1 var(--hx-font-title)!important;color:#f6f2e4!important;border-bottom:1px solid #41594a}
+#towerPanel .targetPriorities>summary{display:grid!important;grid-template-columns:auto minmax(0,1fr);gap:12px;border:0!important;background:none!important;padding:0!important;min-height:44px}
+#towerPanel .targetPriorities>summary::after{display:none}
+#towerPanel .targetPriorities .focusLabel{align-self:center;color:var(--hx-gold-text);font:600 16px var(--hx-font-ui)}
+#towerPanel .targetPriorities .focusValue{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:42px;padding:0 12px;border:1.5px solid #46634f;border-radius:8px;background:#0e1d16;font:600 16px var(--hx-font-ui)}
+#towerPanel .targetPriorities .focusValue::after{content:'';width:14px;height:14px;flex:none;background:#e9dcb8;-webkit-mask:url("assets/uidesign/icons/icon_chevronDown.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_chevronDown.svg") center/contain no-repeat}
+#towerPanel .targetPriorities[open] .focusValue{border-color:#c9a24a}
+#towerPanel .targetPriorities>label{display:flex;align-items:center;gap:8px;margin-top:6px;font:600 14px var(--hx-font-ui);color:#cfd9cf}
+#towerPanel .targetPriorities select{flex:1;min-height:38px;padding:0 10px;border:1.5px solid #46634f;border-radius:8px;background:#0e1d16;color:#f4ecd6;font:600 15px var(--hx-font-ui)}
+/* Upgrade-Zeile */
+#towerPanel .towerUpgradeCard{display:grid!important;grid-template-columns:64px auto minmax(0,1fr) auto;grid-template-areas:"icon name tag buy" "icon stats stats buy" "icon trade trade trade" "icon compare compare compare";column-gap:10px;row-gap:3px;align-items:center}
+#towerPanel .towerUpgradeCard>.towerPathIcon{grid-area:icon;position:relative;width:60px;aspect-ratio:.866;align-self:start;background:url("assets/uidesign/hud/hex_small_normal.svg") center/100% 100% no-repeat;display:grid;place-items:center}
+#towerPanel .towerUpgradeCard>.towerPathIcon .researchIcon{width:62%!important;background:none!important}
+#towerPanel .towerUpgradeCard>.towerPathIcon.hasPortrait .researchIcon{display:none}
+#towerPanel .towerUpgradeCard>.towerPathIcon.hasPortrait::after{content:'';position:absolute;inset:4% 6% 10%;background:var(--portrait) center/contain no-repeat}
+#towerPanel .towerUpgradeCard>strong{grid-area:name;font:700 18px/1.15 var(--hx-font-ui)}
+#towerPanel .towerUpgradeTag{grid-area:tag;justify-self:start;padding:2px 8px;border-radius:5px;font:700 11px/1.4 var(--hx-font-ui);letter-spacing:.06em;text-transform:uppercase;color:#fff;background:#2f63b0}
+#towerPanel .towerUpgradeTag[data-kind=area]{background:#9a3a26}#towerPanel .towerUpgradeTag[data-kind=chain]{background:#8a6a10}#towerPanel .towerUpgradeTag[data-kind=aura],#towerPanel .towerUpgradeTag[data-kind=frost]{background:#1f6f8b}
+#towerPanel .towerUpgradeTag[data-kind=mine]{background:#6b4f2a}#towerPanel .towerUpgradeTag[data-kind=soul]{background:#5b3b8f}#towerPanel .towerUpgradeTag[data-kind=pierce]{background:#6e766f}
+#towerPanel .towerUpgradeStats{grid-area:stats;display:flex;flex-direction:column;gap:2px;font:600 14px/1.3 var(--hx-font-ui);color:#e6ebe7}
+#towerPanel .towerUpgradeStats .towerUpgradeTime::before{width:15px;height:15px}
+#towerPanel .towerUpgradeCard>.towerPathProgress,#towerPanel .towerUpgradeCard>.towerUpgradeDescription{display:none}
+#towerPanel .towerUpgradeCard>.towerTradeoff{grid-area:trade;font-size:13px}
+#towerPanel .towerUpgradeCard>.towerUpgradeActions{display:contents}
+#towerPanel .towerUpgradeCard .towerUpgradeActions>.secondary{grid-area:compare;justify-self:start;min-height:32px;padding:0 10px;font-size:13px}
+#towerPanel .towerUpgradeCard .towerUpgradeActions>.towerBuy{grid-area:buy;align-self:center;min-width:84px}
+#towerPanel .towerUpgradeActions .towerBuy::before{display:none}
+#towerPanel .towerUpgradeActions .towerBuy::after{content:'';width:18px;height:18px;flex:none;background:#7a5414;-webkit-mask:url("assets/uidesign/icons/icon_coin.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_coin.svg") center/contain no-repeat}
+#towerPanel .towerUpgradeActions .towerBuy:disabled::after{background:#9aa39e}
+#towerPanel .towerUpgradeCard>.ultimateLocked{grid-column:2/-1}
+/* Unteransicht „Werte & Einflüsse“ ersetzt Upgrades und Verkaufen */
+.towerPanel:has(#towerExtraDetails[open]) .towerPanelBody,.towerPanel:has(#towerExtraDetails[open]) .towerPanelFooter,#towerExtraDetails[open]>summary{display:none}
+#towerExtraDetails[open]{border:0}
+.towerSubview{display:flex;flex-direction:column;gap:6px}
+.towerBack{display:inline-flex;align-self:flex-start;align-items:center;gap:6px;min-height:40px;padding:0 6px;border:0;background:none;box-shadow:none;color:#f4ecd6;font:600 16px var(--hx-font-ui)}
+.towerBack::before,.towerBackWide::before{content:'';width:16px;height:16px;background:currentColor;-webkit-mask:url("assets/uidesign/icons/icon_chevronLeft.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_chevronLeft.svg") center/contain no-repeat}
+.towerSubTitle{margin:0;font:900 22px/1.15 var(--hx-font-title);color:#f6f2e4}
+.towerDescription{margin:0 0 4px;font-size:14px;color:#cfd9cf}
+.towerSubview h3{margin:10px 0 2px;padding-bottom:4px;border-bottom:1px solid #41594a;color:var(--hx-gold-text);font:700 18px var(--hx-font-ui)}
+.towerValueSheet{margin:0}
+.towerValueSheet>div{display:flex;align-items:center;gap:10px;min-height:38px;border-bottom:1px solid #2c3d31}
+.towerValueSheet dt{flex:1;margin:0;font-size:15px;color:#e6ebe7}
+.towerValueSheet dd{margin:0;font:700 16px var(--hx-font-ui);color:#f6f2e4;font-variant-numeric:tabular-nums}
+.towerPanel .towerValueSheet>div::before{width:22px;height:22px;margin:0}
+.towerInfluenceList{display:flex;flex-direction:column;gap:8px}
+.towerInfluence{display:grid;grid-template-columns:64px minmax(0,1fr);gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid #2c3d31}
+.towerInfluenceIcon{display:grid;place-items:center;width:64px;height:56px}
+.towerInfluenceIcon .hxi{width:34px;height:34px;color:#e9dcb8}
+.towerInfluenceIcon svg.hxCardArt{width:64px;height:auto}
+.towerInfluence p{margin:0;display:flex;flex-direction:column;gap:2px}
+.towerInfluence strong{font:700 16px var(--hx-font-ui);color:#f6f2e4}
+.towerInfluence span{font:600 14px var(--hx-font-ui);color:#7fe08a}
+.towerBackWide{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;margin-top:12px;border:1.5px solid #c9a24a!important;font:700 17px var(--hx-font-ui)}
+
+/* Rahmen alter Regeln an Pfad-Icon und Porträt zurücksetzen; ohne Porträt bleibt das Turm-Icon sichtbar. */
+#towerPanel .towerUpgradeCard>.towerPathIcon{border:0;border-radius:0;padding:0}
+.towerPortrait .researchIcon.hxTowerIcon{width:64px;height:auto;margin:6px}.towerPortrait.hasPortrait .researchIcon{display:none}

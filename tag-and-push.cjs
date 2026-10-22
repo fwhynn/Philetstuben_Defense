@@ -200,6 +200,11 @@ async function main() {
   const hasApiRepo = isGitRepo(apiRepo);
   if (releaseMode === 'client') {
     ensureCleanRepo(repo, 'Game repo');
+    const unfinishedLegal = require('./legal-placeholders.cjs').unfinishedLegalPages(repo);
+    if (unfinishedLegal.length) {
+      console.error(`Legal pages still contain [[…]] placeholders: ${unfinishedLegal.join(', ')}. Fill them in before releasing.`);
+      process.exit(1);
+    }
     const gameDeployInfo = getDeployCommits(repo);
     printDeployCommits('Game', gameDeployInfo);
   }

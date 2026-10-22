@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 866 1000">
+  <g id="rim">
+  <defs><linearGradient id="green-rim" x1="0.35" y1="0" x2="0.6" y2="1"><stop offset="0" stop-color="#a9c98f"/><stop offset="0.5" stop-color="#5f8a5a"/><stop offset="1" stop-color="#2e4b33"/></linearGradient></defs>
+  <polygon points="433,20 848.7,260 848.7,740 433,980 17.3,740 17.3,260" fill="url(#green-rim)" stroke="url(#green-rim)" stroke-width="34" stroke-linejoin="round"/>
+  </g>
+  <g id="groove">
+  <polygon points="433,60 814,280 814,720 433,940 52,720 52,280" fill="#102117" stroke="#102117" stroke-width="16" stroke-linejoin="round"/>
+  </g>
+  <g id="fill">
+  <defs><radialGradient id="green-fill" cx="0.5" cy="0.28" r="0.78"><stop offset="0" stop-color="#4a8059"/><stop offset="0.52" stop-color="#2b5638"/><stop offset="1" stop-color="#1d3d28"/></radialGradient></defs>
+  <polygon points="433,80 796.7,290 796.7,710 433,920 69.3,710 69.3,290" fill="url(#green-fill)" stroke="url(#green-fill)" stroke-width="12" stroke-linejoin="round"/>
+  </g>
+  <g id="shine">
+  <defs><linearGradient id="green-shine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.22"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
+  <path d="M69.3 290 L433 80 L796.7 290 L796.7 430 Q433 345 69.3 430 Z" fill="url(#green-shine)"/>
+  </g>
+</svg>

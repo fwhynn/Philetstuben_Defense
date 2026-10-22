@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Turmfenster-Bausteine 15</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&amp;family=Barlow+Semi+Condensed:wght@500;600;700&amp;family=Inter:wght@500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit}
+</style>
+</helmet>
+<div style="width: 1500px; height: 1100px; box-sizing: border-box; padding: 36px 44px; background: #0f1a15; font-family: Inter, system-ui, sans-serif; color: #f6f2e4; display: flex; flex-direction: column; gap: 20px">
+  <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 24px">
+    <h2 style="margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 800; font-size: 32px; color: #f3d58a">#15 Turmfenster-Bausteine</h2>
+    <p style="margin: 0; font-size: 14px; color: #bfd0c6">Upgrades und „Werte &amp; Einflüsse“ im selben Paneel · längste Texte geprüft</p>
+  </div>
+  <div style="display: flex; gap: 24px; align-items: flex-start">
+    <dc-import name="TowerPanel" view="upgrades" w="{{ 430 }}" hint-size="430px,700px"></dc-import>
+    <dc-import name="TowerPanel" view="stats" w="{{ 430 }}" hint-size="430px,900px"></dc-import>
+    <div style="flex: 1; display: flex; flex-direction: column; gap: 14px; font-family: 'Barlow Semi Condensed', sans-serif">
+      <section style="display: flex; flex-direction: column; gap: 8px; padding: 16px; border-radius: 14px; background: #1a2d24; border: 1px solid #2f4a3a">
+        <h3 style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 20px; color: #f3d58a">Dropdown</h3>
+        <div style="display: flex; flex-direction: column; border-radius: 6px; border: 1px solid #a68a45; background: #0d1d15; overflow: hidden; font-size: 17px; font-weight: 600">
+          <span style="display: flex; justify-content: space-between; align-items: center; min-height: 40px; padding: 0 10px 0 12px; border-bottom: 1px solid #3d5a46">Nächster an der Basis<dc-import name="Icon" glyph="chevronDown" size="{{ 20 }}" fill="#e9dcb8" hint-size="20px,20px"></dc-import></span>
+          <span style="display: flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 12px; background: rgba(243, 201, 76, 0.14); color: #f3c94c"><dc-import name="Icon" glyph="upgradeBadge" size="{{ 12 }}" fill="currentColor" hint-size="12px,12px"></dc-import>Nächster an der Basis</span>
+          <span style="display: flex; align-items: center; min-height: 36px; padding: 0 12px 0 32px">Stärkster Gegner</span>
+          <span style="display: flex; align-items: center; min-height: 36px; padding: 0 12px 0 32px">Schwächster Gegner</span>
+          <span style="display: flex; align-items: center; min-height: 36px; padding: 0 12px 0 32px">Erster am Weg</span>
+        </div>
+        <p style="margin: 0; font-family: Inter, sans-serif; font-size: 12px; color: #bfd0c6">EN „Closest to base“ – längster Eintrag passt ab 260 px Paneelbreite.</p>
+      </section>
+      <section style="display: flex; flex-direction: column; gap: 8px; padding: 16px; border-radius: 14px; background: #1a2d24; border: 1px solid #2f4a3a">
+        <h3 style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 20px; color: #f3d58a">Typ-Chips</h3>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px">
+          <sc-for list="{{chips}}" as="ch" hint-placeholder-count="6">
+            <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px 2px 5px; border-radius: 4px; border: 1px solid {{ch.line}}; background: {{ch.bg}}; color: {{ch.ink}}; font-size: 13px; font-weight: 700; letter-spacing: 0.04em"><dc-import name="Icon" glyph="{{ch.icon}}" size="{{ 13 }}" fill="currentColor" hint-size="13px,13px"></dc-import>{{ch.text}}</span>
+          </sc-for>
+        </div>
+        <p style="margin: 0; font-family: Inter, sans-serif; font-size: 12px; color: #bfd0c6">Chip trägt Icon + Text; Farbe nur als Zusatz.</p>
+      </section>
+      <section style="display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 14px; background: #1a2d24; border: 1px solid #2f4a3a">
+        <h3 style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 20px; color: #f3d58a">Verkaufen · Zurück · Trenner</h3>
+        <button style="display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; border-radius: 8px; border: 2px solid #a8463a; background: linear-gradient(180deg, #7d2a22, #521812); color: #fff3ec; font-size: 18px; font-weight: 700; box-shadow: 0 3px 0 #3d120c"><dc-import name="Icon" glyph="trash" size="{{ 20 }}" fill="currentColor" hint-size="20px,20px"></dc-import>Verkaufen</button>
+        <button style="display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; border-radius: 8px; border: 2px solid #ffb3a0; background: linear-gradient(180deg, #a3302a, #6e1c17); color: #fff3ec; font-size: 18px; font-weight: 700; box-shadow: 0 0 12px rgba(255, 120, 100, 0.45), 0 3px 0 #3d120c"><dc-import name="Icon" glyph="trash" size="{{ 20 }}" fill="currentColor" hint-size="20px,20px"></dc-import>Wirklich verkaufen? +45</button>
+        <button style="display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; border-radius: 8px; border: 1.5px solid #c9a24a; background: transparent; font-size: 18px; font-weight: 700"><dc-import name="Icon" glyph="chevronLeft" size="{{ 20 }}" fill="currentColor" hint-size="20px,20px"></dc-import>Zurück zu Upgrades</button>
+        <hr style="width: 100%; margin: 4px 0; border: 0; border-top: 1px solid rgba(201, 162, 74, 0.35)">
+        <p style="margin: 0; font-family: Inter, sans-serif; font-size: 12px; line-height: 1.5; color: #bfd0c6">sell_normal / sell_confirm.svg: erster Klick zeigt Bestätigung mit Erstattung, zweiter verkauft. Trenner Gold 35 %.</p>
+      </section>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1500,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      chips: [
+        { text: 'FLÄCHE', icon: 'area', bg: '#4a2a14', line: '#c9783a', ink: '#ffcf9e' },
+        { text: 'EINZELZIEL', icon: 'single', bg: '#16304d', line: '#5a8fd0', ink: '#bcd8ff' },
+        { text: 'AURA', icon: 'biome_desert', bg: '#3d3410', line: '#c9a83a', ink: '#ffe9a0' },
+        { text: 'KETTE', icon: 'tower_chain', bg: '#2a2050', line: '#8a7ae0', ink: '#d6ccff' },
+        { text: 'FROST', icon: 'tower_freeze', bg: '#10394a', line: '#5ac8e8', ink: '#c4f1ff' },
+        { text: 'BRAND', icon: 'tower_flame', bg: '#4a1a14', line: '#e0603a', ink: '#ffc0a8' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

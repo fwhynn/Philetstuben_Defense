@@ -55,7 +55,8 @@
   const autoStart = document.getElementById('autoStart');
   const speedToggle = document.getElementById('doubleSpeed');
   let gameSpeed = 1; try { gameSpeed = Math.max(1, Math.min(8, Math.round(Number(gameStorage.getItem('gameSpeed')) || 1))); } catch { }
-  speedToggle.value = String(gameSpeed); document.getElementById('speedValue').textContent = gameSpeed + '×';
+  const syncSpeedFill = () => speedToggle.style.setProperty?.('--fill', ((Number(speedToggle.value) - 1) / 7 * 100) + '%');
+  speedToggle.value = String(gameSpeed); document.getElementById('speedValue').textContent = gameSpeed + '×'; syncSpeedFill(); speedToggle.addEventListener('input', syncSpeedFill);
   function changeSpeed(value) { if (duoToken) { duoAction('speed', { value: Number(value) }); return; } advanceClock(performance.now()); gameSpeed = Math.max(1, Math.min(8, Math.round(Number(value) || 1))); speedToggle.value = String(gameSpeed); document.getElementById('speedValue').textContent = gameSpeed + '×'; try { gameStorage.setItem('gameSpeed', String(gameSpeed)); } catch { } saveGameSettings(); }
   speedToggle.addEventListener('input', () => changeSpeed(speedToggle.value));
   const towerMenu = document.getElementById('towerMenu');
@@ -513,11 +514,28 @@
     state.consumablePickUI = consumablePick;
     renderer.render(state, targets); renderDragShade(); renderConsumablePreview();
   }
+  // Kartenbild: Kachel in Schrägsicht wie cards/road_*_tilt.svg, Straßen aus der echten Kachelgeometrie (Drehung und Sonderformen stimmen).
+  // Feste IDs für Verläufe und Maske: gleiche Form auf allen Karten, Markup bleibt reproduzierbar.
+  const CARD_TUFTS = [[250, 330, 1], [612, 296, 0], [300, 706, 0], [640, 690, 1], [433, 214, 1], [433, 800, 0], [170, 520, 0], [700, 540, 1], [540, 420, 0], [330, 590, 1]];
   function miniPathSvg(card, rot = 0) {
     const geometry = HexMap.roadGeometry({ q: 0, r: 0, type: card.id, roads: rotatedRoads(card, rot) });
-    const lines = [...geometry.legs.values()].map(points => '<polyline points="' + points.map(p => (30 + p.x * 25 / HEX).toFixed(1) + ',' + (30 + p.y * 25 / HEX).toFixed(1)).join(' ') + '"/>').join('');
-    return '<svg class="miniPath" viewBox="0 0 60 60" aria-label="Aktuelle Ausrichtung"><polygon points="51.7,17.5 51.7,42.5 30,55 8.3,42.5 8.3,17.5 30,5"/>' + lines + '</svg>';
+    const points = list => list.map(p => (433 + p.x * 480 / HEX).toFixed(0) + ',' + (500 + p.y * 480 / HEX).toFixed(0)).join(' ');
+    const legs = [...geometry.legs.values()], road = (color, width, extra = '') => legs.map(list => '<polyline points="' + points(list) + '" fill="none" stroke="' + color + '" stroke-width="' + width + '" stroke-linecap="round" stroke-linejoin="round"' + extra + '/>').join('');
+    const tufts = CARD_TUFTS.map(([x, y, light]) => '<ellipse cx="' + x + '" cy="' + y + '" rx="30" ry="18" fill="' + (light ? '#b9e086' : '#6f9f45') + '"/>').join('')
+      + '<ellipse cx="560" cy="760" rx="22" ry="15" fill="#c7c2b0"/><ellipse cx="250" cy="420" rx="16" ry="11" fill="#c7c2b0"/>';
+    return '<svg class="hxCardArt" viewBox="0 0 866 740" aria-label="Aktuelle Ausrichtung"><defs>'
+      + '<clipPath id="hxCardClip"><polygon points="433,60 814,280 814,720 433,940 52,720 52,280"/></clipPath>'
+      + '<radialGradient id="hxCardMeadow" cx=".5" cy=".32" r=".8"><stop offset="0" stop-color="#b3df7c"/><stop offset="1" stop-color="#76a84c"/></radialGradient>'
+      + '<linearGradient id="hxCardEarth" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c39a63"/><stop offset="1" stop-color="#7e5a33"/></linearGradient></defs>'
+      + '<ellipse cx="433" cy="712" rx="370" ry="26" fill="#000" opacity=".18"/>'
+      + '<path d="M17 459L433 608L433 703L17 554Z" fill="url(#hxCardEarth)"/><path d="M433 608L849 459L849 554L433 703Z" fill="#8f6a3e"/>'
+      + '<path d="M17 459L433 608L433 630L17 481ZM433 608L849 459L849 481L433 630Z" fill="#5f8f3c"/>'
+      + '<path d="M17 554L433 703L849 554" fill="none" stroke="#5b3f22" stroke-width="6" stroke-linejoin="round"/>'
+      + '<g transform="scale(1 .62)"><polygon points="433,20 848.7,260 848.7,740 433,980 17.3,740 17.3,260" fill="#5f8f3c" stroke="#5f8f3c" stroke-width="34" stroke-linejoin="round"/>'
+      + '<polygon points="433,60 814,280 814,720 433,940 52,720 52,280" fill="url(#hxCardMeadow)" stroke="#b5d38a" stroke-width="10" stroke-linejoin="round"/>'
+      + '<g clip-path="url(#hxCardClip)">' + tufts + road('#a8763f', 214) + road('#ecd19a', 150) + road('#f6e4b8', 56, ' opacity=".55"') + '</g></g></svg>';
   }
+
 
   function cardTip(id) {
     const c = id === 'rescue' ? state.rescueCard : CARD_LIBRARY[id], n = (c.roads || []).length;
@@ -530,7 +548,7 @@ R dreht die Karte, dann Feld anklicken.`;
     const c = id === 'rescue' ? state.rescueCard : CARD_LIBRARY[id]; const el = document.createElement('button'); el.className = `card rarity-${c.rarity.toLowerCase()}`; el.type = 'button';
     const towerSlotLabel = c.slots === 1 ? 'Turmplatz' : 'Turmplätze';
     const capacity = `${c.slots || 0} ${towerSlotLabel}${c.buildingSlots ? ` · ${c.buildingSlots} ${c.id === 'deadEnd' ? 'Gegnerportal-Plätze' : 'Gebäudeplätze'}` : ''}`;
-    el.innerHTML = `<div class="rarity">${c.rarity}</div>${miniPathSvg(c, previewRotation)}<h3>${c.name}</h3><p>${c.desc}</p><div class="slots" aria-label="${capacity}" title="${capacity}"><span aria-hidden="true">${c.slots || 0} 🛡️<span class="slotLabel"> ${towerSlotLabel}</span>${c.buildingSlots ? ` · ${c.buildingSlots} ${c.id === 'deadEnd' ? '◉' : '🏠'}<span class="slotLabel"> ${c.id === 'deadEnd' ? 'Gegnerportal' : 'Gebäude'}</span>` : ''}</span></div>`;
+    el.innerHTML = `<div class="rarity">${c.rarity}</div>${miniPathSvg(c, previewRotation)}<h3>${c.name}</h3><p>${c.desc}</p><div class="slots" aria-label="${capacity}" title="${capacity}"><span aria-hidden="true"><span class="hxi hxi-towerSlot"></span> ${c.slots || 0}<span class="slotLabel"> ${towerSlotLabel}</span>${c.buildingSlots ? ` · <span class="hxi hxi-${c.id === 'deadEnd' ? 'waveStart' : 'building_house'}"></span> ${c.buildingSlots}<span class="slotLabel"> ${c.id === 'deadEnd' ? 'Gegnerportal' : 'Gebäude'}</span>` : ''}</span></div>`;
     if (!selectable) { el.style.width = '100%'; if (state.phase !== 'removal') { const count = document.createElement('p'); count.className = 'deckCopyCount'; count.textContent = state.deck.filter(cardId => cardId === id).length + '× bereits im Deck'; el.appendChild(count); } }
     return el;
   }
@@ -602,7 +620,7 @@ R dreht die Karte, dann Feld anklicken.`;
     document.getElementById('rotateHexBtn').classList.toggle('hidden', state.phase !== 'place');
     document.getElementById('rotateHexBtn').disabled = state.phase !== 'place' || !state.hand[state.selectedCard];
     const touchControls = !!globalThis.HexCompact?.touch?.();
-    document.getElementById('rotateHexBtn').textContent = touchControls ? '↻ Drehen' : '↻ Drehen (R)';
+    document.getElementById('rotateHexBtn').textContent = touchControls ? 'Drehen' : 'Drehen (R)';
     const tunnelAvailable=!!state.tunnelOffer&&state.phase==='build'&&!state.waveRunning&&state.hp>0;
     document.getElementById('tunnelRescuePanel').classList.toggle('hidden',!tunnelAvailable);
     const tunnelButton = document.getElementById('tunnelRescueBtn'); tunnelButton.classList.toggle('hidden',!tunnelAvailable); tunnelButton.textContent = state.tunnelConfirmed ? 'Tunnel kostenlos bauen' : 'Rettungstunnel ansehen';
@@ -610,6 +628,8 @@ R dreht die Karte, dann Feld anklicken.`;
     renderQuickControls(); renderIntroductionNotice();
     uxFeedback();
     renderBasePanel(); renderTutorial();
+    const bossWave = !!HexWaves.bossProfile(state.waveRunning ? state.wave : state.wave + 1), phaseKind = state.waveRunning ? (bossWave ? 'boss' : 'wave') : 'build';
+    document.getElementById('waveDropdown').dataset.phase = phaseKind; document.getElementById('phaseName').textContent = state.phase === 'gameover' ? 'Niederlage' : state.phase === 'victory' ? 'Sieg' : phaseKind === 'boss' ? 'Bosswelle' : phaseKind === 'wave' ? 'Welle läuft' : 'Bauphase';
     hpEl.textContent = `${state.hp}/${state.maxHp}`; goldEl.textContent = state.gold; waveEl.textContent = state.waveRunning || ['victory', 'gameover'].includes(state.phase) ? state.wave : state.wave + 1; deckCountEl.textContent = state.deck.length;
     updateArsenalHint();
     document.getElementById('upgradeStatus').checked = !!state.showUpgradeStatus;
@@ -637,7 +657,7 @@ R dreht die Karte, dann Feld anklicken.`;
         const effective = HexData.towerDefinition({ type: id, biome: selectedTile ? HexBiomes.forTile(state, selectedTile) : 'grass', rangeFactor: state.challengeDay ? .85 : 1, tileType: selectedTile?.type, supportRange: HexBuildings.rangeBonus(state.map, state.selectedSlot), supportDamage: HexBuildings.effects(state.map, selectedTile).damage });
         const price = buildPrices.get(id);
         const b = document.createElement('button'); b.className = 'towerBtn'; b.title = t.desc + '\n' + towerStats(effective) + (selections('Slot').length > 1 ? '\nGesamtpreis für alle markierten Plätze inklusive lokaler Rabatte. Werte zeigen den zuletzt gewählten Platz.' : '');
-        b.innerHTML = `<span class="towerBuildIcon" aria-hidden="true">${HexArsenal.icon(id, t.color)}</span><span class="towerOffer"><strong class="towerOfferName">${t.name}</strong><small class="towerOfferDescription">${towerBuildRole(id)}</small><small class="towerOfferStats">${towerStatsMarkup(effective)}</small></span><strong class="towerOfferPrice">${price} 🪙${selections('Slot').length > 1 ? '<small>' + selections('Slot').length + ' × Türme</small>' : ''}<kbd>${towerMenu.children.length + 1}</kbd></strong>`;
+        b.innerHTML = `<span class="towerBuildIcon" aria-hidden="true">${HexArsenal.icon(id, t.color)}</span><span class="towerOffer"><strong class="towerOfferName">${t.name}</strong><small class="towerOfferDescription">${towerBuildRole(id)}</small><small class="towerOfferStats">${towerStatsMarkup(effective)}</small></span><strong class="towerOfferPrice"><span class="towerPriceTag"><span class="towerPriceValue">${price}</span><span class="hxi hxi-coin" aria-hidden="true"></span><span class="sr-only"> Gold</span></span>${selections('Slot').length > 1 ? '<small>' + selections('Slot').length + ' × Türme</small>' : ''}<kbd>${towerMenu.children.length + 1}</kbd></strong>`;
         b.disabled = !['place', 'build', 'wave'].includes(state.phase) || !state.selectedSlot || state.gold < price || state.hp <= 0;
         b.addEventListener('pointerenter', () => { state.previewTower = id; renderBoard(); });
         b.addEventListener('pointerleave', () => { state.previewTower = null; renderBoard(); });
@@ -651,11 +671,11 @@ R dreht die Karte, dann Feld anklicken.`;
     renderForecast();
     const info = document.getElementById('selectedTowerInfo'), sell = document.getElementById('sellTowerBtn');
     const selected = state.selectedTower, tower = selected ? state.map.get(key(selected.q, selected.r))?.towers[selected.index] : null;
-    info.innerHTML = tower ? HexTowerView.summary(towerPanelDefinition(tower)) : '';
+    info.innerHTML = tower ? HexTowerView.headline(towerPanelDefinition(tower)) : '';
     renderTowerPanel();
     const refund = HexData.towerRefund(state, tower); sell.disabled = !refund || selections('Tower').length > 1;
     sell.textContent = selections('Tower').length > 1 ? 'Zum Verkaufen einen einzelnen Turm wählen' : refund ? `${refund.percent === 100 ? 'Bau rückgängig' : 'Verkaufen'} · ${refund.percent} % (+${refund.amount} Gold)` : 'Turm verkaufen';
-    startWaveBtn.disabled = state.phase !== 'build' || state.waveRunning || state.hp <= 0;
+    startWaveBtn.disabled = state.phase !== 'build' || state.waveRunning || state.hp <= 0; startWaveBtn.dataset.state = state.waveRunning ? 'running' : startWaveBtn.disabled ? 'locked' : 'ready';
     startWaveBtn.title = state.phase === 'place' ? 'Lege zuerst dein Hex, bevor du die nächste Welle startest.' : '';
     startWaveBtn.textContent = state.phase === 'place' ? 'Zuerst Hex legen' : (!state.waveRunning && HexWaves.bossProfile(state.wave + 1) ? `Bosswelle ${state.wave + 1} starten` : 'Wave starten') + (touchControls ? '' : ' (Leertaste)');
     if (document.getElementById('deckDropdown').open) renderDeckOverview(); renderSaleState(); layoutMenus(); duoBridge?.render();
@@ -719,14 +739,15 @@ R dreht die Karte, dann Feld anklicken.`;
   function renderAll() { renderBoard(); renderUI(); }
   const buildingPosition = HexMap.buildingPosition;
   function towerStatsMarkup(def) {
-    const chip = (icon, value, label) => '<span class="statChip" title="' + label + '" aria-label="' + label + ': ' + value + '"><span aria-hidden="true">' + icon + '</span> ' + value + '</span>';
+    // Werte-Icons aus assets/uidesign (icons/ bzw. towers/); Farbe über data-stat in hexwerk.css.
+    const chip = (icon, value, label) => '<span class="statChip" data-stat="' + icon + '" title="' + label + '" aria-label="' + label + ': ' + value + '"><span class="hxi hxi-' + icon + '" aria-hidden="true"></span> ' + value + '</span>';
     const m = def.damageMultipliers || { hp: 1, armor: 1, magic: 1 }; let parts = [];
-    if (def.aura) parts.push(chip('❄', Math.round((1 - def.slow) * 100) + '%', 'Verlangsamung'));
-    else parts.push(chip('♥', Math.round(def.damage * m.hp), 'Schaden gegen Leben'), chip('⬟', Math.round(def.damage * m.armor), 'Schaden gegen Rüstung'), chip('✦', Math.round(def.damage * m.magic), 'Schaden gegen Magieresistenz'));
-    parts.push(chip('◎', def.range, 'Reichweite')); if (!def.aura) parts.push(chip('◷', def.cooldown.toFixed(2) + ' s', def.mine ? 'Zeit zwischen Minen' : 'Zeit zwischen Angriffen (kleiner ist schneller)'));
-    if (def.splash) parts.push(chip('✹', def.splash, 'Explosionsradius')); if (def.chain) parts.push(chip('ϟ', def.chain + ' / ' + def.jumpRange, 'Blitzziele / Sprungweite')); if (def.pierce) parts.push(chip('➶', def.pierceTargets, 'Durchschlagziele'));
-    if (def.hitSlow) parts.push(chip('❄', Math.round((1 - def.hitSlow) * 100) + '% / ' + def.slowDuration + ' s', 'Verlangsamung / Dauer'));
-    if (def.soulLimit) parts.push(chip('☽', def.soulLimit, 'Maximale Geister'), chip('⚔', Math.round(def.soulDamage) + '/s', 'Geisterschaden'), chip('⌛', def.soulDuration + ' s', 'Geisterlebensdauer'));
+    if (def.aura) parts.push(chip('tower_freeze', Math.round((1 - def.slow) * 100) + '%', 'Verlangsamung'));
+    else parts.push(chip('vsHealth', Math.round(def.damage * m.hp), 'Schaden gegen Leben'), chip('vsArmor', Math.round(def.damage * m.armor), 'Schaden gegen Rüstung'), chip('vsMagic', Math.round(def.damage * m.magic), 'Schaden gegen Magieresistenz'));
+    parts.push(chip('range', def.range, 'Reichweite')); if (!def.aura) parts.push(chip('cooldown', def.cooldown.toFixed(2) + ' s', def.mine ? 'Zeit zwischen Minen' : 'Zeit zwischen Angriffen (kleiner ist schneller)'));
+    if (def.splash) parts.push(chip('area', def.splash, 'Explosionsradius')); if (def.chain) parts.push(chip('tower_chain', def.chain + ' / ' + def.jumpRange, 'Blitzziele / Sprungweite')); if (def.pierce) parts.push(chip('single', def.pierceTargets, 'Durchschlagziele'));
+    if (def.hitSlow) parts.push(chip('tower_freeze', Math.round((1 - def.hitSlow) * 100) + '% / ' + def.slowDuration + ' s', 'Verlangsamung / Dauer'));
+    if (def.soulLimit) parts.push(chip('tower_necromancer', def.soulLimit, 'Maximale Geister'), chip('damage', Math.round(def.soulDamage) + '/s', 'Geisterschaden'), chip('cooldown', def.soulDuration + ' s', 'Geisterlebensdauer'));
     return '<span class="statChips">' + parts.join('') + '</span>';
   }
   function towerStats(def) {
@@ -856,8 +877,11 @@ R dreht die Karte, dann Feld anklicken.`;
   function towerUpgradeCard(content, tower, id, upgrade, next, locked = false) {
     const current = towerPanelDefinition(tower), comparing = towerComparison === id;
     const card = document.createElement('section'); card.className = 'towerUpgradeCard'; card.classList.toggle('comparing', comparing);
-    const icon = document.createElement('span'); icon.className = 'towerPathIcon'; icon.setAttribute('aria-hidden', 'true'); icon.innerHTML = HexArsenal.icon(tower.type, next.color); card.appendChild(icon);
+    const icon = document.createElement('span'); icon.className = 'towerPathIcon'; icon.setAttribute('aria-hidden', 'true'); icon.innerHTML = HexArsenal.pathIcon?.(id, next.color) || HexArsenal.icon(tower.type, next.color); card.appendChild(icon);
+    syncTowerPortrait(icon, upgradeModelNames(tower, id));
     const heading = document.createElement('strong'); heading.textContent = upgrade.name; card.appendChild(heading);
+    const kind = HexTowerView.kind(next), tag = document.createElement('span'); tag.className = 'towerUpgradeTag'; tag.dataset.kind = kind.id; tag.textContent = kind.label; card.appendChild(tag);
+    const stats = document.createElement('div'); stats.className = 'towerUpgradeStats'; stats.innerHTML = HexTowerView.upgradeStats(next); card.appendChild(stats);
     const progress = document.createElement('div'); progress.className = 'towerPathProgress'; progress.innerHTML = HexTowerView.pathProgress(tower); card.appendChild(progress);
     const description = document.createElement('p'); description.className = 'towerUpgradeDescription'; description.textContent = upgrade.desc; card.appendChild(description);
     const tradeoff = HexTowerView.tradeoff(current, next);
@@ -888,14 +912,38 @@ R dreht die Karte, dann Feld anklicken.`;
     }
     card.appendChild(actions); content.appendChild(card);
   }
+  // Turmporträts (classes/tower-portraits.mjs): gleiche Modellwahl wie der 3D-Renderer; ohne Porträt bleibt das Icon sichtbar.
+  function towerModelNames(tower) {
+    const names = [], variant = tower.finalUpgrade || tower.branch;
+    if (tower.ultimate && tower.finalUpgrade) names.push('tower_' + tower.type + '_' + tower.finalUpgrade + '_ultimate');
+    if (variant) names.push('tower_' + tower.type + '_' + variant);
+    names.push('tower_' + tower.type); return names;
+  }
+  function upgradeModelNames(tower, id) {
+    if (id.startsWith('ultimate:')) return towerModelNames({ ...tower, ultimate: tower.type });
+    const upgrade = HexData.UPGRADES?.[id];
+    return towerModelNames({ type: tower.type, ...(upgrade?.requires ? { branch: upgrade.requires, finalUpgrade: id } : { branch: id }) });
+  }
+  function syncTowerPortrait(element, names) {
+    const id = names.join('|') + '|' + (typeof HexAssetEdition !== 'undefined' ? HexAssetEdition.get() : 'normal');
+    if (!element || element._portraitKey === id) return;
+    const request = globalThis.HexTowerPortraits?.url(names); if (!request) return;
+    element._portraitKey = id; element.classList?.remove('hasPortrait');
+    request.then(url => { if (element._portraitKey !== id) return; element.style.setProperty?.('--portrait', url ? 'url(' + url + ')' : 'none'); element.classList?.toggle('hasPortrait', !!url); });
+  }
+  globalThis.addEventListener?.('hexportraitsready', () => { towerPanelKey = ''; if (state?.selectedTower) renderAll(); });
+  document.querySelectorAll?.('[data-close-tower-details]').forEach(button => button.addEventListener('click', () => { document.getElementById('towerExtraDetails').open = false; document.querySelector?.('#towerExtraDetails > summary')?.focus?.(); }));
   function renderTowerPanel() {
     const panel = document.getElementById('towerPanel'), selected = state.selectedTower, tower = selected ? state.map.get(key(selected.q, selected.r))?.towers[selected.index] : null;
     if (!tower) { panel.classList.add('hidden'); towerPanelKey = ''; towerSelectionKey = ''; towerComparison = null; state.previewUpgrade = null; return; }
     const selectionKey = JSON.stringify(selections('Tower'));
     if (towerSelectionKey !== selectionKey) { towerSelectionKey = selectionKey; towerComparison = null; towerFocusOpen = false; document.getElementById('towerExtraDetails').open = false; }
-    panel.classList.remove('hidden'); document.getElementById('towerPanelTitle').textContent = `${HexData.towerDefinition(tower).name} · Stufe ${tower.level}`;
+    panel.classList.remove('hidden'); document.getElementById('towerPanelTitle').textContent = HexData.towerDefinition(tower).name;
+    document.getElementById('towerPanelStage').textContent = tower.ultimate ? 'Ultimate' : tower.finalUpgrade ? 'Stufe 3 · Zweigfinale' : tower.branch ? 'Stufe 2 · Spezialisierung' : 'Basisstufe';
+    const portrait = document.getElementById('towerPortrait'); if (portrait._fallbackType !== tower.type) { portrait._fallbackType = tower.type; portrait.innerHTML = HexArsenal.icon(tower.type, HexData.towerDefinition(tower).color); }
+    syncTowerPortrait(portrait, towerModelNames(tower));
     const selectedTowers = selections('Tower').map(s => state.map.get(key(s.q, s.r))?.towers[s.index]).filter(Boolean), group = selectedTowers.length > 1;
-    if (group) { document.getElementById('towerPanelTitle').textContent = selectedTowers.length + ' Türme ausgewählt'; document.getElementById('selectedTowerInfo').textContent = 'Angriffsfokus gemeinsam einstellen · Strg + Klick: Auswahl ändern'; }
+    if (group) { document.getElementById('towerPanelTitle').textContent = selectedTowers.length + ' Türme ausgewählt'; document.getElementById('towerPanelStage').textContent = 'Gemeinsam einstellen'; document.getElementById('selectedTowerInfo').textContent = 'Angriffsfokus gemeinsam einstellen · Strg + Klick: Auswahl ändern'; }
     const definition = towerPanelDefinition(tower);
     const validChoices = tower.ultimate ? [] : tower.finalUpgrade ? ['ultimate:' + tower.type] : HexData.availableUpgrades(tower).map(([id]) => id);
     if (towerComparison && !validChoices.includes(towerComparison)) towerComparison = null;
@@ -904,9 +952,12 @@ R dreht die Karte, dann Feld anklicken.`;
     const panelKey = JSON.stringify([selections('Tower'), definition, tower.biome, tower.tileType, tower.overloadPending, selectedTowers.map(t => t.targetPriority), state.buildingVersion, towerComparison, uiLanguageRevision]);
     if (towerPanelKey !== panelKey) {
       towerPanelKey = panelKey; upgradeButtons.clear(); const content = document.getElementById('towerUpgrades'); content.innerHTML = '';
-      document.getElementById('towerExtraValues').innerHTML = '<p>' + HexTowerView.escape(definition.desc) + '</p>' + HexTowerView.details(definition);
-      const biome = HexBiomes.definitions[tower.biome || 'grass'], terrain = CARD_LIBRARY[tower.tileType], influences = [biome.name + ': ' + biome.description];
-      const bonus = HexData.tileBonusLabel(terrain); if (bonus) influences.push(terrain.name + ': ' + bonus);
+      document.getElementById('towerDescription').textContent = definition.desc;
+      document.getElementById('towerExtraValues').innerHTML = HexTowerView.valueSheet(definition);
+      document.getElementById('towerFactors').innerHTML = HexTowerView.factors(definition);
+      // Einflüsse als Text (wie bisher) mit passendem Bild: Biom-Icon, Kachelbild, Gebäude oder Wertsymbol.
+      const biome = HexBiomes.definitions[tower.biome || 'grass'], terrain = CARD_LIBRARY[tower.tileType], influences = [biome.name + ': ' + biome.description], influenceIcons = ['<span class="hxi hxi-biome_' + (tower.biome || 'grass') + '"></span>'];
+      const bonus = HexData.tileBonusLabel(terrain); if (bonus) { influences.push(terrain.name + ': ' + bonus); influenceIcons[1] = miniPathSvg(terrain, state.map.get(key(selected.q, selected.r))?.rotation || 0); }
       const selectedTile = state.map.get(key(selected.q, selected.r));
       if (selectedTile?.site === 'guardian' && selected.index === selectedTile.siteSlot) influences.push('Wächter-Bauplatz: +20 % Reichweite.');
       for (const tile of state.map.values()) {
@@ -914,7 +965,7 @@ R dreht die Karte, dann Feld anklicken.`;
         if (distance <= 1 && tile.siteEffect) influences.push('Schrein (' + tile.q + ', ' + tile.r + '): ' + (tile.siteEffect === 'damage' ? '+10 % Schaden' : '+15 % Reichweite'));
         for (const building of tile.buildings || []) if (building && ['forge', 'market'].includes(building.type)) {
           const effect = HexBuildings.definition(building);
-          if (distance <= effect.radius || building.special && building.target === key(selected.q, selected.r)) influences.push(effect.name + ' (' + tile.q + ', ' + tile.r + '): ' + effect.desc);
+          if (distance <= effect.radius || building.special && building.target === key(selected.q, selected.r)) { influenceIcons[influences.length] = '<span class="hxi hxi-building_' + building.type + '"></span>'; influences.push(effect.name + ' (' + tile.q + ', ' + tile.r + '): ' + effect.desc); }
         }
       }
       if (tower.overloadPending) influences.push('Überladung: für die nächste Welle vorgemerkt.');
@@ -923,7 +974,8 @@ R dreht die Karte, dann Feld anklicken.`;
       if (tower.supportRange && tower.supportRange !== 1) influences.push('Unterstützung · Reichweite ×' + HexTowerView.number(tower.supportRange));
       if (tower.rangeFactor && tower.rangeFactor !== 1) influences.push('Durchlauf · Reichweite ×' + HexTowerView.number(tower.rangeFactor));
       const discount = HexBuildings.cost(state, selected, 100); if (discount !== 100) influences.push('Standort-Rabatt: ' + (100 - discount) + ' %');
-      document.getElementById('towerInfluences').innerHTML = influences.map(text => '<p>' + HexTowerView.escape(text) + '</p>').join('');
+      document.getElementById('towerInfluences').innerHTML = influences.map((text, i) => { const split = text.search(/: | · /), name = split > 0 ? text.slice(0, split) : text, effect = split > 0 ? text.slice(split + 2).trim() : '';
+        return '<div class="towerInfluence"><span class="towerInfluenceIcon" aria-hidden="true">' + (influenceIcons[i] || '<span class="hxi hxi-upgrade"></span>') + '</span><p><strong>' + HexTowerView.escape(name) + '</strong>' + (effect ? '<span>' + HexTowerView.escape(effect) + '</span>' : '') + '</p></div>'; }).join('');
       let focusSection = null;
       const targetable = selectedTowers.filter(t => { const d = HexData.towerDefinition(t); return !d.aura && !d.mine; });
       if (targetable.length) {
@@ -931,7 +983,7 @@ R dreht die Karte, dann Feld anklicken.`;
         const labels = { closestBase: 'Nächste an der Base', furthestBase: 'Weiteste von der Base', mostHealth: 'Meistes Leben', leastHealth: 'Wenigstes Leben', mostArmor: 'Meiste Rüstung', mostMagic: 'Meiste Magieresistenz', boss: 'Bosse', healer: 'Heiler', closestTower: 'Nächste am Turm', furthestTower: 'Weiteste vom Turm' }, defaults = HexData.defaultTargetPriority(tower);
         tower.targetPriority = [...new Set(tower.targetPriority || defaults)]; for (const value of defaults) if (tower.targetPriority.length < 3 && !tower.targetPriority.includes(value)) tower.targetPriority.push(value); tower.targetPriority = tower.targetPriority.slice(0, 3);
         const targeting = document.createElement('details'); targeting.className = 'targetPriorities towerDisclosure'; targeting.setAttribute('aria-label', 'Angriffsfokus'); targeting.open = group || towerFocusOpen;
-        const summary = document.createElement('summary'); summary.textContent = 'Angriffsfokus · ' + (targetable.some(t => (t.targetPriority || defaults)[0] !== tower.targetPriority[0]) ? 'Unterschiedliche Einstellungen' : labels[tower.targetPriority[0]]); targeting.appendChild(summary);
+        const summary = document.createElement('summary'); summary.innerHTML = '<span class="focusLabel">Angriffsfokus</span><span class="focusValue">' + HexTowerView.escape(targetable.some(t => (t.targetPriority || defaults)[0] !== tower.targetPriority[0]) ? 'Unterschiedliche Einstellungen' : labels[tower.targetPriority[0]]) + '</span>'; targeting.appendChild(summary);
         targeting.addEventListener('toggle', () => { towerFocusOpen = targeting.open; }); focusSection = targeting;
         tower.targetPriority.forEach((value, index) => { const row = document.createElement('label'); row.textContent = `${index + 1}.`; const select = document.createElement('select'); select.setAttribute('aria-label', 'Angriffsfokus Priorität ' + (index + 1)); const mixed = targetable.some(t => (t.targetPriority || defaults)[index] !== value); if (mixed) { const option = document.createElement('option'); option.value = ''; option.textContent = 'Unterschiedliche Einstellungen'; option.disabled = true; option.selected = true; select.appendChild(option); } for (const [id, label] of Object.entries(labels)) { const option = document.createElement('option'); option.value = id; option.textContent = label; option.selected = !mixed && id === value; select.appendChild(option); } select.addEventListener('change', () => { if (duoToken) { const packets = selections('Tower').map(slot => { const target = state.map.get(key(slot.q, slot.r))?.towers[slot.index], priorities = [...(target.targetPriority || defaults)], old = priorities[index], other = priorities.indexOf(select.value); priorities[index] = select.value; if (other >= 0 && other !== index) priorities[other] = old; return { slot, priorities }; }); duoBridge?.priorities(packets); return; } for (const target of targetable) { target.targetPriority = [...(target.targetPriority || defaults)]; const old = target.targetPriority[index], other = target.targetPriority.indexOf(select.value); target.targetPriority[index] = select.value; if (other >= 0 && other !== index) target.targetPriority[other] = old; } towerPanelKey = ''; renderAll(); }); row.appendChild(select); targeting.appendChild(row); });
       }
@@ -948,8 +1000,8 @@ R dreht die Karte, dann Feld anklicken.`;
     }
     for (const [, button] of upgradeButtons) {
       const price = HexBuildings.cost(state, selected, button._baseCost), unavailable = !['place', 'build', 'wave'].includes(state.phase) || state.hp <= 0;
-      button.disabled = unavailable || state.gold < price;
-      const text = unavailable ? 'Zurzeit nicht ausbaubar' : state.gold < price ? price + ' Gold · ' + (price - state.gold) + ' fehlen' : 'Ausbauen · ' + price + ' Gold';
+      button.disabled = unavailable || state.gold < price; button.toggleAttribute?.('data-locked', unavailable);
+      const text = unavailable ? 'Zurzeit nicht ausbaubar' : state.gold < price ? price + ' Gold · ' + (price - state.gold) + ' fehlen' : price + ' Gold';
       if (button.textContent !== text) button.textContent = text;
       button.setAttribute('aria-label', button._upgradeName + ' · ' + text);
     }
@@ -1027,7 +1079,7 @@ R dreht die Karte, dann Feld anklicken.`;
     const rail = document.getElementById('quickLoadout'), next = state.towerLoadout.join('|');
     if (quickKey !== next) {
       quickKey = next; rail.innerHTML = ''; quickButtons.clear(); for (const type of state.towerLoadout) {
-        const def = TOWERS[type], button = document.createElement('button'); button.className = 'quickTower'; button.setAttribute('aria-label', def.name + ' bauen'); button.title = def.name + ' · Ziehen oder anklicken, dann Bauplatz wählen'; button.innerHTML = HexArsenal.icon(type, def.color) + '<small>' + def.cost + '</small>';
+        const def = TOWERS[type], button = document.createElement('button'); button.className = 'quickTower hxHex'; button.setAttribute('aria-label', def.name + ' bauen'); button.title = def.name + ' · Ziehen oder anklicken, dann Bauplatz wählen'; button.innerHTML = HexArsenal.icon(type, def.color) + '<small>' + def.cost + '</small>';
         button.addEventListener('pointerdown', e => { if (e.button !== 0) return; e.preventDefault(); e.stopPropagation(); if (!armQuickTower(type)) return; quickPointer = { id: e.pointerId, type, x: e.clientX, y: e.clientY, moved: false }; button.setPointerCapture?.(e.pointerId); });
         button.addEventListener('click', e => { if (e.detail === 0) armQuickTower(type); }); button.addEventListener('lostpointercapture', () => { if (quickPointer) { if (canQuickBuild() || state.hp <= 0) cancelQuickTower(); else { quickPointer = null; document.getElementById('towerDragGhost').classList.add('hidden'); } renderAll(); } }); rail.appendChild(button); quickButtons.set(type, button);
       }
@@ -1046,7 +1098,7 @@ R dreht die Karte, dann Feld anklicken.`;
     document.getElementById('biomeIntro').classList.toggle('hidden', !state.biomeIntro || !mainMenu.classList.contains('hidden')); renderBiomeIntroDetails();
     if (key !== biomeKey) {
       biomeKey = key; biomes.innerHTML = ''; biomeButtons.clear(); for (const id of ids) {
-        const def = HexBiomes.definitions[id], button = document.createElement('button'); button.className = 'biomeIcon'; button.style.borderColor = def.color; button.setAttribute('aria-label', def.name + ': ' + def.description); button.innerHTML = '<span aria-hidden="true">' + ({ grass: '♧', desert: '☀', ash: '♨', storm: '≋' })[id] + '</span><span class="biomeTooltip"><strong>' + def.name + '</strong><small>' + def.description + '</small></span>';
+        const def = HexBiomes.definitions[id], button = document.createElement('button'); button.className = 'biomeIcon hxHex'; button.dataset.biome = id; button.style.borderColor = def.color; button.setAttribute('aria-label', def.name + ': ' + def.description); button.innerHTML = '<span class="hxi hxi-biome_' + id + '" aria-hidden="true"></span><span class="biomeTooltip"><strong>' + def.name + '</strong><small>' + def.description + '</small></span>';
         button.addEventListener('pointerenter', () => showBiomeHighlight(id)); button.addEventListener('pointerleave', () => showBiomeHighlight(pinnedBiome)); button.addEventListener('focus', () => showBiomeHighlight(id)); button.addEventListener('blur', () => showBiomeHighlight(pinnedBiome)); button.addEventListener('click', () => { pinnedBiome = pinnedBiome === id ? null : id; showBiomeHighlight(pinnedBiome); renderQuickControls(); }); biomes.appendChild(button); biomeButtons.set(id, button);
       }
     } for (const [id, button] of biomeButtons) { button.classList.toggle('biomeIntroTarget', HexBiomes.introIds(state).includes(id)); button.classList.toggle('active', pinnedBiome === id); button.classList.toggle('showTooltip', state.highlightBiome === id); button.setAttribute('aria-pressed', String(pinnedBiome === id)); }
@@ -1409,7 +1461,7 @@ R dreht die Karte, dann Feld anklicken.`;
   function renderAccount() {
     const loggedIn = !!accountUser, dirty = cloudStore.get(CLOUD_DIRTY) === '1';
     accountLoggedOut.classList.toggle('hidden', loggedIn); accountLoggedIn.classList.toggle('hidden', !loggedIn);
-    document.getElementById('menuAccountBtn').textContent = loggedIn ? '👤 ' + accountUser.username : '👤 Anmelden';
+    document.getElementById('menuAccountLabel').textContent = loggedIn ? accountUser.username : 'Anmelden';
     document.getElementById('accountAvatar').textContent = loggedIn ? accountUser.username.slice(0, 1).toUpperCase() : '☁';
     document.getElementById('accountTitle').textContent = loggedIn ? 'Hallo, ' + accountUser.username + '!' : 'Dein Account';
     document.getElementById('accountSubtitle').textContent = loggedIn ? 'Dein Fortschritt wird in deinem Account gesichert.' : 'Sichere deinen Fortschritt und spiele auf jedem Gerät weiter.';
@@ -1515,7 +1567,7 @@ R dreht die Karte, dann Feld anklicken.`;
     try { if (cloudStore.get(CLOUD_DIRTY) === '1') await pushToServer(); else await pullFromServer(); } catch {/* offline: später erneut */ }
     renderAccount();
   })();
-  function updateArsenalHint() { const count = HexProfile.affordableUnlocks(profile), button = document.getElementById('menuArsenalBtn'); button.classList.toggle('upgradeAvailable', arsenalNotifications.pending(profile));  button.textContent = count ? '◆ Arsenal · Upgrade verfügbar' : '◆ Arsenal'; button.title = count ? count + ' Freischaltungen bezahlbar' : 'Arsenal'; }
+  function updateArsenalHint() { const count = HexProfile.affordableUnlocks(profile), button = document.getElementById('menuArsenalBtn'); button.classList.toggle('upgradeAvailable', arsenalNotifications.pending(profile));  document.getElementById('menuArsenalDetail').textContent = count ? '◆ Upgrade verfügbar' : ''; button.title = count ? count + ' Freischaltungen bezahlbar' : 'Arsenal'; }
   function renderIntroductionMenu() {
     const devButton=document.getElementById('devToggleBtn'),dev=globalThis.HexFirstPlayerTest;
     devButton.classList.toggle('hidden',!dev?.available || !!duoToken);devButton.setAttribute('aria-pressed',String(!!dev?.enabled));devButton.textContent=dev?.enabled?'Dev: an':'Dev: aus';
@@ -1530,6 +1582,8 @@ R dreht die Karte, dann Feld anklicken.`;
     const learning = HexProfile.learning(profile), modes = HexProfile.modesUnlocked(profile);
     for (const id of ['skipIntroductionBtn', 'skipIntroductionSettings']) document.getElementById(id).classList.toggle('hidden', !learning);
     for (const id of ['dailyModeBtn', 'duoModeBtn']) { document.getElementById(id).classList.toggle('hidden', !modes); document.getElementById(id).disabled = !modes; }
+    // Hauptmenü-Hexe bleiben sichtbar und nennen ihre Freischaltbedingung.
+    for (const id of ['menuDailyBtn', 'menuDuoBtn']) { document.getElementById(id).classList.toggle('locked', !modes); document.getElementById(id).disabled = !modes; }
     document.getElementById('menuArsenalBtn').classList.toggle('hidden', learning && profile.records.runsPlayed === 0);
     document.getElementById('introductionMenuNote').classList.toggle('hidden', !learning);
   }
@@ -1574,11 +1628,23 @@ R dreht die Karte, dann Feld anklicken.`;
     if (box && !globalThis.HexCompact?.small()) { notice.style.left = (box.right + 12) + 'px'; notice.style.top = Math.max(100, Math.min(box.top, (document.documentElement?.clientHeight || 800) - 160)) + 'px'; }
   }
   function renderDailyMission() { const day = new Date().toISOString().slice(0, 10), mission = HexWaves.daily(day), garrison = mission.id === 'garrison'; document.getElementById('dailyMissionName').textContent = mission.name; document.getElementById('dailyMissionShort').textContent = 'Ziel: ' + mission.target + ' Wellen · Wechsel um 00:00 UTC'; document.getElementById('dailyMissionTitle').textContent = mission.name + ' · Tägliche Herausforderung'; document.getElementById('dailyCaravanRules').classList.toggle('hidden', garrison); document.getElementById('dailyGarrisonRules').classList.toggle('hidden', !garrison); document.getElementById('dailyStartBtn').textContent = 'Heutige Mission starten'; }
-  function openMainMenu() { renderIntroductionMenu(); renderDailyMission(); if (duoToken) { location.assign('/duo-lobby.html'); return; } document.getElementById('biomeIntro').classList.add('hidden'); cancelQuickTower(); resetCameraKeys(); updateArsenalHint(); const today = new Date().toISOString().slice(0, 10), daily = profile.dailyResults?.[today]; document.getElementById('dailyProgress').textContent = today + ' (UTC) · ' + (daily?.won ? 'Heute geschafft · Belohnung erhalten' : 'Tagesbestmarke: ' + (daily?.best || 0) + '/' + HexWaves.daily(today).target + ' Wellen'); document.getElementById('menuContinueBtn').classList.toggle('hidden', (!hasActiveRun || state.hp <= 0) && !readRunAutosave()); document.getElementById('menuPlayBtn').textContent = hasActiveRun ? 'Neuer Run' : 'Spielen'; mainMenu.classList.remove('hidden'); }
+  function openMainMenu() { renderIntroductionMenu(); renderDailyMission(); if (duoToken) { location.assign('/duo-lobby.html'); return; } document.getElementById('biomeIntro').classList.add('hidden'); cancelQuickTower(); resetCameraKeys(); updateArsenalHint(); const today = new Date().toISOString().slice(0, 10), daily = profile.dailyResults?.[today]; document.getElementById('dailyProgress').textContent = today + ' (UTC) · ' + (daily?.won ? 'Heute geschafft · Belohnung erhalten' : 'Tagesbestmarke: ' + (daily?.best || 0) + '/' + HexWaves.daily(today).target + ' Wellen'); const activeRun = hasActiveRun && state.hp > 0, saved = activeRun ? null : readRunAutosave(), resume = activeRun ? state : saved && HexRunSnapshot.restore(saved.checkpoint).state;
+    const resumeWave = resume ? (resume.waveRunning || ['victory', 'gameover'].includes(resume.phase) ? resume.wave : resume.wave + 1) : 0; menuResume = !!resume;
+    // Gespeicherter Run: „Spielen“ zeigt die Welle und öffnet die Spielauswahl mit „Fortsetzen“ an erster Stelle.
+    document.getElementById('menuContinueBtn').classList.toggle('hidden', !resume); document.getElementById('menuContinueDetail').textContent = resume ? 'Welle ' + resumeWave : '';
+    mainMenu.classList.toggle('canContinue', !!resume); document.getElementById('menuPlayLabel').textContent = 'Spielen'; document.getElementById('menuPlayDetail').textContent = resume ? 'Fortsetzen · Welle ' + resumeWave : ''; mainMenu.classList.remove('hidden'); }
+  let menuResume = false;
+  function openPlayChoices() { mainMenu.classList.add('hidden'); document.getElementById('playModeChoices').classList.remove('hidden'); document.getElementById('dailyModeDetails').classList.add('hidden'); document.getElementById('playModeOverlay').classList.remove('hidden'); }
   document.getElementById('dailyStartBtn').addEventListener('click', () => { if (!HexProfile.modesUnlocked(profile) || !confirmRunRestart()) return; mainMenu.classList.add('hidden'); document.getElementById('playModeOverlay').classList.add('hidden'); newRun(undefined, 'standard', 'dual', new Date().toISOString().slice(0, 10)); });
-  document.getElementById('menuPlayBtn').addEventListener('click', () => { if (!HexProfile.modesUnlocked(profile) && !confirmRunRestart()) return; mainMenu.classList.add('hidden'); if (!HexProfile.modesUnlocked(profile)) { if (HexProfile.learning(profile)) newRun(); else openLoadout(); return; } document.getElementById('playModeChoices').classList.remove('hidden'); document.getElementById('dailyModeDetails').classList.add('hidden'); document.getElementById('playModeOverlay').classList.remove('hidden'); });
-  document.getElementById('duoModeBtn').addEventListener('click', () => { if (!HexProfile.modesUnlocked(profile) || !suspendSoloRun()) return; location.href = 'duo-lobby.html'; });
-  document.getElementById('standardModeBtn').addEventListener('click', () => { document.getElementById('playModeOverlay').classList.add('hidden'); openLoadout(); });
+  document.getElementById('menuPlayBtn').addEventListener('click', () => { if (menuResume) { openPlayChoices(); return; } if (!HexProfile.modesUnlocked(profile) && !confirmRunRestart()) return; mainMenu.classList.add('hidden'); if (!HexProfile.modesUnlocked(profile)) { if (HexProfile.learning(profile)) newRun(); else openLoadout(); return; } document.getElementById('playModeChoices').classList.remove('hidden'); document.getElementById('dailyModeDetails').classList.add('hidden'); document.getElementById('playModeOverlay').classList.remove('hidden'); });
+  function openDuoLobby() { if (!HexProfile.modesUnlocked(profile) || !suspendSoloRun()) return; location.href = 'duo-lobby.html'; }
+  for (const id of ['duoModeBtn', 'menuDuoBtn']) document.getElementById(id).addEventListener('click', openDuoLobby);
+  document.getElementById('menuDailyBtn').addEventListener('click', () => { if (!HexProfile.modesUnlocked(profile)) return; mainMenu.classList.add('hidden'); renderDailyMission(); document.getElementById('playModeChoices').classList.add('hidden'); document.getElementById('dailyModeDetails').classList.remove('hidden'); document.getElementById('playModeOverlay').classList.remove('hidden'); });
+  document.getElementById('standardModeBtn').addEventListener('click', () => {
+    // Vor der Freischaltung der Modi: neuer Run wie bisher direkt (Einführung) bzw. über die Run-Vorbereitung.
+    if (!HexProfile.modesUnlocked(profile)) { if (!confirmRunRestart()) return; document.getElementById('playModeOverlay').classList.add('hidden'); if (HexProfile.learning(profile)) newRun(); else openLoadout(); return; }
+    document.getElementById('playModeOverlay').classList.add('hidden'); openLoadout();
+  });
   document.getElementById('dailyModeBtn').addEventListener('click', () => { if (!HexProfile.modesUnlocked(profile)) return; renderDailyMission(); document.getElementById('playModeChoices').classList.add('hidden'); document.getElementById('dailyModeDetails').classList.remove('hidden'); });
   document.getElementById('playModeBackBtn').addEventListener('click', () => { document.getElementById('playModeOverlay').classList.add('hidden'); openMainMenu(); });
   document.getElementById('menuContinueBtn').addEventListener('click', () => {
@@ -1589,7 +1655,7 @@ R dreht die Karte, dann Feld anklicken.`;
       tutorial = saved.tutorial && Number.isInteger(saved.tutorial.step) ? { active: onboardingHints && !!saved.tutorial.active, step: Math.max(0, Math.min(HexTutorial.steps.length - 1, saved.tutorial.step)) } : { active: false, step: 0 };
       restoreRunCheckpoint(saved.checkpoint);
     }
-    mainMenu.classList.add('hidden');
+    mainMenu.classList.add('hidden'); document.getElementById('playModeOverlay').classList.add('hidden');
   });
   document.getElementById('menuArsenalBtn').addEventListener('click', openArsenal);
   document.getElementById('openMainMenuBtn').addEventListener('click', () => { if (!duoToken) { suspendSoloRun(); return; } document.getElementById('settingsDrawer').classList.add('hidden'); openMainMenu(); });

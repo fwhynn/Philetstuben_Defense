@@ -8,6 +8,8 @@
     <link rel="icon" type="image/png" href="assets/favicon.png" />
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="duo.css" />
+    <link rel="stylesheet" href="assets/uidesign/tokens.css" />
+    <link rel="stylesheet" href="hexwerk.css" />
     <script
       type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script>
   </head>
@@ -30,39 +32,51 @@
       <section class="boardWrap">
         <svg id="board" viewBox="-545 -375 1100 760" aria-label="Hex-Karte"></svg>
         <div class="mapControls">
-          <button id="zoomInBtn" class="secondary" aria-label="Map vergrößern">+</button>
-          <button id="zoomOutBtn" class="secondary" aria-label="Map verkleinern">−</button>
+          <button id="zoomOutBtn" class="secondary hxHex" aria-label="Map verkleinern" title="Map verkleinern">−</button>
+          <button id="zoomInBtn" class="secondary hxHex" aria-label="Map vergrößern" title="Map vergrößern">+</button>
           <button id="resetViewBtn" class="secondary">Zur Base</button>
           <span>Mausrad: Zoom · rechte Maustaste ziehen: verschieben</span>
         </div>
         <section id="towerPanel" class="towerPanel hidden" aria-label="Ausgewählter Turm">
           <div class="panelHead">
-            <h2 id="towerPanelTitle">Turm</h2><button id="closeTowerPanel" class="secondary"
+            <span id="towerPortrait" class="towerPortrait" aria-hidden="true"></span>
+            <div class="towerTitle">
+              <h2 id="towerPanelTitle">Turm</h2><small id="towerPanelStage" class="towerStage"></small>
+            </div><button id="closeTowerPanel" class="secondary hxHex"
               aria-label="Turminfos schließen" title="Schließen (Escape)"><small>Esc</small> ×</button>
           </div>
           <div id="towerPanelScroll" class="towerPanelScroll">
           <div class="towerPanelBody">
           <div class="towerOverview">
-          <p class="towerSectionLabel">Aktueller Turm</p>
+          <p class="towerSectionLabel sr-only">Aktueller Turm</p>
           <div id="selectedTowerInfo" class="towerCurrentStats"></div>
 
           </div>
           <div class="towerDevelopment">
-          <p class="towerSectionLabel">Ausbau wählen</p>
+          <p class="towerSectionLabel">Upgrades</p>
           <div id="towerUpgrades" class="towerUpgrades"></div>
           </div>
           </div>
           <details id="towerExtraDetails" class="towerDisclosure">
             <summary>Werte &amp; Einflüsse</summary>
-            <div id="towerExtraValues"></div>
-            <div id="towerInfluences" class="hint"></div>
+            <!-- Unteransicht: ersetzt beim Öffnen Upgrades und Verkaufen; Zurück schließt sie wieder. -->
+            <div class="towerSubview">
+              <button type="button" class="towerBack" data-close-tower-details>Zurück</button>
+              <h3 class="towerSubTitle">Werte &amp; Einflüsse</h3>
+              <p id="towerDescription" class="towerDescription"></p>
+              <div id="towerExtraValues"></div>
+              <h3>Aktive Einflüsse</h3>
+              <div id="towerInfluences" class="towerInfluenceList"></div>
+              <div id="towerFactors"></div>
+              <button type="button" class="towerBackWide secondary" data-close-tower-details>Zurück zu Upgrades</button>
+            </div>
           </details>
           </div>
           <div class="towerPanelFooter"><button id="sellTowerBtn" class="secondary" disabled>Bau rückgängig</button></div>
         </section>
         <section id="buildingPanel" class="towerPanel hidden" aria-label="Gebäudeslot">
           <div class="panelHead">
-            <h2 id="buildingPanelTitle">Gebäudeslot</h2><button id="closeBuildingPanel" class="secondary"
+            <h2 id="buildingPanelTitle">Gebäudeslot</h2><button id="closeBuildingPanel" class="secondary hxHex"
               aria-label="Gebäudeinfos schließen" title="Schließen (Escape)"><small>Esc</small> ×</button>
           </div>
           <button id="sellBuildingBtn" class="secondary" disabled>Gebäude verkaufen</button>
@@ -72,7 +86,7 @@
       </section>
 
       <details id="consumableMenu" class="consumableMenu">
-        <summary>Verbrauchshilfen</summary>
+        <summary class="hxHex" aria-label="Verbrauchshilfen" title="Verbrauchshilfen">Verbrauchshilfen</summary>
         <p>Nur für diese Welle. In der Bauphase: für die nächste Welle. Krähenfüße und Harz: frei auf der Straße platzieren, auch mehrfach.</p><button id="buySpikes">Krähenfüße · 25
           Gold</button><small id="spikesStats">20 Spitzen × 5 Schaden · Position auf der Straße wählen</small><button id="buyResin">Klebeharz · 30
           Gold</button><small id="resinStats">12 Gegner: −35 % Tempo für 4 Sekunden</small><button id="buyOverload">Überladung · 40
@@ -154,28 +168,27 @@
         <nav class="dockTL" aria-label="Menü">
           <h1>AutoHex TD <span data-app-version></span></h1>
           <div class="dockButtons">
-            <button class="secondary drawerBtn" data-drawer="rulesDrawer"><svg class="uiIcon" viewBox="0 0 24 24"
+            <button class="secondary drawerBtn hxHex" data-drawer="rulesDrawer" title="Spielregeln"><svg class="uiIcon" viewBox="0 0 24 24"
                 aria-hidden="true">
                 <path d="M6 3h12v18H6zM9 7h6M9 11h6M9 15h4" />
               </svg> Regeln</button>
-            <button id="settingsOpenBtn" class="secondary drawerBtn" data-drawer="settingsDrawer"><svg class="uiIcon"
+            <button id="settingsOpenBtn" class="secondary drawerBtn hxHex" data-drawer="settingsDrawer" title="Einstellungen (Escape)"><svg class="uiIcon"
                 viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M4 6h16M4 12h16M4 18h16" />
                 <circle cx="9" cy="6" r="2" />
                 <circle cx="15" cy="12" r="2" />
                 <circle cx="8" cy="18" r="2" />
               </svg> Einstellungen</button>
-            <button id="pauseBtn" class="secondary pauseBtn">⏸ Pause (P)</button>
+            <button id="pauseBtn" class="secondary pauseBtn hxHex" title="Pause (P)">⏸ Pause (P)</button>
           </div>
         </nav>
 
         <!-- Oben rechts: Leben, Gold, Wave, Deck -->
         <header class="hud">
-          <div id="healthStat" class="hudStat"><svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M12 21 3 12C-3 3 8-1 12 6 16-1 27 3 21 12z" />
-            </svg> <strong id="hp">20/20</strong></div>
+          <div id="healthStat" class="hudStat"><span class="hxi hxi-heart" aria-hidden="true"></span> <strong
+              id="hp">20/20</strong></div>
           <details class="statDetails">
-            <summary aria-label="Goldplanung öffnen">🪙 <strong id="gold">70</strong> <span id="bonusIncome">(+0)</span>
+            <summary aria-label="Goldplanung öffnen"><span class="hxi hxi-coin" aria-hidden="true"></span> <strong id="gold">70</strong> <span id="bonusIncome">(+0)</span>
               <span class="dropdownArrow" aria-hidden="true">▾</span>
             </summary>
             <div class="statPopup">
@@ -187,8 +200,9 @@
             </div>
           </details>
           <details id="waveDropdown" class="statDetails">
-            <summary aria-label="Waveplanung öffnen">🌊 <strong id="wave">0</strong> <span class="dropdownArrow"
-                aria-hidden="true">▾</span>
+            <summary aria-label="Waveplanung öffnen"><span id="phaseName" class="phaseName">Bauphase</span><span
+                class="phaseDot" aria-hidden="true">·</span><span class="phaseWave">Welle <strong id="wave">0</strong></span>
+              <span class="dropdownArrow" aria-hidden="true">▾</span>
               <div class="waveBarWrap"><i id="waveBar"></i></div>
             </summary>
             <div class="statPopup">
@@ -199,7 +213,8 @@
             </div>
           </details>
           <details id="deckDropdown" class="statDetails">
-            <summary aria-label="Deck und Kartenstapel öffnen">🃏 <strong id="deckCount">5</strong> <span
+            <summary aria-label="Deck und Kartenstapel öffnen"><span class="hxi hxi-deck" aria-hidden="true"></span> <strong
+                id="deckCount">5</strong> <span
                 class="dropdownArrow" aria-hidden="true">▾</span></summary>
             <div class="statPopup">
               <h2>Deck &amp; Kartenstapel</h2>
@@ -208,7 +223,8 @@
             </div>
           </details>
           <details class="statDetails">
-            <summary aria-label="Profilfortschritt öffnen">◆ <strong id="profileDiamonds">0</strong> <span
+            <summary aria-label="Profilfortschritt öffnen"><span class="hxi hxi-gem" aria-hidden="true"></span> <strong
+                id="profileDiamonds">0</strong> <span
                 id="runDiamonds" title="Diamanten bei Ende des aktuellen Durchlaufs">(+0)</span> <span
                 class="dropdownArrow" aria-hidden="true">▾</span></summary>
             <div class="statPopup">
@@ -220,7 +236,8 @@
             </div>
           </details>
           <details id="baseDropdown" class="statDetails">
-            <summary>🏰 Base <span class="dropdownArrow" aria-hidden="true">▾</span></summary>
+            <summary aria-label="Base-Ausbau öffnen"><span class="hxi hxi-build" aria-hidden="true"></span> Base <span
+                class="dropdownArrow" aria-hidden="true">▾</span></summary>
             <div class="statPopup">
               <h2 id="baseTitle">Base-Ausbau</h2>
               <p id="baseStats"></p>
@@ -245,8 +262,7 @@
       <section class="handDock" aria-label="Handkarten">
         <div class="handHead"><strong id="phaseLabel">Hex platzieren</strong><span id="handHint" class="hint">Karte
             wählen (1–3) · R dreht · Hex anklicken</span>
-          <button id="rotateHexBtn" class="secondary" type="button" disabled aria-label="Ausgewählte Hexkarte drehen">↻
-            Drehen (R)</button>
+          <button id="rotateHexBtn" class="secondary" type="button" disabled aria-label="Ausgewählte Hexkarte drehen">Drehen (R)</button>
         </div>
         <div id="hand" class="hand"></div>
       </section>
@@ -265,7 +281,7 @@
 
       <!-- Unten links: Turm-Shop -->
       <div class="dockBL">
-        <button class="secondary drawerBtn" data-drawer="towerDrawer"><svg class="uiIcon" viewBox="0 0 24 24"
+        <button class="secondary drawerBtn hxHex" data-drawer="towerDrawer" title="Türme bauen"><svg class="uiIcon" viewBox="0 0 24 24"
             aria-hidden="true">
             <path d="m5 20 9-11M11 5l4-3 6 6-3 4z" />
           </svg> Türme bauen</button>
@@ -274,14 +290,24 @@
       <!-- Unterfelder -->
       <aside id="towerDrawer" class="drawer hidden" aria-label="Türme">
         <div class="panelHead">
-          <h2>Türme</h2><button class="secondary drawerClose" aria-label="Schließen"
+          <h2>Türme</h2><button class="secondary drawerClose hxHex" aria-label="Schließen"
             title="Schließen (Escape)"><small>Esc</small> ×</button>
         </div>
         <details class="statLegend">
           <summary>ⓘ Werte &amp; Symbole</summary>
-          <p>♥ Schaden gegen Leben · ⬟ Schaden gegen Rüstung · ✦ Schaden gegen Magieresistenz · ⚔ Schaden · ◎ Reichweite
-            · ◷ Sekunden je Angriff (kleiner = schneller) · ❄ Verlangsamung · ✹ Explosionsradius · ϟ
-            Blitzziele/Sprungweite · ➶ Durchschlagziele · ☽ Geister · ⌛ Dauer.</p>
+          <ul class="statLegendList">
+            <li data-stat="vsHealth"><span class="hxi hxi-vsHealth" aria-hidden="true"></span>Schaden gegen Leben</li>
+            <li data-stat="vsArmor"><span class="hxi hxi-vsArmor" aria-hidden="true"></span>Schaden gegen Rüstung</li>
+            <li data-stat="vsMagic"><span class="hxi hxi-vsMagic" aria-hidden="true"></span>Schaden gegen Magieresistenz</li>
+            <li data-stat="damage"><span class="hxi hxi-damage" aria-hidden="true"></span>Schaden</li>
+            <li data-stat="range"><span class="hxi hxi-range" aria-hidden="true"></span>Reichweite</li>
+            <li data-stat="cooldown"><span class="hxi hxi-cooldown" aria-hidden="true"></span>Sekunden je Angriff (kleiner = schneller)</li>
+            <li data-stat="tower_freeze"><span class="hxi hxi-tower_freeze" aria-hidden="true"></span>Verlangsamung</li>
+            <li data-stat="area"><span class="hxi hxi-area" aria-hidden="true"></span>Explosionsradius</li>
+            <li data-stat="tower_chain"><span class="hxi hxi-tower_chain" aria-hidden="true"></span>Blitzziele/Sprungweite</li>
+            <li data-stat="single"><span class="hxi hxi-single" aria-hidden="true"></span>Durchschlagziele</li>
+            <li data-stat="tower_necromancer"><span class="hxi hxi-tower_necromancer" aria-hidden="true"></span>Geister</li>
+          </ul>
         </details>
         <p id="towerSelectionHint" class="hint" role="status"></p><label class="hint"><input id="multiTowerSelection"
             type="checkbox"> Mehrfachauswahl (Strg + Klick)</label>
@@ -294,7 +320,7 @@
 
       <aside id="rulesDrawer" class="drawer hidden rules" aria-label="Spielregeln">
         <div class="panelHead">
-          <h2>Spielregeln</h2><button class="secondary drawerClose" aria-label="Schließen"
+          <h2>Spielregeln</h2><button class="secondary drawerClose hxHex" aria-label="Schließen"
             title="Schließen (Escape)"><small>Esc</small> ×</button>
         </div>
         <ul>
@@ -325,7 +351,7 @@
 
       <aside id="settingsDrawer" class="drawer hidden actions" aria-label="Einstellungen">
         <div class="panelHead">
-          <h2>Einstellungen</h2><button class="secondary drawerClose" aria-label="Schließen"
+          <h2>Einstellungen</h2><button class="secondary drawerClose hxHex" aria-label="Schließen"
             title="Schließen (Escape)"><small>Esc</small> ×</button>
         </div>
         <p class="hint">Escape öffnet die Einstellungen oder schließt offene Menüs und Infofenster.</p>
@@ -409,23 +435,66 @@
     </div>
 
     <div id="mainMenu" class="overlay mainMenu hidden" role="dialog" aria-modal="true" aria-labelledby="mainMenuTitle">
-      <div class="menuBox">
-        <img class="menuLogo" src="assets/favicon.png" alt="" />
-        <p class="eyebrow">TOWER DEFENSE</p>
-        <h1 id="mainMenuTitle">AutoHex TD</h1>
-        <p class="menuTagline">Map bauen → Türme setzen → Wave überleben → Deck erweitern</p>
-        <div class="menuButtons">
-          <button id="menuContinueBtn" class="primary hidden">Weiterspielen</button>
-          <button id="menuPlayBtn" class="primary">Neuer Run</button>
-          <small id="introductionMenuNote">Starte mit Bogenschütze und Katapult. Neue Türme kommen nach Welle 5, 10 und
-            15 dazu.</small><button id="skipIntroductionBtn" class="secondary hidden">Ich kenne das Spiel – Einführung
-            überspringen</button>
-          <button id="menuArsenalBtn" class="secondary">◆ Arsenal</button>
-          <label class="menuLanguage"><span>Sprache</span> <select data-language-picker aria-label="Sprache">
+      <div class="hexMenu">
+        <header class="hexMenuBrand">
+          <h1 id="mainMenuTitle"><span class="sr-only">AutoHex TD</span><svg class="wordmark" viewBox="0 0 760 170"
+              aria-hidden="true">
+              <defs>
+                <linearGradient id="wmGold" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#fff6d6" />
+                  <stop offset="0.45" stop-color="#f3d58a" />
+                  <stop offset="0.78" stop-color="#d9a53c" />
+                  <stop offset="1" stop-color="#b9831f" />
+                </linearGradient>
+                <linearGradient id="wmShine" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0.12" stop-color="#fff" stop-opacity="0.75" />
+                  <stop offset="0.42" stop-color="#fff" stop-opacity="0" />
+                </linearGradient>
+              </defs>
+              <text x="380" y="132" text-anchor="middle" textLength="720" lengthAdjust="spacingAndGlyphs"
+                font-family="Tektur, Fraunces, Georgia, sans-serif" font-weight="900" font-size="122" fill="#3a2506" stroke="#1f1404"
+                stroke-width="12" stroke-linejoin="round" paint-order="stroke">AutoHex TD</text>
+              <text x="380" y="124" text-anchor="middle" textLength="720" lengthAdjust="spacingAndGlyphs"
+                font-family="Tektur, Fraunces, Georgia, sans-serif" font-weight="900" font-size="122" fill="url(#wmGold)" stroke="#4f350d"
+                stroke-width="7" stroke-linejoin="round" paint-order="stroke">AutoHex TD</text>
+              <text x="380" y="124" text-anchor="middle" textLength="720" lengthAdjust="spacingAndGlyphs"
+                font-family="Tektur, Fraunces, Georgia, sans-serif" font-weight="900" font-size="122" fill="url(#wmShine)">AutoHex TD</text>
+            </svg></h1>
+        </header>
+        <!-- Hex-Blüte: Mitte = Hauptaktion, sechs Ring-Hexe Kante an Kante im Uhrzeigersinn ab oben links.
+             Nebel-Hexe füllen freie oder ausgeblendete Plätze. -->
+        <nav id="hexCluster" class="hexCluster" aria-label="Hauptmenü">
+          <span class="hexFog" data-slot="ul" aria-hidden="true"></span><span class="hexFog" data-slot="ur"
+            aria-hidden="true"></span><span class="hexFog" data-slot="r" aria-hidden="true"></span><span class="hexFog"
+            data-slot="lr" aria-hidden="true"></span><span class="hexFog" data-slot="ll" aria-hidden="true"></span><span
+            class="hexFog" data-slot="l" aria-hidden="true"></span>
+          <button id="menuPlayBtn" class="hexBtn hexPrimary" data-slot="center"><span class="hexIcon hexIconPlay hxi hxi-play" aria-hidden="true"></span><span
+              class="hexIcon hexIconNew hxi hxi-newRun" aria-hidden="true"></span><span id="menuPlayLabel" class="hexLabel">Spielen</span><small id="menuPlayDetail"
+              class="hexDetail"></small></button>
+          <button id="menuArsenalBtn" class="hexBtn" data-slot="ul"><span class="hexIcon hxi hxi-arsenal" aria-hidden="true"></span><span class="hexLabel">Arsenal</span><small id="menuArsenalDetail" class="hexDetail"></small></button>
+          <button id="menuLeaderboardBtn" class="hexBtn" data-slot="ur"><span class="hexIcon hxi hxi-leaderboard" aria-hidden="true"></span><span class="hexLabel">Bestenliste</span></button>
+          <button id="menuSettingsBtn" class="hexBtn" data-slot="r" aria-haspopup="dialog"><span class="hexIcon hxi hxi-settings" aria-hidden="true"></span><span class="hexLabel">Einstellungen</span></button>
+          <button id="menuDuoBtn" class="hexBtn" data-slot="lr"><span class="hexIcon hxi hxi-duo" aria-hidden="true"></span><span class="hexLabel">Duo</span><small class="hexDetail hexLockNote">ab Welle 35</small></button>
+          <button id="menuDailyBtn" class="hexBtn" data-slot="ll"><span class="hexIcon hxi hxi-daily" aria-hidden="true"></span><span class="hexLabel">Tägliche Herausforderung</span><small
+              class="hexDetail hexLockNote">ab Welle 35</small></button>
+          <button id="menuAccountBtn" class="hexBtn" data-slot="l"><span class="hexIcon hxi hxi-account" aria-hidden="true"></span><span id="menuAccountLabel" class="hexLabel">Anmelden</span></button>
+        </nav>
+        <!-- Feste Fußleiste: Sprache unten links, Rechtliches in der Mitte, Version und Patch Notes unten rechts. -->
+        <footer class="hexMenuBar">
+          <label class="menuLanguage"><span class="hxi hxi-language" aria-hidden="true"></span><select data-language-picker aria-label="Sprache">
               <option value="de">Deutsch</option>
               <option value="en">English</option>
             </select></label>
-          <button id="menuPatchNotesBtn" class="secondary">Patch Notes · Was ist neu?</button>
+          <nav class="menuLegal" aria-label="Rechtliches"><a href="impressum.html" target="_blank"
+              rel="noopener">Impressum</a><span aria-hidden="true">·</span><a href="datenschutz.html" target="_blank"
+              rel="noopener">Datenschutz</a></nav>
+          <span class="menuBarEnd"><small class="menuVersion" data-app-version></small><button id="menuPatchNotesBtn"
+              class="secondary"><span class="hxi hxi-patchNotes" aria-hidden="true"></span> Patch Notes</button></span>
+        </footer>
+        <div class="hexMenuExtras">
+          <small id="introductionMenuNote">Starte mit Bogenschütze und Katapult. Neue Türme kommen nach Welle 5, 10 und
+            15 dazu.</small><button id="skipIntroductionBtn" class="secondary hidden">Ich kenne das Spiel – Einführung
+            überspringen</button>
           <button id="firstPlayerTestBtn" class="secondary hidden">Erstspieler-Test starten</button>
           <details id="menuDeveloperTools" class="developerTools hidden">
             <summary>Entwicklermenü · lokale Tests</summary>
@@ -441,12 +510,36 @@
             <button id="menuDeveloperReset" class="secondary">Aktuelles Szenario zurücksetzen</button>
           </details>
           <button id="exitFirstPlayerTestBtn" class="secondary hidden">Zurück zu meinem Spielstand</button>
-          <button id="menuAccountBtn" class="secondary">👤 Anmelden</button>
-          <button id="menuLeaderboardBtn" class="secondary">Bestenliste</button>
         </div>
-
-        <small class="menuVersion" data-app-version></small>
       </div>
+    </div>
+
+    <!-- Einstellungen aus dem Hauptmenü; die Schalter steuern dieselben Werte wie das Einstellungsmenü im Spiel. -->
+    <div id="menuSettingsOverlay" class="overlay hidden" role="dialog" aria-modal="true"
+      aria-labelledby="menuSettingsTitle">
+      <section class="modeBox menuSettingsBox">
+        <div class="panelHead">
+          <h2 id="menuSettingsTitle">Einstellungen</h2><button id="closeMenuSettingsBtn" class="secondary">Zurück ·
+            Esc</button>
+        </div>
+        <label class="settingRow"><span>Sprache</span><select data-language-picker aria-label="Sprache">
+            <option value="de">Deutsch</option>
+            <option value="en">English</option>
+          </select></label>
+        <label class="settingRow"><span>Grafikstil</span><select data-asset-edition aria-label="Grafikstil">
+            <option value="normal">Normal</option>
+            <option value="sakura">Sakura-Edition</option>
+            <option value="halloween">Halloween-Edition</option>
+          </select></label>
+        <label class="settingRow"><span>Sounds aktiv</span><input id="menuSoundEnabled" type="checkbox" /></label>
+        <label class="settingRow"><span>Lautstärke</span><input id="menuSoundVolume" type="range" min="0" max="100"
+            aria-label="Sound-Lautstärke" /></label>
+        <label class="settingRow"><span>Einsteigerhinweise anzeigen</span><input id="menuOnboardingHints"
+            type="checkbox" /></label>
+        <p class="hint">Tastenbelegung, Hex-Grid und Spielhilfen findest du im Spiel unter Einstellungen (Escape).</p>
+        <p class="menuLegal"><a href="impressum.html" target="_blank" rel="noopener">Impressum</a><span
+            aria-hidden="true">·</span><a href="datenschutz.html" target="_blank" rel="noopener">Datenschutz</a></p>
+      </section>
     </div>
 
     <div id="firstPlayerTestBadge" class="testProfileBadge hidden">Erstspieler-Test · separater Spielstand</div>
@@ -564,6 +657,9 @@
       <div class="modeBox">
         <h2 id="playModeTitle">Wie möchtest du spielen?</h2>
         <div id="playModeChoices" class="modeChoices">
+          <!-- Mit gespeichertem Run steht „Fortsetzen“ zuerst; alle anderen Karten starten einen neuen Run. -->
+          <button id="menuContinueBtn" class="modeChoice continueChoice hidden" type="button"><strong>Fortsetzen</strong><span
+              id="menuContinueDetail"></span><small>Gespeicherten Durchlauf weiterspielen</small></button>
           <button id="duoModeBtn" class="modeChoice" type="button"><strong>Duo · Freunde-Beta</strong><span
               id="duoServerStatus" class="duoServerStatus" data-state="checking" role="status" aria-live="polite"><span
                 class="duoServerDot" aria-hidden="true"></span><span id="duoServerStatusText">Server wird geprüft
@@ -738,7 +834,9 @@
     <script src="classes/translations.js"></script>
     <script src="classes/i18n.js"></script>
     <script src="classes/patch-notes.js"></script>
+    <script src="classes/menu-variant.js"></script>
     <script src="classes/menu-controls.js"></script>
+    <script src="classes/hex-menu.js"></script>
     <script src="classes/compact-controls.js"></script>
     <script src="classes/dialog-focus.js"></script>
     <script src="runtime-config.js"></script>
@@ -792,6 +890,7 @@
       // 3D nur über http(s) (Modelle werden per fetch geladen); ?svg erzwingt den SVG-Prototyp, Doppelklick (file://) nutzt ihn automatisch.
       if (location.protocol.startsWith('http') && !new URLSearchParams(location.search).has('svg')) {
         import('./classes/menu-backdrop.js').catch(error => console.warn('Menühintergrund nicht verfügbar:', error));
+        import('./classes/tower-portraits.mjs').catch(error => console.warn('Turmporträts nicht verfügbar:', error));
         try { await import('./classes/three-renderer.js'); } catch (error) { console.warn('3D nicht verfügbar, verwende SVG:', error); }
       }
       await new Promise((done, fail) => { const s = document.createElement('script'); s.src = 'classes/game.js'; s.onload = done; s.onerror = fail; document.body.appendChild(s); });

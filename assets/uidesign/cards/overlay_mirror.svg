@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Spiegel">
+  <path d="M70 152a32 8 0 1 0 64 0a32 8 0 1 0 -64 0Z" fill="#1f3a12" opacity="0.35"/>
+  <path d="M90 152L96 120L104 120L110 152Z" fill="#5e4129"/>
+  <path d="M68 76a32 46 0 1 0 64 0a32 46 0 1 0 -64 0Z" fill="#8a6440"/>
+  <path d="M100 26L106 34L100 40L94 34Z" fill="#f3c94c"/>
+  <path d="M30 140L74 112L76 116L32 144ZM170 140L126 112L124 116L168 144Z" fill="#fff1a8"/>
+  <path d="M75 76a25 38 0 1 0 50 0a25 38 0 1 0 -50 0Z" fill="#bfe6ff"/>
+  <path d="M86 58L96 48L100 52L88 66ZM106 96L114 86L116 90L108 100Z" fill="#ffffff"/>
+</svg>

@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Hauptmenü – Handy und Querformat</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&amp;family=Barlow+Semi+Condensed:wght@600;700&amp;family=Inter:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#bfd0c6}a:hover{color:#ffe198}
+button{font:inherit;color:inherit}
+</style>
+</helmet>
+<div style="position: relative; width: 1780px; height: 1040px; background: #0f1a15; font-family: Inter, system-ui, sans-serif; color: #f6f2e4">
+  <div style="position: absolute; left: 48px; top: 36px; display: flex; align-items: baseline; gap: 20px">
+    <h2 style="margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 800; font-size: 32px; color: #f3d58a">Hex-Blüte auf kleinen Bildschirmen</h2>
+    <p style="margin: 0; font-size: 15px; color: #bfd0c6">Ring Kante an Kante · Ring-Hex auf 320 px = 80 × 92 px · Schrift nie unter 12 px</p>
+  </div>
+
+  <!-- 320 × 568 · Erstspieler -->
+  <div style="position: absolute; left: 48px; top: 110px; width: 320px; height: 568px; overflow: hidden; border-radius: 20px; outline: 1px solid #41594a; font-family: 'Barlow Semi Condensed', 'Arial Narrow', sans-serif">
+    <div style="position: absolute; left: 0; top: 0">
+      <dc-import name="Backdrop" w="{{ 320 }}" h="{{ 568 }}" portrait="{{ true }}" hint-size="320px,568px"></dc-import>
+    </div>
+    <div style="position: absolute; left: 50px; top: 52px">
+      <dc-import name="Wordmark" variant="compact" width="{{ 220 }}" hint-size="220px,62px"></dc-import>
+    </div>
+    <div style="position: absolute; left: 74px; top: 164px"><dc-import name="Hex" family="fog" h="{{ 92 }}" q="{{ true }}" label="" sub="" hint-size="80px,92px"></dc-import></div>
+    <button style="position: absolute; left: 166px; top: 164px; padding: 0; border: 0; background: none"><dc-import name="Hex" family="green" h="{{ 92 }}" icon="leaderboard" label="Besten&shy;liste" sub="" hint-size="80px,92px"></dc-import></button>
+    <button style="position: absolute; left: 212px; top: 244px; padding: 0; border: 0; background: none"><dc-import name="Hex" family="green" h="{{ 92 }}" icon="settings" label="Einstel&shy;lungen" sub="" hint-size="80px,92px"></dc-import></button>
+    <button disabled style="position: absolute; left: 166px; top: 324px; padding: 0; border: 0; background: none"><dc-import name="Hex" family="fog" h="{{ 92 }}" icon="lock" label="Duo" sub="ab Welle 35" hint-size="80px,92px"></dc-import></button>
+    <button disabled style="position: absolute; left: 74px; top: 324px; padding: 0; border: 0; background: none"><dc-import name="Hex" family="fog" h="{{ 92 }}" icon="lock" label="Täglich" sub="ab Welle 35" hint-size="80px,92px"></dc-import></button>
+    <button style="position: absolute; left: 28px; top: 244px; padding: 0; border: 0; background: none"><dc-import name="Hex" family="green" h="{{ 92 }}" icon="account" label="Anmelden" sub="" hint-size="80px,92px"></dc-import></button>
+    <button style="position: absolute; left: 116px; top: 240px; padding: 0; border: 0; background: none"><dc-import name="Hex" family="gold" h="{{ 101 }}" emph="{{ true }}" icon="play" label="Spielen" sub="" hint-size="87px,101px"></dc-import></button>
+    <nav aria-label="Rechtliches" style="position: absolute; left: 0; right: 0; top: 462px; display: flex; justify-content: center; gap: 6px; font-size: 13px; font-weight: 600; color: #8fa092">
+      <a href="#">Impressum</a><span aria-hidden="true">·</span><a href="#">Datenschutz</a>
+    </nav>
+    <div style="position: absolute; left: 12px; right: 12px; bottom: 14px; display: flex; justify-content: space-between">
+      <label style="display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; border-radius: 999px; border: 1px solid rgba(93, 125, 99, 0.6); background: rgba(15, 26, 20, 0.85); font-size: 15px; font-weight: 600">
+        <dc-import name="Icon" glyph="language" size="{{ 18 }}" fill="#bfd0c6" hint-size="18px,18px"></dc-import><span>Deutsch</span>
+      </label>
+      <button style="display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; border-radius: 999px; border: 1px solid rgba(93, 125, 99, 0.6); background: rgba(15, 26, 20, 0.85); font-size: 15px; font-weight: 600">
+        <dc-import name="Icon" glyph="patchNotes" size="{{ 18 }}" fill="#bfd0c6" hint-size="18px,18px"></dc-import>Patch Notes
+      </button>
+    </div>
+  </div>
+  <p style="position: absolute; left: 48px; top: 692px; width: 320px; margin: 0; font-size: 14px; line-height: 1.45; color: #bfd0c6"><b style="color: #f6f2e4">320 × 568 · Erstspieler.</b> Arsenal noch unentdeckt („?“), Modi gesperrt mit Schloss und Bedingung. Kompakte Wortmarke.</p>
+
+  <!-- 390 × 844 · gespeicherter Run -->
+  <div style="position: absolute; left: 432px; top: 110px; width: 390px; height: 844px; overflow: hidden; border-radius: 20px; outline: 1px solid #41594a; font-family: 'Barlow Semi Condensed', 'Arial Narrow', sans-serif">
+    <div style="position: absolute; left: 0; top: 0">
+      <dc-import name="Backdrop" w="{{ 390 }}" h="{{ 844 }}" portrait="{{ true }}" hint-size="390px,844px"></dc-import>
+    </div>
+    <div style="position: absolute; left: 25px; top: 96px">
+      <dc-import name="Wordmark" variant="full" width="{{ 340 }}" hint-size="340px,76px"></dc-import>
+    </div>
+    <button aria-label="Arsenal, Upgrade verfügbar" style="position: absolute; left: 85px; top: 239px; padding: 0; border: 0; background: none"><dc-import name="Hex" family="green" h="{{ 118 }}" icon="arsenal" label="Arsenal" sub="" badge="upgrade" hint-size="102px,118px"></dc-import></button>
+    <button style="position: absolute; left: 203px; top: 239px; padding: 0; border: 0; background: none"><dc-import name="Hex" family="green" h="{{ 118 }}" icon="leaderboard" label="Bestenliste" sub="" hint-size="102px,118px"></dc-import></button>
+    <button style="position: absolute; left: 262px; top: 341px; padding: 0; border: 0; background: none"><dc-import name="Hex" family="green" h="{{ 118 }}" icon="settings" label="Einstel&shy;lungen" sub="" hint-size="102px,118px"></dc-import></button>
+    <button style="position: absolute; left: 203px; top: 443px; padding: 0; border: 0; background: none"><dc-import name="Hex" family="green" h="{{ 118 }}" icon="duo" label="Duo" sub="" hint-size="102px,118px"></dc-import></button>
+    <button style="position: absolute; left: 85px; top: 443px; padding: 0; border: 0; background: none"><dc-import name="Hex" family="green" h="{{ 118 }}" icon="daily" label="Täglich" sub="" hint-size="102px,118px"></dc-import></button>
+    <button style="position: absolute; left: 26px; top: 341px; padding: 0; border: 0; background: none"><dc-import name="Hex" family="green" h="{{ 118 }}" icon="account" label="Account" sub="" hint-size="102px,118px"></dc-import></button>
+    <button style="position: absolute; left: 139px; top: 335px; padding: 0; border: 0; background: none"><dc-import name="Hex" family="gold" h="{{ 130 }}" emph="{{ true }}" icon="play" label="Spielen" sub="Welle 20" state="focus" hint-size="113px,130px"></dc-import></button>
+    <button style="position: absolute; left: 50%; top: 596px; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px 0 12px; border-radius: 999px; border: 2px solid #b8a274; background: linear-gradient(180deg, #fffaf0, #f1e6c6 60%, #dfcd9f); color: #2b281f; font-size: 16px; font-weight: 700; box-shadow: 0 3px 0 #7b6c49, 0 8px 14px rgba(0, 0, 0, 0.45); white-space: nowrap">
+      <dc-import name="Icon" glyph="newRun" size="{{ 18 }}" fill="currentColor" hint-size="18px,18px"></dc-import>Neuer Run
+    </button>
+    <nav aria-label="Rechtliches" style="position: absolute; left: 0; right: 0; top: 730px; display: flex; justify-content: center; gap: 6px; font-size: 13px; font-weight: 600; color: #8fa092">
+      <a href="#">Impressum</a><span aria-hidden="true">·</span><a href="#">Datenschutz</a>
+    </nav>
+    <div style="position: absolute; left: 16px; right: 16px; bottom: 20px; display: flex; justify-content: space-between">
+      <label style="display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid rgba(93, 125, 99, 0.6); background: rgba(15, 26, 20, 0.85); font-size: 15px; font-weight: 600">
+        <dc-import name="Icon" glyph="language" size="{{ 18 }}" fill="#bfd0c6" hint-size="18px,18px"></dc-import><span>Deutsch</span>
+      </label>
+      <button style="display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid rgba(93, 125, 99, 0.6); background: rgba(15, 26, 20, 0.85); font-size: 15px; font-weight: 600">
+        <dc-import name="Icon" glyph="patchNotes" size="{{ 18 }}" fill="#bfd0c6" hint-size="18px,18px"></dc-import>Patch Notes
+      </button>
+    </div>
+  </div>
+  <p style="position: absolute; left: 432px; top: 968px; width: 390px; margin: 0; font-size: 14px; line-height: 1.45; color: #bfd0c6"><b style="color: #f6f2e4">390 × 844 · gespeicherter Run.</b> „Spielen“ mit Tastaturfokus, „Neuer Run“ als Creme-Kapsel unter der Blüte.</p>
+
+  <!-- 844 × 390 · Querformat -->
+  <div style="position: absolute; left: 886px; top: 110px; width: 844px; height: 390px; overflow: hidden; border-radius: 20px; outline: 1px solid #41594a; font-family: 'Barlow Semi Condensed', 'Arial Narrow', sans-serif">
+    <div style="position: absolute; left: 0; top: 0">
+      <dc-import name="Backdrop" w="{{ 844 }}" h="{{ 390 }}" hint-size="844px,390px"></dc-import>
+    </div>
+    <div style="position: absolute; left: 36px; top: 56px">
+      <dc-import name="Wordmark" variant="full" width="{{ 330 }}" hint-size="330px,74px"></dc-import>
+    </div>
+    <button style="position: absolute; left: 36px; top: 152px; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px 0 12px; border-radius: 999px; border: 2px solid #b8a274; background: linear-gradient(180deg, #fffaf0, #f1e6c6 60%, #dfcd9f); color: #2b281f; font-size: 16px; font-weight: 700; box-shadow: 0 3px 0 #7b6c49, 0 8px 14px rgba(0, 0, 0, 0.45)">
+      <dc-import name="Icon" glyph="newRun" size="{{ 18 }}" fill="currentColor" hint-size="18px,18px"></dc-import>Neuer Run
+    </button>
+    <nav aria-label="Rechtliches" style="position: absolute; left: 40px; top: 214px; display: flex; gap: 6px; font-size: 13px; font-weight: 600; color: #8fa092">
+      <a href="#">Impressum</a><span aria-hidden="true">·</span><a href="#">Datenschutz</a>
+    </nav>
+    <button aria-label="Arsenal, Upgrade verfügbar" style="position: absolute; left: 515px; top: 27px; padding: 0; border: 0; background: none"><dc-import name="Hex" family="green" h="{{ 112 }}" icon="arsenal" label="Arsenal" sub="" badge="upgrade" hint-size="97px,112px"></dc-import></button>
+    <button style="position: absolute; left: 627px; top: 27px; padding: 0; border: 0; background: none"><dc-import name="Hex" family="green" h="{{ 112 }}" icon="leaderboard" label="Bestenliste" sub="" hint-size="97px,112px"></dc-import></button>
+    <button style="position: absolute; left: 683px; top: 124px; padding: 0; border: 0; background: none"><dc-import name="Hex" family="green" h="{{ 112 }}" icon="settings" label="Einstel&shy;lungen" sub="" hint-size="97px,112px"></dc-import></button>
+    <button style="position: absolute; left: 627px; top: 221px; padding: 0; border: 0; background: none"><dc-import name="Hex" family="green" h="{{ 112 }}" icon="duo" label="Duo" sub="" hint-size="97px,112px"></dc-import></button>
+    <button style="position: absolute; left: 515px; top: 221px; padding: 0; border: 0; background: none"><dc-import name="Hex" family="green" h="{{ 112 }}" icon="daily" label="Täglich" sub="" hint-size="97px,112px"></dc-import></button>
+    <button style="position: absolute; left: 459px; top: 124px; padding: 0; border: 0; background: none"><dc-import name="Hex" family="green" h="{{ 112 }}" icon="account" label="Account" sub="" hint-size="97px,112px"></dc-import></button>
+    <button style="position: absolute; left: 567px; top: 119px; padding: 0; border: 0; background: none"><dc-import name="Hex" family="gold" h="{{ 123 }}" emph="{{ true }}" icon="play" label="Spielen" sub="Welle 20" hint-size="107px,123px"></dc-import></button>
+    <label style="position: absolute; left: 16px; bottom: 14px; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; border-radius: 999px; border: 1px solid rgba(93, 125, 99, 0.6); background: rgba(15, 26, 20, 0.85); font-size: 15px; font-weight: 600">
+      <dc-import name="Icon" glyph="language" size="{{ 18 }}" fill="#bfd0c6" hint-size="18px,18px"></dc-import><span>Deutsch</span>
+    </label>
+    <button style="position: absolute; right: 16px; bottom: 14px; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; border-radius: 999px; border: 1px solid rgba(93, 125, 99, 0.6); background: rgba(15, 26, 20, 0.85); font-size: 15px; font-weight: 600">
+      <dc-import name="Icon" glyph="patchNotes" size="{{ 18 }}" fill="#bfd0c6" hint-size="18px,18px"></dc-import>Patch Notes
+    </button>
+  </div>
+  <p style="position: absolute; left: 886px; top: 514px; width: 640px; margin: 0; font-size: 14px; line-height: 1.45; color: #bfd0c6"><b style="color: #f6f2e4">844 × 390 · Querformat.</b> Titel, „Neuer Run“ und Rechtliches links, Blüte rechts. Die Inseln schrumpfen mit der Höhe und bleiben in den äußeren 30 %.</p>
+
+  <div style="position: absolute; left: 886px; top: 600px; width: 844px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px">
+    <div style="padding: 18px 20px; border-radius: 14px; background: #1a2d24; border: 1px solid #41594a">
+      <h3 style="margin: 0 0 8px; font-family: Fraunces, Georgia, serif; font-size: 20px; color: #f3d58a">Maße der Blüte</h3>
+      <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #dfe8e2">Ring-Hexe Kante an Kante: Mittenabstand = Ring-Höhe u, Mitte 1,1 u. Ergibt gleichmäßige Fugen von 0,13 u. Desktop u = 200, 390 px u = 118, 320 px u = 92, Querformat u = 112.</p>
+    </div>
+    <div style="padding: 18px 20px; border-radius: 14px; background: #1a2d24; border: 1px solid #41594a">
+      <h3 style="margin: 0 0 8px; font-family: Fraunces, Georgia, serif; font-size: 20px; color: #f3d58a">Beschriftung</h3>
+      <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #dfe8e2">Barlow Semi Condensed 700: „Einstellungen“ und „Herausforderung“ passen ab u = 170 in eine Zeile. Darunter weicher Trennstrich (Einstel-lungen), unter u = 130 „Täglich“ / EN „Daily“.</p>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1780,"height":1040}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

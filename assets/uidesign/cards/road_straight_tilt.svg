@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 866 770" role="img">
+  <title>Gerade</title>
+  <defs><clipPath id="clip"><polygon points="433,60 814,280 814,720 433,940 52,720 52,280"/></clipPath><radialGradient id="meadow" cx="0.5" cy="0.3" r="0.8"><stop offset="0" stop-color="#a8d672"/><stop offset="1" stop-color="#76a84c"/></radialGradient><linearGradient id="earth" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9a26b"/><stop offset="1" stop-color="#8f6a3e"/></linearGradient></defs>
+  <path d="M0 459L433 614L433 770L0 615Z" fill="url(#earth)"/>
+  <path d="M433 614L866 459L866 615L433 770Z" fill="#a07a4a"/>
+  <path d="M0 459L433 614L433 646L0 491ZM433 614L866 459L866 491L433 646Z" fill="#5f8f3c"/>
+  <g transform="scale(1 0.62)">
+    <polygon points="433,20 848.7,260 848.7,740 433,980 17.3,740 17.3,260" fill="#5f8f3c" stroke="#5f8f3c" stroke-width="34" stroke-linejoin="round"/>
+    <polygon points="433,60 814,280 814,720 433,940 52,720 52,280" fill="url(#meadow)" stroke="#b5d38a" stroke-width="10" stroke-linejoin="round"/>
+    <g clip-path="url(#clip)">
+      <path d="M0 500 H866" fill="none" stroke="#b9874e" stroke-width="200" stroke-linecap="butt" stroke-linejoin="round"/>
+      <path d="M0 500 H866" fill="none" stroke="#ecd19a" stroke-width="150" stroke-linecap="butt" stroke-linejoin="round"/>
+    </g>
+  </g>
+</svg>

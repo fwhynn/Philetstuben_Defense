@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Handkarte</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="position: relative; box-sizing: border-box; width: {{w}}px; height: {{h}}px; padding: {{pad}}px; border-radius: {{radius}}px; background: linear-gradient(180deg, #fffaf0 0%, #f6ecd3 55%, #eadbb4 100%); border: {{bw}}px solid {{r.frame}}; box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.55), 0 {{lift}}px 0 {{r.depth}}, {{shadow}}; transform: translateY({{raise}}px); outline: {{outline}}; outline-offset: 2px; font-family: 'Barlow Semi Condensed', 'Arial Narrow', system-ui, sans-serif; color: #2b281f; display: flex; flex-direction: column; align-items: center; gap: {{gap}}px; opacity: {{opacity}}; filter: {{filter}}">
+  <div style="position: relative; align-self: stretch; display: flex; justify-content: center; align-items: center; min-height: {{rowH}}px">
+    <span style="position: absolute; left: 0; top: 0; font-size: {{numFs}}px; font-weight: 700; line-height: 1; color: #3a3428">{{num}}</span>
+    <sc-if value="{{badgeTop}}" hint-placeholder-val="{{ true }}">
+      <span style="padding: 2px 7px; border-radius: 5px; background: {{r.badge}}; color: #ffffff; font-size: {{badgeFs}}px; font-weight: 700; letter-spacing: 0.04em; line-height: 1.2">{{r.label}}</span>
+    </sc-if>
+  </div>
+  <dc-import name="Road" kind="{{kind}}" view="tilt" h="{{roadH}}" hint-size="80px,70px"></dc-import>
+  <sc-if value="{{badgeStrip}}" hint-placeholder-val="{{ false }}">
+    <span style="align-self: stretch; text-align: center; border-radius: 4px; background: {{r.badge}}; color: #ffffff; font-size: 12px; font-weight: 700; letter-spacing: 0.02em; line-height: 1.3">{{stripLabel}}</span>
+  </sc-if>
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 0; text-align: center; max-width: 100%">
+    <b lang="de" style="font-size: {{nameFs}}px; font-weight: 700; line-height: 1.05; hyphens: manual; overflow-wrap: break-word; max-width: 100%">{{name}}</b>
+    <sc-if value="{{showSub}}" hint-placeholder-val="{{ true }}">
+      <span style="font-size: {{subFs}}px; font-weight: 500; line-height: 1.2; color: #4d4635">{{sub}}</span>
+    </sc-if>
+  </div>
+  <sc-if value="{{showLines}}" hint-placeholder-val="{{ true }}">
+    <div style="align-self: stretch; display: flex; flex-direction: column; gap: 1px; padding: 0 2px">
+      <sc-for list="{{lines}}" as="ln" hint-placeholder-count="2">
+        <span style="display: flex; align-items: center; gap: 5px; font-size: {{lineFs}}px; font-weight: 600; line-height: 1.25; white-space: nowrap">
+          <span style="display: inline-flex; color: {{ln.color}}"><dc-import name="Icon" glyph="{{ln.icon}}" size="{{iconS}}" fill="currentColor" hint-size="14px,14px"></dc-import></span>{{ln.text}}
+        </span>
+      </sc-for>
+    </div>
+  </sc-if>
+  <sc-if value="{{showStats}}" hint-placeholder-val="{{ false }}">
+    <div style="margin-top: auto; display: flex; gap: 14px; justify-content: center; font-size: {{lineFs}}px; font-weight: 700">
+      <sc-for list="{{stats}}" as="st" hint-placeholder-count="2">
+        <span style="display: inline-flex; align-items: center; gap: 4px"><span style="display: inline-flex; color: {{st.color}}"><dc-import name="Icon" glyph="{{st.icon}}" size="{{iconS}}" fill="currentColor" hint-size="14px,14px"></dc-import></span>{{st.value}}</span>
+      </sc-for>
+    </div>
+  </sc-if>
+  <sc-if value="{{blocked}}" hint-placeholder-val="{{ false }}">
+    <span style="position: absolute; left: 6px; right: 6px; bottom: 6px; padding: 3px 4px; border-radius: 6px; background: {{reasonBg}}; color: #f2f4f2; font-size: 12px; font-weight: 700; text-align: center; line-height: 1.2">{{reason}}</span>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"rarity":{"editor":"enum","default":"epic","options":["common","uncommon","rare","epic","legendary"]},"num":{"editor":"int","default":2},"nameText":{"editor":"text","default":"Signalkreuzung"},"sub":{"editor":"text","default":"Vier Straßenenden"},"kind":{"editor":"enum","default":"cross","options":["straight","curve","cross","tee","deadEnd","crown"]},"state":{"editor":"enum","default":"normal","options":["normal","hover","selected","invalid","blocked"]},"reason":{"editor":"text","default":"Kein freier Platz"},"lines":{"editor":null},"stats":{"editor":null},"w":{"editor":"int","default":178,"min":64,"max":260},"$preview":{"width":178,"height":232}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const R = {
+      common: { frame: '#4fa35a', badge: '#2f7d3a', depth: '#3b6f3f', label: 'GEWÖHNLICH' },
+      uncommon: { frame: '#35b3a6', badge: '#1b7a72', depth: '#1f6a62', label: 'UNGEWÖHNLICH', short: 'UNGEW.' },
+      rare: { frame: '#4f8fe0', badge: '#2f63b0', depth: '#2c4f80', label: 'SELTEN' },
+      epic: { frame: '#9b4fe0', badge: '#7a32b8', depth: '#5a2a85', label: 'EPISCH' },
+      legendary: { frame: '#ef9a3a', badge: '#a8530c', depth: '#8a4a12', label: 'LEGENDÄR' }
+    };
+    const r = R[this.props.rarity] || R.epic;
+    const w = this.props.w ?? 178;
+    const compact = w < 130;
+    const state = this.props.state || 'normal';
+    const lines = Array.isArray(this.props.lines) ? this.props.lines : (this.props.lines === undefined ? [{ icon: 'towerSlot', text: '2 Turmplätze', color: '#8a5a12' }, { icon: 'range', text: '+20 % Reichweite', color: '#c2362b' }] : []);
+    const stats = Array.isArray(this.props.stats) ? this.props.stats : [];
+    const inv = state === 'invalid';
+    const sel = state === 'selected' || inv, hov = state === 'hover', blk = state === 'blocked';
+    const s = w / 178;
+    return {
+      r, w, stripLabel: compact && r.short ? r.short : r.label,
+      reasonBg: inv ? '#8a1f18' : '#2c3430',
+      h: Math.round(w * (compact ? 1.42 : 1.3)),
+      pad: Math.max(4, Math.round(8 * s)),
+      radius: Math.max(6, Math.round(12 * s)),
+      bw: compact ? 3 : 4,
+      gap: compact ? 2 : Math.round(4 * s),
+      rowH: compact ? 13 : Math.round(20 * s),
+      numFs: Math.max(13, Math.round(17 * s)),
+      badgeFs: Math.max(12, Math.round(12.5 * s)),
+      badgeTop: !compact,
+      badgeStrip: compact,
+      roadH: Math.round((compact ? 0.42 : 0.42) * w),
+      kind: this.props.kind || 'cross',
+      num: this.props.num ?? 2,
+      name: this.props.nameText ?? 'Signalkreuzung',
+      nameFs: Math.max(13, Math.round(19 * s)),
+      sub: this.props.sub ?? '',
+      showSub: !compact && !!(this.props.sub ?? ''),
+      subFs: Math.max(12, Math.round(13.5 * s)),
+      lines, showLines: !compact && lines.length > 0,
+      stats, showStats: !compact && lines.length === 0 && stats.length > 0,
+      lineFs: Math.max(12, Math.round(13.5 * s)),
+      iconS: Math.max(12, Math.round(15 * s)),
+      lift: sel ? 6 : 4,
+      raise: sel ? -18 : hov ? -8 : 0,
+      shadow: inv ? '0 0 18px rgba(255, 90, 70, 0.65), 0 16px 22px rgba(0, 0, 0, 0.5)' : sel ? '0 0 18px rgba(255, 210, 110, 0.6), 0 16px 22px rgba(0, 0, 0, 0.5)' : '0 8px 14px rgba(0, 0, 0, 0.4)',
+      outline: inv ? '3px solid #ff6a5a' : sel ? '3px solid #ffe198' : '0 solid transparent',
+      blocked: blk || inv, reason: this.props.reason || 'Kein freier Platz',
+      opacity: blk ? 0.9 : 1,
+      filter: blk ? 'grayscale(0.7) brightness(0.8)' : 'none'
+    };
+  }
+}
+</script>
+</body>
+</html>

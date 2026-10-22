@@ -1,9 +1,18 @@
 [
   {
     "version": "next",
-    "title": "Einheitliche Wiese",
+    "title": "Neue Hex-Oberfläche",
     "changes": [
-      "Weites Land hat jetzt dieselbe grüne Wiese wie die übrigen Hex-Felder statt eines trockenen Gelbtons, in der normalen, der Sakura- und der Halloween-Edition."
+      "Weites Land hat jetzt dieselbe grüne Wiese wie die übrigen Hex-Felder statt eines trockenen Gelbtons, in der normalen, der Sakura- und der Halloween-Edition.",
+      "Neues Hauptmenü im Hex-Stil: ein großer goldener Spielen-Knopf in der Mitte, darum Arsenal, Bestenliste, Einstellungen, Duo, Tägliche Herausforderung und Account. Duo und die Tägliche Herausforderung sind direkt erreichbar und zeigen vor der Freischaltung „ab Welle 35“.",
+      "Mit gespeichertem Durchlauf zeigt „Spielen“ die aktuelle Welle und öffnet die Spielauswahl: „Fortsetzen“ steht an erster Stelle, darunter lässt sich ein neuer Run starten.",
+      "Im Hintergrund des Hauptmenüs liegen Spielkarten mit Festung, Türmen und Gegnern, die zur Festung laufen.",
+      "Einstellungen direkt im Hauptmenü: Sprache, Grafikstil, Ton und Einsteigerhinweise. Die Sprachwahl steht unten links, die Patch Notes unten rechts.",
+      "Neue Spieloberfläche: Pause, Einstellungen, Regeln, Zoom und Bauen als Hex-Knöpfe; Leben, Gold, Deck, Diamanten und Base als Anzeigen oben rechts; ein Phasenschild oben zeigt Bauphase oder laufende Welle. Turmleiste mit Preisschildern, Tempo-Regler und Wellenstart sind neu gestaltet. Der Knopf „Zur Base“ entfällt.",
+      "Handkarten mit Rahmen in der Seltenheitsfarbe und einem Kachelbild, das die aktuelle Drehung zeigt.",
+      "Die Turmauswahl zeigt Werte mit Symbolen und den Preis als Knopf; bei zu wenig Gold ist der Preis rot.",
+      "Neues Turmfenster: Bild des Turms in seiner Ausbaustufe, die wichtigsten Werte auf einen Blick, Angriffsfokus und Upgrades mit Vorschaubild, Typ und Preis. „Werte & Einflüsse“ öffnet eine eigene Ansicht mit allen Werten, aktiven Einflüssen und Schadensfaktoren.",
+      "Neue Schriften für Titel und Bedienelemente, und das Spielfeld liegt vor einem kräftigeren Blau."
     ]
   },
   {

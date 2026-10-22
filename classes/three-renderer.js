@@ -7,7 +7,7 @@ import {MODEL_ENEMIES,isEnemyJoint,enemyPose,applyEnemyPose} from './enemy-motio
 import {flameDetails,bossDetails} from './model-details.mjs';
 import {MineBatches} from './mine-batches.mjs';
 
-const S=54,STEP=Math.PI/3,TILT=55*Math.PI/180,PITCH_MIN=12*Math.PI/180,PITCH_MAX=88*Math.PI/180,DIST_MIN=220,DIST_MAX=3400,DIST_START=950,SKY='#a9cbd8';
+const S=54,STEP=Math.PI/3,TILT=55*Math.PI/180,PITCH_MIN=12*Math.PI/180,PITCH_MAX=88*Math.PI/180,DIST_MIN=220,DIST_MAX=3400,DIST_START=950,SKY='#3f97cf';
 const PREFIX={tiles:'tile',landmarks:'landmark',towers:'tower',enemies:'enemy',buildings:'building',effects:'mine',bases:'base',consumables:'consumable'};
 const FOLDER={consumables:'effects'};                                // Ordner unter assets/, falls abweichend von der Modellart
 const LIMBS=['leg_l','leg_r','arm_l','arm_r'];

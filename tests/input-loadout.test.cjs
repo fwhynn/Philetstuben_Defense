@@ -91,7 +91,7 @@ test('seen arsenal offers stop glowing across reloads, while newly affordable of
   const tabs=r.elements.get('arsenalTabs').children.filter(e=>e.attributes.role==='tab');
   for(const tab of tabs){tab.listeners.click();assert.equal(tab.classList.contains('affordable'),false);}
   assert.equal(r.elements.get('menuArsenalBtn').classList.contains('upgradeAvailable'),false);
-  assert.match(r.elements.get('menuArsenalBtn').textContent,/Upgrade verfügbar/);
+  assert.match(r.elements.get('menuArsenalDetail').textContent,/Upgrade verfügbar/);
   const seen=r.storage.get('hex-arsenal-seen-v1');assert.ok(JSON.parse(seen).length>0);
   const reboot=load({initialProfile:{diamonds:20},initialStorage:{'hex-arsenal-seen-v1':seen}});
   assert.equal(reboot.elements.get('menuArsenalBtn').classList.contains('upgradeAvailable'),false);
@@ -148,7 +148,7 @@ test('multi-build sums local discounts and buys exactly the marked slots atomica
   const first = { q: 1, r: 0, type: 'straight', roads: [0, 3], slots: 1, towers: [null], buildings: [{ type: 'market' }] }, second = { q: 4, r: 0, type: 'cross', roads: [0, 1, 3, 4], slots: 2, towers: [null, null] };
   a.state.map.set('1,0', first); a.state.map.set('4,0', second);
   selectSlot(1, 0, 0); selectSlot(4, 0, 1, true);
-  const offer = elements.get('towerMenu').children[0]; assert.match(offer.innerHTML, /47 🪙/); assert.match(offer.innerHTML, /2 × Türme/); assert.equal(offer.disabled, true);
+  const offer = elements.get('towerMenu').children[0]; assert.match(offer.innerHTML, /towerPriceValue">47</); assert.match(offer.innerHTML, /2 × Türme/); assert.equal(offer.disabled, true);
   buyTower('archer'); assert.equal(first.towers[0], null); assert.equal(second.towers[1], null); assert.equal(a.state.gold, 46);
   a.state.gold = 47; buyTower('archer'); assert.equal(first.towers[0].paid, 22); assert.equal(second.towers[1].paid, 25); assert.equal(second.towers[0], null); assert.equal(a.state.gold, 0); assert.equal(a.state.runTowerStats.archer.builds, 2); assert.equal(a.state.runTowerStats.archer.buildGold, 47); assert.equal(Object.keys(a.state.runTowerDetails).length, 2);
 });

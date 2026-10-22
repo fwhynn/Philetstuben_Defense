@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Sieg, Niederlage, Run-Abschluss</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,800;9..144,900&amp;family=Barlow+Semi+Condensed:wght@500;600;700&amp;family=Inter:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit}
+.po{padding:2px;box-sizing:border-box;background:linear-gradient(170deg,#e9c46a,#8a6a26 60%,#c9a24a);clip-path:polygon(12px 0,calc(100% - 12px) 0,100% 12px,100% calc(100% - 12px),calc(100% - 12px) 100%,12px 100%,0 calc(100% - 12px),0 12px)}
+.pi{height:100%;box-sizing:border-box;background:linear-gradient(180deg,#17301f,#0f2219);clip-path:polygon(11px 0,calc(100% - 11px) 0,100% 11px,100% calc(100% - 11px),calc(100% - 11px) 100%,11px 100%,0 calc(100% - 11px),0 11px)}
+.ui{font-family:'Barlow Semi Condensed','Arial Narrow',sans-serif;color:#f4ecd6}
+.t1{margin:0;font:900 40px/1.05 Fraunces,Georgia,serif}
+.eb{margin:0;font:700 15px 'Barlow Semi Condensed',sans-serif;letter-spacing:.14em}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 18px;border-radius:10px;font:700 18px 'Barlow Semi Condensed',sans-serif;white-space:nowrap}
+.gold{border:2px solid #9c6a17;background:linear-gradient(180deg,#ffe48a,#e8ac38);color:#2a1f10;box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 3px 0 #7a5414}
+.ghost{border:1.5px solid #c9a24a;background:rgba(0,0,0,.25);color:#f4ecd6}
+.row{display:flex;align-items:center;gap:10px;min-height:38px;border-bottom:1px solid rgba(201,162,74,.2);font-size:18px}
+.frame{position:absolute;overflow:hidden;border-radius:18px;outline:1px solid #41594a}
+.lab{position:absolute;margin:0;font:700 15px Inter,sans-serif;color:#bfd0c6}
+</style>
+</helmet>
+<div style="position: relative; width: 1970px; height: 1020px; background: #0f1a15; font-family: Inter, system-ui, sans-serif; color: #f6f2e4">
+  <p class="lab" style="left: 40px; top: 40px">4 · Niederlage und Run-Abschluss · Desktop 1440 × 900</p>
+  <p class="lab" style="left: 1540px; top: 40px">Sieg · Handy 390 × 844</p>
+
+  <div class="frame ui" style="left: 40px; top: 80px; width: 1440px; height: 900px">
+    <dc-import name="Board" w="{{ 1440 }}" h="{{ 900 }}" r="{{ 52 }}" cx="{{ 720 }}" cy="{{ 430 }}" hint-size="1440px,900px"></dc-import>
+    <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(30, 12, 10, 0.78), rgba(10, 8, 8, 0.9))"></div>
+    <section class="po" role="dialog" aria-labelledby="go-title" style="position: absolute; left: 120px; top: 50px; width: 1200px; height: 800px; background: linear-gradient(170deg, #a9a39c, #5a2a24 60%, #8a8f8b); filter: drop-shadow(0 16px 30px rgba(0, 0, 0, 0.6))">
+      <div class="pi" style="padding: 26px 32px; display: flex; flex-direction: column; gap: 16px; background: linear-gradient(180deg, #2a1e1c, #1a1312)">
+        <div style="display: flex; align-items: center; gap: 16px">
+          <dc-import name="Hex" family="fog" h="{{ 76 }}" icon="base" icon-color="#ff9a8a" label="" sub="" hint-size="66px,76px"></dc-import>
+          <div><p class="eb" style="color: #ff9a8a">RUN BEENDET · WELLE 23</p><h2 id="go-title" class="t1" style="color: #f6e7e2">Die Bastion ist gefallen</h2></div>
+          <span style="margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 2px"><span style="font-size: 16px; color: #d9c9c4">Bestenliste diese Woche</span><b style="font-size: 28px; color: #f3c94c">Platz 14</b></span>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 26px; flex: 1; min-height: 0">
+          <section aria-labelledby="dia-h" style="display: flex; flex-direction: column; gap: 6px">
+            <h3 id="dia-h" style="margin: 0 0 4px; font-size: 22px; font-weight: 700">Diamanten-Abrechnung</h3>
+            <sc-for list="{{diamonds}}" as="d" hint-placeholder-count="5">
+              <div class="row"><span style="display: inline-flex; color: {{d.color}}"><dc-import name="Icon" glyph="{{d.icon}}" size="{{ 20 }}" fill="currentColor" hint-size="20px,20px"></dc-import></span><span style="flex: 1">{{d.label}}</span><span style="color: #d9c9c4">{{d.detail}}</span><b style="width: 70px; text-align: right; color: #ffffff">{{d.value}}</b></div>
+            </sc-for>
+            <div style="display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 12px; margin-top: 6px; border-radius: 10px; background: rgba(243, 201, 76, 0.12); border: 1.5px solid #c9a24a; font-size: 22px; font-weight: 700"><dc-import name="Icon" glyph="gem" size="{{ 24 }}" fill="#ffffff" hint-size="24px,24px"></dc-import><span style="flex: 1">Dieser Run</span><span style="color: #f3c94c">+38 ◆</span></div>
+            <p style="margin: 6px 0 0; font-size: 18px; color: #d9c9c4">◆ 412 Diamanten gesamt · Bestmarke: Welle 31</p>
+          </section>
+          <section aria-labelledby="st-h" style="display: flex; flex-direction: column; gap: 8px">
+            <h3 id="st-h" style="margin: 0 0 4px; font-size: 22px; font-weight: 700">Statistik</h3>
+            <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+              <sc-for list="{{kpis}}" as="k" hint-placeholder-count="3">
+                <div style="padding: 10px 12px; border-radius: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(201, 162, 74, 0.25)"><span style="font-size: 15px; color: #d9c9c4">{{k.label}}</span><br><b style="font-size: 26px">{{k.value}}</b></div>
+              </sc-for>
+            </div>
+            <span style="font-size: 17px; font-weight: 700; margin-top: 6px">Schaden nach Turm</span>
+            <sc-for list="{{bars}}" as="b" hint-placeholder-count="5">
+              <div style="display: flex; align-items: center; gap: 10px; font-size: 16px">
+                <span style="display: inline-flex; color: {{b.color}}"><dc-import name="Icon" glyph="{{b.icon}}" size="{{ 20 }}" fill="currentColor" hint-size="20px,20px"></dc-import></span>
+                <span style="width: 96px">{{b.name}}</span>
+                <span style="flex: 1; height: 12px; border-radius: 999px; background: rgba(255, 255, 255, 0.08)"><span style="display: block; height: 100%; width: {{b.pct}}; border-radius: 999px; background: linear-gradient(90deg, #f3c94c, #e8ac38)"></span></span>
+                <b style="width: 54px; text-align: right">{{b.pct}}</b>
+              </div>
+            </sc-for>
+          </section>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end">
+          <button class="btn ghost">Map anschauen</button><button class="btn ghost">Zum Hauptmenü</button><button class="btn ghost">Loadout ändern</button>
+          <button class="btn gold"><dc-import name="Icon" glyph="newRun" size="{{ 20 }}" fill="currentColor" hint-size="20px,20px"></dc-import>Noch einmal mit diesem Loadout</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="frame ui" style="left: 1540px; top: 80px; width: 390px; height: 844px">
+    <dc-import name="Board" w="{{ 390 }}" h="{{ 844 }}" r="{{ 24 }}" cx="{{ 195 }}" cy="{{ 400 }}" hint-size="390px,844px"></dc-import>
+    <div style="position: absolute; inset: 0; background: rgba(8, 18, 12, 0.82)"></div>
+    <section role="dialog" aria-label="Festung verteidigt" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 34px 16px 18px; text-align: center">
+      <dc-import name="Hex" family="gold" h="{{ 110 }}" icon="leaderboard" label="" sub="" hint-size="95px,110px"></dc-import>
+      <p class="eb" style="color: #ffe198">FESTUNG VERTEIDIGT</p>
+      <h2 class="t1" style="font-size: 32px; color: #f3d58a">Wave 35 geschafft!</h2>
+      <p style="margin: 0; font-size: 17px; color: #cfd9cf">Deine Map und Türme bleiben im Endless-Modus erhalten. Diamanten werden beim Beenden abgerechnet.</p>
+      <div style="align-self: stretch; display: flex; flex-direction: column">
+        <sc-for list="{{diamonds}}" as="d" hint-placeholder-count="5">
+          <div class="row" style="font-size: 16px; min-height: 34px"><span style="flex: 1; text-align: left">{{d.label}}</span><b>{{d.value}}</b></div>
+        </sc-for>
+      </div>
+      <div style="align-self: stretch; display: flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 12px; border-radius: 10px; background: rgba(243, 201, 76, 0.14); border: 1.5px solid #c9a24a; font-size: 19px; font-weight: 700"><span style="flex: 1; text-align: left">Dieser Run</span><span style="color: #f3c94c">+38 ◆</span></div>
+      <div style="margin-top: auto; align-self: stretch; display: flex; flex-direction: column; gap: 8px">
+        <button class="btn gold" style="font-size: 17px">Im Endless-Modus weiterspielen</button>
+        <button class="btn ghost" style="font-size: 17px">Run abschließen · Hauptmenü</button>
+      </div>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1970,"height":1020}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      diamonds: [
+        { icon: 'wave', color: '#cfd9cf', label: 'Wellen überstanden', detail: '23 × 1', value: '+23' },
+        { icon: 'boss', color: '#ff9a8a', label: 'Bosse besiegt', detail: '2 × 5', value: '+10' },
+        { icon: 'upgradeBadge', color: '#ffe198', label: 'Neue Bestmarke', detail: 'Welle 20 erstmals', value: '+5' },
+        { icon: 'daily', color: '#cfd9cf', label: 'Tagesbonus', detail: '', value: '+0' }
+      ],
+      kpis: [{ label: 'Gegner besiegt', value: '1.284' }, { label: 'Gold verdient', value: '2.416' }, { label: 'Hexe gelegt', value: '27' }],
+      bars: [
+        { icon: 'tower_flame', color: '#ff9a5a', name: 'Flamme', pct: '34 %' },
+        { icon: 'tower_archer', color: '#f4ecd6', name: 'Bogenschütze', pct: '27 %' },
+        { icon: 'tower_chain', color: '#ffd36a', name: 'Kettenblitz', pct: '19 %' },
+        { icon: 'tower_catapult', color: '#f4ecd6', name: 'Katapult', pct: '14 %' },
+        { icon: 'tower_freeze', color: '#9fe4ff', name: 'Frost', pct: '6 %' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
