@@ -1373,12 +1373,17 @@ R dreht die Karte, dann Feld anklicken.`;
   let resetArsenalPending = false;
   function renderArsenal(message = '') {
     document.getElementById('arsenalDiamonds').textContent = profile.diamonds;
-    HexArsenal.render(document.getElementById('arsenalChoices'), profile, (kind, id) => { const method = { activateUltimate: HexProfile.activateUltimate, tower: HexProfile.unlockTower, ultimate: HexProfile.unlockUltimate, building: HexProfile.unlockBuilding }[kind], next = method(profile, id, TOWERS); if (!next) return; profile = next; resetArsenalPending = false; scheduleCloudSave(); renderLoadout(); renderArsenal('Freigeschaltet. Ab dem nächsten Run verfügbar.'); renderUI(); }, document.getElementById('arsenalTabs'), arsenalNotifications, () => { updateArsenalHint(); saveGameSettings(); });
+    const onUnlock = (kind, id) => { const method = { activateUltimate: HexProfile.activateUltimate, tower: HexProfile.unlockTower, ultimate: HexProfile.unlockUltimate, building: HexProfile.unlockBuilding }[kind], next = method(profile, id, TOWERS); if (!next) return; profile = next; resetArsenalPending = false; scheduleCloudSave(); renderLoadout(); renderArsenal('Freigeschaltet. Ab dem nächsten Run verfügbar.'); renderUI(); };
+    HexArsenal.render(document.getElementById('arsenalChoices'), profile, onUnlock, document.getElementById('arsenalTabs'), arsenalNotifications, () => { updateArsenalHint(); saveGameSettings(); });
+    // Test-Ansicht „Baum“ (classes/arsenal-tree.js): gleiche Daten, gleiche Freischaltung. HexArsenalTree ist „const“, daher typeof statt globalThis.
+    if (typeof HexArsenalTree !== 'undefined') HexArsenalTree.render(document.getElementById('arsenalTree'), HexArsenal.trees(profile), profile, onUnlock);
     const refund = HexProfile.resetValue(profile), button = document.getElementById('resetDiamondsBtn'); button.disabled = refund === 0; button.textContent = resetArsenalPending ? 'Bestätigen: alle Freischaltungen zurücksetzen · +' + refund + ' ◆' : 'Reset · +' + refund + ' ◆';
     document.getElementById('arsenalMessage').textContent = message || '';
   }
   document.getElementById('resetDiamondsBtn').addEventListener('click', () => { if (!resetArsenalPending) { resetArsenalPending = true; renderArsenal('Alle Turm- und Meta-Freischaltungen werden entfernt; Loadouts werden auf die fünf Starttürme zurückgesetzt. Ein bereits laufender Run behält seine Startauswahl. Erneut klicken zum Bestätigen.'); return; } const result = HexProfile.resetUnlocks(profile, TOWERS); profile = result.profile; scheduleCloudSave(); pendingLoadout = [...profile.activeLoadout]; resetArsenalPending = false; renderLoadout(); renderArsenal(result.refund + ' Diamanten erstattet. Du kannst dich neu entscheiden.'); renderUI(); });
   function openArsenal() { resetArsenalPending = false; renderArsenal(); arsenalOverlay.classList.remove('hidden'); }
+  // Ansicht im Arsenal: Baum (Test) oder Werkstatt; gilt für diese Sitzung.
+  for (const button of document.querySelectorAll?.('[data-arsenal-view]') || []) button.addEventListener('click', () => { arsenalOverlay.dataset.view = button.dataset.arsenalView; for (const other of document.querySelectorAll('[data-arsenal-view]')) other.setAttribute('aria-pressed', String(other === button)); });
 
   function toggleUpgradeStatus(value = !state.showUpgradeStatus) { state.showUpgradeStatus = value; document.getElementById('upgradeStatus').checked = value; saveGameSettings(); renderBoard(); }
   document.getElementById('upgradeStatus').addEventListener('change', e => toggleUpgradeStatus(e.target.checked));

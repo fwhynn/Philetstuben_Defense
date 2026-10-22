@@ -587,3 +587,79 @@ h1,h2,.loadoutBox h2,.gameOverBox h2,.arsenalToolbar h2,.accountHeader h2,.celeb
 /* Rahmen alter Regeln an Pfad-Icon und Porträt zurücksetzen; ohne Porträt bleibt das Turm-Icon sichtbar. */
 #towerPanel .towerUpgradeCard>.towerPathIcon{border:0;border-radius:0;padding:0}
 .towerPortrait .researchIcon.hxTowerIcon{width:64px;height:auto;margin:6px}.towerPortrait.hasPortrait .researchIcon{display:none}
+
+/* ===== Arsenal als Fertigkeitenbaum (Test-Ansicht, classes/arsenal-tree.js) ===== */
+#arsenalOverlay[data-view=tree] .arsenalBody{display:none}
+#arsenalOverlay:not([data-view=tree]) .skillTreeView{display:none}
+/* Baum-Ansicht: Fenster fast bildschirmfüllend */
+#arsenalOverlay[data-view=tree] .loadoutBox{width:min(1760px,100%);height:calc(100dvh - 32px)}
+.arsenalViewSwitch{display:inline-flex;gap:4px;padding:3px;border:1.5px solid var(--hx-capsule-line);border-radius:999px;background:#0e1d16}
+.arsenalViewSwitch button{min-height:36px;padding:0 14px;border:0!important;border-radius:999px;background:none!important;box-shadow:none;font:700 14px var(--hx-font-ui)}
+.arsenalViewSwitch button[aria-pressed=true]{background:linear-gradient(180deg,#ffe48a,#e8ac38)!important;color:#2a1f10}
+.skillTreeView{flex:1;min-height:0;width:100%;display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,380px);gap:16px;padding:14px 18px 18px;box-sizing:border-box}
+.skillMain{display:flex;flex-direction:column;gap:12px;min-width:0;min-height:0}
+/* Reiter Türme / Gebäude */
+.skillGroups{display:flex;gap:10px;flex-shrink:0}
+.skillGroup{display:inline-flex;align-items:center;gap:10px;min-height:54px;padding:0 22px 0 16px;border:2px solid #46634f!important;border-radius:12px;background:#12241a!important;color:#cfd9cf;font:800 20px var(--hx-font-ui);box-shadow:none;cursor:pointer}
+.skillGroup .hxi{width:30px;height:30px;color:#a9c98f}
+.skillGroup small{padding:2px 9px;border-radius:999px;background:#0a150f;color:#a9b8ab;font:700 15px var(--hx-font-ui)}
+.skillGroup:hover{border-color:#a9c98f!important;color:#f4ecd6}
+.skillGroup[aria-selected=true]{border-color:#e9b949!important;background:linear-gradient(180deg,#2b5638,#1c3a27)!important;color:#fff3c4;box-shadow:0 0 0 3px #e9b94933,inset 0 1px 0 #ffffff22}
+.skillGroup[aria-selected=true] .hxi{color:#f3c94c}
+.skillGroup.hasOffer small{background:#e8ac38;color:#2a1f10}
+.skillCanvas{position:relative;flex:1;min-height:0;overflow:hidden;border:2px solid transparent;border-radius:14px;touch-action:none;
+  background:radial-gradient(ellipse at 50% 50%,#1b3626 0,#0d1a13 60%,#070d0a 100%) padding-box,var(--hx-panel-edge) border-box}
+.skillCanvas::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.5;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97' viewBox='0 0 56 97'%3E%3Cpath d='M28 0L56 16.2V48.5L28 64.7L0 48.5V16.2ZM28 64.7V97' fill='none' stroke='%23a9c98f' stroke-opacity='.06' stroke-width='1.5'/%3E%3C/svg%3E")}
+.skillSvg{display:block;width:100%;height:100%;cursor:grab;user-select:none}
+.skillSvg:active{cursor:grabbing}
+.skillRing{fill:none;stroke:#a9c98f;stroke-opacity:.09;stroke-width:2.5;stroke-dasharray:8 12}
+.skillEdge{stroke:#2a4031;stroke-width:9;stroke-linecap:round}
+.skillEdge.lit{stroke:#c9a24a;filter:drop-shadow(0 0 5px #f6c95a88)}
+.skillNode{cursor:pointer;outline:none}
+.skillNode polygon,.skillNode circle{fill:#16291d;stroke:#46634f;stroke-width:4;transition:stroke .15s,filter .15s}
+.skillNode.lit polygon,.skillNode.lit circle{fill:#22422d;stroke:#a9c98f}
+.skillNode.root.lit polygon{stroke:#c9a24a;stroke-width:5}
+.skillNode.meta polygon{stroke-width:5}
+.skillNode.meta.lit polygon{fill:#2b5638;stroke:#e9b949}
+.skillNode.active polygon{fill:#e8ac38;stroke:#fff3c4;filter:drop-shadow(0 0 12px #f6c95a)}
+.skillNode.active .hxi{color:#2a1f10!important}
+.skillNode.affordable polygon,.skillNode.affordable circle{stroke:#f3c94c;animation:skillPulse 1.6s ease-in-out infinite}
+.skillNode.hub polygon{fill:#e8ac38;stroke:#fff3c4;stroke-width:6;filter:drop-shadow(0 0 18px #f6c95a88)}
+.skillNode.hub .hxi{color:#2a1f10}
+.skillNode:hover polygon,.skillNode:hover circle{filter:brightness(1.3)}
+.skillNode.selected polygon,.skillNode.selected circle,.skillNode:focus-visible polygon,.skillNode:focus-visible circle{stroke:#ffe198;stroke-width:8;filter:drop-shadow(0 0 10px #ffe198)}
+.skillNode foreignObject{overflow:visible}
+.skillNode .hxi{display:block;width:100%;height:100%;color:#f4ecd6}
+.skillNode:not(.lit):not(.hub) .hxi{opacity:.45}
+.skillTier{fill:#f4ecd6;font-family:var(--hx-font-ui);font-weight:800;font-size:24px;text-anchor:middle;pointer-events:none}
+.skillNode:not(.lit) .skillTier{fill:#8f9a94}
+/* Schriftgröße setzt arsenal-tree.js (font-size-Attribut), damit Layout-Test und Anzeige übereinstimmen */
+.skillLabel{fill:#efe3c2;font-family:var(--hx-font-ui);font-weight:800;text-anchor:middle;paint-order:stroke;stroke:#070d0a;stroke-width:7;stroke-linejoin:round;pointer-events:none}
+.skillNode.meta .skillLabel{font-weight:700;fill:#cfd9cf}
+.skillNode.meta.lit .skillLabel{fill:#f3d58a}
+.skillNode.root:not(.lit) .skillLabel{fill:#b9c4bb}
+@keyframes skillPulse{50%{filter:drop-shadow(0 0 12px #f6c95a)}}
+/* Legende unten links, Zoom unten rechts */
+.skillLegend{position:absolute;left:14px;bottom:14px;display:flex;flex-wrap:wrap;gap:6px 14px;max-width:calc(100% - 210px);margin:0;padding:8px 14px;list-style:none;border:1px solid #2f4a39;border-radius:10px;background:#070d0acc;font:700 14px var(--hx-font-ui);color:#cfd9cf;pointer-events:none}
+.skillLegend li{display:inline-flex;align-items:center;gap:7px}
+.skillLegend li::before{content:'';width:14px;height:14px;border-radius:3px;border:3px solid #46634f;background:#16291d}
+.skillLegend .isOwned::before{border-color:#c9a24a;background:#22422d}
+.skillLegend .isOffer::before{border-color:#f3c94c;box-shadow:0 0 8px #f6c95a}
+.skillLegend .isRun::before{border-radius:50%;border-color:#a9c98f}
+.skillZoom{position:absolute;right:14px;bottom:14px;display:flex;gap:8px}
+.skillZoom button{width:48px;min-height:48px;padding:0;font:800 22px var(--hx-font-ui)}
+/* Detailspalte */
+.skillDetail{min-height:0;overflow:auto;padding:22px 24px;border:2px solid transparent;border-radius:14px;background:linear-gradient(180deg,#17301f,#0f2219) padding-box,var(--hx-panel-edge) border-box;font-family:var(--hx-font-ui)}
+.skillDetail h3{margin:4px 0 12px;font:900 32px/1.1 var(--hx-font-title);color:#f6f2e4}
+.skillDetail p{margin:0 0 14px;font-size:17px;line-height:1.5;color:#cfd9cf}
+.skillKicker{margin:0!important;color:var(--hx-gold-text)!important;font:800 14px var(--hx-font-ui)!important;letter-spacing:.1em;text-transform:uppercase}
+.skillStatus{color:#f4ecd6!important;font-weight:700}
+.skillBalance{color:var(--hx-gold-text)!important;font:800 24px var(--hx-font-ui)!important}
+.skillHint{font-size:15px!important;color:#8fa092!important}
+.skillChanges{margin:0 0 16px;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.skillChanges li{padding:9px 12px;border:1px solid #2f4a39;border-radius:9px;background:#0e1d16;font:600 16px var(--hx-font-ui);color:#e6ebe7}
+.skillBuy{width:100%;min-height:54px;margin:6px 0 14px;font-size:18px}
+@media(max-width:1100px){.skillTreeView{grid-template-columns:minmax(0,1fr) 320px}.skillDetail h3{font-size:26px}.skillLegend{display:none}}
+@media(max-width:760px){#arsenalOverlay[data-view=tree] .loadoutBox{height:100dvh}}
+@media(max-width:820px){.skillTreeView{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto;padding:10px}.skillDetail{max-height:36vh}.skillGroup{min-height:46px;font-size:17px}}
+@media(prefers-reduced-motion:reduce){.skillNode.affordable polygon,.skillNode.affordable circle{animation:none;filter:drop-shadow(0 0 6px #f6c95a)}}

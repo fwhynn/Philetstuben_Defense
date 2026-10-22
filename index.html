@@ -785,12 +785,15 @@
       <button id="backToRunResultBtn" class="primary">Zurück zum Ergebnis · Esc</button>
     </div>
 
-    <div id="arsenalOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="arsenalTitle">
+    <div id="arsenalOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="arsenalTitle" data-view="tree">
       <div class="loadoutBox">
         <header class="arsenalToolbar">
           <h2 id="arsenalTitle">Arsenal</h2><span class="arsenalBalance" title="Diamanten">◆ <strong
               id="arsenalDiamonds">0</strong></span>
           <p class="arsenalLegend">◆ schaltet dauerhaft frei · 🪙 Gold bezahlt den Ausbau im Run</p>
+          <div class="arsenalViewSwitch" role="group" aria-label="Ansicht"><button type="button" class="secondary" data-arsenal-view="tree"
+              aria-pressed="true">Baum (Test)</button><button type="button" class="secondary" data-arsenal-view="workshop"
+              aria-pressed="false">Werkstatt</button></div>
           <button id="resetDiamondsBtn" class="secondary">Reset</button><button id="closeArsenalBtn" class="secondary"
             aria-label="Arsenal schließen (Escape)" title="Zurück (Escape)">Zurück · Esc</button>
         </header>
@@ -799,6 +802,7 @@
             aria-orientation="vertical"></nav>
           <div id="arsenalChoices" class="arsenalDetail"></div>
         </div>
+        <div id="arsenalTree" class="skillTreeView"></div>
         <p id="arsenalMessage" class="loadoutWarning" aria-live="polite"></p>
       </div>
     </div>
@@ -875,6 +879,7 @@
     <script src="classes/buildings.js"></script>
     <script src="classes/tower-commands.js"></script>
     <script src="classes/arsenal.js"></script>
+    <script src="classes/arsenal-tree.js"></script>
     <script src="classes/exploration.js"></script>
     <script src="classes/duo-server-status.js"></script>
     <script src="duo-client.js"></script>

@@ -12,7 +12,9 @@
       "Handkarten mit Rahmen in der Seltenheitsfarbe und einem Kachelbild, das die aktuelle Drehung zeigt.",
       "Die Turmauswahl zeigt Werte mit Symbolen und den Preis als Knopf; bei zu wenig Gold ist der Preis rot.",
       "Neues Turmfenster: Bild des Turms in seiner Ausbaustufe, die wichtigsten Werte auf einen Blick, Angriffsfokus und Upgrades mit Vorschaubild, Typ und Preis. „Werte & Einflüsse“ öffnet eine eigene Ansicht mit allen Werten, aktiven Einflüssen und Schadensfaktoren.",
-      "Neue Schriften für Titel und Bedienelemente, und das Spielfeld liegt vor einem kräftigeren Blau."
+      "Neue Schriften für Titel und Bedienelemente, und das Spielfeld liegt vor einem kräftigeren Blau.",
+      "Gegner im Hintergrund des Hauptmenüs laufen jetzt mit Laufanimation.",
+      "Das Arsenal lässt sich als Fertigkeitenbaum anzeigen (Test): getrennte Reiter für Türme und Gebäude, vom Arsenal in der Mitte über Stufe 2 und 3 bis zu Ultimates und Spezialausbauten. Ein Klick auf einen Knoten zeigt die Details und schaltet direkt frei; Ziehen verschiebt, das Mausrad zoomt. Die bisherige Werkstatt bleibt umschaltbar."
     ]
   },
   {

@@ -1733,10 +1733,30 @@ Minen|Mines
 Durchschlag|Pierce
 Frost|Frost
 Radius|Radius
+Baum (Test)|Tree (test)
+Werkstatt|Workshop
+Ganzen Baum zeigen|Show whole tree
+Vergrößern|Zoom in
+Verkleinern|Zoom out
+Arsenal als Baum|Arsenal as a tree
+Diamanten freischalten Türme, Ultimates und Gebäude-Spezialausbauten dauerhaft. Stufe 2 und 3 baust du im Run mit Gold aus.|Diamonds permanently unlock towers, ultimates and special building upgrades. Levels 2 and 3 are bought with gold during a run.
+im Run mit Gold|bought with gold during a run
+Kosten im Run:|Cost during a run:
+verfügbar|available
+Diamanten schalten Türme und ihre Ultimates dauerhaft frei. Stufe 2 und 3 baust du im Run mit Gold aus.|Diamonds permanently unlock towers and their ultimates. Levels 2 and 3 are bought with gold during a run.
+Diamanten schalten Gebäude und ihre Spezialausbauten dauerhaft frei. Stufe 2 und 3 baust du im Run mit Gold aus.|Diamonds permanently unlock buildings and their special upgrades. Levels 2 and 3 are bought with gold during a run.
+Freigeschaltet:|Unlocked:
+Arsenal-Bereiche|Arsenal sections
+jetzt freischaltbar|unlockable now
+freigeschaltet|unlocked
+gesperrt|locked
+II · III im Run mit Gold|II · III with gold during a run
 Tastenbelegung, Hex-Grid und Spielhilfen findest du im Spiel unter Einstellungen (Escape).|Key bindings, hex grid and gameplay aids are in the in-game settings (Escape).
 `);
 HexTranslations.add(`
 Neue Hex-Oberfläche|New hex interface
+Gegner im Hintergrund des Hauptmenüs laufen jetzt mit Laufanimation.|Enemies in the main menu background now walk with an animation.
+Das Arsenal lässt sich als Fertigkeitenbaum anzeigen (Test): getrennte Reiter für Türme und Gebäude, vom Arsenal in der Mitte über Stufe 2 und 3 bis zu Ultimates und Spezialausbauten. Ein Klick auf einen Knoten zeigt die Details und schaltet direkt frei; Ziehen verschiebt, das Mausrad zoomt. Die bisherige Werkstatt bleibt umschaltbar.|The arsenal can be shown as a skill tree (test): separate tabs for towers and buildings, from the arsenal in the centre through levels 2 and 3 to ultimates and special upgrades. Clicking a node shows its details and unlocks it directly; drag to pan, use the mouse wheel to zoom. The previous workshop view is still available.
 Neues Hauptmenü im Hex-Stil: ein großer goldener Spielen-Knopf in der Mitte, darum Arsenal, Bestenliste, Einstellungen, Duo, Tägliche Herausforderung und Account. Duo und die Tägliche Herausforderung sind direkt erreichbar und zeigen vor der Freischaltung „ab Welle 35“.|New hex-style main menu: a large golden Play button in the centre, surrounded by Arsenal, Leaderboard, Settings, Duo, Daily challenge and Account. Duo and the daily challenge are directly accessible and show “from wave 35” until unlocked.
 Mit gespeichertem Durchlauf zeigt „Spielen“ die aktuelle Welle und öffnet die Spielauswahl: „Fortsetzen“ steht an erster Stelle, darunter lässt sich ein neuer Run starten.|With a saved run, “Play” shows the current wave and opens the play selection: “Continue” comes first, and a new run can be started below it.
 Im Hintergrund des Hauptmenüs liegen Spielkarten mit Festung, Türmen und Gegnern, die zur Festung laufen.|The main menu background shows game maps with a fortress, towers and enemies walking towards the fortress.

@@ -5,6 +5,7 @@
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {MENU_MAPS} from './menu-maps.mjs';
+import {MODEL_ENEMIES,isEnemyJoint,enemyPose} from './enemy-motion.mjs';
 
 const WATCHED=['mainMenu','loadoutOverlay','arsenalOverlay','saveOverlay','playModeOverlay'];
 const TILE=1.1,STEP=Math.PI/3,SQRT3=Math.sqrt(3);
@@ -61,7 +62,13 @@ if(renderer){
     }
     for(const f of map.fog){const p=axialToWorld(f.q,f.r);put('tiles/tile_fog',p.x,0,p.z,0);}
     const walkers=[],path=route(map,lib,hexMap,toMenu);
-    if(path)(map.enemies||[]).forEach((type,i,list)=>{const model=models.get('enemies/enemy_'+type);if(!model)return;const obj=model.clone(true);obj.scale.setScalar(TILE);inner.add(obj);walkers.push({obj,s:path.total*i/list.length});});
+    if(path)(map.enemies||[]).forEach((type,i,list)=>{
+      const model=models.get('enemies/enemy_'+type);if(!model)return;
+      // Gliedmaßen wie im Spiel: benannte Knoten (leg_l … bzw. rig_*) mit ihrer Ausgangslage; der Körper wippt im Schritt.
+      const obj=model.clone(true),body=new THREE.Group(),limbs=[];body.add(obj);body.scale.setScalar(TILE);inner.add(body);
+      obj.traverse(node=>{if(LIMBS.includes(node.name)||isEnemyJoint(node.name))limbs.push({node,name:node.name,pos:node.position.clone(),rot:node.rotation.clone(),scale:node.scale.clone()});});
+      walkers.push({obj:body,inner:obj,type,limbs,articulated:MODEL_ENEMIES.includes(type),phase:i*1.7,s:path.total*i/list.length});
+    });
     for(const walker of walkers)walk(walker,path,0);
     group.rotation.y=tilt;scene.add(group);islands.push({group,inner,side,phase:side>0?Math.PI:0,walkers,path});
   }
@@ -90,6 +97,20 @@ if(renderer){
     let i=1;while(i<path.lengths.length-1&&path.lengths[i]<walker.s)i++;
     const a=path.points[i-1],b=path.points[i],k=(walker.s-path.lengths[i-1])/Math.max(1e-6,path.lengths[i]-path.lengths[i-1]);
     walker.obj.position.set(a.x+(b.x-a.x)*k,.006,a.z+(b.z-a.z)*k);walker.obj.rotation.y=Math.atan2(-(b.z-a.z),b.x-a.x);
+    animate(walker,ds);
+  }
+  // Laufanimation wie im Spiel-Renderer: Schrittphase wächst mit der Strecke (0,14 je Spieleinheit), Gelenke nach enemy-motion.mjs.
+  const LIMBS=['leg_l','leg_r','arm_l','arm_r'],STEP_PER_UNIT=.14*(54/TILE);
+  function animate(walker,ds){
+    walker.phase+=ds*STEP_PER_UNIT;
+    if(walker.articulated){
+      for(const limb of walker.limbs){const p=enemyPose(walker.type,limb.name,walker.phase,{});
+        limb.node.position.set(limb.pos.x+p.x,limb.pos.y+p.y,limb.pos.z+p.z);limb.node.rotation.set(limb.rot.x+p.rx,limb.rot.y+p.ry,limb.rot.z+p.rz);
+        limb.node.scale.set(limb.scale.x*p.sx,limb.scale.y*p.sy,limb.scale.z*p.sz);limb.node.visible=p.visible;}
+      return;
+    }
+    const swing=Math.sin(walker.phase)*.7;walker.inner.position.y=Math.abs(Math.sin(walker.phase))*1.6/54;
+    for(const limb of walker.limbs){const turn=limb.name==='leg_l'?swing:limb.name==='leg_r'?-swing:limb.name==='arm_l'?-swing*.8:swing*.8;limb.node.rotation.set(limb.rot.x,limb.rot.y,limb.rot.z+turn);}
   }
   function load(){
     if(loaded) return;loaded=true;const loader=new GLTFLoader(),models=new Map(),edition=typeof HexAssetEdition!=='undefined'?HexAssetEdition:null,generation=++loadGeneration;
@@ -116,7 +137,7 @@ if(renderer){
     if(!reduce)for(const island of islands){
       island.phase+=dt*.5;island.inner.position.y=Math.sin(island.phase)*.05;
       if(stage)island.group.rotation.y+=dt*.08*island.side;
-      for(const walker of island.walkers)walk(walker,island.path,dt*.32);
+      for(const walker of island.walkers)walk(walker,island.path,dt*.4);
     }
     renderer.render(scene,camera);
   }
