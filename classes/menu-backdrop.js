@@ -1,11 +1,13 @@
 /* Dekorativer Hintergrund für Hauptmenü, Loadout und Arsenal: regelkonforme Spielkarten aus den echten Spielkacheln (classes/menu-maps.mjs),
    mit Festung, fünf Türmen auf Bauplätzen, Gebäuden und Gegnern, die auf der Straße zur Festung laufen. Im Hauptmenü kräftig, sonst gedämpft.
    Entwürfe (classes/menu-variant.js): „insel“ eine Karte links und rechts, „seite“ Menü links und Karte rechts, „gespiegelt“ umgekehrt.
+   Look (classes/menu-variant.js): „pracht“ (Standard) mit Licht, Schatten, Fackeln, Bloom und Landschaft aus menu-look.mjs, „klassisch“ wie bisher.
    Rein optisch. Rendert nur, solange eines dieser Fenster sichtbar ist; ohne WebGL bleibt der reine Farbverlauf. */
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {MENU_MAPS} from './menu-maps.mjs';
 import {MODEL_ENEMIES,isEnemyJoint,enemyPose} from './enemy-motion.mjs';
+import {createMenuLook,LOOK_FILES} from './menu-look.mjs';
 
 const WATCHED=['mainMenu','loadoutOverlay','arsenalOverlay','saveOverlay','playModeOverlay'];
 const TILE=1.1,STEP=Math.PI/3,SQRT3=Math.sqrt(3);
@@ -23,14 +25,21 @@ const overlays=WATCHED.map(id=>document.getElementById(id)).filter(Boolean),main
 const anyOpen=()=>overlays.some(o=>!o.classList.contains('hidden'));
 const vivid=()=>!!mainMenu&&!mainMenu.classList.contains('hidden');
 const variant=document.documentElement.dataset.menuVariant||'insel',stage=variant==='seite'||variant==='gespiegelt';
+const reduce=matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+// Schwache Geräte und ?low bzw. Grafik „low“ (wie im Spiel-Renderer): Pracht-Look ohne Nachbearbeitung.
+const lite=(()=>{try{if(new URLSearchParams(location.search).has('low')||localStorage.getItem('hexQuality')==='low')return true;}catch{}return (navigator.hardwareConcurrency||8)<=4||/Mobi|Android/i.test(navigator.userAgent||'');})();
 
 if(renderer){
   renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));
   const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(38,1,1,80);
   camera.position.set(0,11,15);camera.lookAt(0,0,0);
-  scene.add(new THREE.HemisphereLight('#e6f1ff','#4f5f38',1.35));
-  const sun=new THREE.DirectionalLight('#fff1d0',2.4);sun.position.set(6,12,8);scene.add(sun);
-  const rim=new THREE.DirectionalLight('#9fd0ff',.6);rim.position.set(-8,6,-10);scene.add(rim);
+  let look=null;
+  if(document.documentElement.dataset.menuLook!=='klassisch'){try{look=createMenuLook({renderer,scene,camera,tile:TILE,lite,reduce});}catch{look=null;}}
+  if(!look){
+    scene.add(new THREE.HemisphereLight('#e6f1ff','#4f5f38',1.35));
+    const sun=new THREE.DirectionalLight('#fff1d0',2.4);sun.position.set(6,12,8);scene.add(sun);
+    const rim=new THREE.DirectionalLight('#9fd0ff',.6);rim.position.set(-8,6,-10);scene.add(rim);
+  }
 
   const islands=[];let running=false,last=0,loaded=false,loadGeneration=0;
   const inventory=fetch('assets/index.json').then(r=>r.ok?r.json():null).catch(()=>null);
@@ -39,6 +48,7 @@ if(renderer){
   function mapFiles(){
     const set=new Set(['tiles/tile_base_standard','bases/base_standard_walls_1','bases/base_standard_weapon_1','tiles/tile_fog']);
     for(const {map} of MAP_PLACEMENTS){for(const t of map.tiles)if(t.type!=='base')set.add('tiles/tile_'+t.type);for(const t of map.towers)set.add('towers/tower_'+t.model);for(const b of map.buildings)set.add('buildings/building_'+b.model);for(const e of map.enemies||[])set.add('enemies/enemy_'+e);}
+    if(look)for(const f of LOOK_FILES)set.add(f);
     return [...set];
   }
   // Wie im Spiel-Renderer: Modell und Drehung aus HexModelMap, Türme auf HexMap.slotPositions, Gebäude auf HexMap.buildingPosition.
@@ -70,7 +80,11 @@ if(renderer){
       walkers.push({obj:body,inner:obj,type,limbs,articulated:MODEL_ENEMIES.includes(type),phase:i*1.7,s:path.total*i/list.length});
     });
     for(const walker of walkers)walk(walker,path,0);
-    group.rotation.y=tilt;scene.add(group);islands.push({group,inner,side,phase:side>0?Math.PI:0,walkers,path});
+    // Grundfläche der Karte (Mittelpunkt bis äußerste Kachel), damit Wald und Felsen nicht auf ihr stehen.
+    const radius=Math.max(...[...map.tiles,...map.fog].map(t=>{const p=axialToWorld(t.q,t.r);return Math.hypot(p.x,p.z);}))+TILE;
+    const island={group,inner,side,phase:side>0?Math.PI:0,walkers,path,radius};
+    look?.decorate(island,models,map);
+    group.rotation.y=tilt;scene.add(group);islands.push(island);
   }
   // Gegnerweg wie im Spiel: vom entferntesten Feld über die Straßen zur Festung, entlang HexMap.roadGeometry (folgt auch Kurven).
   function route(map,lib,hexMap,toMenu){
@@ -118,7 +132,7 @@ if(renderer){
     const one=(f,available)=>new Promise(done=>{const queue=(edition?edition.paths(f+'.glb',available):[f+'.glb']).filter(p=>!available||available.has(p));
       const attempt=()=>{const src=queue.shift();if(!src)return done();loader.load('assets/'+src,g=>{models.set(f,g.scene);done();},undefined,attempt);};attempt();});
     inventory.then(list=>Promise.all(mapFiles().map(f=>one(f,list&&new Set(list)))))
-      .then(()=>{if(generation===loadGeneration&&models.size){for(const placement of MAP_PLACEMENTS)buildMap(models,placement);place();}});
+      .then(()=>{if(generation===loadGeneration&&models.size){look?.setModels(models);for(const placement of MAP_PLACEMENTS)buildMap(models,placement);place();}});
   }
   // „insel“: Karten rahmen das Menü an den Bildrändern. „seite“/„gespiegelt“: eine Bildhälfte; im Hochformat unter dem Menü.
   function place(){
@@ -129,19 +143,20 @@ if(renderer){
       else if(stage){island.group.position.set(island.side*halfWidth*.5,0,1.2);island.group.scale.setScalar(Math.min(1.05,halfWidth*.42/4.6));}
       else{island.group.position.set(island.side*Math.max(4,halfWidth-3.2),0,z);island.group.scale.setScalar(.82);}
     }
+    look?.layout(islands);
   }
-  function resize(){const w=backdrop.clientWidth||innerWidth,h=backdrop.clientHeight||innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();place();}
+  function resize(){const w=backdrop.clientWidth||innerWidth,h=backdrop.clientHeight||innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();look?.resize(w,h,renderer.getPixelRatio());place();}
   function frame(now){
     if(!running) return;requestAnimationFrame(frame);
     const dt=Math.min((now-last)/1000,.05);last=now;
     if(!reduce)for(const island of islands){
-      island.phase+=dt*.5;island.inner.position.y=Math.sin(island.phase)*.05;
+      // Im Pracht-Look stehen die Karten in der Landschaft, daher ohne Schweben.
+      if(!look){island.phase+=dt*.5;island.inner.position.y=Math.sin(island.phase)*.05;}
       if(stage)island.group.rotation.y+=dt*.08*island.side;
       for(const walker of island.walkers)walk(walker,island.path,dt*.4);
     }
-    renderer.render(scene,camera);
+    if(look)look.render(dt);else renderer.render(scene,camera);
   }
-  const reduce=matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   function sync(){
     const open=anyOpen();backdrop.classList.toggle('on',open);backdrop.classList.toggle('vivid',open&&vivid());
     if(open&&!running){running=true;load();resize();last=performance.now();requestAnimationFrame(frame);}
