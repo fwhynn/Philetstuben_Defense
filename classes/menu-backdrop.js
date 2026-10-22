@@ -8,8 +8,9 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {MENU_MAPS} from './menu-maps.mjs';
 import {MODEL_ENEMIES,isEnemyJoint,enemyPose} from './enemy-motion.mjs';
 import {createMenuLook,LOOK_FILES} from './menu-look.mjs';
+import {polishMaterials} from './material-polish.mjs';
 
-const WATCHED=['mainMenu','loadoutOverlay','arsenalOverlay','saveOverlay','playModeOverlay'];
+const WATCHED=['mainMenu','loadoutOverlay','arsenalOverlay','saveOverlay','playModeOverlay','leaderboardOverlay'];
 const TILE=1.1,STEP=Math.PI/3,SQRT3=Math.sqrt(3);
 const axialToWorld=(q,r)=>({x:TILE*SQRT3*(q+r/2),z:TILE*1.5*r});
 // Spiel-Bausteine sind „const“ in klassischen Skripten: über ihren Namen erreichbar, aber nicht über globalThis.
@@ -130,7 +131,7 @@ if(renderer){
     if(loaded) return;loaded=true;const loader=new GLTFLoader(),models=new Map(),edition=typeof HexAssetEdition!=='undefined'?HexAssetEdition:null,generation=++loadGeneration;
     // Editionen: vorhandene Editionsdatei, sonst die normale.
     const one=(f,available)=>new Promise(done=>{const queue=(edition?edition.paths(f+'.glb',available):[f+'.glb']).filter(p=>!available||available.has(p));
-      const attempt=()=>{const src=queue.shift();if(!src)return done();loader.load('assets/'+src,g=>{models.set(f,g.scene);done();},undefined,attempt);};attempt();});
+      const attempt=()=>{const src=queue.shift();if(!src)return done();loader.load('assets/'+src,g=>{polishMaterials(g.scene);models.set(f,g.scene);done();},undefined,attempt);};attempt();});
     inventory.then(list=>Promise.all(mapFiles().map(f=>one(f,list&&new Set(list)))))
       .then(()=>{if(generation===loadGeneration&&models.size){look?.setModels(models);for(const placement of MAP_PLACEMENTS)buildMap(models,placement);place();}});
   }
@@ -156,6 +157,17 @@ if(renderer){
       for(const walker of island.walkers)walk(walker,island.path,dt*.4);
     }
     if(look)look.render(dt);else renderer.render(scene,camera);
+    mirrorPodium();
+  }
+  // Bestenliste: Ausschnitt dieses Bildes als Hintergrund des Podests (gleich nach dem Rendern, solange der Zeichenpuffer gilt).
+  const podiumCanvas=document.getElementById('leaderboardScene'),leaderboard=document.getElementById('leaderboardOverlay');
+  function mirrorPodium(){
+    if(!podiumCanvas||!leaderboard||leaderboard.classList.contains('hidden'))return;
+    const w=podiumCanvas.clientWidth,h=podiumCanvas.clientHeight;if(!w||!h)return;
+    if(podiumCanvas.width!==w||podiumCanvas.height!==h){podiumCanvas.width=w;podiumCanvas.height=h;}
+    // Mittelstreifen mit Waldrand und Karten, im Seitenverhältnis des Podests, etwas oberhalb der Bildmitte.
+    const sw=canvas.width,sh=Math.min(canvas.height,sw*h/w),sy=Math.max(0,Math.min(canvas.height-sh,canvas.height*.42-sh/2));
+    try{podiumCanvas.getContext('2d').drawImage(canvas,0,sy,sw,sh,0,0,w,h);}catch{}
   }
   function sync(){
     const open=anyOpen();backdrop.classList.toggle('on',open);backdrop.classList.toggle('vivid',open&&vivid());

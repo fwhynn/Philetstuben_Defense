@@ -67,18 +67,26 @@ const HexArsenalTree=(()=>{
     const caption=lines.length?'<text class="skillLabel" y="'+first.toFixed(1)+'" font-size="'+FONT[n.kind]+'">'+lines.map((l,i)=>'<tspan x="0"'+(i?' dy="'+LINE+'em"':'')+'>'+esc(l)+'</tspan>').join('')+'</text>':'';
     return '<g class="'+cls+'" data-node="'+esc(n.id)+'" transform="translate('+n.x.toFixed(1)+' '+n.y.toFixed(1)+')" tabindex="0" role="button" aria-label="'+esc(label)+'"><title>'+esc(label)+'</title>'+shape+inner+caption+'</g>';
   }
+  // Detailspalte: Kopf mit Symbol, Beschreibung, Statuszeile, Werteänderungen als Tabelle, Hinweise als Infokasten.
   function details(n,profile,list){
-    const chips=rows=>(rows||[]).length?'<ul class="skillChanges">'+rows.map(r=>'<li>'+esc(r)+'</li>').join('')+'</ul>':'';
+    const head=(icon,kicker,title,color='')=>'<header class="skillHead"><span class="skillHeadIcon"><span class="hxi hxi-'+icon+'"'+(color?' style="color:'+color+'"':'')+'></span></span><div><p class="skillKicker">'+esc(kicker)+'</p><h3>'+esc(title)+'</h3></div></header>';
+    const changes=rows=>(rows||[]).length?'<section class="skillBlock"><h4>Änderungen</h4><dl class="skillChanges">'+rows.map(r=>{const at=String(r).lastIndexOf(': ');return at>0?'<div><dt>'+esc(r.slice(0,at))+'</dt><dd>'+esc(r.slice(at+2)).replace('→','<span class="skillArrow">→</span>')+'</dd></div>':'<div><dt>'+esc(r)+'</dt><dd></dd></div>';}).join('')+'</dl></section>':'';
+    const status=(text,tone)=>'<p class="skillStatus '+tone+'">'+esc(String(text).replace(/^✓\s*/,''))+'</p>';
+    const note=text=>'<p class="skillHint"><span aria-hidden="true">ⓘ</span>'+esc(text)+'</p>';
     if(n.kind==='hub'){
       const group=GROUPS.find(g=>g.id===state.group),owned=list.filter(t=>t.owned).length;
-      return '<p class="skillKicker">Arsenal</p><h3>'+esc(group.label)+'</h3><p>'+(state.group==='tower'
+      return head(group.icon,'Arsenal',group.label)+'<p class="skillDesc">'+(state.group==='tower'
         ?'Diamanten schalten Türme und ihre Ultimates dauerhaft frei. Stufe 2 und 3 baust du im Run mit Gold aus.'
         :'Diamanten schalten Gebäude und ihre Spezialausbauten dauerhaft frei. Stufe 2 und 3 baust du im Run mit Gold aus.')
-        +'</p><p class="skillStatus">Freigeschaltet: '+owned+'/'+list.length+'</p><p class="skillBalance">◆ '+profile.diamonds+' verfügbar</p>';
+        +'</p><section class="skillBlock"><h4>Fortschritt</h4><p class="skillProgress"><span style="width:'+Math.round(owned/Math.max(1,list.length)*100)+'%"></span></p><p class="skillProgressText">Freigeschaltet: '+owned+'/'+list.length+'</p></section><p class="skillBalance">◆ '+profile.diamonds+' verfügbar</p>'+note('Wähle einen Knoten im Baum, um Details und Freischaltungen zu sehen.');
     }
-    if(n.kind==='root')return '<p class="skillKicker">'+(n.tree.kind==='tower'?'Turm':'Gebäude')+'</p><h3>'+esc(n.name)+'</h3><p>'+esc(n.tree.desc)+'</p><p class="skillStatus">'+esc(n.tree.summary)+'</p>'+(n.action?button(n.action,n.tree.type,profile):'')+'<p class="skillHint">'+esc(n.tree.hint)+'</p>';
-    if(n.kind==='step')return '<p class="skillKicker">'+esc(n.step.tier)+' · im Run mit Gold</p><h3>'+esc(n.name)+'</h3><p>'+esc(n.step.desc)+'</p>'+chips(n.step.changes)+'<p class="skillStatus">Kosten im Run: '+n.step.cost+' Gold</p>';
-    return '<p class="skillKicker">'+esc(n.meta.tier)+'</p><h3>'+esc(n.name)+'</h3><p>'+esc(n.meta.desc)+'</p>'+chips(n.meta.changes)+'<p class="skillStatus">'+esc(n.meta.status)+'</p>'+(n.action?button(n.action,n.tree.type,profile):'');
+    if(n.kind==='root'){
+      const paths=n.tree.paths.map(path=>'<li><span class="skillPathSteps">'+path.steps.map(step=>esc(step.name)).join(' › ')+'</span><span class="skillPathMeta '+(path.meta.state||'locked')+'">'+esc(path.meta.tier)+': '+esc(path.meta.name)+'</span></li>').join('');
+      return head(ICON[n.tree.type]||'arsenal',n.tree.kind==='tower'?'Turm':'Gebäude',n.name,n.tree.color)+'<p class="skillDesc">'+esc(n.tree.desc)+'</p>'+status(n.tree.summary,n.tree.owned?'ok':'locked')
+        +(n.action?button(n.action,n.tree.type,profile):'')+'<section class="skillBlock"><h4>Ausbaupfade</h4><ul class="skillPaths">'+paths+'</ul></section>'+note(n.tree.hint);
+    }
+    if(n.kind==='step')return head(ICON[n.tree.type]||'arsenal',n.step.tier+' · '+n.tree.name,n.name,n.tree.color)+'<p class="skillDesc">'+esc(n.step.desc)+'</p>'+status('Im Run mit Gold: '+n.step.cost+' Gold','gold')+changes(n.step.changes);
+    return head('upgradeBadge',n.meta.tier+' · '+n.tree.name,n.name)+'<p class="skillDesc">'+esc(n.meta.desc)+'</p>'+status(n.meta.status,n.meta.state==='locked'?'locked':'ok')+(n.action?button(n.action,n.tree.type,profile):'')+changes(n.meta.changes);
   }
   function button(action,fallback,profile){
     const ok=!action.blocked&&profile.diamonds>=(action.cost||0);

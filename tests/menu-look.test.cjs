@@ -52,7 +52,30 @@ test('post-processing never draws twice into a multisampled target', ()=>{
 
 test('colour grading clamps channels after saturation so pow() never sees negative values', ()=>{
  // Sattes Grün mit kaum Blau ging nach der Sättigung unter 0; pow() ergab NaN und schwarze Flächen auf Wiese und Festung.
- const source=fs.readFileSync(path.join(__dirname,'../classes/menu-look.mjs'),'utf8');
+ const source=fs.readFileSync(path.join(__dirname,'../classes/grade-shader.mjs'),'utf8');
  const saturate=source.indexOf('col=max(mix(vec3(l),col,saturation),0.);'),contrast=source.indexOf('pow(col/.18');
  assert.ok(saturate>0&&contrast>saturate);
+});
+
+test('in-game grading runs only on high quality, renders both scenes once each and falls back on low',async()=>{
+ const source=fs.readFileSync(path.join(__dirname,'../classes/three-renderer.js'),'utf8'),look=fs.readFileSync(path.join(__dirname,'../classes/game-look.mjs'),'utf8');
+ assert.match(source,/let look=quality==='high'\?createGameLook\(\{renderer:gl,scenes:\[backgroundScene,scene\],camera\}\):null;/);
+ assert.match(source,/look\?\.dispose\(\);look=null;/,'lowerQuality schaltet die Nachbearbeitung ab');
+ assert.match(source,/if\(!look\?\.render\(\)\)\{gl\.clear\(\);gl\.render\(backgroundScene,camera\);gl\.clearDepth\(\);gl\.render\(scene,camera\);\}/);
+ assert.match(look,/new EffectComposer\(renderer,new THREE\.WebGLRenderTarget\(1,1,\{type:THREE\.HalfFloatType\}\)\)/,'kein MSAA im Zwischenbild');
+ const {GAME_GRADE}=await import('../classes/game-look.mjs');
+ assert.ok(GAME_GRADE.saturation>1&&GAME_GRADE.saturation<1.2,'zurückhaltender als das Hauptmenü');
+});
+
+test('material polish makes meadow and foliage richer once, never touches fog tiles',async()=>{
+ const THREE=await import('three'),{polishMaterials}=await import('../classes/material-polish.mjs');
+ const mesh=(name,rgb)=>{const m=new THREE.MeshStandardMaterial({name});m.color.setRGB(...rgb);return new THREE.Mesh(new THREE.BufferGeometry(),m);};
+ const root=new THREE.Group(),grass=mesh('grass_meadow',[.37,.52,.13]),fog=mesh('fog_ground',[.4,.4,.42]),stone=mesh('stone',[.32,.28,.24]),leaf=mesh('foliage_dark',[.09,.22,.05]);
+ root.add(grass,fog,stone,leaf);
+ const before=grass.material.color.clone(),fogBefore=fog.material.color.clone(),hsl=c=>{const t={};c.getHSL(t,THREE.SRGBColorSpace);return t;};
+ assert.equal(polishMaterials(root),2);assert.equal(polishMaterials(root),0,'nur einmal');
+ assert.ok(hsl(grass.material.color).s>hsl(before).s+.1,'Wiese satter');assert.ok(hsl(grass.material.color).l<hsl(before).l,'Wiese dunkler');
+ assert.ok(Math.abs(hsl(grass.material.color).h-hsl(before).h)<.01,'Farbton bleibt');
+ assert.ok(fog.material.color.equals(fogBefore),'Nebelkachel unverändert');assert.equal(stone.material.userData.polished,undefined);
+ for(const file of ['three-renderer.js','menu-backdrop.js'])assert.match(fs.readFileSync(path.join(__dirname,'../classes',file),'utf8'),/polishMaterials\((gltf|g)\.scene\)/,file);
 });

@@ -118,9 +118,9 @@ test('account upload includes completed-wave checkpoint and another browser can 
 test('game preferences persist locally, upload to the account and restore in another browser', async()=>{
  const api=fakeApi(), first=load({accountApi:api});
  const set=(id,value)=>{const el=first.elements.get(id);el.checked=value;el.listeners.change({target:el});};
- set('slotHints',false);set('onboardingHints',false);set('hexGrid',true);set('upgradeStatus',true);set('autoStart',true);set('multiTowerSelection',true);
+ set('slotHints',false);set('onboardingHints',false);set('hexGrid',true);set('upgradeStatus',true);set('autoStart',true);
  await submit(first.document,'register');
- assert.deepEqual(api.server.gameSettings,{slotHints:false,onboardingHints:false,hexGrid:true,upgradeStatus:true,autoStart:true,multiTowerSelection:true,arsenalSeen:[],gameSpeed:1});
+ assert.deepEqual(api.server.gameSettings,{slotHints:false,onboardingHints:false,hexGrid:true,upgradeStatus:true,autoStart:true,arsenalSeen:[],gameSpeed:1});
  const reload=load({initialStorage:Object.fromEntries(first.storage)});
  for(const [key,value] of Object.entries(api.server.gameSettings))if(typeof value==='boolean')assert.equal(reload.elements.get(key).checked,value,key);
  const second=load({accountApi:api});await flush();await flush();

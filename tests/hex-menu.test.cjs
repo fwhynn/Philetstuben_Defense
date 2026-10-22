@@ -135,3 +135,18 @@ test('menu backdrop and tower portraits reach the const game modules by name, no
  }
  for(const file of ['classes/map.js','classes/data.js','classes/model-map.js'])assert.match(fs.readFileSync(path.join(__dirname,'..',file),'utf8'),/^(\/\*.*\*\/\s*)?const Hex/m,file);
 });
+
+test('main menu size counts the wordmark height so small laptop screens do not scroll',()=>{
+ const css=fs.readFileSync(path.join(__dirname,'../hexwerk.css'),'utf8');
+ const formulas=css.match(/--u:max\(56px,min\(\d+px,calc\(\(100d?vh - var\(--reserve\)\)\/[^,]+/g)||[];
+ assert.ok(formulas.length>=4,'Formeln gefunden: '+formulas.length);
+ for(const formula of formulas)assert.match(formula,/\(var\(--span-h\) \+ var\(--brand-r\)\)/,formula);
+ assert.match(css,/--brand-r:1\.05/);
+});
+
+test('wave planning opens centred under the phase badge, not right-aligned',()=>{
+ const source=fs.readFileSync(path.join(__dirname,'../classes/game.js'),'utf8'),css=fs.readFileSync(path.join(__dirname,'../hexwerk.css'),'utf8');
+ assert.match(source,/panel\.parentElement\.id === 'waveDropdown' \? \(anchor\.left \+ anchor\.right - width\) \/ 2/);
+ // Eine Verschiebung (translate) am Phasenschild würde fixe Kinder versetzen.
+ assert.doesNotMatch(css,/\.hud #waveDropdown\{[^}]*translate/);
+});

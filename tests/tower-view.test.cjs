@@ -52,3 +52,19 @@ test('temporary overload updates current and compared attack intervals, then exp
  button(cards(e)[0],n=>n.id==='compare-volley').listeners.click();const buy=button(cards(e)[0],n=>n.className?.includes('towerBuy'));buy.listeners.pointerenter();buy.listeners.pointerleave();assert.ok(e.a.state.previewUpgrade);assert.match(e.elements.get('towerUpgrades').children.find(n=>n.className==='towerComparisonSheet').innerHTML,/0,43 s/);
  e.a.state.elapsedMs=1001;e.a.renderAll();assert.match(e.elements.get('towerUpgrades').children.find(n=>n.className==='towerComparisonSheet').innerHTML,/0,65 s/);assert.doesNotMatch(e.elements.get('towerInfluences').innerHTML,/Überladung aktiv/);
 });
+test('tower window v2: name and type share a title row, details stay collapsed, values open from the footer',()=>{
+ const e=fixture(),card=cards(e)[0],title=card.children.find(n=>n.className==='towerUpgradeTitle');
+ assert.ok(title,'Titelzeile');assert.equal(title.children.length,2);assert.equal(title.children[0].textContent,'Salve');assert.equal(title.children[1].className,'towerUpgradeTag');
+ const toggle=button(card,n=>n.id==='compare-volley');assert.equal(toggle.textContent,'Details & Vergleich');assert.equal(toggle.attributes['aria-expanded'],'false');
+ e.elements.get('towerValuesBtn').listeners.click();assert.equal(e.elements.get('towerExtraDetails').open,true);
+ assert.match(e.elements.get('towerSubNote').textContent,/^Archer · Basisstufe$/);
+ assert.match(e.elements.get('towerInfluences').innerHTML,/<small>Biom des Bauplatzes<\/small>/);
+});
+test('build menu rows match the tower window: type tag, short stats, strength line and price with hotkey',()=>{
+ const e=fixture();e.a.state.selectedTower=null;e.a.state.selectedSlot={q:1,r:0,index:0};e.a.state.selectedSlots=[e.a.state.selectedSlot];e.a.renderAll();
+ const offer=e.elements.get('towerMenu').children[0].innerHTML;
+ assert.match(offer,/class="towerOfferTitle"><strong class="towerOfferName">[^<]+<\/strong><span class="towerUpgradeTag" data-kind="[a-z]+">/);
+ assert.match(offer,/class="towerOfferStats"><span class="towerUpgradeMain">[^<]+ Schaden · /);
+ assert.match(offer,/towerPriceValue">\d+</);assert.match(offer,/<kbd>1<\/kbd>/);
+ assert.doesNotMatch(offer,/statChip/,'keine Wertechips mehr in der Zeile');
+});
