@@ -83,6 +83,7 @@ test('main-menu settings mirror the game settings and close with Escape',()=>{
  node('menuSoundVolume').value='20';node('menuSoundVolume').listeners.input();
  assert.equal(node('soundVolume').value,'20');assert.deepEqual(node('soundVolume').events,['input']);
  node('menuOnboardingHints').checked=true;node('menuOnboardingHints').listeners.change();assert.equal(node('onboardingHints').checked,true);
+ node('menuMusicVolume').value='15';node('menuMusicVolume').listeners.input();assert.equal(node('musicVolume').value,'15');
  let stopped=false;docKey({key:'Escape',preventDefault(){},stopImmediatePropagation(){stopped=true;}});
  assert.equal(classes.has('hidden'),true);assert.equal(stopped,true);assert.equal(focused,'menuSettingsBtn');
 });

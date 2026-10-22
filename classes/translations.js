@@ -109,6 +109,8 @@ Automatisch|Automatic
 Überspringen|Skip
 Lautstärke|Volume
 Sounds aktiv|Sound enabled
+Musik aktiv|Music enabled
+Musiklautstärke|Music volume
 Turm|Tower
 Türme|Towers
 Turmplatz|Tower slot
@@ -1755,6 +1757,7 @@ Tastenbelegung, Hex-Grid und Spielhilfen findest du im Spiel unter Einstellungen
 `);
 HexTranslations.add(`
 Neue Hex-Oberfläche|New hex interface
+Ruhige Klaviermusik im Hintergrund, im Hauptmenü und im Spiel in Endlosschleife. Musik lässt sich in den Einstellungen getrennt von den Soundeffekten ein- und ausschalten und in der Lautstärke regeln; im Hintergrund-Tab pausiert sie. Musik von Nikita Kondrashev über Pixabay, verlinkt in den Einstellungen.|Calm piano music now plays in a loop in the main menu and in game. Music can be switched on and off and adjusted separately from sound effects in the settings, and pauses while the tab is in the background. Music by Nikita Kondrashev via Pixabay, linked in the settings.
 Gegner im Hintergrund des Hauptmenüs laufen jetzt mit Laufanimation.|Enemies in the main menu background now walk with an animation.
 Das Arsenal lässt sich als Fertigkeitenbaum anzeigen (Test): getrennte Reiter für Türme und Gebäude, vom Arsenal in der Mitte über Stufe 2 und 3 bis zu Ultimates und Spezialausbauten. Ein Klick auf einen Knoten zeigt die Details und schaltet direkt frei; Ziehen verschiebt, das Mausrad zoomt. Die bisherige Werkstatt bleibt umschaltbar.|The arsenal can be shown as a skill tree (test): separate tabs for towers and buildings, from the arsenal in the centre through levels 2 and 3 to ultimates and special upgrades. Clicking a node shows its details and unlocks it directly; drag to pan, use the mouse wheel to zoom. The previous workshop view is still available.
 Neues Hauptmenü im Hex-Stil: ein großer goldener Spielen-Knopf in der Mitte, darum Arsenal, Bestenliste, Einstellungen, Duo, Tägliche Herausforderung und Account. Duo und die Tägliche Herausforderung sind direkt erreichbar und zeigen vor der Freischaltung „ab Welle 35“.|New hex-style main menu: a large golden Play button in the centre, surrounded by Arsenal, Leaderboard, Settings, Duo, Daily challenge and Account. Duo and the daily challenge are directly accessible and show “from wave 35” until unlocked.

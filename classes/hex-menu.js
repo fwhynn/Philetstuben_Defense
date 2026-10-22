@@ -18,7 +18,7 @@
 
  const overlay=document.getElementById('menuSettingsOverlay'),opener=document.getElementById('menuSettingsBtn');if(!overlay||!opener)return;
  // [Menüschalter, Spielschalter, Eigenschaft, weitergereichte Ereignisse]
- const mirrors=[['menuSoundEnabled','soundEnabled','checked',['change']],['menuSoundVolume','soundVolume','value',['input','change']],['menuOnboardingHints','onboardingHints','checked',['change']]]
+ const mirrors=[['menuSoundEnabled','soundEnabled','checked',['change']],['menuSoundVolume','soundVolume','value',['input','change']],['menuMusicEnabled','musicEnabled','checked',['change']],['menuMusicVolume','musicVolume','value',['input','change']],['menuOnboardingHints','onboardingHints','checked',['change']]]
    .map(([mine,game,prop,events])=>({mine:document.getElementById(mine),game:document.getElementById(game),prop,events})).filter(m=>m.mine&&m.game);
  for(const m of mirrors)for(const type of m.events)m.mine.addEventListener(type,()=>{m.game[m.prop]=m.mine[m.prop];m.game.dispatchEvent(new Event(type,{bubbles:true}));});
  const open=()=>{for(const m of mirrors)m.mine[m.prop]=m.game[m.prop];overlay.classList.remove('hidden');};

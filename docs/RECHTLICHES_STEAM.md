@@ -37,7 +37,7 @@ Keine Werbe- oder Analyse-Cookies, kein Tracking durch Dritte, three.js liegt lo
    - Kauf, Widerruf und Rückerstattung laufen über Valve; keine eigenen AGB dafür nötig.
 7. **Nutzungsbedingungen / Verhaltensregeln** für Accounts und öffentliche Benutzernamen (verbotene Namen, Moderation, Sperren). Kurz halten, im Accountfenster verlinken.
 8. **Altersgrenze:** Account ab 16 oder mit Zustimmung der Eltern (Art. 8 DSGVO). Die Registrierung sollte das abfragen oder bestätigen lassen. Jugendschutz: Steam-Fragebogen; für eine physische oder konsolen­gebundene Veröffentlichung wäre eine USK-Prüfung nötig.
-9. **Rechte an Assets:** schriftliche Nutzungsrechte vom Designer für alle gelieferten Modelle, Grafiken und Schriften (exklusiv/nicht exklusiv, kommerziell, zeitlich unbegrenzt, inkl. Bearbeitung). Lizenzliste im Spiel: three.js (MIT), Schriften (OFL), ggf. Sounds.
+9. **Rechte an Assets:** schriftliche Nutzungsrechte vom Designer für alle gelieferten Modelle, Grafiken und Schriften (exklusiv/nicht exklusiv, kommerziell, zeitlich unbegrenzt, inkl. Bearbeitung). Lizenzliste im Spiel: three.js (MIT), Schriften (OFL), Musik (Pixabay Content License: „Inspirational Calm Romantic Story Piano“ von Nikita Kondrashev, Nachweis mit Link in den Einstellungen; Lizenzstand vor Release auf pixabay.com/service/license-summary prüfen).
 10. **Name „AutoHex TD“** vor dem Release in DPMA- und EUIPO-Markenregistern sowie auf Steam auf Kollisionen prüfen.
 
 ## Auszufüllende Platzhalter

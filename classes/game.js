@@ -1667,6 +1667,8 @@ R dreht die Karte, dann Feld anklicken.`;
   const soundToggle = document.getElementById('soundEnabled');
   soundToggle.addEventListener('change', scheduleCloudSave);
   document.getElementById('soundVolume').addEventListener('change', scheduleCloudSave);
+  document.getElementById('musicEnabled').addEventListener('change', scheduleCloudSave);
+  document.getElementById('musicVolume').addEventListener('change', scheduleCloudSave);
   newRunBtn.addEventListener('click', openLoadout);
   document.getElementById('confirmLoadoutBtn').addEventListener('click', confirmLoadout);
   document.getElementById('cancelLoadoutBtn').addEventListener('click', () => { loadoutOverlay.classList.add('hidden'); if (!hasActiveRun || loadoutEdit) openMainMenu(); loadoutEdit = false; });
