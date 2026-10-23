@@ -9,3 +9,8 @@ webhook.log
 assets/index.json
 .deploy-webhook-secret
 .npm-cache/
+
+# generated previews, exports and archives
+/artifacts/enemies/
+/artifacts/*.zip
+/output/
