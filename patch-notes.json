@@ -1,6 +1,6 @@
 [
   {
-    "version": "next",
+    "version": "1.1.1",
     "title": "Neue Hex-Oberfläche und sichere Spielstände",
     "changes": [
       "Weites Land hat jetzt dieselbe grüne Wiese wie die übrigen Hex-Felder statt eines trockenen Gelbtons, in der normalen, der Sakura- und der Halloween-Edition.",
@@ -35,7 +35,8 @@
       "Bessere Darstellung auf kleineren Bildschirmen: Das Hauptmenü passt ohne Scrollen, die Anzeigen oben rechts überdecken das Phasenschild nicht mehr, und die Wellenplanung öffnet mittig darunter.",
       "Updates bewahren bestehende Spielstände und Bestenlisten. Während der kurzen Vorbereitung kann die Account-Speicherung vorübergehend pausieren; der lokale Fortschritt bleibt erhalten.",
       "Impressum und Datenschutzhinweise sind direkt aus dem Spiel erreichbar; Datenschutz- und Löschanfragen können per E-Mail gestellt werden."
-    ]
+    ],
+    "date": "2026-10-23"
   },
   {
     "version": "1.1.0",
