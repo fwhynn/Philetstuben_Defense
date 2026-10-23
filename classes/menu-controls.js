@@ -11,8 +11,7 @@
    if(event.target.closest?.('#rewardOverlay,#celebration,#campaignVictory,#hotkeyTip,#introductionNotice'))return;
    for(const panel of panels)if(panel.open&&!panel.contains(event.target))panel.open=false;
    const disclosureOpener=event.target.closest?.('[aria-controls]');
-   // Fensterbereiche mit data-keep-open (Ergebnisdetails, Biome, Tastenübersicht) bleiben offen; sie sind Inhalt, kein Ausklappmenü.
-   for(const panel of document.querySelectorAll('details[open]'))if(panel.open&&!panel.matches?.('[data-keep-open]')&&!panel.contains(event.target)&&disclosureOpener?.getAttribute('aria-controls')!==panel.id)panel.open=false;
+   for(const panel of document.querySelectorAll('details[open]'))if(panel.open&&!panel.contains(event.target)&&disclosureOpener?.getAttribute('aria-controls')!==panel.id)panel.open=false;
    for(const drawer of document.querySelectorAll('.drawer:not(.hidden)')){
      const opener=event.target.closest?.('[data-drawer]');
      if(!drawer.contains(event.target)&&opener?.dataset.drawer!==drawer.id)drawer.classList.add('hidden');

@@ -1,5 +1,13 @@
 [
   {
+    "version": "next",
+    "title": "Zurück zum bisherigen Design",
+    "changes": [
+      "Hauptmenü, Spieloberfläche, Turmfenster und die übrigen Fenster sehen wieder so aus wie vor der Hex-Oberfläche. Die Hex-Oberfläche, die Baumansicht im Arsenal und die Klavier-Hintergrundmusik sind vorerst nicht mehr zu sehen bzw. zu hören.",
+      "Impressum und Datenschutz sind weiterhin unten im Hauptmenü erreichbar. Spielstand-Sicherung, Balance-Änderungen und die grüne Wiese auf Weitem Land bleiben erhalten."
+    ]
+  },
+  {
     "version": "1.1.2",
     "title": "Kleine Verbesserungen",
     "changes": [

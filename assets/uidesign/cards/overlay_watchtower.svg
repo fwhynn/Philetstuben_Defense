@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Wachturm">
-  <path d="M70 148a34 9 0 1 0 68 0a34 9 0 1 0 -68 0Z" fill="#1f3a12" opacity="0.35"/>
-  <path d="M80 148L86 148L94 70L90 70ZM114 148L120 148L110 70L106 70ZM86 120L114 104L115 108L87 124Z" fill="#5e4129"/>
-  <path d="M82 70L118 70L118 54L82 54Z" fill="#8a6440"/>
-  <path d="M118 70L126 64L126 48L118 54Z" fill="#a87a4c"/>
-  <path d="M76 56L124 56L100 24Z" fill="#c93b34"/>
-  <path d="M124 56L132 50L100 24Z" fill="#e8605a"/>
-  <path d="M100 24L100 8L116 13L100 18Z" fill="#2f4f8f"/>
-</svg>

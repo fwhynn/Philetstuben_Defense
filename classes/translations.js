@@ -1910,3 +1910,9 @@ Object.assign(globalThis.HexTranslations.en, {
   "Impressum und Datenschutzhinweise sind direkt aus dem Spiel erreichbar; Datenschutz- und Löschanfragen können per E-Mail gestellt werden.": "Legal and privacy information is accessible directly from the game; privacy and deletion requests can be sent by email.",
   "Updates bewahren bestehende Spielstände und Bestenlisten. Während der kurzen Vorbereitung kann die Account-Speicherung vorübergehend pausieren; der lokale Fortschritt bleibt erhalten.": "Updates preserve existing saves and leaderboards. Account saving may pause briefly during preparation; local progress is retained."
 });
+
+Object.assign(globalThis.HexTranslations.en, {
+  "Zurück zum bisherigen Design": "Back to the previous design",
+  "Hauptmenü, Spieloberfläche, Turmfenster und die übrigen Fenster sehen wieder so aus wie vor der Hex-Oberfläche. Die Hex-Oberfläche, die Baumansicht im Arsenal und die Klavier-Hintergrundmusik sind vorerst nicht mehr zu sehen bzw. zu hören.": "The main menu, game interface, tower window and other windows look as they did before the hex interface again. The hex interface, the Arsenal tree view and the piano background music are gone for now.",
+  "Impressum und Datenschutz sind weiterhin unten im Hauptmenü erreichbar. Spielstand-Sicherung, Balance-Änderungen und die grüne Wiese auf Weitem Land bleiben erhalten.": "The legal notice and privacy policy remain available at the bottom of the main menu. Save protection, balance changes and the green meadow on Open Land are kept."
+});
