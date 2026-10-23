@@ -1,7 +1,7 @@
 [
   {
     "version": "next",
-    "title": "Neue Hex-Oberfläche",
+    "title": "Neue Hex-Oberfläche und sichere Spielstände",
     "changes": [
       "Weites Land hat jetzt dieselbe grüne Wiese wie die übrigen Hex-Felder statt eines trockenen Gelbtons, in der normalen, der Sakura- und der Halloween-Edition.",
       "Neues Hauptmenü im Hex-Stil: ein großer goldener Spielen-Knopf in der Mitte, darum Arsenal, Bestenliste, Einstellungen, Duo, Tägliche Herausforderung und Account. Duo und die Tägliche Herausforderung sind direkt erreichbar und zeigen vor der Freischaltung „ab Welle 35“.",
@@ -24,7 +24,16 @@
       "Die Basis lässt sich auf Mobilgeräten zum Ausbauen öffnen. Fernschmieden markieren ein Zusatzfeld, das inzwischen gleich stark durch eine nahe Schmiede versorgt wird.",
       "Verbrauchshilfen sind auf drei Einsätze je Sorte und Welle begrenzt. Vorbereitete Einsätze zählen mit; die verbleibende Anzahl wird angezeigt.",
       "Kettenblitze und Nekromanten verursachen mehr Schaden, Flammentürme und Minen weniger. Flammen sind gegen Rüstung und Magieresistenz schwächer. Gegner in Welle 1 bewegen sich langsamer.",
-      "Rammbockkäfer beschleunigen auf geraden Straßen schneller. Nekromanten erhalten auch aus Krähenfuß-Kills Seelen."
+      "Rammbockkäfer beschleunigen auf geraden Straßen schneller. Nekromanten erhalten auch aus Krähenfuß-Kills Seelen.",
+      "Die Einstellungen sind ein großes Fenster mit Bereichen: Spiel & Anzeige, Audio & Sprache, Steuerung mit Tastenübersicht und Hilfe mit Tutorial, Spielregeln und Biomen. Schalter und Regler statt Häkchen; unten stehen Welle, „Speichern & Hauptmenü“ und „Zurück zum Spiel“. Der Schalter „Mehrfachauswahl“ entfällt, mehrere Bauplätze wählst du mit Strg + Klick.",
+      "Neues Account-Fenster: Registrieren und Anmelden als Reiter, die Anmeldung über Twitch und Google ist angekündigt. Angemeldet zeigt „Account & Spielstand“ Diamanten, beste Welle und letzte Sicherung sowie Hochladen und Herunterladen des Spielstands.",
+      "Neuer Ergebnisbildschirm „Durchlauf beendet“: erreichte Welle, gewonnene Diamanten, Platzierung, Kills, besiegte Bosse, verdientes Gold und eine übersichtliche Turmstatistik. Ein Klick auf einen Turm zeigt seine Bau-, Upgrade- und Erstattungskosten.",
+      "Die Bestenliste zeigt die ersten drei auf einem Podest vor dem Hauptmenü-Hintergrund, mit Boss-Porträts als Medaillen. Dein Eintrag ist hervorgehoben, unten steht deine Platzierung. Bei Gleichstand stehen trotzdem drei Einträge auf dem Podest.",
+      "Arsenal-Baum: Die Detailspalte ist größer und gegliedert, mit Ausbaupfaden, Statuszeile und Werteänderungen als Tabelle.",
+      "Turmfenster überarbeitet: größere Schrift, kompakte Upgrade-Karten mit Typ, Kurzwerten und Preis; Beschreibung und Vergleich gibt es auf Wunsch über das Info-Symbol. „Werte & Einflüsse“ und „Verkaufen“ sind immer unten sichtbar, und jeder Einfluss nennt seine Herkunft. „Turm bauen“ ist im gleichen Stil gestaltet, mit Turmbildern und größeren Zeilen.",
+      "Das Spielfeld wirkt kräftiger: sattere Wiese, Laub und Wege, ein etwas dunklerer Himmel und bei hoher Grafikqualität eine Farbkorrektur wie im Hauptmenü.",
+      "Bessere Darstellung auf kleineren Bildschirmen: Das Hauptmenü passt ohne Scrollen, die Anzeigen oben rechts überdecken das Phasenschild nicht mehr, und die Wellenplanung öffnet mittig darunter.",
+      "Updates bewahren bestehende Spielstände und Bestenlisten. Während der kurzen Vorbereitung kann die Account-Speicherung vorübergehend pausieren; der lokale Fortschritt bleibt erhalten."
     ]
   },
   {

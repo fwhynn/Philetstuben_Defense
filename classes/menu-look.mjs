@@ -13,6 +13,7 @@ import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
 import {ShaderPass} from 'three/addons/postprocessing/ShaderPass.js';
 import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
 import {SMAAPass} from 'three/addons/postprocessing/SMAAPass.js';
+import {gradeShader} from './grade-shader.mjs';
 
 const DECOR=['pine_l','pine_m','pine_s','tree_a','tree_b','rock_a','rock_b','bush','grass','flowers','torch'];
 export const LOOK_FILES=DECOR.map(name=>'decor/deco_'+name);
@@ -52,19 +53,6 @@ export function torchSpots(exit,tile=1.1){
   return [base-.5,base+.5,base+Math.PI-.75,base+Math.PI+.75].map(a=>({x:Math.cos(a)*R,z:Math.sin(a)*R}));
 }
 
-const GradeShader={
-  uniforms:{tDiffuse:{value:null},saturation:{value:1.2},contrast:{value:1.07},vignette:{value:.38},
-    shadowTint:{value:new THREE.Vector3(.9,.97,1.1)},lightTint:{value:new THREE.Vector3(1.07,1,.9)}},
-  vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
-  fragmentShader:`uniform sampler2D tDiffuse;uniform float saturation,contrast,vignette;uniform vec3 shadowTint,lightTint;varying vec2 vUv;
-    void main(){vec4 c=texture2D(tDiffuse,vUv);vec3 col=max(c.rgb,0.);float l=dot(col,vec3(.2126,.7152,.0722));
-      // Sättigung kann einzelne Kanäle unter 0 drücken (sattes Grün hat kaum Blau); pow() darauf ergibt NaN = schwarze Flächen.
-      col=max(mix(vec3(l),col,saturation),0.);
-      col=.18*pow(col/.18+1e-5,vec3(contrast));
-      col*=mix(shadowTint,lightTint,smoothstep(.02,.6,l));
-      float d=distance(vUv,vec2(.5));col*=1.-vignette*smoothstep(.38,.9,d);
-      gl_FragColor=vec4(col,c.a);}`
-};
 
 function gradientTexture(stops,width=4,height=512){
   const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;const ctx=canvas.getContext('2d'),g=ctx.createLinearGradient(0,0,0,height);
@@ -150,7 +138,7 @@ export function createMenuLook({renderer,scene,camera,tile=1.1,lite=false,reduce
     composer=new EffectComposer(renderer,new THREE.WebGLRenderTarget(1,1,{type:THREE.HalfFloatType}));
     composer.addPass(new RenderPass(scene,camera));
     composer.addPass(new UnrealBloomPass(new THREE.Vector2(1,1),.6,.5,3));
-    composer.addPass(new ShaderPass(GradeShader));composer.addPass(new OutputPass());composer.addPass(new SMAAPass());
+    composer.addPass(new ShaderPass(gradeShader()));composer.addPass(new OutputPass());composer.addPass(new SMAAPass());
   }catch{composer=null;}}
 
   // --- Fackeln und Festungslicht je Karte

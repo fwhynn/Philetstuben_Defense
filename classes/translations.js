@@ -1757,6 +1757,14 @@ Tastenbelegung, Hex-Grid und Spielhilfen findest du im Spiel unter Einstellungen
 `);
 HexTranslations.add(`
 Neue Hex-Oberfläche|New hex interface
+Die Einstellungen sind ein großes Fenster mit Bereichen: Spiel & Anzeige, Audio & Sprache, Steuerung mit Tastenübersicht und Hilfe mit Tutorial, Spielregeln und Biomen. Schalter und Regler statt Häkchen; unten stehen Welle, „Speichern & Hauptmenü“ und „Zurück zum Spiel“. Der Schalter „Mehrfachauswahl“ entfällt, mehrere Bauplätze wählst du mit Strg + Klick.|Settings are now a large window with sections: Game & display, Audio & language, Controls with a key overview, and Help with tutorial, rules and biomes. Switches and sliders replace checkboxes; the bottom bar shows the wave, “Save & main menu” and “Back to the game”. The “Multi-select” switch is gone; select several building slots with Ctrl + click.
+Neues Account-Fenster: Registrieren und Anmelden als Reiter, die Anmeldung über Twitch und Google ist angekündigt. Angemeldet zeigt „Account & Spielstand“ Diamanten, beste Welle und letzte Sicherung sowie Hochladen und Herunterladen des Spielstands.|New account window: register and sign in as tabs, sign-in with Twitch and Google is announced. When signed in, “Account & save” shows diamonds, best wave and last backup, plus uploading and downloading your progress.
+Neuer Ergebnisbildschirm „Durchlauf beendet“: erreichte Welle, gewonnene Diamanten, Platzierung, Kills, besiegte Bosse, verdientes Gold und eine übersichtliche Turmstatistik. Ein Klick auf einen Turm zeigt seine Bau-, Upgrade- und Erstattungskosten.|New “Run complete” screen: wave reached, diamonds earned, ranking, kills, bosses defeated, gold earned and a clear tower statistic. Clicking a tower shows its build, upgrade and refund costs.
+Die Bestenliste zeigt die ersten drei auf einem Podest vor dem Hauptmenü-Hintergrund, mit Boss-Porträts als Medaillen. Dein Eintrag ist hervorgehoben, unten steht deine Platzierung. Bei Gleichstand stehen trotzdem drei Einträge auf dem Podest.|The leaderboard shows the top three on a podium in front of the main menu landscape, with boss portraits as medals. Your entry is highlighted and your rank is shown at the bottom. With tied ranks the podium still shows three entries.
+Arsenal-Baum: Die Detailspalte ist größer und gegliedert, mit Ausbaupfaden, Statuszeile und Werteänderungen als Tabelle.|Arsenal tree: the detail column is larger and structured, with upgrade paths, a status line and value changes as a table.
+Turmfenster überarbeitet: größere Schrift, kompakte Upgrade-Karten mit Typ, Kurzwerten und Preis; Beschreibung und Vergleich gibt es auf Wunsch über das Info-Symbol. „Werte & Einflüsse“ und „Verkaufen“ sind immer unten sichtbar, und jeder Einfluss nennt seine Herkunft. „Turm bauen“ ist im gleichen Stil gestaltet, mit Turmbildern und größeren Zeilen.|Tower window reworked: larger text, compact upgrade cards with type, key values and price; description and comparison are available via the info button. “Values & influences” and “Sell” are always visible at the bottom, and every influence states where it comes from. “Build tower” uses the same style with tower images and larger rows.
+Das Spielfeld wirkt kräftiger: sattere Wiese, Laub und Wege, ein etwas dunklerer Himmel und bei hoher Grafikqualität eine Farbkorrektur wie im Hauptmenü.|The playing field looks richer: more saturated meadow, foliage and paths, a slightly darker sky and, on high graphics quality, colour grading like in the main menu.
+Bessere Darstellung auf kleineren Bildschirmen: Das Hauptmenü passt ohne Scrollen, die Anzeigen oben rechts überdecken das Phasenschild nicht mehr, und die Wellenplanung öffnet mittig darunter.|Better layout on smaller screens: the main menu fits without scrolling, the top-right displays no longer cover the phase badge, and the wave plan opens centred below it.
 Der Hintergrund des Hauptmenüs ist aufwendiger gestaltet: Abendsonne mit weichen Schatten, flackernde Fackeln und warmes Licht an der Festung, leuchtende Flammen, kräftigere Farben, dazu Wiese, Wald, Berge im Dunst, Himmel und ziehende Wolken rund um die Karten. Auf schwächeren Geräten entfallen die Leuchteffekte, bei „Bewegung reduzieren“ das Flackern und der Wolkenzug.|The main menu background is more elaborate: evening sun with soft shadows, flickering torches and warm light at the fortress, glowing flames, richer colours, plus meadow, forest, hazy mountains, sky and drifting clouds around the maps. Weaker devices skip the glow effects, and “reduce motion” turns off flickering and cloud movement.
 Ruhige Klaviermusik im Hintergrund, im Hauptmenü und im Spiel in Endlosschleife. Musik lässt sich in den Einstellungen getrennt von den Soundeffekten ein- und ausschalten und in der Lautstärke regeln; im Hintergrund-Tab pausiert sie. Musik von Nikita Kondrashev über Pixabay, verlinkt in den Einstellungen.|Calm piano music now plays in a loop in the main menu and in game. Music can be switched on and off and adjusted separately from sound effects in the settings, and pauses while the tab is in the background. Music by Nikita Kondrashev via Pixabay, linked in the settings.
 Gegner im Hintergrund des Hauptmenüs laufen jetzt mit Laufanimation.|Enemies in the main menu background now walk with an animation.
@@ -1789,4 +1797,113 @@ Object.assign(globalThis.HexTranslations.en, {
   "Fokus kopieren": "Copy focus",
   "Fokus einfügen": "Paste focus",
   "Zusatz-Hex bereits gleich stark versorgt · neu wählen": "Remote tile already equally supported · choose another"
+});
+// Fenster im Referenzstil (Einstellungen, Account, Durchlauf, Bestenliste)
+HexTranslations.add(`
+Passe dein Spielerlebnis an.|Adjust your game experience.
+Spiel & Anzeige|Game & display
+Audio & Sprache|Audio & language
+Steuerung|Controls
+Hilfe|Help
+Kartenübersicht|Map overview
+Freie Bauplätze anzeigen|Show free building slots
+Weiß: Türme · Türkis: Gebäude|White: towers · Teal: buildings
+Upgrade-Markierungen (U)|Upgrade markers (U)
+↑ zeigt, was im Run ausbaubar ist, unabhängig vom Gold.|↑ shows what can be upgraded in the run, regardless of gold.
+Hex-Raster anzeigen (G)|Show hex grid (G)
+Kanten der Spielfelder hervorheben.|Highlight the edges of the tiles.
+Spielablauf|Gameplay
+Einsteigerhinweise|Beginner hints
+Wellen automatisch starten|Start waves automatically
+Nach dem Platzieren eines Hexes starten.|Start after placing a hex.
+Nächster Run|Next run
+Startwert (Seed)|Seed
+Alle Spielgeräusche wiedergeben.|Play all game sounds.
+Lautstärke aller Spielgeräusche.|Volume of all game sounds.
+Hintergrundmusik im Menü und im Spiel.|Background music in the menu and in game.
+Unabhängig von den Spielgeräuschen.|Independent of the game sounds.
+Gilt für Menüs, Spieltexte und Hinweise.|Applies to menus, game texts and hints.
+Tastatur & Maus|Keyboard & mouse
+Die wichtigsten Eingaben auf einen Blick.|The most important inputs at a glance.
+Kamera bewegen/drehen|Move/rotate camera
+Kamera drehen (halten)|Rotate camera (hold)
+Kamera bewegen|Move camera
+Kamera|Camera
+Zoomen|Zoom
+Mausrad-Klick|Middle click
+Mausrad|Mouse wheel
+Ziehen|Drag
+Bauen & Spielen|Build & play
+Handkarte wählen|Choose hand card
+Welle starten|Start wave
+Tempo erhöhen|Increase speed
+Mehrfachauswahl|Multi-select
+Strg|Ctrl
+Klick|Click
+Einstellungen / Schließen|Settings / close
+Anzeige|Display
+Upgrade-Markierungen|Upgrade markers
+FPS-Anzeige|FPS counter
+ⓘ Bei zwei Fronten am Anfang: Karten 1–5.|ⓘ With two fronts at the start: cards 1–5.
+ⓘ Tempo: 1× bis 8×, danach wieder 1×.|ⓘ Speed: 1× to 8×, then back to 1×.
+Einstieg|Getting started
+Lerne das Platzieren von Hexen und den Turmbau.|Learn how to place hexes and build towers.
+Gegner −15 % Tempo · Türme −15 % Reichweite.|Enemies −15% speed · Towers −15% range.
+Kettenblitz +25 % Sprungweite · Wind +1 Durchschlagziel · Archer/Balliste −15 % Angriffsrate.|Chain lightning +25% jump range · Wind +1 pierce target · Archer/Ballista −15% attack rate.
+Feuer +20 % Schaden · Freeze −15 % Reichweite · Wasser-Slow −25 % Dauer.|Fire +20% damage · Freeze −15% range · Water slow −25% duration.
+Steuerung nachschlagen|Look up controls
+Pausiert|Paused
+Änderungen werden automatisch gespeichert.|Changes are saved automatically.
+Zurück zum Spiel|Back to the game
+Hilfe & Rechtliches|Help & legal
+Tipps zu Steuerung, Bauen und neuen Biomen.|Tips on controls, building and new biomes.
+Dein Benutzername|Your username
+Dein Passwort|Your password
+Ohne Account weiterspielen.|Continue without an account.
+Account & Spielstand|Account & save
+Dein Fortschritt auf einen Blick.|Your progress at a glance.
+Auf dem neuesten Stand.|Up to date.
+Änderungen noch nicht gesichert.|Changes not saved yet.
+Spielstand verwalten|Manage save
+Aktuellen Fortschritt in deinem Account sichern.|Save your current progress to your account.
+Gespeicherten Account-Spielstand auf dieses Gerät laden.|Load the saved account progress onto this device.
+Ersetzt den lokalen Spielstand.|Replaces the local save.
+Durchlauf beendet|Run complete
+Wellen abgeschlossen|waves completed
+Welle abgeschlossen|wave completed
+Details einblenden|Show details
+Details ausblenden|Hide details
+Deine Belohnung ist unabhängig von der Ranglistenprüfung.|Your reward does not depend on the leaderboard review.
+Gold verdient|Gold earned
+Gold gesamt|Total gold
+Kosten (gesamt)|Costs (total)
+Upgrades:|Upgrades:
+Erstattet:|Refunded:
+Ergebnis teilen|Share result
+Die besten drei|Top three
+Deine Platzierung:|Your rank:
+Bereiche|Sections
+Bestmarke: Wave|Best: wave
+Turm bauen|Build tower
+Details & Vergleich|Details & comparison
+Details schließen|Close details
+Biom des Bauplatzes|Biome of the building slot
+Bonus des bebauten Hexes|Bonus of the built hex
+Schrein in der Nähe|Shrine nearby
+Besiegter Erkundungswächter|Defeated exploration guardian
+Gebäude in Reichweite|Building in range
+Verbrauchshilfe|Consumable
+Änderungen|Changes
+Ausbaupfade|Upgrade paths
+Fortschritt|Progress
+Im Run mit Gold:|During a run with gold:
+Wähle einen Knoten im Baum, um Details und Freischaltungen zu sehen.|Select a node in the tree to see details and unlocks.
+Mit Konto fortfahren|Continue with an account
+Bald verfügbar|Coming soon
+Mit Benutzername|With username
+`);
+
+Object.assign(globalThis.HexTranslations.en, {
+  "Neue Hex-Oberfläche und sichere Spielstände": "New hex interface and safer saves",
+  "Updates bewahren bestehende Spielstände und Bestenlisten. Während der kurzen Vorbereitung kann die Account-Speicherung vorübergehend pausieren; der lokale Fortschritt bleibt erhalten.": "Updates preserve existing saves and leaderboards. Account saving may pause briefly during preparation; local progress is retained."
 });

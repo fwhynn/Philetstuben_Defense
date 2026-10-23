@@ -33,8 +33,8 @@
    return (direction==='ascending'?value:-value)||(Number(a.rank)||0)-(Number(b.rank)||0)||collator.compare(String(a.username||''),String(b.username||''));
   });
   for(const player of ordered){
-   const row=node('tr',undefined,player.rank<=3?'top'+player.rank:''),name=node('td',player.username,'name');name.setAttribute('data-no-translate','');
-   if(ownName&&player.username===ownName)row.classList.add('own');
+   const row=node('tr',undefined,(player.rank<=3?'top'+player.rank:'')+(podiumPlayers().includes(player)?' onPodium':'')),name=node('td',player.username,'name');name.setAttribute('data-no-translate','');
+   if(ownName&&player.username===ownName){row.classList.add('own');const badge=node('span','Du','lbYou');name.appendChild(badge);}
    row.appendChild(node('td',String(player.rank),'rank'));row.appendChild(name);
    for(const [field,key]of columns)row.appendChild(node('td',number.format(Number(player[field])||0),key===orderBy?'sorted':''));
    if(canDelete){
@@ -53,6 +53,31 @@
    body.appendChild(row);
   }
   table.appendChild(body);content.appendChild(table);
+  podium(number,canDelete);
+ }
+ // Podest für die ersten drei (Reihenfolge 2 · 1 · 3) und die eigene Platzierung in der Fußzeile. Bei Standardsortierung
+ // blendet CSS die ersten drei Tabellenzeilen aus (.withPodium), außer wenn Verwaltung nötig ist.
+ // Die ersten drei Einträge nach Rang (bei Gleichstand teilen sich zwei denselben Rang, z. B. 1 · 2 · 2); Plätze nach Position.
+ function podiumPlayers(){return [...players].filter(p=>Number(p.rank)>=1).sort((a,b)=>Number(a.rank)-Number(b.rank)).slice(0,3);}
+ function podium(number,canDelete){
+  const host=$('leaderboardPodium'),own=$('leaderboardOwn');host.replaceChildren();
+  const top=podiumPlayers(),[field,,title]=columns[0];
+  if(top.length)host.classList.remove('hidden');else host.classList.add('hidden');
+  // Medaille: ein Bossporträt je Spieler (aus dem Namen gewählt, auf dem Podest ohne Doppelte), sonst die Initiale.
+  const portraits=globalThis.HexBossPortraits,used=new Set();
+  const bossFor=name=>{const list=portraits?.BOSSES||[];if(!list.length)return null;let i=[...String(name)].reduce((h,c)=>(h*31+c.charCodeAt(0))>>>0,7)%list.length;while(used.has(i)&&used.size<list.length)i=(i+1)%list.length;used.add(i);return list[i];};
+  for(const player of top)player.medalBoss=bossFor(player.username);
+  for(const place of [2,1,3]){
+   const player=top[place-1];if(!player)continue;
+   const column=node('div',undefined,'lbPlace lbPlace'+place),medal=node('span',undefined,'lbMedal'),name=node('strong',player.username,'lbName');
+   medal.appendChild(node('span',String(player.username||'?').slice(0,1).toUpperCase(),'lbInitial'));
+   if(player.medalBoss){const image=node('img',undefined,'lbBoss');image.alt='';medal.appendChild(image);portraits.url(player.medalBoss).then(src=>{if(src){image.src=src;medal.classList.add('hasBoss');}}).catch(()=>{});}
+   medal.appendChild(node('span',String(player.rank),'lbRankBadge'));name.setAttribute('data-no-translate','');
+   column.appendChild(medal);column.appendChild(name);column.appendChild(node('span',number.format(Number(player[field])||0),'lbValue'));column.appendChild(node('small',title,'lbValueLabel'));
+   host.appendChild(column);
+  }
+  if(top.length&&orderBy===columns[0][1]&&direction==='descending'&&!canDelete)content.classList.add('withPodium');else content.classList.remove('withPodium');
+  const mine=ownName&&players.find(p=>p.username===ownName);own.textContent=mine?'Deine Platzierung: '+mine.rank:'';
  }
  async function load(){
   const current=++generation;loading=false;
@@ -65,14 +90,16 @@
  }
  for(const button of modeButtons)button.addEventListener('click',()=>{
   if(mode===button.dataset.leaderboardMode)return;
-  fallbackNotice='';mode=button.dataset.leaderboardMode;columns=mode==='legacy'?legacyColumns:[['highestWave','highest_wave','Beste Welle'],['normalKills','normal_kills','Kills']];fields=[['rank','rank','Rang'],['username','name','Name'],...columns];sort=orderBy='highest_wave';direction='descending';loadedSort=null;players=null;content.replaceChildren();load();
+  fallbackNotice='';mode=button.dataset.leaderboardMode;columns=mode==='legacy'?legacyColumns:[['highestWave','highest_wave','Beste Welle'],['normalKills','normal_kills','Kills']];fields=[['rank','rank','Rang'],['username','name','Name'],...columns];sort=orderBy='highest_wave';direction='descending';loadedSort=null;players=null;content.replaceChildren();$('leaderboardPodium').replaceChildren();load();
  });
  function close(){overlay.classList.add('hidden');$('menuLeaderboardBtn').focus?.();}
  function open(){
-  fallbackNotice='';mode='single';columns=[['highestWave','highest_wave','Beste Welle'],['normalKills','normal_kills','Kills']];fields=[['rank','rank','Rang'],['username','name','Name'],...columns];sort=orderBy='highest_wave';direction='descending';players=null;loadedSort=null;content.replaceChildren();
+  fallbackNotice='';mode='single';columns=[['highestWave','highest_wave','Beste Welle'],['normalKills','normal_kills','Kills']];fields=[['rank','rank','Rang'],['username','name','Name'],...columns];sort=orderBy='highest_wave';direction='descending';players=null;loadedSort=null;content.replaceChildren();$('leaderboardPodium').replaceChildren();$('leaderboardOwn').textContent='';
   overlay.classList.remove('hidden');load();
   ownName='';if(HexApi.isLoggedIn())HexApi.currentUser().then(user=>{ownName=user?.username||'';render();}).catch(()=>{});
  }
- $('menuLeaderboardBtn').addEventListener('click',open);$('closeLeaderboardBtn').addEventListener('click',close);
+ // Bossporträts laden als Modul nach; sobald sie da sind, das Podest neu zeichnen.
+ globalThis.addEventListener?.('hexbossportraitsready',()=>{if(!overlay.classList.contains('hidden')&&players)render();});
+ $('menuLeaderboardBtn').addEventListener('click',open);$('closeLeaderboardBtn').addEventListener('click',close);$('leaderboardBackBtn').addEventListener('click',close);
  document.addEventListener('keydown',event=>{if(!overlay.classList.contains('hidden')&&event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();close();}},true);
 })();

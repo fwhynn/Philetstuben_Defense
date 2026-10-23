@@ -6,8 +6,10 @@ import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 import {MODEL_ENEMIES,isEnemyJoint,enemyPose,applyEnemyPose} from './enemy-motion.mjs';
 import {flameDetails,bossDetails} from './model-details.mjs';
 import {MineBatches} from './mine-batches.mjs';
+import {createGameLook} from './game-look.mjs';
+import {polishMaterials} from './material-polish.mjs';
 
-const S=54,STEP=Math.PI/3,TILT=55*Math.PI/180,PITCH_MIN=12*Math.PI/180,PITCH_MAX=88*Math.PI/180,DIST_MIN=220,DIST_MAX=3400,DIST_START=950,SKY='#3f97cf';
+const S=54,STEP=Math.PI/3,TILT=55*Math.PI/180,PITCH_MIN=12*Math.PI/180,PITCH_MAX=88*Math.PI/180,DIST_MIN=220,DIST_MAX=3400,DIST_START=950,SKY='#3384bd';                 // Himmel etwas dunkler als früher (#3f97cf), passend zur kräftigeren Farbkorrektur
 const PREFIX={tiles:'tile',landmarks:'landmark',towers:'tower',enemies:'enemy',buildings:'building',effects:'mine',bases:'base',consumables:'consumable'};
 const FOLDER={consumables:'effects'};                                // Ordner unter assets/, falls abweichend von der Modellart
 const LIMBS=['leg_l','leg_r','arm_l','arm_r'];
@@ -131,7 +133,7 @@ function create(host0,commands){
   const dom=gl.domElement,scene=new THREE.Scene();scene.background=new THREE.Color(SKY);scene.fog=new THREE.Fog(SKY,2600,6500);
   const camera=new THREE.PerspectiveCamera(35,1,20,12000);
   scene.add(new THREE.HemisphereLight('#dff0ff','#6b7a4c',1.15));
-  const sun=new THREE.DirectionalLight('#fff1d0',2.5);sun.castShadow=true;sun.shadow.mapSize.set(quality==='high'?2048:1024,quality==='high'?2048:1024);sun.shadow.bias=-.0004;
+  const sun=new THREE.DirectionalLight('#ffe9c4',2.6);sun.castShadow=true;sun.shadow.mapSize.set(quality==='high'?2048:1024,quality==='high'?2048:1024);sun.shadow.bias=-.0004;
   Object.assign(sun.shadow.camera,{left:-1100,right:1100,top:1100,bottom:-1100,near:100,far:3500});scene.add(sun,sun.target);
 
   // ---- Kamera: Blick von schräg oben, verschieben (rechte/mittlere Maustaste) und zoomen (Mausrad) ----
@@ -171,7 +173,7 @@ function create(host0,commands){
       return Promise.all(wanted.map(item=>new Promise(done=>{
         const queue=sources(item);
         const attempt=()=>{const src=queue.shift();if(!src)return done();
-          loader.load(`assets/${src}`,gltf=>{try{next.set(item.id,makeTemplate(item.id,gltf.scene,item.kind));}catch(e){console.warn('Modell unbrauchbar:',item.id,e);}done();},undefined,
+          loader.load(`assets/${src}`,gltf=>{try{polishMaterials(gltf.scene);next.set(item.id,makeTemplate(item.id,gltf.scene,item.kind));}catch(e){console.warn('Modell unbrauchbar:',item.id,e);}done();},undefined,
             e=>{if(queue.length)return attempt();console.warn('Modell fehlt:',item.id,e?.message||e);done();});};
         attempt();
       }))).then(()=>generation===modelGeneration&&!destroyed?next:null);
@@ -247,6 +249,8 @@ function create(host0,commands){
   const backgroundSun=new THREE.DirectionalLight('#fff1d0',2.5);backgroundScene.add(new THREE.HemisphereLight('#dff0ff','#6b7a4c',1.15),backgroundSun,backgroundSun.target,layer.empty,fogLandmarks);
   gl.autoClear=false;
   let state,targetList=[],hoverPick=null;
+  // Nachbearbeitung (classes/game-look.mjs) nur bei Grafik „hoch“; lowerQuality() schaltet sie mit ab.
+  let look=quality==='high'?createGameLook({renderer:gl,scenes:[backgroundScene,scene],camera}):null;
   const tileRecords=new Map(),landmarkRecords=new Map(),objectRecords=new Map(),labels=new Map(),usedLabels=new Set();
   let emptySig='',targetSig='',ghostSig='',pickables=[],pickDirty=true,runToken=null;
   const mineBatches=new MineBatches(THREE,layer.dynamic,S);
@@ -942,6 +946,7 @@ function create(host0,commands){
     try{localStorage.setItem('hexQuality','low');}catch{/* Speichern nicht möglich */}
     gl.setPixelRatio(1);gl.setSize(Math.max(1,host.clientWidth),Math.max(1,host.clientHeight));
     sun.shadow.mapSize.set(1024,1024);if(sun.shadow.map){sun.shadow.map.dispose();sun.shadow.map=null;}
+    look?.dispose();look=null;
     console.info('AutoHex TD: Grafik automatisch auf "niedrig" gestellt (?high in der Adresse stellt sie zurück).');
   }
   function loop(now){
@@ -998,7 +1003,7 @@ function create(host0,commands){
       }
     }
     animateBiomeWind(now);animateSakuraAmbient(now);placeLabels();backgroundSun.position.copy(sun.position);backgroundSun.target.position.copy(sun.target.position);
-    gl.clear();gl.render(backgroundScene,camera);gl.clearDepth();gl.render(scene,camera);renderedFrameCount++;
+    if(!look?.render()){gl.clear();gl.render(backgroundScene,camera);gl.clearDepth();gl.render(scene,camera);}renderedFrameCount++;
   }
 
   // ---- Eingabe ----
@@ -1073,7 +1078,7 @@ function create(host0,commands){
     on('pointercancel',e=>{pinch.up(e);hoverBuildingKey=null;commands.hoverBuilding?.(null);drag=null;press=null;dom.style.cursor='';}),
     on('pointerleave',e=>{pointerPosition=null;dom.style.cursor='';if(e.pointerType==='touch')return;hoverBuildingKey=null;commands.hoverBuilding?.(null);if(hoverPick){commands.leavePlacement(hoverPick);hoverPick=null;if(state&&ready) render(state,targetList);}})
   ];
-  const resize=new ResizeObserver(()=>{const w=Math.max(1,host.clientWidth),h=Math.max(1,host.clientHeight);gl.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();positionRotateHint();if(state) commands.viewChanged?.();});
+  const resize=new ResizeObserver(()=>{const w=Math.max(1,host.clientWidth),h=Math.max(1,host.clientHeight);gl.setSize(w,h);look?.resize(w,h,gl.getPixelRatio());camera.aspect=w/h;camera.updateProjectionMatrix();positionRotateHint();if(state) commands.viewChanged?.();});
   resize.observe(host);applyCamera();raf=requestAnimationFrame(loop);
 
   function towerBounds(slot){
