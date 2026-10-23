@@ -40,7 +40,7 @@ test('mine layer places mines before enemies arrive and detonates when one cross
   const { state, step, towers } = setup(), tower = { type: 'mine', lastShot: 0 }, ref = { tw: tower, pos: { x: 0, y: 0 }, roadPoints: [{ x: 20, y: 0 }, { x: 80, y: 0 }] };
   step(state, [ref], towers, 0, 2000); assert.equal(state.mines.length, 1); assert.equal(state.projectiles.length, 0);
   state.enemies = [enemy(20), enemy(50), enemy(100)]; step(state, [ref], towers, 0, 2100);
-  assert.equal(state.enemies[0].hp, 73.6); assert.equal(state.enemies[1].hp, 73.6); assert.equal(state.enemies[2].hp, 100); assert.equal(state.mines.length, 0); assert.equal(state.projectiles[0].kind, 'blast');
+  assert.equal(state.enemies[0].hp, 77.56); assert.equal(state.enemies[1].hp, 77.56); assert.equal(state.enemies[2].hp, 100); assert.equal(state.mines.length, 0); assert.equal(state.projectiles[0].kind, 'blast');
 });
 test('periodic bosses resist extreme freeze but recover full speed outside the aura', () => {
   const { state, step, towers } = setup(), e = enemy(0); e.speed = 20; e.minSpeedFactor = .6; state.enemies = [e];
@@ -55,7 +55,7 @@ test('constant travel speed crosses segments with different lengths', () => {
 test('lightning jumps from the last victim and never hits a disconnected target', () => {
   const { state, step, towers } = setup(); state.enemies = [enemy(130), enemy(190), enemy(300)];
   step(state, [{ tw: { type: 'chain', lastShot: 0 }, pos: { x: 0, y: 0 } }], towers, 0, 1000);
-  assert.equal(state.enemies[0].hp, 92); assert.ok(state.enemies[1].hp < 100); assert.equal(state.enemies[2].hp, 100);
+  assert.equal(state.enemies[0].hp, 89.6); assert.ok(state.enemies[1].hp < 100); assert.equal(state.enemies[2].hp, 100);
 });
 test('freeze aura slows all nearby enemies without damage, shots or stacking', () => {
   const { state, step, towers } = setup(), e = enemy(0); e.speed = 20; state.enemies = [e];
@@ -94,7 +94,7 @@ test('catapult and lightning branches apply their distinct attack profiles', () 
   state.enemies = [enemy(20), enemy(40), enemy(60), enemy(80), enemy(100)];
   step(state, [{ tw: { type: 'chain', branch: 'storm', lastShot: 0 }, pos: { x: 0, y: 0 } }], towers, 0, 3000); assert.ok(state.enemies.every(e => e.hp < 100));
   state.enemies = [enemy(20), enemy(40), enemy(60)];
-  step(state, [{ tw: { type: 'chain', branch: 'overload', lastShot: 0 }, pos: { x: 0, y: 0 } }], towers, 0, 4000); assert.equal(state.enemies[0].hp, 82); assert.equal(state.enemies[2].hp, 100);
+  step(state, [{ tw: { type: 'chain', branch: 'overload', lastShot: 0 }, pos: { x: 0, y: 0 } }], towers, 0, 4000); assert.equal(state.enemies[0].hp, 76.6); assert.equal(state.enemies[2].hp, 100);
 });
 
 test('final lightning network damages all seven targets without negative damage', () => {
@@ -166,9 +166,9 @@ test('necromancers share each death once, cap souls, attack and expire them with
   state.enemies = [enemy(1, 0, 1), enemy(2, 0, 1)]; step(state, refs, towers, 0, 2000);
   assert.equal(near.souls.length + far.souls.length, 2); assert.equal(state.waveKills, 2);
   const e = enemy(20, 0, 1000); state.enemies = [e]; near.lastShot = far.lastShot = 3000;
-  step(state, refs, towers, 0, 3000); assert.equal(e.hp, 984); assert.equal(state.waveKills, 2);
+  step(state, refs, towers, 0, 3000); assert.equal(e.hp, 980); assert.equal(state.waveKills, 2);
   near.lastShot = far.lastShot = 9000; step(state, refs, towers, 0, 9000);
-  assert.equal(near.souls.length + far.souls.length, 0); assert.equal(e.hp, 984);
+  assert.equal(near.souls.length + far.souls.length, 0); assert.equal(e.hp, 980);
   near.souls = Array.from({ length: 3 }, () => ({ until: 20000, lastShot: 10000 })); near.lastShot = 0;
   state.enemies = [enemy(1, 0, 1)]; step(state, [refs[0]], towers, 0, 10000); assert.equal(near.souls.length, 3);
 });
@@ -214,5 +214,5 @@ test('mine damage survives tower sale and base damage does not inflate archer st
   const base = { type: 'archer', lastShot: 0 }; state.baseWeapon = base; state.enemies = [enemy(20, 0, 2)]; step(state, [{ tw: base, pos: { x: 0, y: 0 } }], towers, 0, 3000); assert.equal(state.baseDamage, 2); assert.equal(state.runTowerStats.archer, undefined);
 });
 test('necromancer statistics include spirit damage', () => {
-  const { state, step, towers } = setup(), tw = { type: 'necromancer', statId: 4, lastShot: 2000, souls: [{ until: 10000, lastShot: 0 }] }; state.runTowerDetails = { 4: { type: 'necromancer', damage: 0 } }; state.enemies = [enemy(20, 0, 100)]; step(state, [{ tw, pos: { x: 0, y: 0 } }], towers, 0, 2000); assert.equal(state.runTowerStats.necromancer.damage, 8); assert.equal(state.runTowerDetails[4].damage, 8);
+  const { state, step, towers } = setup(), tw = { type: 'necromancer', statId: 4, lastShot: 2000, souls: [{ until: 10000, lastShot: 0 }] }; state.runTowerDetails = { 4: { type: 'necromancer', damage: 0 } }; state.enemies = [enemy(20, 0, 100)]; step(state, [{ tw, pos: { x: 0, y: 0 } }], towers, 0, 2000); assert.equal(state.runTowerStats.necromancer.damage, 10); assert.equal(state.runTowerDetails[4].damage, 10);
 });

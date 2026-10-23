@@ -31,6 +31,6 @@ test('ability timers and immunity survive checkpoint restore without reroll or e
  const saved=JSON.parse(JSON.stringify(run.core.snapshot.capture(run.state,run.random))),restored={core:run.core,...run.core.snapshot.restore(saved)};tick(run,1);tick(restored,1);assert.deepEqual(JSON.parse(JSON.stringify(restored.state.enemies)),JSON.parse(JSON.stringify(run.state.enemies)));assert.equal(restored.state.enemies[1].hp,55);
 });
 test('small tower nerfs apply to every specialization while unrelated towers retain their stats',()=>{
- const {core}=setup();for(const type of ['freeze','flame'])for(const branch of [null,...core.data.availableUpgrades({type}).map(([id])=>id)]){const tw={type,branch},raw={...core.data.TOWERS[type],...(core.data.UPGRADES[branch]||{})},actual=core.data.towerDefinition(tw);if(type==='freeze')assert.equal(actual.range,Math.round(raw.range*.95));else assert.equal(actual.damage,Number((raw.damage*.95).toFixed(2)));}
+ const {core}=setup();for(const type of ['freeze','flame'])for(const branch of [null,...core.data.availableUpgrades({type}).map(([id])=>id)]){const tw={type,branch},raw={...core.data.TOWERS[type],...(core.data.UPGRADES[branch]||{})},actual=core.data.towerDefinition(tw);if(type==='freeze')assert.equal(actual.range,Math.round(raw.range*.95));else assert.equal(actual.damage,Number((raw.damage*.8).toFixed(2)));}
  assert.equal(core.data.towerDefinition({type:'archer'}).damage,core.data.TOWERS.archer.damage);
 });

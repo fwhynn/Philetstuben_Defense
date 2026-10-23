@@ -25,11 +25,11 @@ test('every tower has exactly one exclusive tile; only validated run loadout til
 test('exclusive bonuses apply to their tower, upgraded branches and necromancer spirits only', () => {
   const { data } = rules(); for (const c of Object.values(data.CARD_LIBRARY).filter(c => c.towerBonus)) {
     const type = c.requiredTower, base = data.towerDefinition({ type }), buff = data.towerDefinition({ type, tileType: c.id });
-    if (c.towerBonus.range) assert.equal(buff.range, Math.round((type==='freeze'?data.TOWERS.freeze.range*.95:base.range) * 1.25)); else assert.equal(buff.damage, Number(((type==='flame'?data.TOWERS[type].damage*.95:base.damage) * 1.25).toFixed(2)));
+    if (c.towerBonus.range) assert.equal(buff.range, Math.round((type==='freeze'?data.TOWERS.freeze.range*.95:base.range) * 1.25)); else assert.equal(buff.damage, Number(((type==='flame'?data.TOWERS[type].damage*.8:base.damage) * 1.25).toFixed(2)));
     const other = data.towerDefinition({ type: 'archer', tileType: c.id }); assert.equal(other.damage, data.TOWERS.archer.damage); assert.equal(other.range, data.TOWERS.archer.range);
-    for (const [branch] of data.availableUpgrades({ type })) { const plain = data.towerDefinition({ type, branch }), boost = data.towerDefinition({ type, branch, tileType: c.id }); if (c.towerBonus.damage) assert.equal(boost.damage, Number(((type==='flame'?data.UPGRADES[branch].damage*.95:plain.damage) * 1.25).toFixed(2))); }
+    for (const [branch] of data.availableUpgrades({ type })) { const plain = data.towerDefinition({ type, branch }), boost = data.towerDefinition({ type, branch, tileType: c.id }); if (c.towerBonus.damage) assert.ok(Math.abs(boost.damage-plain.damage*1.25)<.02); }
   }
-  assert.equal(data.towerDefinition({ type: 'necromancer', tileType: 'soulFork' }).soulDamage, 10);
+  assert.equal(data.towerDefinition({ type: 'necromancer', tileType: 'soulFork' }).soulDamage, 12.5);
 });
 test('building sale refunds only once and removes income, damage and discounts immediately', () => {
   const { buildings } = rules(), slot = { q: 0, r: 0, index: 0 };

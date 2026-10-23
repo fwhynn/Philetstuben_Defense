@@ -3,6 +3,8 @@ const {load}=require('./helpers/game.cjs');
 test('wave completion cancels remote building targeting before placement, rewards and victory',()=>{
   for(const type of ['forge','market'])for(const wave of [1,2,35]){
     const {a,elements}=load();const slot={q:1,r:0,index:0};
+    // This fixture tests menu targeting, not randomly generated landmark occupancy.
+    a.state.landmarks.clear();
     a.state.map.set('1,0',{q:1,r:0,type:'village',roads:[0,3],slots:1,towers:[],buildings:[{type,special:true,target:'0,0'}]});
     Object.assign(a.state,{wave,phase:'wave',waveRunning:true,pendingSpawns:0,enemies:[],buildingTarget:slot,selectedBuilding:slot,previewBuilding:slot,hoverBuilding:slot});
     elements.get('message').textContent='Zusatzwirkung: ein erkundetes Hex anklicken';elements.get('message').classList.add('show');

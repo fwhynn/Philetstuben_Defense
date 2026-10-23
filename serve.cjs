@@ -97,7 +97,7 @@ http.createServer((req, res) => {
   }
   if (p.endsWith('/')) p += 'index.html';
   if (p === '/assets/index.json') { res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' }); return res.end(JSON.stringify(listModels())); }
-  if (p.split('/').some(part => part.startsWith('.'))) { res.writeHead(403); return res.end('Forbidden'); }
+  if (p.split('/').some(part => part.startsWith('.') || /^env(?:$|[.\s(])/i.test(part))) { res.writeHead(403); return res.end('Forbidden'); }
   const file = path.join(root, p);
   if (!file.startsWith(root)) { res.writeHead(403); return res.end('Forbidden'); }
   fs.readFile(file, (err, data) => {

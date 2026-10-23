@@ -16,7 +16,15 @@
       "Gegner im Hintergrund des Hauptmenüs laufen jetzt mit Laufanimation.",
       "Das Arsenal lässt sich als Fertigkeitenbaum anzeigen (Test): getrennte Reiter für Türme und Gebäude, vom Arsenal in der Mitte über Stufe 2 und 3 bis zu Ultimates und Spezialausbauten. Ein Klick auf einen Knoten zeigt die Details und schaltet direkt frei; Ziehen verschiebt, das Mausrad zoomt. Die bisherige Werkstatt bleibt umschaltbar.",
       "Ruhige Klaviermusik im Hintergrund, im Hauptmenü und im Spiel in Endlosschleife. Musik lässt sich in den Einstellungen getrennt von den Soundeffekten ein- und ausschalten und in der Lautstärke regeln; im Hintergrund-Tab pausiert sie. Musik von Nikita Kondrashev über Pixabay, verlinkt in den Einstellungen.",
-      "Der Hintergrund des Hauptmenüs ist aufwendiger gestaltet: Abendsonne mit weichen Schatten, flackernde Fackeln und warmes Licht an der Festung, leuchtende Flammen, kräftigere Farben, dazu Wiese, Wald, Berge im Dunst, Himmel und ziehende Wolken rund um die Karten. Auf schwächeren Geräten entfallen die Leuchteffekte, bei „Bewegung reduzieren“ das Flackern und der Wolkenzug."
+      "Der Hintergrund des Hauptmenüs ist aufwendiger gestaltet: Abendsonne mit weichen Schatten, flackernde Fackeln und warmes Licht an der Festung, leuchtende Flammen, kräftigere Farben, dazu Wiese, Wald, Berge im Dunst, Himmel und ziehende Wolken rund um die Karten. Auf schwächeren Geräten entfallen die Leuchteffekte, bei „Bewegung reduzieren“ das Flackern und der Wolkenzug.",
+      "Spielstände sind besser gegen veraltete Uploads und gleichzeitiges Spielen in mehreren Tabs geschützt. Ein zweiter Tab zeigt an, wenn er nicht speichern darf.",
+      "Lokale Spielstände von Accounts und Gästen werden getrennt aufbewahrt. Vorherige Cloud-Spielstände werden beim Ersetzen gesichert; beschädigte Uploads werden abgewiesen.",
+      "Wenn die Aktualisierung der Profil-Bestenliste vorübergehend fehlschlägt, wird sie nachgeholt. Der Account zeigt dabei an, dass der Spielstand bereits gesichert ist.",
+      "Ballisten und andere Türme richten sich nach ihrem Angriffsfokus aus. Der Angriffsfokus lässt sich auf andere Türme kopieren.",
+      "Die Basis lässt sich auf Mobilgeräten zum Ausbauen öffnen. Fernschmieden markieren ein Zusatzfeld, das inzwischen gleich stark durch eine nahe Schmiede versorgt wird.",
+      "Verbrauchshilfen sind auf drei Einsätze je Sorte und Welle begrenzt. Vorbereitete Einsätze zählen mit; die verbleibende Anzahl wird angezeigt.",
+      "Kettenblitze und Nekromanten verursachen mehr Schaden, Flammentürme und Minen weniger. Flammen sind gegen Rüstung und Magieresistenz schwächer. Gegner in Welle 1 bewegen sich langsamer.",
+      "Rammbockkäfer beschleunigen auf geraden Straßen schneller. Nekromanten erhalten auch aus Krähenfuß-Kills Seelen."
     ]
   },
   {

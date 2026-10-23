@@ -4,6 +4,7 @@ async function listen(server){server.listen(0,'127.0.0.1');await once(server,'li
 async function devServer(t,api){
   const dir=fs.mkdtempSync(path.join(os.tmpdir(),'autohex-local-api-'));
   fs.copyFileSync(path.join(root,'serve.cjs'),path.join(dir,'serve.cjs'));
+  for(const name of ['env','env (1)','env.txt','.env (1)'])fs.writeFileSync(path.join(dir,name),'DB_PASS=TEST_SENTINEL_DO_NOT_SERVE\n');
   if(api)fs.writeFileSync(path.join(dir,'.env'),'API_BASE_URL='+api+'\nDB_PASS=TEST_SENTINEL_DO_NOT_SERVE\n');
   const reservation=http.createServer(),port=await listen(reservation);await new Promise(r=>reservation.close(r));
   const child=spawn(process.execPath,['serve.cjs'],{cwd:dir,env:{...process.env,PORT:String(port)},stdio:['ignore','pipe','pipe']});
@@ -24,6 +25,7 @@ test('explicit local proxy forwards method, auth, body and query; hides env; nev
   const response=await fetch(base+'/api/saves?test=1',{method:'PUT',headers:{Authorization:'Bearer TEST_TOKEN'},body:'{"test":true}'});
   assert.equal(response.status,201);assert.deepEqual(received,{url:'/saves?test=1',method:'PUT',auth:'Bearer TEST_TOKEN',body:'{"test":true}'});
   const denied=await fetch(base+'/.env');assert.equal(denied.status,403);assert.ok(!(await denied.text()).includes('TEST_SENTINEL'));
+  for(const name of ['env','env (1)','env.txt','.env (1)']){const result=await fetch(base+'/'+encodeURIComponent(name));assert.equal(result.status,403,name);assert.ok(!(await result.text()).includes('TEST_SENTINEL'));}
   await new Promise(r=>upstream.close(r));
   const failed=await fetch(base+'/api/me');assert.equal(failed.status,502);assert.match(await failed.text(),/Lokale API/);
 });

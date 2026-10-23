@@ -8,7 +8,7 @@ const HexCombat=(()=>{
   }
   function buyConsumable(state,kind,slot,preview=false){
     const def=Object.hasOwn(consumables,kind)?consumables[kind]:null;
-    if(!def||state.hp<=0||!['place','build','wave'].includes(state.phase)||!Number.isInteger(slot?.q)||!Number.isInteger(slot?.r)||state.gold<def.cost)return false;
+    if(!def||consumableRemaining(state,kind)<=0||state.hp<=0||!['place','build','wave'].includes(state.phase)||!Number.isInteger(slot?.q)||!Number.isInteger(slot?.r)||state.gold<def.cost)return false;
     const tile=state.map.get(slot.q+','+slot.r);if(!tile)return false;
     if(kind==='overload'){
       const tower=Number.isInteger(slot.index)&&tile.towers?.[slot.index];if(!tower||tower.guestOwner!==undefined||!HexData.towerDefinition(tower).cooldown||HexData.towerDefinition(tower).aura||tower.overloadPending||tower.overloadUntil>state.elapsedMs)return false;
@@ -19,8 +19,9 @@ const HexCombat=(()=>{
       if(!point)return false;
       if(!preview)(state.consumables??=[]).push({kind,q:slot.q,r:slot.r,x:point.x,y:point.y,charges:kind==='spikes'?20:consumableStats(state).resinCharges,damage:consumableStats(state).spikeDamage,duration:consumableStats(state).resinDuration*1000,seen:[]});
     }
-    if(!preview)state.gold-=def.cost;return true;
+    if(!preview){state.gold-=def.cost;const wave=consumableStats(state).wave;if(state.consumableUsage?.wave!==wave)state.consumableUsage={wave};state.consumableUsage[kind]=(state.consumableUsage[kind]||0)+1;}return true;
   }
+  function consumableRemaining(state,kind){return Math.max(0,3-(state.consumableUsage?.wave===consumableStats(state).wave?state.consumableUsage[kind]||0:0));}
   function clearConsumables(state){state.enemyZones=[];state.consumables=[];for(const tile of state.map.values())for(const tower of tile.towers||[])if(tower){delete tower.overloadPending;delete tower.overloadUntil;delete tower.overloadDuration;}for(const e of state.enemies||[])e.slowEffects=(e.slowEffects||[]).filter(s=>s.source!=='resin');}
   // Snap a nearby click to the actual lane, including curved and model-specific roads.
   function lanePoint(tile,point){
@@ -46,9 +47,14 @@ const HexCombat=(()=>{
   }
   const DEFAULT_PRIORITY=['closestBase','mostHealth','boss'];
   function straightSegment(e){
+    // Road joins may contain coincident endpoints. They are not corners.
     const p=e.points,i=e.index,a=p[i],b=p[i+1];if(!a||!b||a.tunnel||b.tunnel)return false;
+    let before=i-1,after=i+2;
+    while(before>=0&&Math.hypot(p[before].x-a.x,p[before].y-a.y)<.001&&!p[before].tunnel)before--;
+    while(after<p.length&&Math.hypot(p[after].x-b.x,p[after].y-b.y)<.001&&!p[after].tunnel)after++;
+    if(Math.hypot(b.x-a.x,b.y-a.y)<.001)return before>=0&&after<p.length&&straightSegment({...e,points:[p[before],a,p[after]],index:0});
     const aligned=(u,v,w)=>{const x=v.x-u.x,y=v.y-u.y,xx=w.x-v.x,yy=w.y-v.y,l=Math.hypot(x,y)*Math.hypot(xx,yy);return l>0&&(x*xx+y*yy)/l>.99999;};
-    return (!p[i-1]||aligned(p[i-1],a,b))&&(!p[i+2]||aligned(a,b,p[i+2]));
+    return (before<0||aligned(p[before],a,b))&&(after>=p.length||aligned(a,b,p[after]));
   }
   function nearbyTile(state,p){let best=null,d=HexMap.HEX;for(const t of state.map.values()){const c=HexMap.axialToWorld(t.q,t.r),n=Math.hypot(p.x-c.x,p.y-c.y);if(n<d){best=t;d=n;}}return best;}
   function toadShortcut(state,e,range){
@@ -225,14 +231,14 @@ const HexCombat=(()=>{
     }
     // Tick-local values: upgrades and support/biome changes apply on the next step.
     towerRefs=towerRefs.map(ref=>{if(ref.tw.overloadPending){delete ref.tw.overloadPending;ref.tw.overloadUntil=time+(ref.tw.overloadDuration??12000);}const definition={...(ref.definition||HexData.towerDefinition(ref.tw,definitions))};if(ref.tw.overloadUntil>time)definition.cooldown/=1.5;return {...ref,definition};});
+    state.soulDeaths=[];
     applyConsumables(state,time,emit);
     const auraRefs=towerRefs.filter(ref=>ref.definition.aura);
     // Movement finishes before targeting. Only path distance is shared: health,
     // armor and magic values must stay live between consecutive tower hits.
     const pathDistances=new Map();
     const targetDistance=e=>{if(!pathDistances.has(e))pathDistances.set(e,remainingDistance(e));return pathDistances.get(e);};
-    const TOWERS=definitions;state.mines??=[];state.soulDeaths=[];const arrive=e=>{e.alive=false;state.hp-=e.type==='ramBeetle'&&e.charge>=.95?3:(e.baseDamage??1);if(e.goldLoss)state.gold=Math.max(0,state.gold-e.goldLoss);const landmark=state.landmarks?.get(e.landmarkId);if(landmark)landmark.status='escaped';emit('hit');};
-    applyConsumables(state,time,emit);
+    const TOWERS=definitions;state.mines??=[];const arrive=e=>{e.alive=false;state.hp-=e.type==='ramBeetle'&&e.charge>=.95?3:(e.baseDamage??1);if(e.goldLoss)state.gold=Math.max(0,state.gold-e.goldLoss);const landmark=state.landmarks?.get(e.landmarkId);if(landmark)landmark.status='escaped';emit('hit');};
     for(const e of state.enemies){if(!e.alive)continue;if(e.index>=e.points.length-1){arrive(e);continue;}e.slowEffects=(e.slowEffects||[]).filter(effect=>effect.until>time);e.slowFactor=Math.min(1,...e.slowEffects.map(effect=>effect.factor));for(const ref of auraRefs){const def=ref.definition;if(Math.hypot(e.x-ref.pos.x,e.y-ref.pos.y)<=def.range)e.slowFactor=Math.min(e.slowFactor,def.slow);}e.slowFactor=Math.max(e.minSpeedFactor||0,e.slowFactor);const terrainSpeed=typeof HexBiomes!=='undefined'&&state.biomeSeed!=null&&HexBiomes.atWorld(state,e.x,e.y)==='desert'?.85:1;
       const slowResistance=Math.max(0,Math.min(1,e.slowResistance||0));
       e.spawnedAt??=time;const age=Math.max(0,time-e.spawnedAt),cycle=age%4000;let motion=1;
@@ -240,7 +246,7 @@ const HexCombat=(()=>{
         const hopCycle=age%1600,hop=Math.floor(age/1600);e.leaping=hopCycle>=900;e.crouching=hopCycle>=650&&!e.leaping;e.leapProgress=e.leaping?(hopCycle-900)/700:0;motion=e.leaping?1600/700:0;
         if(!e.shortcutFlight&&e.leaping&&e.lastHop!==hop){e.lastHop=hop;e.shortcutJump=false;if(hop%4===3)toadShortcut(state,e,HexMap.HEX*Math.sqrt(3)*e.slowFactor);}
       }
-      if(e.type==='ramBeetle'){e.charge=straightSegment(e)&&e.slowFactor>=.95?Math.min(1,(e.charge||0)+dt/4):0;motion=1+e.charge;}
+      if(e.type==='ramBeetle'){e.charge=straightSegment(e)&&e.slowFactor>=.95?Math.min(1,(e.charge||0)+dt/1.5):0;motion=1+e.charge;}
       if(e.shortcutFlight){const f=e.shortcutFlight,u=Math.min(1,Math.max(0,(time-f.start)/700));e.leaping=u<1;e.crouching=false;e.leapProgress=u;e.x=f.from.x+(f.to.x-f.from.x)*u;e.y=f.from.y+(f.to.y-f.from.y)*u;e.t=u;if(u===1){e.index=1;e.t=0;delete e.shortcutFlight;}continue;}
       if(motion===0)continue;
       let distance=e.speed*dt*motion*(1-(1-e.slowFactor*terrainSpeed)*(1-slowResistance));while(e.index<e.points.length-1){const a=e.points[e.index],b=e.points[e.index+1],length=b.tunnel?0:Math.hypot(b.x-a.x,b.y-a.y),remaining=length*(1-e.t);if(length>0&&distance<remaining){e.t+=distance/length;break;}distance-=remaining;e.t=0;
@@ -262,7 +268,7 @@ const HexCombat=(()=>{
     }
     triggerMines(state,emit);state.enemies=state.enemies.filter(e=>e.alive&&durability(e)>0);
     const mineLayout={}; // Shared lazily by all mine layers in this simulation step.
-    for(const ref of towerRefs){const def=ref.definition||HexData.towerDefinition(ref.tw,TOWERS);if(def.aura)continue;if(def.mine){layMine(state,ref,def,time,mineLayout);continue;}if(time-ref.tw.lastShot<def.cooldown*1000)continue;const inRange=state.enemies.filter(e=>e.alive&&durability(e)>0&&!hiddenBySpores(state,e)&&(!e.immunity||e.immunity!==def.damageType)&&Math.hypot(e.x-ref.pos.x,e.y-ref.pos.y)<=def.range);if(!inRange.length)continue;const primary=targetByPriority(inRange,ref.tw,ref.pos,targetDistance);ref.tw.lastShot=time;emit(ref.tw.type);
+    for(const ref of towerRefs){const def=ref.definition||HexData.towerDefinition(ref.tw,TOWERS);if(def.aura)continue;if(def.mine){layMine(state,ref,def,time,mineLayout);continue;}if(time-ref.tw.lastShot<def.cooldown*1000)continue;const inRange=state.enemies.filter(e=>e.alive&&durability(e)>0&&!hiddenBySpores(state,e)&&(!e.immunity||e.immunity!==def.damageType)&&Math.hypot(e.x-ref.pos.x,e.y-ref.pos.y)<=def.range);if(!inRange.length)continue;const primary=targetByPriority(inRange,ref.tw,ref.pos,targetDistance);ref.tw.lastShot=time;ref.tw.aim={x:primary.x,y:primary.y,time};emit(ref.tw.type);
       if(def.chain){const hit=[primary];while(hit.length<def.chain){const last=hit.at(-1),next=nextChainTarget(state.enemies,hit,last,def.jumpRange,def.damageType,state);if(!next)break;hit.push(next);}hit.forEach((e,i)=>damageEnemy(e,def.damage*Math.max(.25,1-i*.18),def,state,emit,ref.tw));state.projectiles.push({kind:'chain',pts:[ref.pos,...hit.map(e=>({x:e.x,y:e.y}))],ttl:.24,max:.24,color:def.color,tower:ref.tw.type,id:nextProjectileId(state),hits:hit.map(e=>e.id),hitAt:hit.map(e=>({x:e.x,y:e.y}))});}
       else if(def.pierce){const vx=primary.x-ref.pos.x,vy=primary.y-ref.pos.y,mag=Math.hypot(vx,vy)||1,ux=vx/mag,uy=vy/mag,hit=[];for(const e of state.enemies){if(!e.alive||durability(e)<=0||(e.immunity&&e.immunity===def.damageType))continue;const ex=e.x-ref.pos.x,ey=e.y-ref.pos.y,along=ex*ux+ey*uy,perp=Math.abs(ex*uy-ey*ux);if(along>0&&along<def.range&&perp<20)hit.push({enemy:e,along});}const struck=hit.sort((a,b)=>a.along-b.along).slice(0,def.pierceTargets||3);struck.forEach(({enemy})=>damageEnemy(enemy,def.damage,def,state,emit,ref.tw));state.projectiles.push({kind:'line',x1:ref.pos.x,y1:ref.pos.y,x2:ref.pos.x+ux*def.range,y2:ref.pos.y+uy*def.range,ttl:.38,max:.38,color:def.color,tower:ref.tw.type,variant:ref.tw.branch,id:nextProjectileId(state),hits:struck.map(h=>h.enemy.id),hitAt:struck.map(h=>({x:h.enemy.x,y:h.enemy.y,along:h.along/def.range}))});}
       else{const hit=def.splash?state.enemies.filter(e=>e.alive&&Math.hypot(e.x-primary.x,e.y-primary.y)<=def.splash):[primary];const life=FLIGHT_TTL[ref.tw.type]||.1;hit.forEach(e=>{damageEnemy(e,def.damage,def,state,emit,ref.tw);if(e.alive&&def.hitSlow&&e.immunity!==def.damageType){e.slowEffects??=[];const effect=e.slowEffects.find(item=>item.factor===def.hitSlow);if(effect)effect.until=time+def.slowDuration*1000;else e.slowEffects.push({factor:def.hitSlow,until:time+def.slowDuration*1000});}});state.projectiles.push({kind:'line',x1:ref.pos.x,y1:ref.pos.y,x2:primary.x,y2:primary.y,ttl:life,max:life,color:def.color,tower:ref.tw.type,variant:ref.tw.branch,splash:def.splash,id:nextProjectileId(state),hits:hit.map(e=>e.id),hitAt:[{x:primary.x,y:primary.y}]});}
@@ -291,5 +297,5 @@ const HexCombat=(()=>{
     if(state.splitChildren?.length){state.enemies.push(...state.splitChildren);state.splitChildren=[];}
     state.projectiles.forEach(p=>p.ttl-=dt);state.projectiles=state.projectiles.filter(p=>p.ttl>0);state.enemies=state.enemies.filter(e=>e.alive&&durability(e)>0);
   }
-  return {step,durability,remainingDistance,targetByPriority,consumables,lanePoint,buyConsumable,clearConsumables,applyConsumables,consumableStats};
+  return {step,durability,remainingDistance,targetByPriority,consumables,lanePoint,buyConsumable,clearConsumables,applyConsumables,consumableStats,consumableRemaining};
 })();

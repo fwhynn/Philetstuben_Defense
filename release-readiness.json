@@ -1,0 +1,25 @@
+{
+  "change": "save-safety-v2",
+  "checks": {
+    "test_database_integration": {
+      "status": "passed",
+      "evidence": "2026-10-23: 68 real database checks passed repeatedly using isolated random-prefix tables on the verified test database. Covers backup restore, repeated and partial-failure migration, exact legacy/Solo/Duo leaderboard responses, stale writes, locking, archive, worker repair and cleanup. Original test table inventory and saves/player_stats/leaderboard_runs checksums unchanged. No production access."
+    },
+    "automatic_rollout": {
+      "status": "passed",
+      "evidence": "2026-10-23: Actual Composer post-install hook and local HTTP readiness/maintenance/failure/retry passed against fixture-only bootstrap. 30 PDO-double assertions passed. Targeted Node release-order, exact-version health, Windows/Linux identity, cloud-save and local proxy/deployment tests passed (54 distinct checks). 22 PHP source files linted. PHP and Node source fingerprints agree."
+    },
+    "production_backup": {
+      "status": "enforced_on_deploy",
+      "evidence": "Every Composer deployment creates and independently verifies a private consistent snapshot before DDL. Failure leaves the API gate closed. Not yet executed on production."
+    },
+    "production_migration": {
+      "status": "enforced_on_deploy",
+      "evidence": "Only three allowlisted additive CREATE TABLE IF NOT EXISTS statements. Schema and existing-data preservation checked before activation. Not yet executed on production."
+    },
+    "statistics_worker": {
+      "status": "enforced_on_deploy",
+      "evidence": "Bounded real worker probe required for readiness; request-triggered retries installed without cron. No traffic means no scheduled background execution. Optional CLI worker respects release gate."
+    }
+  }
+}

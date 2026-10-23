@@ -853,6 +853,7 @@
     <script src="classes/dialog-focus.js"></script>
     <script src="runtime-config.js"></script>
     <script src="classes/api.js"></script>
+    <script src="classes/local-store.js"></script>
     <script src="classes/leaderboard-ui.js"></script>
     <script src="classes/run-ranking.js"></script>
     <script src="classes/public-leaderboard.js"></script>
@@ -899,6 +900,7 @@
     <script src="classes/model-map.js"></script>
     <script src="classes/asset-edition.js"></script>
     <script type="module">
+      await globalThis.HexLocalStore?.ready;
       if (new URLSearchParams(location.hash.slice(1)).has('duo')) await new Promise(resolve => { const script = document.createElement('script'); script.src = '/socket.io/socket.io.js'; script.onload = resolve; script.onerror = resolve; document.head.appendChild(script); });
       // 3D nur über http(s) (Modelle werden per fetch geladen); ?svg erzwingt den SVG-Prototyp, Doppelklick (file://) nutzt ihn automatisch.
       if (location.protocol.startsWith('http') && !new URLSearchParams(location.search).has('svg')) {

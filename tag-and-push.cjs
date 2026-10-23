@@ -123,9 +123,9 @@ function isGitRepo(cwd) {
 }
 
 function ensureCleanRepo(cwd, label) {
-  const dirty = gitAt(cwd, ['status', '--porcelain', '--untracked-files=no'], { stdio: ['ignore', 'pipe', 'inherit'] }).trim();
+  const dirty = gitAt(cwd, ['status', '--porcelain', '--untracked-files=normal'], { stdio: ['ignore', 'pipe', 'inherit'] }).trim();
   if (dirty) {
-    console.error(`${label} has tracked changes. Commit or stash first.`);
+    console.error(`${label} has uncommitted changes or untracked files. Review and commit first.`);
     process.exit(1);
   }
 }
@@ -197,7 +197,9 @@ function pushRelease(cwd, tag, label) {
 }
 
 async function main() {
+  require('./scripts/release-readiness.cjs').assertReleaseReady(repo, { apiOnly: releaseMode === 'server' });
   const hasApiRepo = isGitRepo(apiRepo);
+  if (hasApiRepo) require('./scripts/release-data-safety.cjs').assertDataSafe(apiRepo);
   if (releaseMode === 'client') {
     ensureCleanRepo(repo, 'Game repo');
     const unfinishedLegal = require('./legal-placeholders.cjs').unfinishedLegalPages(repo);
@@ -223,153 +225,44 @@ async function main() {
   const releaseApi = await confirmApiRelease(hasApiRepo);
   if (releaseApi) ensureCleanRepo(apiRepo, 'API repo');
 
-  // If the user passed --test, run test-only mode: create <latest>-testN on HEAD
-  // In test mode we must NOT change package.json or create commits — only create/push test tags.
-  const testOnly = Boolean(testFlag);
-  if (testOnly) {
-    console.log('Running test-only: will create <latest>-testN tags on HEAD for both repos using game base tag.');
-    // Determine base tag from the game repo
-    try {
-      if (!isGitRepo(repo)) throw new Error('game repo is not a git repository');
-      const rawBase = latestTag(repo);
-      if (!rawBase) throw new Error('no base tag found in game repo');
-      // strip any existing -testN suffix so test tags are always based on the release tag
-      const base = rawBase.replace(/-test\d+$/i, '');
-      const n = nextTestNumber(repo, base);
-      const testTag = `${base}-test${n}`;
 
-      // Game: create test tag on HEAD and push
-      try {
-        git(['tag', '-a', testTag, '-m', testTag], { stdio: 'inherit' });
-        gitAt(repo, ['push', 'origin', testTag], { stdio: 'inherit' });
-        console.log(`Game: created and pushed test tag ${testTag}`);
-      } catch (e) {
-        console.error('Game: failed to create/push test tag:', e && e.message ? e.message : e);
-      }
+  // The sibling checkout identifies the exact API code we require, even for client-only releases.
+  if (!hasApiRepo) throw Error('The API checkout is required to verify the deployed version.');
+  const { prepareClientRelease } = require('./scripts/deployment-status.cjs');
+  if (releaseApi && gitAt(apiRepo, ['branch','--show-current']).trim() !== 'main') throw Error('API deployment pulls main; switch or merge to main before releasing.');
+  if (releaseMode === 'client' && gitAt(repo, ['branch','--show-current']).trim() !== 'main') throw Error('Client deployment pulls main; switch or merge to main before releasing.');
 
-      // API: if present, create same test tag name on API HEAD and push
-      try {
-        if (hasApiRepo && isGitRepo(apiRepo)) {
-          gitAt(apiRepo, ['tag', '-a', testTag, '-m', testTag], { stdio: 'inherit' });
-          gitAt(apiRepo, ['push', 'origin', testTag], { stdio: 'inherit' });
-          console.log(`API: created and pushed test tag ${testTag}`);
-        } else {
-          console.log('API repo not available; skipped API test tag.');
-        }
-      } catch (e) {
-        console.error('API: failed to create/push test tag:', e && e.message ? e.message : e);
-      }
+  const previousVersion = readVersion();
+  const nextVersion = bumpDigitCarryVersion(previousVersion);
+  const base = (latestTag(repo) || 'v' + previousVersion).replace(/-test\d+$/i, '');
+  const tag = testFlag ? base + '-test' + nextTestNumber(repo, base) : 'v' + nextVersion;
+  const apiTag = releaseMode === 'server' ? (testFlag ? base + '-test' + nextTestNumber(apiRepo, base) : bumpDigitCarryTag(latestTag(apiRepo))) : tag;
+  if (releaseMode === 'client' && tagExists(repo, tag)) throw Error('Client tag already exists: ' + tag);
+  if (releaseApi && tagExists(apiRepo, apiTag)) throw Error('API tag already exists. Use a separate --server release to retry the API rollout, then --client.');
 
-    } catch (err) {
-      console.error('Test-only mode failed:', err && err.message ? err.message : err);
-    }
+  // Validate release notes before publishing either repository, without mutating them.
+  const notesFile = path.join(repo, 'patch-notes.json');
+  const releaseNotes = releaseMode === 'client' && !testFlag ? require('./release-notes.cjs').prepare(notesFile, nextVersion) : null;
+  await prepareClientRelease({apiRoot: apiRepo, publishApi: releaseApi ? async () => {
+    gitAt(apiRepo, ['tag','-a',apiTag,'-m',apiTag], {stdio:'inherit'});
+    pushRelease(apiRepo, apiTag, 'API');
+    console.log('Waiting for verified API backup, migration and worker readiness...');
+  } : undefined});
+  if (releaseMode === 'server') { console.log('API release verified: ' + apiTag); return; }
 
-    return;
+  // No client version, commit or tag is changed until the exact API release is ready.
+  if (!testFlag) {
+    npm(['version', nextVersion, '--no-git-tag-version'], {stdio:'inherit'});
+    fs.writeFileSync(notesFile, JSON.stringify(releaseNotes,null,2)+'\n');
+    const filesToCommit=[packageJsonGitPath,'patch-notes.json'];
+    if(fs.existsSync(packageLockPath))filesToCommit.push(packageLockGitPath);
+    git(['add',...filesToCommit],{stdio:'inherit'});
+    git(['commit','-m','chore: release '+tag],{stdio:'inherit'});
   }
+  git(['tag','-a',tag,'-m',tag],{stdio:'inherit'});
+  pushRelease(repo,tag,'Game');
+  console.log('Released ' + tag + ' after verified API preparation.');
 
-  if (releaseMode === 'client') {
-    const previousVersion = readVersion();
-    const nextVersion = bumpDigitCarryVersion(previousVersion);
-    const notesFile = path.join(repo, 'patch-notes.json');
-    const releaseNotes = require('./release-notes.cjs').prepare(notesFile, nextVersion);
-    npm(['version', nextVersion, '--no-git-tag-version'], { stdio: 'inherit' });
-
-    const version = readVersion();
-    const tag = `v${version}`;
-
-    if (version === previousVersion) {
-      console.error(`Version stayed at ${version}.`);
-      process.exit(1);
-    }
-    if (tagExists(repo, tag)) {
-      console.error(`Tag ${tag} already exists in the game repo.`);
-      process.exit(1);
-    }
-    if (releaseApi && tagExists(apiRepo, tag)) {
-      console.error(`Tag ${tag} already exists in the API repo.`);
-      process.exit(1);
-    }
-
-    fs.writeFileSync(notesFile, JSON.stringify(releaseNotes, null, 2) + '\n');
-    const filesToCommit = [packageJsonGitPath, 'patch-notes.json'];
-    if (fs.existsSync(packageLockPath)) filesToCommit.push(packageLockGitPath);
-
-    git(['add', ...filesToCommit], { stdio: 'inherit' });
-    git(['commit', '-m', `chore: release ${tag}`], { stdio: 'inherit' });
-    git(['tag', '-a', tag, '-m', tag], { stdio: 'inherit' });
-    pushRelease(repo, tag, 'Game');
-
-    // if requested, also create and push a test tag for the game repo
-    if (testFlag) {
-      try {
-        const nGame = nextTestNumber(repo, tag);
-        const testTagGame = `${tag}-test${nGame}`;
-        // tag the same commit as the release tag
-        git(['tag', '-a', testTagGame, tag, '-m', testTagGame], { stdio: 'inherit' });
-        pushRelease(repo, testTagGame, 'Game (test)');
-        console.log(`Created and pushed test tag ${testTagGame} in Game repo.`);
-      } catch (e) {
-        console.error('Warning: could not create/push test tag in Game repo.', e && e.message ? e.message : e);
-      }
-    }
-
-    if (releaseApi) {
-      // create and push the normal API tag
-      gitAt(apiRepo, ['tag', '-a', tag, '-m', tag], { stdio: 'inherit' });
-      pushRelease(apiRepo, tag, 'API');
-
-      // create an extra empty commit in the API repo to trigger commit-based webhooks
-      try {
-        gitAt(apiRepo, ['commit', '--allow-empty', '-m', `chore: trigger webhook for ${tag}`], { stdio: 'inherit' });
-        gitAt(apiRepo, ['push', 'origin', 'HEAD'], { stdio: 'inherit' });
-        console.log('API: pushed an extra empty commit to trigger commit webhooks.');
-      } catch (e) {
-        console.error('Warning: could not create/push empty commit in API repo.', e && e.message ? e.message : e);
-      }
-
-      // if requested, also create and push a test tag like `${tag}-testN`
-      if (testFlag) {
-        const n = nextTestNumber(apiRepo, tag);
-        const testTag = `${tag}-test${n}`;
-        // explicitly tag the same commit that the release tag points to
-        gitAt(apiRepo, ['tag', '-a', testTag, tag, '-m', testTag], { stdio: 'inherit' });
-        pushRelease(apiRepo, testTag, 'API (test)');
-        console.log(`Created and pushed test tag ${testTag} in API repo.`);
-      }
-    }
-
-    console.log(`Released ${tag}${releaseApi ? ' for game and API' : ''}.`);
-    return;
-  }
-
-  const apiTag = bumpDigitCarryTag(latestTag(apiRepo));
-  if (tagExists(apiRepo, apiTag)) {
-    console.error(`Tag ${apiTag} already exists in the API repo.`);
-    process.exit(1);
-  }
-
-  gitAt(apiRepo, ['tag', '-a', apiTag, '-m', apiTag], { stdio: 'inherit' });
-  pushRelease(apiRepo, apiTag, 'API');
-
-  // push extra empty commit to trigger commit-based webhooks
-  try {
-    gitAt(apiRepo, ['commit', '--allow-empty', '-m', `chore: trigger webhook for ${apiTag}`], { stdio: 'inherit' });
-    gitAt(apiRepo, ['push', 'origin', 'HEAD'], { stdio: 'inherit' });
-    console.log('API: pushed an extra empty commit to trigger commit webhooks.');
-  } catch (e) {
-    console.error('Warning: could not create/push empty commit in API repo.', e && e.message ? e.message : e);
-  }
-
-  if (testFlag) {
-    const n = nextTestNumber(apiRepo, apiTag);
-    const testTag = `${apiTag}-test${n}`;
-    // tag the same commit as apiTag
-    gitAt(apiRepo, ['tag', '-a', testTag, apiTag, '-m', testTag], { stdio: 'inherit' });
-    pushRelease(apiRepo, testTag, 'API (test)');
-    console.log(`Created and pushed test tag ${testTag} for API.`);
-  }
-
-  console.log(`Released ${apiTag} for API.`);
 }
 
 main().catch(error => {

@@ -7,7 +7,7 @@
     for(const id of ['devEnemyType','devEnemyCount','devEnemyAdd','devEnemyClear'])document.getElementById(id).disabled=!allowed;
     document.getElementById('devEnemyQueue').textContent=!allowed?'Starte zuerst den separaten Gegnertest.':devEnemyQueue.length?devEnemyQueue.map(row=>row.count+' × '+HexDevEnemies.entries.find(e=>e[0]===row.id)[1]).join(' → '):'Keine Auswahl: Die nächste Welle ist normal.';
   }
-  const gameStorage = testProfile ? HexFirstPlayerTest.storage : localStorage;
+  const gameStorage = testProfile ? HexFirstPlayerTest.storage : globalThis.HexLocalStore || localStorage;
   const arsenalNotifications = HexArsenal.notifications(gameStorage);
   const duoToken = typeof location === 'undefined' ? null : new URLSearchParams(location.hash.slice(1)).get('duo');
   let duoBridge = null;
@@ -25,7 +25,7 @@
     },
     placeTile, inspectCaravan() { document.getElementById('waveDropdown').open = true; }, selectSlot(q, r, index, multiple, pointerType) { if (!applyBuildingTarget(q, r)) selectSlot(q, r, index, multiple, pointerType); }, inspectBiome,
     fieldClick() { document.getElementById('towerDrawer').classList.add('hidden'); if (state?.dragTower) { cancelQuickTower(); renderAll(); } },
-    selectBase() { if (applyBuildingTarget(0, 0)) return; document.getElementById('towerDrawer').classList.add('hidden'); state.selectedBase = true; state.selectedTower = null; state.selectedSlot = null; state.selectedBuilding = null; document.getElementById('baseDropdown').open = true; renderAll(); },
+    selectBase(event) { if (applyBuildingTarget(0, 0)) return; if (globalThis.HexCompact?.small()) HexCompact.open('stats',event); document.getElementById('towerDrawer').classList.add('hidden'); state.selectedBase = true; state.selectedTower = null; state.selectedSlot = null; state.selectedBuilding = null; document.getElementById('baseDropdown').open = true; renderAll(); },
     hoverBuilding(slot) { state.hoverBuilding = slot; renderBoard(); },
     rotatePlacement() { return rotateSelected(-1); },
     viewChanged() { positionTowerPanel(); positionTutorialSpotlight(); if (state?.dragTower) renderDragShade(); if (state?.consumablePickUI) renderConsumablePreview(); },
@@ -160,6 +160,7 @@
     }
     return uiWavePlans.get(cacheKey);
   }
+  let copiedTowerPriorities = null;
   let towerPanelKey = '';
   let towerComparison = null, towerSelectionKey = '', towerFocusOpen = false, towerComparisonScroll = 0, towerComparedPreview = null;
   let buildingPanelKey = ''; const buildingButtons = new Map();
@@ -614,11 +615,12 @@ R dreht die Karte, dann Feld anklicken.`;
     document.getElementById('overloadStats').textContent='+50 % · '+consumableValues.overloadDuration+' s';
     const canConsume = state.hp > 0 && ['place', 'build', 'wave'].includes(state.phase) && (!duoToken || !state.consumablesLocked);
     document.getElementById('consumableMenu').classList.toggle('hidden', !canConsume); document.getElementById('compactConsumables').disabled = !canConsume;
-    for (const [id, kind] of [['buySpikes', 'spikes'], ['buyResin', 'resin'], ['buyOverload', 'overload']]) document.getElementById(id).disabled = !canConsume || state.gold < HexCombat.consumables[kind].cost;
-    if (!canConsume) consumablePick = null;
+    for (const [id, kind] of [['buySpikes', 'spikes'], ['buyResin', 'resin'], ['buyOverload', 'overload']]) { const button=document.getElementById(id), remaining=HexCombat.consumableRemaining(state,kind); button.disabled = !canConsume || remaining===0 || state.gold < HexCombat.consumables[kind].cost; button.title=remaining+' / 3 Einsätze in dieser Welle übrig'; }
+    if (!canConsume || consumablePick && HexCombat.consumableRemaining(state,consumablePick)===0) consumablePick = null;
     renderHotkeyTip();
     document.getElementById('rotateHexBtn').classList.toggle('hidden', state.phase !== 'place');
     document.getElementById('rotateHexBtn').disabled = state.phase !== 'place' || !state.hand[state.selectedCard];
+    for (const [id,kind] of [['spikesStats','spikes'],['resinStats','resin'],['overloadStats','overload']]) { const label=document.getElementById(id); if(label)label.textContent+=' · '+HexCombat.consumableRemaining(state,kind)+'/3'; }
     const touchControls = !!globalThis.HexCompact?.touch?.();
     document.getElementById('rotateHexBtn').textContent = touchControls ? 'Drehen' : 'Drehen (R)';
     const tunnelAvailable=!!state.tunnelOffer&&state.phase==='build'&&!state.waveRunning&&state.hp>0;
@@ -857,7 +859,7 @@ R dreht die Karte, dann Feld anklicken.`;
       const content = document.getElementById('buildingOptions'); content.innerHTML = ''; const next = HexBuildings.nextUpgrade(state, building);
       if (next) { const button = document.createElement('button'); button.className = 'upgradeOption'; button._cost = next.cost; buildingButtons.set('upgrade', button); const after = HexBuildings.definition({ ...building, level: (building.level || 1) + 1 }); button.textContent = (next.name || 'Ausbauen') + ' · ' + next.cost + ' Gold · ' + (next.desc || after.desc); button.disabled = state.gold < next.cost || state.hp <= 0 || !['place', 'build', 'wave'].includes(state.phase); button.addEventListener('click', () => { if (duoToken) { duoAction('buildingUpgrade', { slot: state.selectedBuilding }); return; } if (HexBuildings.upgrade(state, state.selectedBuilding)) renderAll(); }); content.appendChild(button); }
       else if ((building.level || 1) === 3 && !building.special && HexBuildings.specials[building.type]) { const hint = document.createElement('p'); hint.textContent = 'Spezialausbau im Arsenal für 40 Diamanten freischalten. Ab dem nächsten Run verfügbar.'; content.appendChild(hint); }
-      if (building.special && building.type !== 'house') { const choose = document.createElement('button'); panel._targetButton = choose; choose.textContent = HexBuildings.targetRemaining(building)===0 ? 'Zusatz-Hex festgelegt · keine Änderung mehr möglich' : state.buildingTarget ? 'Hex auf der Map anklicken · Abbrechen' : (building.target ? 'Zusatz-Hex ändern' : 'Zusatz-Hex auf der Map auswählen'); choose.title = building.type==='market' ? 'Zusatz-Hex: einmal wählen, einmal korrigieren. Noch '+HexBuildings.targetRemaining(building)+' Platzierungen.' : building.target ? 'Aktuelles Zusatzhex: ' + building.target + ' · kräftig markiert' : 'Zusatzhex auswählen'; choose.addEventListener('pointerenter', () => renderBoard()); choose.addEventListener('focus', () => renderBoard()); choose.disabled = state.hp <= 0 || !['place', 'build', 'wave'].includes(state.phase); choose.addEventListener('click', () => { state.buildingTarget = state.buildingTarget ? null : { ...state.selectedBuilding }; state.selectedBuilding = null; setMessage('Zusatzwirkung: ein erkundetes Hex anklicken · Escape: abbrechen'); renderAll(); }); content.appendChild(choose); }
+      if (building.special && building.type !== 'house') { const choose = document.createElement('button'); panel._targetButton = choose; choose.textContent = HexBuildings.redundantTarget(state,building) ? 'Zusatz-Hex bereits gleich stark versorgt · neu wählen' : HexBuildings.targetRemaining(building)===0 ? 'Zusatz-Hex festgelegt · keine Änderung mehr möglich' : state.buildingTarget ? 'Hex auf der Map anklicken · Abbrechen' : (building.target ? 'Zusatz-Hex ändern' : 'Zusatz-Hex auf der Map auswählen'); choose.title = building.type==='market' ? 'Zusatz-Hex: einmal wählen, einmal korrigieren. Noch '+HexBuildings.targetRemaining(building)+' Platzierungen.' : building.target ? 'Aktuelles Zusatzhex: ' + building.target + ' · kräftig markiert' : 'Zusatzhex auswählen'; choose.addEventListener('pointerenter', () => renderBoard()); choose.addEventListener('focus', () => renderBoard()); choose.disabled = state.hp <= 0 || !['place', 'build', 'wave'].includes(state.phase); choose.addEventListener('click', () => { state.buildingTarget = state.buildingTarget ? null : { ...state.selectedBuilding }; state.selectedBuilding = null; setMessage('Zusatzwirkung: ein erkundetes Hex anklicken · Escape: abbrechen'); renderAll(); }); content.appendChild(choose); }
     }
     if (panel._targetButton) panel._targetButton.disabled = HexBuildings.targetRemaining(building)<=0 || state.hp <= 0 || !['place', 'build', 'wave'].includes(state.phase);
     for (const [type, button] of buildingButtons) button.disabled = !!HexBuildings.buildBlockReason(tile, type) || (type === 'portal' && (!['place', 'build'].includes(state.phase) || state.waveRunning)) || !['place', 'build', 'wave'].includes(state.phase) || state.hp <= 0 || state.gold < (button._cost || HexBuildings.definitions[type].cost);
@@ -985,6 +987,11 @@ R dreht die Karte, dann Feld anklicken.`;
         const targeting = document.createElement('details'); targeting.className = 'targetPriorities towerDisclosure'; targeting.setAttribute('aria-label', 'Angriffsfokus'); targeting.open = group || towerFocusOpen;
         const summary = document.createElement('summary'); summary.innerHTML = '<span class="focusLabel">Angriffsfokus</span><span class="focusValue">' + HexTowerView.escape(targetable.some(t => (t.targetPriority || defaults)[0] !== tower.targetPriority[0]) ? 'Unterschiedliche Einstellungen' : labels[tower.targetPriority[0]]) + '</span>'; targeting.appendChild(summary);
         targeting.addEventListener('toggle', () => { towerFocusOpen = targeting.open; }); focusSection = targeting;
+        const copy = document.createElement('button'), paste = document.createElement('button');
+        copy.className = paste.className = 'towerFocusCopy'; copy.textContent = 'Fokus kopieren'; paste.textContent = 'Fokus einfügen'; paste.disabled = !copiedTowerPriorities;
+        copy.addEventListener('click', () => { copiedTowerPriorities = [...tower.targetPriority]; towerPanelKey = ''; renderAll(); });
+        paste.addEventListener('click', () => { if (!copiedTowerPriorities) return; if (duoToken) duoBridge?.priorities(selections('Tower').filter(slot => { const t=state.map.get(key(slot.q,slot.r))?.towers[slot.index]; return targetable.includes(t); }).map(slot => ({slot,priorities:[...copiedTowerPriorities]}))); else for (const target of targetable) target.targetPriority = [...copiedTowerPriorities]; towerPanelKey = ''; renderAll(); });
+        content.appendChild(copy); content.appendChild(paste);
         tower.targetPriority.forEach((value, index) => { const row = document.createElement('label'); row.textContent = `${index + 1}.`; const select = document.createElement('select'); select.setAttribute('aria-label', 'Angriffsfokus Priorität ' + (index + 1)); const mixed = targetable.some(t => (t.targetPriority || defaults)[index] !== value); if (mixed) { const option = document.createElement('option'); option.value = ''; option.textContent = 'Unterschiedliche Einstellungen'; option.disabled = true; option.selected = true; select.appendChild(option); } for (const [id, label] of Object.entries(labels)) { const option = document.createElement('option'); option.value = id; option.textContent = label; option.selected = !mixed && id === value; select.appendChild(option); } select.addEventListener('change', () => { if (duoToken) { const packets = selections('Tower').map(slot => { const target = state.map.get(key(slot.q, slot.r))?.towers[slot.index], priorities = [...(target.targetPriority || defaults)], old = priorities[index], other = priorities.indexOf(select.value); priorities[index] = select.value; if (other >= 0 && other !== index) priorities[other] = old; return { slot, priorities }; }); duoBridge?.priorities(packets); return; } for (const target of targetable) { target.targetPriority = [...(target.targetPriority || defaults)]; const old = target.targetPriority[index], other = target.targetPriority.indexOf(select.value); target.targetPriority[index] = select.value; if (other >= 0 && other !== index) target.targetPriority[other] = old; } towerPanelKey = ''; renderAll(); }); row.appendChild(select); targeting.appendChild(row); });
       }
       if (group) { const hint = document.createElement('p'); hint.className = 'hint'; hint.textContent = 'Änderungen gelten für ' + targetable.length + ' Türme mit Angriffsfokus. Unterschiedliche bisherige Einstellungen werden durch die Auswahl je Zeile angepasst. Support und Minenleger bleiben unverändert. Upgrades und Verkauf: einzelnen Turm auswählen.'; content.appendChild(hint); }
@@ -1473,7 +1480,7 @@ R dreht die Karte, dann Feld anklicken.`;
     if (!loggedIn) return;
     document.getElementById('accountWhoami').textContent = 'Angemeldet als ' + accountUser.username;
     document.getElementById('accountSyncDot').dataset.state = dirty ? 'pending' : 'ok';
-    document.getElementById('accountSyncInfo').textContent = dirty ? 'Nicht gesicherte Änderungen – werden beim nächsten Mal übertragen.' : 'Wird nach jeder abgeschlossenen Welle und nach jedem Spiel gesichert.';
+    document.getElementById('accountSyncInfo').textContent = cloudSaveError || (dirty ? 'Nicht gesicherte Änderungen – werden beim nächsten Mal übertragen.' : accountApi()?.statsStatus==='pending' ? 'Spielstand gesichert. Die Bestenliste wird noch aktualisiert.' : 'Wird nach jeder abgeschlossenen Welle und nach jedem Spiel gesichert.');
     document.getElementById('accountDiamonds').textContent = profile.diamonds;
     document.getElementById('accountBestWave').textContent = profile.records?.highestWave || 0;
     document.getElementById('accountLastSync').textContent = formatSyncTime(cloudStore.get(CLOUD_LAST));
@@ -1492,6 +1499,7 @@ R dreht die Karte, dann Feld anklicken.`;
     renderAccount();
   }
   function applyServerProfile(data) {
+    globalThis.HexLocalStore?.activate(accountUser?.id);
     cloudStore.set(PROFILE_BACKUP, HexProfile.exportFile(profile, TOWERS));   // Sicherung des ersetzten lokalen Stands
     const previousIntro = profile.introduction;
     profile = HexProfile.importFile(JSON.stringify(data), TOWERS);
@@ -1500,33 +1508,71 @@ R dreht die Karte, dann Feld anklicken.`;
     if (data.audioSettings) sound.applySettings?.(data.audioSettings);
     applyGameSettings(data.gameSettings);
     if (Object.prototype.hasOwnProperty.call(data, 'runAutosave')) {
-      try { if (data.runAutosave) HexRunSnapshot.restore(data.runAutosave.checkpoint); gameStorage.setItem(RUN_AUTOSAVE_KEY, data.runAutosave ? JSON.stringify(data.runAutosave) : ''); } catch {}
+      // Preserve checkpoints from newer versions even when this client cannot resume them.
+      gameStorage.setItem(RUN_AUTOSAVE_KEY, data.runAutosave ? JSON.stringify(data.runAutosave) : '');
     }
     pendingLoadout = [...profile.activeLoadout]; pendingHero = profile.activeHero; pendingDifficulty = profile.difficulty;
     renderLoadout(); renderUI(); updateArsenalHint();
   }
-  function applyPendingServerProfile() { if (!pendingServerProfile) return; const data = pendingServerProfile; pendingServerProfile = null; applyServerProfile(data); }
+  function applyPendingServerProfile() { if (!pendingServerProfile) return; const data = pendingServerProfile; applyServerProfile(data); accountApi()?.commitLoadedSave?.(data); pendingServerProfile = null; }
   // Server-Stand holen: 'loaded', 'deferred' (Spiel läuft) oder 'empty' (noch nichts gespeichert).
+  let cloudUpload = null, cloudChange = 0, cloudSaveError = '';
+  function adoptCurrentProfileForAccount() {
+    if(!globalThis.HexLocalStore) return;
+    const snapshot=gameStorage.getItem(RUN_AUTOSAVE_KEY),settings=readGameSettings();
+    HexLocalStore.activate(accountUser.id);
+    if(gameStorage.getItem(HexProfile.STORAGE_KEY)) profile=HexProfile.load(TOWERS);
+    else { profile=HexProfile.save(profile,TOWERS);if(snapshot)gameStorage.setItem(RUN_AUTOSAVE_KEY,snapshot);applyGameSettings(settings); }
+  }
   async function pullFromServer() {
-    const data = await accountApi().getSave(); if (!data) return 'empty';
+    if (cloudUpload) await cloudUpload;
+    const data = await accountApi().getSave({ deferCommit: true });
+    cloudSaveError = '';
+    if (!data) { adoptCurrentProfileForAccount(); return 'empty'; }
     data.gameSettings = {...data.gameSettings, arsenalSeen: Array.isArray(data.gameSettings?.arsenalSeen) ? data.gameSettings.arsenalSeen : []};
     applyGameSettings(data.gameSettings);
     cloudStore.set(CLOUD_DIRTY, null); cloudStore.set(CLOUD_LAST, new Date().toISOString());
     if (hasActiveRun && state?.hp > 0) { pendingServerProfile = data; return 'deferred'; }
-    applyServerProfile(data); if (!mainMenu.classList.contains('hidden')) openMainMenu(); return 'loaded';
+    try { applyServerProfile(data); accountApi().commitLoadedSave?.(data); }
+    catch (error) { cloudSaveError = 'Cloud-Spielstand konnte nicht übernommen werden. Automatisches Hochladen ist angehalten.'; throw error; }
+    if (!mainMenu.classList.contains('hidden')) openMainMenu(); return 'loaded';
   }
   async function pushToServer() {
     if (!accountApi()?.isLoggedIn()) return false; clearTimeout(cloudSaveTimer);
-    try { const payload=pendingServerProfile ? JSON.parse(JSON.stringify(pendingServerProfile)) : JSON.parse(HexProfile.exportFile(profile, TOWERS)); if (!pendingServerProfile) payload.runAutosave=readRunAutosave(); payload.gameSettings=readGameSettings(); payload.audioSettings=sound.settings?.() || null; await accountApi().putSave(JSON.stringify(payload)); cloudStore.set(CLOUD_DIRTY, null); cloudStore.set(CLOUD_LAST, new Date().toISOString()); renderAccount(); return true; }
-    catch { cloudStore.set(CLOUD_DIRTY, '1'); renderAccount(); return false; }
+    if (cloudUpload) return cloudUpload;
+    if (globalThis.HexLocalStore?.blocked) { setAccountStatus('Speichern gesperrt: Dieses Profil ist in einem anderen Tab geöffnet. Bitte den anderen Tab schließen und neu laden.', 'error'); return false; }
+    if (HexProfile.storageProblem) { cloudSaveError = 'Das lokale Profil ist beschädigt oder benötigt eine neuere Spielversion. Cloud-Upload angehalten; bitte den Account-Spielstand laden.'; setAccountStatus(cloudSaveError, 'error'); return false; }
+    if (cloudSaveError) return false;
+    const change = cloudChange;
+    cloudUpload = Promise.resolve().then(async () => {
+      try {
+        const payload=pendingServerProfile ? JSON.parse(JSON.stringify(pendingServerProfile)) : JSON.parse(HexProfile.exportFile(profile, TOWERS));
+        if (!pendingServerProfile) payload.runAutosave=JSON.parse(gameStorage.getItem(RUN_AUTOSAVE_KEY) || 'null');
+        payload.gameSettings=readGameSettings(); payload.audioSettings=sound.settings?.() || null;
+        await accountApi().putSave(JSON.stringify(payload));
+        cloudStore.set(CLOUD_DIRTY, change === cloudChange ? null : '1');
+        cloudStore.set(CLOUD_LAST, new Date().toISOString()); renderAccount();
+        if (change !== cloudChange) cloudSaveTimer = setTimeout(pushToServer, 800);
+        return true;
+      } catch (error) {
+        cloudStore.set(CLOUD_DIRTY, '1');
+        if (error.status === 409 || error.status === 428) {
+          cloudSaveError = error.message;
+          cloudStore.set(PROFILE_BACKUP, HexProfile.exportFile(profile, TOWERS));
+          setAccountStatus(cloudSaveError, 'error');
+        }
+        renderAccount(); return false;
+      } finally { cloudUpload = null; }
+    });
+    return cloudUpload;
   }
-  function scheduleCloudSave() { if (!accountApi()?.isLoggedIn()) return; cloudStore.set(CLOUD_DIRTY, '1'); clearTimeout(cloudSaveTimer); cloudSaveTimer = setTimeout(pushToServer, 800); }
+  function scheduleCloudSave() { if (!accountApi()?.isLoggedIn()) return; cloudChange++; cloudStore.set(CLOUD_DIRTY, '1'); clearTimeout(cloudSaveTimer); cloudSaveTimer = setTimeout(pushToServer, 800); }
   // Nach einem abgeschlossenen Spiel: sichern und im Ergebnisfenster Bescheid geben.
   async function saveRunToCloud() {
     const note = document.getElementById('cloudSaveNote'); note.classList.remove('hidden');
     if (!accountApi()?.isLoggedIn()) { note.dataset.state = 'hint'; note.textContent = 'Tipp: Mit einem Account wird dein Fortschritt automatisch gesichert.'; return; }
     note.dataset.state = 'saving'; note.textContent = '☁ Spielstand wird gesichert …';
-    const ok = await pushToServer(); note.dataset.state = ok ? 'ok' : 'error'; note.textContent = ok ? '☁ Spielstand in deinem Account gesichert.' : '☁ Gerade offline – wird beim nächsten Mal gesichert.';
+    const ok = await pushToServer(); note.dataset.state = ok ? 'ok' : 'error'; note.textContent = ok ? (accountApi()?.statsStatus==='pending' ? '☁ Spielstand gesichert. Die Bestenliste wird noch aktualisiert.' : '☁ Spielstand in deinem Account gesichert.') : cloudSaveError || '☁ Gerade offline – wird beim nächsten Mal gesichert.';
   }
   function openAccount() { setAccountStatus(''); renderAccount(); accountOverlay.classList.remove('hidden'); refreshAccountView().then(() => { if (!accountUser) document.getElementById('accountUsername').focus?.(); }); }
   function closeAccount() { accountOverlay.classList.add('hidden'); document.getElementById('accountPassword').value = ''; openMainMenu(); document.getElementById('menuAccountBtn').focus?.(); }
@@ -1541,7 +1587,11 @@ R dreht die Karte, dann Feld anklicken.`;
     if (!username || !password) { setAccountStatus('Bitte Benutzername und Passwort eingeben.', 'error'); return; }
     const register = accountMode === 'register'; setAccountBusy(true); setAccountStatus(register ? 'Account wird erstellt …' : 'Anmelden …');
     try {
+      if (cloudUpload) await cloudUpload;
+      clearTimeout(cloudSaveTimer); cloudSaveError = '';
       accountUser = register ? await accountApi().register(username, password) : await accountApi().login(username, password);
+      await globalThis.HexLocalStore?.prepare(accountUser.id);
+      if (register) adoptCurrentProfileForAccount();
       document.getElementById('accountPassword').value = '';
       if (register) { const ok = await pushToServer(); setAccountStatus(ok ? 'Account erstellt. Dein Fortschritt ist jetzt gesichert.' : 'Account erstellt. Der Spielstand wird beim nächsten Mal gesichert.', 'success'); }
       else {
@@ -1554,10 +1604,10 @@ R dreht die Karte, dann Feld anklicken.`;
     } catch (error) { setAccountStatus((register ? 'Registrierung fehlgeschlagen: ' : 'Anmeldung fehlgeschlagen: ') + error.message, 'error'); }
     finally { setAccountBusy(false); renderAccount(); globalThis.HexLeaderboardUI?.refreshResult(); globalThis.HexRunRanking?.refresh(); }
   });
-  document.getElementById('accountLogoutBtn').addEventListener('click', async () => { setAccountBusy(true); await accountApi()?.logout(); accountUser = null; pendingServerProfile = null; cloudStore.set(CLOUD_DIRTY, null); setAccountBusy(false); setAccountMode('login'); renderAccount(); setAccountStatus('Abgemeldet. Dein Spielstand bleibt auf diesem Gerät erhalten.', 'success'); });
+  document.getElementById('accountLogoutBtn').addEventListener('click', async () => { setAccountBusy(true); clearTimeout(cloudSaveTimer); if (cloudUpload) await cloudUpload; clearTimeout(cloudSaveTimer); if(hasActiveRun){saveRunAutosave(true);hasActiveRun=false;clearRunTimers();stopSoloPresence();} await accountApi()?.logout(); cloudSaveError = ''; accountUser = null; pendingServerProfile = null; if(globalThis.HexLocalStore){HexLocalStore.activate();profile=HexProfile.load(TOWERS);applyGameSettings(JSON.parse(gameStorage.getItem('hex-game-settings-v1')||'null'));openMainMenu();} else cloudStore.set(CLOUD_DIRTY, null); setAccountBusy(false); setAccountMode('login'); renderAccount(); setAccountStatus('Abgemeldet. Dein Spielstand bleibt auf diesem Gerät erhalten.', 'success'); });
   document.getElementById('accountSaveServerBtn').addEventListener('click', async () => {
     setAccountBusy(true); setAccountStatus('Spielstand wird gesichert …');
-    const ok = await pushToServer(); setAccountBusy(false); setAccountStatus(ok ? 'Spielstand gesichert.' : 'Sichern fehlgeschlagen. Bitte Verbindung prüfen.', ok ? 'success' : 'error');
+    const ok = await pushToServer(); setAccountBusy(false); setAccountStatus(ok ? 'Spielstand gesichert.' : cloudSaveError || 'Sichern fehlgeschlagen. Bitte Verbindung prüfen.', ok ? 'success' : 'error');
   });
   document.getElementById('accountLoadServerBtn').addEventListener('click', async () => {
     setAccountBusy(true); setAccountStatus('Spielstand wird geladen …');
@@ -1569,7 +1619,8 @@ R dreht die Karte, dann Feld anklicken.`;
   (async () => {
     if (!accountApi()?.isLoggedIn()) return;
     await refreshAccountView(); if (!accountUser) return;
-    try { if (cloudStore.get(CLOUD_DIRTY) === '1') await pushToServer(); else await pullFromServer(); } catch {/* offline: später erneut */ }
+    await globalThis.HexLocalStore?.prepare(accountUser.id);
+    try { if (cloudStore.get(CLOUD_DIRTY) === '1' && (!globalThis.HexLocalStore || HexLocalStore.scope === 'user-'+accountUser.id)) await pushToServer(); else await pullFromServer(); } catch {/* offline: später erneut */ }
     renderAccount();
   })();
   function updateArsenalHint() { const count = HexProfile.affordableUnlocks(profile), button = document.getElementById('menuArsenalBtn'); button.classList.toggle('upgradeAvailable', arsenalNotifications.pending(profile));  document.getElementById('menuArsenalDetail').textContent = count ? '◆ Upgrade verfügbar' : ''; button.title = count ? count + ' Freischaltungen bezahlbar' : 'Arsenal'; }

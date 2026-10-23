@@ -10,6 +10,17 @@ const HexBuildings=(()=>{
   function upgrade(state,slot){const tile=slot&&state.map.get(slot.q+','+slot.r),b=tile?.buildings?.[slot.index],next=nextUpgrade(state,b);if(!next||state.hp<=0||!['place','build','wave'].includes(state.phase)||state.gold<next.cost)return false;const before=definition(b);if((b.level||1)<3)b.level=(b.level||1)+1;else b.special=true;b.paid+=next.cost;state.gold-=next.cost;state.income+=(definition(b).income||0)-(before.income||0);state.buildingVersion=(state.buildingVersion||0)+1;refresh(state);return true;}
   function targetUses(building){return Math.max(building?.target?1:0,Math.floor(Number(building?.targetUses)||0));}
   function targetRemaining(building){return building?.type==='market'?Math.max(0,2-targetUses(building)):Infinity;}
+  function redundantTarget(state,building){
+    const target=building?.type==='forge'&&building.special&&state.map.get(building.target);
+    if(!target)return false;
+    const strength=definition(building).damage;
+    for(const tile of state.map.values())for(const other of tile.buildings||[]){
+      if(other?.type!=='forge'||definition(other).damage<strength)continue;
+      const dq=tile.q-target.q,dr=tile.r-target.r;
+      if(Math.max(Math.abs(dq),Math.abs(dr),Math.abs(dq+dr))<=definition(other).radius)return true;
+    }
+    return false;
+  }
   function canTarget(state,slot,target){const source=slot&&state.map.get(slot.q+','+slot.r),b=source?.buildings?.[slot.index],tile=state.map.get(target);if(!b?.special||b.type==='house'||!tile||targetRemaining(b)<=0||b.target===target)return false;if(b.type==='forge')for(const t of state.map.values())for(const other of t.buildings||[])if(other?.type==='forge'&&applies(t,tile,other))return false;return true;}
   function setTarget(state,slot,target){const source=slot&&state.map.get(slot.q+','+slot.r),b=source?.buildings?.[slot.index];if(!canTarget(state,slot,target)||state.hp<=0||!['place','build','wave'].includes(state.phase))return false;if(b.type==='market')b.targetUses=targetUses(b)+1;b.target=target;state.buildingVersion=(state.buildingVersion||0)+1;refresh(state);return true;}
   function effects(map,target){
@@ -77,5 +88,5 @@ const count=patricianCount(state),bonus=2*count*Math.max(0,count-1);state.income
     tile.buildings[slot.index]=null;state.gold+=value.amount;state.income-=definition(building).income||0;
     state.buildingVersion=(state.buildingVersion||0)+1;refresh(state);return true;
   }
-  return {targetRemaining,rangeBonus,buildBlockReason,allowedTypes,upgrades,specials,definition,nextUpgrade,upgrade,canTarget,setTarget,definitions,highlight,buy,effects,cost,freeSlotDiscount,refresh,refund,sell};
+  return {redundantTarget,targetRemaining,rangeBonus,buildBlockReason,allowedTypes,upgrades,specials,definition,nextUpgrade,upgrade,canTarget,setTarget,definitions,highlight,buy,effects,cost,freeSlotDiscount,refresh,refund,sell};
 })();

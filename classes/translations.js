@@ -1771,3 +1771,22 @@ Die Turmauswahl zeigt Werte mit Symbolen und den Preis als Knopf; bei zu wenig G
 Neues Turmfenster: Bild des Turms in seiner Ausbaustufe, die wichtigsten Werte auf einen Blick, Angriffsfokus und Upgrades mit Vorschaubild, Typ und Preis. „Werte & Einflüsse“ öffnet eine eigene Ansicht mit allen Werten, aktiven Einflüssen und Schadensfaktoren.|New tower window: an image of the tower at its upgrade level, the key stats at a glance, targeting and upgrades with preview image, type and price. “Stats & modifiers” opens its own view with all stats, active modifiers and damage factors.
 Neue Schriften für Titel und Bedienelemente, und das Spielfeld liegt vor einem kräftigeren Blau.|New fonts for titles and controls, and the board sits in front of a stronger blue.
 `);
+
+Object.assign(globalThis.HexTranslations.en, {
+  "Spielstände sind besser gegen veraltete Uploads und gleichzeitiges Spielen in mehreren Tabs geschützt. Ein zweiter Tab zeigt an, wenn er nicht speichern darf.": "Saves are better protected against outdated uploads and playing in multiple tabs. A second tab indicates when it cannot save.",
+  "Lokale Spielstände von Accounts und Gästen werden getrennt aufbewahrt. Vorherige Cloud-Spielstände werden beim Ersetzen gesichert; beschädigte Uploads werden abgewiesen.": "Local account and guest saves are kept separately. Previous cloud saves are backed up before replacement; damaged uploads are rejected.",
+  "Wenn die Aktualisierung der Profil-Bestenliste vorübergehend fehlschlägt, wird sie nachgeholt. Der Account zeigt dabei an, dass der Spielstand bereits gesichert ist.": "If updating the profile leaderboard temporarily fails, the update is retried. Your account shows that your progress has already been saved.",
+  "Spielstand gesichert. Die Bestenliste wird noch aktualisiert.": "Progress saved. The leaderboard update is still pending.",
+  "☁ Spielstand gesichert. Die Bestenliste wird noch aktualisiert.": "☁ Progress saved. The leaderboard update is still pending."
+});
+
+Object.assign(globalThis.HexTranslations.en, {
+  "Ballisten und andere Türme richten sich nach ihrem Angriffsfokus aus. Der Angriffsfokus lässt sich auf andere Türme kopieren.": "Ballistas and other towers face their selected attack target. Attack priorities can be copied to other towers.",
+  "Die Basis lässt sich auf Mobilgeräten zum Ausbauen öffnen. Fernschmieden markieren ein Zusatzfeld, das inzwischen gleich stark durch eine nahe Schmiede versorgt wird.": "The base upgrade panel opens on mobile. Remote forges flag a remote tile that now receives equally strong support from a nearby forge.",
+  "Verbrauchshilfen sind auf drei Einsätze je Sorte und Welle begrenzt. Vorbereitete Einsätze zählen mit; die verbleibende Anzahl wird angezeigt.": "Consumables are limited to three uses per type per wave. Preparation uses count toward this limit, and remaining uses are shown.",
+  "Kettenblitze und Nekromanten verursachen mehr Schaden, Flammentürme und Minen weniger. Flammen sind gegen Rüstung und Magieresistenz schwächer. Gegner in Welle 1 bewegen sich langsamer.": "Chain lightning and necromancers deal more damage; flame towers and mines deal less. Flames are weaker against armor and magic resistance. Wave 1 enemies move more slowly.",
+  "Rammbockkäfer beschleunigen auf geraden Straßen schneller. Nekromanten erhalten auch aus Krähenfuß-Kills Seelen.": "Ram beetles accelerate faster on straight roads. Necromancers also collect souls from caltrop kills.",
+  "Fokus kopieren": "Copy focus",
+  "Fokus einfügen": "Paste focus",
+  "Zusatz-Hex bereits gleich stark versorgt · neu wählen": "Remote tile already equally supported · choose another"
+});

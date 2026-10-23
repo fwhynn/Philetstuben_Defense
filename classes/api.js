@@ -10,6 +10,24 @@
 	const TOKEN_KEY = baseUrl === productionBaseUrl
 		? 'hex-bastion-auth-token'
 		: 'hex-bastion-auth-token:' + baseUrl;
+	// This baseline belongs to the loaded profile, never to a freshly probed cloud save.
+	let saveRevision, pendingSave = null;
+	let sessionToken = getToken();
+	let statsStatus = null;
+	function assertSession() { if (getToken() !== sessionToken) throw saveError('Der Account wurde in einem anderen Tab geändert. Bitte die Seite neu laden.'); }
+	try { saveRevision = JSON.parse(localStorage.getItem(TOKEN_KEY + ':save-base') || 'null'); } catch {}
+	function rememberRevision(token, revision) {
+		saveRevision = { token, revision };
+		try { localStorage.setItem(TOKEN_KEY + ':save-base', JSON.stringify(pendingSave ? { token, revision: null } : saveRevision)); } catch {}
+	}
+	function commitLoadedSave(data) {
+		if (!pendingSave || pendingSave.data !== data || pendingSave.token !== getToken()) throw saveError('Der geladene Account-Spielstand ist nicht mehr aktuell.');
+		pendingSave = null;
+		rememberRevision(saveRevision.token, saveRevision.revision);
+	}
+	function saveError(message, status = 409) { return Object.assign(new Error(message), { status }); }
+	function rememberUser(user) { if(user?.id != null) localStorage.setItem(TOKEN_KEY + ':user',JSON.stringify({token:getToken(),id:user.id})); }
+	function storedUserId() { try { const user=JSON.parse(localStorage.getItem(TOKEN_KEY+':user')); return user?.token===getToken()?user.id:null; } catch {return null;} }
 
 	async function parseJson(response) {
 		const payload = await response.json().catch(() => null);
@@ -18,7 +36,7 @@
 			const message = payload && payload.error && payload.error.message
 				? payload.error.message
 				: `API request failed with status ${response.status}`;
-			throw new Error(message);
+			throw saveError(message, response.status);
 		}
 
 		return payload;
@@ -49,6 +67,7 @@
 	}
 
 	function authHeaders() {
+		assertSession();
 		const token = getToken();
 		return token ? { Authorization: `Bearer ${token}` } : {};
 	}
@@ -77,6 +96,9 @@
 
 		const payload = await parseJson(response);
 		setToken(payload.token);
+		sessionToken = payload.token;
+		rememberRevision(payload.token, 'empty');
+		rememberUser(payload.user);
 		return payload.user;
 	}
 
@@ -92,12 +114,17 @@
 
 		const payload = await parseJson(response);
 		setToken(payload.token);
+		sessionToken = payload.token;
+		rememberRevision(payload.token, null);
+		rememberUser(payload.user);
 		return payload.user;
 	}
 
 	async function logout() {
+		assertSession();
 		const token = getToken();
 		clearToken();
+		sessionToken = null;
 
 		if (!token) {
 			return;
@@ -115,6 +142,8 @@
 	}
 
 	async function currentUser() {
+		assertSession();
+		const token = getToken();
 		if (!getToken()) {
 			return null;
 		}
@@ -128,16 +157,21 @@
 			cache: 'no-store'
 		});
 
+		if (getToken() !== token) throw saveError('Account wurde inzwischen gewechselt.');
 		if (response.status === 401) {
 			clearToken();
+			sessionToken = null;
 			return null;
 		}
 
 		const payload = await parseJson(response);
-		return payload.user;
+		if (getToken() !== token) throw saveError('Account wurde inzwischen gewechselt.');
+		rememberUser(payload.user); return payload.user;
 	}
 
-	async function getSave() {
+	async function getSave({ deferCommit = false } = {}) {
+		assertSession();
+		const token = getToken();
 		const response = await fetch(`${baseUrl}/saves`, {
 			method: 'GET',
 			headers: {
@@ -148,14 +182,33 @@
 		});
 
 		if (response.status === 404) {
+			if (getToken() === token) rememberRevision(token, null);
 			return null;
 		}
 
 		const payload = await parseJson(response);
+		if (getToken() !== token) throw saveError('Account wurde inzwischen gewechselt.');
+		pendingSave = deferCommit && payload.data ? { token, data: payload.data } : null;
+		statsStatus = payload.statsStatus || null;
+		rememberRevision(token, payload.revision || null);
 		return payload.data;
 	}
 
 	async function putSave(data) {
+		assertSession();
+		const token = getToken();
+		if (!token || saveRevision?.token !== token || !saveRevision.revision) {
+			throw saveError('Cloud-Speicherung angehalten: Bitte zuerst den Account-Spielstand laden. Der lokale Stand bleibt erhalten.');
+		}
+		const body = typeof data === 'string' ? JSON.parse(data) : { ...data };
+		body._baseRevision = saveRevision.revision;
+		// Capability check also makes a client-first deployment fail closed on an old API.
+		// Do not adopt this revision: doing so would bless a stale local profile.
+		const probe = await fetch(`${baseUrl}/saves`, { headers: { Accept: 'application/json', ...authHeaders() }, cache: 'no-store' });
+		const remote = await parseJson(probe);
+		if (!remote?.revision) throw saveError('Die API unterstützt noch keine sichere Cloud-Speicherung.', 428);
+		if (remote.revision !== body._baseRevision) throw saveError('Cloud-Speicherung angehalten: Ein neuerer Account-Spielstand liegt vor. Dein lokaler Stand bleibt erhalten. Bitte den Account-Spielstand laden.');
+		if (getToken() !== token) throw saveError('Account wurde inzwischen gewechselt.');
 		const response = await fetch(`${baseUrl}/saves`, {
 			method: 'PUT',
 			headers: {
@@ -163,10 +216,15 @@
 				'Content-Type': 'application/json',
 				...authHeaders()
 			},
-			body: typeof data === 'string' ? data : JSON.stringify(data)
+			body: JSON.stringify(body)
 		});
 
-		return parseJson(response);
+		const payload = await parseJson(response);
+		if (getToken() !== token) throw saveError('Account wurde inzwischen gewechselt.');
+		if (!payload.revision) throw saveError('Die API unterstützt noch keine sichere Cloud-Speicherung.', 428);
+		rememberRevision(token, payload.revision);
+		statsStatus = payload.statsStatus || null;
+		return payload;
 	}
 
 	async function pulsePresence({ mode = 'solo', wave = 0 } = {}) {
@@ -295,12 +353,15 @@
 		getPendingRankings: (offset = 0) => rankingRequest('/pending?' + new URLSearchParams({ offset })),
 		reviewRanking: (runId, decision, reason) => rankingRequest('/results/' + encodeURIComponent(runId) + '/review', { method: 'POST', body: { decision, reason } }),
 		baseUrl,
+		storedUserId,
+		get statsStatus(){return statsStatus;},
 		getUserById,
 		register,
 		login,
 		logout,
 		currentUser,
 		getSave,
+		commitLoadedSave,
 		putSave,
 		pulsePresence,
 		clearPresence,

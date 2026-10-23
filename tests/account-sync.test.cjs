@@ -21,6 +21,45 @@ function fakeApi(serverSave = null) {
     async putSave(text) { const data = JSON.parse(text); this.puts.push(data); this.server = data; return { updatedAt: 'now' }; } };
 }
 const flush = () => new Promise(resolve => setImmediate(resolve));
+test('account UI distinguishes a saved profile from pending leaderboard statistics',async()=>{
+ const api=fakeApi();api.statsStatus='pending';const r=load({accountApi:api,bootToMenu:true});await submit(r.document,'register');
+ assert.match(r.elements.get('accountSyncInfo').textContent,/Spielstand gesichert.*Bestenliste/);
+});
+test('a newer unreadable run checkpoint survives cloud restore and subsequent settings upload',async()=>{
+ const checkpoint={checkpoint:{version:999,rules:'future',state:{runId:'future-run'}},manual:true};
+ const api=fakeApi({...serverSave({diamonds:100}),runAutosave:checkpoint});
+ const r=load({accountApi:api,bootToMenu:true});await submit(r.document,'login');
+ assert.deepEqual(JSON.parse(r.storage.get('autohex-solo-autosave-v1')),checkpoint);
+ await r.elements.get('accountSaveServerBtn').listeners.click();
+ assert.deepEqual(api.server.runAutosave,checkpoint);
+});
+
+test('a malformed local checkpoint stops upload instead of erasing the cloud checkpoint',async()=>{
+ const api=fakeApi(),r=load({accountApi:api,bootToMenu:true});await submit(r.document,'register');
+ const count=api.puts.length;r.storage.set('autohex-solo-autosave-v1','{broken');
+ await r.elements.get('accountSaveServerBtn').listeners.click();
+ assert.equal(api.puts.length,count);
+ r.storage.set('autohex-solo-autosave-v1','');
+ await r.elements.get('accountSaveServerBtn').listeners.click();assert.equal(api.puts.length,count+1);
+});
+test('an in-flight upload does not clear newer changes or start a parallel upload', async()=>{
+ const api=fakeApi(),r=load({accountApi:api,bootToMenu:true});await submit(r.document,'register');
+ let finish, calls=0;const original=api.putSave.bind(api);
+ api.putSave=async text=>{calls++;await new Promise(resolve=>{finish=resolve});return original(text)};
+ const first=r.elements.get('accountSaveServerBtn').listeners.click();await flush();
+ const second=r.elements.get('accountSaveServerBtn').listeners.click();
+ acknowledgeArsenal(r);finish();await Promise.all([first,second]);
+ assert.equal(calls,1);assert.equal(r.storage.get('hex-cloud-dirty'),'1');
+ api.putSave=original;await r.elements.get('accountSaveServerBtn').listeners.click();
+ assert.equal(r.storage.get('hex-cloud-dirty'),undefined);
+});
+test('cloud conflict preserves local profile and stops automatic retries',async()=>{
+ const api=fakeApi(),r=load({accountApi:api,bootToMenu:true,initialProfile:{diamonds:80}});await submit(r.document,'register');
+ let calls=0;api.putSave=async()=>{calls++;throw Object.assign(Error('Neuerer Account-Spielstand vorhanden.'),{status:409})};
+ await r.elements.get('accountSaveServerBtn').listeners.click();await r.elements.get('accountSaveServerBtn').listeners.click();
+ assert.equal(calls,1);assert.ok(r.storage.get('hex-bastion-profile-backup'));assert.equal(r.storage.get('hex-cloud-dirty'),'1');
+ assert.match(r.elements.get('accountStatus').textContent,/Neuerer/);
+});
 function acknowledgeArsenal(r){
  r.elements.get('menuArsenalBtn').listeners.click();
  for(const tab of r.elements.get('arsenalTabs').children.filter(e=>e.attributes.role==='tab'))tab.listeners.click();

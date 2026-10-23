@@ -546,7 +546,9 @@ function create(host0,commands){
     if(!building){const pick=new THREE.Mesh(slotPick,invisible);pick.userData.pick={kind:'building',q:tile.q,r:tile.r,index};group.add(pick);picks.push(pick);}
     const hint=building?new THREE.Mesh(hintGeometry,mats.hint):null;
     if(hint){hint.position.y=50;hint.visible=false;group.add(hint);}
-    return {group,picks,hint,tile,index};
+    const retargetRing=building?.type==='forge'?new THREE.Mesh(circleRing,basic('#ffd16a',.8)):null;
+    if(retargetRing){retargetRing.scale.setScalar(24);retargetRing.position.y=2;retargetRing.visible=false;group.add(retargetRing);}
+    return {group,picks,hint,retargetRing,tile,index};
   }
   function objectSig(tile){return JSON.stringify([tile.type==='base'?baseUpgradeParts().key:'',tile.slots,tile.buildingSlots,tile.type,tile.rotation,(tile.towers||[]).map(t=>t&&[t.type,t.branch,t.finalUpgrade,t.ultimate,t.level,t.tileType]),(tile.buildings||[]).map(b=>b&&b.type)]);}
   function syncObjects(){
@@ -629,7 +631,7 @@ function create(host0,commands){
       ring.visible=true;ring.position.set(p.x,3,p.y);ring.scale.setScalar(kind==='Tower'?24:18);
     });
     const canHint=['place','build','wave'].includes(state.phase)&&state.hp>0;
-    for(const record of objectRecords.values())for(const obj of record.buildings){const next=HexBuildings.nextUpgrade(state,obj.tile.buildings[obj.index]);obj.hint.visible=!state.showUpgradeStatus&&canHint&&!!next&&state.gold>=next.cost;}
+    for(const record of objectRecords.values())for(const obj of record.buildings){const next=HexBuildings.nextUpgrade(state,obj.tile.buildings[obj.index]);if(obj.retargetRing)obj.retargetRing.visible=canHint&&HexBuildings.redundantTarget(state,obj.tile.buildings[obj.index]);obj.hint.visible=canHint&&(HexBuildings.redundantTarget(state,obj.tile.buildings[obj.index])||!state.showUpgradeStatus&&!!next&&state.gold>=next.cost);}
     for(const record of objectRecords.values()) for(const obj of record.towers) obj.hint.visible=state.workshopPicking&&HexData.availableUpgrades(obj.tower).length>0||!state.showUpgradeStatus&&canHint&&HexData.runUpgrades(state,obj.tower).some(([,u])=>state.gold>=HexBuildings.cost(state,obj.tile,u.cost));
   }
 
@@ -956,16 +958,19 @@ function create(host0,commands){
     }else slowFrames=0;
     const dt=Math.min((now-last)/1000,.1);last=now;
     if(state&&ready){
-      const enemies=state.enemies||[];
+      const enemies=state.enemies||[],aimDistances=new Map();
+      const aimDistance=e=>{if(!aimDistances.has(e))aimDistances.set(e,HexCombat.remainingDistance(e));return aimDistances.get(e);};
       for(const ring of overloadRings)ring.rotation.y=now*.004;
       for(const record of objectRecords.values())for(const obj of record.buildings)if(obj.hint.visible)obj.hint.position.y=50+Math.sin(now/220)*3;
       for(const record of objectRecords.values()) for(const obj of record.towers){
         if(obj.auraModel) obj.auraModel.rotation.y+=dt*.8;
         if(obj.hint.visible) obj.hint.position.y=66+Math.sin(now/220)*3;
         if(!obj.turret||obj.def.aura) continue;
-        let best=null,bestDistance=obj.def.range;
-        for(const e of enemies){if(e.sporeHidden)continue;const d=Math.hypot(e.x-obj.pos.x,e.y-obj.pos.y);if(d<=bestDistance){best=e;bestDistance=d;}}
-        if(best){const wanted=Math.atan2(-(best.y-obj.pos.y),best.x-obj.pos.x),diff=Math.atan2(Math.sin(wanted-obj.angle),Math.cos(wanted-obj.angle));obj.angle+=diff*Math.min(1,dt*10);obj.turret.rotation.y=obj.angle;}
+        const tower=state.map.get(key(obj.tile.q,obj.tile.r))?.towers[obj.index]||obj.tower,definition=HexData.towerDefinition(tower);
+        const candidates=enemies.filter(e=>e.alive&&!e.sporeHidden&&(!e.immunity||e.immunity!==definition.damageType)&&Math.hypot(e.x-obj.pos.x,e.y-obj.pos.y)<=definition.range);
+        const shot=tower.aim,shooting=shot&&state.elapsedMs-shot.time<350;
+        const best=shooting?shot:HexCombat.targetByPriority(candidates,tower,obj.pos,aimDistance);
+        if(best){const wanted=Math.atan2(-(best.y-obj.pos.y),best.x-obj.pos.x),diff=Math.atan2(Math.sin(wanted-obj.angle),Math.cos(wanted-obj.angle));obj.angle+=diff*(shooting?1:Math.min(1,dt*10));obj.turret.rotation.y=obj.angle;}
         if(obj.kick>0){obj.kick=Math.max(0,obj.kick-dt*9);const k=obj.kick*obj.kick*.045;obj.turret.position.set(obj.turretBase.x-Math.cos(obj.angle)*k,obj.turretBase.y,obj.turretBase.z+Math.sin(obj.angle)*k);}   // Rückstoß entgegen der Schussrichtung
       }
       const baseRange=(typeof HexHeroes!=='undefined'&&HexHeroes.weapon(state)?.range)||0;
@@ -1062,7 +1067,7 @@ function create(host0,commands){
       }
       else if(hit.kind==='slot') commands.selectSlot(hit.q,hit.r,hit.index,e.ctrlKey||e.metaKey,e.pointerType);
       else if(hit.kind==='tower') commands.selectTower(hit.q,hit.r,hit.index,e.ctrlKey||e.metaKey);
-      else if(hit.kind==='base') commands.selectBase?.();
+      else if(hit.kind==='base') commands.selectBase?.(e);
       else if(hit.kind==='building') commands.selectBuilding(hit.q,hit.r,hit.index);
     }),
     on('pointercancel',e=>{pinch.up(e);hoverBuildingKey=null;commands.hoverBuilding?.(null);drag=null;press=null;dom.style.cursor='';}),

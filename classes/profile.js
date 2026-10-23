@@ -1,6 +1,7 @@
 const HexProfile=(()=>{
-  const profileStorage=globalThis.HexFirstPlayerTest?.active?HexFirstPlayerTest.storage:typeof localStorage!=='undefined'?localStorage:{getItem:()=>null,setItem(){}};
+  const profileStorage=globalThis.HexFirstPlayerTest?.active?HexFirstPlayerTest.storage:globalThis.HexLocalStore|| (typeof localStorage!=='undefined'?localStorage:{getItem:()=>null,setItem(){}});
   const STORAGE_KEY='hex-bastion-profile-v1';
+  let storageProblem=false;
   const START_TOWERS=['archer','catapult','chain','freeze','mine'];
   const TOWER_UNLOCKS={ballista:{cost:20},flame:{cost:35},element:{cost:45},necromancer:{cost:55}};
   const ULTIMATE_UNLOCKS={element:{cost:35},necromancer:{cost:40},archer:{cost:20},catapult:{cost:20},chain:{cost:20},freeze:{cost:20},mine:{cost:20},ballista:{cost:30},flame:{cost:30}};
@@ -34,11 +35,11 @@ const HexProfile=(()=>{
       records:{...base.records,...(source.records||{})},lifetime:{...base.lifetime,...(source.lifetime||{}),towers:{...(source.lifetime?.towers||{})}}};
   }
   function load(definitions){
-    try{let raw=JSON.parse(profileStorage.getItem(STORAGE_KEY)||'null');if(!raw&&profileStorage.getItem('tutorial-v1')==='done')raw={};const clean=normalize(raw,definitions);try{profileStorage.setItem(STORAGE_KEY,JSON.stringify(clean));}catch{}return clean;}
-    catch(error){return normalize(null,definitions);}
+    try{let raw=JSON.parse(profileStorage.getItem(STORAGE_KEY)||'null');if(raw&&(typeof raw!=='object'||Array.isArray(raw)||(raw.version!==undefined&&raw.version!==1)))throw Error('Unsupported profile');if(!raw&&profileStorage.getItem('tutorial-v1')==='done')raw={};const clean=normalize(raw,definitions);try{profileStorage.setItem(STORAGE_KEY,JSON.stringify(clean));}catch{}storageProblem=false;return clean;}
+    catch(error){storageProblem=true;return normalize(null,definitions);}
   }
   function save(profile,definitions){
-    const clean=normalize(profile,definitions);try{profileStorage.setItem(STORAGE_KEY,JSON.stringify(clean));}catch(error){}return clean;
+    const clean=normalize(profile,definitions);if(!storageProblem)try{profileStorage.setItem(STORAGE_KEY,JSON.stringify(clean));}catch(error){}return clean;
   }
   function setLoadout(profile,ids,definitions){
     const selected=validIds(ids,definitions);
@@ -62,6 +63,7 @@ const HexProfile=(()=>{
     return {wave:waveDiamonds,bosses:bossDiamonds,milestones:milestoneDiamonds,total};
   }
   function settleDuo(profile,receipt,definitions){
+    if(storageProblem)throw Error('Das lokale Profil kann nicht sicher überschrieben werden. Bitte zuerst den Account-Spielstand laden.');
     const clean=normalize(profile,definitions);
     if(!receipt||!/^[a-f0-9]{64}$/.test(receipt.id)||!Number.isSafeInteger(receipt.diamonds)||receipt.diamonds<0||receipt.diamonds>100000)throw Error('Ungültige Duo-Abrechnung');
     if(clean.duoSettledRuns.includes(receipt.id))return clean;
@@ -114,11 +116,11 @@ const HexProfile=(()=>{
     const next=readFile(text,definitions),previous=profileStorage.getItem(STORAGE_KEY);
     // Fail visibly before replacing the profile if storage or the backup is unavailable.
     if(previous!==null)profileStorage.setItem(STORAGE_KEY+'-before-import',previous);
-    profileStorage.setItem(STORAGE_KEY,JSON.stringify(next));return next;
+    profileStorage.setItem(STORAGE_KEY,JSON.stringify(next));storageProblem=false;return next;
   }
   function learning(profile){const intro=profile.introduction;return !!intro&&!intro.legacy&&!intro.skipped&&intro.bestWave<35;}
   function modesUnlocked(profile){return !!profile.introduction?.legacy||profile.milestones?.includes('standard35')||profile.introduction?.bestWave>=35;}
   function recordIntroduction(profile,wave,definitions){const clean=normalize(profile,definitions);if(!Number.isInteger(wave)||wave<0)return clean;return save({...clean,introduction:{...clean.introduction,bestWave:Math.max(clean.introduction.bestWave,Math.min(35,wave))}},definitions);}
   function skipIntroduction(profile,definitions){const clean=normalize(profile,definitions);return save({...clean,introduction:{...clean.introduction,skipped:true}},definitions);}
-  return {learning,modesUnlocked,recordIntroduction,skipIntroduction,ULTIMATE_BRANCHES,ownsUltimate,activeUltimate,runUnlocks,activateUltimate,settleDuo,heroUnlocked,exportFile,readFile,importFile,resetValue,resetUnlocks,affordableUnlocks,BUILDING_UNLOCKS,unlockBuilding,STORAGE_KEY,START_TOWERS,TOWER_UNLOCKS,ULTIMATE_UNLOCKS,defaults,normalize,load,save,setLoadout,renamePreset,savePreset,runReward,settleRun,settleDaily,unlockTower,unlockUltimate};
+  return {get storageProblem(){return storageProblem;},learning,modesUnlocked,recordIntroduction,skipIntroduction,ULTIMATE_BRANCHES,ownsUltimate,activeUltimate,runUnlocks,activateUltimate,settleDuo,heroUnlocked,exportFile,readFile,importFile,resetValue,resetUnlocks,affordableUnlocks,BUILDING_UNLOCKS,unlockBuilding,STORAGE_KEY,START_TOWERS,TOWER_UNLOCKS,ULTIMATE_UNLOCKS,defaults,normalize,load,save,setLoadout,renamePreset,savePreset,runReward,settleRun,settleDaily,unlockTower,unlockUltimate};
 })();
