@@ -2,7 +2,7 @@
 
 ## Stand 23.10.2026
 
-Lokal implementiert und mit isolierten Tabellen in der echten Testdatenbank geprüft. Nichts gepusht oder auf Live ausgeführt. Live-Freigaben werden nicht mehr durch manuell gesetzte „passed“-Werte vorgetäuscht: Jeder Deployment-Lauf prüft Sicherung, Schema und Worker auf seinem Zielserver selbst.
+Implementiert und mit isolierten Tabellen in der echten Testdatenbank geprüft. Der erste Live-Versuch scheiterte vor der Migration an fehlenden Backup-Verzeichnisrechten; der vorherige API-Code wurde ohne Datenbank-Rücksetzung wiederhergestellt. Der Betreiber hat inzwischen den privaten Backup-Ordner eingerichtet und bestätigt, dass nginx ausschließlich public/ ausliefert. Live-Freigaben werden nicht mehr durch manuell gesetzte „passed“-Werte vorgetäuscht: Jeder Deployment-Lauf prüft Sicherung, Schema und Worker auf seinem Zielserver selbst.
 
 ## Ablauf bei jedem Release
 
@@ -23,7 +23,7 @@ Der bestehende Webhook aktualisiert den Checkout direkt. Deshalb kann es währen
 
 ## Sicherungsort und Wiederherstellung
 
-Standard: neben dem API-Repository unter .autohex-private/api-backups. Optional AUTOHEX_BACKUP_DIR in der serverseitigen Umgebung/.env. Der Ordner muss außerhalb des Repositorys und Webroots liegen, für den PHP-Benutzer beschreibbar sein und unter Unix Rechte 0700 haben; Dateien bekommen 0600. Der Runner legt den Standardordner an, soweit die vorhandenen Rechte reichen. Fehlen sie, stoppt er mit geschlossenem API-Zugang. Keine Zugangsdaten oder Sicherungsinhalte erscheinen im Health-Endpunkt.
+Standard: neben dem API-Repository unter .autohex-private/api-backups. Optional AUTOHEX_BACKUP_DIR in der serverseitigen Umgebung/.env. Der Ordner muss außerhalb des Webroots liegen. Innerhalb des Repositorys ist ausschließlich der explizit konfigurierte, gitignorierte Ordner .private-backups erlaubt; alle anderen internen Pfade und aufgelöste Pfade unter public/ werden abgelehnt. Der Ordner muss für den PHP-Benutzer beschreibbar sein und unter Unix Rechte 0700 haben; Dateien bekommen 0600. Der Runner legt den Standardordner an, soweit die vorhandenen Rechte reichen. Fehlen sie, stoppt er mit geschlossenem API-Zugang. Keine Zugangsdaten oder Sicherungsinhalte erscheinen im Health-Endpunkt.
 
 Die Sicherung ist JSONL mit Tabellendefinitionen, Base64-kodierten Zellwerten und Prüfsummen. Sie umfasst die sieben genannten Datentabellen, nicht beliebige weitere Hosting-Daten. Die Wiederherstellung der drei Kernbereiche wurde in isolierten Testtabellen bytegenau geprüft. Eine echte Wiederherstellung ist immer ein eigener kontrollierter Vorgang: Sicherung verifizieren, in einen isolierten Bereich laden, vergleichen und nur ausdrücklich gewünschte Daten übernehmen. Keine automatische Rücksetzung bei Deployment-Fehlern. Sicherungen werden nicht automatisch gelöscht; freien Speicher und eine zusätzliche externe Kopie überwachen.
 
@@ -37,6 +37,8 @@ Echter Testaufruf im API-Repository: php scripts/test-save-database.php --run --
 
 Geprüft: wiederholte Rollouts, echte Sicherung/Wiederherstellung, beschädigte Sicherung, unsicherer Sicherungsort, tatsächlicher SQL-Fehler nach Teilmigration, inkompatibles Schema, abgelehnte Löschanweisung, parallele Schreibzugriffe, veraltete Uploads, Worker-Ausfall/Reparatur, echte Composer-Hooks und lokale HTTP-Sperren/Freigabe. Die Antworten der bisherigen öffentlichen Bestenliste sowie der Solo-/Duo-Listen bleiben nach Migration identisch. Die alten Gesamtwerte werden nicht als eindeutig zugeordnete Solo-/Duo-Läufe erfunden; ihre bisherige Liste bleibt erhalten.
 
-Vor einem ausdrücklich beauftragten Release: Änderungen in beiden Repositories reviewen/committen und in main übernehmen. Die Webhooks deployen main. Uncommittete oder neue, ungetrackte Dateien blockieren den Tag-Befehl. Der aktuelle Client-Arbeitsbranch ist menudesign. Direkte manuelle Pushes/Tags umgehen die lokale Release-Reihenfolge; der API-eigene Gate bleibt bestehen. Tests sind keine Behauptung bereits geprüfter Live-Schreibrechte oder eines bereits ausgeführten Live-Backups.
+Vor einem ausdrücklich beauftragten Release: Änderungen in beiden Repositories reviewen/committen und in main übernehmen. Die Webhooks deployen main. Uncommittete oder neue, ungetrackte Dateien blockieren den Tag-Befehl. Der Release erfolgt auf main. Direkte manuelle Pushes/Tags umgehen die lokale Release-Reihenfolge; der API-eigene Gate bleibt bestehen. Tests sind keine Behauptung bereits geprüfter Live-Schreibrechte oder eines bereits ausgeführten Live-Backups.
 
-Nachweis am 23.10.2026: 68 echte Datenbankprüfungen bestanden, einschließlich echter Composer- und lokaler HTTP-Tests; 30 PDO-Double-Prüfungen und 54 unterschiedliche gezielte Node-Prüfungen bestanden. 22 PHP-Dateien syntaxgeprüft. PHP-/Node-Versionsfingerprints stimmen überein. Live-Ausführung weiterhin nicht erfolgt.
+Nachweis am 23.10.2026: 68 echte Datenbankprüfungen bestanden, einschließlich echter Composer- und lokaler HTTP-Tests; 30 PDO-Double-Prüfungen und 54 unterschiedliche gezielte Node-Prüfungen bestanden. 22 PHP-Dateien syntaxgeprüft. PHP-/Node-Versionsfingerprints stimmen überein. Erster Live-Versuch abgebrochen; die öffentlichen Bestenlisten wurden nach Wiederherstellung bytegleich verifiziert. Erneuter Rollout nach Einrichtung des privaten Backup-Ordners ausstehend.
+
+Aktuelle Prüfung: 74 echte Datenbankchecks inklusive privatem Repository-Backup, Ablehnung anderer interner Pfade, unveränderten Bestandsdaten und vollständiger Fixture-Bereinigung bestanden.
