@@ -1905,6 +1905,8 @@ Mit Benutzername|With username
 
 Object.assign(globalThis.HexTranslations.en, {
   "Neue Hex-Oberfläche und sichere Spielstände": "New hex interface and safer saves",
+  "Kleine Verbesserungen": "Small improvements",
+  "„Zum Spiel“ auf den Seiten Impressum und Datenschutz schließt den Tab wieder, wenn du sie aus dem Spiel geöffnet hast. Es bleibt kein zweiter Spiel-Tab offen.": "“Zum Spiel” on the legal notice and privacy pages closes the tab again when you opened them from the game, so no second game tab stays open.",
   "Impressum und Datenschutzhinweise sind direkt aus dem Spiel erreichbar; Datenschutz- und Löschanfragen können per E-Mail gestellt werden.": "Legal and privacy information is accessible directly from the game; privacy and deletion requests can be sent by email.",
   "Updates bewahren bestehende Spielstände und Bestenlisten. Während der kurzen Vorbereitung kann die Account-Speicherung vorübergehend pausieren; der lokale Fortschritt bleibt erhalten.": "Updates preserve existing saves and leaderboards. Account saving may pause briefly during preparation; local progress is retained."
 });

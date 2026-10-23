@@ -1,5 +1,12 @@
 [
   {
+    "version": "next",
+    "title": "Kleine Verbesserungen",
+    "changes": [
+      "„Zum Spiel“ auf den Seiten Impressum und Datenschutz schließt den Tab wieder, wenn du sie aus dem Spiel geöffnet hast. Es bleibt kein zweiter Spiel-Tab offen."
+    ]
+  },
+  {
     "version": "1.1.1",
     "title": "Neue Hex-Oberfläche und sichere Spielstände",
     "changes": [
