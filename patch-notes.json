@@ -1,10 +1,11 @@
 [
   {
-    "version": "next",
+    "version": "1.1.2",
     "title": "Kleine Verbesserungen",
     "changes": [
       "„Zum Spiel“ auf den Seiten Impressum und Datenschutz schließt den Tab wieder, wenn du sie aus dem Spiel geöffnet hast. Es bleibt kein zweiter Spiel-Tab offen."
-    ]
+    ],
+    "date": "2026-10-23"
   },
   {
     "version": "1.1.1",
