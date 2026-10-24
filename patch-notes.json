@@ -1,6 +1,6 @@
 [
   {
-    "version": "next",
+    "version": "1.2.0",
     "title": "Duo-Verbesserungen und Reliktjagd",
     "summary": "Stärkere Partnergeschenke, sauberere Duo-Bewegung und mehr Orientierung und Spannung in der Expedition.",
     "overview": [
@@ -97,7 +97,8 @@
       "Geschenke sind wertvoller, Verstärkung ist leichter zu finden und Gegner folgen Kurven sauberer.",
       "Das nächste Ziel wird klarer sichtbar, Relikte feiern ihren Fund und spätere Wellen werden stärker.",
       "Fokusaktionen stehen beim Angriffsfokus; Popup-Positionen und die Speichersperre beim Seitenwechsel sind korrigiert."
-    ]
+    ],
+    "date": "2026-10-24"
   },
   {
     "version": "1.1.9",
