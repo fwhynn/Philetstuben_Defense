@@ -47,7 +47,7 @@ test('game menu links and legal pages are wired up',()=>{
  assert.equal((menu.match(/href="(impressum|datenschutz)\.html\?from=game" target="_blank"/g)||[]).length,2);
  for(const name of ['impressum.html','datenschutz.html']){
   const html=fs.readFileSync(path.join(root,name),'utf8');
-  assert.match(html,/<script src="legal\.js" defer><\/script>/);
+  assert.match(html,/<script src="legal\.js(?:\?v=[a-f0-9]+)?" defer><\/script>/);
   assert.match(html,/<a href="index\.html" data-back-to-game>/);
  }
 });

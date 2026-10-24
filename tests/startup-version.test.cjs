@@ -1,5 +1,17 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path'),{execFileSync}=require('node:child_process');
 const {load}=require('./helpers/game.cjs'),{stampClientFiles}=require('../deploy/build-public.cjs');
+test('startup script errors stay visible even when the script load event follows; no save deletion',()=>{
+ const vm=require('node:vm'),events={},nodes=[],body={appendChild:n=>nodes.push(n)},document={body,createElement:()=>({style:{},setAttribute(){},append(...children){this.children=children;},addEventListener(){}})};
+ vm.runInNewContext(fs.readFileSync('classes/boot-guard.js','utf8'),{document,window:{addEventListener:(id,fn)=>events[id]=fn}});
+ events.error({error:new Error('stale script')});events['autohex-ready']();events.error({error:new Error('second')});assert.equal(nodes.length,1);assert.equal(nodes[0].id,'bootFailure');assert.match(nodes[0].children[1].textContent,/nicht gelöscht/);
+});
+test('direct-checkout release refreshes cache keys idempotently and leaves private files alone',t=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'autohex-direct-'));t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));fs.mkdirSync(path.join(dir,'classes'));fs.mkdirSync(path.join(dir,'.local'));
+ fs.writeFileSync(path.join(dir,'index.html'),'<script src="classes/a.js"></script>');fs.writeFileSync(path.join(dir,'classes/a.js'),'// one');fs.writeFileSync(path.join(dir,'.local/private.js'),'PRIVATE');
+ const first=stampClientFiles(dir,{sourceTree:true});assert.equal(stampClientFiles(dir,{sourceTree:true}),first);assert.equal(fs.readFileSync(path.join(dir,'.local/private.js'),'utf8'),'PRIVATE');
+ fs.writeFileSync(path.join(dir,'classes/a.js'),'// two');const changed=[];const next=stampClientFiles(dir,{sourceTree:true,onChanged:f=>changed.push(f)});assert.notEqual(first,next);assert.ok(changed.includes('index.html'));assert.ok(fs.readFileSync(path.join(dir,'index.html'),'utf8').includes('?v='+next));
+ assert.match(fs.readFileSync('tag-and-push.cjs','utf8'),/stampClientFiles\(repo,\{sourceTree:true/);
+});
 test('reported v1.0.4 script with removed biome button reproduces startup crash; current script boots',()=>{
  const old=execFileSync('git',['show','v1.0.4:classes/game.js'],{encoding:'utf8'});
  assert.match(old.split('\n')[1398],/towerBiomeInfo.*addEventListener/);

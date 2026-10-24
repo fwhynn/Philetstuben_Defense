@@ -48,3 +48,16 @@ test('daily win pays once, retry does not alter solo records and earlier dates k
  const c=core();for(const [d,id]of [['2026-11-22','expedition'],['2026-11-28','garrison'],[day,'towerDraft'],['2026-11-30','expedition']])assert.equal(c.waves.daily(d).id,id);
 });
 
+
+test('draft map grows once per stage, varies by seed and survives snapshots',()=>{
+ const r=setup(),b=setup(),{c,state:s}=r;assert.deepEqual(json([...s.map]),json([...b.state.map]));const size=s.map.size;
+ s.wave=3;c.towerDraft.prepare(s);assert.equal(s.map.size,size+2);c.towerDraft.prepare(s);assert.equal(s.map.size,size+2);
+ const saved=c.snapshot.restore(json(c.snapshot.capture(s,r.random)));c.towerDraft.prepare(saved.state);assert.equal(saved.state.map.size,size+2);
+ const shapes=new Set();for(let i=0;i<12;i++){const x=c.session.create({seed:'map-'+i,runId:'test',challengeDay:day,loadout:['archer','catapult','chain','freeze','mine']}).state;shapes.add(JSON.stringify([...x.map].map(([k,t])=>[k,t.roads])));assert.ok(c.runtime.spawnSources(x).length);}
+ assert.ok(shapes.size>1);
+});
+test('draft quick inventory only shows owned towers and removes spent entries',()=>{
+ const {a,elements}=load({labMission:'towerDraft'});assert.equal(elements.get('quickLoadout').children.length,0);
+ const d=a.state.towerDraft;d.inventory={archer:1,mine:0};a.renderAll();assert.equal(elements.get('quickLoadout').children.length,1);
+ d.inventory.archer=0;a.renderAll();assert.equal(elements.get('quickLoadout').children.length,0);
+});

@@ -64,6 +64,10 @@ const HexWaves=(()=>{
       for(const e of p.enemies)for(const field of ['hp','armorHp','magicHp'])if(e[field])e[field]=Math.ceil(e[field]*factor);
       return p;
     }
+    if(context.challengeKind==='expedition'){
+      const p=plan(wave,0,false,{...context,challengeKind:null}),factor=1+Math.max(0,wave-2)*.12;
+      for(const e of p.enemies)for(const field of ['hp','armorHp','magicHp'])if(e[field])e[field]=Math.ceil(e[field]*factor);return p;
+    }
     if(context.challengeKind==='powerGrid'){
       const p=plan(wave,0,false,{...context,challengeKind:null});
       if(wave===12){p.boss=bossProfile(15);p.maxGold+=p.boss.killGold||0;}return p;

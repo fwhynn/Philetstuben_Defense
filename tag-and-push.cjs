@@ -256,6 +256,9 @@ async function main() {
     fs.writeFileSync(notesFile, JSON.stringify(releaseNotes,null,2)+'\n');
     const filesToCommit=[packageJsonGitPath,'patch-notes.json'];
     if(fs.existsSync(packageLockPath))filesToCommit.push(packageLockGitPath);
+    // The live webhook serves the checkout directly, not build-public's artifact.
+    // Commit one consistent cache identity for that deployment path as well.
+    require('./deploy/build-public.cjs').stampClientFiles(repo,{sourceTree:true,onChanged:file=>filesToCommit.push(file)});
     git(['add',...filesToCommit],{stdio:'inherit'});
     git(['commit','-m','chore: release '+tag],{stdio:'inherit'});
   }

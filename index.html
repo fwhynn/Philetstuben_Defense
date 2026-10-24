@@ -5,6 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>AutoHex TD</title>
+    <script src="classes/boot-guard.js"></script>
     <link rel="icon" type="image/png" href="assets/favicon.png" />
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="duo.css" />
@@ -249,6 +250,7 @@
             Drehen (R)</button>
         </div>
         <div id="hand" class="hand"></div>
+<section id="draftControls" class="hidden" aria-label="Turm-Draft"><p id="draftStatus" aria-live="polite"></p><div id="draftOffers"></div><p id="draftInventory"></p></section>
       </section>
 
       <!-- Unten rechts: Wave starten -->
@@ -265,14 +267,20 @@
         <button id="buyExtraHexBtn" class="secondary hidden" type="button">Zusatzhex kaufen</button>
         <button id="greedOpenBtn" class="secondary hidden" type="button">Giervertrag · freiwillig</button>
         <details id="challengeGuide" class="hidden"><summary id="challengeGoal"></summary><p id="challengeInstructions"></p></details>
-        <section id="draftControls" class="hidden" aria-label="Turm-Draft"><p id="draftStatus" aria-live="polite"></p><div id="draftOffers"></div><p id="draftInventory"></p></section>
+
         <section id="expeditionControls" class="hidden" aria-label="Expedition">
           <p id="expeditionProgress" aria-live="polite"></p><p id="expeditionRelics"></p>
           <button id="expeditionReadyBtn" class="secondary" type="button">Planung abschließen</button>
         </section>
         <section id="powerControls" class="hidden" aria-label="Stromnetz">
           <p id="powerStatus" aria-live="polite"></p>
-          <details><summary>Leitfelder schalten</summary><p id="powerHint"></p><div id="powerFields" style="display:grid;grid-template-columns:1fr 1fr;gap:4px;max-height:210px;overflow:auto"></div></details>
+          <details id="powerEditor"><summary>Stromnetz verwalten · Felder &amp; Türme</summary><div class="powerEditorPanel">
+            <header><h2>Stromnetz verwalten</h2><button id="powerCloseBtn" class="secondary" type="button">Schließen</button></header>
+            <p>1. Türme bauen. 2. Benachbarte Leitfelder bis zum Generator einschalten. 3. Versorgung prüfen.</p>
+            <p>Jeder Generator versorgt bis zu drei Türme in seinem verbundenen Netz. Zusammen sind sechs möglich. Leitfelder und Turmschalter sind getrennt: EIN allein bedeutet noch nicht „versorgt“.</p>
+            <p id="powerHint" role="status"></p><h3>Leitfelder · höchstens sechs eingeschaltet</h3><div id="powerFields"></div>
+            <h3>Deine Türme</h3><p>Ein ausgeschalteter Turm gibt Kapazität frei. Bei Überlast werden die zuerst gebauten Türme versorgt.</p><div id="powerTowers"></div>
+          </div></details>
         </section>
         <section id="villageControls" class="hidden" aria-label="Dorfverteidigung">
           <p id="villageHealth" aria-live="polite"></p>
@@ -637,7 +645,7 @@
             <div id="dailyFortressRules" class="hidden"><p>Verteidige dieselbe Festung an vier Stationen für jeweils drei Wellen. Nach Welle 3, 6 und 9 zieht sie automatisch weiter. Verbleibende Leben und alle Türme bleiben erhalten.</p><p>In der Bauphase direkt nach einem Ortswechsel kannst du Türme kostenlos beliebig oft an die aktuelle Station umsetzen: Turm auswählen, Umsetzen anklicken, freien Bauplatz wählen. Upgrades und Angriffsfokus bleiben erhalten.</p><p>150 Startgold, normale Einnahmen. Kein Straßenbau, Basis-Ausbau, Verbrauchshilfen oder persönliche Arsenalboni. Bauen und Verbessern nur zwischen Wellen. Überlebe Welle 12 für einmal täglich zehn Diamanten. Kein Endlosmodus.</p></div>
             <div id="dailyDraftRules" class="hidden"><p>Überlebe zwölf Wellen auf einer festen Karte. Wähle jeweils eines von drei Angeboten: vor Welle 1 dreimal, danach einmal je Bauphase.</p><p>Türme kommen ins Inventar und werden kostenlos auf freien Plätzen gebaut. Upgrade-Tickets erlauben eine normale Verbesserung deiner Wahl. Reparaturen heilen fünf Basisleben. Unverbrauchte Türme und Tickets bleiben erhalten.</p><p>Kein Gold-Shop, Verkauf, Basis-Ausbau, Verbrauchshilfen oder persönliche Arsenalboni. Bauen und Verbessern nur zwischen Wellen. Kein Endlosmodus. Sieg: einmal täglich zehn Diamanten.</p></div>
             <div id="dailyExpeditionRules" class="hidden">
-              <p>Verbinde alle drei Reliktinseln im Norden, Osten und Süden mit deiner Straße zur Basis und überlebe Welle 12. Aufdecken allein zählt nicht. Fehlt am Ende ein Relikt, ist die Expedition verloren.</p>
+              <p>Relikte sind die goldenen ◆-Missionsfelder im Norden, Osten und Süden. Verbinde alle drei über Straßen mit deiner Basis und überlebe danach eine Welle: Dann gewinnst du sofort. Je früher, desto besser! Welle 12 ist die Frist. Aufdecken allein zählt nicht.</p>
               <p>Bis zu zwei Hexe je Bauphase. Der feste Straßenbaukasten enthält Gerade, kleine und große Kurve, T-Kreuzung und Y-Kreuzung. Karten sind wiederverwendbar; ungenutzte Platzierungen werden nicht angespart. Nach der ersten Straße kannst du die Planung auch vorzeitig abschließen.</p>
               <p>100 Startgold. Jedes angeschlossene Relikt gibt einmalig 25 Gold, keinen weiteren Schreinbonus. Keine zufälligen Inseln oder Kartenbelohnungen. Persönliche Arsenalboni gelten nicht. Kein Endlosmodus; einmal täglich +10 Diamanten nur bei vollständig erfülltem Ziel.</p>
             </div>
@@ -869,6 +877,7 @@
         try { await import('./classes/three-renderer.js'); } catch (error) { console.warn('3D nicht verfügbar, verwende SVG:', error); }
       }
       await new Promise((done, fail) => { const s = document.createElement('script'); s.src = 'classes/game.js'; s.onload = done; s.onerror = fail; document.body.appendChild(s); });
+      window.dispatchEvent(new Event('autohex-ready'));
     </script>
   </body>
 

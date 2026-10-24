@@ -1,5 +1,94 @@
 [
   {
+    "version": "next",
+    "title": "Draft, Expedition & Stromnetz",
+    "summary": "Klarere Missionen, wechselnde Karten und mehr Druck bei der Reliktsuche.",
+    "overview": [
+      {
+        "kind": "new",
+        "title": "NEU",
+        "items": [
+          "Draft-Karten & wachsende Straßen",
+          "Variable Reliktregionen"
+        ]
+      },
+      {
+        "kind": "fix",
+        "title": "VERBESSERT",
+        "items": [
+          "Stromnetz-Verwaltung",
+          "Turmbaumenü & Missionsstart"
+        ]
+      },
+      {
+        "kind": "nerf",
+        "title": "SCHWIERIGER",
+        "items": [
+          "Expedition: stärkere Gegner ab Welle 3"
+        ]
+      }
+    ],
+    "sections": [
+      {
+        "title": "Herausforderungen",
+        "entries": [
+          {
+            "title": "Turm-Draft",
+            "summary": "Wähle deine Angebote als bebilderte Karten unten in der Mitte. Links stehen nur Türme, die du noch platzieren kannst.",
+            "stats": [],
+            "bullets": [
+              "Die Turmliste ist auf großen Bildschirmen vertikal zentriert. Aufgebrauchte Türme verschwinden aus der Schnellwahl.",
+              "Die Karte erhält nach Welle 3, 6 und 9 jeweils zwei weitere Straßenhexe. Ihr Verlauf variiert mit der Mission."
+            ]
+          },
+          {
+            "title": "Expedition ins Unbekannte",
+            "summary": "Drei Relikte anschließen und danach eine Welle überleben: Das beendet die Expedition sofort. Welle 12 bleibt die Frist.",
+            "stats": [
+              {
+                "label": "Zusätzliches Gegnerleben und Schutz je Welle ab W3",
+                "before": "+0 %",
+                "after": "+12 %"
+              }
+            ],
+            "bullets": [
+              "Relikte variieren in Entfernung und Straßenform innerhalb der Regionen Nord, Ost und Süd.",
+              "Goldene Reliktmarkierungen und eine deutlichere Zielanzeige erklären, welche Felder angeschlossen werden müssen.",
+              "Tempo und Goldbelohnungen der Gegner bleiben unverändert."
+            ]
+          },
+          {
+            "title": "Abwechslung mit gleichen Chancen",
+            "summary": "Im Testlabor erhalten Expedition und Turm-Draft bei jedem neuen Versuch eine neue Variante. In der Tagesmission gelten für alle Spieler dieselben Bedingungen am selben Tag.",
+            "stats": [],
+            "bullets": []
+          },
+          {
+            "title": "Stromnetz",
+            "summary": "Eine größere Verwaltung trennt Leitfelder und Turmschalter. Verbindungsprobleme, Kapazität und die Sperre während einer Welle sind klar erkennbar.",
+            "stats": [],
+            "bullets": []
+          },
+          {
+            "title": "Bedienung & Start",
+            "summary": "Das Turmbaumenü nutzt auf großen Bildschirmen den freien Platz links besser aus. Startfehler zeigen einen Hinweis zum Neuladen, ohne Spielstände zu löschen.",
+            "stats": [],
+            "bullets": [
+              "Spielaktualisierungen laden zusammengehörige Spieldateien zuverlässiger."
+            ]
+          }
+        ]
+      }
+    ],
+    "changes": [
+      "Wähle deine Angebote als bebilderte Karten unten in der Mitte. Links stehen nur Türme, die du noch platzieren kannst.",
+      "Drei Relikte anschließen und danach eine Welle überleben: Das beendet die Expedition sofort. Welle 12 bleibt die Frist.",
+      "Im Testlabor erhalten Expedition und Turm-Draft bei jedem neuen Versuch eine neue Variante. In der Tagesmission gelten für alle Spieler dieselben Bedingungen am selben Tag.",
+      "Eine größere Verwaltung trennt Leitfelder und Turmschalter. Verbindungsprobleme, Kapazität und die Sperre während einer Welle sind klar erkennbar.",
+      "Das Turmbaumenü nutzt auf großen Bildschirmen den freien Platz links besser aus. Startfehler zeigen einen Hinweis zum Neuladen, ohne Spielstände zu löschen."
+    ]
+  },
+  {
     "version": "1.1.6",
     "title": "Herausforderungen, Testlabor & Turmrollen",
     "summary": "Sieben neue Missionen, klare Ziele und gezielte Balance für Türme und Herausforderungen.",

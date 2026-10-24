@@ -14,7 +14,7 @@ test('village armor increase changes the actual armor health pool',()=>{
 });
 test('all practice missions expose the victory target and actionable rules',()=>{
  for(const id of ['greed','detour','villages','powerGrid','expedition','towerDraft','movingFortress','caravan','garrison']){
-  const {a,elements}=load({labMission:id});a.renderAll();assert.ok(!elements.get('challengeGuide').classList.contains('hidden'));assert.match(elements.get('challengeGoal').textContent,new RegExp('0/'+a.state.challengeTarget));assert.ok(elements.get('challengeInstructions').textContent.length>80);
+  const {a,elements}=load({labMission:id});a.renderAll();assert.ok(!elements.get('challengeGuide').classList.contains('hidden'));assert.match(elements.get('challengeGoal').textContent,new RegExp('0/'+(id==='expedition'?3:a.state.challengeTarget)));assert.ok(elements.get('challengeInstructions').textContent.length>80);
  }
  const {a,elements}=load();a.newRun();a.renderAll();assert.ok(elements.get('challengeGuide').classList.contains('hidden'));
 });

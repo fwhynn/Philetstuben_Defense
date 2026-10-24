@@ -67,3 +67,13 @@ test('controller exposes switches and locks, saves off state and grants daily di
 test('rotation keeps previously assigned missions and adds Stromnetz only at the new cutover',()=>{
  const c=core();for(const [date,id]of [['2026-11-01','detour'],['2026-11-08','villages'],['2026-11-14','detour'],['2026-11-15','powerGrid'],['2026-11-16','villages'],['2026-11-17','detour'],['2026-11-18','greed'],['2026-11-19','caravan'],['2026-11-20','garrison']])assert.equal(c.waves.daily(date).id,id);
 });
+
+test('large power manager toggles a tower independently of its field, explains disconnection and locks in combat',()=>{
+ const h=load({labMission:'powerGrid'}),{a,elements}=h;h.selectSlot(1,0,0);h.buyTower('archer');a.renderAll();
+ const tower=a.state.map.get('1,0').towers[0];let button=elements.get('powerTowers').children[0];assert.match(button.textContent,/Versorgt.*Ausschalten/);
+ button.listeners.click();assert.equal(tower.powerOff,true);assert.match(elements.get('powerTowers').children[0].textContent,/Ausgeschaltet.*Einschalten/);
+ elements.get('powerTowers').children[0].listeners.click();assert.equal(tower.powerOff,false);
+ elements.get('powerFields').children[0].listeners.click();assert.match(elements.get('powerTowers').children[0].textContent,/Keine Verbindung/);
+ a.startWave();assert.ok(elements.get('powerTowers').children[0].disabled);assert.match(elements.get('powerHint').textContent,/Welle läuft/);assert.equal(tower.powerOff,false);
+ h.document.getElementById('powerEditor').open=true;elements.get('powerCloseBtn').listeners.click();assert.equal(elements.get('powerEditor').open,false);
+});

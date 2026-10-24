@@ -5,8 +5,10 @@ const HexExpedition=(()=>{
     Object.assign(state,{gold:100,income:0,difficulty:'normal',openingRemaining:0,baseExits:[0],phase:'place',deck:[...cards],drawPile:[],discard:[],hand:[],landmarks:new Map()});
     state.map=new Map([['0,0',{q:0,r:0,type:'base',roads:[0],slots:0,towers:[],buildingSlots:0,buildings:[],income:0}]]);
     state.landmarks.fixed=true;state.expedition={preparedWave:-1,remaining:0,collected:[],failed:false};
-    for(const [id,name,q,r,rotation]of [['east','Relikt Ost',7,0,0],['north','Relikt Nord',1,-6,2],['south','Relikt Süd',2,6,2]]){
-      state.landmarks.set(HexMap.key(q,r),{q,r,type:'shrine',relicId:id,relicName:name,claimed:false,prefab:{type:'straight',roads:HexMap.rotatedRoads(HexData.CARD_LIBRARY.straight,rotation),rotation,slots:1}});
+    const random=HexRandom.create(state.seed+'|relic-regions');const distance=()=>6+Math.floor(random()*3);
+    for(const [id,name,q,r,rotation]of [['east','Relikt Ost',distance(),0,0],['north','Relikt Nord',1,-distance(),2],['south','Relikt Süd',2,distance(),2]]){
+      const type=random()<.5?'straight':'tJunction';
+      state.landmarks.set(HexMap.key(q,r),{q,r,type:'shrine',relicId:id,relicName:name,claimed:false,prefab:{type,roads:HexMap.rotatedRoads(HexData.CARD_LIBRARY[type],rotation),rotation,slots:HexData.CARD_LIBRARY[type].slots}});
     }
     state.vision=HexExploration.expand(state.landmarks,state.map);
   }

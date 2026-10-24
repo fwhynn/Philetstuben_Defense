@@ -124,7 +124,7 @@ test('research map exposes all towers and buildings and reset needs confirmation
 });
 
 test('arsenal shows one tree at a time, picked from a rail that marks affordable unlocks', () => {
-  const fs = require('node:fs'), path = require('node:path'), html = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8'); const arsenal=html.search(/src\s*=\s*["']classes\/arsenal\.js["']/),game=html.search(/s\.src\s*=\s*["']classes\/game\.js["']/); assert.ok(arsenal>=0&&game>arsenal,'Arsenal must load before the game controller');
+  const fs = require('node:fs'), path = require('node:path'), html = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8'); const arsenal=html.search(/src\s*=\s*["']classes\/arsenal\.js(?:\?v=[a-f0-9]+)?["']/),game=html.search(/s\.src\s*=\s*["']classes\/game\.js(?:\?v=[a-f0-9]+)?["']/); assert.ok(arsenal>=0&&game>arsenal,'Arsenal must load before the game controller');
   const { elements } = load({ initialProfile: { diamonds: 20 } }); elements.get('menuArsenalBtn').listeners.click();
   const trees = elements.get('arsenalChoices').children, tabs = elements.get('arsenalTabs').children.filter(e => e.attributes.role === 'tab');
   assert.equal(tabs.length, 12); assert.equal(trees.filter(t => !t.hidden).length, 1);

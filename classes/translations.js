@@ -2313,3 +2313,62 @@ HexTranslations.add("Herausforderungen, Testlabor & Turmrollen|Challenges, pract
 HexTranslations.add("VERBESSERT|IMPROVED");
 
 HexTranslations.add("+0 %|+0 %\n+10 %|+10 %\n+8 %|+8 %\n7 / 11|7 / 11\n11 / 20|11 / 20\n1,3× / 1,3×|1.3× / 1.3×\n1,6× / 1,8×|1.6× / 1.8×\n6 s / 6 s|6 s / 6 s\n10 s / 12 s|10 s / 12 s\n11|11\n14|14\n65 / 75 / 85 %|65 / 75 / 85 %\n60 / 65 / 72 %|60 / 65 / 72 %\n10 %|10 %\n8 %|8 %\n40 / 65|40 / 65\n30 / 50|30 / 50\n40 / 55|40 / 55\n35 / 50|35 / 50\n20 / 25 / 30 %|20 / 25 / 30 %\n15 / 22 / 30 %|15 / 22 / 30 %");
+HexTranslations.add(`Stromnetz verwalten · Felder & Türme|Manage power grid · Fields & towers
+Stromnetz verwalten|Manage power grid
+1. Türme bauen. 2. Benachbarte Leitfelder bis zum Generator einschalten. 3. Versorgung prüfen.|1. Build towers. 2. Enable adjacent relay fields leading to a generator. 3. Check the power supply.
+Jeder Generator versorgt bis zu drei Türme in seinem verbundenen Netz. Zusammen sind sechs möglich. Leitfelder und Turmschalter sind getrennt: EIN allein bedeutet noch nicht „versorgt“.|Each generator powers up to three towers in its connected network, six in total. Relay fields and tower switches are separate: ON does not necessarily mean powered.
+Leitfelder · höchstens sechs eingeschaltet|Relay fields · At most six enabled
+Deine Türme|Your towers
+Ein ausgeschalteter Turm gibt Kapazität frei. Bei Überlast werden die zuerst gebauten Türme versorgt.|Switching a tower off frees capacity. When overloaded, towers built first receive power first.
+Alle sechs Leitfelder sind an. Schalte zuerst ein Feld aus, um ein anderes einzuschalten.|All six relay fields are on. Switch one off before enabling another.
+Verbinde benachbarte eingeschaltete Felder mit einem Generator. Straßenanschlüsse spielen für Strom keine Rolle.|Connect adjacent enabled fields to a generator. Road connections do not affect power.
+Welle läuft: Die Versorgung ist bis zum letzten Gegner festgelegt. Auch bei Pause kannst du erst danach umschalten.|Wave in progress: Power allocation is locked until the last enemy is gone. Pausing does not unlock switching.
+Generator verbunden|Generator connected
+Kein Generator verbunden|No generator connected
+Leitet keinen Strom|Does not conduct power
+Das Spiel konnte nicht vollständig starten.|The game could not finish starting.
+Bitte lade die Seite neu. Dein gespeicherter Spielstand wird dabei nicht gelöscht.|Please reload the page. Your saved game will not be deleted.
+Spiel neu laden|Reload game`);
+
+HexTranslations.add("Noch keine Türme gebaut. Schließe diese Übersicht und wähle einen freien Bauplatz.|No towers built yet. Close this overview and select an empty tower site.");
+
+HexTranslations.add(`◆ Relikte geborgen:|◆ Relics recovered:
+Alle geborgen! Noch eine Welle überleben.|All recovered! Survive one more wave.
+Goldene ◆-Felder mit der Basis verbinden. Frist: Welle 12.|Connect golden ◆ sites to the base. Deadline: wave 12.
+Straße anschließen|Connect a road
+erkunden & anschließen|Explore & connect
+erkunden|Explore
+Alle drei Relikte geborgen und den letzten Angriff überlebt. Kein Endlosmodus.|All three relics recovered and the final attack survived. No endless mode.
+Drei Relikte + letzter Angriff · Frist: Welle 12|Three relics + final attack · Deadline: wave 12
+Drei Relikte anschließen, dann eine Welle überleben. Frist: Welle 12.|Connect three relics, then survive one wave. Deadline: wave 12.
+Relikte sind die goldenen ◆-Missionsfelder. Verbinde alle drei über Straßen mit der Basis und überlebe danach eine Welle. Je früher, desto besser; spätestens Welle 12. Aufdecken allein reicht nicht! Zwei Hexe pro Bauphase, Karten beliebig wiederverwendbar. Danach Planung abschließen.|Relics are the golden ◆ objective sites. Connect all three to the base by road, then survive one wave. The sooner the better; wave 12 is the deadline. Revealing alone is not enough! Two tiles per build phase, reusable cards. Then finish planning.
+Relikte sind die goldenen ◆-Missionsfelder im Norden, Osten und Süden. Verbinde alle drei über Straßen mit deiner Basis und überlebe danach eine Welle: Dann gewinnst du sofort. Je früher, desto besser! Welle 12 ist die Frist. Aufdecken allein zählt nicht.|Relics are the golden ◆ objective sites to the north, east and south. Connect all three to your base by road, then survive one wave to win immediately. The sooner the better! Wave 12 is the deadline. Revealing alone does not count.`);
+
+HexTranslations.add(`Wählen → links auswählen → Bauplatz anklicken|Choose → select on the left → click a tower site
+Am gebauten Turm einlösen|Redeem at a built tower
+Sofort +5 Leben|Instantly restore 5 health`);
+
+HexTranslations.add(`Draft, Expedition & Stromnetz|Draft, Expedition & Power Grid
+Klarere Missionen, wechselnde Karten und mehr Druck bei der Reliktsuche.|Clearer missions, varied maps and more pressure while hunting relics.
+Draft-Karten & wachsende Straßen|Draft cards & expanding roads
+Variable Reliktregionen|Varied relic regions
+Stromnetz-Verwaltung|Power grid management
+Turmbaumenü & Missionsstart|Tower menu & mission startup
+SCHWIERIGER|HARDER
+Expedition: stärkere Gegner ab Welle 3|Expedition: stronger enemies from wave 3
+Wähle deine Angebote als bebilderte Karten unten in der Mitte. Links stehen nur Türme, die du noch platzieren kannst.|Choose illustrated offer cards at the bottom center. The left rail only shows towers you can still place.
+Die Turmliste ist auf großen Bildschirmen vertikal zentriert. Aufgebrauchte Türme verschwinden aus der Schnellwahl.|The tower list is vertically centered on large screens. Spent towers disappear from quick selection.
+Die Karte erhält nach Welle 3, 6 und 9 jeweils zwei weitere Straßenhexe. Ihr Verlauf variiert mit der Mission.|Two road tiles are added after waves 3, 6 and 9. Their route varies with the mission.
+Drei Relikte anschließen und danach eine Welle überleben: Das beendet die Expedition sofort. Welle 12 bleibt die Frist.|Connect three relics and survive the following wave to complete the expedition immediately. Wave 12 remains the deadline.
+Zusätzliches Gegnerleben und Schutz je Welle ab W3|Additional enemy health and defenses per wave from W3
++12 %|+12 %
+Relikte variieren in Entfernung und Straßenform innerhalb der Regionen Nord, Ost und Süd.|Relic distance and road shape vary within the northern, eastern and southern regions.
+Goldene Reliktmarkierungen und eine deutlichere Zielanzeige erklären, welche Felder angeschlossen werden müssen.|Golden relic markers and a clearer objective display explain which sites must be connected.
+Tempo und Goldbelohnungen der Gegner bleiben unverändert.|Enemy speed and gold rewards remain unchanged.
+Abwechslung mit gleichen Chancen|Variety with equal chances
+Im Testlabor erhalten Expedition und Turm-Draft bei jedem neuen Versuch eine neue Variante. In der Tagesmission gelten für alle Spieler dieselben Bedingungen am selben Tag.|In the test lab, Expedition and Tower Draft get a new variant each attempt. Daily missions give all players the same conditions on the same day.
+Eine größere Verwaltung trennt Leitfelder und Turmschalter. Verbindungsprobleme, Kapazität und die Sperre während einer Welle sind klar erkennbar.|A larger management panel separates relay fields and tower switches. Connection issues, capacity and the combat lock are clearly explained.
+Bedienung & Start|Controls & startup
+Das Turmbaumenü nutzt auf großen Bildschirmen den freien Platz links besser aus. Startfehler zeigen einen Hinweis zum Neuladen, ohne Spielstände zu löschen.|The tower menu makes better use of free space on the left on large screens. Startup errors show a reload prompt without deleting saves.
+Spielaktualisierungen laden zusammengehörige Spieldateien zuverlässiger.|Updates load matching game files more reliably.`);
+HexTranslations.add("Herausforderungen|Challenges");

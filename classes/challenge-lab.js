@@ -5,7 +5,7 @@
     ['detour','Die Kunst des Umwegs','2026-12-12','Plane Straßen um feste Türme. Fünf Angriffe.'],
     ['villages','Drei Dörfer','2026-12-11','Beschütze drei getrennte Lebensbalken.'],
     ['powerGrid','Stromnetz','2026-12-10','Verbinde Türme mit deinen Generatoren.'],
-    ['expedition','Expedition ins Unbekannte','2026-12-09','Finde drei Relikte in zwölf Wellen.'],
+    ['expedition','Expedition ins Unbekannte','2026-12-09','Drei Relikte anschließen, dann eine Welle überleben. Frist: Welle 12.'],
     ['towerDraft','Turm-Draft','2026-12-08','Drei Angebote – entscheide dich für eines.'],
     ['movingFortress','Wandernde Festung','2026-12-07','Begleite die Festung über vier Stationen.'],
     ['caravan','Die letzte Karawane','2026-12-14','Überlebe zwanzig Wellen im Sandsturm.'],

@@ -114,6 +114,7 @@ const HexRunFlow=(()=>{
     for(const tile of state.map.values())for(const tower of tile.towers||[])if(tower)tower.souls=[];
     if(!['garrison','detour'].includes(state.challengeKind)){state.goldEarned.completion+=HexWaves.economy.completion;state.goldEarned.income+=state.income;}state.phase='place';
     if(['detour','villages','powerGrid','expedition','towerDraft','movingFortress'].includes(state.challengeKind))state.bossRewards=[];
+    if(state.challengeKind==='expedition'&&HexExpedition.complete(state)&&!state.challengeWon){state.challengeTarget=state.wave;state.challengeWon=true;state.phase='victory';return {victory:true};}
     if(state.challengeKind==='expedition'&&state.wave===12&&!HexExpedition.complete(state)){state.expedition.failed=true;state.phase='gameover';return {victory:false,objectiveFailed:true};}
     if(state.challengeDay&&state.wave===(state.challengeTarget||20)&&!state.challengeWon){state.challengeWon=true;state.phase='victory';return {victory:true};}
     return {victory:false};

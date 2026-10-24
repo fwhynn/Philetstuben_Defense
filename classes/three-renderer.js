@@ -476,7 +476,7 @@ function create(host0,commands){
         else holder=buildTile({kind:'tile',...HexModelMap.modelFor(tile)},tile,{prop:{name:landmark.type,angle:HexModelMap.propAngle(p.type,HexMap.slotOffsets(p.type,p.slots))}});
         (clear?layer.landmarks:fogLandmarks).add(holder);record={sig,holder};landmarkRecords.set(id,record);
       }
-      label(`lm:${id}`,c.x,c.y,clear?(landmark.relicId?landmark.relicName+' · anschließen':landmark.augment?'Seltenes Augment · ungesammelt':landmark.merchant?'Händler · noch nicht verbunden':landmark.type==='treasure'?'Schatz +'+HexExploration.treasureReward(landmark)+' Gold · ungesammelt':LANDMARK_LABEL[landmark.type]):'?',clear?'':'big',clear?30:0);
+      label(`lm:${id}`,c.x,c.y,landmark.relicId?'◆ '+landmark.relicName+' · '+(clear?'anschließen':'erkunden'):clear?(landmark.augment?'Seltenes Augment · ungesammelt':landmark.merchant?'Händler · noch nicht verbunden':landmark.type==='treasure'?'Schatz +'+HexExploration.treasureReward(landmark)+' Gold · ungesammelt':LANDMARK_LABEL[landmark.type]):'?',landmark.relicId?'relic':clear?'':'big',clear?30:0);
     }
     for(const [id,record] of [...landmarkRecords]) if(!seen.has(id)){record.holder.removeFromParent();landmarkRecords.delete(id);}
   }
@@ -887,7 +887,7 @@ function create(host0,commands){
   function label(id,x,z,text,cls='',lift=0){
     usedLabels.add(id);let entry=labels.get(id);
     if(!entry){const el=document.createElement('div');el.style.cssText='position:absolute;transform:translate(-50%,-50%);color:#fff4c3;text-shadow:0 1px 3px #000,0 0 2px #000;font:700 11px Inter,system-ui,sans-serif;white-space:nowrap;pointer-events:none';labelLayer.appendChild(el);entry={el,pos:new THREE.Vector3()};labels.set(id,entry);}
-    if(entry.text!==text||entry.cls!==cls){entry.text=text;entry.cls=cls;entry.el.textContent=text;entry.el.style.fontSize=cls==='big'?'26px':'11px';entry.el.style.color=id.startsWith('upgrade:')?'#14532d':cls==='big'?'#e6ecf2':'#fff4c3';if(id.startsWith('upgrade:')){entry.el.style.textShadow='none';entry.el.innerHTML='<svg width="28" height="32" viewBox="0 0 28 32" aria-label="Ausbaubar"><polygon points="14,2 26,14 19,14 19,30 9,30 9,14 2,14" fill="#ffffff" stroke="#172019" stroke-width="2" stroke-linejoin="round"/></svg>';}}
+    if(entry.text!==text||entry.cls!==cls){entry.text=text;entry.cls=cls;entry.el.textContent=text;entry.el.style.fontSize=cls==='big'?'26px':cls==='relic'?'15px':'11px';entry.el.style.color=id.startsWith('upgrade:')?'#14532d':cls==='relic'?'#ffe08a':cls==='big'?'#e6ecf2':'#fff4c3';if(id.startsWith('upgrade:')){entry.el.style.textShadow='none';entry.el.innerHTML='<svg width="28" height="32" viewBox="0 0 28 32" aria-label="Ausbaubar"><polygon points="14,2 26,14 19,14 19,30 9,30 9,14 2,14" fill="#ffffff" stroke="#172019" stroke-width="2" stroke-linejoin="round"/></svg>';}}
     entry.pos.set(x,lift+6,z);return entry;
   }
   function syncLabels(){

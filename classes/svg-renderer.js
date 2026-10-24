@@ -47,8 +47,8 @@ function create(svg,commands){
           const marker=document.createElementNS(NS,'circle');marker.setAttribute('cx',slot.x);marker.setAttribute('cy',slot.y);marker.setAttribute('r',6);marker.setAttribute('fill','#303735');marker.setAttribute('stroke','#929e91');scene.appendChild(marker);
         }
       }
-      const label=text(c.x,c.y+5,visibility==='clear'?(landmark.type==='shrine'?'✦':landmark.type==='boss'?'☠':'◆'):'?',24,'#b7bfba','700');label.style.pointerEvents='none';scene.appendChild(label);
-      if(visibility==='clear'){const note=text(c.x,c.y+27,landmark.relicId?landmark.relicName+' · anschließen':landmark.augment?'Seltenes Augment · ungesammelt':landmark.merchant?'Händler · noch nicht verbunden':landmark.type==='shrine'?'Shrine · Bonus unbekannt':landmark.type==='boss'?'Wächter · inaktiv':'Schatz +'+HexExploration.treasureReward(landmark)+' Gold · ungesammelt',8,'#b7bfba');note.style.pointerEvents='none';scene.appendChild(note);}
+      const label=text(c.x,c.y+5,landmark.relicId?'◆':visibility==='clear'?(landmark.type==='shrine'?'✦':landmark.type==='boss'?'☠':'◆'):'?',24,landmark.relicId?'#ffe08a':'#b7bfba','700');label.style.pointerEvents='none';scene.appendChild(label);
+      if(visibility==='clear'||landmark.relicId){const note=text(c.x,c.y+27,landmark.relicId?landmark.relicName+' · anschließen':landmark.augment?'Seltenes Augment · ungesammelt':landmark.merchant?'Händler · noch nicht verbunden':landmark.type==='shrine'?'Shrine · Bonus unbekannt':landmark.type==='boss'?'Wächter · inaktiv':'Schatz +'+HexExploration.treasureReward(landmark)+' Gold · ungesammelt',8,'#b7bfba');note.style.pointerEvents='none';scene.appendChild(note);}
     }
 
     // Global passes keep all roads below every tower, regardless of tile age.

@@ -1,14 +1,15 @@
 'use strict';
 const fs=require('node:fs'),path=require('node:path');const root=path.resolve(__dirname,'..');
 const {createHash}=require('node:crypto');
-function stampClientFiles(out){
+function stampClientFiles(out,{sourceTree=false,onChanged=()=>{}}={}){
   const files=[];
-  function walk(dir){for(const entry of fs.readdirSync(dir,{withFileTypes:true})){const full=path.join(dir,entry.name);if(entry.isDirectory()){if(entry.name!=='assets'&&entry.name!=='node_modules')walk(full);}else if(/\.(html|css|js|mjs)$/.test(entry.name))files.push(full);}}
+  function walk(dir){for(const entry of fs.readdirSync(dir,{withFileTypes:true})){const full=path.join(dir,entry.name);if(entry.isDirectory()){if(sourceTree?(dir===out&&entry.name==='classes'):(!entry.name.startsWith('.')&&entry.name!=='assets'&&entry.name!=='node_modules'))walk(full);}else if(/\.(html|css|js|mjs)$/.test(entry.name))files.push(full);}}
   walk(out);files.sort();
-  const hash=createHash('sha256');for(const file of files)hash.update(path.relative(out,file)).update(fs.readFileSync(file));
+  const normalize=s=>s.replace(/(\.(?:js|mjs|css))\?v=[a-f0-9]+(?=["'])/g,'$1').replace(/\r\n/g,'\n');
+  const hash=createHash('sha256');for(const file of files)hash.update(path.relative(out,file).replace(/\\/g,'/')).update(normalize(fs.readFileSync(file,'utf8')));
   const version=hash.digest('hex').slice(0,16);
   for(const file of files.filter(f=>/\.(html|js|mjs)$/.test(f))){
-    const source=fs.readFileSync(file,'utf8');
+    const original=fs.readFileSync(file,'utf8'),source=normalize(original);
     // Only local files that actually exist in this artifact, including dynamic
     // script URLs and relative ES-module imports. API/socket URLs stay unchanged.
     const stamped=source.replace(/(["'])([^"'`\s<>?]+\.(?:js|mjs|css))\1/g,(whole,quote,url)=>{
@@ -17,7 +18,7 @@ function stampClientFiles(out){
       if(!target.startsWith(out+path.sep)||!fs.existsSync(target))return whole;
       return quote+url+'?v='+version+quote;
     });
-    fs.writeFileSync(file,stamped);
+    if(stamped!==original){fs.writeFileSync(file,stamped);onChanged(path.relative(out,file));}
   }
   return version;
 }
