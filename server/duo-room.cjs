@@ -17,6 +17,7 @@ function payloadValid(action, p) {
     case 'lobbyReady':
     case 'pause':
     case 'rematch':
+    case 'endless':
     case 'ready': return exact(p, ['value']) && typeof p.value === 'boolean';
     case 'place': return exact(p, ['q', 'r', 'index', 'rotation']) && integer(p.q, -1000, 1000) && integer(p.r, -1000, 1000) && integer(p.index, 0, 4) && integer(p.rotation, 0, 5);
     case 'tower': return exact(p, ['type', 'slots']) && word(p.type) && Array.isArray(p.slots) && p.slots.length > 0 && p.slots.length <= 32 && p.slots.every(slot);
@@ -38,7 +39,7 @@ function payloadValid(action, p) {
   }
 }
 const offerId = id => crypto.createHash('sha256').update(id).digest('hex');
-const copy = v => JSON.parse(JSON.stringify(v));
+const copy = v => v !== null && typeof v === 'object' ? JSON.parse(JSON.stringify(v)) : v;
 const pick = (v, fields) => Object.fromEntries(fields.filter(k => v[k] !== undefined).map(k => [k, copy(v[k])]));
 // Bounded, already travelled path for presentation; no future route or private seed.
 function motionPath(e) {
@@ -124,10 +125,11 @@ function createRoom({ seed = crypto.randomUUID(), loadouts, now = () => Date.now
       mines: (s.mines || []).map(m => pick(m, ['id', 'x', 'y', 'color'])),
       ...(index === player ? { ...pick(s, ['runTowerStats', 'runTowerDetails', 'baseKills', 'consumableKills', 'baseDamage', 'patricianBonusIncome']), duoDiamondEstimate: Math.floor(Math.min(...match.boards.map(r => r.state.lastCompletedWave || 0)) / 2) + (s.earnedMeta?.periodicBosses || 0) * 5 + match.boards.reduce((n, r) => n + (r.state.earnedMeta?.explorationBosses || 0), 0) * 3, hand: [...s.hand], placements: copy(placements(s)), rescueCard: s.rescueCard ? copy(s.rescueCard) : null, tunnelOffer: s.tunnelOffer ? copy(s.tunnelOffer) : null, ultimateUnlocks: [...s.ultimateUnlocks], buildingUnlocks: [...s.buildingUnlocks], wavePlans: [core.waves.plan(s.wave, s.income, !!s.challengeDay, s), core.waves.plan(s.wave + 1, s.income, !!s.challengeDay, s)], drawPile: [...s.drawPile], discard: [...s.discard], deckCounts: s.deck.reduce((a, id) => (a[id] = (a[id] || 0) + 1, a), {}), loadout: [...s.towerLoadout], rewardOffer: s.rewardOffer ? { ...pick(s.rewardOffer, ['kind', 'choices', 'skippable']), id: offerId(s.rewardOffer.id) } : null, celebration: s.activeCelebration ? copy(s.activeCelebration) : null } : {}),
     }));
-    return { lobbyState: {...copy(lobby),loadouts:match.boards.map(r=>[...r.state.towerLoadout])}, speed: match.speed || 1, paused: !!match.paused, protocol: 1, frameTime, serverId, epoch, revision, player, connection: presence, next: seats[player].next, hp: match.hp, maxHp: match.maxHp, wave: match.wave, phase: match.phase, ready: [...match.ready], finished: [...match.finished], portals: copy(match.portals), reinforcements: copy(match.reinforcements), pendingHelp: match.pendingHelp.map(h => h ? { at: h.at } : null), result: publicResult(), rematch: match.rematch || [false, false], support: copy(match.support), delivery: match.delivery ? { wave: match.delivery.wave, offers: match.delivery.offers.map((o, i) => i === player ? { ...copy(o), id: offerId(o.id) } : { index:o.index, choices:copy(o.choices) }) } : null, boards };
+    const value={ lobbyState: {...copy(lobby),loadouts:match.boards.map(r=>[...r.state.towerLoadout])}, speed: match.speed || 1, paused: !!match.paused, protocol: 1, frameTime, serverId, epoch, revision, player, connection: presence, next: seats[player].next, hp: match.hp, maxHp: match.maxHp, wave: match.wave, phase: match.phase, ready: [...match.ready], finished: [...match.finished], portals: copy(match.portals), reinforcements: copy(match.reinforcements), pendingHelp: match.pendingHelp.map(h => h ? { at: h.at } : null), result: publicResult(), endless:!!match.endless, endlessVotes:copy(match.endlessVotes||[false,false]), rematch: copy(match.rematch || [false, false]), support: copy(match.support), delivery: match.delivery ? { wave: match.delivery.wave, offers: match.delivery.offers.map((o, i) => i === player ? { ...copy(o), id: offerId(o.id) } : { index:o.index, choices:copy(o.choices) }) } : null, boards };
+    return value;
   }
   function publicResult() { return match.result ? { ...copy(match.result), id: offerId(match.result.id) } : null; }
   function checkpoint() { if (ended || expired) return null; return { format: 'autohex-room', version: 1, ruleset: RULESET, lobby: copy(lobby), epoch, revision, seats: copy(seats), match: core.duo.capture(match) }; }
-  return { get result() { return publicResult(); }, setMaintenance, connect, touch, claim, leave, receive, view, presence() { return connection(); }, checkpoint, tick() { if (!lobby.started || connection().paused) return; frameTime=now(); for (let i = 0; i < (match.speed || 1) * core.runtime.PLAYBACK_RATE; i++)core.duo.tick(match); revision++; } };
+  return { hasSeat:token=>seat(token)>=0, pushKey(token){const i=seat(token);if(i<0)return null;connection();return serverId+epoch+':'+revision+':'+seats[i].next;}, get result() { return publicResult(); }, setMaintenance, connect, touch, claim, leave, receive, view, presence() { return connection(); }, checkpoint, tick() { if (!lobby.started || connection().paused || match.paused || match.phase!=='combat') return; frameTime=now(); for (let i = 0; i < (match.speed || 1) * core.runtime.PLAYBACK_RATE; i++)core.duo.tick(match); revision++; } };
 }
 module.exports = { createRoom, payloadValid, RULESET, motionPath, compatibleRuleset };

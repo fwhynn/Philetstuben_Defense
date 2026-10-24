@@ -18,7 +18,7 @@ const HexDuoSession=(()=>{
     if(choice.kind==='gold'){recipient.gold+=choice.amount;recipient.goldEarned.partner=(recipient.goldEarned.partner||0)+choice.amount;}
     else{HexDeck.addReward(recipient,choice.cardId);}
     offer.index=payload.index;
-    if(delivery.offers.every(o=>o.index!==null))for(const run of match.boards){run.state.duoDeliveryPending=false;HexRunSession.preparation(run.state,run.random);}
+    if(delivery.offers.every(o=>o.index!==null))for(const run of match.boards){run.state.duoDeliveryPending=false;if(match.endless&&match.wave===35)HexRunSession.waveRewards(run.state,run.random);else HexRunSession.preparation(run.state,run.random);}
     return true;
   }
   const same=(a,b)=>a&&b&&a.q===b.q&&a.r===b.r&&a.index===b.index;
@@ -36,7 +36,7 @@ const HexDuoSession=(()=>{
     if(match.result)return;
     const wave=outcome==='victory'?match.wave:Math.min(...match.boards.map(r=>r.state.lastCompletedWave||0));
     const exploration=match.boards.reduce((sum,r)=>sum+(r.state.earnedMeta?.explorationBosses||0),0);
-    match.result={id:match.seed+'|result',outcome,wave,players:match.boards.map((r,i)=>({wave,diamonds:Math.floor(wave/2)+(r.state.earnedMeta?.periodicBosses||0)*5+exploration*3,towers:JSON.parse(JSON.stringify(r.state.runTowerStats)),support:JSON.parse(JSON.stringify(match.support[i])),gold:r.state.gold}))};
+    match.result={id:match.seed+(match.endless?'|endless-result':'|result'),outcome,wave,players:match.boards.map((r,i)=>({wave,diamonds:Math.max(0,Math.floor(wave/2)+(r.state.earnedMeta?.periodicBosses||0)*5+exploration*3-(match.victoryPaid?.[i]||0)),towers:JSON.parse(JSON.stringify(r.state.runTowerStats)),support:JSON.parse(JSON.stringify(match.support[i])),gold:r.state.gold}))};
     match.rematch=[false,false];
   }
   function lose(match){cleanGuests(match);match.hp=0;match.phase='gameover';match.ready=[false,false];for(const {state:s} of match.boards){HexCombat.clearConsumables(s);s.hp=0;s.phase='gameover';s.waveRunning=false;s.spawnQueue=[];s.pendingSpawns=0;s.enemies=[];s.projectiles=[];}finishMatch(match,'defeat');}
@@ -46,8 +46,19 @@ const HexDuoSession=(()=>{
     if(!Number.isInteger(player)||player<0||player>1||typeof id!=='string'||!id||id.length>120||wave!==match.wave)return false;
     if(match.receipts[player].includes(id))return false;
     if(match.result){
+      if(action==='endless'){
+        if(match.phase!=='victory'||match.endless||typeof payload.value!=='boolean')return false;
+        match.endlessVotes??=[false,false];match.endlessVotes[player]=payload.value;match.rematch[player]=false;match.receipts[player].push(id);
+        if(match.endlessVotes.every(Boolean)){
+          match.victoryPaid=match.result.players.map(p=>p.diamonds);match.endless=true;match.result=null;match.phase='prepare';match.ready=[false,false];match.rematch=[false,false];match.endlessVotes=[false,false];
+          match.delivery={wave:match.wave,rulesVersion:2,offers:deliveryOffers(match)};
+          for(const run of match.boards){run.state.endless=true;run.state.campaignWon=true;run.state.duoDeliveryPending=true;HexRunSession.preparation(run.state,run.random);}
+          sync(match);
+        }
+        return true;
+      }
       if(action!=='rematch'||typeof payload.value!=='boolean')return false;
-      match.rematch[player]=payload.value;match.receipts[player].push(id);
+      if(match.endlessVotes)match.endlessVotes[player]=false;match.rematch[player]=payload.value;match.receipts[player].push(id);
       if(match.rematch.every(Boolean)){const receipts=match.receipts;const next=create(match.seed+'|rematch',match.boards.map(r=>r.state.towerLoadout));for(const key of Object.keys(match))delete match[key];Object.assign(match,next,{receipts});}
       return true;
     }
@@ -120,7 +131,7 @@ const HexDuoSession=(()=>{
   }
   function capture(match){
 
-    return {duo:JSON.parse(JSON.stringify({speed:match.speed||1,paused:!!match.paused,portals:match.portals,reinforcements:match.reinforcements,waveHelp:match.waveHelp,pendingHelp:match.pendingHelp,leaked:match.leaked,support:match.support,delivery:match.delivery||null,result:match.result||null,rematch:match.rematch||[false,false]})),format:'autohex-duo',version:VERSION,seed:match.seed,hp:match.hp,maxHp:match.maxHp,wave:match.wave,phase:match.phase,ready:[...match.ready],finished:[...match.finished],elapsedMs:match.elapsedMs,receipts:match.receipts.map(r=>[...r]),boards:match.boards.map(run=>HexRunSnapshot.capture(run.state,run.random))};
+    return {duo:JSON.parse(JSON.stringify({...(match.endless?{endless:true,victoryPaid:match.victoryPaid}:{}),...(match.endlessVotes?{endlessVotes:match.endlessVotes}:{}),speed:match.speed||1,paused:!!match.paused,portals:match.portals,reinforcements:match.reinforcements,waveHelp:match.waveHelp,pendingHelp:match.pendingHelp,leaked:match.leaked,support:match.support,delivery:match.delivery||null,result:match.result||null,rematch:match.rematch||[false,false]})),format:'autohex-duo',version:VERSION,seed:match.seed,hp:match.hp,maxHp:match.maxHp,wave:match.wave,phase:match.phase,ready:[...match.ready],finished:[...match.finished],elapsedMs:match.elapsedMs,receipts:match.receipts.map(r=>[...r]),boards:match.boards.map(run=>HexRunSnapshot.capture(run.state,run.random))};
   }
   function restore(snapshot){
     if(snapshot?.format!=='autohex-duo'||![2,VERSION].includes(snapshot.version)||!Array.isArray(snapshot.boards)||snapshot.boards.length!==2||!['prepare','combat','gameover','victory'].includes(snapshot.phase))throw new Error('Invalid Duo checkpoint');
@@ -132,6 +143,13 @@ const HexDuoSession=(()=>{
     match.speed=snapshot.duo?.speed||1;match.paused=!!snapshot.duo?.paused;
     for(const field of ['portals','reinforcements','waveHelp','pendingHelp','leaked','support']){if(!Array.isArray(snapshot.duo?.[field])||snapshot.duo[field].length!==2)throw new Error('Invalid Duo checkpoint');match[field]=JSON.parse(JSON.stringify(snapshot.duo[field]));}
     match.delivery=snapshot.version===2?null:JSON.parse(JSON.stringify(snapshot.duo.delivery??null));
+    if(snapshot.duo?.endless!==undefined&&typeof snapshot.duo.endless!=='boolean')throw Error('Invalid endless flag');
+    if(snapshot.duo?.endless){
+      const paid=snapshot.duo.victoryPaid;
+      if(snapshot.wave<35||!Array.isArray(paid)||paid.length!==2||paid.some(v=>!Number.isSafeInteger(v)||v<17||v>100000)||match.boards.some(r=>!r.state.endless))throw Error('Invalid endless checkpoint');
+      match.endless=true;match.victoryPaid=[...paid];
+    }
+    if(snapshot.duo?.endlessVotes!==undefined){const votes=snapshot.duo.endlessVotes;if(!Array.isArray(votes)||votes.length!==2||votes.some(v=>typeof v!=='boolean'))throw Error('Invalid endless votes');match.endlessVotes=[...votes];}
     match.result=snapshot.duo?.result?JSON.parse(JSON.stringify(snapshot.duo.result)):null;match.rematch=snapshot.duo?.rematch||[false,false];
     const terminal=['gameover','victory'].includes(match.phase);
     if(terminal!==!!match.result||match.phase==='gameover'&&match.hp!==0||!terminal&&match.hp<=0||match.phase==='victory'&&(match.hp<=0||match.wave!==35))throw new Error('Invalid Duo result phase');

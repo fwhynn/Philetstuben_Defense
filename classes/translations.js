@@ -2602,4 +2602,7 @@ Offene Goldgeschenke: 50 Gold|Pending gold gifts: 50 gold
 KORRIGIERT|FIXED
 Bewegung und springende Leisten|Movement and shifting sidebars
 Duo-Modus|Duo mode
+Endlos-Zustimmung zurücknehmen|Withdraw endless vote
+Endlos weiterspielen · Partner wartet|Continue endlessly · partner is waiting
+Gemeinsam endlos weiterspielen|Continue endlessly together
 `);

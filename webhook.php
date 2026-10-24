@@ -100,6 +100,9 @@ try {
         set_time_limit(300);
         $steps = [];
 
+        // Fail before changing live files when PHP cannot restart the running Duo process.
+        $steps[] = runCheckedCommand('/usr/bin/sudo -n -l /usr/bin/systemctl restart ' . DUO_SERVICE, REPO_ROOT, 'Duo restart permission missing for the PHP-FPM user. Install the matching sudoers rule before deploying.');
+
         // Repos on server are kept on `main`; just pull latest
         $steps[] = runCheckedCommand(gitCommand('pull --ff-only ' . escapeshellarg(REMOTE_NAME) . ' ' . escapeshellarg(DEPLOY_BRANCH)), REPO_ROOT, 'git pull failed.');
         $steps[] = runCheckedCommand(NPM_BIN . ' ci --omit=dev', APP_ROOT, 'npm ci failed.');

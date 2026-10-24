@@ -105,3 +105,17 @@ Vor Rollback Dienst stoppen und **die zum alten Release gehörende Sicherung** s
 - Lokale Node-Tests laufen ohne Browser; systemd, PHP-FPM und Proxy müssen auf Debian geprüft werden. Eine PHP-Laufzeit und systemd standen in der Windows-Entwicklungsumgebung nicht zur Verfügung.
 
 Referenzen: https://socket.io/docs/v4/server-options/ und https://socket.io/docs/v4/client-api/ (Client-Bundle, Origin-Prüfung, Acknowledgements und Wiederverbindung).
+
+### Diagnose: Dateien neu, Duo-Prozess noch alt
+
+Der Release v1.2.1 scheiterte beim Neustart mit `sudo: a password is required`. Git-Pull und npm waren erfolgreich. Die sudoers-Regel muss dem **tatsächlichen PHP-FPM-Poolnutzer** gehören; `www-data` in der Vorlage ist nur der Standard. Ein erfolgreicher manueller Neustart als root beweist nicht, dass der Webhook dieselbe Berechtigung hat.
+
+Nach Installation/Anpassung der eng begrenzten Regel in `autohextd-duo.sudoers` als root prüfen (PHP_USER durch den tatsächlichen Poolnutzer ersetzen):
+
+```sh
+sudo -u PHP_USER sudo -n -l /usr/bin/systemctl restart autohextd-duo.service
+```
+
+Der Webhook führt diese Berechtigungsprüfung vor dem Pull aus. Der abschließende Healthcheck akzeptiert ausschließlich die Version aus package.json. Der Dienst muss dafür den neuen Health-Endpunkt geladen haben. Bestehende Checkpoints und Ergebnisbelege werden weder gelöscht noch zurückgesetzt.
+
+Auch `webhook.log` muss per Nginx gesperrt sein, zusätzlich zu `webhook-error.log`; die aktualisierte Vorlage enthält beide. Diese Serverkonfiguration wird durch einen Git-Push nicht automatisch installiert.
