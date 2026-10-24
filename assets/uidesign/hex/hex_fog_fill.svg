@@ -1,4 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 866 1000">
-  <defs><radialGradient id="fog-fill" cx="0.5" cy="0.28" r="0.78"><stop offset="0" stop-color="#46514b"/><stop offset="0.5" stop-color="#3a4440"/><stop offset="1" stop-color="#2c3430"/></radialGradient></defs>
-  <polygon points="433,80 796.7,290 796.7,710 433,920 69.3,710 69.3,290" fill="url(#fog-fill)" stroke="url(#fog-fill)" stroke-width="12" stroke-linejoin="round"/>
-</svg>

@@ -61,23 +61,3 @@ test('ordinary public entries have no deletion control',async()=>{
  const view=setup({players:async()=>({players:sample})});view.open();await tick();
  assert.equal(view.rows()[0].children.length,4);
 });
-test('podium shows the top three as 2 · 1 · 3 and the footer names the own placement',async()=>{
- const players=[{rank:1,username:'Hexfuchs',highestWave:82},{rank:2,username:'Waldwache',highestWave:76},{rank:3,username:'Turmfalke',highestWave:71},{rank:4,username:'Ich',highestWave:61}];
- const view=setup({players:async()=>({players}),loggedIn:true,username:'Ich'});view.open();await tick();await tick();
- const podium=view.nodes.get('leaderboardPodium').children;
- assert.deepEqual(podium.map(c=>c.className),['lbPlace lbPlace2','lbPlace lbPlace1','lbPlace lbPlace3']);
- assert.deepEqual(podium.map(c=>c.children[1].textContent),['Waldwache','Hexfuchs','Turmfalke']);
- assert.equal(podium[1].children[2].textContent,'82');
- assert.equal(view.nodes.get('leaderboardOwn').textContent,'Deine Platzierung: 4');
- assert.equal(view.rows().length,4,'Tabelle behält alle Zeilen; CSS blendet die ersten drei aus');
- assert.equal(view.nodes.get('leaderboardContent').classList.contains('withPodium'),true);
- assert.equal(view.rows()[3].children[1].children[0].textContent,'Du');
-});
-test('tied ranks still fill the podium and leave nobody hidden',async()=>{
- const players=[{rank:1,username:'Jogurt',highestWave:77},{rank:2,username:'Autophil',highestWave:73},{rank:2,username:'Davit',highestWave:73},{rank:4,username:'Tomate',highestWave:71}];
- const view=setup({players:async()=>({players})});view.open();await tick();await tick();
- const podium=view.nodes.get('leaderboardPodium').children;
- assert.deepEqual(podium.map(c=>c.children[1].textContent),['Autophil','Jogurt','Davit']);
- assert.deepEqual(podium.map(c=>c.children[0].children.at(-1).textContent),['2','1','2'],'Rangabzeichen zeigt den echten Rang');
- assert.deepEqual(view.rows().filter(r=>!r.className.includes('onPodium')).map(r=>r.children[1].textContent),['Tomate']);
-});

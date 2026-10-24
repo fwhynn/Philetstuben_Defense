@@ -2,13 +2,8 @@
 const HexArsenal=(()=>{
   const icons={archer:'➶',catapult:'◈',chain:'ϟ',freeze:'❄',mine:'✹',ballista:'➳',flame:'♨',element:'✦',necromancer:'☽',house:'⌂',forge:'⚒',market:'◆'};
   const BUILDING_COLOR='#d3b566';
-  // Designer-Icons (assets/uidesign/towers) in Turmfarbe auf kleinem Hex; Typen ohne Datei behalten das Zeichen-Icon.
-  const ARTWORK={archer:'tower_archer',catapult:'tower_catapult',chain:'tower_chain',freeze:'tower_freeze',mine:'tower_mine',ballista:'tower_ballista',flame:'tower_flame',element:'tower_element',necromancer:'tower_necromancer',house:'building_house',forge:'building_forge',market:'building_market'};
-  const PATH_ARTWORK={volley:'path_volley',marksman:'path_sniper'};
-  const artwork=(name,color)=>`<span class="researchIcon hxTowerIcon" aria-hidden="true" style="color:${color||'#a7bda4'}"><span class="hxi hxi-${name}"></span></span>`;
-  function pathIcon(branch,color){return PATH_ARTWORK[branch]?artwork(PATH_ARTWORK[branch],color):'';}
   let current=null;// Selected tree survives re-renders after unlocks.
-  function icon(type,color){if(ARTWORK[type])return artwork(ARTWORK[type],color);return `<svg class="researchIcon" viewBox="0 0 48 48" aria-hidden="true"><path d="M10 42h28l-3-8H13zM16 34V18h16v16" fill="${color||'#a7bda4'}" stroke="#14261c" stroke-width="2"/><circle cx="24" cy="15" r="13" fill="#14261c" stroke="${color||'#a7bda4'}"/><text x="24" y="21" text-anchor="middle" font-size="20" fill="${color||'#a7bda4'}">${icons[type]}</text></svg>`;}
+  function icon(type,color){return `<svg class="researchIcon" viewBox="0 0 48 48" aria-hidden="true"><path d="M10 42h28l-3-8H13zM16 34V18h16v16" fill="${color||'#a7bda4'}" stroke="#14261c" stroke-width="2"/><circle cx="24" cy="15" r="13" fill="#14261c" stroke="${color||'#a7bda4'}"/><text x="24" y="21" text-anchor="middle" font-size="20" fill="${color||'#a7bda4'}">${icons[type]}</text></svg>`;}
   function el(tag,className,html){const e=document.createElement(tag);if(className)e.className=className;if(html!==undefined)e.innerHTML=html;return e;}
   // Collects every tree as plain data so rail and detail view share one source.
   function trees(profile){
@@ -105,5 +100,5 @@ const HexArsenal=(()=>{
     }
     select(current);
   }
-  return {render,icon,pathIcon,trees,notifications};
+  return {render,icon,trees,notifications};
 })();

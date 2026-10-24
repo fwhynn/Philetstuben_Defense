@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Auswahlring Bauplatz">
-  <defs><clipPath id="fx-hex"><polygon points="128,10 230.2,69 230.2,187 128,246 25.8,187 25.8,69"/></clipPath></defs>
-  <path d="M128 18L223.3 73L223.3 183L128 238L32.7 183L32.7 73Z" fill="#ffffff" opacity="0.1"/>
-  <path d="M128 18L223.3 73L223.3 183L128 238L32.7 183L32.7 73Z" fill="none" opacity="0.95" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="16 12"/>
-  <path d="M128 104V152M104 128H152" fill="none" opacity="0.9" stroke="#ffffff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>

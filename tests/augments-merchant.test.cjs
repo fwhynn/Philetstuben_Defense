@@ -40,7 +40,7 @@ test('Duo commands enforce ownership, preparation and ready locks for rerolls an
 });
 const {load:loadUI}=require('./helpers/game.cjs');
 test('free tower prices and redraw controls are usable through the game UI',()=>{
- const {a,elements,selectSlot,buyTower}=loadUI();a.state.phase='build';a.state.freeTowerBuilds=3;a.state.gold=0;a.state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[null],buildings:[]});selectSlot(1,0,0);const buttons=elements.get('towerMenu').children;assert.ok(buttons.length);assert.equal(buttons[0].disabled,false);assert.match(buttons[0].innerHTML,/towerPriceValue">0</);buyTower('archer');assert.equal(a.state.freeTowerBuilds,2);assert.equal(a.state.gold,0);
+ const {a,elements,selectSlot,buyTower}=loadUI();a.state.phase='build';a.state.freeTowerBuilds=3;a.state.gold=0;a.state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[null],buildings:[]});selectSlot(1,0,0);const buttons=elements.get('towerMenu').children;assert.ok(buttons.length);assert.equal(buttons[0].disabled,false);assert.match(buttons[0].innerHTML,/0 🪙/);buyTower('archer');assert.equal(a.state.freeTowerBuilds,2);assert.equal(a.state.gold,0);
  a.state.augments=['wayfinder','fourthCard'];a.state.openingRemaining=0;a.state.phase='place';a.renderAll();assert.equal(elements.get('redrawHandBtn').disabled,false);elements.get('redrawHandBtn').listeners.click();assert.equal(a.state.hand.length,4);assert.equal(elements.get('redrawHandBtn').disabled,true);
 });
 test('merchant UI performs direct purchases, disables unavailable offers and closes with Escape',()=>{

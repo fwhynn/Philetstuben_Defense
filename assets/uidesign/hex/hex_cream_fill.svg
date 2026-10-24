@@ -1,4 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 866 1000">
-  <defs><radialGradient id="cream-fill" cx="0.5" cy="0.28" r="0.78"><stop offset="0" stop-color="#fffaf0"/><stop offset="0.55" stop-color="#f1e6c6"/><stop offset="1" stop-color="#dfcd9f"/></radialGradient></defs>
-  <polygon points="433,80 796.7,290 796.7,710 433,920 69.3,710 69.3,290" fill="url(#cream-fill)" stroke="url(#cream-fill)" stroke-width="12" stroke-linejoin="round"/>
-</svg>

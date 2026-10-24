@@ -33,10 +33,10 @@ test('multi-build shares discounts but rounds each slot separately and keeps aff
   const {a,elements,buildings}=load(),s=a.state;s.phase='build';s.gold=39;
   for(const [q,level] of [[1,1],[8,3]])s.map.set(q+',0',{q,r:0,type:'straight',roads:[0,3],slots:1,towers:[null],buildings:[{type:'market',level}]});
   s.selectedSlots=[{q:1,r:0,index:0},{q:8,r:0,index:0}];s.selectedSlot=s.selectedSlots[1];a.renderAll();
-  const button=elements.get('towerMenu').children[0];assert.match(button.innerHTML,/towerPriceValue">39</);assert.equal(button.disabled,false);
+  const button=elements.get('towerMenu').children[0];assert.match(button.innerHTML,/39 🪙/);assert.equal(button.disabled,false);
   const effects=buildings.effects;let calls=0;buildings.effects=(...args)=>{calls++;return effects(...args);};
   a.renderAll();assert.equal(calls,2,'one discount lookup per selected slot');
   s.gold=38;a.renderAll();assert.equal(button.disabled,true);
   s.map.get('1,0').buildings[0].level=2;s.buildingVersion=(s.buildingVersion||0)+1;a.renderAll();
-  assert.match(elements.get('towerMenu').children[0].innerHTML,/towerPriceValue">36</);assert.equal(elements.get('towerMenu').children[0].disabled,false);
+  assert.match(elements.get('towerMenu').children[0].innerHTML,/36 🪙/);assert.equal(elements.get('towerMenu').children[0].disabled,false);
 });
