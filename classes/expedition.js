@@ -4,9 +4,12 @@ const HexExpedition=(()=>{
   function initialize(state){
     Object.assign(state,{gold:100,income:0,difficulty:'normal',openingRemaining:0,baseExits:[0],phase:'place',deck:[...cards],drawPile:[],discard:[],hand:[],landmarks:new Map()});
     state.map=new Map([['0,0',{q:0,r:0,type:'base',roads:[0],slots:0,towers:[],buildingSlots:0,buildings:[],income:0}]]);
-    state.landmarks.fixed=true;state.expedition={preparedWave:-1,remaining:0,collected:[],failed:false,rulesVersion:3,drawSerial:0,heldCards:[...cards]};
-    const random=HexRandom.create(state.seed+'|relic-regions');const distance=()=>6+Math.floor(random()*3);
-    for(const [id,name,q,r,rotation]of [['east','Relikt Ost',distance(),Math.floor(random()*5)-2,0],['north','Relikt Nord',Math.floor(random()*4),-distance(),2],['south','Relikt Süd',Math.floor(random()*4)-1,distance(),2]]){
+    state.landmarks.fixed=true;state.expedition={preparedWave:-1,remaining:0,collected:[],failed:false,rulesVersion:4,drawSerial:0,heldCards:[...cards]};
+    const random=HexRandom.create(state.seed+'|relic-regions');
+    // Same total route budget for every seed: 18 placements, leaving six for detours.
+    const distances=[6,7,8];for(let i=distances.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[distances[i],distances[j]]=[distances[j],distances[i]];}
+    const distance=()=>distances.pop();
+    for(const [id,name,q,r,rotation]of [['east','Relikt Ost',distance(),0,0],['north','Relikt Nord',1+Math.floor(random()*2),-distance(),2],['south','Relikt Süd',3+Math.floor(random()*2),distance(),2]]){
       const type=random()<.5?'straight':'tJunction';
       state.landmarks.set(HexMap.key(q,r),{q,r,type:'shrine',relicId:id,relicName:name,claimed:false,prefab:{type,roads:HexMap.rotatedRoads(HexData.CARD_LIBRARY[type],rotation),rotation,slots:HexData.CARD_LIBRARY[type].slots}});
     }
@@ -26,7 +29,9 @@ const HexExpedition=(()=>{
     state.vision=HexExploration.expand(state.landmarks,state.map);HexBuildings.refresh(state);
     if(state.expedition.rulesVersion>=3){
       const e=state.expedition,rng=HexRandom.create(state.seed+'|relic-hand|'+e.drawSerial++);
-      const pool=Object.entries(HexData.CARD_LIBRARY).filter(([key,c])=>key!==id&&!c.rescue&&c.roads?.length>=2&&!c.buildingSlots&&['Common','Uncommon','Rare'].includes(c.rarity));
+      // Each slot keeps its road geometry, but receives a different card. This prevents
+      // unlucky draws from eliminating every curve or junction before the deadline.
+      const pool=Object.entries(HexData.CARD_LIBRARY).filter(([key,c])=>key!==id&&!c.rescue&&c.roads?.length>=2&&!c.buildingSlots&&['Common','Uncommon','Rare'].includes(c.rarity)&&(e.rulesVersion<4||c.roads.join()===card.roads.join()));
       e.heldCards=[...state.hand];e.heldCards[index]=pool[Math.floor(rng()*pool.length)][0];
     }
     state.expedition.remaining--;state.phase=state.expedition.remaining?'place':'build';sync(state);return {opening:false,connected,treasure:0,relicEvents};

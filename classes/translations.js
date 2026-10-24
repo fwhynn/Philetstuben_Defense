@@ -2662,3 +2662,15 @@ Freie Turmauswahl vor dem Start von Gier und Drei Dörfern. Türme lassen sich a
 HexTranslations.add(`SCHWERER|TOUGHER
 Vertragsgold erst nach überlebter Welle.|Contract gold after surviving the wave.
 nach der Welle|after the wave`);
+
+HexTranslations.add(`
+Herausforderungen: Fairer Zufall|Challenges: Fairer randomness
+Abwechslung bleibt – fehlende Straßenformen und einseitige Angebote werden abgesichert.|Variety stays, with safeguards against missing road shapes and one-sided offers.
+Expedition: Planbare Wege|Expedition: Routes you can plan
+Die ausgespielte Karte wird weiterhin ersetzt. Ihre Straßenform bleibt verfügbar: Geraden, beide Kurvenformen und Abzweigungen können nicht aus der Hand verschwinden.|Played cards are still replaced. Their road shape stays available: straights, both bend types and junctions cannot disappear from your hand.
+Relikte wechseln ihre Position innerhalb ihrer Regionen bei einem vergleichbaren gesamten Wegbudget. Eine passende Verbindung benötigt 18 Platzierungen; sechs bleiben für Umwege.|Relics change position within their regions with a comparable total route budget. A suitable connection takes 18 placements, leaving six for detours.
+Turm-Draft: Mehr echte Auswahl|Tower Draft: More meaningful choices
+Startangebote enthalten Möglichkeiten für Einzelziel- und Flächenschaden. Spätere Angebote ziehen Turmtypen aus einem gemeinsamen Pool ohne Zurücklegen.|Starting offers include single-target and area-damage options. Later offers draw tower types from a shared pool without replacement.
+Keine doppelten Ticketoptionen in einem Angebot. Spätestens nach zwei Angeboten ohne Verbesserungsticket steht wieder eines zur Auswahl.|No duplicate ticket options in one offer. After at most two offers without an upgrade ticket, one becomes available again.
+Die Gegnerstärke bleibt unverändert. Bereits laufende Missionen behalten ihre bisherigen Regeln und Zufallsfolgen.|Enemy strength stays unchanged. Runs already in progress keep their existing rules and random sequences.
+`);

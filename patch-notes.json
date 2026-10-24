@@ -1,5 +1,51 @@
 [
   {
+    "version": "next",
+    "title": "Herausforderungen: Fairer Zufall",
+    "summary": "Abwechslung bleibt – fehlende Straßenformen und einseitige Angebote werden abgesichert.",
+    "overview": [
+      {
+        "kind": "fixed",
+        "title": "VERBESSERT",
+        "items": [
+          "Expedition: Planbare Wege",
+          "Turm-Draft: Mehr echte Auswahl"
+        ]
+      }
+    ],
+    "sections": [
+      {
+        "title": "Tägliche Herausforderungen",
+        "entries": [
+          {
+            "title": "Expedition: Planbare Wege",
+            "bullets": [
+              "Die ausgespielte Karte wird weiterhin ersetzt. Ihre Straßenform bleibt verfügbar: Geraden, beide Kurvenformen und Abzweigungen können nicht aus der Hand verschwinden.",
+              "Relikte wechseln ihre Position innerhalb ihrer Regionen bei einem vergleichbaren gesamten Wegbudget. Eine passende Verbindung benötigt 18 Platzierungen; sechs bleiben für Umwege."
+            ],
+            "stats": []
+          },
+          {
+            "title": "Turm-Draft: Mehr echte Auswahl",
+            "bullets": [
+              "Startangebote enthalten Möglichkeiten für Einzelziel- und Flächenschaden. Spätere Angebote ziehen Turmtypen aus einem gemeinsamen Pool ohne Zurücklegen.",
+              "Keine doppelten Ticketoptionen in einem Angebot. Spätestens nach zwei Angeboten ohne Verbesserungsticket steht wieder eines zur Auswahl.",
+              "Die Gegnerstärke bleibt unverändert. Bereits laufende Missionen behalten ihre bisherigen Regeln und Zufallsfolgen."
+            ],
+            "stats": []
+          }
+        ]
+      }
+    ],
+    "changes": [
+      "Die ausgespielte Karte wird weiterhin ersetzt. Ihre Straßenform bleibt verfügbar: Geraden, beide Kurvenformen und Abzweigungen können nicht aus der Hand verschwinden.",
+      "Relikte wechseln ihre Position innerhalb ihrer Regionen bei einem vergleichbaren gesamten Wegbudget. Eine passende Verbindung benötigt 18 Platzierungen; sechs bleiben für Umwege.",
+      "Startangebote enthalten Möglichkeiten für Einzelziel- und Flächenschaden. Spätere Angebote ziehen Turmtypen aus einem gemeinsamen Pool ohne Zurücklegen.",
+      "Keine doppelten Ticketoptionen in einem Angebot. Spätestens nach zwei Angeboten ohne Verbesserungsticket steht wieder eines zur Auswahl.",
+      "Die Gegnerstärke bleibt unverändert. Bereits laufende Missionen behalten ihre bisherigen Regeln und Zufallsfolgen."
+    ]
+  },
+  {
     "version": "1.2.4",
     "title": "Herausforderungen: Neue Wege, echte Risiken",
     "summary": "Mehr Abwechslung, stärkere Missionen und verlässliche Belohnungen.",
