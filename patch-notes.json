@@ -1,6 +1,6 @@
 [
   {
-    "version": "next",
+    "version": "1.2.5",
     "title": "Herausforderungen: Fairer Zufall",
     "summary": "Abwechslung bleibt – fehlende Straßenformen und einseitige Angebote werden abgesichert.",
     "overview": [
@@ -43,7 +43,8 @@
       "Startangebote enthalten Möglichkeiten für Einzelziel- und Flächenschaden. Spätere Angebote ziehen Turmtypen aus einem gemeinsamen Pool ohne Zurücklegen.",
       "Keine doppelten Ticketoptionen in einem Angebot. Spätestens nach zwei Angeboten ohne Verbesserungsticket steht wieder eines zur Auswahl.",
       "Die Gegnerstärke bleibt unverändert. Bereits laufende Missionen behalten ihre bisherigen Regeln und Zufallsfolgen."
-    ]
+    ],
+    "date": "2026-10-24"
   },
   {
     "version": "1.2.4",
