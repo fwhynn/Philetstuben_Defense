@@ -26,7 +26,7 @@ const HexRunFlow=(()=>{
     state.discard.push(...state.hand.filter(id=>id!=='rescue'));
     state.hand=[];
     let guard=0;
-    while(state.hand.length<(state.openingRemaining===2?5:3) && guard<30){
+    while(state.hand.length<(state.openingRemaining===2?5:state.augments?.includes('fourthCard')?4:3) && guard<30){
       guard++;
       refillDraw();
       if(state.drawPile.length===0) break;

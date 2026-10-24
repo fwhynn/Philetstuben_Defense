@@ -12,7 +12,7 @@ const HexExploration=(()=>{
   function region(map){
     const cells=new Map();
     for(const tile of map.values()) for(let q=-fogRadius;q<=fogRadius;q++) for(let r=Math.max(-fogRadius,-q-fogRadius);r<=Math.min(fogRadius,-q+fogRadius);r++){
-      const position={q:tile.q+q,r:tile.r+r},id=position.q+','+position.r,clear=distance({q,r},{q:0,r:0})<=clearRadius;
+      const position={q:tile.q+q,r:tile.r+r},id=position.q+','+position.r,clear=distance({q,r},{q:0,r:0})<=clearRadius+(map.revealBonus||0);
       if(!cells.has(id)||clear) cells.set(id,{...position,visibility:clear?'clear':'fog'});
     }
     return cells;
@@ -23,7 +23,7 @@ const HexExploration=(()=>{
       if(landmarks.surveyed.has(id)) continue;landmarks.surveyed.add(id);
       const baseDistance=distance(cell,{q:0,r:0});if(baseDistance<3||map.has(id)||landmarks.has(id)) continue;
       const type=eventType(landmarks.seed||0,cell,landmarks.sparse);
-      if(type) landmarks.set(id,{q:cell.q,r:cell.r,type,claimed:false,prefab:prefab(landmarks.seed||0,cell,type,landmarks.sparse)});
+      if(type){const special=hash((landmarks.seed||0)^0x51ab12,cell.q,cell.r),augment=special<.05,merchant=!augment&&special<.13;landmarks.set(id,{q:cell.q,r:cell.r,type:augment?'shrine':merchant?'treasure':type,augment,merchant,claimed:false,prefab:prefab(landmarks.seed||0,cell,type,landmarks.sparse)});}
     }
     return cells;
   }
@@ -65,14 +65,14 @@ const HexExploration=(()=>{
     return result;
   }
   function shrineEffect(landmarks,id){
-    const landmark=landmarks.get(id);if(landmark.shrineEffect)return landmark.shrineEffect;if(landmark.strategic)return 'aura';
+    const landmark=landmarks.get(id);if(landmark.augment)return 'augment';if(landmark.shrineEffect)return landmark.shrineEffect;if(landmark.strategic)return 'aura';
     const roll=hash((landmarks.seed||0)^987654321,landmark.q,landmark.r);
     return roll<.2?'remove':roll<.4?'card':roll<.6?'epic':roll<.7?'legendary':roll<.85?'repair':'upgrade';
   }
   function bossRewardRarity(seed,id){if(id.startsWith('duo:')){const parts=id.split(':');seed=String(seed)+'|guardian-board|'+parts[1];id=parts.slice(2).join(':');}const landmark=id.startsWith('wave:')?[-Number(id.slice(5)),0]:id.split(',').map(Number);let value=0;for(const char of String(seed)) value=Math.imul(value,31)+char.charCodeAt(0)|0;return hash(value^246813579,landmark[0],landmark[1])<.1?'Legendary':'Epic';}
   function visibility(map,position){
     let nearest=Infinity;for(const tile of map.values()) nearest=Math.min(nearest,distance(tile,position));
-    return nearest<=clearRadius?'clear':nearest<=fogRadius?'fog':'hidden';
+    return nearest<=clearRadius+(map.revealBonus||0)?'clear':nearest<=fogRadius?'fog':'hidden';
   }
   function gridCells(map,landmarks){
     const cells=new Map(map);
@@ -86,7 +86,8 @@ const HexExploration=(()=>{
     const tile=state.map.get(id);
     if(!(tile.roads||[]).some(d=>{const n=HexMap.neighbor(q,r,d),other=state.map.get(HexMap.key(n.q,n.r));return other&&(other.roads||[]).includes(HexMap.OPP(d));})) return 0;
     landmark.claimed=true;
-    if(landmark.type==='shrine'){landmark.strategic=true;tile.site='shrine';if(state.pendingShrine)(state.shrineQueue??=[]).push(id);else state.pendingShrine=id;return 0;}
+    if(landmark.merchant){tile.site='merchant';state.buildingVersion=(state.buildingVersion||0)+1;return 0;}
+    if(landmark.type==='shrine'){landmark.strategic=true;tile.site=landmark.augment?'augment':'shrine';if(state.pendingShrine)(state.shrineQueue??=[]).push(id);else state.pendingShrine=id;return 0;}
     if(landmark.type==='boss'){landmark.status=state.duoMode?'pending':'ready';if(state.duoMode)landmark.consent=[false,false];return 0;}
     tile.site='tradePost';HexBuildings.refresh(state);const amount=treasureReward(landmark);state.gold+=amount;state.goldEarned.treasure=(state.goldEarned.treasure||0)+amount;return amount;
   }
@@ -99,6 +100,6 @@ const HexExploration=(()=>{
     const tile=state.map?.get(id),landmark=state.landmarks?.get(id);if(!tile||landmark?.type!=='boss'||tile.site==='guardian')return;
     tile.site='guardian';tile.siteSlot=tile.slots||0;tile.slots=tile.siteSlot+1;tile.towers??=[];tile.towers.push(null);state.buildingVersion=(state.buildingVersion||0)+1;
   }
-  function siteLabel(tile){return tile.site==='tradePost'?'Handelsposten · +'+(tile.siteIncome||0)+' Gold/Welle (gesamt max. 20)':tile.site==='guardian'?'Wächterplatz · +20 % Reichweite':tile.site==='shrine'?(tile.siteEffect==='damage'?'Schrein · +10 % Schaden · Nachbarhexe':tile.siteEffect==='range'?'Schrein · +15 % Reichweite · Nachbarhexe':'Schrein · Segen wählen'):'';}
+  function siteLabel(tile){return tile.site==='merchant'?'Händler · Vorräte kaufen':tile.site==='augment'?'Augment-Insel':tile.site==='tradePost'?'Handelsposten · +'+(tile.siteIncome||0)+' Gold/Welle (gesamt max. 20)':tile.site==='guardian'?'Wächterplatz · +20 % Reichweite':tile.site==='shrine'?(tile.siteEffect==='damage'?'Schrein · +10 % Schaden · Nachbarhexe':tile.siteEffect==='range'?'Schrein · +15 % Reichweite · Nachbarhexe':'Schrein · Segen wählen'):'';}
   return {activateShrine,defeatGuardian,siteLabel,clearRadius,fogRadius,treasureReward,distance,create,region,expand,visibility,claim,bossProfile,shrineEffect,bossRewardRarity,prefab,attach,gridCells};
 })();

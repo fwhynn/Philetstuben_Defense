@@ -1303,3 +1303,9 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 #towerMenu .towerOfferPrice kbd{font-size:14px;padding:2px 9px}
 #towerDrawer .buildNote{margin-top:10px;padding:10px 14px;font-size:14px!important}
 @media(max-height:760px) and (min-width:701px){#towerMenu .towerBtn{padding:10px 10px!important}#towerMenu .towerBuildIcon{width:68px!important;height:76px}#towerMenu .towerBtn{grid-template-columns:68px minmax(0,1fr) auto!important}}
+/* Four-card augment and the five-card opening keep all choices reachable. */
+#hand:has(> :nth-child(4)){display:flex!important;justify-content:flex-start;overflow-x:auto;max-width:100%;padding:6px 3px 12px}
+#hand:has(> :nth-child(4))>.card{flex:0 0 clamp(110px,12vw,165px);width:clamp(110px,12vw,165px)}
+#merchantChoices{grid-template-columns:repeat(2,minmax(0,1fr))}
+#merchantChoices .upgradeOption{min-height:90px;display:flex;flex-direction:column;gap:8px;text-align:left}
+@media(max-width:600px){#merchantChoices{grid-template-columns:1fr}}

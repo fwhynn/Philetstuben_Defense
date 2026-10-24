@@ -480,7 +480,7 @@ function create(host0,commands){
         else holder=buildTile({kind:'tile',...HexModelMap.modelFor(tile)},tile,{prop:{name:landmark.type,angle:HexModelMap.propAngle(p.type,HexMap.slotOffsets(p.type,p.slots))}});
         (clear?layer.landmarks:fogLandmarks).add(holder);record={sig,holder};landmarkRecords.set(id,record);
       }
-      label(`lm:${id}`,c.x,c.y,clear?(landmark.type==='treasure'?'Schatz +'+HexExploration.treasureReward(landmark)+' Gold · ungesammelt':LANDMARK_LABEL[landmark.type]):'?',clear?'':'big',clear?30:0);
+      label(`lm:${id}`,c.x,c.y,clear?(landmark.augment?'Seltenes Augment · ungesammelt':landmark.merchant?'Händler · noch nicht verbunden':landmark.type==='treasure'?'Schatz +'+HexExploration.treasureReward(landmark)+' Gold · ungesammelt':LANDMARK_LABEL[landmark.type]):'?',clear?'':'big',clear?30:0);
     }
     for(const [id,record] of [...landmarkRecords]) if(!seen.has(id)){record.holder.removeFromParent();landmarkRecords.delete(id);}
   }

@@ -29,7 +29,8 @@ function payloadValid(action, p) {
     case 'portal': case 'reinforcement': return exact(p, ['slot']) && (p.slot === null || slot(p.slot));
     case 'delivery': return exact(p, ['offerId', 'index']) && typeof p.offerId === 'string' && p.offerId.length <= 200 && integer(p.index, 0, 2);
     case 'reward': return exact(p, ['offerId', 'index']) && typeof p.offerId === 'string' && p.offerId.length <= 200 && (p.index === null || integer(p.index, 0, 1000));
-    case 'extraHex': case 'acknowledge': case 'tunnel': return exact(p, []);
+    case 'merchant': return exact(p,['site','item']) && typeof p.site==='string' && /^-?\d{1,4},-?\d{1,4}$/.test(p.site) && ['repair','protection'].includes(p.item);
+    case 'redraw': case 'extraHex': case 'acknowledge': case 'tunnel': return exact(p, []);
     default: return false;
   }
 }
@@ -95,9 +96,9 @@ function createRoom({ seed = crypto.randomUUID(), loadouts, now = () => Date.now
   function view(token) {
     const player = seat(token); if (player < 0) return null; const presence = connection();
     const boards = match.boards.map(({ state: s }, index) => ({
-      visibleBiomes: Object.fromEntries(core.biomes.visibleTiles(s).map(t => [t.q + ',' + t.r, core.biomes.forTile(s, t)])), player: index, phase: s.phase, gold: s.gold, income: s.income, wave: s.wave, elapsedMs: s.elapsedMs, ...pick(s, ['heroId', 'baseUpgrades', 'difficulty', 'openingRemaining', 'baseExits', 'lastCompletedWave', 'pendingSpawns', 'waveKills', 'buildingVersion', 'goldEarned', 'consumables', 'consumableUsage', 'extraHexPurchases', 'extraHexWave']),
+      visibleBiomes: Object.fromEntries(core.biomes.visibleTiles(s).map(t => [t.q + ',' + t.r, core.biomes.forTile(s, t)])), player: index, phase: s.phase, gold: s.gold, income: s.income, wave: s.wave, elapsedMs: s.elapsedMs, ...pick(s, ['heroId', 'baseUpgrades', 'difficulty', 'openingRemaining', 'baseExits', 'lastCompletedWave', 'pendingSpawns', 'waveKills', 'buildingVersion', 'goldEarned', 'consumables', 'consumableUsage', 'extraHexPurchases', 'extraHexWave', 'augments', 'freeTowerBuilds', 'freeExtraHexes', 'redrawWave', 'merchantPurchases', 'merchantProtectionWave', 'merchantProtection']),
       map: [...s.map.values()].map(t => ({ ...pick(t, ['q', 'r', 'type', 'rotation', 'roads', 'slots', 'buildingSlots', 'buildings', 'income', 'tunnels', 'tunnelLabel', 'site', 'siteEffect', 'siteSlot', 'siteIncome']), biome: core.biomes.forTile(s, t), towers: (t.towers || []).map(tower => tower ? pick(tower, ['type', 'level', 'branch', 'finalUpgrade', 'ultimate', 'guestOwner', 'targetPriority', 'biome', 'tileType', 'rangeFactor', 'supportDamage', 'supportRange', 'paid', 'upgradeSpent', 'builtOnWave', 'statId', 'souls', 'aim', 'overloadUntil', 'overloadPending']) : null) })),
-      landmarks: [...s.landmarks.values()].flatMap(l => { const visibility = core.exploration.visibility(s.map, l); return visibility === 'clear' ? [pick(l, ['q', 'r', 'type', 'claimed', 'status', 'consent', 'prefab'])] : visibility === 'fog' ? [pick(l, ['q', 'r'])] : []; }),
+      landmarks: [...s.landmarks.values()].flatMap(l => { const visibility = core.exploration.visibility(s.map, l); return visibility === 'clear' ? [pick(l, ['q', 'r', 'type', 'claimed', 'status', 'consent', 'prefab', 'augment', 'merchant'])] : visibility === 'fog' ? [pick(l, ['q', 'r'])] : []; }),
       enemies: s.enemies.map(e => pick(e, ['id', 'type', 'name', 'originBiome', 'bossKind', 'immunity', 'abilityIcon', 'description', 'color', 'caravan', 'splitOnDeath', 'killGold', 'x', 'y', 'hp', 'maxHp', 'armorHp', 'maxArmorHp', 'magicHp', 'maxMagicHp', 'alive', 'slowFactor', 'shieldHits', 'molted', 'sprinting', 'leaping', 'leapProgress', 'crouching', 'sporeHidden', 'charge'])),
       projectiles: (s.projectiles || []).map(p => pick(p, ['kind', 'x', 'y', 'x1', 'y1', 'x2', 'y2', 'r', 'ttl', 'max', 'fade', 'color', 'tower', 'variant', 'splash', 'id', 'hits', 'hitAt', 'pts'])),
       mines: (s.mines || []).map(m => pick(m, ['id', 'x', 'y', 'color'])),

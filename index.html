@@ -276,6 +276,8 @@
         <label class="speedControl" for="doubleSpeed">Tempo <output id="speedValue" for="doubleSpeed">1×</output>
           <small>F: nächstes Tempo</small><input id="doubleSpeed" type="range" min="1" max="8" step="1" value="1"
             aria-label="Spielgeschwindigkeit" /></label>
+        <button id="redrawHandBtn" class="secondary hidden" type="button">Wegweiser · Neu ziehen</button>
+        <button id="merchantOpenBtn" class="secondary hidden" type="button">Händler</button>
         <button id="buyExtraHexBtn" class="secondary hidden" type="button">Zusatzhex kaufen</button>
         <button id="startWaveBtn" class="primary" disabled>Wave starten (Leertaste)</button>
       </div>
@@ -818,6 +820,7 @@
         <p id="celebrationText"></p><button id="celebrationContinue" class="primary">Weiter geht’s!</button>
       </div>
     </div>
+    <div id="merchantOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="merchantTitle"><div class="rewardBox"><div class="rewardHeading"><h2 id="merchantTitle" tabindex="-1" data-dialog-initial-focus>Händler</h2><button id="merchantCloseBtn" type="button">Schließen</button></div><p>Kaufen und fertig. Jeder Kauf erhöht den Preis dieses Angebots um 20 Gold. Alle Händler teilen dieselben Preise.</p><p id="merchantStatus" aria-live="polite"></p><div id="merchantChoices" class="rewardChoices"></div></div></div>
     <div id="rewardOverlay" class="overlay hidden" role="dialog" aria-modal="true">
       <div class="rewardBox">
         <div id="rewardSelection">

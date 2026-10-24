@@ -6,7 +6,7 @@ const { payloadValid } = require('./duo-room.cjs');
 const RULESET = require('../package.json').version;
 const clone = value => JSON.parse(JSON.stringify(value));
 const empty = value => value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0;
-const allowed = new Set(['place','reward','acknowledge','tower','upgrade','consumable','baseUpgrade','buildingTarget','sellBuilding','sellTower','targetPriority','building','buildingUpgrade','tunnel','extraHex']);
+const allowed = new Set(['place','reward','acknowledge','tower','upgrade','consumable','baseUpgrade','buildingTarget','sellBuilding','sellTower','targetPriority','building','buildingUpgrade','tunnel','extraHex','redraw','merchant']);
 
 // Internal adapter: options must be derived from VERIFIED server-side progress.
 // This module deliberately has no public endpoint accepting a profile or score.
@@ -47,6 +47,8 @@ function createSoloRun({ options, season, account = null, now = Date.now, persis
     if (action === 'sellBuilding') return core.buildings.sell(s, p.slot);
     if (action === 'building') return core.buildings.buy(s, p.slot, p.type);
     if (action === 'buildingUpgrade') return core.buildings.upgrade(s, p.slot);
+    if (action === 'redraw') return core.rewards.redraw(s,run.random);
+    if (action === 'merchant') return core.rewards.trade(s,p.site,p.item);
     if (action === 'extraHex') return core.session.buyExtraHex(s, run.random);
     if (action === 'tunnel') return core.runtime.rescueTunnel(s);
     if (action === 'targetPriority') { const tower = slotTower(p.slot); if (!tower) return false; tower.targetPriority = [...p.priorities]; return true; }

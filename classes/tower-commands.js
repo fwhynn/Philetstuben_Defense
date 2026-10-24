@@ -2,18 +2,19 @@
 const HexTowerCommands=(()=>{
   const TOWERS=HexData.TOWERS,key=HexMap.key;
   function validSlot(slot){return slot&&Number.isInteger(slot.q)&&Number.isInteger(slot.r)&&Number.isInteger(slot.index)&&slot.index>=0;}
+  function buildPrice(state,slot,base,index=0){return (state.freeTowerBuilds||0)>index?0:HexBuildings.cost(state,slot,base);}
   function buy(state,type,selectedSlots){
     if(!['place','build','wave'].includes(state.phase)||state.hp<=0||!Object.hasOwn(TOWERS,type)||!state.towerLoadout.includes(type)||!Array.isArray(selectedSlots)||!selectedSlots.length)return {ok:false,reason:'invalid'};
     const seen=new Set();
     for(const s of selectedSlots){if(!validSlot(s))return {ok:false,reason:'invalid'};const tile=state.map.get(key(s.q,s.r)),id=s.q+','+s.r+':'+s.index;if(!tile||s.index>=tile.slots||tile.towers[s.index]||seen.has(id))return {ok:false,reason:'invalid'};seen.add(id);}
-    const tdef=TOWERS[type],total=selectedSlots.reduce((sum,slot)=>sum+HexBuildings.cost(state,slot,tdef.cost),0);
+    const tdef=TOWERS[type],total=selectedSlots.reduce((sum,slot,index)=>sum+buildPrice(state,slot,tdef.cost,index),0);
     if(state.gold<total)return {ok:false,reason:'gold'};
     for(const selected of selectedSlots){
-    const tile=state.map.get(key(selected.q,selected.r)),price=HexBuildings.cost(state,selected,tdef.cost);
+    const tile=state.map.get(key(selected.q,selected.r)),price=buildPrice(state,selected,tdef.cost);
     tile.towers[selected.index]={type,biome:HexBiomes.forTile(state,tile),rangeFactor:state.challengeDay&&state.challengeKind!=='garrison'?.85:1,tileType:tile.type,level:1,lastShot:-Infinity,targetPriority:HexData.defaultTargetPriority({type}),builtOnWave:['place','build'].includes(state.phase)?state.wave:null,paid:price};
     const built=tile.towers[selected.index];built.statId=++state.nextTowerStatId;state.runTowerDetails[built.statId]={type,q:tile.q,r:tile.r,index:selected.index,damage:0,kills:0,buildGold:0,upgradeGold:0,refundGold:0};HexData.recordTowerStat(state,built,'buildGold',price);
     const usage=state.runTowerStats[type]||{builds:0,upgrades:0};usage.builds++;state.runTowerStats[type]=usage;
-    HexBuildings.recordDiscount(state,selected,tdef.cost,price);state.gold-=price;}HexBuildings.refresh(state);
+    if(state.freeTowerBuilds>0)state.freeTowerBuilds--;else HexBuildings.recordDiscount(state,selected,tdef.cost,price);state.gold-=price;}HexBuildings.refresh(state);
     return {ok:true,total};
   }
   function upgrade(state,selected,branch){
@@ -28,5 +29,5 @@ const HexTowerCommands=(()=>{
 
     return true;
   }
-  return {buy,upgrade};
+  return {buy,upgrade,buildPrice};
 })();

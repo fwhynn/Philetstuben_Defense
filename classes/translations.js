@@ -1919,3 +1919,38 @@ Ein zusätzliches Hex je Bauphase ab Welle 35. Jeder Kauf erhöht den Preis um 1
 Zusatzhex aktuell nicht möglich: Gold, Bauphase und freien Anschluss prüfen.|Cannot buy an extra hex now: check gold, preparation phase and an available connection.
 Zusatzhex gekauft. Wähle eine Karte und lege sie an.|Extra hex purchased. Choose a card and place it.
 `);
+HexTranslations.add(`
+Wegweiser|Wayfinder
+Einmal je Welle die gesamte Kartenhand kostenlos neu ziehen.|Redraw your entire hand for free once per wave.
+Späher|Scout
+Deckt unbekannte Inseln ein Hex früher auf. Keine zusätzliche Turmreichweite.|Reveals unknown islands one hex earlier. Does not increase tower range.
+Schutzsiegel|Protective Seal
+Verhindert den ersten Punkt Basisschaden jeder Welle.|Prevents the first point of base damage each wave.
+Veredelung|Refinement
+Ersetzt eine Deckkarte durch eine passende Karte der nächsthöheren Seltenheit.|Replaces one deck card with a matching card of the next rarity.
+Freies Zusatzhex|Free Extra Hex
+Der nächste Zusatzhex-Kauf ab Welle 35 ist kostenlos.|Your next extra hex purchase from wave 35 is free.
+Mehr Auswahl|More Choice
+Ziehe vier statt drei Karten je Welle. Die Anzahl platzierbarer Hexe bleibt gleich.|Draw four cards instead of three each wave. The number of hexes you may place stays the same.
+Bautrupp|Construction Crew
+Die nächsten drei neuen Türme sind kostenlos. Keine kostenlosen Upgrades oder Verkaufserlöse.|Your next three new towers are free. Upgrades are not free and free builds have no resale value.
+Seltenes Augment wählen|Choose a rare augment
+Wähle einen Bonus für diesen Durchlauf. Gewählte Augments erscheinen nicht erneut.|Choose a bonus for this run. Selected augments will not appear again.
+Keine weiteren passenden Augments verfügbar: +30 Gold.|No more eligible augments available: +30 gold.
+Vorräte|Supplies
+Wegweiser · Neu ziehen|Wayfinder · Redraw
+Händler|Merchant
+Händler · Vorräte kaufen|Merchant · Buy supplies
+Händler · noch nicht verbunden|Merchant · Not connected yet
+Seltenes Augment · ungesammelt|Rare augment · Unclaimed
+Augment-Insel|Augment island
+Feldversorgung|Field Supplies
+Sofort bis zu 2 Basisleben wiederherstellen.|Immediately restore up to 2 base health.
+Schutzvorrat|Protective Supplies
+In der nächsten Welle insgesamt 2 Basisschaden verhindern.|Prevent a total of 2 base damage in the next wave.
+Kaufen und fertig. Jeder Kauf erhöht den Preis dieses Angebots um 20 Gold. Alle Händler teilen dieselben Preise.|Buy and benefit immediately. Each purchase increases that item's price by 20 gold. All merchants share the same prices.
+`);
+HexTranslations.add(`
+Karte wählen (1–4) · Drehen: Knopf oder R · Hex antippen|Choose card (1–4) · Rotate: button or R · Click hex
+Karte wählen (1–5) · Drehen: Knopf oder R · Hex antippen|Choose card (1–5) · Rotate: button or R · Click hex
+`);
