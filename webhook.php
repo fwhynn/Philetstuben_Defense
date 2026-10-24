@@ -10,7 +10,7 @@ const WEBHOOK_LOG_FILE = APP_ROOT . '/webhook.log';
 const DEPLOY_BRANCH = 'main';
 const NODE_BIN = '/usr/local/bin/node';
 const NPM_BIN = '/usr/local/bin/npm';
-const DUO_SERVICE = 'autohextd-duo.service';
+const DUO_SERVICE = 'autohextd.service';
 const ALLOWED_ACTORS = ['autophil317', 'fwhynn', 'zlyfer'];
 
 header('Content-Type: application/json; charset=utf-8');
@@ -100,11 +100,17 @@ try {
         set_time_limit(300);
         $steps = [];
 
+        // Match the existing www-data sudoers grants before changing live files.
+        foreach (['stop', 'start'] as $action) {
+            $steps[] = runCheckedCommand('/usr/bin/sudo -n -l /usr/bin/systemctl ' . $action . ' ' . DUO_SERVICE, REPO_ROOT, 'Service permission missing: ' . $action);
+        }
         // Repos on server are kept on `main`; just pull latest
         $steps[] = runCheckedCommand(gitCommand('pull --ff-only ' . escapeshellarg(REMOTE_NAME) . ' ' . escapeshellarg(DEPLOY_BRANCH)), REPO_ROOT, 'git pull failed.');
         $steps[] = runCheckedCommand(NPM_BIN . ' ci --omit=dev', APP_ROOT, 'npm ci failed.');
         $steps[] = runCheckedCommand(NPM_BIN . ' run generate-assets-index', APP_ROOT, 'npm run generate-assets-index failed.');
-        $steps[] = runCheckedCommand('/usr/bin/sudo -n /usr/bin/systemctl restart ' . DUO_SERVICE, REPO_ROOT, 'Duo restart failed. Check journalctl.');
+        // stop waits for SIGTERM/checkpoint completion; only then start the updated process.
+        $steps[] = runCheckedCommand('/usr/bin/sudo -n /usr/bin/systemctl stop ' . DUO_SERVICE, REPO_ROOT, 'Duo stop failed. Check journalctl.');
+        $steps[] = runCheckedCommand('/usr/bin/sudo -n /usr/bin/systemctl start ' . DUO_SERVICE, REPO_ROOT, 'Duo start failed. Check journalctl.');
         // Nicht fatal: Das Spiel ist zu diesem Zeitpunkt bereits aktualisiert.
         $health = runCommand(NODE_BIN . ' deploy/check-duo-health.cjs', APP_ROOT);
         $steps[] = $health;

@@ -1,0 +1,3 @@
+# PHP-FPM runs as www-data. These match the existing production permissions.
+www-data ALL=(root) NOPASSWD: /usr/bin/systemctl stop autohextd.service
+www-data ALL=(root) NOPASSWD: /usr/bin/systemctl start autohextd.service

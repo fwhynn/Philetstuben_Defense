@@ -10,9 +10,9 @@ Voraussetzung: Node.js 24 und npm unter `/usr/local/bin/node` bzw. `/usr/local/b
 Als root:
 
 ```sh
-install -o root -g root -m 0644 /var/www/html/net.zlyfer.autohextd/deploy/systemd/autohextd-duo.service /etc/systemd/system/autohextd-duo.service
-install -o root -g root -m 0440 /var/www/html/net.zlyfer.autohextd/deploy/systemd/autohextd-duo.sudoers /etc/sudoers.d/autohextd-duo
-visudo -cf /etc/sudoers.d/autohextd-duo
+install -o root -g root -m 0644 /var/www/html/net.zlyfer.autohextd/deploy/systemd/autohextd.service /etc/systemd/system/autohextd.service
+install -o root -g root -m 0440 /var/www/html/net.zlyfer.autohextd/deploy/systemd/autohextd.sudoers /etc/sudoers.d/autohextd
+visudo -cf /etc/sudoers.d/autohextd
 systemctl daemon-reload
 ```
 
@@ -29,9 +29,9 @@ cd /var/www/html/net.zlyfer.autohextd
 Anschließend als root:
 
 ```sh
-systemctl enable --now autohextd-duo.service
-systemctl status autohextd-duo.service
-journalctl -u autohextd-duo.service -n 80 --no-pager
+systemctl enable --now autohextd.service
+systemctl status autohextd.service
+journalctl -u autohextd.service -n 80 --no-pager
 ```
 
 `StateDirectory` erzeugt `/var/lib/autohextd` mit privaten Rechten. Port 8090 hört nur auf Loopback. Optionale Umgebungsvariablen gehören nach `/etc/autohextd/duo.env`; bei Portänderung auch Proxy und Healthcheck anpassen.
@@ -43,7 +43,7 @@ install -d -o root -g root -m 0755 /etc/autohextd
 printf 'DUO_LIVE_SECRET=%s\n' "$(openssl rand -hex 32)" > /etc/autohextd/duo.env
 chown root:root /etc/autohextd/duo.env
 chmod 0600 /etc/autohextd/duo.env
-systemctl restart autohextd-duo.service
+systemctl restart autohextd.service
 ```
 
 Den identischen Wert als `DUO_LIVE_SECRET` in der API-`.env` setzen; dort außerdem `DUO_INTERNAL_URL=http://127.0.0.1:8090` konfigurieren. `GET /live` ist ohne dieses Secret nicht verfügbar und darf nicht über Nginx öffentlich weitergereicht werden.
@@ -84,7 +84,7 @@ Der signierte Webhook wird durch einen berechtigten Tag-Push ausgelöst und beh�
 1. Arbeitskopie prüfen (lokale Änderungen an versionierten Dateien brechen ab).
 2. `git checkout main` und `git pull --ff-only origin main`.
 3. `/usr/local/bin/npm ci --omit=dev` und `/usr/local/bin/npm run generate-assets-index`.
-4. `systemctl restart autohextd-duo.service` – der alte Prozess schreibt beim SIGTERM seinen Checkpoint, der neue startet mit dem aktualisierten Code.
+4. `sudo -n systemctl stop autohextd.service`, anschließend `sudo -n systemctl start autohextd.service` – der alte Prozess schreibt beim SIGTERM seinen Checkpoint, der neue startet mit dem aktualisierten Code.
 5. Lokaler Healthcheck; ein Fehlschlag wird in der Antwort gemeldet, das Spiel-Update gilt trotzdem als durchgeführt.
 
 Schlägt Pull/npm fehl, bricht der Webhook vor dem Neustart ab; der Dienst läuft dann mit dem alten Code weiter. Beim erfolgreichen Update verbinden Browser automatisch neu. Beide Spieler müssen innerhalb des bestehenden Rückkehrfensters (120 Sekunden ab Serverwiederaufnahme) wieder da sein, bevor der Kampf weiterläuft. Während der Server aus ist, wird keine Spielzeit nachgeholt. Der Hauptmenüeintrag bleibt bis zur Browser-Abnahme wie bisher Coming Soon; direkter Betatest über `/duo-lobby.html`.
@@ -105,3 +105,5 @@ Vor Rollback Dienst stoppen und **die zum alten Release gehörende Sicherung** s
 - Lokale Node-Tests laufen ohne Browser; systemd, PHP-FPM und Proxy müssen auf Debian geprüft werden. Eine PHP-Laufzeit und systemd standen in der Windows-Entwicklungsumgebung nicht zur Verfügung.
 
 Referenzen: https://socket.io/docs/v4/server-options/ und https://socket.io/docs/v4/client-api/ (Client-Bundle, Origin-Prüfung, Acknowledgements und Wiederverbindung).
+
+Der PHP-FPM-Nutzer ist `www-data`; der bestehende Produktionsdienst heißt `autohextd.service`. Die getrennten Stop-/Start-Aufrufe entsprechen den bereits eingerichteten sudoers-Regeln. Die Service-Datei ist eine Vorlage; zum Korrigieren des Webhooks den bestehenden Serverdienst und seine Speicherpfade nicht ersetzen.
