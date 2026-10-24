@@ -50,7 +50,7 @@ function createTransport(room, { browser = false, autoTick = false, publicOrigin
     if (room.healthy === false) return send(503, { error: 'storage-unavailable' });
     if (req.method === 'GET' && req.url === '/results' && room.receipts) { const receipts = room.receipts(token); return receipts ? send(200, { receipts }) : send(401, { error: 'unauthorized' }); }
     const lobbyAction = req.method === 'POST' && room.create && ['/lobby/create', '/lobby/join'].includes(req.url);
-    if (!lobbyAction && (!token || !room.view(token))) return send(401, { error: 'unauthorized' });
+    if (!lobbyAction && (!token || !(room.hasSeat?room.hasSeat(token):room.view(token)))) return send(401, { error: 'unauthorized' });
     if (lobbyAction) { const ip = req.socket.remoteAddress, time = Date.now(), old = attempts.get(ip); if (!old || time - old.at > 60000) attempts.set(ip, { at: time, count: 1 }); else if (++old.count > 20) return send(429, { error: 'rate-limit' }); if (attempts.size > 1024) for (const [key, value] of attempts) if (time - value.at > 60000) attempts.delete(key); }
     const sessionAction = req.method === 'POST' && req.url === '/session' && room.claim, clientId = req.headers['x-duo-client'];
     if (!lobbyAction && !sessionAction && room.claim) { let access; try { access = room.claim(token, clientId); } catch { return send(503, { error: 'storage-unavailable' }); } if (!access.ok) return send(409, { error: access.reason }); }

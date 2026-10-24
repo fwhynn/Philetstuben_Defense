@@ -2602,4 +2602,22 @@ Offene Goldgeschenke: 50 Gold|Pending gold gifts: 50 gold
 KORRIGIERT|FIXED
 Bewegung und springende Leisten|Movement and shifting sidebars
 Duo-Modus|Duo mode
+Endlos-Zustimmung zurücknehmen|Withdraw endless vote
+Endlos weiterspielen · Partner wartet|Continue endlessly · partner is waiting
+Gemeinsam endlos weiterspielen|Continue endlessly together
+Duo: Gemeinsam endlos|Duo: Endless together
+Nach Welle 35 gemeinsam weiterspielen – mit flüssigerer Zustandsübertragung und sicherer Fortsetzung.|Continue together after wave 35 with smoother updates and reliable resuming.
+Duo-Endlosmodus nach Welle 35|Duo endless mode after wave 35
+Duo-Verbindungsruckler reduziert|Reduced Duo connection stutter
+Bestehende Duo-Partien fortsetzen|Resume existing Duo matches
+Nach dem Sieg entscheidet ihr gemeinsam, ob eure Partie weitergeht.|After victory, decide together whether to continue your match.
+Stimmt beide nach Welle 35 dem Endlosmodus zu. Karten, Türme und Fortschritt bleiben erhalten.|Both players can choose endless mode after wave 35. Maps, towers and progress are preserved.
+Bereits ausgezahlte Diamanten werden beim späteren Ende nicht doppelt vergeben.|Diamonds already awarded are not awarded again when the endless run ends.
+Eure Zustimmung und der Endlosfortschritt bleiben beim Wiederverbinden erhalten.|Your votes and endless progress persist when reconnecting.
+Flüssiger und verlässlich|Smoother and reliable
+Weniger unnötige Aktualisierungen und bessere Fortsetzung bestehender Partien.|Fewer unnecessary updates and improved resuming of existing matches.
+Ruhende Bauphasen erzeugen keine laufenden vollständigen Kartenupdates mehr.|Idle build phases no longer produce continuous full map updates.
+Die Aufbereitung von Gegner- und Karteninformationen wurde beschleunigt.|Enemy and map information is now processed faster.
+Bestehende Duo-Spielstände der vorherigen Versionen können fortgesetzt werden.|Existing Duo saves from previous versions can be resumed.
+Duo-Endlosmodus nach gemeinsamem Sieg in Welle 35.|Duo endless mode after your shared victory in wave 35.
 `);

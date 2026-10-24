@@ -107,3 +107,5 @@ Vor Rollback Dienst stoppen und **die zum alten Release gehörende Sicherung** s
 Referenzen: https://socket.io/docs/v4/server-options/ und https://socket.io/docs/v4/client-api/ (Client-Bundle, Origin-Prüfung, Acknowledgements und Wiederverbindung).
 
 Der PHP-FPM-Nutzer ist `www-data`; der bestehende Produktionsdienst heißt `autohextd.service`. Die getrennten Stop-/Start-Aufrufe entsprechen den bereits eingerichteten sudoers-Regeln. Die Service-Datei ist eine Vorlage; zum Korrigieren des Webhooks den bestehenden Serverdienst und seine Speicherpfade nicht ersetzen.
+
+Der Healthcheck verifiziert die laufende Version. Auch webhook.log muss in Nginx gesperrt werden; die Vorlage umfasst beide Deployment-Protokolle.

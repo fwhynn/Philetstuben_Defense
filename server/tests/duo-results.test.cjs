@@ -14,3 +14,23 @@ test('HTTPS proxy origin and durable result recovery use authenticated real HTTP
 test('defeat result and rematch survive core checkpoint; corrupt reward values are rejected', () => {
 	const c = loadCore(), m = c.duo.create('defeat', ['archer,catapult,chain,freeze,mine'.split(','), 'archer,catapult,chain,freeze,mine'.split(',')]); m.phase = 'combat'; m.wave = 3; m.hp = 1; for (const { state: s } of m.boards) { s.wave = 3; s.lastCompletedWave = 2; s.hp = 1; s.phase = 'wave'; s.waveRunning = true; s.spawnQueue = []; s.pendingSpawns = 0; s.enemies = [{ alive: true, hp: 1, baseDamage: 2, index: 1, points: [{ x: 0, y: 0 }, { x: 0, y: 0 }], x: 0, y: 0 }]; } c.duo.tick(m); assert.equal(m.result.outcome, 'defeat'); assert.equal(m.result.wave, 2); assert.equal(m.result.players[0].diamonds, 1); const snapshot = JSON.parse(JSON.stringify(c.duo.capture(m))); assert.equal(c.duo.restore(snapshot).phase, 'gameover'); snapshot.duo.result.players[0].diamonds = 999; assert.throws(() => c.duo.restore(snapshot), /result/);
 });
+
+test('endless requires both votes, survives restart and pays only additional diamonds',t=>{
+ let {store,a,b,file}=fixture(t);store.tick();const victory=store.view(a.token);const map=JSON.stringify(victory.boards[0].map);
+ assert.ok(store.receive(a.token,cmd(store,a,'endless',{value:true})).ok);assert.equal(store.view(a.token).phase,'victory');
+ store=createStore(file,{now:()=>1});store.touch(a.token);store.touch(b.token);assert.deepEqual(store.view(a.token).endlessVotes,[true,false]);
+ assert.ok(store.receive(a.token,cmd(store,a,'rematch',{value:true})).ok);assert.equal(store.view(a.token).endlessVotes[0],false);
+ assert.ok(store.receive(a.token,cmd(store,a,'endless',{value:true})).ok);assert.equal(store.view(a.token).rematch[0],false);
+ const vote=cmd(store,b,'endless',{value:true});assert.ok(store.receive(b.token,vote).ok);assert.equal(store.receive(b.token,vote).duplicate,true);
+ let view=store.view(a.token);assert.equal(view.phase,'prepare');assert.equal(view.wave,35);assert.equal(view.endless,true);assert.equal(JSON.stringify(view.boards[0].map),map);assert.equal(view.settlements.length,1);
+ store=createStore(file,{now:()=>2});store.touch(a.token);store.touch(b.token);assert.equal(store.view(a.token).endless,true);
+ for(const seat of [a,b]){let v=store.view(seat.token);const offer=v.delivery.offers[seat.player];assert.ok(store.receive(seat.token,cmd(store,seat,'delivery',{offerId:offer.id,index:0})).ok);}
+ for(const seat of [a,b]){for(let i=0;i<12;i++){const v=store.view(seat.token),board=v.boards[seat.player];if(board.phase==='build')break;let choice;for(let index=0;index<board.placements.length&&!choice;index++)for(let rotation=0;rotation<6&&!choice;rotation++){const t=board.placements[index][rotation].find(x=>x.legal);if(t)choice={index,rotation,q:t.q,r:t.r};}assert.ok(choice,'a legal continuation tile exists');assert.ok(store.receive(seat.token,cmd(store,seat,'place',choice)).ok);}assert.ok(store.receive(seat.token,cmd(store,seat,'ready',{value:true})).ok);}
+ assert.equal(store.view(a.token).wave,36);assert.equal(store.view(a.token).phase,'combat');
+ const snapshot=JSON.parse(fs.readFileSync(file)),core=loadCore(),m=core.duo.restore(snapshot.rooms[0].room.match);
+ m.wave=37;m.phase='combat';m.hp=1;m.finished=[false,false];m.delivery=null;
+ for(const {state:s} of m.boards){s.duoDeliveryPending=false;s.wave=37;s.lastCompletedWave=36;s.hp=1;s.phase='wave';s.waveRunning=true;s.pendingSpawns=0;s.spawnQueue=[];s.enemies=[{alive:true,hp:1,baseDamage:2,index:1,points:[{x:0,y:0},{x:0,y:0}],x:0,y:0}];}
+ snapshot.rooms[0].room.match=core.duo.capture(m);fs.writeFileSync(file,JSON.stringify(snapshot));store=createStore(file,{now:()=>3});store.touch(a.token);store.touch(b.token);store.tick();
+ view=store.view(a.token);assert.equal(view.result.wave,36);assert.equal(view.result.players[0].diamonds,1);assert.notEqual(view.result.id,victory.result.id);assert.equal(view.settlements.length,2);assert.equal(view.settlements.reduce((n,r)=>n+r.diamonds,0),18);
+ store=createStore(file,{now:()=>4});assert.equal(store.receipts(a.token).length,2);
+});

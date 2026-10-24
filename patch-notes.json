@@ -1,5 +1,58 @@
 [
   {
+    "version": "next",
+    "title": "Duo: Gemeinsam endlos",
+    "summary": "Nach Welle 35 gemeinsam weiterspielen – mit flüssigerer Zustandsübertragung und sicherer Fortsetzung.",
+    "overview": [
+      {
+        "kind": "new",
+        "title": "NEU",
+        "items": [
+          "Duo-Endlosmodus nach Welle 35"
+        ]
+      },
+      {
+        "kind": "fixed",
+        "title": "KORRIGIERT",
+        "items": [
+          "Duo-Verbindungsruckler reduziert",
+          "Bestehende Duo-Partien fortsetzen"
+        ]
+      }
+    ],
+    "sections": [
+      {
+        "title": "Duo-Modus",
+        "entries": [
+          {
+            "title": "Gemeinsam endlos weiterspielen",
+            "summary": "Nach dem Sieg entscheidet ihr gemeinsam, ob eure Partie weitergeht.",
+            "bullets": [
+              "Stimmt beide nach Welle 35 dem Endlosmodus zu. Karten, Türme und Fortschritt bleiben erhalten.",
+              "Bereits ausgezahlte Diamanten werden beim späteren Ende nicht doppelt vergeben.",
+              "Eure Zustimmung und der Endlosfortschritt bleiben beim Wiederverbinden erhalten."
+            ],
+            "stats": []
+          },
+          {
+            "title": "Flüssiger und verlässlich",
+            "summary": "Weniger unnötige Aktualisierungen und bessere Fortsetzung bestehender Partien.",
+            "bullets": [
+              "Ruhende Bauphasen erzeugen keine laufenden vollständigen Kartenupdates mehr.",
+              "Die Aufbereitung von Gegner- und Karteninformationen wurde beschleunigt.",
+              "Bestehende Duo-Spielstände der vorherigen Versionen können fortgesetzt werden."
+            ],
+            "stats": []
+          }
+        ]
+      }
+    ],
+    "changes": [
+      "Duo-Endlosmodus nach gemeinsamem Sieg in Welle 35.",
+      "Weniger unnötige Aktualisierungen und bessere Fortsetzung bestehender Partien."
+    ]
+  },
+  {
     "version": "1.2.1",
     "title": "Duo: Gemeinsam besser vorbereitet",
     "summary": "Kompakte Teamleiste, bessere Bewegung und gemeinsame Planung von Geschenken und Türmen.",
