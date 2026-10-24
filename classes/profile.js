@@ -1,5 +1,5 @@
 const HexProfile=(()=>{
-  const profileStorage=globalThis.HexFirstPlayerTest?.active?HexFirstPlayerTest.storage:globalThis.HexLocalStore|| (typeof localStorage!=='undefined'?localStorage:{getItem:()=>null,setItem(){}});
+  const profileStorage=globalThis.HexChallengeLab?.active?HexChallengeLab.storage:globalThis.HexFirstPlayerTest?.active?HexFirstPlayerTest.storage:globalThis.HexLocalStore|| (typeof localStorage!=='undefined'?localStorage:{getItem:()=>null,setItem(){}});
   const STORAGE_KEY='hex-bastion-profile-v1';
   let storageProblem=false;
   const START_TOWERS=['archer','catapult','chain','freeze','mine'];
@@ -85,9 +85,9 @@ const HexProfile=(()=>{
     return save({...clean,diamonds:clean.diamonds-offer.cost,unlockCosts:{...clean.unlockCosts,['tower:'+id]:offer.cost},unlockedTowers:[...clean.unlockedTowers,id],unlocks:[...clean.unlocks,'tower:'+id]},definitions);
   }
   function unlockUltimate(profile,id,definitions){const [type,branch]=id.split(':'),offer=ULTIMATE_UNLOCKS[type],clean=normalize(profile,definitions),key='ultimate:'+id;if(!offer||branch&&!ULTIMATE_BRANCHES[type]?.includes(branch)||!clean.unlockedTowers.includes(type)||(branch?ownsUltimate(clean,type,branch):clean.unlocks.includes(key))||clean.diamonds<offer.cost)return null;return save({...clean,diamonds:clean.diamonds-offer.cost,unlockCosts:{...clean.unlockCosts,[key]:offer.cost},unlocks:[...clean.unlocks,key],activeUltimates:{...clean.activeUltimates,...(!activeUltimate(clean,type)&&branch?{[type]:branch}:{})}},definitions);}
-  function settleDaily(profile,day,wave,definitions,target=20){
-    const clean=normalize(profile,definitions),results={...(clean.dailyResults||{})},old=results[day]||{},won=wave>=target,reward=won&&!old.won?10:0;
-    results[day]={best:Math.max(Number(old.best)||0,wave),won:!!old.won||won};
+  function settleDaily(profile,day,wave,definitions,target=20,score=0,qualified=true){
+    const clean=normalize(profile,definitions),results={...(clean.dailyResults||{})},old=results[day]||{},won=wave>=target&&qualified,reward=won&&!old.won&&!globalThis.HexChallengeLab?.active?10:0;
+    results[day]={best:Math.max(Number(old.best)||0,wave),won:!!old.won||won,...(score>0||old.bestRiskScore?{bestRiskScore:Math.max(Math.min(48,Math.max(0,Math.floor(Number(old.bestRiskScore)||0))),Math.min(48,Math.max(0,Math.floor(Number(score)||0))))}:{})};
     return {profile:save({...clean,dailyResults:results,diamonds:clean.diamonds+reward,lifetime:{...clean.lifetime,diamondsEarned:clean.lifetime.diamondsEarned+reward}},definitions),reward};
   }
   function exportFile(profile,definitions){return JSON.stringify({format:'autohex-profile',version:1,exportedAt:new Date().toISOString(),profile:normalize(profile,definitions)},null,2);}

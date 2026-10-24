@@ -153,7 +153,7 @@ function create(host0,commands){
   }
   function panView(x,y){const forward=new THREE.Vector3();camera.getWorldDirection(forward);forward.y=0;forward.normalize();const right=new THREE.Vector3().crossVectors(forward,camera.up).normalize(),speed=cam.dist*.65;cam.x+=(right.x*x-forward.x*y)*speed;cam.z+=(right.z*x-forward.z*y)*speed;applyCamera();commands.viewChanged?.();}
   function rotateView(direction){cam.yaw+=direction*Math.PI/18;applyCamera();commands.viewChanged?.();}
-  function resetView(notify=true){cam.x=0;cam.z=0;cam.dist=DIST_START;cam.yaw=0;cam.pitch=TILT;applyCamera();if(notify) commands.viewChanged?.();}
+  function resetView(notify=true){const station=state?.movingFortress?.stations[state.movingFortress.stage],p=station?axialToWorld(station.q,station.r):{x:0,y:0};cam.x=p.x;cam.z=p.y;cam.dist=DIST_START;cam.yaw=0;cam.pitch=TILT;applyCamera();if(notify) commands.viewChanged?.();}
   function getView(){return {x:cam.x,y:cam.z,w:cam.dist,h:cam.dist,yaw:cam.yaw,pitch:cam.pitch};}
 
   // ---- Modelle laden ----
@@ -452,7 +452,7 @@ function create(host0,commands){
       const id=key(tile.q,tile.r),spec=tileSpec(tile),upgrades=tile.type==='base'?baseUpgradeParts():null,sig=[spec.kind,spec.name,spec.rotation,tile.slots,tile.buildingSlots,tile.site,(tile.roads||[]).join(''),upgrades?.key].join('|');seen.add(id);
       const record=tileRecords.get(id);if(record?.sig===sig) continue;
       if(record) layer.tiles.remove(record.holder);
-      const holder=buildTile(spec,tile,tile.site==='shrine'||tile.site==='tradePost'?{prop:{name:tile.site==='shrine'?'shrine':'treasure',angle:HexModelMap.propAngle(tile.type,HexMap.slotOffsets(tile.type,tile.slots))}}:{});layer.tiles.add(holder);
+      const holder=buildTile(spec,tile,tile.site==='shrine'||tile.site==='relic'||tile.site==='tradePost'?{prop:{name:tile.site==='shrine'||tile.site==='relic'?'shrine':'treasure',angle:HexModelMap.propAngle(tile.type,HexMap.slotOffsets(tile.type,tile.slots))}}:{});layer.tiles.add(holder);
       const weapon=upgrades?attachBaseUpgrades(holder,tile,upgrades):null;tileRecords.set(id,{sig,holder,weapon});
     }
     for(const [id,record] of [...tileRecords]) if(!seen.has(id)){layer.tiles.remove(record.holder);tileRecords.delete(id);}
@@ -476,7 +476,7 @@ function create(host0,commands){
         else holder=buildTile({kind:'tile',...HexModelMap.modelFor(tile)},tile,{prop:{name:landmark.type,angle:HexModelMap.propAngle(p.type,HexMap.slotOffsets(p.type,p.slots))}});
         (clear?layer.landmarks:fogLandmarks).add(holder);record={sig,holder};landmarkRecords.set(id,record);
       }
-      label(`lm:${id}`,c.x,c.y,clear?(landmark.augment?'Seltenes Augment · ungesammelt':landmark.merchant?'Händler · noch nicht verbunden':landmark.type==='treasure'?'Schatz +'+HexExploration.treasureReward(landmark)+' Gold · ungesammelt':LANDMARK_LABEL[landmark.type]):'?',clear?'':'big',clear?30:0);
+      label(`lm:${id}`,c.x,c.y,clear?(landmark.relicId?landmark.relicName+' · anschließen':landmark.augment?'Seltenes Augment · ungesammelt':landmark.merchant?'Händler · noch nicht verbunden':landmark.type==='treasure'?'Schatz +'+HexExploration.treasureReward(landmark)+' Gold · ungesammelt':LANDMARK_LABEL[landmark.type]):'?',clear?'':'big',clear?30:0);
     }
     for(const [id,record] of [...landmarkRecords]) if(!seen.has(id)){record.holder.removeFromParent();landmarkRecords.delete(id);}
   }
@@ -899,12 +899,17 @@ function create(host0,commands){
     if(state.tunnelOffer&&state.tunnelConfirmed){const p=state.tunnelOffer,[q,r]=p.source.split(',').map(Number);for(const [name,t] of [['Eingang',{q,r}],['Ausgang',p]]){const c=axialToWorld(t.q,t.r);label('tunnel-preview:'+name,c.x,c.y,'Tunnel '+name+' · Vorschau','',30);}}
 
     for(const e of state.enemies)if(e.alive&&e.caravan){const entry=label('caravan:'+e.id,e.x,e.y,'🪙','',55);if(!entry.caravan){entry.caravan=true;const el=entry.el;el.style.pointerEvents='auto';el.style.cursor='help';el.setAttribute('role','button');el.tabIndex=0;el.setAttribute('aria-label',e.splitOnDeath?'Geldtransport: 18 Gold verteilt auf Golem und Splitter. Erreicht der Golem die Basis, verlierst du 10 Gold.':'Geldtransport: Besiegen bringt 15 Gold extra. Erreicht er die Basis, verlierst du 10 Gold.');el.title=el.getAttribute('aria-label');for(const name of ['pointerdown','pointerup'])el.addEventListener(name,event=>event.stopPropagation());el.addEventListener('click',event=>{event.stopPropagation();commands.inspectCaravan?.();});el.addEventListener('keydown',event=>{if(['Enter',' '].includes(event.key)){event.preventDefault();event.stopPropagation();commands.inspectCaravan?.();}});}}
+    const gridState=state.powerGrid?HexPowerGrid.evaluate(state):null;
+    if(state.villages)for(const m of HexVillages.markers(state)){const entry=label('village-attack:'+m.id,m.x,m.y,m.text,'',95);entry.el.style.color='#ffce84';entry.el.style.background='#542719';entry.el.style.padding='5px 9px';entry.el.style.border='2px solid #ffba75';entry.el.style.borderRadius='8px';}
     for(const tile of state.map.values()){
       const c=axialToWorld(tile.q,tile.r),terrain=CARD_LIBRARY[tile.type],id=key(tile.q,tile.r);
       if(state.showUpgradeStatus)(tile.towers||[]).forEach((tower,i)=>{if(tower&&HexData.upgradeStatus(state,tower)){const p=slotPositions(tile)[i];label('upgrade:'+id+':'+i,p.x,p.y,HexData.upgradeStatus(state,tower),'big',72);}});
       if(state.showUpgradeStatus&&state.hp>0&&['place','build','wave'].includes(state.phase))(tile.buildings||[]).forEach((b,i)=>{if(b&&HexBuildings.nextUpgrade(state,b)){const p=buildingPosition(tile,i);label('upgrade:building:'+id+':'+i,p.x,p.y,'Gebäude ausbaubar','big',72);}});
+      if(gridState){label('grid:'+id,c.x,c.y+48,HexPowerGrid.label(state,id),'',26);(tile.towers||[]).forEach((tw,i)=>{if(tw){const p=slotPositions(tile)[i];label('power:'+id+':'+i,p.x,p.y,HexPowerGrid.reasons[gridState.status.get(tw.statId)],'',75);}});}
       if(tile.tunnelLabel)label('tunnel:'+id,c.x,c.y,tile.tunnelLabel+' ⇄','',24);
       if(tile.site)label(`site:${id}`,c.x,c.y+58,HexExploration.siteLabel(tile));
+      if(tile.fortressStation!==undefined&&state.movingFortress){const i=tile.fortressStation,f=state.movingFortress;label('fortress:'+id,c.x,c.y+44,f.stations[i].name+' · '+(i===f.stage?'Festung':i<f.stage?'abgeschlossen':'Welle '+(i*3+1)),'',70);}
+      if(tile.type==='base'&&state.villages){const g=state.villages.goals.find(g=>g.id===tile.villageId);if(g)label('village:'+id,c.x,c.y+44,g.name+' · '+g.hp+'/'+g.maxHp,'',70);}
       if(tile.income) label(`inc:${id}`,c.x,c.y+44,'+'+tile.income+' Gold');
       const bonus=HexData.tileBonusLabel(terrain);
       if(bonus) label(`bon:${id}`,c.x,c.y+35,bonus);

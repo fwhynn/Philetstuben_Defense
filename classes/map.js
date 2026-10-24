@@ -231,7 +231,7 @@ const HexMap=(()=>{
     return {hub,legs};
   }
   function length(points){return points.slice(1).reduce((sum,p,i)=>sum+Math.hypot(p.x-points[i].x,p.y-points[i].y),0);}
-  function routeGraph(map){
+  function routeGraph(map,target=key(0,0)){
     const graph=new Map(),geometry=new Map();
     for(const [id,tile] of map){geometry.set(id,roadGeometry(tile));graph.set(id,[]);}
     for(const [id,tile] of map) for(const d of tile.roads||[]){
@@ -241,7 +241,7 @@ const HexMap=(()=>{
       graph.get(id).push({next,cost:length(points),points});
     }
     for(const [id,tile] of map)for(const next of tile.tunnels||[])if(geometry.has(next))graph.get(id).push({next,cost:0,points:[geometry.get(id).hub,{...geometry.get(next).hub,tunnel:true}]});
-    const distances=new Map([[key(0,0),0]]),visited=new Set();
+    const distances=new Map([[target,0]]),visited=new Set();
     while(true){
       let current=null,best=Infinity;
       for(const [id,distance] of distances) if(!visited.has(id)&&distance<best){current=id;best=distance;}

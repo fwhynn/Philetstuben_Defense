@@ -3,6 +3,12 @@ const HexRunFlow=(()=>{
   const {key}=HexMap;
   function shuffle(arr,random){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
   function drawHand(state,random){
+    if(state.challengeKind==='movingFortress')return HexMovingFortress.prepare(state);
+    if(state.challengeKind==='towerDraft')return HexTowerDraft.prepare(state);
+    if(state.challengeKind==='detour')return HexDetour.prepare(state);
+    if(state.challengeKind==='villages')return HexVillages.prepare(state);
+    if(state.challengeKind==='powerGrid')return HexPowerGrid.prepare(state);
+    if(state.challengeKind==='expedition')return HexExpedition.prepare(state);
     if(state.challengeKind==='garrison'){state.hand=[];state.phase='build';return 'ready';}
     const CARD_LIBRARY=HexData.CARD_LIBRARY;let result='ready';
     const shuffle=arr=>HexRunFlow.shuffle(arr,random);
@@ -62,8 +68,11 @@ const HexRunFlow=(()=>{
   }
   function start(state,random){
     if(state.hp<=0||state.waveRunning||state.phase!=='build'||state.openingRemaining||state.celebrationActive) return;
+    if(state.challengeKind==='detour'&&!HexDetour.ready(state))return null;
+    if(state.challengeKind==='towerDraft'&&state.towerDraft.picks)return null;
     const sources=HexRunRuntime.spawnSources(state);
     if(!sources.length)return null;
+    if(state.challengeKind==='powerGrid')HexPowerGrid.lock(state);
     state.waveRunning=true;state.wave++;
     state.phase='wave';
 
@@ -77,7 +86,7 @@ const HexRunFlow=(()=>{
       // Separate seeded stream: choosing an entrance must not alter card rewards.
       const pick=HexRandom.create(state.seed+'|waveboss|'+state.wave);
       const source=sources[Math.floor(pick()*sources.length)],points=HexRunRuntime.nextSourcePoints(state,random,source),start=points[0];
-      state.enemies.push({id:state.nextEnemyId++,...waveBoss,...HexBiomes.guardian(state,source.tile),landmarkId:'wave:'+state.wave,points,index:0,t:0,maxHp:waveBoss.hp,maxArmorHp:waveBoss.armorHp||0,maxMagicHp:waveBoss.magicHp||0,alive:true,x:start.x,y:start.y});
+      state.enemies.push({id:state.nextEnemyId++,...waveBoss,...HexBiomes.guardian(state,source.tile),...(source.villageId===undefined?{}:{villageId:source.villageId}),landmarkId:'wave:'+state.wave,points,index:0,t:0,maxHp:waveBoss.hp,maxArmorHp:waveBoss.armorHp||0,maxMagicHp:waveBoss.magicHp||0,alive:true,x:start.x,y:start.y});
     }
     return {fronts:sources.length,bosses,waveBoss:!!waveBoss};
   }
@@ -89,7 +98,7 @@ const HexRunFlow=(()=>{
       const id=key(landmark.q,landmark.r);if(!routes.distances.has(id)) continue;
       const source={tile:state.map.get(id),routes,points:[routes.geometry.get(id).hub],branchCounts:new Map()};
       const points=HexRunRuntime.nextSourcePoints(state,random,source);if(points.length<2) continue;
-      const profile=HexExploration.bossProfile(state.wave);if(state.challengeDay)profile.speed*=.85;const start=points[0];landmark.status='fighting';
+      const profile=HexExploration.bossProfile(state.wave);if(state.challengeDay&&(!state.challengeKind||state.challengeKind==='caravan'))profile.speed*=.85;const start=points[0];landmark.status='fighting';
       state.enemies.push({id:state.nextEnemyId++,...profile,...HexBiomes.guardian(state,landmark),landmarkId:id,points,index:0,t:0,maxHp:profile.hp,maxArmorHp:profile.armorHp||0,maxMagicHp:profile.magicHp||0,alive:true,x:start.x,y:start.y});count++;
     }
     return count;
@@ -99,10 +108,13 @@ const HexRunFlow=(()=>{
   function finish(state){
     if(state.hp<=0||state.wave<1||state.pendingSpawns>0||state.enemies.some(e=>e.alive)||state.lastCompletedWave===state.wave)return null;
     state.lastCompletedWave=state.wave;state.waveRunning=false;HexRunRuntime.advanceIntroduction(state);
+    HexWaves.settleGreed(state);
     HexCombat.clearConsumables(state);
-    if(state.challengeKind!=='garrison')state.gold+=HexWaves.economy.completion+state.income;state.projectiles=[];state.mines=[];
+    if(!['garrison','detour'].includes(state.challengeKind))state.gold+=HexWaves.economy.completion+state.income;state.projectiles=[];state.mines=[];
     for(const tile of state.map.values())for(const tower of tile.towers||[])if(tower)tower.souls=[];
-    if(state.challengeKind!=='garrison'){state.goldEarned.completion+=HexWaves.economy.completion;state.goldEarned.income+=state.income;}state.phase='place';
+    if(!['garrison','detour'].includes(state.challengeKind)){state.goldEarned.completion+=HexWaves.economy.completion;state.goldEarned.income+=state.income;}state.phase='place';
+    if(['detour','villages','powerGrid','expedition','towerDraft','movingFortress'].includes(state.challengeKind))state.bossRewards=[];
+    if(state.challengeKind==='expedition'&&state.wave===12&&!HexExpedition.complete(state)){state.expedition.failed=true;state.phase='gameover';return {victory:false,objectiveFailed:true};}
     if(state.challengeDay&&state.wave===(state.challengeTarget||20)&&!state.challengeWon){state.challengeWon=true;state.phase='victory';return {victory:true};}
     return {victory:false};
   }

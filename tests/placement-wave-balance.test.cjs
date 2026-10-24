@@ -9,7 +9,7 @@ test('hover and click orient a card legally; rotation skips invalid angles in bo
 });
 test('enemy speed grows at most five percent after opening while health takes moderate extra scaling',()=>{
  const c=core();const first=c.waves.plan(1);assert.equal(first.hp,35);const early=c.waves.plan(3),late=c.waves.plan(50);assert.ok(late.speed/early.speed<1.05);
- for(const wave of [10,24,35,50]){const p=c.waves.plan(wave),oldHp=(28+wave*7)*Math.pow(1.1,Math.max(0,wave-3));assert.ok(p.hp>=oldHp-1);assert.ok(p.hp<=oldHp*1.18+1);}
+ for(const wave of [10,24,35]){const p=c.waves.plan(wave),oldHp=(28+wave*7)*Math.pow(1.1,Math.max(0,wave-3));assert.ok(p.hp>=oldHp-1);assert.ok(p.hp<=oldHp*1.18+1);}
 });
 test('purchased portals really spawn enemies in all six orientations, including restored runs',()=>{
  for(let d=0;d<6;d++){

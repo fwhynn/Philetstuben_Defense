@@ -1,6 +1,11 @@
 const { test } = require('node:test'), assert = require('node:assert/strict');
 const fs = require('node:fs'), path = require('node:path'), vm = require('node:vm');
 function load() { const context = {}; for (const file of ['data.js', 'map.js', 'model-map.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../classes', file), 'utf8'), context); vm.runInNewContext('globalThis.data=HexData;globalThis.map=HexMap;globalThis.models=HexModelMap;', context); return context; }
+test('roadless mission islands use a stripped model, regular Weites Land retains its road',()=>{
+ const {models,map}=load(),island={q:1,r:-1,type:'empty',roads:[],slots:1,towers:[]};
+ assert.deepEqual({...models.modelFor(island)},{name:'straight',rotation:0,proceduralRoads:true});assert.equal(map.roadGeometry(island).legs.size,0);
+ assert.equal(models.modelFor({...island,roads:[0,3]}).name,'empty');
+});
 test('every card type has a model and its road edges match the shape table', () => {
   const { data, models } = load();
   for (const [id, card] of Object.entries(data.CARD_LIBRARY)) {

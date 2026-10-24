@@ -44,8 +44,8 @@ test('building sale refunds only once and removes income, damage and discounts i
 test('building upgrades charge once per level, update income and retain the correct refund', () => {
   const { buildings } = rules(), slot = { q: 0, r: 0, index: 0 };
   const tile = { q: 0, r: 0, buildingSlots: 1, buildings: [null] }, s = { hp: 20, gold: 300, income: 2, phase: 'build', wave: 0, map: new Map([['0,0', tile]]) };
-  buildings.buy(s, slot, 'house'); assert.equal(s.income, 5); buildings.upgrade(s, slot); assert.equal(s.income, 7); buildings.upgrade(s, slot); assert.equal(s.income, 10); assert.equal(s.gold, 165); assert.equal(buildings.upgrade(s, slot), false); assert.equal(buildings.refund(s, tile.buildings[0]).amount, 135);
-  s.wave = 1; assert.equal(buildings.refund(s, tile.buildings[0]).amount, 67); buildings.sell(s, slot); assert.equal(s.income, 2);
+  buildings.buy(s, slot, 'house'); assert.equal(s.income, 5); buildings.upgrade(s, slot); assert.equal(s.income, 7); buildings.upgrade(s, slot); assert.equal(s.income, 10); assert.equal(s.gold, 190); assert.equal(buildings.upgrade(s, slot), false); assert.equal(buildings.refund(s, tile.buildings[0]).amount, 110);
+  s.wave = 1; assert.equal(buildings.refund(s, tile.buildings[0]).amount, 55); buildings.sell(s, slot); assert.equal(s.income, 2);
 });
 test('meta building upgrades affect exactly one remote hex and retargeting removes the old effect', () => {
   const { buildings } = rules(), slot = { q: 0, r: 0, index: 0 };
@@ -64,7 +64,7 @@ test('building unlocks are captured for a run and disabled in the fixed daily ch
 });
 
 test('patrician house doubles only its own income and sale removes its complete bonus', () => {
-  const { buildings } = rules(), slot = { q: 0, r: 0, index: 0 }, tile = { q: 0, r: 0, buildingSlots: 1, buildings: [null] }, s = { hp: 20, gold: 1000, income: 2, wave: 0, phase: 'build', buildingUnlocks: ['building:house'], map: new Map([['0,0', tile]]) }; buildings.buy(s, slot, 'house'); buildings.upgrade(s, slot); buildings.upgrade(s, slot); assert.equal(s.income, 10); buildings.upgrade(s, slot); assert.equal(s.income, 18); assert.equal(s.gold, 745); assert.equal(buildings.upgrade(s, slot), false); assert.equal(buildings.refund(s, tile.buildings[0]).amount, 255); buildings.sell(s, slot); assert.equal(s.income, 2); assert.equal(s.gold, 1000);
+  const { buildings } = rules(), slot = { q: 0, r: 0, index: 0 }, tile = { q: 0, r: 0, buildingSlots: 1, buildings: [null] }, s = { hp: 20, gold: 1000, income: 2, wave: 0, phase: 'build', buildingUnlocks: ['building:house'], map: new Map([['0,0', tile]]) }; buildings.buy(s, slot, 'house'); buildings.upgrade(s, slot); buildings.upgrade(s, slot); assert.equal(s.income, 10); buildings.upgrade(s, slot); assert.equal(s.income, 18); assert.equal(s.gold, 770); assert.equal(buildings.upgrade(s, slot), false); assert.equal(buildings.refund(s, tile.buildings[0]).amount, 230); buildings.sell(s, slot); assert.equal(s.income, 2); assert.equal(s.gold, 1000);
 });
 
 test('one forge and one market per hex; houses remain repeatable and sale reopens the type',()=>{

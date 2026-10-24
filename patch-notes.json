@@ -1,5 +1,172 @@
 [
   {
+    "version": "next",
+    "title": "Herausforderungen, Testlabor & Turmrollen",
+    "summary": "Sieben neue Missionen, klare Ziele und gezielte Balance für Türme und Herausforderungen.",
+    "overview": [
+      {
+        "kind": "new",
+        "title": "NEU",
+        "items": [
+          "7 Herausforderungen & öffentliches Testlabor",
+          "Missionsziele und Hilfen im Spiel"
+        ]
+      },
+      {
+        "kind": "buff",
+        "title": "VERSTÄRKT",
+        "items": [
+          "Kettenblitz · Balliste · Nekromant",
+          "Haus- und Schmiede-Ausbau günstiger"
+        ]
+      },
+      {
+        "kind": "nerf",
+        "title": "ABGESCHWÄCHT",
+        "items": [
+          "Frost-Kontrolle · frühe Schmiede"
+        ]
+      },
+      {
+        "kind": "fix",
+        "title": "VERBESSERT",
+        "items": [
+          "Umweg · Drei Dörfer · Draft · Festung"
+        ]
+      }
+    ],
+    "sections": [
+      {
+        "title": "Neue Herausforderungen",
+        "entries": [
+          {
+            "title": "Sieben neue Spielideen",
+            "summary": "Gierverträge, Straßenrätsel, drei Dörfer, Stromversorgung, Reliktsuche, Turm-Draft und eine wandernde Festung ergänzen die Herausforderungen.",
+            "stats": [],
+            "bullets": [
+              "Alle neun Missionen sind im Testlabor jederzeit spielbar. Testfortschritte bleiben getrennt; es gibt dort keine Diamanten oder Bestenlistenwertung.",
+              "Neue Tagesmissionen kommen ab 25. Oktober schrittweise in die Rotation. Bereits gespielte Tage behalten ihre Zuordnung."
+            ]
+          },
+          {
+            "title": "Klarere Ziele",
+            "summary": "Jede Mission zeigt ihren Wellenfortschritt und eine aufklappbare Anleitung. Normale Wellenfeiern und Einstellungstipps unterbrechen tägliche Herausforderungen nicht mehr.",
+            "stats": [],
+            "bullets": []
+          },
+          {
+            "title": "Drei Dörfer & Umweg",
+            "summary": "Drei Dörfer teilen sich gewundene Wege; Eingänge und Dorfziele sind markiert. Im Umweg sind Straßenanschlüsse, Vorrat und Platzierungsbudget klarer erkennbar.",
+            "stats": [],
+            "bullets": [
+              "Straßenlose Turmfelder zeigen keine falschen Straßen mehr. Ist nur eine Ausrichtung erlaubt, erklärt der Drehknopf das."
+            ]
+          },
+          {
+            "title": "Gezielter Druck ab Welle 4",
+            "summary": "Turm-Draft und Wandernde Festung erhöhen das Gegnerleben und vorhandene Schutzbalken ab Welle 4 schrittweise. Tempo und Goldbelohnungen bleiben gleich.",
+            "stats": [
+              {
+                "label": "Draft: zusätzlicher Faktor je Welle ab W4",
+                "before": "+0 %",
+                "after": "+10 %"
+              },
+              {
+                "label": "Festung: zusätzlicher Faktor je Welle ab W4",
+                "before": "+0 %",
+                "after": "+8 %"
+              }
+            ],
+            "bullets": []
+          }
+        ]
+      },
+      {
+        "title": "Turmrollen & Wirtschaft",
+        "entries": [
+          {
+            "title": "Kettenblitz, Balliste und Geister",
+            "summary": "Kettenblitz bekommt einen stärkeren Flächenzweig, die Balliste mehr Bossschaden und der Nekromant langlebigere Geister.",
+            "stats": [
+              {
+                "label": "Sturmnetz / Gewitter: Grundschaden",
+                "before": "7 / 11",
+                "after": "11 / 20"
+              },
+              {
+                "label": "Harpunenbolzen / Drachentöter: Bossfaktor",
+                "before": "1,3× / 1,3×",
+                "after": "1,6× / 1,8×"
+              },
+              {
+                "label": "Seelenchor / Geisterlegion: Geisterdauer",
+                "before": "6 s / 6 s",
+                "after": "10 s / 12 s"
+              },
+              {
+                "label": "Geisterlegion: Grundschaden",
+                "before": "11",
+                "after": "14"
+              }
+            ],
+            "bullets": []
+          },
+          {
+            "title": "Frost und spätere Gegner",
+            "summary": "Starke Frost-Upgrades verlangsamen weniger. Dafür wächst normales Gegnerleben nach Welle 35 langsamer; späte Bosse bleiben durch mehr Leben relevant. Feldheiler haben eine wellenabhängige Heilungsgrenze.",
+            "stats": [
+              {
+                "label": "Tiefenfrost / Eisstarre / Ewiges Eis: Verlangsamung",
+                "before": "65 / 75 / 85 %",
+                "after": "60 / 65 / 72 %"
+              },
+              {
+                "label": "Lebenswachstum nach W35",
+                "before": "10 %",
+                "after": "8 %"
+              }
+            ],
+            "bullets": []
+          },
+          {
+            "title": "Gebäude ausbauen lohnt sich",
+            "summary": "Haus- und Schmiede-Upgrades kosten weniger. Der erste Schmiedebonus fällt schwächer aus, die höchste Stufe bleibt bei 30 Prozent.",
+            "stats": [
+              {
+                "label": "Haus-Upgrades: Gold",
+                "before": "40 / 65",
+                "after": "30 / 50"
+              },
+              {
+                "label": "Schmiede-Upgrades: Gold",
+                "before": "40 / 55",
+                "after": "35 / 50"
+              },
+              {
+                "label": "Schmiedebonus",
+                "before": "20 / 25 / 30 %",
+                "after": "15 / 22 / 30 %"
+              }
+            ],
+            "bullets": []
+          }
+        ]
+      }
+    ],
+    "changes": [
+      "Gierverträge, Straßenrätsel, drei Dörfer, Stromversorgung, Reliktsuche, Turm-Draft und eine wandernde Festung ergänzen die Herausforderungen.",
+      "Alle neun Missionen sind im Testlabor jederzeit spielbar. Testfortschritte bleiben getrennt; es gibt dort keine Diamanten oder Bestenlistenwertung.",
+      "Neue Tagesmissionen kommen ab 25. Oktober schrittweise in die Rotation. Bereits gespielte Tage behalten ihre Zuordnung.",
+      "Jede Mission zeigt ihren Wellenfortschritt und eine aufklappbare Anleitung. Normale Wellenfeiern und Einstellungstipps unterbrechen tägliche Herausforderungen nicht mehr.",
+      "Drei Dörfer teilen sich gewundene Wege; Eingänge und Dorfziele sind markiert. Im Umweg sind Straßenanschlüsse, Vorrat und Platzierungsbudget klarer erkennbar.",
+      "Straßenlose Turmfelder zeigen keine falschen Straßen mehr. Ist nur eine Ausrichtung erlaubt, erklärt der Drehknopf das.",
+      "Turm-Draft und Wandernde Festung erhöhen das Gegnerleben und vorhandene Schutzbalken ab Welle 4 schrittweise. Tempo und Goldbelohnungen bleiben gleich.",
+      "Kettenblitz bekommt einen stärkeren Flächenzweig, die Balliste mehr Bossschaden und der Nekromant langlebigere Geister.",
+      "Starke Frost-Upgrades verlangsamen weniger. Dafür wächst normales Gegnerleben nach Welle 35 langsamer; späte Bosse bleiben durch mehr Leben relevant. Feldheiler haben eine wellenabhängige Heilungsgrenze.",
+      "Haus- und Schmiede-Upgrades kosten weniger. Der erste Schmiedebonus fällt schwächer aus, die höchste Stufe bleibt bei 30 Prozent."
+    ]
+  },
+  {
     "version": "1.1.5",
     "title": "Händler: Preise & eigene Vorräte",
     "summary": "Wiederholte Käufe werden teurer. Neu entdeckte Händler bieten wieder die Grundpreise.",

@@ -2109,3 +2109,207 @@ Object.assign(globalThis.HexTranslations.en, {
   "Heilung und Schutz haben getrennte Preissteigerungen. Schutz bleibt auf einen Kauf für dieselbe nächste Welle begrenzt.": "Healing and protection have separate price increases. Protection remains limited to one purchase for the same upcoming wave.",
   "Händlerpreise bleiben beim Speichern und Fortsetzen erhalten. Bei älteren Spielständen werden bisherige gemeinsame Kaufzähler dem ersten Händler zugeordnet.": "Merchant prices persist when saving and continuing. Older saves assign previous shared purchase counts to the first merchant."
 });
+
+HexTranslations.add(`
++40 % Schaden, vier zusätzliche Kettenziele und +30 Sprungweite.|+40% damage, four additional chain targets and +30 jump range.
+20 % geringere Bewegungsgeschwindigkeit innerhalb der Aura.|20% less movement speed within the aura.
+60 % Slow in kleinerem Radius.|60% slow in a smaller radius.
+65 % Verlangsamung im Kampfbereich.|65% slow in the combat area.
+Bis zu 5 Geister gleichzeitig, jeweils 10 Sekunden.|Up to 5 spirits at once, lasting 10 seconds each.
+Bis zu 8 Geister mit verstärkten Angriffen für jeweils 12 Sekunden.|Up to 8 spirits with stronger attacks, lasting 12 seconds each.
++15 % Tower-Schaden auf diesem Hex und direkt benachbarten Hexen. Nicht stapelbar.|+15% tower damage on this hex and adjacent hexes. Does not stack.
+Heilt andere Gegner im kleinen Umkreis alle 3 Sekunden um bis zu 5 % (maximal 20 + 8 je Welle). Heiler heilen einander nicht.|Heals nearby enemies every 3 seconds for up to 5% (capped at 20 + 8 per wave). Healers cannot heal each other.
+`);
+
+HexTranslations.add(`
+Der Fluch der Gier|The Curse of Greed
+Giervertrag · freiwillig|Greed contract · optional
+Giervertrag angenommen|Greed contract accepted
+Risikopunkte|Risk points
+Beste Risikopunkte|Best risk score
+Schwarmvertrag|Swarm contract
+Heilervertrag|Healer contract
+Elitevertrag|Elite contract
+Vertragsschwarm|Contract swarm
+Vertragsheiler|Contract healer
+Vertragswache|Contract guard
+Vertragselite|Contract elite
+Sechs zusätzliche schnelle Schwarmgegner.|Six additional fast swarm enemies.
+Ein Feldheiler und drei zusätzliche gepanzerte Begleiter.|One field healer and three additional armored escorts.
+Ein Elitegegner mit vierfachem Leben, Rüstung und Magieresistenz. Drei Basisschaden bei Durchbruch.|One elite with quadruple health, armor and magic resistance. Deals three base damage if it escapes.
+Gold sofort|gold immediately
+Risikopunkte bei Erfolg|risk points on success
+Zurück zur Vorbereitung|Back to preparation
+Freiwillige Gierverträge|Optional greed contracts
+Dem Fluch widerstanden!|The curse is broken!
+DEM FLUCH WIDERSTANDEN!|THE CURSE IS BROKEN!
+Der Gier erlegen|Consumed by greed
+Im Endlosmodus gibt es keine weiteren Verträge oder Risikopunkte. Die Tagesbelohnung gibt es nur einmal pro Tag.|Endless mode offers no additional contracts or risk points. The daily reward is only awarded once per day.
+Fluch der Gier testen · isoliertes Testprofil|Test Curse of Greed · isolated test profile
+Starte zuerst das isolierte Erstspieler-Testprofil im Dev-Modus.|Start the isolated first-player test profile in Dev mode first.
+Freiwillig: höchstens ein Vertrag für die nächste Welle. Gold sofort, Risikopunkte erst nach überstandener Welle. Die Wahl ist verbindlich. Zusätzliche Vertragsgegner geben kein weiteres Gold.|Optional: at most one contract for the next wave. Gold immediately, risk points only after surviving the wave. Your choice is final. Additional contract enemies grant no further gold.
+Überlebe zwölf Wellen. Vor jeder Welle kannst du einen freiwilligen Vertrag annehmen: zusätzliche Gegner gegen sofortiges Gold. Höchstens ein Vertrag pro Welle; die Wahl kann nicht rückgängig gemacht werden.|Survive twelve waves. Before each wave, you can accept an optional contract: extra enemies for immediate gold. At most one contract per wave; your choice cannot be undone.
+Risikopunkte erhältst du nur für überstandene Vertragswellen. Schwarm: 2 Punkte. Heilertrupp: 3 Punkte. Elite: 4 Punkte. Ohne Vertrag kannst du die Mission ebenfalls gewinnen. Maximal 48 Punkte; im Endlosmodus gibt es keine weiteren Verträge.|Earn risk points only for survived contract waves. Swarm: 2 points. Healers: 3 points. Elite: 4 points. You can also win without a contract. Maximum 48 points; endless mode offers no additional contracts.
+Eine Front, kein Sandsturm. Bogenschütze, Katapult, Kettenblitz, Frost und Balliste stehen allen zur Verfügung; persönliche Arsenalboni gelten nicht. Einmal täglich +10 Diamanten beim Sieg.|One front, no sandstorm. Archer, Catapult, Chain Lightning, Frost and Ballista are available to everyone; personal Arsenal bonuses do not apply. Win to earn +10 diamonds once per day.
+`);
+
+HexTranslations.add(`
+Die Kunst des Umwegs|The Art of the Detour
+Straßenplanung|Road planning
+Straßenbudget|Road budget
+Ältere Hexe umsetzen|Reposition older hexes
+Feste Türme|Fixed towers
+Fünf Angriffe|Five attacks
+Straßen planen|Plan roads
+Letztes Straßenhex zurücknehmen|Undo last road hex
+Straßenplanung abschließen|Finish road planning
+Straßenplanung fortsetzen|Resume road planning
+Nur Straße. Die Verteidigung steht bereits.|Road only. Defenses are already in place.
+In dieser Mission bleibt die Verteidigung unverändert.|Defenses cannot be changed in this mission.
+Straße gelegt. Plane weiter oder schließe die Straßenplanung ab.|Road placed. Continue planning or finish road planning.
+Der Umweg hat sich gelohnt!|The detour paid off!
+DER UMWEG HAT SICH GELOHNT!|THE DETOUR PAID OFF!
+Die Straße hielt nicht stand|The road did not hold
+Alle fünf Angriffe abgewehrt. Diese Straßenmission ist abgeschlossen; es gibt keinen Endlosmodus.|All five attacks repelled. This road mission is complete; there is no endless mode.
+Kunst des Umwegs testen · isoliertes Testprofil|Test The Art of the Detour · isolated test profile
+Fünf Angriffe, fünf feste Türme. Baue die Straße durch ihre Wirkungsbereiche. Kein Turmbau, Ausbau, Verkauf, Basis-Ausbau oder Verbrauchshilfen. Keine Goldeinnahmen.|Five attacks, five fixed towers. Build the road through their ranges. No tower building, upgrades, sales, base upgrades or consumables. No gold income.
+Vor dem ersten Angriff bis zu sechs Straßenhexe, danach je zwei. Anfangs je drei Geraden, kleine und große Kurven; nach jedem Angriff je eine weitere Karte. Mindestens zwei Straßenhexe sind nötig, dann kannst du die Planung vorzeitig abschließen.|Up to six road hexes before the first attack, then two each time. Start with three straights, small curves and large curves each; gain one more of each after every attack. At least two road hexes are required before you can finish planning early.
+Aktuelle Platzierungen kannst du zurücknehmen. Zwischen Angriffen dürfen außerdem höchstens die letzten zwei älteren Straßenhexe neu gesetzt werden. Zurückgenommene Karten und Platzierungen erhältst du zurück. Keine zufälligen Kartenangebote, kein Endlosmodus. Einmal täglich +10 Diamanten beim Sieg.|You can undo current placements. Between attacks, you can also reposition up to the last two older road hexes. Undone cards and placements are refunded. No random card offers, no endless mode. Win to earn +10 diamonds once per day.
+`);
+
+HexTranslations.add(`
+Drei Dörfer|Three Villages
+Norddorf|North Village
+Mitteldorf|Central Village
+Süddorf|South Village
+Dorfverteidigung|Village defense
+Unter Angriff|Under attack
+Nächster Angriff|Next attack
+Kostenlose Umzüge|Free relocations
+Umzug abbrechen|Cancel relocation
+Turm kostenlos umsetzen|Relocate tower for free
+Freien Bauplatz wählen · Escape: abbrechen|Choose an empty tower slot · Escape: cancel
+Wähle einen freien Bauplatz. Umzüge sind nur in der Bauphase möglich.|Choose an empty tower slot. Relocation is only available during preparation.
+Die drei Dörfer können nicht ausgebaut werden.|The three villages cannot be upgraded.
+Drei Dörfer · Feste Karte · Verteidigung vorbereiten|Three Villages · Fixed map · Prepare your defenses
+Drei getrennte Lebensbalken|Three separate health bars
+Alle drei Dörfer gerettet!|All three villages saved!
+Ein Dorf ist gefallen|A village has fallen
+Zwölf Angriffe überstanden. Alle drei Dörfer stehen noch! Kein Endlosmodus.|Twelve attacks survived. All three villages are still standing! No endless mode.
+Drei Dörfer testen · isoliertes Testprofil|Test Three Villages · isolated test profile
+Drei Dörfer mit je 15 Leben. Überlebe zwölf Wellen; sobald ein Dorf fällt, ist die Mission verloren. Die Karte ist fest. Du startest mit 180 Gold, ohne persönliche Arsenalboni.|Three villages with 15 health each. Survive twelve waves; if any village falls, you lose the mission. The map is fixed. Start with 180 gold and no personal Arsenal bonuses.
+Drei Dörfer mit je 15 Leben. Überlebe zwölf Wellen; sobald ein Dorf fällt, ist die Mission verloren. Gewundene Zufahrten teilen sich ein festes Wegenetz: Zentrale Türme können mehrere Angriffe abdecken. Die markierten Eingänge zeigen, wo die nächste Welle erscheint und welches Dorf ihr Ziel ist. Du startest mit 180 Gold, ohne persönliche Arsenalboni.|Three villages with 15 health each. Survive twelve waves; if any village falls, you lose the mission. Winding approaches share a fixed road network: centrally placed towers can cover multiple attacks. Marked entrances show where the next wave appears and which village it targets. Start with 180 gold and no personal Arsenal bonuses.
+Ziel Welle|Target wave
+Angriff →|Attack →
+Wellen 1–6: Nord, Mitte und Süd im Wechsel. Wellen 7–9: Nord + Mitte, Mitte + Süd, Nord + Süd. Wellen 10–12: alle drei Dörfer, zuletzt mit einem Boss. Das Angriffsziel wird vor der Welle angezeigt.|Waves 1–6: North, Central and South in rotation. Waves 7–9: North + Central, Central + South, North + South. Waves 10–12: all three villages, with a boss in the last wave. Attack targets are shown before each wave.
+Zwei kostenlose Turmumzüge je Bauphase, ohne Ansparen. Wähle einen Turm, dann „Turm kostenlos umsetzen“ und einen freien Bauplatz. Stufe, Einstellungen und investiertes Gold bleiben erhalten. Im Kampf sind Umzüge gesperrt. Turmbau und Upgrades sind erlaubt, Basis-Ausbau und Verbrauchshilfen nicht. Kein Endlosmodus; einmal täglich +10 Diamanten beim Sieg.|Two free tower relocations per preparation phase, without banking unused moves. Select a tower, then “Relocate tower for free” and an empty slot. Level, settings and invested gold are preserved. Relocation is blocked during combat. Tower construction and upgrades are allowed; base upgrades and consumables are not. No endless mode; win to earn +10 diamonds once per day.
+`);
+
+HexTranslations.add(`
+Stromnetz|Power Grid
+Generator A|Generator A
+Generator B|Generator B
+Leitfeld|Conduit
+Relais Nord|North Relay
+Relais Süd|South Relay
+Strom|power
+EIN|ON
+AUS|OFF
+Versorgt|Powered
+Ausgeschaltet|Switched off
+Keine Verbindung|Disconnected
+Kapazität belegt|Capacity exhausted
+Stromversorgung|Power supply
+Strom einschalten|Switch power on
+Strom ausschalten|Switch power off
+Leitfelder schalten|Switch conduits
+Türme versorgt|towers powered
+Leitfelder|Conduits
+Benachbarte eingeschaltete Hexe leiten Strom.|Adjacent enabled hexes conduct power.
+Versorgung während der Welle gesperrt.|Power switching is locked during the wave.
+Stromnetz · Versorgung prüfen · Zwölf Wellen|Power Grid · Check supply · Twelve waves
+Zwei Generatoren · Sechs Strom|Two generators · Six power
+Das Netz hält!|The grid holds!
+Stromnetz überrannt|Power grid overrun
+Zwölf Angriffe mit deiner Stromversorgung abgewehrt. Kein Endlosmodus.|Twelve attacks repelled with your power network. No endless mode.
+Stromnetz testen · isoliertes Testprofil|Test Power Grid · isolated test profile
+Überlebe zwölf Wellen auf der festen Karte, zuletzt mit einem Boss. Du startest mit 150 Gold. Zwei Generatoren liefern je drei Strom; jeder Turm benötigt einen Strom, unabhängig von seiner Stufe.|Survive twelve waves on a fixed map, with a boss in the final wave. Start with 150 gold. Two generators supply three power each; each tower uses one power, regardless of its level.
+Schalte höchstens sechs Leitfelder ein. Strom fließt über benachbarte eingeschaltete Hexe, unabhängig von Straßenanschlüssen. Die beiden Relais verbinden die Netzteile. Verbundene Generatoren teilen ihre Kapazität.|Enable up to six conduits. Power flows through adjacent enabled hexes, regardless of road connections. The two relays link the network sections. Connected generators share their capacity.
+Ohne Verbindung oder freie Kapazität greifen Türme nicht an; auch Frost-Auren und Minenleger bleiben inaktiv. Bei Engpässen haben zuerst gebaute Türme Vorrang. Schalte einen Turm im Turmmenü aus, um Strom für einen anderen freizugeben.|Towers cannot attack without a connection and available capacity; frost auras and minelayers also remain inactive. Earlier-built towers have priority when capacity is limited. Switch off a tower in its menu to free power for another.
+Schalter, Turmbau, Upgrades und Verkauf sind nur zwischen Wellen möglich. Kein Basis-Ausbau, keine Verbrauchshilfen, keine persönlichen Arsenalboni, kein Endlosmodus. Einmal täglich +10 Diamanten beim Sieg.|Switching, tower construction, upgrades and sales are only possible between waves. No base upgrades, consumables, personal Arsenal bonuses or endless mode. Win to earn +10 diamonds once per day.
+`);
+HexTranslations.add(`
+Basis-Ausbau ist in dieser Mission gesperrt.|Base upgrades are disabled in this mission.
+`);
+HexTranslations.add(`
+Expedition ins Unbekannte|Expedition into the Unknown
+Expedition erfolgreich!|Expedition successful!
+Expedition gescheitert · Relikte fehlen|Expedition failed · Missing relics
+Expedition gescheitert|Expedition failed
+Alle drei Relikte geborgen und Welle 12 überlebt. Kein Endlosmodus.|All three relics recovered and wave 12 survived. No endless mode.
+Expedition testen · isoliertes Testprofil|Test Expedition · isolated test profile
+Relikt Ost|Eastern relic
+Relikt Nord|Northern relic
+Relikt Süd|Southern relic
+Relikt geborgen|Relic recovered
+Relikte|Relics
+geborgen|recovered
+entdeckt|discovered
+unbekannt|unknown
+Platzierungen|placements
+Planung abschließen|Finish planning
+Planung fortsetzen|Resume planning
+Drei Relikte bis Ende Welle 12|Three relics by the end of wave 12
+Ziel: Ende Welle 12|Goal: end of wave 12
+Hex gelegt · Noch|Hex placed · Remaining:
+Verbinde alle drei Reliktinseln im Norden, Osten und Süden mit deiner Straße zur Basis und überlebe Welle 12. Aufdecken allein zählt nicht. Fehlt am Ende ein Relikt, ist die Expedition verloren.|Connect all three relic islands in the north, east and south to the road leading to your base and survive wave 12. Revealing them is not enough. A missing relic at the end means defeat.
+Bis zu zwei Hexe je Bauphase. Der feste Straßenbaukasten enthält Gerade, kleine und große Kurve, T-Kreuzung und Y-Kreuzung. Karten sind wiederverwendbar; ungenutzte Platzierungen werden nicht angespart. Nach der ersten Straße kannst du die Planung auch vorzeitig abschließen.|Place up to two hexes per preparation phase. Your fixed road kit contains a straight, small and large bends, a T-junction and a Y-junction. Cards are reusable; unused placements do not carry over. After placing the first road, you may finish planning early.
+100 Startgold. Jedes angeschlossene Relikt gibt einmalig 25 Gold, keinen weiteren Schreinbonus. Keine zufälligen Inseln oder Kartenbelohnungen. Persönliche Arsenalboni gelten nicht. Kein Endlosmodus; einmal täglich +10 Diamanten nur bei vollständig erfülltem Ziel.|Start with 100 gold. Each connected relic grants 25 gold once, without a shrine bonus. No random islands or card rewards. Personal Arsenal bonuses do not apply. No endless mode; earn +10 diamonds once per day only after completing the entire objective.
+`);
+HexTranslations.add(`
+Turm-Draft|Tower Draft
+Turm-Draft testen · isoliertes Testprofil|Test Tower Draft · isolated test profile
+Turm-Draft · Inventar platzieren · Zwölf Wellen|Tower Draft · Place your inventory · Twelve waves
+Drei Angebote, eine Wahl|Three offers, one choice
+Auswahl offen|Picks remaining
+Upgrade-Tickets|Upgrade tickets
+Upgrade-Ticket|Upgrade ticket
+Inventar|Inventory
+Reparatur: +5 Leben|Repair: +5 health
+Zuerst Draft wählen|Choose your draft first
+Ausbauen · 1 Upgrade-Ticket|Upgrade · 1 upgrade ticket
+Kein Upgrade-Ticket verfügbar|No upgrade ticket available
+Maximale Draft-Stufe erreicht.|Maximum draft level reached.
+Draft gemeistert!|Draft mastered!
+Draft gescheitert|Draft failed
+Zwölf Wellen mit deiner gedrafteten Verteidigung überlebt. Kein Endlosmodus.|Survived twelve waves with your drafted defenses. No endless mode.
+Gold kann im Turm-Draft nicht ausgegeben werden. Verwende dein Inventar und Upgrade-Tickets.|Gold cannot be spent in Tower Draft. Use your inventory and upgrade tickets.
+Überlebe zwölf Wellen auf einer festen Karte. Wähle jeweils eines von drei Angeboten: vor Welle 1 dreimal, danach einmal je Bauphase.|Survive twelve waves on a fixed map. Pick one of three offers: three picks before wave 1, then one pick per preparation phase.
+Türme kommen ins Inventar und werden kostenlos auf freien Plätzen gebaut. Upgrade-Tickets erlauben eine normale Verbesserung deiner Wahl. Reparaturen heilen fünf Basisleben. Unverbrauchte Türme und Tickets bleiben erhalten.|Towers enter your inventory and can be built on empty slots for free. Upgrade tickets grant one regular upgrade of your choice. Repairs restore five base health. Unused towers and tickets carry over.
+Kein Gold-Shop, Verkauf, Basis-Ausbau, Verbrauchshilfen oder persönliche Arsenalboni. Bauen und Verbessern nur zwischen Wellen. Kein Endlosmodus. Sieg: einmal täglich zehn Diamanten.|No gold shop, selling, base upgrades, consumables or personal Arsenal bonuses. Build and upgrade only between waves. No endless mode. Win to earn ten diamonds once per day.
+`);
+HexTranslations.add(`
+Wandernde Festung|Wandering Fortress
+Wandernde Festung testen · isoliertes Testprofil|Test Wandering Fortress · isolated test profile
+Vier Stationen, je drei Wellen|Four stations, three waves each
+Station|Station
+Festung|Fortress
+abgeschlossen|completed
+Nächster Halt|Next stop
+Letzte Station|Final station
+Etappenwechsel: Türme kostenlos umsetzen|New stage: relocate towers for free
+Umsetzen nach Welle 3, 6 und 9|Relocate after waves 3, 6 and 9
+Festung sicher angekommen!|Fortress arrived safely!
+Die Festung ist gefallen|The fortress has fallen
+Alle vier Stationen verteidigt. Kein Endlosmodus.|All four stations defended. No endless mode.
+Verteidige dieselbe Festung an vier Stationen für jeweils drei Wellen. Nach Welle 3, 6 und 9 zieht sie automatisch weiter. Verbleibende Leben und alle Türme bleiben erhalten.|Defend the same fortress at four stations for three waves each. It moves automatically after waves 3, 6 and 9. Remaining health and all towers are preserved.
+In der Bauphase direkt nach einem Ortswechsel kannst du Türme kostenlos beliebig oft an die aktuelle Station umsetzen: Turm auswählen, Umsetzen anklicken, freien Bauplatz wählen. Upgrades und Angriffsfokus bleiben erhalten.|During the preparation phase immediately after moving, relocate towers to the current station for free as often as needed: select a tower, click relocate, then choose an empty slot. Upgrades and targeting priorities are preserved.
+150 Startgold, normale Einnahmen. Kein Straßenbau, Basis-Ausbau, Verbrauchshilfen oder persönliche Arsenalboni. Bauen und Verbessern nur zwischen Wellen. Überlebe Welle 12 für einmal täglich zehn Diamanten. Kein Endlosmodus.|Start with 150 gold and earn regular income. No road building, base upgrades, consumables or personal Arsenal bonuses. Build and upgrade only between waves. Survive wave 12 to earn ten diamonds once per day. No endless mode.
+`);
+
+HexTranslations.add("Überlebe zwölf Wellen. Nach dem Hexbau ist ein Giervertrag freiwillig: Gold sofort, zusätzliche Gegner in dieser Welle. Risikopunkte sind ein Bonus, keine Siegbedingung.|Survive twelve waves. After placing a hex, a greed contract is optional: gold now, extra enemies this wave. Risk points are a bonus, not a victory requirement.\nVerlängere den Weg um die festen Türme. Erst sechs, danach zwei Platzierungen pro Angriff. Karten bleiben im Vorrat; ungenutzte Platzierungen verfallen. Danach Straßenplanung abschließen.|Extend the road around the fixed towers. Place up to six hexes initially, then two per attack. Cards remain in stock; unused placements expire. Then finish road planning.\nAlle drei Dörfer müssen zwölf Wellen überleben. Die Markierungen zeigen Eingang und Ziel. Gemeinsame Wege nutzen; zwischen Wellen zwei Türme kostenlos umsetzen.|All three villages must survive twelve waves. Markers show entrances and targets. Cover shared roads; relocate two towers for free between waves.\nÜberlebe zwölf Wellen. Erst Türme bauen und Leitfelder schalten: nur mit einem Generator verbundene Türme greifen an. Maximal sechs versorgte Türme und sechs Leitfelder. Während des Kampfes ist das Netz gesperrt.|Survive twelve waves. Build towers and switch on conducting tiles: only towers connected to a generator attack. At most six powered towers and six conducting tiles. The network is locked during combat.\nVerbinde alle drei Relikte über Straßen mit der Basis UND überlebe Welle 12. Aufdecken reicht nicht! Zwei Hexe pro Bauphase, Karten beliebig wiederverwendbar. Danach Planung abschließen.|Connect all three relics to the base by road AND survive wave 12. Revealing them is not enough! Two hexes per preparation phase, with reusable cards. Then finish planning.\nWähle vor dem ersten Angriff drei Angebote, danach eines pro Bauphase. Turm im Inventar? Freien Bauplatz anklicken und kostenlos bauen. Upgrade-Tickets am gebauten Turm einlösen. Überlebe zwölf Wellen; Gold ist hier nicht ausgebbar.|Choose three offers before the first attack, then one per preparation phase. Tower in your inventory? Click an empty slot and build it for free. Spend upgrade tickets on a built tower. Survive twelve waves; gold cannot be spent here.\nÜberlebe zwölf Wellen. Nach Welle 3, 6 und 9 zieht die Festung weiter. Dann alte Türme auswählen, kostenlos umsetzen und einen Platz an der neuen Station wählen. Sie ziehen nicht automatisch mit!|Survive twelve waves. The fortress moves after waves 3, 6 and 9. Select old towers, choose free relocation and select a slot at the new station. Towers do not move automatically!\nÜberlebe zwanzig Wellen auf zwei Fronten. Erst beide Basis-Ausgänge verlängern. Goldtransporter geben 18 Gold; bei Durchbruch verlierst du bis zu 10 Gold. Der Sandsturm senkt Reichweite und Gegnertempo.|Survive twenty waves on two fronts. Extend both base exits first. Gold carriers award 18 gold; a leak costs up to 10 gold. The sandstorm reduces range and enemy speed.\nÜberlebe drei schwere Angriffe mit insgesamt 1200 Gold. Keine Einnahmen und keine neuen Hexe. Baue und verbessere deine Verteidigung vor dem ersten Angriff; Restgold bleibt für spätere Anpassungen.|Survive three heavy attacks with a total of 1200 gold. No income or new hexes. Build and upgrade before the first attack; unspent gold remains available for later adjustments.\nGeschafft:|Completed:\nLeitfelder schalten → mit Generator verbinden → Turm bauen. Nur versorgte Türme greifen an.|Switch on conducting tiles → connect to a generator → build a tower. Only powered towers attack.\nEtappenwechsel: alten Turm wählen → Umsetzen → freien Platz an neuer Station wählen|New stage: select an old tower → relocate → choose an empty slot at the new station");
+
+HexTranslations.add("Herausforderungen, Testlabor & Turmrollen|Challenges, practice lab & tower roles\nSieben neue Missionen, klare Ziele und gezielte Balance für Türme und Herausforderungen.|Seven new missions, clearer objectives and targeted tower and challenge balance.\n7 Herausforderungen & öffentliches Testlabor|7 challenges & public practice lab\nMissionsziele und Hilfen im Spiel|In-game objectives and guidance\nKettenblitz · Balliste · Nekromant|Chain Lightning · Ballista · Necromancer\nHaus- und Schmiede-Ausbau günstiger|Cheaper house and forge upgrades\nFrost-Kontrolle · frühe Schmiede|Frost control · early forge\nUmweg · Drei Dörfer · Draft · Festung|Detour · Three Villages · Draft · Fortress\nAlle neun Missionen sind im Testlabor jederzeit spielbar. Testfortschritte bleiben getrennt; es gibt dort keine Diamanten oder Bestenlistenwertung.|All nine missions are always playable in the practice lab. Practice saves stay separate, with no diamonds or leaderboard entries.\nNeue Tagesmissionen kommen ab 25. Oktober schrittweise in die Rotation. Bereits gespielte Tage behalten ihre Zuordnung.|New daily missions enter the rotation gradually from October 25. Previously played days keep their assignments.\nGierverträge, Straßenrätsel, drei Dörfer, Stromversorgung, Reliktsuche, Turm-Draft und eine wandernde Festung ergänzen die Herausforderungen.|Greed contracts, road puzzles, three villages, power networks, relic hunts, tower drafting and a moving fortress join the challenges.\nSieben neue Spielideen|Seven new ways to play\nJede Mission zeigt ihren Wellenfortschritt und eine aufklappbare Anleitung. Normale Wellenfeiern und Einstellungstipps unterbrechen tägliche Herausforderungen nicht mehr.|Each mission shows wave progress and expandable instructions. Regular wave celebrations and settings tips no longer interrupt daily challenges.\nKlarere Ziele|Clearer objectives\nStraßenlose Turmfelder zeigen keine falschen Straßen mehr. Ist nur eine Ausrichtung erlaubt, erklärt der Drehknopf das.|Roadless tower tiles no longer display phantom roads. The rotate button explains when only one orientation is valid.\nDrei Dörfer teilen sich gewundene Wege; Eingänge und Dorfziele sind markiert. Im Umweg sind Straßenanschlüsse, Vorrat und Platzierungsbudget klarer erkennbar.|Three Villages shares winding roads with marked entrances and village targets. Detour makes road connections, stock and placement budgets clearer.\nDrei Dörfer & Umweg|Three Villages & Detour\nDraft: zusätzlicher Faktor je Welle ab W4|Draft: added multiplier per wave from W4\nFestung: zusätzlicher Faktor je Welle ab W4|Fortress: added multiplier per wave from W4\nTurm-Draft und Wandernde Festung erhöhen das Gegnerleben und vorhandene Schutzbalken ab Welle 4 schrittweise. Tempo und Goldbelohnungen bleiben gleich.|Tower Draft and Moving Fortress gradually increase enemy health and existing defense pools from wave 4. Speed and gold rewards stay unchanged.\nGezielter Druck ab Welle 4|Targeted pressure from wave 4\nNeue Herausforderungen|New challenges\nSturmnetz / Gewitter: Grundschaden|Storm Network / Thunderstorm: base damage\nHarpunenbolzen / Drachentöter: Bossfaktor|Harpoon Bolt / Dragon Slayer: boss multiplier\nSeelenchor / Geisterlegion: Geisterdauer|Soul Choir / Ghost Legion: spirit duration\nGeisterlegion: Grundschaden|Ghost Legion: base damage\nKettenblitz bekommt einen stärkeren Flächenzweig, die Balliste mehr Bossschaden und der Nekromant langlebigere Geister.|Chain Lightning gains a stronger area branch, Ballista deals more boss damage and Necromancer spirits last longer.\nKettenblitz, Balliste und Geister|Chain Lightning, Ballista and spirits\nTiefenfrost / Eisstarre / Ewiges Eis: Verlangsamung|Deep Frost / Frozen Stasis / Eternal Ice: slow\nLebenswachstum nach W35|Health growth after W35\nStarke Frost-Upgrades verlangsamen weniger. Dafür wächst normales Gegnerleben nach Welle 35 langsamer; späte Bosse bleiben durch mehr Leben relevant. Feldheiler haben eine wellenabhängige Heilungsgrenze.|Strong frost upgrades slow less. Normal enemy health grows more slowly after wave 35, while late bosses gain health to remain relevant. Field healers have a wave-dependent healing cap.\nFrost und spätere Gegner|Frost and late enemies\nHaus-Upgrades: Gold|House upgrades: gold\nSchmiede-Upgrades: Gold|Forge upgrades: gold\nSchmiedebonus|Forge bonus\nHaus- und Schmiede-Upgrades kosten weniger. Der erste Schmiedebonus fällt schwächer aus, die höchste Stufe bleibt bei 30 Prozent.|House and forge upgrades cost less. The initial forge bonus is weaker, while the highest tier stays at 30 percent.\nGebäude ausbauen lohnt sich|Building upgrades pay off\nTurmrollen & Wirtschaft|Tower roles & economy");
+HexTranslations.add("VERBESSERT|IMPROVED");
+
+HexTranslations.add("+0 %|+0 %\n+10 %|+10 %\n+8 %|+8 %\n7 / 11|7 / 11\n11 / 20|11 / 20\n1,3× / 1,3×|1.3× / 1.3×\n1,6× / 1,8×|1.6× / 1.8×\n6 s / 6 s|6 s / 6 s\n10 s / 12 s|10 s / 12 s\n11|11\n14|14\n65 / 75 / 85 %|65 / 75 / 85 %\n60 / 65 / 72 %|60 / 65 / 72 %\n10 %|10 %\n8 %|8 %\n40 / 65|40 / 65\n30 / 50|30 / 50\n40 / 55|40 / 55\n35 / 50|35 / 50\n20 / 25 / 30 %|20 / 25 / 30 %\n15 / 22 / 30 %|15 / 22 / 30 %");

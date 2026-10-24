@@ -1,5 +1,6 @@
 (() => {
 	'use strict';
+	if(globalThis.HexChallengeLab?.active)return;
 
 	const productionBaseUrl = 'https://api.autohextd.zlyfer.net';
 	const configuredBaseUrl = globalThis.AUTOHEX_CONFIG && globalThis.AUTOHEX_CONFIG.apiBaseUrl;

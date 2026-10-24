@@ -64,33 +64,33 @@ const HexData=(()=>{
     elementVolcano:{tower:'element',requires:'elementFire',name:'Vulkanherz',cost:70,damage:34,splash:65,desc:'Stärkeres Feuer mit größerer Fläche.'},
     elementTide:{tower:'element',requires:'elementWater',name:'Gezeitenherz',cost:70,damage:26,hitSlow:.5,slowDuration:3,desc:'Halbiert das Tempo getroffener Gegner für 3 Sekunden.'},
     elementTempest:{tower:'element',requires:'elementWind',name:'Orkanherz',cost:70,damage:30,range:250,pierceTargets:5,desc:'Durchschlägt bis zu 5 Gegner mit großer Reichweite.'},
-    soulChoir:{tower:'necromancer',name:'Seelenchor',cost:50,soulLimit:5,desc:'Bis zu 5 Geister gleichzeitig.'},
+    soulChoir:{tower:'necromancer',name:'Seelenchor',cost:50,soulLimit:5,soulDuration:10,desc:'Bis zu 5 Geister gleichzeitig, jeweils 10 Sekunden.'},
     soulKeeper:{tower:'necromancer',name:'Seelenhüter',cost:50,soulDamage:15,soulDuration:9,desc:'Stärkere Geister bleiben 9 Sekunden.'},
-    soulLegion:{tower:'necromancer',requires:'soulChoir',name:'Geisterlegion',cost:80,soulLimit:8,soulDamage:11,desc:'Bis zu 8 Geister mit verstärkten Angriffen.'},
+    soulLegion:{tower:'necromancer',requires:'soulChoir',name:'Geisterlegion',cost:80,soulLimit:8,soulDamage:14,soulDuration:12,desc:'Bis zu 8 Geister mit verstärkten Angriffen für jeweils 12 Sekunden.'},
     soulLord:{tower:'necromancer',requires:'soulKeeper',name:'Lichfürst',cost:80,soulDamage:24,soulDuration:12,damage:20,desc:'Mächtige Geister bleiben 12 Sekunden.'},
     volley:{tower:'archer',name:'Salve',cost:35,damage:7,cooldown:.65,splash:55,desc:'Treffer schädigen Gegner im Umkreis von 55.'},
     marksman:{tower:'archer',name:'Scharfschütze',cost:35,damage:22,cooldown:.85,range:190,desc:'Mehr Einzelzielschaden und Reichweite.'},
     siege:{tower:'catapult',name:'Belagerung',cost:45,damage:36,cooldown:1.8,range:230,desc:'Schwere Steine mit mehr Schaden und Reichweite.'},
     barrage:{tower:'catapult',name:'Steinhagel',cost:45,damage:13,cooldown:.65,range:190,desc:'Schnelle, durchschlagende Steine für gerade Straßenabschnitte.'},
-    storm:{tower:'chain',name:'Sturmnetz',cost:45,damage:7,chain:5,jumpRange:95,desc:'Bis zu fünf Ziele und weitere Sprünge.'},
+    storm:{tower:'chain',name:'Sturmnetz',cost:45,damage:11,chain:5,jumpRange:95,desc:'Bis zu fünf Ziele und weitere Sprünge.'},
     overload:{tower:'chain',name:'Überladung',cost:45,damage:18,chain:2,cooldown:1.1,range:155,desc:'Zwei starke Treffer für robuste Gegner.'},
-    deepFrost:{tower:'freeze',name:'Tiefenfrost',cost:35,slow:.35,range:125,desc:'65 % Slow in kleinerem Radius.'},
+    deepFrost:{tower:'freeze',name:'Tiefenfrost',cost:35,slow:.4,range:125,desc:'60 % Slow in kleinerem Radius.'},
     frostField:{tower:'freeze',name:'Frostfeld',cost:35,slow:.55,range:200,desc:'45 % Slow mit großem Wirkungsbereich.'},
     eagleEye:{tower:'archer',requires:'marksman',name:'Adlerauge',cost:60,damage:38,range:230,cooldown:.8,desc:'Finale Einzelziel-Spezialisierung.'},
     arrowRain:{tower:'archer',requires:'volley',name:'Pfeilregen',cost:60,damage:12,cooldown:.5,splash:75,desc:'Größere und schnellere Flächentreffer.'},
     fortressBreaker:{tower:'catapult',requires:'siege',name:'Festungsbrecher',cost:70,damage:60,range:260,cooldown:1.7,desc:'Finale schwere Belagerungssteine.'},
     rockStorm:{tower:'catapult',requires:'barrage',name:'Steinsturm',cost:70,damage:21,cooldown:.5,desc:'Finale schnelle Steinsalven.'},
-    tempest:{tower:'chain',requires:'storm',name:'Gewitter',cost:70,damage:11,chain:7,jumpRange:110,desc:'Großes Blitznetz für dichte Gruppen.'},
+    tempest:{tower:'chain',requires:'storm',name:'Gewitter',cost:70,damage:20,chain:7,jumpRange:110,desc:'Großes Blitznetz für dichte Gruppen.'},
     thunder:{tower:'chain',requires:'overload',name:'Donnerschlag',cost:70,damage:32,chain:3,range:175,desc:'Starke Blitze für robuste Ziele.'},
-    absoluteZero:{tower:'freeze',requires:'deepFrost',name:'Eisstarre',cost:60,slow:.25,range:145,desc:'75 % Verlangsamung im Kampfbereich.'},
+    absoluteZero:{tower:'freeze',requires:'deepFrost',name:'Eisstarre',cost:60,slow:.35,range:145,desc:'65 % Verlangsamung im Kampfbereich.'},
     winter:{tower:'freeze',requires:'frostField',name:'Winterfeld',cost:60,slow:.5,range:250,desc:'50 % Slow auf großem Gebiet.'},
     demolition:{tower:'mine',name:'Sprengmeister',cost:40,damage:42,cooldown:1.8,range:170,splash:60,desc:'Langsam gelegte schwere Minen für robuste Gegner.'},
     minefield:{tower:'mine',name:'Minenfeld',cost:40,damage:16,cooldown:.75,range:140,splash:42,desc:'Legt schnell viele kleinere Minen gegen Gruppen.'},
     earthquake:{tower:'mine',requires:'demolition',name:'Erdbrecher',cost:65,damage:75,cooldown:1.9,range:185,splash:80,desc:'Finale Großmine mit gewaltigem Explosionsradius.'},
     carpet:{tower:'mine',requires:'minefield',name:'Minenteppich',cost:65,damage:24,cooldown:.5,range:155,splash:55,desc:'Finales dichtes Minenfeld für dauerhaften Flächenschaden.'},
-    harpoon:{tower:'ballista',name:'Harpunenbolzen',cost:55,damage:72,cooldown:2.2,range:255,desc:'Massiver Treffer für Bosse und gepanzerte Ziele.'},
+    harpoon:{tower:'ballista',name:'Harpunenbolzen',cost:55,damage:72,cooldown:2.2,range:255,bossMultiplier:1.6,desc:'Massiver Treffer für Bosse und gepanzerte Ziele.'},
     repeater:{tower:'ballista',name:'Repetierwerk',cost:55,damage:30,cooldown:1.05,range:215,desc:'Schnellere Bolzen für verlässlichen Einzelzielschaden.'},
-    dragonSlayer:{tower:'ballista',requires:'harpoon',name:'Drachentöter',cost:80,damage:125,cooldown:2.25,range:285,desc:'Finaler Fernschuss mit extremem Einzelschaden.'},
+    dragonSlayer:{tower:'ballista',requires:'harpoon',name:'Drachentöter',cost:80,damage:125,cooldown:2.25,range:285,bossMultiplier:1.8,desc:'Finaler Fernschuss mit extremem Einzelschaden.'},
     boltStorm:{tower:'ballista',requires:'repeater',name:'Bolzensturm',cost:80,damage:48,cooldown:.72,range:235,desc:'Finales Repetierwerk mit hoher Feuerrate.'},
     inferno:{tower:'flame',name:'Inferno',cost:50,damage:23.75,cooldown:.85,range:125,splash:65,desc:'Größere, schwerere Feuerstöße für dichte Gruppen.'},
     wildfire:{tower:'flame',name:'Lauffeuer',cost:50,damage:9.5,cooldown:.38,range:120,splash:42,desc:'Sehr schnelle Flammenstöße halten Schwärme unter Druck.'},
@@ -108,7 +108,7 @@ const HexData=(()=>{
     ballista:{name:'Apex-Bolzen',cost:125,damageFactor:1.35,rangeFactor:1.08,bossFactor:1.2,desc:'Maximale Durchschlagskraft mit zusätzlichem Bossschaden.'},
     flame:{name:'Phönixkern',cost:120,damageFactor:1.3,splashBonus:15,desc:'Verstärkt Schaden und Fläche beider Flammenspezialisierungen.'}
   };
-  const SPECIALIZATIONS={"volley":{"name":"Pfeilhagel","cooldownFactor":0.75,"splashBonus":25,"desc":"25 % kürzere Nachladezeit und +25 Explosionsradius."},"marksman":{"name":"Meisterschütze","damageFactor":1.5,"rangeFactor":1.2,"desc":"+50 % Schaden und +20 % Reichweite."},"siege":{"name":"Belagerungstitan","damageFactor":1.6,"rangeFactor":1.15,"desc":"+60 % Schaden und +15 % Reichweite."},"barrage":{"name":"Steinlawine","cooldownFactor":0.65,"desc":"35 % kürzere Nachladezeit."},"storm":{"name":"Gewitterfront","chainBonus":4,"jumpBonus":30,"desc":"Vier zusätzliche Kettenziele und +30 Sprungweite."},"overload":{"name":"Donnerschlag","damageFactor":1.7,"desc":"+70 % Schaden pro Treffer."},"deepFrost":{"name":"Ewiges Eis","slowFactor":0.6,"desc":"40 % geringere Bewegungsgeschwindigkeit innerhalb der Aura."},"frostField":{"name":"Polarweite","rangeFactor":1.35,"desc":"+35 % Aura-Reichweite."},"demolition":{"name":"Weltenbrecher","damageFactor":1.5,"splashBonus":30,"desc":"+50 % Schaden und +30 Explosionsradius."},"minefield":{"name":"Minenmeer","cooldownFactor":0.6,"desc":"40 % kürzere Nachladezeit."},"harpoon":{"name":"Drachentod","damageFactor":1.3,"bossFactor":1.5,"desc":"+30 % Schaden und zusätzlich +50 % Bossschaden."},"repeater":{"name":"Bolzenorkan","cooldownFactor":0.65,"desc":"35 % kürzere Nachladezeit."},"inferno":{"name":"Sonnenkern","damageFactor":1.5,"splashBonus":25,"desc":"+50 % Schaden und +25 Explosionsradius."},"wildfire":{"name":"Feuerwalze","cooldownFactor":0.65,"splashBonus":10,"desc":"35 % kürzere Nachladezeit und +10 Explosionsradius."},"elementFire":{"name":"Weltenbrand","damageFactor":1.3,"splashBonus":30,"desc":"+30 % Feuerschaden und +30 Explosionsradius."},"elementWater":{"name":"Ozeanherz","damageFactor":1.3,"hitSlowFactor":0.7,"slowDurationBonus":2,"desc":"+30 % Wasserschaden, stärkere Verlangsamung und +2 Sekunden Dauer."},"elementWind":{"name":"Himmelssturm","damageFactor":1.3,"rangeFactor":1.2,"pierceBonus":3,"desc":"+30 % Windschaden, +20 % Reichweite und drei zusätzliche Durchschlagsziele."},"soulChoir":{"name":"Seelenheer","soulLimitBonus":4,"desc":"Vier zusätzliche Geister gleichzeitig."},"soulKeeper":{"name":"Seelenherrscher","damageFactor":1.5,"soulDurationBonus":6,"desc":"+50 % Turm- und Geisterschaden und +6 Sekunden Geisterdauer."}};
+  const SPECIALIZATIONS={"volley":{"name":"Pfeilhagel","cooldownFactor":0.75,"splashBonus":25,"desc":"25 % kürzere Nachladezeit und +25 Explosionsradius."},"marksman":{"name":"Meisterschütze","damageFactor":1.5,"rangeFactor":1.2,"desc":"+50 % Schaden und +20 % Reichweite."},"siege":{"name":"Belagerungstitan","damageFactor":1.6,"rangeFactor":1.15,"desc":"+60 % Schaden und +15 % Reichweite."},"barrage":{"name":"Steinlawine","cooldownFactor":0.65,"desc":"35 % kürzere Nachladezeit."},"storm":{"name":"Gewitterfront","chainBonus":4,"jumpBonus":30,"damageFactor":1.4,"desc":"+40 % Schaden, vier zusätzliche Kettenziele und +30 Sprungweite."},"overload":{"name":"Donnerschlag","damageFactor":1.7,"desc":"+70 % Schaden pro Treffer."},"deepFrost":{"name":"Ewiges Eis","slowFactor":0.8,"desc":"20 % geringere Bewegungsgeschwindigkeit innerhalb der Aura."},"frostField":{"name":"Polarweite","rangeFactor":1.35,"desc":"+35 % Aura-Reichweite."},"demolition":{"name":"Weltenbrecher","damageFactor":1.5,"splashBonus":30,"desc":"+50 % Schaden und +30 Explosionsradius."},"minefield":{"name":"Minenmeer","cooldownFactor":0.6,"desc":"40 % kürzere Nachladezeit."},"harpoon":{"name":"Drachentod","damageFactor":1.3,"bossFactor":1.5,"desc":"+30 % Schaden und zusätzlich +50 % Bossschaden."},"repeater":{"name":"Bolzenorkan","cooldownFactor":0.65,"desc":"35 % kürzere Nachladezeit."},"inferno":{"name":"Sonnenkern","damageFactor":1.5,"splashBonus":25,"desc":"+50 % Schaden und +25 Explosionsradius."},"wildfire":{"name":"Feuerwalze","cooldownFactor":0.65,"splashBonus":10,"desc":"35 % kürzere Nachladezeit und +10 Explosionsradius."},"elementFire":{"name":"Weltenbrand","damageFactor":1.3,"splashBonus":30,"desc":"+30 % Feuerschaden und +30 Explosionsradius."},"elementWater":{"name":"Ozeanherz","damageFactor":1.3,"hitSlowFactor":0.7,"slowDurationBonus":2,"desc":"+30 % Wasserschaden, stärkere Verlangsamung und +2 Sekunden Dauer."},"elementWind":{"name":"Himmelssturm","damageFactor":1.3,"rangeFactor":1.2,"pierceBonus":3,"desc":"+30 % Windschaden, +20 % Reichweite und drei zusätzliche Durchschlagsziele."},"soulChoir":{"name":"Seelenheer","soulLimitBonus":4,"desc":"Vier zusätzliche Geister gleichzeitig."},"soulKeeper":{"name":"Seelenherrscher","damageFactor":1.5,"soulDurationBonus":6,"desc":"+50 % Turm- und Geisterschaden und +6 Sekunden Geisterdauer."}};
   function ultimateAvailable(state,tower){return state.ultimateUnlocks?.includes('ultimate:'+tower.type+':'+tower.branch)||state.ultimateUnlocks?.includes('ultimate:'+tower.type);}
   const BRANCH_VISUALS={marksman:{icon:'◎',color:'#f5d06e'},volley:{icon:'≋',color:'#96d47c'},siege:{icon:'◆',color:'#e99a5c'},barrage:{icon:'⋮',color:'#ffdca1'},storm:{icon:'ϟ',color:'#93a5ff'},overload:{icon:'✦',color:'#e2a1ff'},deepFrost:{icon:'❄',color:'#70d5ff'},frostField:{icon:'❆',color:'#c0f6ea'},demolition:{icon:'✹',color:'#ff9b55'},minefield:{icon:'••',color:'#d9bc72'},harpoon:{icon:'➶',color:'#e7d39e'},repeater:{icon:'»',color:'#d4b979'},inferno:{icon:'☀',color:'#ff7448'},wildfire:{icon:'≋',color:'#ff9b55'}};
   Object.assign(BRANCH_VISUALS,{elementFire:{icon:'♨',color:'#ff8654'},elementWater:{icon:'≈',color:'#69d8ff'},elementWind:{icon:'≋',color:'#dbefae'},soulChoir:{icon:'☽',color:'#a6edb4'},soulKeeper:{icon:'☠',color:'#c8a3ee'}});
@@ -138,7 +138,10 @@ const HexData=(()=>{
     const detail=state.runTowerDetails?.[tower.statId];if(detail)detail[field]=(detail[field]||0)+amount;
   }
   function runUpgrades(state,tower){
-    if(!tower||tower.guestOwner!==undefined||tower.ultimate)return [];
+    if(state.challengeKind==='movingFortress'&&!HexMovingFortress.planning(state))return [];
+    if(state.challengeKind==='towerDraft'&&!HexTowerDraft.canUpgrade(state))return [];
+    if(state.challengeKind==='powerGrid'&&!HexPowerGrid.planning(state))return [];
+    if(state.challengeKind==='detour'||!tower||tower.guestOwner!==undefined||tower.ultimate)return [];
     if(!tower.finalUpgrade)return availableUpgrades(tower);
     const id='ultimate:'+tower.type;
     return ultimateAvailable(state,tower)&&ULTIMATES[tower.type]?[[id,ultimateDefinition(tower)]]:[];
@@ -168,7 +171,10 @@ const HexData=(()=>{
   const UPGRADE_ORDER={archer:['volley','marksman'],catapult:['barrage','siege'],chain:['storm','overload'],freeze:['frostField','deepFrost'],mine:['minefield','demolition'],flame:['inferno','wildfire'],necromancer:['soulChoir','soulKeeper'],element:['elementFire','elementWind','elementWater']};
   function availableUpgrades(tower){return Object.entries(UPGRADES).filter(([,upgrade])=>upgrade.tower===tower.type&&!tower.finalUpgrade&&(tower.branch?upgrade.requires===tower.branch:!upgrade.requires)).sort(([a],[b])=>{const order=UPGRADE_ORDER[tower.type]||[];return order.indexOf(a)-order.indexOf(b);});}
   function towerRefund(state,tower){
-    if(state.challengeKind==='garrison'||!tower||tower.guestOwner!==undefined||state.hp<=0||state.phase==='gameover') return null;
+    if(state.challengeKind==='movingFortress'&&!HexMovingFortress.planning(state))return null;
+    if(state.challengeKind==='towerDraft')return null;
+    if(state.challengeKind==='powerGrid'&&!HexPowerGrid.planning(state))return null;
+    if(['garrison','detour'].includes(state.challengeKind)||!tower||tower.guestOwner!==undefined||state.hp<=0||state.phase==='gameover') return null;
     const full=['place','build'].includes(state.phase)&&!state.waveRunning&&tower.builtOnWave===state.wave;
     return {amount:full?tower.paid:Math.floor(tower.paid*.5),percent:full?100:50};
   }

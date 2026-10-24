@@ -18,7 +18,7 @@ const HexExploration=(()=>{
     return cells;
   }
   function expand(landmarks,map){
-    const cells=region(map);landmarks.surveyed??=new Set();
+    const cells=region(map);if(landmarks.fixed)return cells;landmarks.surveyed??=new Set();
     for(const [id,cell] of cells){
       if(landmarks.surveyed.has(id)) continue;landmarks.surveyed.add(id);
       const baseDistance=distance(cell,{q:0,r:0});if(baseDistance<3||map.has(id)||landmarks.has(id)) continue;
@@ -85,6 +85,7 @@ const HexExploration=(()=>{
     if(!landmark||landmark.claimed||!state.map.has(id)) return 0;
     const tile=state.map.get(id);
     if(!(tile.roads||[]).some(d=>{const n=HexMap.neighbor(q,r,d),other=state.map.get(HexMap.key(n.q,n.r));return other&&(other.roads||[]).includes(HexMap.OPP(d));})) return 0;
+    if(landmark.relicId)return HexExpedition.collect(state,landmark,tile);
     landmark.claimed=true;
     if(landmark.merchant){tile.site='merchant';state.buildingVersion=(state.buildingVersion||0)+1;return 0;}
     if(landmark.type==='shrine'){landmark.strategic=true;tile.site=landmark.augment?'augment':'shrine';if(state.pendingShrine)(state.shrineQueue??=[]).push(id);else state.pendingShrine=id;return 0;}
@@ -100,6 +101,6 @@ const HexExploration=(()=>{
     const tile=state.map?.get(id),landmark=state.landmarks?.get(id);if(!tile||landmark?.type!=='boss'||tile.site==='guardian')return;
     tile.site='guardian';tile.siteSlot=tile.slots||0;tile.slots=tile.siteSlot+1;tile.towers??=[];tile.towers.push(null);state.buildingVersion=(state.buildingVersion||0)+1;
   }
-  function siteLabel(tile){return tile.site==='merchant'?'Händler · Vorräte kaufen':tile.site==='augment'?'Augment-Insel':tile.site==='tradePost'?'Handelsposten · +'+(tile.siteIncome||0)+' Gold/Welle (gesamt max. 20)':tile.site==='guardian'?'Wächterplatz · +20 % Reichweite':tile.site==='shrine'?(tile.siteEffect==='damage'?'Schrein · +10 % Schaden · Nachbarhexe':tile.siteEffect==='range'?'Schrein · +15 % Reichweite · Nachbarhexe':'Schrein · Segen wählen'):'';}
+  function siteLabel(tile){if(tile.site==='relic')return tile.relicName+' · geborgen';return tile.site==='merchant'?'Händler · Vorräte kaufen':tile.site==='augment'?'Augment-Insel':tile.site==='tradePost'?'Handelsposten · +'+(tile.siteIncome||0)+' Gold/Welle (gesamt max. 20)':tile.site==='guardian'?'Wächterplatz · +20 % Reichweite':tile.site==='shrine'?(tile.siteEffect==='damage'?'Schrein · +10 % Schaden · Nachbarhexe':tile.siteEffect==='range'?'Schrein · +15 % Reichweite · Nachbarhexe':'Schrein · Segen wählen'):'';}
   return {activateShrine,defeatGuardian,siteLabel,clearRadius,fogRadius,treasureReward,distance,create,region,expand,visibility,claim,bossProfile,shrineEffect,bossRewardRarity,prefab,attach,gridCells};
 })();

@@ -30,6 +30,8 @@ const HexModelMap=(()=>{
   }
   /** Modell + Drehschritte (60° gegen den Uhrzeigersinn) für ein gelegtes Tile. */
   function modelFor(tile){
+    // Fixed mission towers stand on grass, not the road-bearing "Weites Land" card.
+    if(tile.type==='empty'&&Array.isArray(tile.roads)&&tile.roads.length===0)return {name:'straight',rotation:0,proceduralRoads:true};
     if(NAMED_TILES.includes(tile.type)) return {name:tile.type,rotation:tile.rotation||0,...(PROCEDURAL_ROAD_TILES.includes(tile.type)?{proceduralRoads:true}:{})};
     if(HexData.CARD_LIBRARY[tile.type]?.procedural)return {name:'straight',rotation:tile.rotation||0,proceduralRoads:true};
     const alias=HexData.CARD_LIBRARY[tile.type]?.model;if(alias)return {name:alias,rotation:tile.rotation||0};

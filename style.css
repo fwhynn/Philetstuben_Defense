@@ -118,6 +118,12 @@ html,body{height:100%;overflow:hidden}
 .handDock .card p{font-size:10.5px;line-height:13px}
 .dockBR{position:absolute;right:16px;bottom:16px;z-index:6;display:flex;flex-direction:column;gap:8px;align-items:stretch;width:230px}
 .dockBR .toggle{background:#162019dd;border-radius:8px;padding:6px 10px;text-align:center}
+.dockBR #challengeGuide,.dockBR #draftControls,.dockBR #expeditionControls,.dockBR #powerControls,.dockBR #villageControls,.dockBR #detourControls{grid-column:1/-1;min-width:0;background:#16291ff5;color:#fff2d3;border:1px solid #6d8157;border-radius:9px;padding:10px;font-size:13px;line-height:1.4;max-height:24vh;overflow:auto;box-sizing:border-box}
+.dockBR #challengeGuide summary{cursor:pointer;font-weight:700;color:#f0cb70}
+.dockBR #challengeGuide p,.dockBR section p{margin:6px 0}
+#draftOffers{display:flex;flex-wrap:wrap;gap:5px}#draftOffers button{flex:1;padding:8px;font-size:12px;min-height:44px}
+.dockBR:has(#challengeGuide:not(.hidden)) .speedControl{order:10}
+.dockBR:has(#challengeGuide:not(.hidden)) #startWaveBtn{order:11}
 .dockBL{position:absolute;left:16px;bottom:64px;z-index:6}
 .drawer{position:absolute;top:96px;left:16px;bottom:240px;width:min(400px,calc(100% - 32px));z-index:8;overflow:auto;background:#1d2922f7;border:1px solid #4d684f;border-radius:14px;padding:14px;box-shadow:0 12px 32px #000a}
 .drawer.hidden{display:none}

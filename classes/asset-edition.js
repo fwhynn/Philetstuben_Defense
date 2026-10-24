@@ -2,11 +2,11 @@
 const HexAssetEdition=(()=>{
   const KEY='hexAssetEdition',EDITIONS=['normal','sakura','halloween'],listeners=new Set();
   let current='normal';
-  try{const stored=localStorage.getItem(KEY);if(EDITIONS.includes(stored))current=stored;}catch{/* Speicher nicht verfügbar */}
+  try{const stored=(globalThis.HexChallengeLab?.active?HexChallengeLab.storage:localStorage).getItem(KEY);if(EDITIONS.includes(stored))current=stored;}catch{/* Speicher nicht verfügbar */}
   function sync(){if(typeof document==='undefined')return;for(const el of document.querySelectorAll('[data-asset-edition]'))el.value=current;}
   function set(value){
     if(!EDITIONS.includes(value)||value===current)return;
-    current=value;try{localStorage.setItem(KEY,value);}catch{/* Speichern nicht möglich */}
+    current=value;try{(globalThis.HexChallengeLab?.active?HexChallengeLab.storage:localStorage).setItem(KEY,value);}catch{/* Speichern nicht möglich */}
     sync();for(const fn of listeners)fn(value);
   }
   /** Ladereihenfolge für ein Modell relativ zu assets/: Datei der gewählten Edition (falls vorhanden) mit Rückfall auf die normale. */

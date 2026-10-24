@@ -4,7 +4,7 @@ const HexAudio=(()=>{
   const recent=new Map();
   const toggle=document.getElementById('soundEnabled');
   const volume=document.getElementById('soundVolume');
-  const storage=globalThis.HexFirstPlayerTest?.active?HexFirstPlayerTest.storage:localStorage;
+  const storage=globalThis.HexChallengeLab?.active?HexChallengeLab.storage:globalThis.HexFirstPlayerTest?.active?HexFirstPlayerTest.storage:localStorage;
   const settings=()=>({enabled:toggle.checked,volume:Number(volume.value)});
   function persist(){try{storage.setItem('autohex-audio-v1',JSON.stringify(settings()));}catch{}}
   function applySettings(value){

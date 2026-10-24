@@ -4,7 +4,7 @@
  */
 const HexRunSnapshot=(()=>{
   const VERSION=1,RULES='duo-foundation-4';
-  const ui=new Set(['workshopPicking','duoPortal','consumablePickUI','buildingTarget','previewBuilding','selectedCard','rotation','hoveredPlacement','showHexGrid','showSlotHints','hoverBuilding','selectedSlot','selectedSlots','selectedTower','selectedTowers','selectedBuilding','selectedBase','previewTower','previewUpgrade','dragTower','dragSlot','highlightBiome','biomeIntro','showUpgradeStatus','inspectEndMap']);
+  const ui=new Set(['villageMove','workshopPicking','duoPortal','consumablePickUI','buildingTarget','previewBuilding','selectedCard','rotation','hoveredPlacement','showHexGrid','showSlotHints','hoverBuilding','selectedSlot','selectedSlots','selectedTower','selectedTowers','selectedBuilding','selectedBase','previewTower','previewUpgrade','dragTower','dragSlot','highlightBiome','biomeIntro','showUpgradeStatus','inspectEndMap']);
   function encode(value,stack=new Set()){
     if(value===undefined)return ['undefined'];
     if(typeof value==='number'&&!Number.isFinite(value))return ['number',String(value)];
@@ -51,6 +51,9 @@ const HexRunSnapshot=(()=>{
     const state=decode(snapshot.state),random=HexRandom.restore(snapshot.random);
     if(!(state.map instanceof Map)||!(state.landmarks instanceof Map)||!supported(state)||!Array.isArray(state.spawnQueue)||state.pendingSpawns!==state.spawnQueue.length)throw new Error('Invalid run checkpoint');
     state.biomeLayoutVersion??=1;
+    // Support multipliers are derived from buildings, not permanent purchases.
+    // Reconcile older forge values without changing paid costs or owned levels.
+    if([...state.map.values()].some(tile=>tile.buildings?.some(b=>b?.type==='forge')))HexBuildings.refresh(state);
     return {state,random};
   }
   return {capture,restore,VERSION,RULES};

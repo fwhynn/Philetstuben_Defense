@@ -37,6 +37,16 @@ const HexRunRuntime=(()=>{
     state.vision=HexExploration.expand(state.landmarks,new Map([['0,0',{q:0,r:0}]]));
     state.map.set('0,0',{q:0,r:0,type:'base',roads:state.baseExits,slots:0,towers:[],income:0});
     if(challengeDay){state.challengeKind=HexWaves.daily(challengeDay).id;state.challengeTarget=HexWaves.daily(challengeDay).target;}
+    if(state.challengeKind==='detour')HexDetour.initialize(state);
+    if(state.challengeKind==='villages')HexVillages.initialize(state);
+    if(state.challengeKind==='powerGrid')HexPowerGrid.initialize(state);
+    if(state.challengeKind==='expedition')HexExpedition.initialize(state);
+    if(state.challengeKind==='towerDraft')HexTowerDraft.initialize(state);
+    if(state.challengeKind==='movingFortress')HexMovingFortress.initialize(state);
+    if(state.challengeKind==='greed'){
+      state.difficulty='normal';state.openingRemaining=0;state.baseExits=[0];state.map.get('0,0').roads=[0];state.greedScore=0;
+      state.towerLoadout=['archer','catapult','chain','freeze','ballista'];
+    }
     if(state.challengeKind==='garrison'){
       state.gold=1200;state.income=0;state.difficulty='normal';state.openingRemaining=0;state.baseExits=[0];state.map.get('0,0').roads=[0];state.landmarks=new Map();state.vision=[];state.hand=[];state.phase='build';
       let p={q:0,r:0};const directions=[0,0,0,5,5,3,3,3,5,5,0,0];
@@ -69,6 +79,8 @@ const HexRunRuntime=(()=>{
   }
   const {key,neighbor,axialToWorld,edgePoint}=HexMap;
   function spawnSources(state){
+    if(state.challengeKind==='movingFortress')return HexMovingFortress.sources(state);
+    if(state.challengeKind==='villages')return HexVillages.sources(state);
     const routes=cachedRoutes(state.map),sources=[];
     for(const tile of state.map.values()){
       const id=key(tile.q,tile.r);if(tile.type==='base'||!routes.distances.has(id)) continue;
@@ -85,10 +97,10 @@ const HexRunRuntime=(()=>{
   function nextSourcePoints(state,random,source){
     if(source.routes){
       const points=source.points.slice(),{graph}=source.routes,visited=new Set();
-      let current=key(source.tile.q,source.tile.r);
-      while(current!==key(0,0)){
+      let current=key(source.tile.q,source.tile.r);const target=source.target||key(0,0);
+      while(current!==target){
         visited.add(current);
-        const canReachBase=start=>{const queue=[start],seen=new Set(visited);seen.add(start);for(let i=0;i<queue.length;i++){const id=queue[i];if(id===key(0,0))return true;for(const edge of graph.get(id)||[])if(!seen.has(edge.next)){seen.add(edge.next);queue.push(edge.next);}}return false;};
+        const canReachBase=start=>{const queue=[start],seen=new Set(visited);seen.add(start);for(let i=0;i<queue.length;i++){const id=queue[i];if(id===target)return true;for(const edge of graph.get(id)||[])if(!seen.has(edge.next)){seen.add(edge.next);queue.push(edge.next);}}return false;};
         const choices=(graph.get(current)||[]).filter(edge=>!visited.has(edge.next)&&canReachBase(edge.next));
         if(!choices.length)return [];
         const edge=choices[Math.floor(random()*choices.length)];points.push(...edge.points.slice(1));current=edge.next;
@@ -99,28 +111,30 @@ const HexRunRuntime=(()=>{
   }
 
 
-  function spawnEnemy(state,points,idx){
+  function spawnEnemy(state,points,idx,villageId){
     if(state.hp<=0) return;
     const plan=spawnPlan(state),profile=plan.enemies[idx||0],hp=profile.hp;
     const start=points[0];
-    state.enemies.push({id:state.nextEnemyId++,...profile,spawnedAt:state.elapsedMs,points,index:0,t:0,hp,maxHp:hp,maxArmorHp:profile.armorHp||0,maxMagicHp:profile.magicHp||0,alive:true,x:start.x,y:start.y});
+    state.enemies.push({id:state.nextEnemyId++,...profile,...(villageId===undefined?{}:{villageId}),spawnedAt:state.elapsedMs,points,index:0,t:0,hp,maxHp:hp,maxArmorHp:profile.armorHp||0,maxMagicHp:profile.magicHp||0,alive:true,x:start.x,y:start.y});
   }
 
   function advance(state,random,dt,emit=()=>{}){
     if(!Number.isFinite(dt)||dt<0)throw new Error('Invalid simulation delta');
     if(!state.waveRunning)return 'idle';
     state.elapsedMs+=dt*1000;const time=state.elapsedMs;let sources;
-    drain(state,time,job=>{sources??=spawnSources(state);const source=sources.find(s=>s.tile.q===job.source.q&&s.tile.r===job.source.r&&s.dir===job.source.dir);if(!source)throw new Error('Spawn source missing');spawnEnemy(state,nextSourcePoints(state,random,source),job.index);});
+    drain(state,time,job=>{sources??=spawnSources(state);const source=sources.find(s=>s.tile.q===job.source.q&&s.tile.r===job.source.r&&s.dir===job.source.dir);if(!source)throw new Error('Spawn source missing');spawnEnemy(state,nextSourcePoints(state,random,source),job.index,source.villageId);});
     // Capture length: newly summoned units are processed from the next step,
     // exactly as with the former array snapshot, without copying every enemy.
     const existingEnemyCount=state.enemies.length;
-    for(let i=0;i<existingEnemyCount;i++){const boss=state.enemies[i];if(!boss.alive||!boss.summonInterval||(boss.summoned||0)>=boss.summonLimit)continue;boss.nextSummonAt??=time+boss.summonInterval;if(time<boss.nextSummonAt)continue;boss.nextSummonAt=time+boss.summonInterval;boss.summoned=(boss.summoned||0)+1;const hp=Math.round(boss.maxHp*.025);state.projectiles.push({kind:'blast',x:boss.x,y:boss.y,r:24,ttl:1,max:1,color:'#c598ff'});state.enemies.push({id:state.nextEnemyId++,type:'swarm',name:'Seelendiener',summoned:true,hp,maxHp:hp,armorHp:0,magicHp:0,speed:boss.speed*.8,killGold:0,baseDamage:1,alive:true,points:boss.points.map(p=>({...p})),index:boss.index,t:boss.t,x:boss.x,y:boss.y});}
-    const refs=[];for(const tile of state.map.values()){if(!tile.towers?.some(Boolean))continue;const slots=HexMap.slotPositions(tile);(tile.towers||[]).forEach((tw,i)=>{if(tw)refs.push({tw,pos:slots[i],tile});});}
+    for(let i=0;i<existingEnemyCount;i++){const boss=state.enemies[i];if(!boss.alive||!boss.summonInterval||(boss.summoned||0)>=boss.summonLimit)continue;boss.nextSummonAt??=time+boss.summonInterval;if(time<boss.nextSummonAt)continue;boss.nextSummonAt=time+boss.summonInterval;boss.summoned=(boss.summoned||0)+1;const hp=Math.round(boss.maxHp*.025);state.projectiles.push({kind:'blast',x:boss.x,y:boss.y,r:24,ttl:1,max:1,color:'#c598ff'});state.enemies.push({id:state.nextEnemyId++,type:'swarm',name:'Seelendiener',...(boss.villageId===undefined?{}:{villageId:boss.villageId}),summoned:true,hp,maxHp:hp,armorHp:0,magicHp:0,speed:boss.speed*.8,killGold:0,baseDamage:1,alive:true,points:boss.points.map(p=>({...p})),index:boss.index,t:boss.t,x:boss.x,y:boss.y});}
+    const powered=state.challengeKind==='powerGrid'?HexPowerGrid.activeIds(state):null;
+    const refs=[];for(const tile of state.map.values()){if(!tile.towers?.some(Boolean))continue;const slots=HexMap.slotPositions(tile);(tile.towers||[]).forEach((tw,i)=>{if(tw&&(!powered||powered.has(tw.statId)))refs.push({tw,pos:slots[i],tile});});}
     const base=HexHeroes.combatRef(state);if(base)refs.push(base);
     HexCombat.step(state,refs,HexData.TOWERS,dt,time,emit);
     return state.hp<=0?'defeat':state.pendingSpawns===0&&state.enemies.length===0?'complete':'running';
   }
   function rescueTunnel(state){
+    if(['detour','villages','powerGrid','expedition','towerDraft','movingFortress'].includes(state.challengeKind))return false;
     if(state.phase!=='build'||state.waveRunning||state.hp<=0)return false;
     const plan=HexMap.tunnelPlan(state.map,state.landmarks,!!state.tunnelOffer);if(!plan)return false;
     const id=key(plan.q,plan.r),source=state.map.get(plan.source),number=state.nextTunnelId=(state.nextTunnelId||0)+1;

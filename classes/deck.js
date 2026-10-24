@@ -17,7 +17,7 @@ const HexDeck=(()=>{
   function addReward(state,id){state.deck.push(id);state.drawPile.push(id);}
   // Recover copies lost by older blocked turns, without duplicating existing cards.
   function recoverMissing(state){
-    if(state.challengeKind==='garrison')return;
+    if(['garrison','detour','villages','powerGrid','expedition','towerDraft','movingFortress'].includes(state.challengeKind))return;
     const available=new Map();
     for(const id of [...state.hand,...state.drawPile,...state.discard])available.set(id,(available.get(id)||0)+1);
     for(const id of state.deck){const count=available.get(id)||0;if(count)available.set(id,count-1);else state.discard.push(id);}

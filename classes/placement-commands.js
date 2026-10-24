@@ -1,8 +1,11 @@
 /* Authoritative placement mutation; UI chooses an index and rotation only. */
 const HexPlacementCommands=(()=>{
-  const card=(state,id)=>id==='rescue'?state.rescueCard:HexData.CARD_LIBRARY[id];
+  const card=(state,id)=>{const c=id==='rescue'?state.rescueCard:HexData.CARD_LIBRARY[id];return state.challengeKind==='detour'&&c?{...c,slots:0,buildingSlots:0,desc:'Nur Straße. Die Verteidigung steht bereits.'}:c;};
   function canPlace(state,q,r,definition,rotation){
+    if(['villages','powerGrid','towerDraft','movingFortress'].includes(state.challengeKind))return false;
     if(!definition||!Number.isInteger(q)||!Number.isInteger(r)||!Number.isInteger(rotation)||rotation<0||rotation>5)return false;
+    if(state.challengeKind==='expedition')return HexExpedition.canPlace(state,q,r,definition,rotation);
+    if(state.challengeKind==='detour')return HexDetour.canPlace(state,q,r,definition,rotation);
     if(definition.rescue)definition={...definition,minExits:state.difficulty==='dual'?2:1};
     if(state.openingRemaining){const remaining=[...state.hand],index=remaining.indexOf(definition.id);if(index>=0)remaining.splice(index,1);return HexMap.canPlaceOpening(state.map,q,r,definition,rotation,remaining.map(id=>card(state,id)),state.baseExits);}
     if(state.landmarks.get(HexMap.key(q,r))?.prefab)return false;
@@ -16,6 +19,8 @@ const HexPlacementCommands=(()=>{
   }
   function place(state,{q,r,index,rotation}){
     if(state.phase!=='place'||state.waveRunning||state.celebrationActive||state.hp<=0||!Number.isInteger(index)||index<0||index>=state.hand.length)return null;
+    if(state.challengeKind==='expedition')return HexExpedition.place(state,{q,r,index,rotation});
+    if(state.challengeKind==='detour')return HexDetour.place(state,{q,r,index,rotation});
     const id=state.hand[index],definition=card(state,id);if(!canPlace(state,q,r,definition,rotation))return null;
     const tile={q,r,type:id,rotation,roads:HexMap.rotatedRoads(definition,rotation),slots:definition.slots||0,buildingSlots:definition.buildingSlots||0,buildings:Array(definition.buildingSlots||0).fill(null),towers:Array(definition.slots||0).fill(null),income:definition.income||0};
     state.map.set(HexMap.key(q,r),tile);

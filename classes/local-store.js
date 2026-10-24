@@ -1,6 +1,6 @@
 /* Account-scoped storage. Web Locks keep only one writable tab per profile. */
 (() => {
-  if (globalThis.HexFirstPlayerTest?.active || typeof localStorage === 'undefined') return;
+  if (globalThis.HexChallengeLab?.active || globalThis.HexFirstPlayerTest?.active || typeof localStorage === 'undefined') return;
   const environment = globalThis.HexApi?.baseUrl || 'https://api.autohextd.zlyfer.net';
   const prefix = 'autohex-store-v2:' + encodeURIComponent(environment) + ':';
   const legacyKeys = ['hex-bastion-profile-v1','autohex-solo-autosave-v1','hex-cloud-dirty','hex-cloud-last-sync','hex-bastion-profile-backup','hex-game-settings-v1','hex-arsenal-seen-v1','gameSpeed','hexGrid','slotHints','onboardingHints','tutorial-v1'];

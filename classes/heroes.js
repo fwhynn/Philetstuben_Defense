@@ -27,6 +27,9 @@ const HexHeroes=(()=>{
     return true;
   }
   function blockReason(state,kind){
+    if(['powerGrid','towerDraft','movingFortress'].includes(state.challengeKind))return 'Basis-Ausbau ist in dieser Mission gesperrt.';
+    if(state.challengeKind==='villages')return 'Die drei Dörfer können nicht ausgebaut werden.';
+    if(['detour','villages','powerGrid'].includes(state.challengeKind))return 'In dieser Mission bleibt die Verteidigung unverändert.';
     if(state.hp<=0||state.phase==='gameover')return 'Der Run ist beendet.';
     const next=offer(state,kind);if(!next)return 'Maximalstufe erreicht.';
     if(!['place','build','wave'].includes(state.phase))return 'Schließe zuerst die offene Belohnung oder Auswahl ab.';

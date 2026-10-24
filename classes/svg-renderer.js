@@ -48,7 +48,7 @@ function create(svg,commands){
         }
       }
       const label=text(c.x,c.y+5,visibility==='clear'?(landmark.type==='shrine'?'✦':landmark.type==='boss'?'☠':'◆'):'?',24,'#b7bfba','700');label.style.pointerEvents='none';scene.appendChild(label);
-      if(visibility==='clear'){const note=text(c.x,c.y+27,landmark.augment?'Seltenes Augment · ungesammelt':landmark.merchant?'Händler · noch nicht verbunden':landmark.type==='shrine'?'Shrine · Bonus unbekannt':landmark.type==='boss'?'Wächter · inaktiv':'Schatz +'+HexExploration.treasureReward(landmark)+' Gold · ungesammelt',8,'#b7bfba');note.style.pointerEvents='none';scene.appendChild(note);}
+      if(visibility==='clear'){const note=text(c.x,c.y+27,landmark.relicId?landmark.relicName+' · anschließen':landmark.augment?'Seltenes Augment · ungesammelt':landmark.merchant?'Händler · noch nicht verbunden':landmark.type==='shrine'?'Shrine · Bonus unbekannt':landmark.type==='boss'?'Wächter · inaktiv':'Schatz +'+HexExploration.treasureReward(landmark)+' Gold · ungesammelt',8,'#b7bfba');note.style.pointerEvents='none';scene.appendChild(note);}
     }
 
     // Global passes keep all roads below every tower, regardless of tile age.
@@ -91,6 +91,7 @@ function create(svg,commands){
 
     drawFreezeAuras();drawSelectedRange();
     hintLayer.innerHTML='';scene=hintLayer;
+    if(state.villages)for(const m of HexVillages.markers(state)){const marker=text(m.x,m.y-25,m.text,13,'#ffba75','800');marker.style.pointerEvents='none';scene.appendChild(marker);}
     if(state.consumablePickUI&&state.consumablePickUI!=='overload')for(const t of placementTargets){const c=axialToWorld(t.q,t.r),hit=drawPoly(c.x,c.y,HEX-3,'rgba(110,220,200,.25)','#8ff3df',1);hit.style.pointerEvents='all';hit.addEventListener('click',e=>{e.stopPropagation();commands.placeTile(t.q,t.r);});}
     for(const c of state.consumables||[]){
       const p=Number.isFinite(c.x)&&Number.isFinite(c.y)?c:axialToWorld(c.q,c.r);
@@ -106,7 +107,7 @@ function create(svg,commands){
     for(const mine of state.mines||[]) drawMine(mine);
     for(const e of state.enemies) drawEnemy(e);
     for(const p of state.projectiles) drawProjectile(p);
-    const nextObjectKey=JSON.stringify([[...state.map.values()].map(t=>[t.q,t.r,t.rotation,t.slots,t.income,t.buildings,t.towers.map(tw=>[tw?.type,tw?.branch,tw?.finalUpgrade,tw?.ultimate])]),state.selectedSlot,state.selectedBuilding,state.showSlotHints,state.phase,HexHeroes.upgradeAvailable(state)]);
+    const nextObjectKey=JSON.stringify([state.movingFortress?.stage,[...state.map.values()].map(t=>[t.q,t.r,t.rotation,t.slots,t.income,t.buildings,t.towers.map(tw=>[tw?.type,tw?.branch,tw?.finalUpgrade,tw?.ultimate])]),state.selectedSlot,state.selectedBuilding,state.showSlotHints,state.phase,state.powerGrid?.enabled,[...state.map.values()].flatMap(t=>(t.towers||[]).map(tw=>tw?.powerOff)),state.villages?.goals.map(v=>v.hp),HexHeroes.upgradeAvailable(state)]);
     if(nextObjectKey!==objectKey){
       objectKey=nextObjectKey;objectLayer.innerHTML='';scene=objectLayer;
       for(const tile of state.map.values()) drawTile(tile,'objects');
@@ -195,6 +196,9 @@ function create(svg,commands){
     }
     if(tile.tunnelLabel){const t=text(c.x,c.y-16,tile.tunnelLabel+' ⇄',12,'#8ff3ff','700');t.style.pointerEvents='none';scene.appendChild(t);}
     if(tile.site){const t=text(c.x,c.y+58,HexExploration.siteLabel(tile),9,'#fff4c3','700');t.style.pointerEvents='none';scene.appendChild(t);}
+    if(state.powerGrid){const t=text(c.x,c.y+48,HexPowerGrid.label(state,HexMap.key(tile.q,tile.r)),10,'#fff4c3','700');t.style.pointerEvents='none';scene.appendChild(t);const network=HexPowerGrid.evaluate(state);(tile.towers||[]).forEach((tw,i)=>{if(tw){const p=HexMap.slotPositions(tile)[i],hint=text(p.x,p.y-24,HexPowerGrid.reasons[network.status.get(tw.statId)],10,'#fff4c3','700');hint.style.pointerEvents='none';scene.appendChild(hint);}});}
+    if(tile.fortressStation!==undefined&&state.movingFortress){const i=tile.fortressStation,f=state.movingFortress,label=text(c.x,c.y+44,f.stations[i].name+' · '+(i===f.stage?'Festung':i<f.stage?'abgeschlossen':'Welle '+(i*3+1)),11,'#fff4c3','700');label.style.pointerEvents='none';scene.appendChild(label);}
+    if(tile.type==='base'&&state.villages){const g=state.villages.goals.find(g=>g.id===tile.villageId);if(g){const label=text(c.x,c.y+44,g.name+' · '+g.hp+'/'+g.maxHp,11,'#fff4c3','700');label.style.pointerEvents='none';scene.appendChild(label);}}
     if(tile.income){const t=text(c.x,c.y+44,'+'+tile.income+' Gold',10,'#fff4c3','700');t.style.pointerEvents='none';scene.appendChild(t);}
     const terrain=CARD_LIBRARY[tile.type],bonus=HexData.tileBonusLabel(terrain);
     if(bonus){const label=text(c.x,c.y+35,bonus,9,'#fff4c3','700');label.style.pointerEvents='none';scene.appendChild(label);}
@@ -273,7 +277,7 @@ function create(svg,commands){
   }
   function clearSelection(e){if(!e||e.button===undefined||e.button===0)commands.clearSelection();}
   svg.addEventListener('click',clearSelection);
-  return {render,reset,project,consumableTarget,panView:camera.panView,zoom:camera.zoom,resetView:camera.reset,getView:camera.getView,destroy(){camera.destroy();svg.removeEventListener('click',consumeClick,true);svg.removeEventListener('click',clearSelection);for(const layer of [fogLayer,worldLayer,objectLayer,hintLayer]) layer.remove();}};
+  return {render,reset,project,consumableTarget,panView:camera.panView,zoom:camera.zoom,resetView(){camera.reset();const g=state?.movingFortress?.stations[state.movingFortress.stage];if(g){const p=axialToWorld(g.q,g.r),v=camera.getView();camera.panView(p.x/(v.w*.65),p.y/(v.h*.65));}},getView:camera.getView,destroy(){camera.destroy();svg.removeEventListener('click',consumeClick,true);svg.removeEventListener('click',clearSelection);for(const layer of [fogLayer,worldLayer,objectLayer,hintLayer]) layer.remove();}};
 }
 return {create};
 })();
