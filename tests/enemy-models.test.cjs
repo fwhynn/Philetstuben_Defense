@@ -45,6 +45,6 @@ test('ability poses show lost shield, molted armor, crouch, leap and charge with
 });
 test('3D renderer loads models and shares their pose implementation instead of creating enemy sprites',()=>{
   const source=fs.readFileSync(path.join(root,'classes/three-renderer.js'),'utf8');
-  assert.ok(source.includes("from './enemy-motion.mjs'"));assert.ok(source.includes('isEnemyJoint(n.name)'));assert.ok(source.includes('applyEnemyPose(limb.g,limb.base'));
+  assert.match(source,/from '\.\/enemy-motion\.mjs(?:\?v=[a-f0-9]+)?'/);assert.ok(source.includes('isEnemyJoint(n.name)'));assert.ok(source.includes('applyEnemyPose(limb.g,limb.base'));
   assert.equal(source.includes('new THREE.Sprite('),false);
 });

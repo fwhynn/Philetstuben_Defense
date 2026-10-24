@@ -2372,3 +2372,6 @@ Bedienung & Start|Controls & startup
 Das Turmbaumenü nutzt auf großen Bildschirmen den freien Platz links besser aus. Startfehler zeigen einen Hinweis zum Neuladen, ohne Spielstände zu löschen.|The tower menu makes better use of free space on the left on large screens. Startup errors show a reload prompt without deleting saves.
 Spielaktualisierungen laden zusammengehörige Spieldateien zuverlässiger.|Updates load matching game files more reliably.`);
 HexTranslations.add("Herausforderungen|Challenges");
+
+HexTranslations.add("Duo-Start nach Updates|Duo startup after updates\nDuo-Seiten laden auch mit aktualisierten Spieldateien zuverlässig.|Duo pages load reliably with updated game files.\nDuo-Dateien nach Updates|Duo files after updates");
+HexTranslations.add("Duo|Duo");

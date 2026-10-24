@@ -1,5 +1,35 @@
 [
   {
+    "version": "next",
+    "title": "Duo-Start nach Updates",
+    "summary": "Duo-Seiten laden auch mit aktualisierten Spieldateien zuverlässig.",
+    "overview": [
+      {
+        "kind": "fix",
+        "title": "VERBESSERT",
+        "items": [
+          "Duo-Dateien nach Updates"
+        ]
+      }
+    ],
+    "sections": [
+      {
+        "title": "Duo",
+        "entries": [
+          {
+            "title": "Duo-Start nach Updates",
+            "summary": "Duo-Seiten laden auch mit aktualisierten Spieldateien zuverlässig.",
+            "stats": [],
+            "bullets": []
+          }
+        ]
+      }
+    ],
+    "changes": [
+      "Duo-Seiten laden auch mit aktualisierten Spieldateien zuverlässig."
+    ]
+  },
+  {
     "version": "1.1.7",
     "title": "Draft, Expedition & Stromnetz",
     "summary": "Klarere Missionen, wechselnde Karten und mehr Druck bei der Reliktsuche.",
