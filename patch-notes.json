@@ -1,6 +1,6 @@
 [
   {
-    "version": "next",
+    "version": "1.1.6",
     "title": "Herausforderungen, Testlabor & Turmrollen",
     "summary": "Sieben neue Missionen, klare Ziele und gezielte Balance für Türme und Herausforderungen.",
     "overview": [
@@ -164,7 +164,8 @@
       "Kettenblitz bekommt einen stärkeren Flächenzweig, die Balliste mehr Bossschaden und der Nekromant langlebigere Geister.",
       "Starke Frost-Upgrades verlangsamen weniger. Dafür wächst normales Gegnerleben nach Welle 35 langsamer; späte Bosse bleiben durch mehr Leben relevant. Feldheiler haben eine wellenabhängige Heilungsgrenze.",
       "Haus- und Schmiede-Upgrades kosten weniger. Der erste Schmiedebonus fällt schwächer aus, die höchste Stufe bleibt bei 30 Prozent."
-    ]
+    ],
+    "date": "2026-10-24"
   },
   {
     "version": "1.1.5",
