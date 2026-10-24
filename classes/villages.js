@@ -8,7 +8,7 @@ const HexVillages=(()=>{
     return [0,1,2];
   }
   function initialize(state){
-    Object.assign(state,{gold:180,income:0,hp:45,maxHp:45,difficulty:'normal',openingRemaining:0,baseExits:[0],landmarks:new Map(),vision:[],deck:[],drawPile:[],discard:[],hand:[],phase:'build',consumablesLocked:true});
+    Object.assign(state,{gold:130,income:0,hp:45,maxHp:45,difficulty:'normal',openingRemaining:0,baseExits:[0],landmarks:new Map(),vision:[],deck:[],drawPile:[],discard:[],hand:[],phase:'build',consumablesLocked:true});
     state.villages={goals:[],preparedWave:-1,moves:0,layoutVersion:2,entrances:[{q:10,r:-3,dir:1},{q:10,r:-1,dir:0},{q:9,r:1,dir:0}]};state.map=new Map();
     for(let i=0;i<3;i++){
       const q=(i-1)*-2,r=(i-1)*4;

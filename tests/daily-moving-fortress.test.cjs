@@ -1,6 +1,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),core=require('../headless-core.cjs'),{load}=require('./helpers/game.cjs');
 const day='2026-12-07',json=x=>JSON.parse(JSON.stringify(x));
-function setup(){const c=core();return {c,...c.session.create({seed:'movingFortress-v1|'+day,runId:'fortress-test',challengeDay:day,loadout:['archer','catapult','chain','freeze','mine']})};}
+// Preserve regression coverage for existing v1.2.3 saves; new rules have separate tests.
+function setup(){const c=core();return {c,...c.snapshot.restore(JSON.parse(JSON.stringify(require('./fixtures/movingFortress-v123.json'))))};}
 const slot=(g,n=3,index=0)=>({...g.path?.[n-1]||{q:g.q+n,r:g.r},index});
 function finish(r){let result,steps=0;do{result=r.c.session.advance(r.state,r.random,.05);}while(result==='running'&&++steps<20000);return result;}
 test('four stations have valid slots and each stage routes actual enemies to the relocated base',()=>{
@@ -17,7 +18,7 @@ test('stage transitions preserve life, towers, stats and upgrades; free moves ar
  const r=setup(),{c,state:s}=r,g=s.movingFortress.stations,from=slot(g[0]),to=slot(g[1]);assert.ok(c.towers.buy(s,'archer',[from]).ok);const tw=s.map.get(from.q+','+from.r).towers[0];assert.ok(c.towers.upgrade(s,from,'volley'));tw.lastShot=123;tw.targetPriority=['boss'];s.hp=13;
  assert.equal(c.movingFortress.move(s,from,to),false);s.wave=3;c.movingFortress.prepare(s);const gold=s.gold,paid=tw.paid;assert.equal(s.hp,13);assert.equal(c.movingFortress.move(s,from,{...to,index:99}),false);assert.ok(c.movingFortress.move(s,from,to));assert.equal(s.gold,gold);assert.equal(tw.paid,paid);assert.equal(tw.branch,'volley');assert.equal(tw.lastShot,123);assert.deepEqual(json(tw.targetPriority),['boss']);assert.equal(s.runTowerDetails[tw.statId].r,to.r);
  assert.equal(c.movingFortress.move(s,from,to),false);assert.equal(c.movingFortress.move(s,to,slot(g[2])),false);assert.ok(c.movingFortress.move(s,to,slot(g[1],4)));c.movingFortress.prepare(s);assert.equal(s.movingFortress.relocation,true);
- assert.ok(c.flow.start(s,r.random));for(const paused of [false,true]){s.paused=paused;assert.equal(c.movingFortress.move(s,slot(g[1],4),to),false);assert.equal(c.towers.buy(s,'archer',[to]).ok,false);assert.equal(c.data.towerRefund(s,tw),null);}s.waveRunning=false;s.phase='build';s.wave=4;c.movingFortress.prepare(s);assert.equal(s.movingFortress.relocation,false);
+ assert.ok(c.flow.start(s,r.random));for(const paused of [false,true]){s.paused=paused;assert.equal(c.movingFortress.move(s,slot(g[1],4),to),false);assert.equal(c.movingFortress.building(s),true);assert.equal(c.data.towerRefund(s,tw),null);}s.waveRunning=false;s.phase='build';s.wave=4;c.movingFortress.prepare(s);assert.equal(s.movingFortress.relocation,false);
 });
 test('a paid mixed defense can relocate through all four stages and win twelve waves',()=>{
  const r=setup(),{c,state:s}=r;let oldStage=0;const build=[['catapult',1,0],['freeze',2,0],['ballista',3,0],['archer',4,0],['mine',5,0],['catapult',6,0]];

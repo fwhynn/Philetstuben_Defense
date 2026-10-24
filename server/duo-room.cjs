@@ -4,7 +4,7 @@ const crypto = require('node:crypto');
 const loadCore = require('../headless-core.cjs');
 const RULESET = require('../package.json').version;
 // Reviewed checkpoint compatibility, including legacy 20-gold gift migration.
-function compatibleRuleset(source,target=RULESET){return source===target || target==='1.2.1'&&source==='1.2.0' || target==='1.2.2'&&['1.1.9','1.2.0','1.2.1'].includes(source) || target==='1.2.3'&&['1.1.9','1.2.0','1.2.1','1.2.2'].includes(source);}
+function compatibleRuleset(source,target=RULESET){return source===target || target==='1.2.1'&&source==='1.2.0' || target==='1.2.2'&&['1.1.9','1.2.0','1.2.1'].includes(source) || target==='1.2.3'&&['1.1.9','1.2.0','1.2.1','1.2.2'].includes(source) || target==='1.2.4'&&['1.1.9','1.2.0','1.2.1','1.2.2','1.2.3'].includes(source);}
 const object = v => v !== null && typeof v === 'object' && !Array.isArray(v);
 const exact = (v, keys) => object(v) && Object.keys(v).every(k => keys.includes(k)) && keys.every(k => Object.hasOwn(v, k));
 const integer = (v, min, max) => Number.isInteger(v) && v >= min && v <= max;

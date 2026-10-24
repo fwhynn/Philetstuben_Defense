@@ -2638,3 +2638,27 @@ Seitlich liegende Missionsanzeigen verkleinern das Turmmenü nicht mehr unnötig
 Stromnetz aus Tagesrotation, Testlabor und Dev-Auswahl entfernt.|Power Grid removed from the daily rotation, challenge lab and developer selection.
 Einheitlich große Turmmenüs mit mehr Platz auf Tablets.|Consistently sized tower menus with more space on tablets.
 `);
+
+HexTranslations.add(`
+Herausforderungen: Neue Wege, echte Risiken|Challenges: New paths, real risks
+Mehr Abwechslung, stärkere Missionen und verlässliche Belohnungen.|More variety, tougher missions and reliable rewards.
+Fluch der Gier|Curse of Greed
+Vertragsgold gibt es erst nach der überlebten Welle. Der zusätzliche Vertragsboss blockiert den Ablauf nicht mehr mit leerer Bossbeute.|Contract gold is paid only after surviving the wave. The extra contract boss no longer blocks progress with empty boss loot.
+Drei Dörfer|Three Villages
+Startgold: 180 → 130. Die Dorfleben stehen mit Herzsymbolen oben in der Bildschirmmitte.|Starting gold: 180 → 130. Village health appears with heart icons at the top center of the screen.
+Expedition: Neue Karten und mehr Gefahr|Expedition: New cards and greater danger
+Ausgespielte Karten werden einzeln ersetzt. Relikte liegen bei jedem neuen Durchlauf an anderen Positionen innerhalb ihrer Regionen.|Played cards are replaced individually. Each new run places relics at different positions within their regions.
+Die Gegner starten deutlich stärker. Der Fristzähler steht oben mittig; sein Ton ertönt beim Herunterzählen.|Enemies start substantially stronger. The deadline counter is centered at the top; its sound plays when it decreases.
+Turm-Draft: Zufällige Angebote, stetiges Wachstum|Tower Draft: Random offers, steady growth
+Ein Klick sammelt den Turm; direktes Ziehen platziert ihn. Nach jeder Welle wächst die Karte um ein zufälliges Straßenhex.|Click to collect a tower; drag to place it directly. After each wave the map grows by one random road hex.
+Neue Durchläufe haben neue Angebote. Verbesserungstickets teilen sich einen gewichteten Pool mit Türmen und sind nicht mehr garantiert.|New runs have new offers. Upgrade tickets share a weighted pool with towers and are no longer guaranteed.
+Stärkerer Auftakt, keine Goldeinnahmen und Bauplatzmarker nur mit verfügbaren Türmen im Inventar.|A tougher opening, no gold income and building markers only while towers are available in inventory.
+Wandernde Festung: Eine gemeinsame Karte|Moving Fortress: One shared map
+Vier sichtbare Stationen auf einer verbundenen Karte. Nach Welle 3, 6 und 9 teleportiert sich die Festung; Straßen und Türme bleiben erhalten.|Four visible stations on one connected map. After waves 3, 6 and 9 the fortress teleports; roads and towers remain.
+Missionseinstieg und Turmbau|Starting missions and building towers
+Freie Turmauswahl vor dem Start von Gier und Drei Dörfern. Türme lassen sich auch während erlaubter Kampfphasen per Drag-and-drop bauen.|Choose your loadout before starting Greed or Three Villages. Drag and drop also builds towers during combat phases that allow construction.
+`);
+
+HexTranslations.add(`SCHWERER|TOUGHER
+Vertragsgold erst nach überlebter Welle.|Contract gold after surviving the wave.
+nach der Welle|after the wave`);

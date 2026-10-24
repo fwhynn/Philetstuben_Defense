@@ -19,7 +19,7 @@ test('all practice missions expose the victory target and actionable rules',()=>
  const {a,elements}=load();a.newRun();a.renderAll();assert.ok(elements.get('challengeGuide').classList.contains('hidden'));
 });
 test('underinvesting in upgrades loses the later fortress waves; checkpoint continuation stays identical',()=>{
- const c=core(),run=c.session.create({seed:'movingFortress-v1|2026-12-07',runId:'audit',challengeDay:'2026-12-07',loadout:['archer','catapult','chain','freeze','mine']}),s=run.state;
+ const c=core(),run=c.snapshot.restore(json(require('./fixtures/movingFortress-v123.json'))),s=run.state;
  const build=[['catapult',1,0],['freeze',2,0],['ballista',3,0],['archer',4,0],['mine',5,0],['catapult',6,0]];let previous=0;
  for(let wave=1;wave<=12;wave++){
   const f=s.movingFortress,g=f.stations[f.stage];if(f.stage!==previous){for(const [,n,index]of build){const old=f.stations[previous],from={...old.path[n-1],index};if(s.map.get(from.q+','+from.r).towers[index])assert.ok(c.movingFortress.move(s,from,{...g.path[n-1],index}));}previous=f.stage;}

@@ -111,9 +111,9 @@ const HexRunFlow=(()=>{
     state.lastCompletedWave=state.wave;state.waveRunning=false;HexRunRuntime.advanceIntroduction(state);
     HexWaves.settleGreed(state);
     HexCombat.clearConsumables(state);
-    if(!['garrison','detour'].includes(state.challengeKind))state.gold+=HexWaves.economy.completion+state.income;state.projectiles=[];state.mines=[];
+    if(!['garrison','detour','towerDraft'].includes(state.challengeKind))state.gold+=HexWaves.economy.completion+state.income;state.projectiles=[];state.mines=[];
     for(const tile of state.map.values())for(const tower of tile.towers||[])if(tower)tower.souls=[];
-    if(!['garrison','detour'].includes(state.challengeKind)){state.goldEarned.completion+=HexWaves.economy.completion;state.goldEarned.income+=state.income;}state.phase='place';
+    if(!['garrison','detour','towerDraft'].includes(state.challengeKind)){state.goldEarned.completion+=HexWaves.economy.completion;state.goldEarned.income+=state.income;}state.phase='place';
     if(['detour','villages','powerGrid','expedition','towerDraft','movingFortress'].includes(state.challengeKind))state.bossRewards=[];
     if(state.challengeKind==='expedition'&&HexExpedition.complete(state)&&!state.challengeWon){state.challengeTarget=state.wave;state.challengeWon=true;state.phase='victory';return {victory:true};}
     if(state.challengeKind==='expedition'&&state.wave===12&&!HexExpedition.complete(state)){state.expedition.failed=true;state.phase='gameover';return {victory:false,objectiveFailed:true};}

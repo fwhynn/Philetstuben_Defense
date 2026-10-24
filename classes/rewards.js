@@ -80,6 +80,7 @@ const HexRewards=(()=>{
   function offer(state,kind,random){
     const phase={normal:'reward',boss:'bossReward',shrine:'shrineReward',removal:'removal'}[kind];
     if(!phase||state.phase!==phase)throw new Error('Invalid reward phase');
+    if(kind==='boss')state.bossRewards=state.bossRewards.map(id=>typeof id==='string'?id:'wave:'+state.wave);
     const context=kind==='boss'?state.bossRewards[0]:kind==='shrine'||kind==='removal'&&state.removalSource==='shrine'?state.pendingShrine:String(state.wave);
     const old=state.rewardOffer;
     if(old&&old.kind===kind&&old.context===context&&old.wave===state.wave)return old;

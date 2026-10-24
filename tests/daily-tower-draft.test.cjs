@@ -1,6 +1,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),core=require('../headless-core.cjs'),{load}=require('./helpers/game.cjs');
 const day='2026-11-29',json=x=>JSON.parse(JSON.stringify(x));
-function setup(){const c=core();return {c,...c.session.create({seed:'towerDraft-v1|'+day,runId:'draft-test',challengeDay:day,loadout:['archer','catapult','chain','freeze','mine']})};}
+// Preserve regression coverage for existing v1.2.3 saves; new rules have separate tests.
+function setup(){const c=core();return {c,...c.snapshot.restore(JSON.parse(JSON.stringify(require('./fixtures/towerDraft-v123.json'))))};}
 function slots(s){return [...s.map.values()].flatMap(t=>Array.from({length:t.slots},(_,index)=>({q:t.q,r:t.r,index})));}
 function deploy(r){const {c,state:s}=r;const order=slots(s).sort((a,b)=>Math.abs(a.q-1)+Math.abs(a.r-2)-Math.abs(b.q-1)-Math.abs(b.r-2));for(const [type,n]of Object.entries(s.towerDraft.inventory))for(let i=0;i<n;i++){const slot=order.find(x=>!s.map.get(x.q+','+x.r).towers[x.index]);if(slot)assert.ok(c.towers.buy(s,type,[slot]).ok);}
  for(const slot of order){const tw=s.map.get(slot.q+','+slot.r).towers[slot.index];if(tw&&s.towerDraft.upgrades){const up=c.data.runUpgrades(s,tw)[0];if(up)assert.ok(c.towers.upgrade(s,slot,up[0]));}}
@@ -75,14 +76,14 @@ test('draft offers drag directly onto a slot once, retain cancelled picks and hi
  const card=elements.get('draftOffers').children[0],type=s.towerDraft.offers[0].type;
  assert.match(elements.get('draftStatus').textContent,/3 STARTTÜRME.*0\/3/);
  const down={button:0,pointerId:4,clientX:10,clientY:10,preventDefault(){},stopPropagation(){}};
- card.listeners.pointerdown(down);assert.equal(s.towerDraft.picks,2);assert.equal(s.dragTower,type);
+ card.listeners.pointerdown(down);assert.equal(s.towerDraft.picks,3);assert.ok(!s.dragTower);
  documentListeners.pointermove({pointerId:4,clientX:300,clientY:200});assert.match(elements.get('towerDragGhost').innerHTML,/0 🪙/);
  documentListeners.pointerup({pointerId:4,clientX:300,clientY:200});card.listeners.click();assert.equal(s.towerDraft.picks,2);assert.equal(s.map.get('1,0').towers[0].type,type);assert.equal(s.towerDraft.inventory[type],0);
- hit=null;const second=elements.get('draftOffers').children[0],secondType=s.towerDraft.offers[0].type;second.listeners.pointerdown({...down,pointerId:5});documentListeners.pointercancel({});assert.equal(s.towerDraft.inventory[secondType],1);assert.equal(s.towerDraft.picks,1);
+ hit=null;const second=elements.get('draftOffers').children[0],secondType=s.towerDraft.offers[0].type;second.listeners.pointerdown({...down,pointerId:5});documentListeners.pointermove({pointerId:5,clientX:300,clientY:200});documentListeners.pointercancel({});assert.equal(s.towerDraft.inventory[secondType],1);assert.equal(s.towerDraft.picks,1);
  elements.get('draftOffers').children[0].listeners.click();a.startWave();assert.equal(s.waveRunning,true);assert.ok(elements.get('draftControls').classList.contains('hidden'));
 });
 test('long draft has fixed five-wave expansion dates, capped final expansion and scaling ticket packs',()=>{
  const {c,state:s}=setup();while(s.towerDraft.picks)c.towerDraft.choose(s,0);deploy({c,state:s});const size=s.map.size;
  for(let w=1;w<35;w++){s.wave=w;c.towerDraft.prepare(s);assert.equal(s.map.size,size+Math.floor(w/5)*2);if(w===12||w===24){const up=s.towerDraft.offers.find(o=>o.kind==='upgrade');assert.equal(up.count,w===12?2:3);}}
- const {a,elements}=load({labMission:'towerDraft'});a.state.wave=30;a.renderAll();assert.match(elements.get('draftGrowth').textContent,/vollständig erweitert/);
+ const {a,elements}=load({labMission:'towerDraft'});a.state.wave=30;a.renderAll();assert.match(elements.get('draftGrowth').textContent,/nach Welle 31 um 1 Straßenhex/);
 });

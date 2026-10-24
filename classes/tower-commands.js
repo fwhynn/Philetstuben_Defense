@@ -4,7 +4,7 @@ const HexTowerCommands=(()=>{
   function validSlot(slot){return slot&&Number.isInteger(slot.q)&&Number.isInteger(slot.r)&&Number.isInteger(slot.index)&&slot.index>=0;}
   function buildPrice(state,slot,base,index=0){if(state.challengeKind==='towerDraft')return 0;return (state.freeTowerBuilds||0)>index?0:HexBuildings.cost(state,slot,base);}
   function buy(state,type,selectedSlots){
-    if(state.challengeKind==='movingFortress'&&!HexMovingFortress.planning(state))return {ok:false,reason:'locked'};
+    if(state.challengeKind==='movingFortress'&&!HexMovingFortress.building(state))return {ok:false,reason:'locked'};
     if(state.challengeKind==='towerDraft'&&(!Array.isArray(selectedSlots)||!HexTowerDraft.canBuild(state,type,selectedSlots.length)))return {ok:false,reason:'inventory'};
     if(state.challengeKind==='powerGrid'&&!HexPowerGrid.planning(state))return {ok:false,reason:'powerLocked'};
     if(state.challengeKind==='detour')return {ok:false,reason:'fixed'};
@@ -23,7 +23,7 @@ const HexTowerCommands=(()=>{
     return {ok:true,total};
   }
   function upgrade(state,selected,branch){
-    if(state.challengeKind==='movingFortress'&&!HexMovingFortress.planning(state))return false;
+    if(state.challengeKind==='movingFortress'&&!HexMovingFortress.building(state))return false;
     if(state.challengeKind==='towerDraft'&&(!HexTowerDraft.canUpgrade(state)||String(branch).startsWith('ultimate:')))return false;
     if(state.challengeKind==='powerGrid'&&!HexPowerGrid.planning(state))return false;
     if(state.challengeKind==='detour')return false;

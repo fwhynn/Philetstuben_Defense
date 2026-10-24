@@ -1,6 +1,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),core=require('../headless-core.cjs'),{load}=require('./helpers/game.cjs');
 const day='2026-11-22',json=x=>JSON.parse(JSON.stringify(x));
-function setup(){const c=core();return {c,...c.session.create({seed:'expedition-v1|'+day,runId:'expedition-test',challengeDay:day,loadout:['archer','catapult','chain','freeze','mine']})};}
+// Preserve regression coverage for existing v1.2.3 saves; new rules have separate tests.
+function setup(){const c=core();return {c,...c.snapshot.restore(JSON.parse(JSON.stringify(require('./fixtures/expedition-v123.json'))))};}
 const fixture=setup().state,east=fixture.landmarks.get([...fixture.landmarks.keys()][0]).q,north=-[...fixture.landmarks.values()][1].r,south=[...fixture.landmarks.values()][2].r;
 const route=[[1,0,'tJunction',0],[2,0,'tJunction',3],...Array.from({length:east-3},(_,i)=>[i+3,0,'straight',0]),...Array.from({length:north-1},(_,i)=>[1,-i-1,'straight',2]),...Array.from({length:south-1},(_,i)=>[2,i+1,'straight',2])];
 function place(r,p){const [q,z,id,rotation]=p;assert.ok(r.c.session.place(r.state,r.random,{q,r:z,index:r.state.hand.indexOf(id),rotation}),JSON.stringify(p));}
@@ -50,6 +51,7 @@ test('resumed expedition combat produces the same enemies, life and objective pr
 test('failed objective can later earn a real victory once, without changing solo records',()=>{
  const h=load(),{a,storage,elements}=h;a.newRun(undefined,undefined,undefined,day);a.state.wave=12;a.endWave();
  elements.get('retryLoadoutBtn').listeners.click();
+ a.restoreRunCheckpoint(setup().c.snapshot.capture(setup().state,setup().random));
  // Build a connected objective fixture; full legal placement and combat are covered above.
  for(const [q,r,id,rotation]of route){const roads={straight:[0,3],tJunction:[0,2,3]}[id].map(d=>(d+rotation)%6);a.state.map.set(q+','+r,{q,r,type:id,roads,slots:0,towers:[],buildings:[]});}
  for(const l of a.state.landmarks.values()){l.claimed=true;a.state.expedition.collected.push(l.relicId);a.state.map.set(l.q+','+l.r,{q:l.q,r:l.r,type:'straight',roads:l.prefab.roads,slots:0,towers:[],buildings:[]});}

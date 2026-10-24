@@ -1,5 +1,99 @@
 [
   {
+    "version": "next",
+    "title": "Herausforderungen: Neue Wege, echte Risiken",
+    "summary": "Mehr Abwechslung, stärkere Missionen und verlässliche Belohnungen.",
+    "overview": [
+      {
+        "kind": "new",
+        "title": "NEU",
+        "items": [
+          "Wandernde Festung: Eine gemeinsame Karte"
+        ]
+      },
+      {
+        "kind": "nerf",
+        "title": "SCHWERER",
+        "items": [
+          "Drei Dörfer",
+          "Expedition: Neue Karten und mehr Gefahr",
+          "Turm-Draft: Zufällige Angebote, stetiges Wachstum"
+        ]
+      },
+      {
+        "kind": "fixed",
+        "title": "KORRIGIERT",
+        "items": [
+          "Fluch der Gier",
+          "Missionseinstieg und Turmbau"
+        ]
+      }
+    ],
+    "sections": [
+      {
+        "title": "Tägliche Herausforderungen",
+        "entries": [
+          {
+            "title": "Fluch der Gier",
+            "bullets": [
+              "Vertragsgold gibt es erst nach der überlebten Welle. Der zusätzliche Vertragsboss blockiert den Ablauf nicht mehr mit leerer Bossbeute."
+            ],
+            "stats": []
+          },
+          {
+            "title": "Drei Dörfer",
+            "bullets": [
+              "Startgold: 180 → 130. Die Dorfleben stehen mit Herzsymbolen oben in der Bildschirmmitte."
+            ],
+            "stats": []
+          },
+          {
+            "title": "Expedition: Neue Karten und mehr Gefahr",
+            "bullets": [
+              "Ausgespielte Karten werden einzeln ersetzt. Relikte liegen bei jedem neuen Durchlauf an anderen Positionen innerhalb ihrer Regionen.",
+              "Die Gegner starten deutlich stärker. Der Fristzähler steht oben mittig; sein Ton ertönt beim Herunterzählen."
+            ],
+            "stats": []
+          },
+          {
+            "title": "Turm-Draft: Zufällige Angebote, stetiges Wachstum",
+            "bullets": [
+              "Ein Klick sammelt den Turm; direktes Ziehen platziert ihn. Nach jeder Welle wächst die Karte um ein zufälliges Straßenhex.",
+              "Neue Durchläufe haben neue Angebote. Verbesserungstickets teilen sich einen gewichteten Pool mit Türmen und sind nicht mehr garantiert.",
+              "Stärkerer Auftakt, keine Goldeinnahmen und Bauplatzmarker nur mit verfügbaren Türmen im Inventar."
+            ],
+            "stats": []
+          },
+          {
+            "title": "Wandernde Festung: Eine gemeinsame Karte",
+            "bullets": [
+              "Vier sichtbare Stationen auf einer verbundenen Karte. Nach Welle 3, 6 und 9 teleportiert sich die Festung; Straßen und Türme bleiben erhalten."
+            ],
+            "stats": []
+          },
+          {
+            "title": "Missionseinstieg und Turmbau",
+            "bullets": [
+              "Freie Turmauswahl vor dem Start von Gier und Drei Dörfern. Türme lassen sich auch während erlaubter Kampfphasen per Drag-and-drop bauen."
+            ],
+            "stats": []
+          }
+        ]
+      }
+    ],
+    "changes": [
+      "Vertragsgold gibt es erst nach der überlebten Welle. Der zusätzliche Vertragsboss blockiert den Ablauf nicht mehr mit leerer Bossbeute.",
+      "Startgold: 180 → 130. Die Dorfleben stehen mit Herzsymbolen oben in der Bildschirmmitte.",
+      "Ausgespielte Karten werden einzeln ersetzt. Relikte liegen bei jedem neuen Durchlauf an anderen Positionen innerhalb ihrer Regionen.",
+      "Die Gegner starten deutlich stärker. Der Fristzähler steht oben mittig; sein Ton ertönt beim Herunterzählen.",
+      "Ein Klick sammelt den Turm; direktes Ziehen platziert ihn. Nach jeder Welle wächst die Karte um ein zufälliges Straßenhex.",
+      "Neue Durchläufe haben neue Angebote. Verbesserungstickets teilen sich einen gewichteten Pool mit Türmen und sind nicht mehr garantiert.",
+      "Stärkerer Auftakt, keine Goldeinnahmen und Bauplatzmarker nur mit verfügbaren Türmen im Inventar.",
+      "Vier sichtbare Stationen auf einer verbundenen Karte. Nach Welle 3, 6 und 9 teleportiert sich die Festung; Straßen und Türme bleiben erhalten.",
+      "Freie Turmauswahl vor dem Start von Gier und Drei Dörfern. Türme lassen sich auch während erlaubter Kampfphasen per Drag-and-drop bauen."
+    ]
+  },
+  {
     "version": "1.2.3",
     "title": "Herausforderungen: Mehr Platz für Türme",
     "summary": "Einheitlich große Turmmenüs und ein mittelalterlicher Missionspool.",

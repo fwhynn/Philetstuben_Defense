@@ -9,5 +9,5 @@ test('daily calendar slots repeat deterministically for the date and change on t
 });
 test('villages preserve selected loadout and display three correctly ordered health bars',()=>{
  const c=core(),{state:s}=c.session.create({seed:'villages-v1|2026-12-11',runId:'health',loadout,challengeDay:'2026-12-11'});assert.deepEqual([...s.towerLoadout],loadout);const ys=s.villages.goals.map(g=>c.map.axialToWorld(g.q,g.r).y);assert.ok(ys[0]<ys[1]&&ys[1]<ys[2]);
- const {a,elements}=load();a.newRun(loadout,undefined,undefined,'2026-12-11');a.renderAll();assert.equal(elements.get('villageHud').children.length,3);assert.ok(elements.get('healthStat').classList.contains('hidden'));assert.equal(elements.get('villageHud').children[0].children[0].textContent,'N 15/15');
+ const {a,elements}=load();a.newRun(loadout,undefined,undefined,'2026-12-11');a.renderAll();assert.equal(elements.get('villageHud').children.length,3);assert.ok(elements.get('healthStat').classList.contains('hidden'));assert.equal(elements.get('villageHud').children[0].children[0].textContent,'N ♥ 15/15');
 });

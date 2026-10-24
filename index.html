@@ -175,11 +175,10 @@
 
         <!-- Oben rechts: Leben, Gold, Wave, Deck -->
         <header class="hud">
-          <div id="villageHud" class="hidden" aria-label="Dorf-Lebenspunkte"></div><div id="healthStat" class="hudStat"><svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true">
+          <strong id="expeditionDeadline" class="hidden" role="status"></strong><div id="villageHud" class="hidden" aria-label="Dorf-Lebenspunkte"></div><div id="healthStat" class="hudStat"><svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M12 21 3 12C-3 3 8-1 12 6 16-1 27 3 21 12z" />
             </svg> <strong id="hp">20/20</strong></div>
-          <details class="statDetails">
-            <summary aria-label="Goldplanung öffnen">🪙 <strong id="gold">70</strong> <span id="bonusIncome">(+0)</span>
+          <details id="goldDetails" class="statDetails"><summary aria-label="Goldplanung öffnen">🪙 <strong id="gold">70</strong> <span id="bonusIncome">(+0)</span>
               <span class="dropdownArrow" aria-hidden="true">▾</span>
             </summary>
             <div class="statPopup">
@@ -283,7 +282,7 @@
         <details id="challengeGuide" class="hidden"><summary id="challengeGoal"></summary><p id="challengeInstructions"></p></details>
 
         <section id="expeditionControls" class="hidden" aria-label="Expedition">
-          <strong id="expeditionDeadline" role="status"></strong><p id="expeditionProgress" aria-live="polite"></p><p id="expeditionRelics"></p>
+          <p id="expeditionProgress" aria-live="polite"></p><p id="expeditionRelics"></p>
           <button id="expeditionReadyBtn" class="secondary" type="button">Planung abschließen</button>
         </section>
         <section id="villageControls" class="hidden" aria-label="Dorfverteidigung">

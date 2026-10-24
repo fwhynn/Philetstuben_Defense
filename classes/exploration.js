@@ -69,7 +69,7 @@ const HexExploration=(()=>{
     const roll=hash((landmarks.seed||0)^987654321,landmark.q,landmark.r);
     return roll<.2?'remove':roll<.4?'card':roll<.6?'epic':roll<.7?'legendary':roll<.85?'repair':'upgrade';
   }
-  function bossRewardRarity(seed,id){if(id.startsWith('duo:')){const parts=id.split(':');seed=String(seed)+'|guardian-board|'+parts[1];id=parts.slice(2).join(':');}const landmark=id.startsWith('wave:')?[-Number(id.slice(5)),0]:id.split(',').map(Number);let value=0;for(const char of String(seed)) value=Math.imul(value,31)+char.charCodeAt(0)|0;return hash(value^246813579,landmark[0],landmark[1])<.1?'Legendary':'Epic';}
+  function bossRewardRarity(seed,id){id=String(id??"wave:0");if(id.startsWith('duo:')){const parts=id.split(':');seed=String(seed)+'|guardian-board|'+parts[1];id=parts.slice(2).join(':');}const landmark=id.startsWith('wave:')?[-Number(id.slice(5)),0]:id.split(',').map(Number);let value=0;for(const char of String(seed)) value=Math.imul(value,31)+char.charCodeAt(0)|0;return hash(value^246813579,landmark[0],landmark[1])<.1?'Legendary':'Epic';}
   function visibility(map,position){
     let nearest=Infinity;for(const tile of map.values()) nearest=Math.min(nearest,distance(tile,position));
     return nearest<=clearRadius+(map.revealBonus||0)?'clear':nearest<=fogRadius||position.relicId&&position.relicLocated?'fog':'hidden';

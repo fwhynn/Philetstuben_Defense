@@ -38,11 +38,10 @@ const HexWaves=(()=>{
   function acceptGreed(state,id){
     if(state.challengeKind!=='greed'||state.phase!=='build'||state.waveRunning||state.hp<=0||state.celebrationActive||state.greedContract?.wave===state.wave+1)return false;
     const offer=greedOffers(state).find(o=>o.id===id);if(!offer)return false;
-    state.greedContract={id,wave:state.wave+1,points:offer.points};state.gold+=offer.gold;
-    state.goldEarned.greed=(state.goldEarned.greed||0)+offer.gold;return true;
+    state.greedContract={id,wave:state.wave+1,points:offer.points,pendingGold:offer.gold};return true;
   }
   function greedGold(state){return ['kills','completion','income','boss','treasure','shrine','greed'].reduce((n,k)=>n+Math.max(0,Math.floor(state.goldEarned?.[k]||0)),0);}
-  function settleGreed(state){const c=state.greedContract;if(state.challengeKind!=='greed'||!c||c.wave!==state.wave||c.settled)return;c.settled=true;state.greedScore=greedGold(state);}
+  function settleGreed(state){const c=state.greedContract;if(state.challengeKind!=='greed'||!c||c.wave!==state.wave||c.settled||state.waveRunning||state.hp<=0||state.lastCompletedWave!==state.wave)return;c.settled=true;const gold=Math.max(0,c.pendingGold||0);state.gold+=gold;state.goldEarned.greed=(state.goldEarned.greed||0)+gold;state.greedScore=greedGold(state);}
   // Preserve the opening curve; late health grows with 8 % rather than 10 %.
   function normalHealth(wave){return Math.round((28+wave*7)*Math.pow(1.10,Math.max(0,Math.min(wave,35)-3))*Math.pow(1.08,Math.max(0,wave-35))*(1+Math.min(.18,Math.max(0,wave-3)*.006)));}
   function bossProfile(wave){
@@ -63,17 +62,20 @@ const HexWaves=(()=>{
     caravan=caravan&&(!context.challengeKind||context.challengeKind==='caravan');
     const dev=typeof HexDevEnemies!=='undefined'&&HexDevEnemies.plan(wave,context);if(dev)return dev;
     if(['towerDraft','movingFortress'].includes(context.challengeKind)){
-      const longDraft=context.challengeKind==='towerDraft'&&context.towerDraft?.rulesVersion===2;
-      const strength=longDraft&&wave>3?3+Math.floor((wave-3)*.5):wave;
+      const modernDraft=context.challengeKind==='towerDraft'&&context.towerDraft?.rulesVersion>=3;
+      const longDraft=context.challengeKind==='towerDraft'&&context.towerDraft?.rulesVersion>=2;
+      const strength=modernDraft?Math.max(4,3+Math.floor((wave-3)*.5)):longDraft&&wave>3?3+Math.floor((wave-3)*.5):wave;
       const p=plan(strength,income,false,{...context,challengeKind:null});
       if(longDraft){p.maxGold-=p.boss?.killGold||0;p.boss=[15,25,35].includes(wave)?bossProfile(wave===35?25:15):null;p.maxGold+=p.boss?.killGold||0;p.wave=wave;p.strength=strength;}
-      const factor=1+Math.max(0,Math.min(wave,12)-3)*(longDraft?.04:context.challengeKind==='towerDraft'?.10:.08);
+      const factor=(modernDraft?1.25:1)+Math.max(0,Math.min(wave,12)-3)*(longDraft?.04:context.challengeKind==='towerDraft'?.10:.08);
       // Draft growth adds space and supplies; do not compound the old twelve-wave modifier forever.
       for(const e of p.enemies)for(const field of ['hp','armorHp','magicHp'])if(e[field])e[field]=Math.ceil(e[field]*factor);
+      if(modernDraft){for(const e of p.enemies)e.killGold=0;if(p.boss)p.boss.killGold=0;p.killGold=0;p.completionGold=0;p.income=0;p.maxGold=0;}
       return p;
     }
     if(context.challengeKind==='expedition'){
-      const p=plan(wave,0,false,{...context,challengeKind:null}),factor=1+Math.max(0,wave-2)*(context.expedition?.rulesVersion===2?.20:.12);
+      const modern=context.expedition?.rulesVersion>=3;
+      const p=plan(modern?wave+2:wave,0,false,{...context,challengeKind:null}),factor=modern?1.3+wave*.12:1+Math.max(0,wave-2)*(context.expedition?.rulesVersion===2?.20:.12);p.wave=wave;
       for(const e of p.enemies)for(const field of ['hp','armorHp','magicHp'])if(e[field])e[field]=Math.ceil(e[field]*factor);return p;
     }
     if(context.challengeKind==='powerGrid'){
@@ -143,7 +145,7 @@ const HexWaves=(()=>{
       if(id==='haste')for(const e of enemies)e.speed*=1.35;
       if(id==='bulwark')for(const e of enemies){e.armorHp=(e.armorHp||0)+Math.round(e.hp*.35);e.magicHp=(e.magicHp||0)+Math.round(e.hp*.35);}
       if(id==='giants')for(const e of enemies){e.hp=Math.round(e.hp*1.8);e.baseDamage=Math.max(2,e.baseDamage||1);}
-      if(id==='boss')enemies.push({...common,type:'boss',bossKind:'iron',name:'Vertragskoloss',hp:hp*6,armorHp:hp*2,magicHp:hp,baseDamage:7,speed:speed*.7});
+      if(id==='boss')enemies.push({...common,type:'boss',bossKind:'iron',name:'Vertragskoloss',noBossReward:true,hp:hp*6,armorHp:hp*2,magicHp:hp,baseDamage:7,speed:speed*.7});
       if(context.greedContract.id==='swarm')for(let i=0;i<6;i++)enemies.push({...common,type:'swarm',name:'Vertragsschwarm',hp:Math.round(hp*.6),speed:speed*1.3});
       if(context.greedContract.id==='healers'){
         enemies.push({...common,type:'healer',name:'Vertragsheiler',hp:Math.round(hp*.8),healRadius:50,healInterval:3000});

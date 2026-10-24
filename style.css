@@ -918,3 +918,5 @@ body:has(#biomeIntro:not(.hidden)) .biomeTooltip{display:none!important}
 
 /* Tower menus share the same readable dimensions in every game mode. */
 @media(min-width:701px){#towerPanel,#towerDrawer{width:440px;box-sizing:border-box}}
+
+#villageHud,#expeditionDeadline{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:50;max-width:calc(100vw - 24px);box-sizing:border-box}#expeditionDeadline.hidden{display:none}#expeditionDeadline{margin:0;text-align:center;padding:12px 18px}body:has(#villageHud:not(.hidden)) #challengeLabBar,body:has(#expeditionDeadline:not(.hidden)) #challengeLabBar{top:82px!important}@keyframes deadlineTick{0%,100%{box-shadow:none}35%{box-shadow:0 0 26px #e9bb58;transform:translateX(-50%) scale(1.06)}}.deadlineTick{animation:deadlineTick .65s ease-out}@media(max-width:1100px){#villageHud,#expeditionDeadline{top:70px}body:has(#villageHud:not(.hidden)) #challengeLabBar,body:has(#expeditionDeadline:not(.hidden)) #challengeLabBar{top:132px!important}}

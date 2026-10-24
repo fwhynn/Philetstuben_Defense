@@ -5,7 +5,7 @@ const slot=(g,offset=3,index=0)=>({q:g.q+offset,r:g.r,index});
 function point(c,g){return c.map.axialToWorld(g.q,g.r);}
 function finish(r){let result,steps=0;do{result=r.c.session.advance(r.state,r.random,.05);}while(result==='running'&&++steps<20000);return result;}
 test('three fixed villages, valid tower slots, no personal bonuses or road expansion',()=>{
- const {c,state:s}=setup();assert.equal(s.gold,180);assert.equal(s.maxHp,45);assert.equal(s.hp,45);assert.equal(s.phase,'build');assert.ok(s.map.size>=32);assert.equal(s.challengeTarget,20);assert.equal(s.ultimateUnlocks.length,0);assert.equal(s.buildingUnlocks.length,0);
+ const {c,state:s}=setup();assert.equal(s.gold,130);assert.equal(s.maxHp,45);assert.equal(s.hp,45);assert.equal(s.phase,'build');assert.ok(s.map.size>=32);assert.equal(s.challengeTarget,20);assert.equal(s.ultimateUnlocks.length,0);assert.equal(s.buildingUnlocks.length,0);
  assert.deepEqual(json(s.villages.goals.map(g=>g.hp)),[15,15,15]);assert.equal(c.placement.canPlace(s,9,0,c.data.CARD_LIBRARY.straight,0),false);assert.equal(c.runtime.rescueTunnel(s),false);assert.equal(c.heroes.buy(s,'walls'),false);assert.equal(c.combat.buyConsumable(s,'caltrops'),false);
  for(const tile of s.map.values())assert.equal(c.map.slotPositions(tile).length,tile.slots);
 });
