@@ -1,9 +1,10 @@
 const HexWaves=(()=>{
   const economy={kill:3,completion:10,startGold:70};
-  const dailyMissions={movingFortress:{id:'movingFortress',name:'Wandernde Festung',target:12},towerDraft:{id:'towerDraft',name:'Turm-Draft',target:35},expedition:{id:'expedition',name:'Expedition ins Unbekannte',target:12},powerGrid:{id:'powerGrid',name:'Stromnetz',target:12},villages:{id:'villages',name:'Drei Dörfer',target:20},detour:{id:'detour',name:'Die Kunst des Umwegs',target:15},caravan:{id:'caravan',name:'Die letzte Karawane',target:20},garrison:{id:'garrison',name:'Die letzte Garnison',target:3},greed:{id:'greed',name:'Der Fluch der Gier',target:35}};
+  const dailyMissions={movingFortress:{id:'movingFortress',name:'Wandernde Festung',target:12},towerDraft:{id:'towerDraft',name:'Turm-Draft',target:35},expedition:{id:'expedition',name:'Expedition ins Unbekannte',target:12},villages:{id:'villages',name:'Drei Dörfer',target:20},detour:{id:'detour',name:'Die Kunst des Umwegs',target:15},caravan:{id:'caravan',name:'Die letzte Karawane',target:20},garrison:{id:'garrison',name:'Die letzte Garnison',target:3},greed:{id:'greed',name:'Der Fluch der Gier',target:35}};
   function daily(day){
     const time=Date.parse(day+'T00:00:00Z'),offset=Math.floor((time-Date.UTC(2026,8,22))/86400000);
-    // Preserve already played days. New missions enter only at a UTC day boundary.
+    // Keep the calendar of remaining missions stable. Retired Stromnetz slots
+    // now use Detour; existing snapshots retain their original rules.
     const next=Math.floor((time-Date.UTC(2026,9,25))/86400000);
     const expanded=Math.floor((time-Date.UTC(2026,10,1))/86400000);
     const villages=Math.floor((time-Date.UTC(2026,10,8))/86400000);
@@ -11,10 +12,10 @@ const HexWaves=(()=>{
     const expedition=Math.floor((time-Date.UTC(2026,10,22))/86400000);
     const draft=Math.floor((time-Date.UTC(2026,10,29))/86400000);
     const moving=Math.floor((time-Date.UTC(2026,11,7))/86400000);
-    if(moving>=0)return {...dailyMissions[['movingFortress','towerDraft','expedition','powerGrid','villages','detour','greed','caravan','garrison'][moving%9]]};
-    if(draft>=0)return {...dailyMissions[['towerDraft','expedition','powerGrid','villages','detour','greed','caravan','garrison'][draft%8]]};
-    if(expedition>=0)return {...dailyMissions[['expedition','powerGrid','villages','detour','greed','caravan','garrison'][expedition%7]]};
-    if(power>=0)return {...dailyMissions[['powerGrid','villages','detour','greed','caravan','garrison'][power%6]]};
+    if(moving>=0)return {...dailyMissions[['movingFortress','towerDraft','expedition','detour','villages','detour','greed','caravan','garrison'][moving%9]]};
+    if(draft>=0)return {...dailyMissions[['towerDraft','expedition','detour','villages','detour','greed','caravan','garrison'][draft%8]]};
+    if(expedition>=0)return {...dailyMissions[['expedition','detour','villages','detour','greed','caravan','garrison'][expedition%7]]};
+    if(power>=0)return {...dailyMissions[['detour','villages','detour','greed','caravan','garrison'][power%6]]};
     if(villages>=0)return {...dailyMissions[['villages','detour','greed','caravan','garrison'][villages%5]]};
     if(expanded>=0)return {...dailyMissions[['detour','greed','caravan','garrison'][expanded%4]]};
     return {...dailyMissions[next>=0?['greed','caravan','garrison'][next%3]:Math.abs(offset%2)===1?'garrison':'caravan']};

@@ -915,3 +915,6 @@ body:has(#biomeIntro:not(.hidden)) .biomeTooltip{display:none!important}
 @media(prefers-reduced-motion:reduce){.relicBurst,.relicBurst::before,.relicBurst i{animation:none}.relicBurst::before,.relicBurst i{display:none}}
 
 .duoGoldGift{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:radial-gradient(circle at 50% 30%,#fff1b8,#e6c779);border:3px solid #d4a943;color:#35250c;text-align:center;padding:24px;min-height:260px}.duoGoldGift .duoGiftIcon{font-size:64px;filter:drop-shadow(0 5px 8px #ae7b3460)}.duoGoldGift strong{font-size:32px}.duoGoldGift:hover{box-shadow:0 0 0 3px #f9de8a80}.duoSupportShortcut{margin-left:8px}
+
+/* Tower menus share the same readable dimensions in every game mode. */
+@media(min-width:701px){#towerPanel,#towerDrawer{width:440px;box-sizing:border-box}}

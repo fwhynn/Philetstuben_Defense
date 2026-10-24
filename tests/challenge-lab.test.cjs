@@ -5,7 +5,7 @@ function bootstrap(id,hash=''){
  const context={location:{search:'?challenge-lab='+id,hash},URLSearchParams,localStorage:{getItem:k=>values.get(k)||null,setItem:(k,v)=>values.set(k,v),removeItem:k=>values.delete(k)}};
  vm.runInNewContext(fs.readFileSync('classes/challenge-lab.js','utf8'),context);return {context,values,lab:context.HexChallengeLab};
 }
-test('all nine public mission links resolve to their actual daily rules',()=>{
+test('all eight public mission links resolve to their actual daily rules',()=>{
  const c=core();for(const m of bootstrap('greed').lab.missions)assert.equal(c.waves.daily(m.day).id,m.id);
  assert.equal(bootstrap('unknown').lab.active,false);assert.equal(bootstrap('greed','#duo=room').lab.active,false);
 });
@@ -58,4 +58,11 @@ for(const m of bootstrap('greed').lab.missions)test(m.id+': three seeds finish a
   assert.equal(restored.state.hp,s.hp);assert.equal(restored.state.gold,s.gold);assert.equal(restored.state.pendingSpawns,s.pendingSpawns);
   assert.deepEqual(JSON.parse(JSON.stringify(restored.state.enemies)),JSON.parse(JSON.stringify(s.enemies)));
  }
+});
+
+test('retired Stromnetz is absent from catalog and dates, and old links cannot touch normal saves',()=>{
+ const c=core(),h=bootstrap('powerGrid');assert.equal(h.lab.active,true);assert.equal(h.lab.retired,true);assert.equal(h.lab.missions.length,8);assert.ok(!h.lab.missions.some(m=>m.id==='powerGrid'));assert.equal(c.waves.dailyMissions.powerGrid,undefined);
+ for(let offset=0;offset<800;offset++){const d=new Date(Date.UTC(2026,9,24)+offset*86400000).toISOString().slice(0,10);assert.notEqual(c.waves.daily(d).id,'powerGrid');}
+ h.lab.storage.setItem('autohex-solo-autosave-v1','ignored');assert.equal(h.values.get('autohex-solo-autosave-v1'),'REAL RUN');
+ let target;const context={...h.context,location:{search:'?challenge-lab=powerGrid',hash:'',replace:url=>target=url}};vm.runInNewContext(fs.readFileSync('classes/challenge-lab.js','utf8'),context);assert.equal(target,'challenge-lab.html');
 });

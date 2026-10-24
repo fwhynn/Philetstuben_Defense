@@ -1,6 +1,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),core=require('../headless-core.cjs'),{load}=require('./helpers/game.cjs');
 const day='2026-11-15',json=x=>JSON.parse(JSON.stringify(x)),loc=(q,r)=>({q,r,index:0});
-function setup(legacy=true){const c=core();const result={c,...c.session.create({seed:'powerGrid-v1|'+day,runId:'power-test',challengeDay:day,loadout:['archer','catapult','chain','freeze','mine'],unlocks:['ultimate:archer','building:market']})};if(legacy)result.state.powerGrid.version=1;return result;}
+// Legacy snapshots remain supported, but no public date starts this retired mode.
+function setup(legacy=true){const c=core();c.waves.daily=()=>({id:"powerGrid",name:"Stromnetz",target:12});const result={c,...c.session.create({seed:'powerGrid-v1|'+day,runId:'power-test',challengeDay:day,loadout:['archer','catapult','chain','freeze','mine'],unlocks:['ultimate:archer','building:market']})};if(legacy)result.state.powerGrid.version=1;return result;}
 function configure(c,s,keys){for(const id of [...s.powerGrid.enabled])assert.ok(c.powerGrid.toggleField(s,id));for(const id of keys)assert.ok(c.powerGrid.toggleField(s,id));}
 function tower(r,q,z,type='archer'){assert.ok(r.c.towers.buy(r.state,type,[loc(q,z)]).ok);return r.state.map.get(q+','+z).towers[0];}
 test('fixed mission initializes two generators, limited relays, valid geometry and isolated bonuses',()=>{
@@ -55,28 +56,4 @@ test('real mixed defense wins twelve waves at the actual daily seed without extr
  }
  assert.equal(s.phase,'victory');assert.equal(s.hp,20);assert.equal(s.earnedMeta.periodicBosses,1);assert.equal(c.session.endless(s,r.random),false);assert.equal(c.session.finish(s,r.random),null);
 });
-test('controller exposes switches and locks, saves off state and grants daily diamonds only once',()=>{
- const regular=load(),before=regular.a.state;regular.elements.get('devPowerStart').listeners.click();assert.equal(regular.a.state,before);
- const preview=load({firstPlayerTest:true});preview.elements.get('devPowerStart').listeners.click();assert.equal(preview.a.state.challengeKind,'powerGrid');
- const h=load(),{a,elements,storage}=h;a.newRun(undefined,undefined,undefined,day);a.state.powerGrid.version=1;h.selectSlot(1,0,0);h.buyTower('archer');a.rendererCommands.selectTower(1,0,0);elements.get('powerTowerBtn').listeners.click();assert.equal(a.state.map.get('1,0').towers[0].powerOff,true);
- const button=elements.get('powerFields').children[0];a.renderAll();assert.equal(elements.get('powerFields').children[0],button);button.listeners.click();assert.ok(!a.state.powerGrid.enabled.includes('1,0'));
- a.restoreRunCheckpoint(json(a.captureRunCheckpoint()));assert.equal(a.state.map.get('1,0').towers[0].powerOff,true);assert.ok(!a.state.powerGrid.enabled.includes('1,0'));a.startWave();assert.ok(elements.get('powerFields').children.every(b=>b.disabled));assert.equal(elements.get('powerTowerBtn').disabled,true);
- a.state.waveRunning=false;a.state.enemies=[];a.state.pendingSpawns=0;a.state.spawnQueue=[];a.state.wave=12;a.endWave();let p=JSON.parse(storage.get('hex-bastion-profile-v1'));assert.equal(p.diamonds,10);assert.equal(p.records.highestWave,0);assert.ok(elements.get('endlessBtn').classList.contains('hidden'));
- elements.get('retryLoadoutBtn').listeners.click();a.state.wave=12;a.endWave();p=JSON.parse(storage.get('hex-bastion-profile-v1'));assert.equal(p.diamonds,10);
-});
-test('rotation keeps previously assigned missions and adds Stromnetz only at the new cutover',()=>{
- const c=core();for(const [date,id]of [['2026-11-01','detour'],['2026-11-08','villages'],['2026-11-14','detour'],['2026-11-15','powerGrid'],['2026-11-16','villages'],['2026-11-17','detour'],['2026-11-18','greed'],['2026-11-19','caravan'],['2026-11-20','garrison']])assert.equal(c.waves.daily(date).id,id);
-});
-
-test('large power manager toggles a tower independently of its field, explains disconnection and locks in combat',()=>{
- const h=load({labMission:'powerGrid'}),{a,elements}=h;a.state.powerGrid.version=1;h.selectSlot(1,0,0);h.buyTower('archer');a.renderAll();
- const tower=a.state.map.get('1,0').towers[0];let button=elements.get('powerTowers').children[0];assert.match(button.textContent,/Versorgt.*Ausschalten/);
- button.listeners.click();assert.equal(tower.powerOff,true);assert.match(elements.get('powerTowers').children[0].textContent,/Ausgeschaltet.*Einschalten/);
- elements.get('powerTowers').children[0].listeners.click();assert.equal(tower.powerOff,false);
- elements.get('powerFields').children[0].listeners.click();assert.match(elements.get('powerTowers').children[0].textContent,/Keine Verbindung/);
- a.startWave();assert.ok(elements.get('powerTowers').children[0].disabled);assert.match(elements.get('powerHint').textContent,/Welle läuft/);assert.equal(tower.powerOff,false);
- h.document.getElementById('powerEditor').open=true;elements.get('powerCloseBtn').listeners.click();assert.equal(elements.get('powerEditor').open,false);
-});
-
 test('new power rules supply every tower on connected yellow tiles with one field limit',()=>{const r=setup(false),{c,state:s}=r;s.gold=1000;s.powerGrid.enabled=['1,0','2,0','3,0','3,1'];let count=0;for(const key of s.powerGrid.enabled){const t=s.map.get(key);for(let i=0;i<t.slots;i++){assert.ok(c.towers.buy(s,'archer',[{q:t.q,r:t.r,index:i}]).ok);count++;}}assert.ok(count>3);assert.equal(c.powerGrid.evaluate(s).used,count);assert.equal(c.powerGrid.toggleTower(s,loc(1,0)),false);assert.ok(c.powerGrid.toggleField(s,'2,0'));assert.ok(c.powerGrid.evaluate(s).used<count);const restored=c.snapshot.restore(json(c.snapshot.capture(s,r.random)));assert.equal(restored.state.powerGrid.version,2);assert.equal(c.powerGrid.evaluate(restored.state).used,c.powerGrid.evaluate(s).used);});
-test('power can be toggled directly on the map and UI explains colors without per-tower controls',()=>{const {a,elements}=load({labMission:'powerGrid'});assert.ok(elements.get('powerEditor').classList.contains('hidden'));assert.match(elements.get('powerHint').textContent,/Gelb/);const before=a.state.powerGrid.enabled.length;a.rendererCommands.togglePowerField('1,0');assert.equal(a.state.powerGrid.enabled.length,before-1);a.startWave();const now=json(a.state.powerGrid.enabled);a.rendererCommands.togglePowerField('1,0');assert.deepEqual(json(a.state.powerGrid.enabled),now);});

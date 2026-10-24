@@ -1,5 +1,60 @@
 [
   {
+    "version": "next",
+    "title": "Herausforderungen: Mehr Platz für Türme",
+    "summary": "Einheitlich große Turmmenüs und ein mittelalterlicher Missionspool.",
+    "overview": [
+      {
+        "kind": "removed",
+        "title": "ENTFERNT",
+        "items": [
+          "Stromnetz-Herausforderung"
+        ]
+      },
+      {
+        "kind": "fixed",
+        "title": "VERBESSERT",
+        "items": [
+          "Mehr Platz im Turmbaumenü – auch auf Tablets"
+        ]
+      }
+    ],
+    "sections": [
+      {
+        "title": "Tägliche Herausforderungen",
+        "entries": [
+          {
+            "title": "Stromnetz entfernt",
+            "summary": "Die elektrische Mission passt nicht zum mittelalterlichen Spielstil.",
+            "bullets": [
+              "Stromnetz erscheint nicht mehr in der Tagesrotation, im Testlabor oder in der Dev-Auswahl.",
+              "Bisherige Stromnetz-Termine werden durch Die Kunst des Umwegs ersetzt. Andere Missionstermine bleiben unverändert."
+            ],
+            "stats": []
+          }
+        ]
+      },
+      {
+        "title": "Bedienung",
+        "entries": [
+          {
+            "title": "Turmmenüs mit mehr Platz",
+            "summary": "Turmbau und Upgrades nutzen auch auf Tablet-Breiten ein normal großes Menü.",
+            "bullets": [
+              "Bei ausreichend Bildschirmbreite sind die Turmmenüs 440 Pixel breit und nutzen die verfügbare Höhe.",
+              "Seitlich liegende Missionsanzeigen verkleinern das Turmmenü nicht mehr unnötig."
+            ],
+            "stats": []
+          }
+        ]
+      }
+    ],
+    "changes": [
+      "Stromnetz aus Tagesrotation, Testlabor und Dev-Auswahl entfernt.",
+      "Einheitlich große Turmmenüs mit mehr Platz auf Tablets."
+    ]
+  },
+  {
     "version": "1.2.2",
     "title": "Duo: Gemeinsam endlos",
     "summary": "Nach Welle 35 gemeinsam weiterspielen – mit flüssigerer Zustandsübertragung und sicherer Fortsetzung.",

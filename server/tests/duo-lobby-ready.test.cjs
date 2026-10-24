@@ -54,3 +54,14 @@ test('release 1.2.1 restores a 1.2.0 wave-30 checkpoint without changing either 
  const result=JSON.parse(require('node:child_process').execFileSync(process.execPath,['-e',code],{cwd:require('node:path').resolve(__dirname,'../..'),input:JSON.stringify(snapshot),encoding:'utf8'}));
  assert.equal(result.ruleset,'1.2.1');assert.deepEqual(result.match,JSON.parse(JSON.stringify(snapshot.match)));assert.deepEqual(result.seats.map(s=>s.token),snapshot.seats.map(s=>s.token));
 });
+
+test('1.2.3 preserves both boards, session tokens and deliveries from supported releases',()=>{
+ const {createRoom,compatibleRuleset}=require('../duo-room.cjs'),room=createRoom({seed:'menu-release',loadouts:Array(2).fill(['archer','catapult','chain','freeze','mine'])});room.connect(0);room.connect(1);
+ for(const version of ['1.1.9','1.2.0','1.2.1','1.2.2']){
+  assert.equal(compatibleRuleset(version,'1.2.3'),true);const snapshot=JSON.parse(JSON.stringify(room.checkpoint()));snapshot.ruleset=version;
+  const code="const p=require.resolve('./package.json');require(p);require.cache[p].exports={...require.cache[p].exports,version:'1.2.3'};const s=JSON.parse(require('fs').readFileSync(0,'utf8'));process.stdout.write(JSON.stringify(require('./server/duo-room.cjs').createRoom({snapshot:s}).checkpoint()));";
+  const restored=JSON.parse(require('node:child_process').execFileSync(process.execPath,['-e',code],{cwd:require('node:path').resolve(__dirname,'../..'),input:JSON.stringify(snapshot),encoding:'utf8'}));
+  assert.equal(restored.ruleset,'1.2.3');assert.deepEqual(restored.match,snapshot.match);assert.deepEqual(restored.seats.map(({token,next,last})=>({token,next,last})),snapshot.seats.map(({token,next,last})=>({token,next,last})));
+ }
+ assert.equal(compatibleRuleset('0.0.1','1.2.3'),false);assert.equal(compatibleRuleset('1.2.3','1.2.2'),false);
+});

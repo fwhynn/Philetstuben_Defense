@@ -32,7 +32,7 @@ test('surviving wave twelve without relics fails without inventing damage or awa
 test('preview remains isolated and historical calendar entries remain stable',()=>{
  const h=load(),s=h.a.state;h.elements.get('devExpeditionStart').listeners.click();assert.equal(h.a.state,s);
  const p=load({firstPlayerTest:true});p.elements.get('devExpeditionStart').listeners.click();assert.equal(p.a.state.challengeKind,'expedition');
- const c=core();for(const [d,id]of [['2026-11-15','powerGrid'],['2026-11-21','powerGrid'],[day,'expedition'],['2026-11-23','powerGrid']])assert.equal(c.waves.daily(d).id,id);
+ const c=core();for(const [d,id]of [['2026-11-15','detour'],['2026-11-21','detour'],[day,'expedition'],['2026-11-23','detour']])assert.equal(c.waves.daily(d).id,id);
 });
 
 

@@ -108,3 +108,13 @@ test('tutorial puts Archer first while ordinary runs preserve chosen loadout ord
  const order=['chain','freeze','mine','catapult','archer'];const tutorial=load({initialProfile:{version:1},initialStorage:{'tutorial-v1':'new'}});tutorial.a.newRun(order);assert.deepEqual(Array.from(tutorial.a.state.towerLoadout),['archer','chain','freeze','mine','catapult']);assert.deepEqual(order,['chain','freeze','mine','catapult','archer']);
  const normal=load();normal.a.newRun(order);assert.deepEqual(Array.from(normal.a.state.towerLoadout),order);
 });
+
+test('normal tower menu column stays tall beside mission controls on desktop and tablet',()=>{
+ const rules=layout(),rect=(left,top,width,height)=>({left,top,right:left+width,bottom:top+height,width,height});
+ for(const width of [1920,1200,1024,820]){
+  const controls=[rect(12,12,width-24,76),rect(width-240,320,228,568),rect(12,800,150,88)];
+  const area=rules.columnArea(width,900,controls),panel=rules.fit(area,440,900);
+  assert.equal(panel.width,440);assert.equal(panel.height,688);assert.equal(panel.y,100);
+  for(const r of controls)assert.ok(panel.x+panel.width<=r.left||panel.x>=r.right||panel.y+panel.height<=r.top||panel.y>=r.bottom);
+ }
+});

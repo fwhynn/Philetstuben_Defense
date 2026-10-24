@@ -863,10 +863,10 @@ R dreht die Karte, dann Feld anklicken.`;
     messageEl.style.position = 'fixed'; messageEl.style.left = ((raw.left + raw.right) / 2) + 'px'; messageEl.style.top = raw.top + 'px'; messageEl.style.bottom = 'auto'; messageEl.style.maxHeight = (tutorial.active ? Math.max(120, Math.min(280, document.documentElement.clientHeight - 180)) : Math.max(0, Math.min(240, (raw.bottom - raw.top) * .65))) + 'px'; if (document.documentElement.style?.setProperty) document.documentElement.style.setProperty('--tutorial-bottom', messageEl.getBoundingClientRect().bottom + 'px');
     const area = menuArea(); for (const panel of document.querySelectorAll('.towerPanel:not(.hidden),.drawer:not(.hidden)')) {
       let bounds=area;
-      if(document.documentElement.clientWidth>1100){
-        const left=area.left,right=Math.min(area.right,left+440),height=document.documentElement.clientHeight;
+      if(document.documentElement.clientWidth>700){
+        const left=document.documentElement.clientWidth>1100?area.left:12,right=Math.min(document.documentElement.clientWidth-12,left+440),height=document.documentElement.clientHeight;
         const obstacles=[...document.querySelectorAll('.compactToolbar,.dockTL,.hud,.dockBR,.dockBL,.mapControls,.handDock,.duoQuickMap')].map(el=>el.getBoundingClientRect()).filter(r=>r.right>left&&r.left<right);
-        bounds={...HexUiLayout.safeArea(document.documentElement.clientWidth,height,obstacles),left,right};
+        bounds=HexUiLayout.columnArea(document.documentElement.clientWidth,height,obstacles,left,right-left);
         if(tutorial.active)bounds.top=Math.max(bounds.top,area.top);
         panel.style.height=Math.max(0,bounds.bottom-bounds.top)+'px';
       }else panel.style.height='';
@@ -878,7 +878,7 @@ R dreht die Karte, dann Feld anklicken.`;
   function positionTowerPanel() {
     if (!state.selectedTower && !state.selectedBuilding) return;
     const panel = document.getElementById(state.selectedTower ? 'towerPanel' : 'buildingPanel'), area = menuArea();
-    if (area && document.documentElement.clientWidth>1100) { const left=area.left,right=Math.min(area.right,left+440),height=document.documentElement.clientHeight;const obstacles=[...document.querySelectorAll('.dockTL,.hud,.dockBL,.mapControls,.handDock,.duoQuickMap')].map(el=>el.getBoundingClientRect()).filter(r=>r.right>left&&r.left<right);const bounds={...HexUiLayout.safeArea(document.documentElement.clientWidth,height,obstacles),left,right};if(tutorial.active)bounds.top=Math.max(bounds.top,area.top);panel.style.height=Math.max(0,bounds.bottom-bounds.top)+'px';fitMenu(panel,bounds,bounds.left,bounds.top);return;}
+    if (area && document.documentElement.clientWidth>700) { const left=document.documentElement.clientWidth>1100?area.left:12,right=Math.min(document.documentElement.clientWidth-12,left+440),height=document.documentElement.clientHeight;const obstacles=[...document.querySelectorAll('.compactToolbar,.dockTL,.hud,.dockBL,.mapControls,.handDock,.duoQuickMap')].map(el=>el.getBoundingClientRect()).filter(r=>r.right>left&&r.left<right);const bounds=HexUiLayout.columnArea(document.documentElement.clientWidth,height,obstacles,left,right-left);if(tutorial.active)bounds.top=Math.max(bounds.top,area.top);panel.style.height=Math.max(0,bounds.bottom-bounds.top)+'px';fitMenu(panel,bounds,bounds.left,bounds.top);return;}
     if (area) { const narrow = document.documentElement.clientWidth <= 700; fitMenu(panel, area, area.left, narrow ? area.bottom - panel.getBoundingClientRect().height : area.top); }
   }
   function renderBuildingPanel() {
@@ -1532,10 +1532,6 @@ R dreht die Karte, dann Feld anklicken.`;
   }
   document.getElementById('powerCloseBtn').addEventListener('click',()=>{document.getElementById('powerEditor').open=false;});
   document.getElementById('powerTowerBtn').addEventListener('click',()=>{if(HexPowerGrid.toggleTower(state,state.selectedTower)){renderAll();saveRunAutosave(true);}});
-  document.getElementById('devPowerStart').addEventListener('click',()=>{
-    if(!testProfile||!globalThis.HexFirstPlayerTest?.enabled||duoToken){setMessage('Starte zuerst das isolierte Erstspieler-Testprofil im Dev-Modus.');return;}
-    newRun(undefined,undefined,undefined,'2026-11-15');mainMenu.classList.add('hidden');document.getElementById('settingsDrawer').classList.add('hidden');renderAll();
-  });
   function renderVillages(){
     const moving=state.challengeKind==='movingFortress',active=state.challengeKind==='villages'||moving,move=document.getElementById('villageMoveBtn');
     document.getElementById('villageControls').classList.toggle('hidden',!active);

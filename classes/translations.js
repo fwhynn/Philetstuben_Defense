@@ -2620,4 +2620,21 @@ Ruhende Bauphasen erzeugen keine laufenden vollständigen Kartenupdates mehr.|Id
 Die Aufbereitung von Gegner- und Karteninformationen wurde beschleunigt.|Enemy and map information is now processed faster.
 Bestehende Duo-Spielstände der vorherigen Versionen können fortgesetzt werden.|Existing Duo saves from previous versions can be resumed.
 Duo-Endlosmodus nach gemeinsamem Sieg in Welle 35.|Duo endless mode after your shared victory in wave 35.
+
+Herausforderungen: Mehr Platz für Türme|Challenges: More room for towers
+Einheitlich große Turmmenüs und ein mittelalterlicher Missionspool.|Consistently sized tower menus and a medieval mission pool.
+Stromnetz-Herausforderung|Power Grid challenge
+VERBESSERT|IMPROVED
+Mehr Platz im Turmbaumenü – auch auf Tablets|More room in the tower build menu, including on tablets
+Stromnetz entfernt|Power Grid removed
+Die elektrische Mission passt nicht zum mittelalterlichen Spielstil.|The electricity-themed mission does not fit the medieval setting.
+Stromnetz erscheint nicht mehr in der Tagesrotation, im Testlabor oder in der Dev-Auswahl.|Power Grid no longer appears in the daily rotation, challenge lab or developer selection.
+Bisherige Stromnetz-Termine werden durch Die Kunst des Umwegs ersetzt. Andere Missionstermine bleiben unverändert.|Former Power Grid dates now feature The Art of the Detour. Other mission dates stay unchanged.
+Bedienung|Controls
+Turmmenüs mit mehr Platz|Roomier tower menus
+Turmbau und Upgrades nutzen auch auf Tablet-Breiten ein normal großes Menü.|Tower building and upgrades now use a normal-sized menu on tablet-width screens too.
+Bei ausreichend Bildschirmbreite sind die Turmmenüs 440 Pixel breit und nutzen die verfügbare Höhe.|Where screen width allows, tower menus are 440 pixels wide and use the available height.
+Seitlich liegende Missionsanzeigen verkleinern das Turmmenü nicht mehr unnötig.|Mission panels to the side no longer unnecessarily shrink the tower menu.
+Stromnetz aus Tagesrotation, Testlabor und Dev-Auswahl entfernt.|Power Grid removed from the daily rotation, challenge lab and developer selection.
+Einheitlich große Turmmenüs mit mehr Platz auf Tablets.|Consistently sized tower menus with more space on tablets.
 `);

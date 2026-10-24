@@ -129,6 +129,7 @@ test('new enemy art is rendered as an image with the real asset path and readabl
 
 test('power pylons mark all nodes including base and relays, cache geometry and dispose on changes',async()=>{
  const THREE=await import('three'),c=require('../headless-core.cjs')(),s=c.session.create({seed:'power-test',runId:'pylon-test',challengeDay:'2026-11-15',loadout:['archer','catapult','chain','freeze','mine']}).state;
+ s.challengeKind='powerGrid';c.powerGrid.initialize(s);
  const source=fs.readFileSync(path.join(__dirname,'../classes/three-renderer.js'),'utf8'),block=source.slice(source.indexOf('  const powerVisuals='),source.indexOf('  // ---- Beschriftungen'));
  const ctx={THREE,state:s,scene:new THREE.Scene(),HexPowerGrid:c.powerGrid,HEX:c.map.HEX,axialToWorld:c.map.axialToWorld};
  vm.runInNewContext(block+';globalThis.power={sync:syncPowerVisuals,clear:clearPowerVisuals,group:powerVisuals}',ctx);
