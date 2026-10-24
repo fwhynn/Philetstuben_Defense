@@ -1,6 +1,7 @@
-(()=>{
+(async()=>{
+ await globalThis.HexLocalStore?.ready;
  const $=id=>document.getElementById(id),params=new URLSearchParams(location.hash.slice(1));
- const code=$('code'),status=$('status');code.value=HexDuoClient.inviteCode(params.get('join'));let pending=null,client=null,view=null,navigating=false,noticeUntil=0;
+ const code=$('code'),status=$('status');code.value=HexDuoClient.inviteCode(params.get('join'));let pending=null,client=null,view=null,navigating=false,noticeUntil=0,draftLoadout=null,loadoutKey='',loadoutRenderKey='',savingLoadout=false;
  const canCreate=()=>HexProfile.modesUnlocked(HexProfile.load(HexData.TOWERS));
  const lockCreate=()=>{const open=canCreate();$('create').disabled=!open;$('createLocked').hidden=open;};lockCreate();
  // Short-lived feedback (copied, errors) must not be overwritten by the 10 Hz connection status.
@@ -13,6 +14,18 @@
    try{const response=await fetch('/lobby/'+kind,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({requestId:pending.requestId,...(kind==='join'?{code:value}:{})}),signal:AbortSignal.timeout(5000)});if(!response.ok)throw Error('Server nicht erreichbar.');const result=await response.json();if(!result.ok){pending=null;throw Error(reasons[result.reason]||'Verbindung fehlgeschlagen.');}status.textContent='';localStorage.setItem('autohex-duo-session',result.token);history.replaceState(null,'','#session='+result.token);wait(result.token);}catch(error){notice(error.message);}finally{lockCreate();$('join').querySelector('button').disabled=false;}
  }
  function step(id,state){$(id).dataset.state=state;}
+ function renderLoadouts(next){
+   const own=next.lobbyState?.loadouts?.[next.player]||next.boards[next.player].loadout||[],partner=next.lobbyState?.loadouts?.[1-next.player]||[];
+   const key=own.join('|');if(key!==loadoutKey||!draftLoadout){loadoutKey=key;draftLoadout=[...own];}
+   const ready=!!next.lobbyState?.ready?.[next.player],available=new Set(['archer','catapult','chain','freeze','mine',...HexProfile.load(HexData.TOWERS).unlockedTowers||[],...own]);
+   const dirty=draftLoadout.join('|')!==key,renderKey=JSON.stringify([draftLoadout,partner,savingLoadout,next.lobby.players,dirty,ready,[...available]]);
+   $('lobbyApplyLoadout').disabled=savingLoadout||ready||draftLoadout.length!==5||!dirty;
+   if(renderKey===loadoutRenderKey)return;loadoutRenderKey=renderKey;
+   $('lobbyLoadoutCount').textContent=draftLoadout.length+'/5';$('lobbyLoadoutChoices').replaceChildren();$('lobbyPartnerLoadout').replaceChildren();
+   function tower(id,selected,interactive){const def=HexData.TOWERS[id],button=document.createElement(interactive?'button':'div');button.className='lobbyTowerChoice';button.innerHTML=HexArsenal.icon(id,def.color);const name=document.createElement('span');name.textContent=def.name+(interactive&&!available.has(id)?' · Gesperrt':'');button.appendChild(name);if(interactive){button.type='button';button.setAttribute('aria-pressed',String(selected));button.disabled=savingLoadout||ready||!available.has(id)||(!selected&&draftLoadout.length>=5);button.addEventListener('click',()=>{draftLoadout=selected?draftLoadout.filter(t=>t!==id):[...draftLoadout,id];renderLoadouts(view);$('lobbyReady').disabled=true;});}return button;}
+   for(const id of Object.keys(HexData.TOWERS))$('lobbyLoadoutChoices').appendChild(tower(id,draftLoadout.includes(id),true));
+   if(next.lobby.players<2)$('lobbyPartnerLoadout').textContent='Wartet auf deinen Partner …';else for(const id of partner)$('lobbyPartnerLoadout').appendChild(tower(id,true,false));
+ }
  function show(next){
    const own=next.player,other=1-own,ready=next.lobbyState?.ready||[false,false],joined=next.lobby.players>=2,online=next.connection.players[other]==='connected';
    $('invite').value=location.origin+'/duo-lobby.html#join='+next.lobby.code;
@@ -21,7 +34,7 @@
    $('seatFriend').dataset.state=!joined?'open':!online?'offline':ready[other]?'ready':'notready';
    $('friendReady').textContent=!joined?'Wartet auf Beitritt …':!online?'Verbindung unterbrochen':ready[other]?'Bereit ✓':'Noch nicht bereit';
    step('stepInvite',joined?'done':'current');step('stepJoin',joined?'done':'');step('stepReady',ready.every(Boolean)?'done':joined?'current':'');
-   $('lobbyReady').textContent=ready[own]?'Bereitschaft zurücknehmen':'Ich bin bereit';$('lobbyReady').disabled=!joined||next.connection.paused;
+   $('lobbyReady').textContent=ready[own]?'Bereitschaft zurücknehmen':'Ich bin bereit';renderLoadouts(next);$('lobbyReady').disabled=!joined||next.connection.paused||savingLoadout||draftLoadout.join('|')!==loadoutKey;
    $('lobbyHint').textContent=!joined?'Schicke deinem Partner den Link. Sobald er beitritt, könnt ihr euch bereit melden.':!online?'Dein Partner ist gerade nicht verbunden. Warte kurz, bis er zurück ist.':ready[own]&&!ready[other]?'Du bist bereit. Das Spiel startet, sobald dein Partner auch bereit ist.':!ready[own]&&ready[other]?'Dein Partner ist bereit und wartet auf dich.':'Das Spiel startet, sobald ihr beide bereit seid.';
  }
  function wait(token){
@@ -34,6 +47,7 @@
  }
  // Expired or removed rooms answer 401 forever; drop the stale link instead of retrying.
  function closed(token){client?.stop();client=null;view=null;if(localStorage.getItem('autohex-duo-session')===token)localStorage.removeItem('autohex-duo-session');$('resumeDuo')?.remove();history.replaceState(null,'',location.pathname);$('waitingLobby').hidden=true;$('lobbyEntry').hidden=false;notice('Diese Duo-Lobby existiert nicht mehr oder ist abgelaufen.');}
+ $('lobbyApplyLoadout').addEventListener('click',async()=>{if(!client||!view||savingLoadout||draftLoadout?.length!==5)return;savingLoadout=true;renderLoadouts(view);try{await client.send('lobbyLoadout',{towers:[...draftLoadout]});notice('Turmauswahl übernommen. Melde dich anschließend erneut bereit.');}catch(e){notice(e.message);}finally{savingLoadout=false;show(view);}});
  $('lobbyReady').addEventListener('click',async()=>{if(!view)return;try{await client.send('lobbyReady',{value:!view.lobbyState.ready[view.player]});}catch(error){notice(error.message);}});
  $('lobbyTakeover').addEventListener('click',()=>client.takeover().catch(e=>notice(e.message)));
  $('lobbyLeave').addEventListener('click',async()=>{try{await client.leave();localStorage.removeItem('autohex-duo-session');location.replace('/duo-lobby.html');}catch(e){notice(e.message);}});

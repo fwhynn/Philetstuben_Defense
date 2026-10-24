@@ -8,7 +8,7 @@ function attachSockets(server,room,{browser,publicOrigin,isClosing}){
  const present=new Set(),touch=socket=>{if(isClosing()||room.healthy===false)return;try{room.touch?.(socket.data.token);}catch{}};
  const heartbeat=setInterval(()=>{for(const socket of present)touch(socket);},1000);heartbeat.unref?.();
  // Push changed snapshots at a steady 10 Hz instead of waiting for request/response round trips.
- const sent=new WeakMap(),push=setInterval(()=>{if(isClosing()||room.healthy===false)return;for(const socket of present){try{const {token,clientId}=socket.data;if(room.claim&&!room.claim(token,clientId).ok)continue;const view=room.view(token);if(!view)continue;const key=view.serverId+view.epoch+':'+view.revision+':'+view.next;if(sent.get(socket)===key)continue;sent.set(socket,key);socket.emit('state',view);}catch{}}},100);push.unref?.();
+ const sent=new WeakMap(),push=setInterval(()=>{if(isClosing()||room.healthy===false)return;for(const socket of present){try{const {token,clientId}=socket.data;if(room.claim&&!room.claim(token,clientId).ok)continue;const view=room.view(token);if(!view)continue;const key=view.serverId+view.epoch+':'+view.revision+':'+view.next;if(sent.get(socket)===key)continue;sent.set(socket,key);socket.volatile.emit('state',view);}catch{}}},100);push.unref?.();
  server.on('close',()=>{clearInterval(heartbeat);clearInterval(push);});
  io.on('connection',socket=>{
   present.add(socket);touch(socket);socket.on('disconnect',()=>present.delete(socket));

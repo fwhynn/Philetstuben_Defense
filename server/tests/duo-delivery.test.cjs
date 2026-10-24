@@ -7,9 +7,9 @@ function fixture(){
  const room=createRoom({snapshot});for(const seat of seats)room.touch(seat.token);return {room,seats};
 }
 function packet(room,seat,payload){const v=room.view(seat.token);return {epoch:v.epoch,sequence:v.next,wave:v.wave,phase:v.boards[seat.player].phase,action:'delivery',payload};}
-test('delivery protocol hides partner choices and rejects forged, cross-seat and repeated gifts',()=>{
+test('delivery protocol shares partner choices read-only and rejects forged, cross-seat and repeated gifts',()=>{
  const {room,seats:[a,b]}=fixture(),av=room.view(a.token),bv=room.view(b.token),offer=av.delivery.offers[0],before=bv.boards[1].gold;
- assert.equal(av.delivery.offers[1].choices,undefined);assert.equal(av.delivery.offers[1].id,undefined);assert.ok(!JSON.stringify(av).includes('private-deliveries'));
+ assert.deepEqual(av.delivery.offers[1].choices,bv.delivery.offers[1].choices);assert.equal(av.delivery.offers[1].id,undefined);assert.ok(!JSON.stringify(av).includes('private-deliveries'));
  for(const payload of [{offerId:offer.id,index:0,amount:999},{offerId:offer.id,index:null},{offerId:bv.delivery.offers[1].id,index:0},{offerId:'forged',index:0}])assert.equal(room.receive(a.token,packet(room,a,payload)).ok,false);
  const gift=packet(room,a,{offerId:offer.id,index:0});assert.ok(room.receive(a.token,gift).ok);assert.equal(room.view(b.token).boards[1].gold,before+50);assert.equal(room.receive(a.token,gift).duplicate,true);
  assert.equal(room.receive(a.token,packet(room,a,gift.payload)).ok,false);assert.equal(room.view(b.token).boards[1].gold,before+50);

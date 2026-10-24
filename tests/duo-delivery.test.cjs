@@ -35,11 +35,17 @@ test('version 2 checkpoints migrate without retroactive gifts and invalid delive
  const h=finished(),snap=json(h.c.duo.capture(h.m));snap.duo.delivery.offers[0].choices[0].amount=999;assert.throws(()=>h.c.duo.restore(snap),/delivery/);
 });
 
-test('pending legacy 20 gold gifts survive restore and cannot be forged into new gifts',()=>{
+test('pending legacy gifts upgrade to 50 while completed gifts retain their original amount',()=>{
  const {c,m}=finished(),snap=json(c.duo.capture(m));delete snap.duo.delivery.rulesVersion;
  for(const o of snap.duo.delivery.offers)o.choices[0].amount=20;
  const restored=c.duo.restore(snap),before=restored.boards[1].state.gold;
  assert.ok(c.duo.command(restored,0,{id:'legacy',wave:5,action:'delivery',payload:{offerId:restored.delivery.offers[0].id,index:0}}));
- assert.equal(restored.boards[1].state.gold,before+20);assert.doesNotThrow(()=>c.duo.restore(json(c.duo.capture(restored))));
+ assert.equal(restored.boards[1].state.gold,before+50);assert.doesNotThrow(()=>c.duo.restore(json(c.duo.capture(restored))));
  const bad=json(c.duo.capture(m));bad.duo.delivery.offers[0].choices[0].amount=20;assert.throws(()=>c.duo.restore(bad),/delivery/);
+});
+
+test('legacy gifts already delivered are not paid or relabeled again during migration',()=>{
+ const {c,m}=finished(),snap=json(c.duo.capture(m));delete snap.duo.delivery.rulesVersion;for(const o of snap.duo.delivery.offers)o.choices[0].amount=20;snap.duo.delivery.offers[0].index=0;
+ const restored=c.duo.restore(snap);assert.equal(restored.delivery.offers[0].choices[0].amount,20);assert.equal(restored.delivery.offers[1].choices[0].amount,50);
+ const gold=restored.boards[1].state.gold;assert.equal(c.duo.command(restored,0,{id:'duplicate',wave:5,action:'delivery',payload:{offerId:restored.delivery.offers[0].id,index:0}}),false);assert.equal(restored.boards[1].state.gold,gold);assert.doesNotThrow(()=>c.duo.restore(json(c.duo.capture(restored))));
 });

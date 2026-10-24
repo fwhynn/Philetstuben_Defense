@@ -107,6 +107,7 @@
                 id="duoSendTower">Turm wählen</button><button id="duoClearTower" class="secondary">Abwählen</button>
             </div>
           </section>
+          <section id="duoGifts" class="duoHudSection hidden"><h3>Partnergeschenke</h3><div id="duoGiftHistory"></div></section>
           <section id="duoGuardianSection" class="duoHudSection hidden">
             <h3>Wächter</h3>
             <p class="duoHelpText">Wächter starten erst, wenn ihr beide zustimmt.</p>
@@ -134,7 +135,8 @@
           <p id="duoTurnText"></p><button id="duoQuickMap" class="duoQuickMap hidden" type="button">⇄ Partnerkarte
             ansehen</button>
         </div>
-      <button id="duoSupportShortcut" class="duoSupportShortcut" type="button">⇄ Turmverstärkung &amp; Partnerportal</button>
+      <p id="duoGiftReceived" class="duoGiftReceived hidden" role="status"></p>
+      <button id="duoSupportShortcut" class="duoSupportShortcut" type="button">⇄ Partnerhilfe &amp; Geschenke</button>
       </section>
       <div id="duoTransfer" class="duoTransfer hidden" role="status"></div>
       <nav id="quickLoadout" class="mapRail loadoutRail" aria-label="Loadout: Turm auf einen freien Platz ziehen"></nav>
@@ -676,7 +678,7 @@
               id="skipRemovalTopBtn" class="secondary hidden">Keine Karte entfernen</button>
           </div>
           <p id="rewardDescription">Wähle 1 von 3 Hexkarten.</p>
-          <div id="rewardChoices" class="rewardChoices"></div>
+          <div id="rewardChoices" class="rewardChoices"></div><section id="duoGiftPreview" class="duoGiftPreview hidden"></section>
           <button id="skipRemovalBtn" class="secondary hidden">Keine Karte entfernen</button>
         </div>
         <section id="rewardDeck" class="hidden" aria-label="Deckübersicht">

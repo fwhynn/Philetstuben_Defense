@@ -136,3 +136,10 @@ test('power pylons mark all nodes including base and relays, cache geometry and 
  let disposed=0;first.geometry.addEventListener('dispose',()=>disposed++);c.powerGrid.toggleField(s,'1,0');ctx.power.sync();assert.equal(disposed,1);assert.equal(ctx.power.group.children.length,count);
  ctx.power.clear();assert.equal(ctx.power.group.children.length,0);
 });
+
+test('buffered Duo motion updates enemies without repeating static map and mine synchronization',()=>{
+ const source=fs.readFileSync(path.join(__dirname,'../classes/three-renderer.js'),'utf8');
+ const fn=source.match(/  function renderMotion\(\)\{[^\n]+\}/)[0];let updates=0;const context={state:{remoteView:true},ready:true,syncEnemies(){updates++;}};
+ vm.runInNewContext(fn+';globalThis.move=renderMotion;',context);for(let i=0;i<60;i++)context.move();assert.equal(updates,60);context.ready=false;context.move();assert.equal(updates,60);
+ const sync=source.match(/  function syncEnemies\(\)\{[\s\S]*?\n  function syncMines/)[0];assert.match(sync,/if\(state.remoteMotionBuffered\)obj.remoteMotion=null/);assert.match(sync,/state.remoteView&&!state.remoteMotionBuffered/);
+});

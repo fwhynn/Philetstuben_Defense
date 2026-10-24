@@ -141,12 +141,15 @@ const HexDuoSession=(()=>{
     if(match.delivery){
       const d=match.delivery;
       if(!Number.isInteger(d.wave)||d.wave<=0||d.wave%DELIVERY.interval||d.wave>match.wave||!Array.isArray(d.offers)||d.offers.length!==2)throw new Error('Invalid Duo delivery');
-      if (![1,2].includes(d.rulesVersion??1)) throw new Error('Invalid Duo delivery rules');
+      if (![1,2,3].includes(d.rulesVersion??1)) throw new Error('Invalid Duo delivery rules');
       const expected=deliveryOffers({...match,wave:d.wave},d.rulesVersion??1);
+      if(d.rulesVersion===3)for(let i=0;i<d.offers.length;i++){const o=d.offers[i];if(o?.legacyGold===true&&o.index!==null)expected[i].choices[0].amount=20;else if(o?.legacyGold!==undefined)throw new Error('Invalid legacy gift');}
       if(d.offers.some((o,i)=>!o||o.id!==expected[i].id||JSON.stringify(o.choices)!==JSON.stringify(expected[i].choices)||o.index!==null&&(!Number.isInteger(o.index)||o.index<0||o.index>=o.choices.length)))throw new Error('Invalid Duo delivery');
       const unfinished=d.offers.some(o=>o.index===null);
       if(unfinished&&(match.phase!=='prepare'||d.wave!==match.wave||!match.boards.every(run=>run.state.duoDeliveryPending))||pending!==unfinished)throw new Error('Inconsistent Duo delivery');
     }else if(pending)throw new Error('Missing Duo delivery');
+    // Upgrade only unclaimed old gifts. Completed transfers keep their real amount.
+    if(match.delivery&&(match.delivery.rulesVersion??1)===1){for(const o of match.delivery.offers){if(o.index===null)o.choices[0].amount=DELIVERY.gold;else o.legacyGold=true;}match.delivery.rulesVersion=3;}
     return match;
   }
   return {create,command,tick,capture,restore,DELIVERY};

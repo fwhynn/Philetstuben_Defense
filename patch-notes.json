@@ -1,5 +1,73 @@
 [
   {
+    "version": "next",
+    "title": "Duo: Gemeinsam besser vorbereitet",
+    "summary": "Kompakte Teamleiste, bessere Bewegung und gemeinsame Planung von Geschenken und Türmen.",
+    "overview": [
+      {
+        "kind": "new",
+        "title": "NEU",
+        "items": [
+          "Loadout-Wahl in der Duo-Lobby",
+          "Partnerangebote ansehen"
+        ]
+      },
+      {
+        "kind": "buff",
+        "title": "VERBESSERT",
+        "items": [
+          "Offene Goldgeschenke: 50 Gold"
+        ]
+      },
+      {
+        "kind": "fixed",
+        "title": "KORRIGIERT",
+        "items": [
+          "Bewegung und springende Leisten"
+        ]
+      }
+    ],
+    "sections": [
+      {
+        "title": "Duo-Modus",
+        "entries": [
+          {
+            "title": "Duo: flüssiger und kompakter",
+            "summary": "Weniger Bildschirmfläche für Hinweise, stabilere Leisten und flüssigere Gegnerbewegung.",
+            "bullets": [
+              "Die Teamleiste sitzt kompakt am oberen Bildschirmrand. Lange Anleitungstexte entfallen.",
+              "Turm- und Biomleisten bleiben beim Verschieben, Kaufen und Verbessern an ihrem Platz.",
+              "Gegnerbewegungen werden gepuffert und nicht mehr doppelt geglättet. Der Kartenabgleich wird bei reinen Bewegungsschritten reduziert.",
+              "Bei langsamen Verbindungen werden überholte Ansichten nicht hintereinander nachgeholt."
+            ],
+            "stats": []
+          },
+          {
+            "title": "Partnergeschenke und Turmauswahl",
+            "summary": "Stimmt eure Geschenke und Türme vor dem nächsten Angriff ab.",
+            "bullets": [
+              "Die Geschenkangebote des Partners sind einsehbar; erhaltene Geschenke werden mit Name oder Goldbetrag angezeigt.",
+              "Noch offene alte 20-Gold-Angebote werden beim Fortsetzen auf 50 Gold angehoben. Bereits ausgezahlte Geschenke werden nicht erneut gutgeschrieben.",
+              "In der Duo-Lobby wählst du fünf Türme und siehst die Turmauswahl deines Partners.",
+              "Eine geänderte Turmauswahl hebt nur deine eigene Bereitschaft auf."
+            ],
+            "stats": [
+              {
+                "label": "Noch offene alte Goldgeschenke",
+                "before": "20 Gold",
+                "after": "50 Gold"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "changes": [
+      "Weniger Bildschirmfläche für Hinweise, stabilere Leisten und flüssigere Gegnerbewegung.",
+      "Stimmt eure Geschenke und Türme vor dem nächsten Angriff ab."
+    ]
+  },
+  {
     "version": "1.2.0",
     "title": "Duo-Verbesserungen und Reliktjagd",
     "summary": "Stärkere Partnergeschenke, sauberere Duo-Bewegung und mehr Orientierung und Spannung in der Expedition.",

@@ -2552,3 +2552,54 @@ Duo|Duo
 Tägliche Herausforderungen|Daily challenges
 Allgemeine Verbesserungen|General improvements
 `);
+
+HexTranslations.add(`
+Deine Turmauswahl|Your tower loadout
+Turmauswahl deines Partners|Your partner's tower loadout
+Wähle fünf Türme für diese Duo-Partie. Änderungen heben eure Bereitschaft auf.|Choose five towers for this Duo match. Changes reset both players' ready status.
+Turmauswahl übernehmen|Apply tower loadout
+Wartet auf deinen Partner …|Waiting for your partner …
+Turmauswahl übernommen. Beide Spieler müssen sich erneut bereit melden.|Tower loadout applied. Both players must ready up again.
+Partnergeschenke|Partner gifts
+⇄ Partnerhilfe & Geschenke|⇄ Partner support & gifts
+Vom Partner erhalten:|Received from your partner:
+Dein Partner hat noch kein Geschenk gewählt.|Your partner has not chosen a gift yet.
+Diese Geschenke kann dein Partner dir schicken:|Your partner can send you one of these gifts:
+Sofort verfügbares Gold|Gold available immediately
+✓ Erhalten|✓ Received
+Du hast verschenkt:|You sent:
+Stimmt euch ab. Jeder wählt das Geschenk für den anderen.|Coordinate with each other. Each player chooses a gift for their partner.
+`);
+
+HexTranslations.add(`
+Wähle fünf Türme für diese Duo-Partie. Änderungen heben deine Bereitschaft auf.|Choose five towers for this Duo match. Changes reset only your ready status.
+Turmauswahl übernommen. Melde dich anschließend erneut bereit.|Tower loadout applied. Ready up again when you are done.
+`);
+
+HexTranslations.add(`
+Duo: flüssiger und kompakter|Duo: smoother and more compact
+Weniger Bildschirmfläche für Hinweise, stabilere Leisten und flüssigere Gegnerbewegung.|Less screen space for hints, stable sidebars and smoother enemy movement.
+Die Teamleiste sitzt kompakt am oberen Bildschirmrand. Lange Anleitungstexte entfallen.|The compact team bar sits at the top edge. Long instruction text is removed.
+Turm- und Biomleisten bleiben beim Verschieben, Kaufen und Verbessern an ihrem Platz.|Tower and biome bars stay in place while panning, building and upgrading.
+Gegnerbewegungen werden gepuffert und nicht mehr doppelt geglättet. Der Kartenabgleich wird bei reinen Bewegungsschritten reduziert.|Enemy motion is buffered and no longer smoothed twice. Motion-only updates avoid repeated map synchronization.
+Bei langsamen Verbindungen werden überholte Ansichten nicht hintereinander nachgeholt.|Slow connections no longer queue outdated views for later playback.
+Noch offene alte Goldgeschenke|Pending legacy gold gifts
+20 Gold|20 gold
+50 Gold|50 gold
+Partnergeschenke und Turmauswahl|Partner gifts and tower loadouts
+Stimmt eure Geschenke und Türme vor dem nächsten Angriff ab.|Coordinate gifts and towers before the next attack.
+Die Geschenkangebote des Partners sind einsehbar; erhaltene Geschenke werden mit Name oder Goldbetrag angezeigt.|Partner gift offers are visible; received gifts show the card name or gold amount.
+Noch offene alte 20-Gold-Angebote werden beim Fortsetzen auf 50 Gold angehoben. Bereits ausgezahlte Geschenke werden nicht erneut gutgeschrieben.|Pending legacy 20-gold offers become 50 gold on resume. Completed gifts are not paid again.
+In der Duo-Lobby wählst du fünf Türme und siehst die Turmauswahl deines Partners.|Choose five towers in the Duo lobby and see your partner’s loadout.
+Eine geänderte Turmauswahl hebt nur deine eigene Bereitschaft auf.|Changing your tower loadout clears only your own ready status.
+Duo: Gemeinsam besser vorbereitet|Duo: better prepared together
+Kompakte Teamleiste, bessere Bewegung und gemeinsame Planung von Geschenken und Türmen.|A compact team bar, smoother movement and shared gift and tower planning.
+NEU|NEW
+Loadout-Wahl in der Duo-Lobby|Duo lobby loadout selection
+Partnerangebote ansehen|View partner gift offers
+VERBESSERT|IMPROVED
+Offene Goldgeschenke: 50 Gold|Pending gold gifts: 50 gold
+KORRIGIERT|FIXED
+Bewegung und springende Leisten|Movement and shifting sidebars
+Duo-Modus|Duo mode
+`);

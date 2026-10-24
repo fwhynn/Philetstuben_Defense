@@ -36,3 +36,12 @@ test('Duo support can be selected button-first and quick map switch stays availa
  ui.elements.get('duoSendTower').listeners.click();ui.rendererCommands.selectTower(1,0,0);assert.equal(duo.calls.at(-1).action,'reinforcement');
  assert.equal(ui.elements.get('duoQuickMap').classList.contains('hidden'),false);ui.elements.get('duoQuickMap').listeners.click();assert.equal(ui.elements.get('duoMapLabel').textContent,'Partnerkarte · Nur anschauen');
 });
+
+test('partner gifts are inspectable without acting for the partner and received gifts remain visible',()=>{
+ const duo={real:true,calls:[]},ui=load({duo}),room=createRoom({seed:'gift-preview',loadouts:Array(2).fill(['archer','catapult','chain','freeze','mine'])}),seat=room.connect(0);room.connect(1);
+ const view=room.view(seat.token);view.boards[0].phase='duoDelivery';view.delivery={wave:5,offers:[{id:'own',index:null,choices:[{kind:'gold',amount:50}]},{index:null,choices:[{kind:'gold',amount:50},{kind:'card',cardId:'smallCurve'},{kind:'card',cardId:'bigCurve'}]}]};duo.receive(view);
+ const preview=ui.elements.get('duoGiftPreview');assert.equal(preview.classList.contains('hidden'),false);assert.equal(preview.children[2].children.length,3);assert.equal(preview.children[2].children[1].children[1].textContent,'Kleine Kurve');
+ const first=preview.children[2];view.revision++;duo.receive(JSON.parse(JSON.stringify(view)));assert.equal(preview.children[2],first,'unchanged snapshots do not replace gift cards');
+ view.delivery.offers[1].index=1;view.revision++;duo.receive(view);assert.match(ui.elements.get('duoGiftReceived').textContent,/Kleine Kurve/);assert.equal(ui.elements.get('duoGiftReceived').classList.contains('hidden'),false);
+ view.boards[0].phase='place';view.delivery.offers[0].index=0;view.revision++;duo.receive(view);assert.equal(preview.classList.contains('hidden'),true);assert.match(ui.elements.get('duoGiftHistory').children.at(-1).textContent,/50 Gold/);assert.equal(duo.calls.length,0);
+});

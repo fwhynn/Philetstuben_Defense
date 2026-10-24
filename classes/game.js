@@ -2031,7 +2031,7 @@ R dreht die Karte, dann Feld anklicken.`;
   function togglePause() { if (duoToken) { duoBridge?.pause(); return; } advanceClock(performance.now()); paused = !paused; clockDebt = 0; last = performance.now(); document.getElementById('app').classList.toggle('paused', paused); const b = document.getElementById('pauseBtn'); if (b) b.textContent = paused ? '▶ Weiter (P)' : '⏸ Pause (P)'; }
   document.getElementById('pauseBtn')?.addEventListener('click', togglePause);
   function advanceClock(now) {
-    if (duoToken) { last = now; clockDebt = 0; if (state.waveRunning && !document.hidden && duoBridge?.animate?.(now)) renderBoard(); return; }
+    if (duoToken) { last = now; clockDebt = 0; if (state.waveRunning && !document.hidden && duoBridge?.animate?.(now)) { if(renderer.renderMotion) renderer.renderMotion(); else renderBoard(); } return; }
     const elapsed = Math.max(0, (now - last) / 1000); last = now;
     if (paused || !hasActiveRun || !state.waveRunning) { clockDebt = 0; return; }
     clockDebt += elapsed * HexRunRuntime.PLAYBACK_RATE; const step = .05 / gameSpeed; let count = 0;

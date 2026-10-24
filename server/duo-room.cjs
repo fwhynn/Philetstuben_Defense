@@ -3,6 +3,8 @@
 const crypto = require('node:crypto');
 const loadCore = require('../headless-core.cjs');
 const RULESET = require('../package.json').version;
+// Explicitly reviewed compatibility: this release changes presentation/lobby only.
+function compatibleRuleset(source,target=RULESET){return source===target || target==='1.2.1'&&source==='1.2.0';}
 const object = v => v !== null && typeof v === 'object' && !Array.isArray(v);
 const exact = (v, keys) => object(v) && Object.keys(v).every(k => keys.includes(k)) && keys.every(k => Object.hasOwn(v, k));
 const integer = (v, min, max) => Number.isInteger(v) && v >= min && v <= max;
@@ -11,6 +13,7 @@ const slot = v => exact(v, ['q', 'r', 'index']) && integer(v.q, -1000, 1000) && 
 function payloadValid(action, p) {
   switch (action) {
     case 'guardian': return exact(p, ['board', 'id', 'value']) && integer(p.board, 0, 1) && typeof p.id === 'string' && /^-?\d{1,4},-?\d{1,4}$/.test(p.id) && typeof p.value === 'boolean';
+    case 'lobbyLoadout': return exact(p,['towers']) && Array.isArray(p.towers) && p.towers.length===5 && new Set(p.towers).size===5 && p.towers.every(word);
     case 'lobbyReady':
     case 'pause':
     case 'rematch':
@@ -50,13 +53,13 @@ function motionPath(e) {
   return result;
 }
 function createRoom({ seed = crypto.randomUUID(), loadouts, now = () => Date.now(), disconnectMs = 10000, reconnectMs = 120000, snapshot, lobbyRequired = false } = {}) {
-  if (snapshot && (snapshot.format !== 'autohex-room' || snapshot.version !== 1 || snapshot.ruleset !== RULESET || typeof snapshot.epoch !== 'string' || !Array.isArray(snapshot.seats) || snapshot.seats.length !== 2 || snapshot.seats.some(s => s && (!/^[a-f0-9]{64}$/.test(s.token) || !Number.isSafeInteger(s.next) || s.next < 1)))) throw Error('Invalid room checkpoint');
+  if (snapshot && (snapshot.format !== 'autohex-room' || snapshot.version !== 1 || !compatibleRuleset(snapshot.ruleset) || typeof snapshot.epoch !== 'string' || !Array.isArray(snapshot.seats) || snapshot.seats.length !== 2 || snapshot.seats.some(s => s && (!/^[a-f0-9]{64}$/.test(s.token) || !Number.isSafeInteger(s.next) || s.next < 1)))) throw Error('Invalid room checkpoint');
   const core = loadCore(), match = snapshot ? core.duo.restore(snapshot.match) : core.duo.create(seed, loadouts), epoch = snapshot?.epoch || crypto.randomUUID(), seats = snapshot ? copy(snapshot.seats) : [null, null]; let revision = (snapshot?.revision || 0) + 1;
   if (snapshot?.lobby && (!exact(snapshot.lobby, ['started', 'ready']) || typeof snapshot.lobby.started !== 'boolean' || !Array.isArray(snapshot.lobby.ready) || snapshot.lobby.ready.length !== 2 || snapshot.lobby.ready.some(v => typeof v !== 'boolean'))) throw Error('Invalid lobby readiness');
   const lobby = snapshot?.lobby || { started: !lobbyRequired, ready: [false, false] };
   // Restore disconnected. Both original seats must return before combat resumes.
   if (snapshot) for (const seat of seats) if (seat) { seat.seen = now() - disconnectMs; seat.at = now(); seat.tokens = 40; }
-  const serverId = crypto.randomUUID(); let connectionKey = '', expired = false, ended = null, maintenanceAt = null;
+  const serverId = crypto.randomUUID(); let frameTime=now(); let connectionKey = '', expired = false, ended = null, maintenanceAt = null;
   const presenceNow = () => maintenanceAt ?? now();
   function setMaintenance(enabled) { if (typeof enabled !== 'boolean') throw Error('Invalid maintenance state'); if (enabled && maintenanceAt === null) maintenanceAt = now(); else if (!enabled && maintenanceAt !== null) { const elapsed = now() - maintenanceAt; for (const s of seats) if (s) s.seen += Math.max(0, elapsed); maintenanceAt = null; } connection(); }
   function connection() {
@@ -97,6 +100,11 @@ function createRoom({ seed = crypto.randomUUID(), loadouts, now = () => Date.now
     let result;
     const presence = connection();
     if (presence.paused) result = { ok: false, reason: ended ? 'match-ended' : presence.maintenance ? 'maintenance' : presence.expired ? 'reconnect-expired' : 'disconnected' };
+    else if (packet.action === 'lobbyLoadout') {
+      const towers=packet.payload.towers,ok=!lobby.started&&towers.every(id=>Object.hasOwn(core.data.TOWERS,id));
+      if(ok){const old=match.boards[player].state,run=core.session.create({seed:old.seed,runId:old.runId,loadout:towers,heroId:'standard',difficulty:'normal'});run.state.duoMode=true;run.state.hp=match.hp;run.state.maxHp=match.maxHp;match.boards[player]=run;lobby.ready[player]=false;revision++;}
+      result={ok,reason:ok?null:'illegal'};
+    }
     else if (packet.action === 'lobbyReady') { const ok = !lobby.started && seats.every(Boolean); if (ok) { lobby.ready[player] = packet.payload.value; if (lobby.ready.every(Boolean)) lobby.started = true; revision++; } result = { ok, reason: ok ? null : 'illegal' }; }
     else if (!lobby.started) result = { ok: false, reason: 'lobby-not-ready' };
     else if (packet.wave !== match.wave || packet.phase !== match.boards[player].state.phase) result = { ok: false, reason: 'stale' };
@@ -116,10 +124,10 @@ function createRoom({ seed = crypto.randomUUID(), loadouts, now = () => Date.now
       mines: (s.mines || []).map(m => pick(m, ['id', 'x', 'y', 'color'])),
       ...(index === player ? { ...pick(s, ['runTowerStats', 'runTowerDetails', 'baseKills', 'consumableKills', 'baseDamage', 'patricianBonusIncome']), duoDiamondEstimate: Math.floor(Math.min(...match.boards.map(r => r.state.lastCompletedWave || 0)) / 2) + (s.earnedMeta?.periodicBosses || 0) * 5 + match.boards.reduce((n, r) => n + (r.state.earnedMeta?.explorationBosses || 0), 0) * 3, hand: [...s.hand], placements: copy(placements(s)), rescueCard: s.rescueCard ? copy(s.rescueCard) : null, tunnelOffer: s.tunnelOffer ? copy(s.tunnelOffer) : null, ultimateUnlocks: [...s.ultimateUnlocks], buildingUnlocks: [...s.buildingUnlocks], wavePlans: [core.waves.plan(s.wave, s.income, !!s.challengeDay, s), core.waves.plan(s.wave + 1, s.income, !!s.challengeDay, s)], drawPile: [...s.drawPile], discard: [...s.discard], deckCounts: s.deck.reduce((a, id) => (a[id] = (a[id] || 0) + 1, a), {}), loadout: [...s.towerLoadout], rewardOffer: s.rewardOffer ? { ...pick(s.rewardOffer, ['kind', 'choices', 'skippable']), id: offerId(s.rewardOffer.id) } : null, celebration: s.activeCelebration ? copy(s.activeCelebration) : null } : {}),
     }));
-    return { lobbyState: copy(lobby), speed: match.speed || 1, paused: !!match.paused, protocol: 1, serverId, epoch, revision, player, connection: presence, next: seats[player].next, hp: match.hp, maxHp: match.maxHp, wave: match.wave, phase: match.phase, ready: [...match.ready], finished: [...match.finished], portals: copy(match.portals), reinforcements: copy(match.reinforcements), pendingHelp: match.pendingHelp.map(h => h ? { at: h.at } : null), result: publicResult(), rematch: match.rematch || [false, false], support: copy(match.support), delivery: match.delivery ? { wave: match.delivery.wave, offers: match.delivery.offers.map((o, i) => i === player ? { ...copy(o), id: offerId(o.id) } : { index: o.index === null ? null : 0 }) } : null, boards };
+    return { lobbyState: {...copy(lobby),loadouts:match.boards.map(r=>[...r.state.towerLoadout])}, speed: match.speed || 1, paused: !!match.paused, protocol: 1, frameTime, serverId, epoch, revision, player, connection: presence, next: seats[player].next, hp: match.hp, maxHp: match.maxHp, wave: match.wave, phase: match.phase, ready: [...match.ready], finished: [...match.finished], portals: copy(match.portals), reinforcements: copy(match.reinforcements), pendingHelp: match.pendingHelp.map(h => h ? { at: h.at } : null), result: publicResult(), rematch: match.rematch || [false, false], support: copy(match.support), delivery: match.delivery ? { wave: match.delivery.wave, offers: match.delivery.offers.map((o, i) => i === player ? { ...copy(o), id: offerId(o.id) } : { index:o.index, choices:copy(o.choices) }) } : null, boards };
   }
   function publicResult() { return match.result ? { ...copy(match.result), id: offerId(match.result.id) } : null; }
   function checkpoint() { if (ended || expired) return null; return { format: 'autohex-room', version: 1, ruleset: RULESET, lobby: copy(lobby), epoch, revision, seats: copy(seats), match: core.duo.capture(match) }; }
-  return { get result() { return publicResult(); }, setMaintenance, connect, touch, claim, leave, receive, view, presence() { return connection(); }, checkpoint, tick() { if (!lobby.started || connection().paused) return; for (let i = 0; i < (match.speed || 1) * core.runtime.PLAYBACK_RATE; i++)core.duo.tick(match); revision++; } };
+  return { get result() { return publicResult(); }, setMaintenance, connect, touch, claim, leave, receive, view, presence() { return connection(); }, checkpoint, tick() { if (!lobby.started || connection().paused) return; frameTime=now(); for (let i = 0; i < (match.speed || 1) * core.runtime.PLAYBACK_RATE; i++)core.duo.tick(match); revision++; } };
 }
-module.exports = { createRoom, payloadValid, RULESET, motionPath };
+module.exports = { createRoom, payloadValid, RULESET, motionPath, compatibleRuleset };

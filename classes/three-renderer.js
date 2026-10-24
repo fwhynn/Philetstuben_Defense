@@ -672,7 +672,8 @@ function create(host0,commands){
       if(slowed!==obj.slowed){obj.slowed=slowed;if(obj.body) obj.body.material.color.set(slowed?'#79cdd9':obj.color);if(obj.ice) obj.ice.visible=slowed;}
       if(obj.last){const dx=e.x-obj.last.x,dy=e.y-obj.last.y,moved=Math.hypot(dx,dy);   // Laufrichtung und Schrittphase aus der Bewegung
         if(moved>.05){obj.targetAngle=Math.atan2(-dy,dx);obj.phase+=moved*.14;if(!obj.oriented){obj.angle=obj.targetAngle;obj.oriented=true;}}}
-      if(state.remoteView&&(!obj.last||obj.last.x!==e.x||obj.last.y!==e.y)){
+      if(state.remoteMotionBuffered)obj.remoteMotion=null;
+      if(state.remoteView&&!state.remoteMotionBuffered&&(!obj.last||obj.last.x!==e.x||obj.last.y!==e.y)){
         obj.remoteMotion=obj.last?{x:obj.group.position.x,y:obj.group.position.z,toX:e.x,toY:e.y,start:performance.now()}:null;
       }
       obj.last={x:e.x,y:e.y};
@@ -946,6 +947,7 @@ function create(host0,commands){
     if(pickDirty){pickables=[...objectRecords.values()].flatMap(r=>r.picks).concat(layer.targets.children.map(g=>g.children[1]));layer.objects.updateMatrixWorld(true);layer.targets.updateMatrixWorld(true);pickDirty=false;}
     refreshPointerCursor();
   }
+  function renderMotion(){if(state&&ready)syncEnemies();}
   function project(position,height=30){
     camera.updateMatrixWorld(true);
     tmp.set(position.x,height,position.y).project(camera);if(tmp.z>1) return null;
@@ -1101,7 +1103,7 @@ function create(host0,commands){
     const points=[];for(const x of [bounds.min.x,bounds.max.x])for(const y of [bounds.min.y,bounds.max.y])for(const z of [bounds.min.z,bounds.max.z]){const p=project({x,y:z},y);if(p)points.push(p);}if(points.length!==8)return null;
     const left=Math.min(...points.map(p=>p.x)),top=Math.min(...points.map(p=>p.y));return {left,top,width:Math.max(...points.map(p=>p.x))-left,height:Math.max(...points.map(p=>p.y))-top};
   }
-  return {render,reset,project,towerBounds,setConsumablePreview,consumableTarget(event){const p=groundPoint(event),hit=pick(event);return {point:p?{x:p.x,y:p.z}:null,slot:hit?.kind==='tower'?{q:hit.q,r:hit.r,index:hit.index}:null};},getRenderedFrameCount:()=>renderedFrameCount,pickSlot(event){
+  return {render,renderMotion,reset,project,towerBounds,setConsumablePreview,consumableTarget(event){const p=groundPoint(event),hit=pick(event);return {point:p?{x:p.x,y:p.z}:null,slot:hit?.kind==='tower'?{q:hit.q,r:hit.r,index:hit.index}:null};},getRenderedFrameCount:()=>renderedFrameCount,pickSlot(event){
     // Use exactly the same projected ground centers and screen radius as the drag overlay.
     // The old elevated raycast cylinders drifted relative to those circles at oblique camera angles.
     const box=wrap.getBoundingClientRect(),slots=[];

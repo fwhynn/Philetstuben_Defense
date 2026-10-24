@@ -1,6 +1,7 @@
 'use strict';
 const http = require('node:http'), fs = require('node:fs'), path = require('node:path'), crypto = require('node:crypto'), zlib = require('node:zlib');
 const root = path.resolve(__dirname, '..');
+const runningRuleset=require('../package.json').version, deliveryGold=require('../headless-core.cjs')().duo.DELIVERY.gold;
 const assets = new Set(["classes/profile.js", "classes/translations.js", "classes/i18n.js", "duo-lobby.html", "duo-lobby.js", "duo-prototype.html", "classes/duo-prototype.js", "duo-client.js", "classes/random.js", "classes/biomes.js", "classes/data.js", "classes/map.js", "classes/heroes.js", "classes/waves.js", "classes/exploration.js", "classes/placement-commands.js", "classes/run-flow.js", "classes/run-session.js", "classes/buildings.js", "classes/tower-commands.js", "classes/deck.js", "classes/rewards.js", "classes/combat.js", "classes/detour.js", "classes/villages.js", "classes/power-grid.js", "classes/expedition.js", "classes/tower-draft.js", "classes/moving-fortress.js", "classes/run-runtime.js", "classes/run-snapshot.js", "classes/duo-session.js", "classes/camera.js", "classes/svg-renderer.js"]);
 // Behind nginx/Caddy the socket address is the proxy; only then is the forwarded client address trustworthy.
 function clientAddress(req, trustProxy) {
@@ -25,7 +26,7 @@ function createTransport(room, { browser = false, autoTick = false, publicOrigin
       if (publicFile) { const resolved = path.resolve(root, file); if (!resolved.startsWith(root + path.sep)) return send(403, { error: 'forbidden' }); fs.readFile(resolved, (error, data) => { if (error) return send(404, { error: 'not-found' }); const ext = path.extname(file), mime = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.glb': 'model/gltf-binary' }[ext] || 'application/octet-stream'; res.writeHead(200, { 'Content-Type': mime, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }); res.end(data); }); return; }
       if (assets.has(file)) { res.writeHead(200, { 'Content-Type': file.endsWith('.html') ? 'text/html; charset=utf-8' : 'text/javascript; charset=utf-8', 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer', 'X-Content-Type-Options': 'nosniff' }); return res.end(fs.readFileSync(path.join(root, file))); }
     }
-    if (req.method === 'GET' && req.url === '/healthz') return send(room.healthy === false ? 503 : 200, { ok: room.healthy !== false, service: 'autohex-duo', maintenance: !!room.maintenance });
+    if (req.method === 'GET' && req.url === '/healthz') return send(room.healthy === false ? 503 : 200, { ok: room.healthy !== false, service: 'autohex-duo', ruleset: runningRuleset, deliveryGold, maintenance: !!room.maintenance });
     if (req.method === 'GET' && req.url === '/live') {
       if (typeof liveSecret !== 'string' || liveSecret.length < 16 || typeof room.live !== 'function') return send(404, { error: 'not-found' });
       const supplied = String(req.headers['x-duo-live-secret'] || ''), expected = Buffer.from(liveSecret), actual = Buffer.from(supplied);

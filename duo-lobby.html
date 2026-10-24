@@ -34,6 +34,10 @@
   <div id="seatOwn" class="lobbySeat" data-state="notready"><span class="lobbyAvatar">Du</span><div><strong>Du</strong><p id="ownReady">Nicht bereit</p></div></div>
   <div id="seatFriend" class="lobbySeat" data-state="open"><span class="lobbyAvatar">P</span><div><strong>Dein Partner</strong><p id="friendReady">Wartet auf Beitritt …</p></div></div>
  </div>
+ <section class="lobbyLoadouts" aria-label="Turmauswahl">
+  <div><h2>Deine Turmauswahl <span id="lobbyLoadoutCount"></span></h2><p>Wähle fünf Türme für diese Duo-Partie. Änderungen heben deine Bereitschaft auf.</p><div id="lobbyLoadoutChoices" class="lobbyTowerChoices"></div><button id="lobbyApplyLoadout" type="button">Turmauswahl übernehmen</button></div>
+  <div><h2>Turmauswahl deines Partners</h2><div id="lobbyPartnerLoadout" class="lobbyTowerChoices"></div></div>
+ </section>
  <button id="lobbyReady" class="lobbyPrimary" disabled>Bereit</button>
  <p id="lobbyHint" class="lobbyHint"></p>
  <div class="lobbySecondary"><button id="lobbyTakeover" hidden>Sitzung hier übernehmen</button><button id="lobbyLeave" class="lobbyGhost">Lobby verlassen</button></div>
@@ -41,6 +45,6 @@
 <p id="status" role="status" class="lobbyStatus"></p>
 <p class="lobbyFoot">Freunde-Beta: Zwei getrennte Browser oder Geräte nutzen. Die Partie wird auf dem Server gespeichert. Diamanten werden nach dem gemeinsamen Abschluss deinem lokalen Spielstand gutgeschrieben.</p>
 </main>
-<script src="classes/biomes.js?v=4a36452e57676b3b"></script><script src="classes/data.js?v=4a36452e57676b3b"></script><script src="classes/profile.js?v=4a36452e57676b3b"></script><script src="/socket.io/socket.io.js"></script><script src="duo-client.js?v=4a36452e57676b3b"></script><script src="duo-lobby.js?v=4a36452e57676b3b"></script><script src="classes/site-visit.js?v=4a36452e57676b3b"></script>
+<script src="runtime-config.js"></script><script src="classes/api.js"></script><script src="classes/local-store.js"></script><script src="classes/biomes.js?v=4a36452e57676b3b"></script><script src="classes/data.js?v=4a36452e57676b3b"></script><script src="classes/arsenal.js"></script><script src="classes/profile.js?v=4a36452e57676b3b"></script><script src="/socket.io/socket.io.js"></script><script src="duo-client.js?v=4a36452e57676b3b"></script><script src="duo-lobby.js?v=4a36452e57676b3b"></script><script src="classes/site-visit.js?v=4a36452e57676b3b"></script>
 </body>
 </html>

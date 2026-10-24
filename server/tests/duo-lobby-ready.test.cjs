@@ -33,3 +33,24 @@ test('shared-screen targeting and sale affect only the authenticated board and s
 	const gold = own().gold; assert.ok(command(room, a, 'sellTower', { slot }).ok); assert.equal(own().gold, gold + 25); assert.equal(built(), null);
 	assert.equal(command(room, a, 'sellTower', { slot }).ok, false, 'sale cannot pay twice');
 });
+
+test('lobby loadouts are selectable before partner joins, shared, validated and persistent',()=>{
+ let room=createLobbies({now:()=>0});const a=room.create({requestId:randomUUID()}),chosen=['flame','ballista','element','necromancer','freeze'];
+ const before=room.view(a.token).boards[0];assert.ok(command(room,a,'lobbyLoadout',{towers:chosen}).ok);
+ assert.deepEqual(room.view(a.token).lobbyState.loadouts[0],chosen);assert.equal(room.view(a.token).boards[0].gold,before.gold);
+ const b=room.join({requestId:randomUUID(),code:a.code});assert.deepEqual(room.view(b.token).lobbyState.loadouts[0],chosen);
+ command(room,a,'lobbyReady',{value:true});command(room,b,'lobbyLoadout',{towers:['archer','catapult','freeze','mine','flame']});assert.deepEqual(room.view(a.token).lobbyState.ready,[true,false]);
+ for(const towers of [chosen.slice(1),[...chosen,'mine'],['mine','mine','mine','mine','mine'],['unknown',...chosen.slice(1)]])assert.equal(command(room,a,'lobbyLoadout',{towers}).ok,false);
+ const checkpoint=room.checkpoint();room=createLobbies({now:()=>0,snapshot:JSON.parse(JSON.stringify(checkpoint))});room.touch(a.token);room.touch(b.token);assert.deepEqual(room.view(a.token).lobbyState.loadouts[0],chosen);
+ command(room,a,'lobbyReady',{value:true});command(room,b,'lobbyReady',{value:true});assert.equal(command(room,a,'lobbyLoadout',{towers:chosen}).ok,false);assert.deepEqual(room.view(a.token).boards[0].loadout,chosen);
+});
+
+test('only the reviewed 1.2.0 to 1.2.1 room transition is compatible',()=>{const {compatibleRuleset}=require('../duo-room.cjs');assert.equal(compatibleRuleset('1.2.0','1.2.1'),true);assert.equal(compatibleRuleset('1.1.9','1.2.1'),false);assert.equal(compatibleRuleset('1.2.1','1.2.0'),false);});
+
+test('release 1.2.1 restores a 1.2.0 wave-30 checkpoint without changing either board',()=>{
+ const {createRoom}=require('../duo-room.cjs'),core=require('../../headless-core.cjs')(),room=createRoom({seed:'release-preservation',loadouts:Array(2).fill(['archer','catapult','chain','freeze','mine'])});room.connect(0);room.connect(1);
+ const snapshot=room.checkpoint(),match=core.duo.restore(snapshot.match);match.wave=30;match.phase='combat';for(const run of match.boards){run.state.wave=30;run.state.phase='wave';run.state.waveRunning=true;run.state.gold=321;run.state.spawnQueue=[];run.state.pendingSpawns=0;}snapshot.match=core.duo.capture(match);snapshot.ruleset='1.2.0';
+ const code="const p=require.resolve('./package.json');require(p);require.cache[p].exports={...require.cache[p].exports,version:'1.2.1'};const s=JSON.parse(require('fs').readFileSync(0,'utf8'));const r=require('./server/duo-room.cjs').createRoom({snapshot:s});process.stdout.write(JSON.stringify(r.checkpoint()));";
+ const result=JSON.parse(require('node:child_process').execFileSync(process.execPath,['-e',code],{cwd:require('node:path').resolve(__dirname,'../..'),input:JSON.stringify(snapshot),encoding:'utf8'}));
+ assert.equal(result.ruleset,'1.2.1');assert.deepEqual(result.match,JSON.parse(JSON.stringify(snapshot.match)));assert.deepEqual(result.seats.map(s=>s.token),snapshot.seats.map(s=>s.token));
+});

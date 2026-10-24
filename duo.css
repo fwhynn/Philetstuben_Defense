@@ -110,3 +110,20 @@ html:has(.duoLobbyPage),.duoLobbyPage{height:auto;min-height:100%;overflow:auto}
 @media(max-width:640px){.lobbyCard{padding:20px;border-radius:16px}.lobbyCard h1{font-size:28px}.lobbyChoices,.lobbySeats{grid-template-columns:1fr}.lobbySteps{grid-template-columns:1fr}.lobbyInviteRow{flex-direction:column}.lobbyInviteRow button{width:100%}}
 
 .duoTurn .duoSupportShortcut{display:block;pointer-events:auto;margin:0 auto 8px;min-height:32px;padding:5px 14px;border-radius:999px;font-size:12px}
+
+/* Desktop rails are viewport anchored; camera/hand bounds must not move them. */
+@media(min-width:1101px) and (min-height:601px){.duoGame .mapRail{top:50%;bottom:auto;transform:translateY(-50%);max-height:calc(100dvh - 260px);justify-content:safe center}}
+.lobbyLoadouts{display:grid;grid-template-columns:2fr 1fr;gap:24px;margin:24px 0;text-align:left}.lobbyTowerChoices{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.lobbyTowerChoice{display:flex;flex-direction:column;align-items:center;gap:6px;width:100px;padding:10px;border:1px solid #65826b;border-radius:10px;background:#263c30;color:#fff0cf;font-size:12px}.lobbyTowerChoice .researchIcon{width:36px;height:36px}.lobbyTowerChoice[aria-pressed=true]{border:2px solid #e6c56b;background:#435338}.lobbyTowerChoice:disabled{opacity:.55}.lobbyTowerChoice[aria-pressed=true]:disabled{opacity:1}@media(max-width:700px){.lobbyLoadouts{grid-template-columns:1fr}.lobbyTowerChoice{width:88px}}
+
+.duoGiftReceived{text-align:center;margin:4px 12px 8px;color:#ffe29a;font-size:13px;font-weight:700}.duoGiftPreview{margin-top:18px;padding-top:14px;border-top:1px solid #82926c}.duoGiftReceipt{font-weight:700;color:#ffe29a}.duoPartnerOffers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}.duoPartnerGift{display:flex;flex-direction:column;gap:6px;padding:10px;background:#304737;border:1px solid #809073;border-radius:10px}.duoPartnerGift>span{font-size:26px}.duoPartnerGift.chosen{border:2px solid #eccd70;background:#4c5335}.duoPartnerGift small{font-size:12px;line-height:1.4}@media(max-width:600px){.duoPartnerOffers{grid-template-columns:1fr}.duoGiftReceived{font-size:12px}}
+
+/* Compact team controls stay at the viewport edge, independent of camera and menus. */
+.duoGame .duoTurn{position:fixed;top:0;border-radius:0 0 12px 12px;width:min(420px,calc(100vw - 24px))}
+.duoGame .duoTurnBody{display:inline-block;padding:3px 8px}.duoGame .duoTurnBody .duoMapLabel,.duoGame #duoTurnTitle,.duoGame #duoTurnText{display:none}
+.duoGame .duoTurn[data-tone=alert] #duoTurnTitle{display:block;font-size:12px}
+.duoGame .duoTurn .duoSupportShortcut{display:inline-block;margin:3px 4px;font-size:11px;min-height:28px;padding:4px 8px}
+.duoGame .duoTurn .duoQuickMap{margin:0;min-height:28px;padding:4px 8px;font-size:11px}.duoGame .duoSeats{padding:5px 8px}.duoGame .duoGiftReceived{font-size:12px;margin:3px 8px}
+@media(min-width:1101px) and (min-height:601px){.duoGame #quickLoadout,.duoGame #biomeRail{top:130px;bottom:130px;max-height:none;transform:none;justify-content:safe center;transition:none}}
+@media(max-width:1100px),(max-height:600px){.duoGame .duoTurn{left:50%;right:auto;transform:translateX(-50%);max-width:calc(100vw - 24px)}.duoGame .compactToolbar{top:110px}.duoGame .gameHeader{top:174px}html[data-compact=towers] .duoGame #quickLoadout,html[data-compact=biomes] .duoGame #biomeRail{top:174px}}
+
+@media(min-width:1101px) and (max-width:1500px) and (min-height:601px){.duoGame .gameHeader{top:100px}}
