@@ -1,6 +1,6 @@
 [
   {
-    "version": "next",
+    "version": "1.2.2",
     "title": "Duo: Gemeinsam endlos",
     "summary": "Nach Welle 35 gemeinsam weiterspielen – mit flüssigerer Zustandsübertragung und sicherer Fortsetzung.",
     "overview": [
@@ -50,7 +50,8 @@
     "changes": [
       "Duo-Endlosmodus nach gemeinsamem Sieg in Welle 35.",
       "Weniger unnötige Aktualisierungen und bessere Fortsetzung bestehender Partien."
-    ]
+    ],
+    "date": "2026-10-24"
   },
   {
     "version": "1.2.1",
