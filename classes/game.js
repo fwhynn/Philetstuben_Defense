@@ -1389,14 +1389,17 @@ R dreht die Karte, dann Feld anklicken.`;
   document.addEventListener('click', () => renderHotkeyTip());
   document.getElementById('rotateHexBtn').addEventListener('click', () => rotateSelected());
   document.getElementById('redrawHandBtn').addEventListener('click',()=>{if(duoToken){duoAction('redraw');return;}if(HexRewards.redraw(state,random)){renderSessionPhase();saveRunAutosave();}});
-  function merchantSite(){const tile=[...state.map.values()].find(t=>t.site==='merchant');return tile?key(tile.q,tile.r):null;}
+  let selectedMerchantSite=null;
+  function merchantSite(){if(state.map.get(selectedMerchantSite)?.site==='merchant')return selectedMerchantSite;const tile=[...state.map.values()].find(t=>t.site==='merchant');return tile?key(tile.q,tile.r):null;}
   function closeMerchant(){document.getElementById('merchantOverlay').classList.add('hidden');document.getElementById('merchantOpenBtn').focus?.();}
   function renderMerchant(){
     const host=document.getElementById('merchantChoices'),site=merchantSite();
-    const cache=JSON.stringify([site,state.gold,state.hp,state.maxHp,state.phase,state.wave,state.merchantPurchases,state.merchantProtectionWave,state.consumablesLocked,uiLanguageRevision]);if(host._view===cache)return;host._view=cache;host.innerHTML='';
+    const cache=JSON.stringify([site,[...state.map.values()].filter(t=>t.site==='merchant').map(t=>key(t.q,t.r)),state.gold,state.hp,state.maxHp,state.phase,state.wave,state.merchantPurchases,state.merchantProtectionWave,state.consumablesLocked,uiLanguageRevision]);if(host._view===cache)return;host._view=cache;host.innerHTML='';
     document.getElementById('merchantStatus').textContent=state.gold+' Gold · '+state.hp+'/'+state.maxHp+' HP';
+    const merchants=[...state.map.values()].filter(t=>t.site==='merchant');
+    if(merchants.length>1)merchants.forEach((tile,index)=>{const id=key(tile.q,tile.r),button=document.createElement('button');button.type='button';button.textContent=(globalThis.HexI18n?.getLanguage()==='en'?'Merchant ':'Händler ')+(index+1)+' ('+id+')';button.setAttribute('aria-pressed',String(id===site));button.disabled=id===site;button.onclick=()=>{selectedMerchantSite=id;renderMerchant();};host.appendChild(button);});
     for(const [id,item]of Object.entries(HexRewards.merchantOffers)){
-      const button=document.createElement('button');button.type='button';button.className='upgradeOption';button.innerHTML='<strong>'+item.label+' · '+HexRewards.merchantPrice(state,id)+' Gold</strong><small>'+item.desc+'</small>';
+      const button=document.createElement('button');button.type='button';button.className='upgradeOption';button.innerHTML='<strong>'+item.label+' · '+HexRewards.merchantPrice(state,id,site)+' Gold</strong><small>'+item.desc+'</small>';
       button.disabled=!!state.consumablesLocked||!HexRewards.canTrade(state,site,id);button.onclick=()=>{if(duoToken){duoAction('merchant',{site,item:id});return;}if(HexRewards.trade(state,site,id)){renderAll();saveRunAutosave();}};host.appendChild(button);
     }
   }

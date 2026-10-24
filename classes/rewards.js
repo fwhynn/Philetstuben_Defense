@@ -39,10 +39,14 @@ const HexRewards=(()=>{
   function canRedraw(state){return state.augments?.includes('wayfinder')&&state.phase==='place'&&!state.waveRunning&&!state.openingRemaining&&!state.celebrationActive&&state.hp>0&&state.redrawWave!==state.wave&&!state.hand.includes('rescue');}
   function redraw(state,random){if(!canRedraw(state))return false;state.redrawWave=state.wave;state.drawResult=HexRunFlow.drawHand(state,random);return true;}
   const merchantOffers=Object.freeze({repair:{label:'Feldversorgung',desc:'Sofort bis zu 2 Basisleben wiederherstellen.',base:60},protection:{label:'Schutzvorrat',desc:'In der nächsten Welle insgesamt 2 Basisschaden verhindern.',base:80}});
-  function merchantPrice(state,id){return merchantOffers[id]?merchantOffers[id].base+20*(state.merchantPurchases?.[id]||0):Infinity;}
-  function canTrade(state,site,id){return !!merchantOffers[id]&&['place','build'].includes(state.phase)&&!state.waveRunning&&!state.celebrationActive&&state.hp>0&&state.map.get(site)?.site==='merchant'&&state.gold>=merchantPrice(state,id)&&(id==='repair'?state.hp<state.maxHp:state.merchantProtectionWave!==state.wave+1);}
+  function merchantCounts(state,site){const purchases=state.merchantPurchases||{};const first=[...state.map.values()].find(t=>t.site==='merchant');return purchases[site]||(first&&site===first.q+','+first.r?purchases:{});}
+  function merchantPrice(state,id,site){return merchantOffers[id]?merchantOffers[id].base*2**(merchantCounts(state,site)[id]||0):Infinity;}
+  function canTrade(state,site,id){return !!merchantOffers[id]&&['place','build'].includes(state.phase)&&!state.waveRunning&&!state.celebrationActive&&state.hp>0&&state.map.get(site)?.site==='merchant'&&state.gold>=merchantPrice(state,id,site)&&(id==='repair'?state.hp<state.maxHp:state.merchantProtectionWave!==state.wave+1);}
   function trade(state,site,id){
-    if(!canTrade(state,site,id))return false;state.gold-=merchantPrice(state,id);state.merchantPurchases??={};state.merchantPurchases[id]=(state.merchantPurchases[id]||0)+1;
+    if(!canTrade(state,site,id))return false;state.gold-=merchantPrice(state,id,site);state.merchantPurchases??={};
+    const purchases=state.merchantPurchases,first=[...state.map.values()].find(t=>t.site==='merchant');
+    if(first&&(typeof purchases.repair==='number'||typeof purchases.protection==='number')){purchases[first.q+','+first.r]??={repair:purchases.repair||0,protection:purchases.protection||0};delete purchases.repair;delete purchases.protection;}
+    purchases[site]??={};purchases[site][id]=(purchases[site][id]||0)+1;
     if(id==='repair')state.hp=Math.min(state.maxHp,state.hp+2);else{state.merchantProtectionWave=state.wave+1;state.merchantProtection=2;}return true;
   }
   function upgradeChoices(state){

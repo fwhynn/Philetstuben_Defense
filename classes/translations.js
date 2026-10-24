@@ -1950,7 +1950,7 @@ Feldversorgung|Field Supplies
 Sofort bis zu 2 Basisleben wiederherstellen.|Immediately restore up to 2 base health.
 Schutzvorrat|Protective Supplies
 In der nächsten Welle insgesamt 2 Basisschaden verhindern.|Prevent a total of 2 base damage in the next wave.
-Kaufen und fertig. Jeder Kauf erhöht den Preis dieses Angebots um 20 Gold. Alle Händler teilen dieselben Preise.|Buy and benefit immediately. Each purchase increases that item's price by 20 gold. All merchants share the same prices.
+Kaufen und fertig. Jeder Kauf verdoppelt den Preis dieses Angebots bei diesem Händler. Neue Händler starten beim Grundpreis.|Buy and benefit immediately. Each purchase doubles that item's price at this merchant. New merchants start at the base price.
 `);
 HexTranslations.add(`
 Karte wählen (1–4) · Drehen: Knopf oder R · Hex antippen|Choose card (1–4) · Rotate: button or R · Click hex
@@ -2087,4 +2087,25 @@ Object.assign(globalThis.HexTranslations.en, {
   "Zurück zum bisherigen Design": "Back to the previous design",
   "Hauptmenü, Spieloberfläche, Turmfenster und die übrigen Fenster sehen wieder so aus wie vor der Hex-Oberfläche. Die Hex-Oberfläche, die Baumansicht im Arsenal und die Klavier-Hintergrundmusik sind vorerst nicht mehr zu sehen bzw. zu hören.": "The main menu, game interface, tower window and other windows look as they did before the hex interface again. The hex interface, the Arsenal tree view and the piano background music are gone for now.",
   "Impressum und Datenschutz sind weiterhin unten im Hauptmenü erreichbar. Spielstand-Sicherung, Balance-Änderungen und die grüne Wiese auf Weitem Land bleiben erhalten.": "The legal notice and privacy policy remain available at the bottom of the main menu. Save protection, balance changes and the green meadow on Open Land are kept."
+});
+
+Object.assign(globalThis.HexTranslations.en, {
+  "Händler: Preise & eigene Vorräte": "Merchants: prices & individual stock",
+  "Wiederholte Käufe werden teurer. Neu entdeckte Händler bieten wieder die Grundpreise.": "Repeat purchases become more expensive. Newly discovered merchants offer base prices again.",
+  "Händlerpreise verdoppeln sich": "Merchant prices double",
+  "Eigene Preise je Händler": "Individual prices per merchant",
+  "Händler auswählen": "Choose a merchant",
+  "Händler": "Merchants",
+  "Wiederholte Käufe": "Repeat purchases",
+  "Jeder Kauf verdoppelt den Preis desselben Angebots bei diesem Händler.": "Each purchase doubles the price of that offer at this merchant.",
+  "Heilung: erste vier Käufe": "Healing: first four purchases",
+  "Schutz: erste vier Käufe": "Protection: first four purchases",
+  "60 / 80 / 100 / 120 Gold": "60 / 80 / 100 / 120 gold",
+  "60 / 120 / 240 / 480 Gold": "60 / 120 / 240 / 480 gold",
+  "80 / 100 / 120 / 140 Gold": "80 / 100 / 120 / 140 gold",
+  "80 / 160 / 320 / 640 Gold": "80 / 160 / 320 / 640 gold",
+  "Neue Händler starten mit 60 Gold für Heilung und 80 Gold für Schutz.": "New merchants start at 60 gold for healing and 80 gold for protection.",
+  "Im Händlermenü kannst du zwischen den entdeckten Händlern wechseln.": "Switch between discovered merchants in the merchant menu.",
+  "Heilung und Schutz haben getrennte Preissteigerungen. Schutz bleibt auf einen Kauf für dieselbe nächste Welle begrenzt.": "Healing and protection have separate price increases. Protection remains limited to one purchase for the same upcoming wave.",
+  "Händlerpreise bleiben beim Speichern und Fortsetzen erhalten. Bei älteren Spielständen werden bisherige gemeinsame Kaufzähler dem ersten Händler zugeordnet.": "Merchant prices persist when saving and continuing. Older saves assign previous shared purchase counts to the first merchant."
 });

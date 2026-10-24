@@ -29,11 +29,48 @@ test('three free builds are transactional, cannot be refunded for gold, and do n
  const {c,s}=setup();take(c,s,'freeTowers');s.gold=0;const tile={q:1,r:0,type:'straight',roads:[0,3],slots:4,towers:Array(4).fill(null),buildings:[]};s.map.set('1,0',tile);const slots=[0,1,2,3].map(index=>({q:1,r:0,index}));assert.equal(c.towers.buy(s,'archer',slots).ok,false);assert.equal(s.freeTowerBuilds,3);assert.equal(tile.towers.filter(Boolean).length,0);assert.ok(c.towers.buy(s,'archer',slots.slice(0,3)).ok);assert.equal(s.freeTowerBuilds,0);assert.equal(s.gold,0);assert.equal(c.data.towerRefund(s,tile.towers[0]).amount,0);assert.equal(c.towers.upgrade(s,slots[0],'volley'),false);assert.equal(c.towers.buy(s,'archer',[slots[3]]).ok,false);
 });
 function leak(c,s,damage){s.enemies=[{id:1,type:'grunt',hp:100,maxHp:100,alive:true,baseDamage:damage,index:1,points:[{x:0,y:0}],x:0,y:0}];c.combat.step(s,[],c.data.TOWERS,.01,0,()=>{});}
+test('merchant price doubling is independent per offer and merchant, including saved runs',()=>{
+ const {c,s,run}=setup();s.hp=1;s.gold=10000;
+ for(const q of [1,2])s.map.set(q+',0',{q,r:0,site:'merchant',roads:[0,3],towers:[],buildings:[]});
+ for(const price of [60,120,240]){assert.equal(c.rewards.merchantPrice(s,'repair','1,0'),price);const gold=s.gold;assert.ok(c.rewards.trade(s,'1,0','repair'));assert.equal(s.gold,gold-price);}
+ assert.equal(c.rewards.merchantPrice(s,'repair','1,0'),480);
+ assert.equal(c.rewards.merchantPrice(s,'repair','2,0'),60);
+ assert.equal(c.rewards.merchantPrice(s,'protection','1,0'),80);
+ assert.ok(c.rewards.trade(s,'2,0','repair'));
+ assert.ok(c.rewards.trade(s,'1,0','protection'));
+ assert.equal(c.rewards.merchantPrice(s,'protection','1,0'),160);
+ assert.equal(c.rewards.merchantPrice(s,'protection','2,0'),80);
+ const saved=c.snapshot.restore(JSON.parse(JSON.stringify(c.snapshot.capture(s,run.random)))).state;
+ assert.equal(c.rewards.merchantPrice(saved,'repair','1,0'),480);
+ assert.equal(c.rewards.merchantPrice(saved,'repair','2,0'),120);
+ s.gold=479;const before=JSON.stringify(s.merchantPurchases);assert.equal(c.rewards.trade(s,'1,0','repair'),false);assert.equal(JSON.stringify(s.merchantPurchases),before);assert.equal(s.gold,479);
+});
+test('legacy shared purchase counts migrate to the first merchant without affecting new merchants',()=>{
+ const {c,s}=setup();s.hp=5;s.merchantPurchases={repair:2,protection:1};
+ for(const q of [1,2])s.map.set(q+',0',{q,r:0,site:'merchant',roads:[0,3],towers:[],buildings:[]});
+ assert.equal(c.rewards.merchantPrice(s,'repair','1,0'),240);
+ assert.equal(c.rewards.merchantPrice(s,'repair','2,0'),60);
+ assert.ok(c.rewards.trade(s,'2,0','repair'));
+ assert.equal(c.rewards.merchantPrice(s,'repair','1,0'),240);
+ assert.equal(c.rewards.merchantPrice(s,'protection','1,0'),160);
+ assert.equal(c.rewards.merchantPrice(s,'repair','2,0'),120);
+ assert.ok(c.rewards.trade(s,'1,0','repair'));
+ assert.equal(c.rewards.merchantPrice(s,'repair','1,0'),480);
+});
+test('merchant UI can select a fresh merchant and return to the existing prices',()=>{
+ const {a,elements}=loadUI({firstPlayerTest:true,developerScenario:'upgrade'});a.applyDeveloperScenario();a.state.phase='build';a.state.hp=5;a.state.gold=1000;
+ for(const q of [1,2])a.state.map.set(q+',0',{q,r:0,type:'straight',site:'merchant',roads:[0,3],slots:0,towers:[],buildings:[]});
+ a.renderAll();elements.get('merchantOpenBtn').listeners.click();const choices=()=>elements.get('merchantChoices').children;
+ choices()[2].onclick();assert.equal(a.state.gold,940);assert.match(choices()[2].innerHTML,/120 Gold/);
+ choices()[1].onclick();assert.match(choices()[2].innerHTML,/60 Gold/);
+ choices()[2].onclick();assert.equal(a.state.gold,880);
+ choices()[0].onclick();assert.match(choices()[2].innerHTML,/120 Gold/);
+});
 test('Schutzsiegel blocks one point, not an entire boss attack; resets only next wave',()=>{
  const {c,s,run}=setup();take(c,s,'seal');s.hp=20;s.wave=2;leak(c,s,5);assert.equal(s.hp,16);leak(c,s,1);assert.equal(s.hp,15);const restored=c.snapshot.restore(JSON.parse(JSON.stringify(c.snapshot.capture(s,run.random))));leak(c,restored.state,1);assert.equal(restored.state.hp,14);s.wave++;leak(c,s,1);assert.equal(s.hp,15);
 });
-test('merchant remains, purchases apply immediately and prices cannot be reset using another merchant',()=>{
- const {c,s,run}=setup();for(const q of [1,2])s.map.set(q+',0',{q,r:0,site:'merchant',roads:[0,3],slots:0,towers:[],buildings:[]});s.hp=10;s.wave=5;assert.ok(c.rewards.trade(s,'1,0','repair'));assert.equal(s.hp,12);assert.equal(s.gold,940);assert.equal(c.rewards.merchantPrice(s,'repair'),80);assert.ok(c.rewards.trade(s,'2,0','protection'));assert.equal(c.rewards.trade(s,'1,0','protection'),false);s.wave=6;leak(c,s,5);assert.equal(s.hp,9);assert.equal(s.merchantProtection,0);s.phase='wave';assert.equal(c.rewards.trade(s,'1,0','repair'),false);s.phase='build';const restored=c.snapshot.restore(JSON.parse(JSON.stringify(c.snapshot.capture(s,run.random))));assert.equal(c.rewards.merchantPrice(restored.state,'repair'),80);assert.equal(restored.state.map.get('1,0').site,'merchant');assert.equal(c.rewards.trade(s,'99,99','repair'),false);
+test('merchant doubles prices per site and preserves protection limits across merchants',()=>{
+ const {c,s,run}=setup();for(const q of [1,2])s.map.set(q+',0',{q,r:0,site:'merchant',roads:[0,3],slots:0,towers:[],buildings:[]});s.hp=10;s.wave=5;assert.ok(c.rewards.trade(s,'1,0','repair'));assert.equal(s.hp,12);assert.equal(s.gold,940);assert.equal(c.rewards.merchantPrice(s,'repair','1,0'),120);assert.ok(c.rewards.trade(s,'2,0','protection'));assert.equal(c.rewards.trade(s,'1,0','protection'),false);s.wave=6;leak(c,s,5);assert.equal(s.hp,9);assert.equal(s.merchantProtection,0);s.phase='wave';assert.equal(c.rewards.trade(s,'1,0','repair'),false);s.phase='build';const restored=c.snapshot.restore(JSON.parse(JSON.stringify(c.snapshot.capture(s,run.random))));assert.equal(c.rewards.merchantPrice(restored.state,'repair','1,0'),120);assert.equal(restored.state.map.get('1,0').site,'merchant');assert.equal(c.rewards.trade(s,'99,99','repair'),false);
 });
 test('Duo commands enforce ownership, preparation and ready locks for rerolls and merchants',()=>{
  const c=load(),match=c.duo.create('augment-duo',[loadout,loadout]),s=match.boards[0].state;s.phase='place';s.openingRemaining=0;take(c,s,'wayfinder');let n=0;const command=(action,payload={})=>c.duo.command(match,0,{id:'a'+(++n),wave:match.wave,action,payload});match.ready[0]=true;assert.equal(command('redraw'),false);match.ready[0]=false;assert.ok(command('redraw'));assert.equal(match.boards[1].state.redrawWave,undefined);s.phase='build';s.map.set('1,0',{q:1,r:0,site:'merchant',roads:[0,3],towers:[],buildings:[]});s.gold=1000;assert.ok(command('merchant',{site:'1,0',item:'protection'}));assert.equal(match.boards[1].state.merchantProtection,undefined);const {payloadValid}=require('../server/duo-room.cjs');assert.ok(payloadValid('merchant',{site:'1,0',item:'repair'}));assert.equal(payloadValid('merchant',{site:'1,0',item:'repair',price:0}),false);
@@ -44,7 +81,7 @@ test('free tower prices and redraw controls are usable through the game UI',()=>
  a.state.augments=['wayfinder','fourthCard'];a.state.openingRemaining=0;a.state.phase='place';a.renderAll();assert.equal(elements.get('redrawHandBtn').disabled,false);elements.get('redrawHandBtn').listeners.click();assert.equal(a.state.hand.length,4);assert.equal(elements.get('redrawHandBtn').disabled,true);
 });
 test('merchant UI performs direct purchases, disables unavailable offers and closes with Escape',()=>{
- const {a,elements,documentListeners}=loadUI({firstPlayerTest:true,developerScenario:'upgrade'});a.applyDeveloperScenario();a.state.phase='build';a.state.hp=10;a.state.gold=1000;a.state.map.set('1,0',{q:1,r:0,type:'straight',site:'merchant',roads:[0,3],slots:0,towers:[],buildings:[]});a.renderAll();elements.get('merchantOpenBtn').listeners.click();assert.equal(elements.get('merchantOverlay').classList.contains('hidden'),false);elements.get('merchantChoices').children[0].onclick();assert.equal(a.state.hp,12);assert.equal(a.state.gold,940);assert.match(elements.get('merchantChoices').children[0].innerHTML,/80 Gold/);elements.get('merchantChoices').children[1].onclick();assert.equal(elements.get('merchantChoices').children[1].disabled,true);documentListeners.keydown({key:'Escape',preventDefault(){}});assert.equal(elements.get('merchantOverlay').classList.contains('hidden'),true);
+ const {a,elements,documentListeners}=loadUI({firstPlayerTest:true,developerScenario:'upgrade'});a.applyDeveloperScenario();a.state.phase='build';a.state.hp=10;a.state.gold=1000;a.state.map.set('1,0',{q:1,r:0,type:'straight',site:'merchant',roads:[0,3],slots:0,towers:[],buildings:[]});a.renderAll();elements.get('merchantOpenBtn').listeners.click();assert.equal(elements.get('merchantOverlay').classList.contains('hidden'),false);elements.get('merchantChoices').children[0].onclick();assert.equal(a.state.hp,12);assert.equal(a.state.gold,940);assert.match(elements.get('merchantChoices').children[0].innerHTML,/120 Gold/);elements.get('merchantChoices').children[1].onclick();assert.equal(elements.get('merchantChoices').children[1].disabled,true);documentListeners.keydown({key:'Escape',preventDefault(){}});assert.equal(elements.get('merchantOverlay').classList.contains('hidden'),true);
 });
 
 

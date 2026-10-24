@@ -1,5 +1,69 @@
 [
   {
+    "version": "next",
+    "title": "Händler: Preise & eigene Vorräte",
+    "summary": "Wiederholte Käufe werden teurer. Neu entdeckte Händler bieten wieder die Grundpreise.",
+    "overview": [
+      {
+        "kind": "nerf",
+        "title": "ABGESCHWÄCHT",
+        "items": [
+          "Händlerpreise verdoppeln sich"
+        ]
+      },
+      {
+        "kind": "buff",
+        "title": "VERSTÄRKT",
+        "items": [
+          "Eigene Preise je Händler"
+        ]
+      },
+      {
+        "kind": "new",
+        "title": "NEU",
+        "items": [
+          "Händler auswählen"
+        ]
+      }
+    ],
+    "sections": [
+      {
+        "title": "Händler",
+        "entries": [
+          {
+            "title": "Wiederholte Käufe",
+            "summary": "Jeder Kauf verdoppelt den Preis desselben Angebots bei diesem Händler.",
+            "stats": [
+              {
+                "label": "Heilung: erste vier Käufe",
+                "before": "60 / 80 / 100 / 120 Gold",
+                "after": "60 / 120 / 240 / 480 Gold"
+              },
+              {
+                "label": "Schutz: erste vier Käufe",
+                "before": "80 / 100 / 120 / 140 Gold",
+                "after": "80 / 160 / 320 / 640 Gold"
+              }
+            ],
+            "bullets": [
+              "Neue Händler starten mit 60 Gold für Heilung und 80 Gold für Schutz.",
+              "Im Händlermenü kannst du zwischen den entdeckten Händlern wechseln.",
+              "Heilung und Schutz haben getrennte Preissteigerungen. Schutz bleibt auf einen Kauf für dieselbe nächste Welle begrenzt.",
+              "Händlerpreise bleiben beim Speichern und Fortsetzen erhalten. Bei älteren Spielständen werden bisherige gemeinsame Kaufzähler dem ersten Händler zugeordnet."
+            ]
+          }
+        ]
+      }
+    ],
+    "changes": [
+      "Jeder Kauf verdoppelt den Preis desselben Angebots bei diesem Händler.",
+      "Neue Händler starten mit 60 Gold für Heilung und 80 Gold für Schutz.",
+      "Im Händlermenü kannst du zwischen den entdeckten Händlern wechseln.",
+      "Heilung und Schutz haben getrennte Preissteigerungen. Schutz bleibt auf einen Kauf für dieselbe nächste Welle begrenzt.",
+      "Händlerpreise bleiben beim Speichern und Fortsetzen erhalten. Bei älteren Spielständen werden bisherige gemeinsame Kaufzähler dem ersten Händler zugeordnet."
+    ]
+  },
+  {
     "version": "1.1.4",
     "title": "Neue Entdeckungen & ausgewogenere Gebäude",
     "summary": "Mehr Entscheidungen beim Erkunden, bessere Goldnutzung und ein ruhigeres Endgame.",
