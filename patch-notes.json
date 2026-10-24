@@ -1,6 +1,6 @@
 [
   {
-    "version": "next",
+    "version": "1.2.3",
     "title": "Herausforderungen: Mehr Platz für Türme",
     "summary": "Einheitlich große Turmmenüs und ein mittelalterlicher Missionspool.",
     "overview": [
@@ -52,7 +52,8 @@
     "changes": [
       "Stromnetz aus Tagesrotation, Testlabor und Dev-Auswahl entfernt.",
       "Einheitlich große Turmmenüs mit mehr Platz auf Tablets."
-    ]
+    ],
+    "date": "2026-10-24"
   },
   {
     "version": "1.2.2",
