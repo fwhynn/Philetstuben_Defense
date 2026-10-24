@@ -1,6 +1,6 @@
 [
   {
-    "version": "next",
+    "version": "1.1.4",
     "title": "Neue Entdeckungen & ausgewogenere Gebäude",
     "summary": "Mehr Entscheidungen beim Erkunden, bessere Goldnutzung und ein ruhigeres Endgame.",
     "overview": [
@@ -271,7 +271,8 @@
       "Bautrupp — Die nächsten drei neuen Türme sind kostenlos. Upgrades kosten weiterhin Gold; kostenlose Bauten erzeugen keinen Verkaufserlös.",
       "Hex-Platzierung — Beim Anvisieren eines Feldes dreht sich die Karte automatisch in eine gültige Richtung. Manuelles Drehen überspringt dort ungültige Rotationen.",
       "Neue Patchnotes-Ansicht — Buffs, Nerfs, neue Inhalte und entfernte Inhalte auf einen Blick; Werteänderungen mit Alt → Neu. Auch auf Englisch verfügbar."
-    ]
+    ],
+    "date": "2026-10-24"
   },
   {
     "version": "1.1.3",
