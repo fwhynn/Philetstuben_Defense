@@ -1,6 +1,6 @@
 [
   {
-    "version": "next",
+    "version": "1.1.7",
     "title": "Draft, Expedition & Stromnetz",
     "summary": "Klarere Missionen, wechselnde Karten und mehr Druck bei der Reliktsuche.",
     "overview": [
@@ -86,7 +86,8 @@
       "Im Testlabor erhalten Expedition und Turm-Draft bei jedem neuen Versuch eine neue Variante. In der Tagesmission gelten für alle Spieler dieselben Bedingungen am selben Tag.",
       "Eine größere Verwaltung trennt Leitfelder und Turmschalter. Verbindungsprobleme, Kapazität und die Sperre während einer Welle sind klar erkennbar.",
       "Das Turmbaumenü nutzt auf großen Bildschirmen den freien Platz links besser aus. Startfehler zeigen einen Hinweis zum Neuladen, ohne Spielstände zu löschen."
-    ]
+    ],
+    "date": "2026-10-24"
   },
   {
     "version": "1.1.6",
