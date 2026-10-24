@@ -20,3 +20,12 @@ test('late preview cannot replace another run',async()=>{
 test('score uses completed waves and kills of this run, not account lifetime totals',()=>{
  const {ui}=setup({});const s=ui.score({runId:'x',wave:36,lastCompletedWave:35,earnedMeta:{normalKills:100,periodicBosses:3,explorationBosses:2}},'dual');assert.equal(s.wave,35);assert.equal(s.kills,105);assert.equal(s.mode,'dual');
 });
+
+test('greed keeps wave-35 gold separate from endless and normal account records',()=>{
+ const {ui}=setup({});const state={challengeKind:'greed',challengeDay:'2026-10-25',runId:'gold-run',greedGold35:1250,lastCompletedWave:35,gold:1};
+ const score=ui.score(state);assert.equal(score.mode,'greed35');assert.equal(score.gold,1250);assert.equal(score.wave,35);assert.equal(score.runId,'gold-run:35');assert.equal(score.day,state.challengeDay);
+});
+test('greed guest score survives login with its day, mode and earned gold intact',async()=>{
+ let logged=false,claimed;const run={runId:'gold-run:35',mode:'greed35',day:'2026-10-25',gold:1250,wave:35,ruleset:'test'};const api={isLoggedIn:()=>logged,previewRunRanking:async()=>({mode:'greed35',rank:4}),submitRunRanking:async r=>{claimed=r;return {status:'pending'};}};
+ const t=setup(api);await t.ui.show(t.host,run,{api});assert.match(t.text(t.host),/1250 Gold/);logged=true;await t.ui.refresh();assert.equal(claimed.gold,1250);assert.equal(claimed.day,run.day);assert.equal(claimed.mode,'greed35');
+});

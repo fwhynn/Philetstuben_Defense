@@ -36,16 +36,16 @@ const HexRunRuntime=(()=>{
     state.landmarks=HexExploration.create(HexRandom.create(seed+'|exploration'),{sparse:learning});
     state.vision=HexExploration.expand(state.landmarks,new Map([['0,0',{q:0,r:0}]]));
     state.map.set('0,0',{q:0,r:0,type:'base',roads:state.baseExits,slots:0,towers:[],income:0});
-    if(challengeDay){state.challengeKind=HexWaves.daily(challengeDay).id;state.challengeTarget=HexWaves.daily(challengeDay).target;}
+    if(challengeDay){state.dailyVariant=Math.floor(Date.parse(challengeDay+'T00:00:00Z')/86400000);state.challengeKind=HexWaves.daily(challengeDay).id;state.challengeTarget=HexWaves.daily(challengeDay).target;}
     if(state.challengeKind==='detour')HexDetour.initialize(state);
-    if(state.challengeKind==='villages')HexVillages.initialize(state);
+    if(state.challengeKind==='villages'){state.towerLoadout=[...loadout];HexVillages.initialize(state);}
     if(state.challengeKind==='powerGrid')HexPowerGrid.initialize(state);
     if(state.challengeKind==='expedition')HexExpedition.initialize(state);
     if(state.challengeKind==='towerDraft')HexTowerDraft.initialize(state);
     if(state.challengeKind==='movingFortress')HexMovingFortress.initialize(state);
     if(state.challengeKind==='greed'){
       state.difficulty='normal';state.openingRemaining=0;state.baseExits=[0];state.map.get('0,0').roads=[0];state.greedScore=0;
-      state.towerLoadout=['archer','catapult','chain','freeze','ballista'];
+      state.towerLoadout=[...loadout];
     }
     if(state.challengeKind==='garrison'){
       state.gold=1200;state.income=0;state.difficulty='normal';state.openingRemaining=0;state.baseExits=[0];state.map.get('0,0').roads=[0];state.landmarks=new Map();state.vision=[];state.hand=[];state.phase='build';

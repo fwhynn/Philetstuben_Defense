@@ -26,6 +26,9 @@ const HexVillages=(()=>{
       for(const id of ['empty','smallCurve','bigCurve','tee','tJunction','cross','fullCross'])for(let rotation=0;rotation<6;rotation++)if(!match&&HexMap.rotatedRoads(HexData.CARD_LIBRARY[id],rotation).sort().join()===t.roads.slice().sort().join())match={id,rotation};
       t.type=match?.id||'rescue';t.rotation=match?.rotation||0;t.slots=match?HexData.CARD_LIBRARY[t.type].slots:0;t.towers=Array(t.slots).fill(null);
     }
+    // Extra tower islands change daily without rotating north away from the top.
+    const rng=HexRandom.create(state.seed+'|village-sites'),candidates=[[5,-3],[7,-3],[5,0],[6,1],[3,2],[8,-3],[4,3],[1,-1]];
+    for(let n=0;n<3;n++){const i=Math.floor(rng()*candidates.length),[q,r]=candidates.splice(i,1)[0],key=HexMap.key(q,r);if(!state.map.has(key))state.map.set(key,{q,r,type:'empty',roads:[],slots:1,towers:[null],buildingSlots:0,buildings:[],income:0});}
   }
   function planning(state){return state.challengeKind==='villages'&&state.hp>0&&state.phase==='build'&&!state.waveRunning&&!state.celebrationActive;}
   function prepare(state){

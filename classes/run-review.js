@@ -4,17 +4,17 @@
  const el=(tag,text)=>{const n=document.createElement(tag);n.textContent=text;return n;};
  async function load(){
   list.replaceChildren(el('p','Prüfliste wird geladen …'));
-  try{const data=await HexApi.getPendingRunRankings();list.replaceChildren();
+  try{const data=await HexApi.getPendingRunRankings();let greedError='';if(HexApi.getPendingGreedRankings){try{const greed=await HexApi.getPendingGreedRankings();data.entries.push(...greed.entries);}catch{greedError='Gier-Prüfliste momentan nicht verfügbar.';}}list.replaceChildren();if(greedError)list.appendChild(el('p',greedError));
    if(!data.entries.length)list.appendChild(el('p','Keine offenen Prüfungen.'));
    for(const row of data.entries){
-    const item=el('section',''),label=el('p',`${row.username} · ${row.mode} · Welle ${row.wave} · ${row.kills} Kills · ${row.ruleset}`);
+    const item=el('section',''),label=el('p',`${row.username} · ${row.mode} · Welle ${row.wave} · ${row.mode.startsWith('greed')?row.gold+' Gold · '+row.challenge_day:row.kills+' Kills'} · ${row.ruleset}`);
     label.setAttribute('data-no-translate','');item.appendChild(label);
     item.appendChild(el('p',row.suspicion||'Vorhandene Meldung ohne automatischen Prüfgrund.'));
     const reason=el('textarea','');reason.placeholder='Begründung der Entscheidung';reason.setAttribute('aria-label','Begründung der Entscheidung');item.appendChild(reason);
     for(const [decision,text]of [['accepted','Annehmen'],['rejected','Ablehnen']]){
      const button=el('button',text);button.type='button';button.addEventListener('click',async()=>{
       if(!reason.value.trim()){reason.focus();return;}button.disabled=true;
-      try{await HexApi.reviewRunRanking(row.id,row.revision,decision,reason.value);await load();}
+      try{await (row.mode.startsWith('greed')?HexApi.reviewGreedRanking(row.id,row.revision,decision):HexApi.reviewRunRanking(row.id,row.revision,decision,reason.value));await load();}
       catch(error){button.disabled=false;item.appendChild(el('p',error.message));}
      });item.appendChild(button);
     }
@@ -22,7 +22,7 @@
     remove.addEventListener('click',async()=>{
      if(!confirmed){confirmed=true;remove.textContent='Löschen bestätigen';return;}
      remove.disabled=true;
-     try{await HexApi.deleteRunRanking(row.id,row.revision);await load();}
+     try{await (row.mode.startsWith('greed')?HexApi.reviewGreedRanking(row.id,row.revision,'rejected'):HexApi.deleteRunRanking(row.id,row.revision));await load();}
      catch(error){remove.disabled=false;confirmed=false;remove.textContent='Löschen';item.appendChild(el('p',error.message));}
     });item.appendChild(remove);
     list.appendChild(item);

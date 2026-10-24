@@ -883,6 +883,20 @@ function create(host0,commands){
     for(const pool of Object.values(fx)) pool.end();
   }
 
+  // Cached low-poly power pylons and colored ground tiles. No per-frame geometry allocation.
+  const powerVisuals=new THREE.Group();scene.add(powerVisuals);let powerVisualSignature='';
+  function clearPowerVisuals(){powerVisuals.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});powerVisuals.clear();powerVisualSignature='';}
+  function syncPowerVisuals(){
+    const grid=state.powerGrid,sig=grid?JSON.stringify([state.runId,grid.enabled,grid.nodes]):'';if(sig===powerVisualSignature)return;clearPowerVisuals();powerVisualSignature=sig;if(!grid)return;
+    const net=HexPowerGrid.evaluate(state),lit=new Set(net.components.filter(c=>c.capacity>0).flatMap(c=>c.keys));
+    for(const n of grid.nodes){const tile=state.map.get(n.key);if(!tile)continue;const c=axialToWorld(tile.q,tile.r),on=lit.has(n.key),color=on?'#ffdb42':grid.enabled.includes(n.key)?'#de8d37':'#66777b';
+      const fill=new THREE.Mesh(new THREE.CircleGeometry(HEX-3,6).rotateZ(Math.PI/6).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color,transparent:true,opacity:on?.34:.18,depthWrite:false,side:THREE.DoubleSide}));fill.position.set(c.x,4,c.y);powerVisuals.add(fill);
+      const x=c.x-28,z=c.y+22,size=n.capacity?1.3:1;
+      function part(radius,height,y,col){const mesh=new THREE.Mesh(new THREE.CylinderGeometry(radius,radius,height,6),new THREE.MeshStandardMaterial({color:col,roughness:.55,metalness:.3,emissive:on?color:'#000000',emissiveIntensity:on?.12:0}));mesh.position.set(x,y,z);powerVisuals.add(mesh);}
+      part(10*size,5,6,'#374744');part(6*size,21*size,18*size,'#596a68');for(let y=12;y<=28;y+=8)part(9*size,3,y*size,color);part(3*size,7,35*size,color);
+    }
+  }
+
   // ---- Beschriftungen (HTML über der Szene) ----
   function label(id,x,z,text,cls='',lift=0){
     usedLabels.add(id);let entry=labels.get(id);
@@ -905,7 +919,7 @@ function create(host0,commands){
       const c=axialToWorld(tile.q,tile.r),terrain=CARD_LIBRARY[tile.type],id=key(tile.q,tile.r);
       if(state.showUpgradeStatus)(tile.towers||[]).forEach((tower,i)=>{if(tower&&HexData.upgradeStatus(state,tower)){const p=slotPositions(tile)[i];label('upgrade:'+id+':'+i,p.x,p.y,HexData.upgradeStatus(state,tower),'big',72);}});
       if(state.showUpgradeStatus&&state.hp>0&&['place','build','wave'].includes(state.phase))(tile.buildings||[]).forEach((b,i)=>{if(b&&HexBuildings.nextUpgrade(state,b)){const p=buildingPosition(tile,i);label('upgrade:building:'+id+':'+i,p.x,p.y,'Gebäude ausbaubar','big',72);}});
-      if(gridState){label('grid:'+id,c.x,c.y+48,HexPowerGrid.label(state,id),'',26);(tile.towers||[]).forEach((tw,i)=>{if(tw){const p=slotPositions(tile)[i];label('power:'+id+':'+i,p.x,p.y,HexPowerGrid.reasons[gridState.status.get(tw.statId)],'',75);}});}
+      if(gridState){const n=state.powerGrid.nodes.find(n=>n.key===id);if(n){const entry=label('grid:'+id,c.x-28,c.y+22,'⚡','',n.capacity?55:42);entry.el.style.color=gridState.components.some(g=>g.capacity>0&&g.keys.includes(id))?'#ffe35a':'#a4adb0';entry.el.style.fontSize=n.capacity?'30px':'24px';entry.el.style.background='#18251ce8';entry.el.style.borderRadius='50%';entry.el.style.padding='8px';entry.el.style.minWidth='28px';entry.el.style.textAlign='center';entry.el.title=n.capacity?'Generator · Stromquelle':n.name+' · Strom umschalten';if(!n.capacity){entry.el.setAttribute('aria-pressed',String(state.powerGrid.enabled.includes(id)));entry.el.setAttribute('aria-disabled',String(!HexPowerGrid.planning(state)));}if(!n.capacity&&!entry.powerSwitch){entry.powerSwitch=true;entry.el.style.pointerEvents='auto';entry.el.style.cursor='pointer';entry.el.tabIndex=0;entry.el.setAttribute('role','button');entry.el.setAttribute('aria-label',n.name+' Strom umschalten');for(const e of ['pointerdown','pointerup'])entry.el.addEventListener(e,event=>event.stopPropagation());entry.el.addEventListener('click',event=>{event.stopPropagation();commands.togglePowerField?.(id);});entry.el.addEventListener('keydown',event=>{if(['Enter',' '].includes(event.key)){event.preventDefault();commands.togglePowerField?.(id);}});}}}
       if(tile.tunnelLabel)label('tunnel:'+id,c.x,c.y,tile.tunnelLabel+' ⇄','',24);
       if(tile.site)label(`site:${id}`,c.x,c.y+58,HexExploration.siteLabel(tile));
       if(tile.fortressStation!==undefined&&state.movingFortress){const i=tile.fortressStation,f=state.movingFortress;label('fortress:'+id,c.x,c.y+44,f.stations[i].name+' · '+(i===f.stage?'Festung':i<f.stage?'abgeschlossen':'Welle '+(i*3+1)),'',70);}
@@ -928,7 +942,7 @@ function create(host0,commands){
   function render(nextState,placementTargets=[]){
     if(state!==nextState){if(state) rebuildAll();state=nextState;}
     targetList=placementTargets;if(!ready) return;
-    syncTileOverlays();syncTiles();syncLandmarks();syncEmpty();syncObjects();syncTargets();syncGhost();syncSelection();syncMines();syncConsumables();syncEnemies();syncProjectiles();syncLabels();
+    syncTileOverlays();syncTiles();syncLandmarks();syncEmpty();syncObjects();syncTargets();syncGhost();syncSelection();syncMines();syncConsumables();syncEnemies();syncProjectiles();syncPowerVisuals();syncLabels();
     if(pickDirty){pickables=[...objectRecords.values()].flatMap(r=>r.picks).concat(layer.targets.children.map(g=>g.children[1]));layer.objects.updateMatrixWorld(true);layer.targets.updateMatrixWorld(true);pickDirty=false;}
     refreshPointerCursor();
   }
@@ -938,7 +952,7 @@ function create(host0,commands){
     const box=host.getBoundingClientRect(),outer=wrap.getBoundingClientRect();
     return {x:(tmp.x+1)/2*box.width+box.left-outer.left,y:(1-tmp.y)/2*box.height+box.top-outer.top,width:outer.width,height:outer.height};
   }
-  function reset(){consumablePreview.visible=false;clearOverlays();hoverBuildingKey=null;seenShots.clear();rebuildAll();for(const obj of enemyObjects.values()){layer.dynamic.remove(obj.group);obj.sprite?.material.dispose();}enemyObjects.clear();mineBatches.clear();clearConsumables();state=null;hoverPick=null;rotateAnchor=null;positionRotateHint();resetView(false);}
+  function reset(){clearPowerVisuals();consumablePreview.visible=false;clearOverlays();hoverBuildingKey=null;seenShots.clear();rebuildAll();for(const obj of enemyObjects.values()){layer.dynamic.remove(obj.group);obj.sprite?.material.dispose();}enemyObjects.clear();mineBatches.clear();clearConsumables();state=null;hoverPick=null;rotateAnchor=null;positionRotateHint();resetView(false);}
 
   // ---- Animation ----
   let last=performance.now(),raf=0,lastDraw=0,slowFrames=0,renderedFrameCount=0;
@@ -1098,7 +1112,7 @@ function create(host0,commands){
       destroyed=true;stopEditionWatch?.();cancelAnimationFrame(raf);resize.disconnect();for(const [name,fn,options] of listeners) dom.removeEventListener(name,fn,options);
       windPool.mesh.geometry.dispose();windPool.mesh.material.dispose();windPool.mesh.dispose();for(const pool of [flakePool,rainPool]){pool.mesh.geometry.dispose();pool.mesh.material.dispose();pool.mesh.dispose();}mistPool.mesh.geometry.dispose();mistPool.mesh.material.dispose();mistPool.mesh.dispose();
       for(const materials of Object.values(biomeOverlayMaterials)){materials.fill.dispose();materials.border.dispose();}
-      clearOverlays();for(const material of previewMaterials)material.dispose();basePick.dispose();slotPick.dispose();baseTurretPad.dispose();baseTurretMaterial.dispose();buildingPadGeometry.dispose();buildingPadMaterial.dispose();slotDiamondGeometry.dispose();gridGeometry.dispose();buffGeometry.dispose();gridMaterial.dispose();otherBuffMaterial.dispose();otherBuffBorder.dispose();buffMaterial.dispose();buffBorderMaterial.dispose();
+      clearPowerVisuals();scene.remove(powerVisuals);clearOverlays();for(const material of previewMaterials)material.dispose();basePick.dispose();slotPick.dispose();baseTurretPad.dispose();baseTurretMaterial.dispose();buildingPadGeometry.dispose();buildingPadMaterial.dispose();slotDiamondGeometry.dispose();gridGeometry.dispose();buffGeometry.dispose();gridMaterial.dispose();otherBuffMaterial.dispose();otherBuffBorder.dispose();buffMaterial.dispose();buffBorderMaterial.dispose();
       for(const material of biomeMaterials.values())material?.dispose();biomeMaterials.clear();
       mineBatches.clear();gl.dispose();host.remove();wrap.classList.remove('is3d');if(hintText) hintText.textContent=oldHint;host0.style.display='';
     }};

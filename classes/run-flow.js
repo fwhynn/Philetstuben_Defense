@@ -67,6 +67,7 @@ const HexRunFlow=(()=>{
     return draw();
   }
   function start(state,random){
+    if(state.challengeKind==='greed'&&state.greedContract?.wave!==state.wave+1)return null;
     if(state.hp<=0||state.waveRunning||state.phase!=='build'||state.openingRemaining||state.celebrationActive) return;
     if(state.challengeKind==='detour'&&!HexDetour.ready(state))return null;
     if(state.challengeKind==='towerDraft'&&state.towerDraft.picks)return null;
@@ -116,6 +117,7 @@ const HexRunFlow=(()=>{
     if(['detour','villages','powerGrid','expedition','towerDraft','movingFortress'].includes(state.challengeKind))state.bossRewards=[];
     if(state.challengeKind==='expedition'&&HexExpedition.complete(state)&&!state.challengeWon){state.challengeTarget=state.wave;state.challengeWon=true;state.phase='victory';return {victory:true};}
     if(state.challengeKind==='expedition'&&state.wave===12&&!HexExpedition.complete(state)){state.expedition.failed=true;state.phase='gameover';return {victory:false,objectiveFailed:true};}
+    if(state.challengeKind==='greed'){state.greedScore=HexWaves.greedGold(state);if(state.wave===35&&state.greedGold35===undefined)state.greedGold35=state.greedScore;}
     if(state.challengeDay&&state.wave===(state.challengeTarget||20)&&!state.challengeWon){state.challengeWon=true;state.phase='victory';return {victory:true};}
     return {victory:false};
   }

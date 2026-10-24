@@ -5,7 +5,7 @@ const slot=(g,offset=3,index=0)=>({q:g.q+offset,r:g.r,index});
 function point(c,g){return c.map.axialToWorld(g.q,g.r);}
 function finish(r){let result,steps=0;do{result=r.c.session.advance(r.state,r.random,.05);}while(result==='running'&&++steps<20000);return result;}
 test('three fixed villages, valid tower slots, no personal bonuses or road expansion',()=>{
- const {c,state:s}=setup();assert.equal(s.gold,180);assert.equal(s.maxHp,45);assert.equal(s.hp,45);assert.equal(s.phase,'build');assert.equal(s.map.size,32);assert.equal(s.challengeTarget,12);assert.equal(s.ultimateUnlocks.length,0);assert.equal(s.buildingUnlocks.length,0);
+ const {c,state:s}=setup();assert.equal(s.gold,180);assert.equal(s.maxHp,45);assert.equal(s.hp,45);assert.equal(s.phase,'build');assert.ok(s.map.size>=32);assert.equal(s.challengeTarget,20);assert.equal(s.ultimateUnlocks.length,0);assert.equal(s.buildingUnlocks.length,0);
  assert.deepEqual(json(s.villages.goals.map(g=>g.hp)),[15,15,15]);assert.equal(c.placement.canPlace(s,9,0,c.data.CARD_LIBRARY.straight,0),false);assert.equal(c.runtime.rescueTunnel(s),false);assert.equal(c.heroes.buy(s,'walls'),false);assert.equal(c.combat.buyConsumable(s,'caltrops'),false);
  for(const tile of s.map.values())assert.equal(c.map.slotPositions(tile).length,tile.slots);
 });
@@ -50,15 +50,16 @@ test('health, relocation budget and simultaneous attacks survive restoration det
  const restored=c.snapshot.restore(json(c.snapshot.capture(s,random)));for(let i=0;i<120;i++){c.runtime.advance(s,random,.05);c.runtime.advance(restored.state,restored.random,.05);}
  assert.deepEqual(json(restored.state.enemies),json(s.enemies));assert.deepEqual(json(restored.state.villages),json(s.villages));assert.deepEqual(json(restored.state.spawnQueue),json(s.spawnQueue));
 });
-test('a paid mixed defense survives all twelve real waves including the final boss without resource cheats',()=>{
+test('a paid mixed defense survives all twenty real waves including bosses without resource cheats',()=>{
  const r=setup(),{c,state:s}=r;
  const build=[['archer',8,-2,0],['freeze',8,-2,1],['archer',7,-1,0],['archer',7,-1,1],['catapult',8,0,0],['archer',6,0,0],['ballista',6,-3,0],...s.villages.goals.flatMap(g=>[['catapult',g.q+3,g.r,0],['freeze',g.q+3,g.r,1],['ballista',g.q+2,g.r,0],['archer',g.q+2,g.r,1]])];
- for(let wave=1;wave<=12;wave++){
-  for(const [type,q,z,index]of build){const t=s.map.get(q+','+z);if(t&&index<t.slots&&!t.towers[index])c.towers.buy(s,type,[{q,r:z,index}]);}
+ const initialCount=build.length;for(const t of s.map.values())for(let i=0;i<t.slots;i++)if(!build.some(b=>b[1]===t.q&&b[2]===t.r&&b[3]===i))build.push(['chain',t.q,t.r,i]);
+ for(let wave=1;wave<=20;wave++){
+  for(const [type,q,z,index]of build.slice(0,wave<=12?initialCount:undefined)){const t=s.map.get(q+','+z);if(t&&index<t.slots&&!t.towers[index])c.towers.buy(s,type,[{q,r:z,index}]);}
   for(const [,q,z,index]of build){const tw=s.map.get(q+','+z)?.towers[index];if(tw)for(const [id]of c.data.runUpgrades(s,tw).slice(0,1))c.towers.upgrade(s,{q,r:z,index},id);}
   assert.ok(c.flow.start(s,r.random));assert.equal(finish(r),'complete','wave '+wave);assert.ok(!s.celebrationActive);assert.ok(!s.pendingCelebration);c.session.acknowledge(s);assert.equal(s.bossRewards.length,0);assert.ok(s.gold>=0);
  }
- assert.equal(s.phase,'victory');assert.ok(s.villages.goals.every(v=>v.hp>0));assert.equal(s.earnedMeta.periodicBosses,1);assert.equal(c.session.endless(s,r.random),false);assert.equal(c.session.finish(s,r.random),null);
+ assert.equal(s.phase,'victory');assert.ok(s.villages.goals.every(v=>v.hp>0));assert.ok(s.earnedMeta.periodicBosses>=1);assert.equal(c.session.endless(s,r.random),false);assert.equal(c.session.finish(s,r.random),null);
 });
 test('no defense loses the mission rather than advancing forever',()=>{
  const r=setup();for(let i=0;i<12;i++){assert.ok(r.c.flow.start(r.state,r.random));if(finish(r)==='defeat')break;r.c.session.acknowledge(r.state);}assert.equal(r.state.phase,'gameover');assert.ok(r.state.villages.goals.some(v=>v.hp===0));assert.equal(r.state.challengeWon,undefined);
@@ -69,8 +70,8 @@ test('controller relocation, cancellation, isolated preview and once-per-day rew
  const h=load(),{a,elements,storage}=h;a.newRun(undefined,undefined,undefined,day);const [north,middle]=a.state.villages.goals,from=slot(north),to=slot(middle);h.selectSlot(from.q,from.r,0);h.buyTower('archer');a.rendererCommands.selectTower(from.q,from.r,0);elements.get('villageMoveBtn').listeners.click();assert.ok(a.state.villageMove);h.selectSlot(to.q,to.r,0);assert.equal(a.state.villages.moves,1);assert.ok(a.state.map.get(to.q+','+to.r).towers[0]);
  elements.get('villageMoveBtn').listeners.click();h.documentListeners.keydown({key:'Escape',preventDefault(){},target:{tagName:'BODY'}});assert.equal(a.state.villageMove,null);
  a.restoreRunCheckpoint(json(a.captureRunCheckpoint()));assert.equal(a.state.villages.moves,1);assert.equal(a.state.discard.length,0);
- a.state.wave=12;a.endWave();let p=JSON.parse(storage.get('hex-bastion-profile-v1'));assert.equal(p.diamonds,10);assert.equal(p.records.highestWave,0);assert.ok(elements.get('endlessBtn').classList.contains('hidden'));
- elements.get('retryLoadoutBtn').listeners.click();a.state.wave=12;a.endWave();p=JSON.parse(storage.get('hex-bastion-profile-v1'));assert.equal(p.diamonds,10);
+ a.state.wave=20;a.endWave();let p=JSON.parse(storage.get('hex-bastion-profile-v1'));assert.equal(p.diamonds,10);assert.equal(p.records.highestWave,0);assert.ok(elements.get('endlessBtn').classList.contains('hidden'));
+ elements.get('retryLoadoutBtn').listeners.click();a.state.wave=20;a.endWave();p=JSON.parse(storage.get('hex-bastion-profile-v1'));assert.equal(p.diamonds,10);
 });
 test('only future rotation changes, older daily assignments stay intact',()=>{
  const c=core();for(const [date,id]of [['2026-10-25','greed'],['2026-11-01','detour'],['2026-11-07','caravan'],['2026-11-08','villages'],['2026-11-09','detour'],['2026-11-10','greed'],['2026-11-11','caravan'],['2026-11-12','garrison']])assert.equal(c.waves.daily(date).id,id);

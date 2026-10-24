@@ -23,7 +23,7 @@ for(const {id} of bootstrap('greed').lab.missions)test(id+': controller starts, 
  h.a.newRun();assert.equal(h.a.state.challengeKind,id);assert.equal(h.storage.get('hex-bastion-profile-v1'),'REAL PROFILE');assert.equal(h.storage.get('autohex-solo-autosave-v1'),'REAL RUN');
 });
 test('practice victories award no diamonds, including repeat victories',()=>{
- const h=load({labMission:'towerDraft'});for(let i=0;i<2;i++){h.a.state.wave=12;h.a.endWave();const p=JSON.parse(h.storage.get('autohex-challenge-lab-v1:towerDraft:hex-bastion-profile-v1'));assert.equal(p.diamonds,0);assert.equal(p.records.highestWave,0);assert.equal(p.records.runsPlayed,0);assert.match(h.elements.get('campaignVictoryText').textContent,/Testlauf/);h.a.newRun();}
+ const h=load({labMission:'towerDraft'});for(let i=0;i<2;i++){h.a.state.wave=35;h.a.endWave();const p=JSON.parse(h.storage.get('autohex-challenge-lab-v1:towerDraft:hex-bastion-profile-v1'));assert.equal(p.diamonds,0);assert.equal(p.records.highestWave,0);assert.equal(p.records.runsPlayed,0);assert.match(h.elements.get('campaignVictoryText').textContent,/Testlauf/);h.a.newRun();}
 });
 test('a practice checkpoint is rejected by the normal game and by another lab mission',()=>{
  const h=load({labMission:'towerDraft'});h.a.saveRunAutosave(true);
@@ -49,7 +49,7 @@ for(const m of bootstrap('greed').lab.missions)test(m.id+': three seeds finish a
    if(m.id==='detour')c.detour.finishPlanning(s);
    if(m.id==='expedition')c.expedition.finishPlanning(s);
   }
-  if(m.id==='greed')assert.ok(c.waves.acceptGreed(s,['swarm','healers','elite'][seed]));
+  if(m.id==='greed')assert.ok(c.waves.acceptGreed(s,'none'));
   assert.ok(c.flow.start(s,r.random));c.runtime.advance(s,r.random,.4);
   const restored=c.snapshot.restore(JSON.parse(JSON.stringify(c.snapshot.capture(s,r.random))));
   let result='running',other='running',ticks=0;

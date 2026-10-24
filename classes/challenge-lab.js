@@ -2,7 +2,7 @@
 (()=>{
   const missions=[
     ['greed','Der Fluch der Gier','2026-12-13','Freiwillige Risiken gegen mehr Gold.'],
-    ['detour','Die Kunst des Umwegs','2026-12-12','Plane Straßen um feste Türme. Fünf Angriffe.'],
+    ['detour','Die Kunst des Umwegs','2026-12-12','15 Angriffe, zehn feste Türme. Plane Straßen und erhalte neue Karten.'],
     ['villages','Drei Dörfer','2026-12-11','Beschütze drei getrennte Lebensbalken.'],
     ['powerGrid','Stromnetz','2026-12-10','Verbinde Türme mit deinen Generatoren.'],
     ['expedition','Expedition ins Unbekannte','2026-12-09','Drei Relikte anschließen, dann eine Welle überleben. Frist: Welle 12.'],

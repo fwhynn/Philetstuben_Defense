@@ -4,7 +4,9 @@
  const legacyColumns=[['highestWave','highest_wave','Beste Welle'],['runsPlayed','runs_played','Durchläufe'],['normalKills','normal_kills','Gegner'],['bossesKilled','bosses_killed','Bosse'],['diamondsEarned','diamonds_earned','Diamanten']];
  let columns=[['highestWave','highest_wave','Beste Welle'],['normalKills','normal_kills','Kills']];
  let sort='highest_wave',orderBy='highest_wave',direction='descending',generation=0,players=null,ownName='',loading=false;
- let mode='single',loadedSort=null,fallbackNotice='';
+ let mode='single',loadedSort=null,fallbackNotice='',greedMode='greed35';
+ const greedTabs=$('greedBoardTabs'),greedDay=$('greedBoardDay');if(greedDay)greedDay.value=new Date().toISOString().slice(0,10);
+ for(const button of document.querySelectorAll('[data-greed-board]'))button.addEventListener('click',()=>{greedMode=button.dataset.greedBoard;players=null;load();});greedDay?.addEventListener('change',()=>{players=null;load();});
  const modeButtons=[...document.querySelectorAll('[data-leaderboard-mode]')];
  let fields=[['rank','rank','Rang'],['username','name','Name'],...columns];
  function chooseOrder(key){
@@ -44,7 +46,7 @@
      button.addEventListener('click',async()=>{
       if(!confirmed){confirmed=true;button.textContent='Löschen bestätigen';return;}
       button.disabled=true;
-      try{await HexApi.deleteRunRanking(player.id,player.revision);await load();}
+      try{if(mode==='daily')await HexApi.reviewGreedRanking(player.id,player.revision,'rejected');else await HexApi.deleteRunRanking(player.id,player.revision);await load();}
       catch(error){button.disabled=false;confirmed=false;button.textContent='Löschen';status.textContent=error.message||'Eintrag konnte nicht gelöscht werden.';}
      });cell.appendChild(button);
     }
@@ -57,10 +59,11 @@
  async function load(){
   const current=++generation;loading=false;
   for(const button of modeButtons)button.setAttribute('aria-pressed',String(button.dataset.leaderboardMode===mode));
-  if(mode==='daily'){players=[];render();status.textContent='Für diesen Modus sind noch keine Bestenlistendaten verfügbar.';return;}
+  if(greedTabs){if(mode==='daily')greedTabs.classList.remove('hidden');else greedTabs.classList.add('hidden');}
+  if(mode==='daily'){columns=[['gold','gold','Verdientes Gold'],['highestWave','highest_wave','Beste Welle']];fields=[['rank','rank','Rang'],['username','name','Name'],...columns];if(!fields.some(([,key])=>key===orderBy)||orderBy==='highest_wave'){sort=orderBy='gold';direction='descending';}for(const b of document.querySelectorAll('[data-greed-board]'))b.setAttribute('aria-pressed',String(b.dataset.greedBoard===greedMode));}
   loading=true;if(!players)status.textContent='Bestenliste wird geladen …';
   const requestedSort=sort;
-  try{const data=mode==='legacy'?await HexApi.getPublicLeaderboard(requestedSort):await HexApi.getRunLeaderboard(mode);if(mode!=='legacy'){if(data.mode!==mode||!Array.isArray(data.entries))throw Error();data.players=data.entries.map(r=>({...r,highestWave:r.wave,normalKills:r.kills}));}if(current!==generation)return;if(!Array.isArray(data?.players))throw Error();players=data.players;loadedSort=requestedSort;loading=false;render();status.textContent=fallbackNotice+(players.length?(mode==='legacy'?'Ungeprüfte Account-Gesamtwerte, keine getrennte Run-Wertung.':'Freigegebene Bestwerte pro Account · Welle, danach Kills.'):'Noch keine Einträge in dieser Kategorie.');}
+  try{const data=mode==='daily'?await HexApi.getGreedLeaderboard(greedMode,greedDay.value):mode==='legacy'?await HexApi.getPublicLeaderboard(requestedSort):await HexApi.getRunLeaderboard(mode);if(mode!=='legacy'){if(data.mode!==(mode==='daily'?greedMode:mode)||!Array.isArray(data.entries))throw Error();data.players=data.entries.map(r=>({...r,highestWave:r.wave,normalKills:r.kills}));}if(current!==generation)return;if(!Array.isArray(data?.players))throw Error();players=data.players;loadedSort=requestedSort;loading=false;render();status.textContent=fallbackNotice+(players.length?(mode==='legacy'?'Ungeprüfte Account-Gesamtwerte, keine getrennte Run-Wertung.':mode==='daily'?'Freigegebene Bestwerte des gewählten Tages · Verdientes Gold.':'Freigegebene Bestwerte pro Account · Welle, danach Kills.'):'Noch keine Einträge in dieser Kategorie.');}
   catch{if(current===generation){loading=false;if(mode==='single'){mode='legacy';columns=legacyColumns;fields=[['rank','rank','Rang'],['username','name','Name'],...columns];fallbackNotice='Getrennte Run-Bestenlisten sind noch nicht verfügbar. Angezeigt werden die bisherigen Gesamtwerte. ';return load();}status.textContent='Bestenliste konnte nicht geladen werden. Bitte später erneut öffnen.';}}
  }
  for(const button of modeButtons)button.addEventListener('click',()=>{

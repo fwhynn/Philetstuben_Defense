@@ -172,7 +172,7 @@
 
         <!-- Oben rechts: Leben, Gold, Wave, Deck -->
         <header class="hud">
-          <div id="healthStat" class="hudStat"><svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true">
+          <div id="villageHud" class="hidden" aria-label="Dorf-Lebenspunkte"></div><div id="healthStat" class="hudStat"><svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M12 21 3 12C-3 3 8-1 12 6 16-1 27 3 21 12z" />
             </svg> <strong id="hp">20/20</strong></div>
           <details class="statDetails">
@@ -249,8 +249,19 @@
           <button id="rotateHexBtn" class="secondary" type="button" disabled aria-label="Ausgewählte Hexkarte drehen">↻
             Drehen (R)</button>
         </div>
-        <div id="hand" class="hand"></div>
-<section id="draftControls" class="hidden" aria-label="Turm-Draft"><p id="draftStatus" aria-live="polite"></p><div id="draftOffers"></div><p id="draftInventory"></p></section>
+        <section id="detourControls" class="hidden" aria-label="Straßenplanung"><strong id="detourStatus" aria-live="polite"></strong><p id="detourStock"></p></section><div id="hand" class="hand"></div><section id="greedDock" class="hidden"><h2>35 Wellen · Verdiene so viel Gold wie möglich</h2><p id="greedDockStatus"></p><div id="greedDockChoices"></div></section>
+        <section id="powerControls" class="hidden" aria-label="Stromnetz">
+          <p id="powerStatus" aria-live="polite"></p><p id="powerHint" role="status"></p>
+          <details id="powerEditor"><summary>Stromnetz verwalten · Felder &amp; Türme</summary><div class="powerEditorPanel">
+            <header><h2>Stromnetz verwalten</h2><button id="powerCloseBtn" class="secondary" type="button">Schließen</button></header>
+            <p>1. Türme bauen. 2. Benachbarte Leitfelder bis zum Generator einschalten. 3. Versorgung prüfen.</p>
+            <p>Jeder Generator versorgt bis zu drei Türme in seinem verbundenen Netz. Zusammen sind sechs möglich. Leitfelder und Turmschalter sind getrennt: EIN allein bedeutet noch nicht „versorgt“.</p>
+            <h3>Leitfelder · höchstens sechs eingeschaltet</h3><div id="powerFields"></div>
+            <h3>Deine Türme</h3><p>Ein ausgeschalteter Turm gibt Kapazität frei. Bei Überlast werden die zuerst gebauten Türme versorgt.</p><div id="powerTowers"></div>
+          </div></details>
+        </section>
+
+<section id="draftControls" class="hidden" aria-label="Turm-Draft"><p id="draftStatus" aria-live="polite"></p><div id="draftOffers"></div><p id="draftGrowth"></p></section>
       </section>
 
       <!-- Unten rechts: Wave starten -->
@@ -272,27 +283,10 @@
           <p id="expeditionProgress" aria-live="polite"></p><p id="expeditionRelics"></p>
           <button id="expeditionReadyBtn" class="secondary" type="button">Planung abschließen</button>
         </section>
-        <section id="powerControls" class="hidden" aria-label="Stromnetz">
-          <p id="powerStatus" aria-live="polite"></p>
-          <details id="powerEditor"><summary>Stromnetz verwalten · Felder &amp; Türme</summary><div class="powerEditorPanel">
-            <header><h2>Stromnetz verwalten</h2><button id="powerCloseBtn" class="secondary" type="button">Schließen</button></header>
-            <p>1. Türme bauen. 2. Benachbarte Leitfelder bis zum Generator einschalten. 3. Versorgung prüfen.</p>
-            <p>Jeder Generator versorgt bis zu drei Türme in seinem verbundenen Netz. Zusammen sind sechs möglich. Leitfelder und Turmschalter sind getrennt: EIN allein bedeutet noch nicht „versorgt“.</p>
-            <p id="powerHint" role="status"></p><h3>Leitfelder · höchstens sechs eingeschaltet</h3><div id="powerFields"></div>
-            <h3>Deine Türme</h3><p>Ein ausgeschalteter Turm gibt Kapazität frei. Bei Überlast werden die zuerst gebauten Türme versorgt.</p><div id="powerTowers"></div>
-          </div></details>
-        </section>
         <section id="villageControls" class="hidden" aria-label="Dorfverteidigung">
           <p id="villageHealth" aria-live="polite"></p>
           <p id="villageTargets"></p><p id="villageMoves"></p>
           <button id="villageMoveCancel" class="secondary hidden" type="button">Umzug abbrechen</button>
-        </section>
-        <section id="detourControls" class="hidden" aria-label="Straßenplanung">
-          <p id="detourStatus" aria-live="polite"></p>
-          <p id="detourStock"></p>
-          <details><summary>Vorrat &amp; Regeln</summary><p>Kein Zufallsdeck: Die drei Karten sind dein gemeinsamer Vorrat. Die Zahl auf jeder Karte zeigt, wie viele Exemplare noch übrig sind.</p><p>Start: je 3 Geraden, kleine und große Kurven. Vor Angriff 1 darfst du bis zu 6 Hexe legen. Nach jedem Angriff bekommst du je 1 Karte jeder Sorte und 2 neue Platzierungen. Karten bleiben erhalten; ungenutzte Platzierungen verfallen.</p><p>Turminseln sind straßenlos: Führe den Weg an ihnen vorbei, nicht in sie hinein. Die Türme bleiben fest. Mit „Planung abschließen“ startest du die Bauphase; während der Vorbereitung kannst du weiterplanen. Rücknahme gibt Karte und Platzierung zurück; höchstens 2 Hexe aus älteren Angriffen pro Vorbereitung.</p></details>
-          <button id="detourUndoBtn" class="secondary" type="button">Letztes Straßenhex zurücknehmen</button>
-          <button id="detourReadyBtn" class="secondary" type="button">Straßenplanung abschließen</button>
         </section>
         <button id="startWaveBtn" class="primary" disabled>Wave starten (Leertaste)</button>
       </div>
@@ -519,7 +513,7 @@
         </div>
         <p id="leaderboardStatus" class="leaderboardStatus" role="status" aria-live="polite"></p>
         <details id="runReview" hidden><summary>Runs prüfen</summary><div id="runReviewEntries"></div></details>
-        <div id="leaderboardContent" class="leaderboardTable"></div>
+        <div id="greedBoardTabs" class="hidden"><strong>Der Fluch der Gier · Goldwertung</strong><button type="button" data-greed-board="greed35">Welle 35</button><button type="button" data-greed-board="greedEndless">Endlos</button><label>Tag <input id="greedBoardDay" type="date"></label></div><div id="leaderboardContent" class="leaderboardTable"></div>
         <small class="leaderboardNote">Getrennte Run-Wertungen zeigen freigegebene Ergebnisse. Gesamtwerte stammen aus gespeicherten Account-Spielständen und sind ungeprüft.</small>
       </section>
     </div>
@@ -637,33 +631,24 @@
                 Wellenplanung vor dem Start ansehen! Einmal täglich +10 Diamanten beim Sieg. Gleiche Bedingungen für
                 alle; Wechsel mit der Karawane um 00:00 UTC.</p>
             </div>
-            <div id="dailyGreedRules" class="hidden">
-              <p>Überlebe zwölf Wellen. Vor jeder Welle kannst du einen freiwilligen Vertrag annehmen: zusätzliche Gegner gegen sofortiges Gold. Höchstens ein Vertrag pro Welle; die Wahl kann nicht rückgängig gemacht werden.</p>
-              <p>Risikopunkte erhältst du nur für überstandene Vertragswellen. Schwarm: 2 Punkte. Heilertrupp: 3 Punkte. Elite: 4 Punkte. Ohne Vertrag kannst du die Mission ebenfalls gewinnen. Maximal 48 Punkte; im Endlosmodus gibt es keine weiteren Verträge.</p>
-              <p>Eine Front, kein Sandsturm. Bogenschütze, Katapult, Kettenblitz, Frost und Balliste stehen allen zur Verfügung; persönliche Arsenalboni gelten nicht. Einmal täglich +10 Diamanten beim Sieg.</p>
-            </div>
-            <div id="dailyFortressRules" class="hidden"><p>Verteidige dieselbe Festung an vier Stationen für jeweils drei Wellen. Nach Welle 3, 6 und 9 zieht sie automatisch weiter. Verbleibende Leben und alle Türme bleiben erhalten.</p><p>In der Bauphase direkt nach einem Ortswechsel kannst du Türme kostenlos beliebig oft an die aktuelle Station umsetzen: Turm auswählen, Umsetzen anklicken, freien Bauplatz wählen. Upgrades und Angriffsfokus bleiben erhalten.</p><p>150 Startgold, normale Einnahmen. Kein Straßenbau, Basis-Ausbau, Verbrauchshilfen oder persönliche Arsenalboni. Bauen und Verbessern nur zwischen Wellen. Überlebe Welle 12 für einmal täglich zehn Diamanten. Kein Endlosmodus.</p></div>
-            <div id="dailyDraftRules" class="hidden"><p>Überlebe zwölf Wellen auf einer festen Karte. Wähle jeweils eines von drei Angeboten: vor Welle 1 dreimal, danach einmal je Bauphase.</p><p>Türme kommen ins Inventar und werden kostenlos auf freien Plätzen gebaut. Upgrade-Tickets erlauben eine normale Verbesserung deiner Wahl. Reparaturen heilen fünf Basisleben. Unverbrauchte Türme und Tickets bleiben erhalten.</p><p>Kein Gold-Shop, Verkauf, Basis-Ausbau, Verbrauchshilfen oder persönliche Arsenalboni. Bauen und Verbessern nur zwischen Wellen. Kein Endlosmodus. Sieg: einmal täglich zehn Diamanten.</p></div>
+            <div id="dailyGreedRules" class="hidden"><p>Erreiche Welle 35 und verdiene so viel Gold wie möglich. Wähle dein eigenes Loadout. Vor jeder Welle musst du einen von drei wechselnden Verträgen oder Kein Vertrag wählen.</p><p>Verträge zahlen sofort Gold und verstärken nur den nächsten Angriff: etwa doppelte Gegnerzahl, einen zusätzlichen Boss oder mehr Schutz und Tempo. Ausgegebenes Gold zählt weiterhin, Startgold und Verkäufe nicht.</p><p>Nach Welle 35 kannst du endlos weiterspielen. Die Goldwertung bis Welle 35 bleibt gespeichert; Endlos hat eine eigene Bestenliste. Gleicher Tag, gleicher Angebotsplan. Account erforderlich; neue Gier-Ergebnisse warten auf Freigabe.</p></div>
+            <div id="dailyFortressRules" class="hidden"><p>Verteidige dieselbe Festung an vier Stationen für jeweils drei Wellen. Nach Welle 3, 6 und 9 zieht sie automatisch weiter. Verbleibende Leben und alle Türme bleiben erhalten.</p><p>In der Bauphase direkt nach einem Ortswechsel kannst du Türme kostenlos beliebig oft an die aktuelle Station umsetzen: Turm auswählen, Umsetzen anklicken, freien Bauplatz wählen. Upgrades und Angriffsfokus bleiben erhalten.</p><p>150 Startgold, normale Einnahmen. Kein Straßenbau, Basis-Ausbau, Verbrauchshilfen oder persönliche Arsenalboni. Türme bauen nur zwischen Wellen. Upgrade-Tickets auch während des Kampfes einlösen. Überlebe Welle 12 für einmal täglich zehn Diamanten. Kein Endlosmodus.</p></div>
+            <div id="dailyDraftRules" class="hidden"><p>Überlebe 35 Wellen. Die Karte wächst nach Welle 5, 10, 15, 20, 25 und 30 um je zwei Straßenhexe. Wähle jeweils eines von drei Angeboten: vor Welle 1 dreimal, danach nach jeder zweiten Welle.</p><p>Ziehe eine Turmkarte direkt auf einen freien Platz oder wähle sie erst aus und baue über die linke Turmleiste. Tickets erlauben eine normale Verbesserung deiner Wahl, auch während einer Welle. Reparaturen heilen fünf Basisleben. Unverbrauchte Türme und Tickets bleiben erhalten.</p><p>Kein Gold-Shop, Verkauf, Basis-Ausbau, Verbrauchshilfen oder persönliche Arsenalboni. Neue Türme baust du zwischen Wellen. Kein Endlosmodus. Sieg: einmal täglich zehn Diamanten.</p></div>
             <div id="dailyExpeditionRules" class="hidden">
               <p>Relikte sind die goldenen ◆-Missionsfelder im Norden, Osten und Süden. Verbinde alle drei über Straßen mit deiner Basis und überlebe danach eine Welle: Dann gewinnst du sofort. Je früher, desto besser! Welle 12 ist die Frist. Aufdecken allein zählt nicht.</p>
               <p>Bis zu zwei Hexe je Bauphase. Der feste Straßenbaukasten enthält Gerade, kleine und große Kurve, T-Kreuzung und Y-Kreuzung. Karten sind wiederverwendbar; ungenutzte Platzierungen werden nicht angespart. Nach der ersten Straße kannst du die Planung auch vorzeitig abschließen.</p>
               <p>100 Startgold. Jedes angeschlossene Relikt gibt einmalig 25 Gold, keinen weiteren Schreinbonus. Keine zufälligen Inseln oder Kartenbelohnungen. Persönliche Arsenalboni gelten nicht. Kein Endlosmodus; einmal täglich +10 Diamanten nur bei vollständig erfülltem Ziel.</p>
             </div>
-            <div id="dailyPowerRules" class="hidden">
-              <p>Überlebe zwölf Wellen auf der festen Karte, zuletzt mit einem Boss. Du startest mit 150 Gold. Zwei Generatoren liefern je drei Strom; jeder Turm benötigt einen Strom, unabhängig von seiner Stufe.</p>
-              <p>Schalte höchstens sechs Leitfelder ein. Strom fließt über benachbarte eingeschaltete Hexe, unabhängig von Straßenanschlüssen. Die beiden Relais verbinden die Netzteile. Verbundene Generatoren teilen ihre Kapazität.</p>
-              <p>Ohne Verbindung oder freie Kapazität greifen Türme nicht an; auch Frost-Auren und Minenleger bleiben inaktiv. Bei Engpässen haben zuerst gebaute Türme Vorrang. Schalte einen Turm im Turmmenü aus, um Strom für einen anderen freizugeben.</p>
-              <p>Schalter, Turmbau, Upgrades und Verkauf sind nur zwischen Wellen möglich. Kein Basis-Ausbau, keine Verbrauchshilfen, keine persönlichen Arsenalboni, kein Endlosmodus. Einmal täglich +10 Diamanten beim Sieg.</p>
-            </div>
+            <div id="dailyPowerRules" class="hidden"><p>Überlebe zwölf Wellen. Die beiden großen Strommasten sind Generatoren. Klicke die Blitzsymbole der kleinen Masten, um bis zu sechs Leitfelder einzuschalten. Benachbarte Felder leiten den Strom weiter.</p><p>Gelb: mit einem Generator verbunden – alle Türme auf diesem Feld kämpfen. Grau: ausgeschaltet. Orange: eingeschaltet, aber ohne Verbindung. Es gibt kein zusätzliches Turmlimit und keine einzelnen Turmschalter. Während einer Welle bleibt das Netz unverändert.</p></div>
             <div id="dailyVillagesRules" class="hidden">
-              <p>Drei Dörfer mit je 15 Leben. Überlebe zwölf Wellen; sobald ein Dorf fällt, ist die Mission verloren. Gewundene Zufahrten teilen sich ein festes Wegenetz: Zentrale Türme können mehrere Angriffe abdecken. Die markierten Eingänge zeigen, wo die nächste Welle erscheint und welches Dorf ihr Ziel ist. Du startest mit 180 Gold, ohne persönliche Arsenalboni.</p>
-              <p>Wellen 1–6: Nord, Mitte und Süd im Wechsel. Wellen 7–9: Nord + Mitte, Mitte + Süd, Nord + Süd. Wellen 10–12: alle drei Dörfer, zuletzt mit einem Boss. Das Angriffsziel wird vor der Welle angezeigt.</p>
+              <p>Drei Dörfer mit je 15 Leben. Überlebe 20 Wellen; sobald ein Dorf fällt, ist die Mission verloren. Gewundene Zufahrten teilen sich ein festes Wegenetz: Zentrale Türme können mehrere Angriffe abdecken. Die markierten Eingänge zeigen, wo die nächste Welle erscheint und welches Dorf ihr Ziel ist. Du startest mit 180 Gold, ohne persönliche Arsenalboni.</p>
+              <p>Wellen 1–6: Nord, Mitte und Süd im Wechsel. Wellen 7–9: Nord + Mitte, Mitte + Süd, Nord + Süd. Wellen 10–20: alle drei Dörfer. Bosse erhöhen zwischendurch den Druck. Wähle vor dem Start deine fünf Türme. Das Angriffsziel wird vor der Welle angezeigt.</p>
               <p>Zwei kostenlose Turmumzüge je Bauphase, ohne Ansparen. Wähle einen Turm, dann „Turm kostenlos umsetzen“ und einen freien Bauplatz. Stufe, Einstellungen und investiertes Gold bleiben erhalten. Im Kampf sind Umzüge gesperrt. Turmbau und Upgrades sind erlaubt, Basis-Ausbau und Verbrauchshilfen nicht. Kein Endlosmodus; einmal täglich +10 Diamanten beim Sieg.</p>
             </div>
             <div id="dailyDetourRules" class="hidden">
-              <p>Fünf Angriffe, fünf feste Türme. Baue die Straße durch ihre Wirkungsbereiche. Kein Turmbau, Ausbau, Verkauf, Basis-Ausbau oder Verbrauchshilfen. Keine Goldeinnahmen.</p>
-              <p>Vor dem ersten Angriff bis zu sechs Straßenhexe, danach je zwei. Anfangs je drei Geraden, kleine und große Kurven; nach jedem Angriff je eine weitere Karte. Mindestens zwei Straßenhexe sind nötig, dann kannst du die Planung vorzeitig abschließen.</p>
-              <p>Aktuelle Platzierungen kannst du zurücknehmen. Zwischen Angriffen dürfen außerdem höchstens die letzten zwei älteren Straßenhexe neu gesetzt werden. Zurückgenommene Karten und Platzierungen erhältst du zurück. Keine zufälligen Kartenangebote, kein Endlosmodus. Einmal täglich +10 Diamanten beim Sieg.</p>
+              <p>15 Angriffe, zehn feste Türme. Baue die Straße durch ihre Wirkungsbereiche. Kein Turmbau, Ausbau, Verkauf, Basis-Ausbau oder Verbrauchshilfen. Keine Goldeinnahmen.</p>
+              <p>Vor dem ersten Angriff bis zu sechs Straßenhexe, danach je zwei und ab Angriff 6 je drei. Anfangs je drei Geraden, kleine und große Kurven; nach jedem Angriff je eine weitere Karte. Mindestens zwei Straßenhexe sind nötig, dann kannst du direkt Welle starten wählen.</p>
+              <p>Nach Welle 3 gibt es Lange Straßen, nach Welle 6 Y-Kreuzungen und nach Welle 9 seltene Seitenkreuzungen im Nachschub. Kein Endlosmodus. Einmal täglich +10 Diamanten beim Sieg.</p>
             </div>
             <p id="dailyProgress"></p><button id="dailyStartBtn" class="primary">Heutige Mission starten</button>
           </section>
@@ -680,7 +665,7 @@
         <p id="celebrationText"></p><button id="celebrationContinue" class="primary">Weiter geht’s!</button>
       </div>
     </div>
-    <div id="greedOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="greedTitle"><div class="rewardBox"><div class="rewardHeading"><h2 id="greedTitle" tabindex="-1" data-dialog-initial-focus>Der Fluch der Gier</h2><button id="greedCloseBtn" type="button">Zurück zur Vorbereitung</button></div><p>Freiwillig: höchstens ein Vertrag für die nächste Welle. Gold sofort, Risikopunkte erst nach überstandener Welle. Die Wahl ist verbindlich. Zusätzliche Vertragsgegner geben kein weiteres Gold.</p><p id="greedStatus" aria-live="polite"></p><div id="greedChoices" class="rewardChoices"></div></div></div>
+    <div id="greedOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="greedTitle"><div class="rewardBox"><div class="rewardHeading"><h2 id="greedTitle" tabindex="-1" data-dialog-initial-focus>Der Fluch der Gier</h2><button id="greedCloseBtn" type="button">Zurück zur Vorbereitung</button></div><p>Wähle einen Vertrag oder Kein Vertrag. Gold gibt es sofort; die Wahl gilt für den nächsten Angriff. Erreiche Welle 35 und verdiene so viel Gold wie möglich.</p><p id="greedStatus" aria-live="polite"></p><div id="greedChoices" class="rewardChoices"></div></div></div>
     <div id="merchantOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="merchantTitle"><div class="rewardBox"><div class="rewardHeading"><h2 id="merchantTitle" tabindex="-1" data-dialog-initial-focus>Händler</h2><button id="merchantCloseBtn" type="button">Schließen</button></div><p>Kaufen und fertig. Jeder Kauf verdoppelt den Preis dieses Angebots bei diesem Händler. Neue Händler starten beim Grundpreis.</p><p id="merchantStatus" aria-live="polite"></p><div id="merchantChoices" class="rewardChoices"></div></div></div>
     <div id="rewardOverlay" class="overlay hidden" role="dialog" aria-modal="true">
       <div class="rewardBox">

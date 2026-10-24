@@ -337,14 +337,17 @@
 		if (response.status === 404 || response.status === 503) throw Error('Die Bestenliste ist noch nicht verfügbar. Bitte später erneut versuchen.');
 		return parseJson(response);
 	}
-	async function runRankingRequest(path, body) {
- const response=await fetch(baseUrl+'/run-leaderboard'+path,{method:body?'POST':'GET',cache:'no-store',signal:AbortSignal.timeout(10000),headers:{Accept:'application/json',...authHeaders(),...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});
+	async function runRankingRequest(path, body, greed=false) {
+ const response=await fetch(baseUrl+(greed?'/greed-leaderboard':'/run-leaderboard')+path,{method:body?'POST':'GET',cache:'no-store',signal:AbortSignal.timeout(10000),headers:{Accept:'application/json',...authHeaders(),...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});
  return parseJson(response);
  }
  globalThis.HexApi = {
+ getGreedLeaderboard:(mode,day)=>runRankingRequest('?'+new URLSearchParams({mode,day}),undefined,true),
  getRunLeaderboard:mode=>runRankingRequest('?'+new URLSearchParams({mode})),
- previewRunRanking:run=>runRankingRequest('/preview?'+new URLSearchParams({mode:run.mode,wave:run.wave,kills:run.kills})),
- submitRunRanking:run=>runRankingRequest('',run),
+ previewRunRanking:run=>runRankingRequest('/preview?'+new URLSearchParams({mode:run.mode,wave:run.wave,kills:run.kills,...(run.day?{day:run.day,gold:run.gold}:{})}),undefined,run.mode.startsWith('greed')),
+ submitRunRanking:run=>runRankingRequest('',run,run.mode.startsWith('greed')),
+ getPendingGreedRankings:()=>runRankingRequest('/pending',undefined,true),
+ reviewGreedRanking:(id,revision,decision)=>runRankingRequest('/'+encodeURIComponent(id)+'/review',{revision,decision},true),
  getPendingRunRankings:()=>runRankingRequest('/pending'),
  reviewRunRanking:(id,revision,decision,reason)=>runRankingRequest('/'+encodeURIComponent(id)+'/review',{revision,decision,reason}),
  deleteRunRanking:(id,revision)=>runRankingRequest('/'+encodeURIComponent(id)+'/delete',{revision}),

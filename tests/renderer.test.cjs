@@ -74,7 +74,7 @@ test('3D cursor is refreshed by render after legality changes without another po
  const render=source.match(/  function render\(nextState,placementTargets=\[\]\)\{[\s\S]*?\n  \}/)[0];
  const refresh=source.match(/  function refreshPointerCursor\(\)\{[\s\S]*?\n  \}/)[0];
  const state={},dom={style:{}},context={state,dom,ready:true,pickDirty:true,pickables:[],objectRecords:new Map(),targetList:[],pointerPosition:{clientX:20,clientY:20},drag:null,layer:{objects:{updateMatrixWorld(){}},targets:{children:[],updateMatrixWorld(){context.matricesReady=true;}}},pick(){assert.equal(context.matricesReady,true);return {kind:'target',legal:context.targetList[0].legal};}};
- for(const name of ['syncTileOverlays','syncTiles','syncLandmarks','syncEmpty','syncObjects','syncTargets','syncGhost','syncSelection','syncMines','syncConsumables','syncEnemies','syncProjectiles','syncLabels'])context[name]=()=>{};
+ for(const name of ['syncTileOverlays','syncTiles','syncLandmarks','syncEmpty','syncObjects','syncTargets','syncGhost','syncSelection','syncMines','syncConsumables','syncEnemies','syncProjectiles','syncPowerVisuals','syncLabels'])context[name]=()=>{};
  vm.runInNewContext(render+'\n'+refresh+'\nglobalThis.draw=render;',context);
  context.draw(state,[{legal:false}]);assert.equal(dom.style.cursor,'not-allowed');
  context.pickDirty=true;context.matricesReady=false;context.draw(state,[{legal:true}]);assert.equal(dom.style.cursor,'pointer');
@@ -124,4 +124,15 @@ test('new enemy art is rendered as an image with the real asset path and readabl
  const {renderer,svg,state}=setup();state.enemies=[{id:1,type:'shieldbearer',name:'Schildknecht',description:'Drei Treffer',abilityIcon:'▣',x:30,y:30,hp:10,maxHp:20}];renderer.render(state);
  const all=[];function walk(n){all.push(n);for(const c of n.children||[])walk(c);}walk(svg);
  const image=all.find(n=>n.attributes.href==='assets/enemies-concepts/shieldbearer.png');assert.ok(image);assert.ok(image.children.some(n=>n.textContent==='Schildknecht · Drei Treffer'));
+});
+
+
+test('power pylons mark all nodes including base and relays, cache geometry and dispose on changes',async()=>{
+ const THREE=await import('three'),c=require('../headless-core.cjs')(),s=c.session.create({seed:'power-test',runId:'pylon-test',challengeDay:'2026-11-15',loadout:['archer','catapult','chain','freeze','mine']}).state;
+ const source=fs.readFileSync(path.join(__dirname,'../classes/three-renderer.js'),'utf8'),block=source.slice(source.indexOf('  const powerVisuals='),source.indexOf('  // ---- Beschriftungen'));
+ const ctx={THREE,state:s,scene:new THREE.Scene(),HexPowerGrid:c.powerGrid,HEX:c.map.HEX,axialToWorld:c.map.axialToWorld};
+ vm.runInNewContext(block+';globalThis.power={sync:syncPowerVisuals,clear:clearPowerVisuals,group:powerVisuals}',ctx);
+ ctx.power.sync();const first=ctx.power.group.children[0],count=ctx.power.group.children.length;assert.equal(count,s.powerGrid.nodes.length*7);ctx.power.sync();assert.equal(ctx.power.group.children[0],first);
+ let disposed=0;first.geometry.addEventListener('dispose',()=>disposed++);c.powerGrid.toggleField(s,'1,0');ctx.power.sync();assert.equal(disposed,1);assert.equal(ctx.power.group.children.length,count);
+ ctx.power.clear();assert.equal(ctx.power.group.children.length,0);
 });

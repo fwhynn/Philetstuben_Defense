@@ -6,7 +6,7 @@ function element(tag='div'){return {tag,children:[],attrs:{},dataset:{},textCont
 function setup({players=async()=>({players:[]}),loggedIn=false,username='Ich',deleteResult=async()=>{}}={}){
  const nodes=new Map(),listeners={},requests=[],sorts=['single','dual','daily','duo','legacy'].map(sort=>{const button=element('button');button.dataset.leaderboardMode=sort;return button;});
  const HexApi={isLoggedIn:()=>loggedIn,currentUser:async()=>({username}),deleteRunRanking:deleteResult,getRunLeaderboard:async mode=>{requests.push(mode);const data=await players(mode);return {mode,entries:data.players.map(p=>({...p,wave:p.highestWave,kills:p.runsPlayed}))};},getPublicLeaderboard:sort=>{requests.push(sort);return players(sort);}};
- const document={getElementById:id=>{if(!nodes.has(id))nodes.set(id,element());return nodes.get(id);},createElement:element,querySelectorAll:()=>sorts,addEventListener:(name,fn)=>listeners[name]=fn};
+ const document={getElementById:id=>{if(!nodes.has(id))nodes.set(id,element());return nodes.get(id);},createElement:element,querySelectorAll:selector=>selector==='[data-leaderboard-mode]'?sorts:[],addEventListener:(name,fn)=>listeners[name]=fn};
  vm.runInNewContext(source,{document,HexApi,Intl,Number,Array,String,Error});
  const rows=()=>nodes.get('leaderboardContent').children[0]?.children[1].children||[];
  return {nodes,listeners,requests,sorts,rows,open:()=>nodes.get('menuLeaderboardBtn').events.click()};

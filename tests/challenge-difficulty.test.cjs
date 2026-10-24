@@ -20,10 +20,10 @@ test('all practice missions expose the victory target and actionable rules',()=>
 });
 test('underinvesting in upgrades loses the later fortress waves; checkpoint continuation stays identical',()=>{
  const c=core(),run=c.session.create({seed:'movingFortress-v1|2026-12-07',runId:'audit',challengeDay:'2026-12-07',loadout:['archer','catapult','chain','freeze','mine']}),s=run.state;
- const build=[['catapult',3,0],['freeze',4,0],['ballista',5,0],['archer',3,1],['mine',4,1],['catapult',5,1]];let previous=0;
+ const build=[['catapult',1,0],['freeze',2,0],['ballista',3,0],['archer',4,0],['mine',5,0],['catapult',6,0]];let previous=0;
  for(let wave=1;wave<=12;wave++){
-  const f=s.movingFortress,g=f.stations[f.stage];if(f.stage!==previous){for(const [,n,index]of build){const old=f.stations[previous],from={q:old.q+n,r:old.r,index};if(s.map.get(from.q+','+from.r).towers[index])assert.ok(c.movingFortress.move(s,from,{q:g.q+n,r:g.r,index}));}previous=f.stage;}
-  for(const [type,n,index]of build){const loc={q:g.q+n,r:g.r,index};if(!s.map.get(loc.q+','+loc.r).towers[index])c.towers.buy(s,type,[loc]);}
+  const f=s.movingFortress,g=f.stations[f.stage];if(f.stage!==previous){for(const [,n,index]of build){const old=f.stations[previous],from={...old.path[n-1],index};if(s.map.get(from.q+','+from.r).towers[index])assert.ok(c.movingFortress.move(s,from,{...g.path[n-1],index}));}previous=f.stage;}
+  for(const [type,n,index]of build){const loc={...g.path[n-1],index};if(!s.map.get(loc.q+','+loc.r).towers[index])c.towers.buy(s,type,[loc]);}
   assert.ok(c.flow.start(s,run.random));
   if(wave===7){c.runtime.advance(s,run.random,1);const saved=c.snapshot.restore(json(c.snapshot.capture(s,run.random)));for(let i=0;i<80;i++){c.runtime.advance(s,run.random,.05);c.runtime.advance(saved.state,saved.random,.05);}assert.deepEqual(json(s.enemies),json(saved.state.enemies));}
   let result,t=0;do{result=c.session.advance(s,run.random,.05);}while(result==='running'&&++t<20000);assert.ok(t<20000);if(result==='defeat')break;

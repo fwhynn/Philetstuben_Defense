@@ -15,7 +15,7 @@ const HexPowerGrid=(()=>{
     for(const [q,r,name] of [[1,1,'Relais Nord'],[1,3,'Relais Süd']]){
       const key=HexMap.key(q,r);state.map.set(key,{q,r,type:'buildingPlot',roads:[],slots:0,towers:[],buildingSlots:0,buildings:[],income:0});nodes.push({key,name,capacity:0});
     }
-    state.powerGrid={nodes,enabled:[nodes[1].key,nodes[2].key,nodes[10].key,nodes[11].key],limit:6,battlePowerIds:[]};
+    state.powerGrid={version:2,nodes,enabled:[nodes[1].key,nodes[2].key,nodes[10].key,nodes[11].key],limit:6,battlePowerIds:[]};
   }
   const planning=state=>state.challengeKind==='powerGrid'&&state.hp>0&&state.phase==='build'&&!state.waveRunning&&!state.celebrationActive;
   function prepare(state){state.hand=[];state.phase='build';state.powerGrid.battlePowerIds=[];return 'ready';}
@@ -31,10 +31,10 @@ const HexPowerGrid=(()=>{
       }
       // Stable build-ID priority; traversal order and reloads never reassign capacity.
       towers.sort((a,b)=>a.statId-b.statId);let used=0;
-      for(const tw of towers){const reason=tw.powerOff?'off':!capacity?'disconnected':used>=capacity?'capacity':'powered';status.set(tw.statId,reason);if(reason==='powered'){active.add(tw.statId);used++;}}
+      for(const tw of towers){const reason=grid.version!==2&&tw.powerOff?'off':!capacity?'disconnected':grid.version!==2&&used>=capacity?'capacity':'powered';status.set(tw.statId,reason);if(reason==='powered'){active.add(tw.statId);used++;}}
       components.push({keys,capacity,used});
     }
-    for(const tile of state.map.values())for(const tw of tile.towers||[])if(tw&&!status.has(tw.statId))status.set(tw.statId,tw.powerOff?'off':'disconnected');
+    for(const tile of state.map.values())for(const tw of tile.towers||[])if(tw&&!status.has(tw.statId))status.set(tw.statId,grid.version!==2&&tw.powerOff?'off':'disconnected');
     return {components,status,active,used:active.size,capacity:grid.nodes.reduce((n,g)=>n+g.capacity,0)};
   }
   function toggleField(state,key){
@@ -43,7 +43,7 @@ const HexPowerGrid=(()=>{
     if(index>=0)g.enabled.splice(index,1);else{if(g.enabled.length>=g.limit)return false;g.enabled.push(key);}return true;
   }
   function toggleTower(state,slot){
-    if(!planning(state)||!slot||!Number.isInteger(slot.q)||!Number.isInteger(slot.r)||!Number.isInteger(slot.index)||slot.index<0)return false;
+    if(state.powerGrid.version===2||!planning(state)||!slot||!Number.isInteger(slot.q)||!Number.isInteger(slot.r)||!Number.isInteger(slot.index)||slot.index<0)return false;
     const tw=state.map.get(HexMap.key(slot.q,slot.r))?.towers?.[slot.index];if(!tw)return false;tw.powerOff=!tw.powerOff;return true;
   }
   function lock(state){state.powerGrid.battlePowerIds=[...evaluate(state).active].sort((a,b)=>a-b);}

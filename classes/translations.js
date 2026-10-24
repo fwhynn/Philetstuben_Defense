@@ -2375,3 +2375,126 @@ HexTranslations.add("Herausforderungen|Challenges");
 
 HexTranslations.add("Duo-Start nach Updates|Duo startup after updates\nDuo-Seiten laden auch mit aktualisierten Spieldateien zuverlässig.|Duo pages load reliably with updated game files.\nDuo-Dateien nach Updates|Duo files after updates");
 HexTranslations.add("Duo|Duo");
+
+HexTranslations.add("Nachschub alle zwei Wellen|New offers every two waves");
+
+HexTranslations.add(`Wähle vor dem ersten Angriff drei Angebote, danach eines nach jeder zweiten Welle. Turm im Inventar? Freien Bauplatz anklicken und kostenlos bauen. Upgrade-Tickets am gebauten Turm einlösen. Überlebe zwölf Wellen; Gold ist hier nicht ausgebbar.|Choose three offers before the first attack, then one after every second wave. Got a tower in inventory? Click an empty site to build it for free. Redeem upgrade tickets at built towers. Survive twelve waves; gold cannot be spent here.
+Überlebe zwölf Wellen auf einer festen Karte. Wähle jeweils eines von drei Angeboten: vor Welle 1 dreimal, danach nach jeder zweiten Welle.|Survive twelve waves on the mission map. Choose one of three offers: three times before wave 1, then after every second wave.
+Kein Gold-Shop, Verkauf, Basis-Ausbau, Verbrauchshilfen oder persönliche Arsenalboni. Türme bauen nur zwischen Wellen. Upgrade-Tickets auch während des Kampfes einlösen. Kein Endlosmodus. Sieg: einmal täglich zehn Diamanten.|No gold shop, selling, base upgrades, consumables or personal arsenal bonuses. Build towers between waves. Redeem upgrade tickets during combat too. No endless mode. Victory awards ten diamonds once per day.`);
+
+HexTranslations.add(`35 Wellen · Verdiene so viel Gold wie möglich|35 waves · Earn as much gold as possible
+Der Fluch der Gier · Goldwertung|Curse of Greed · Gold leaderboard
+Verdientes Gold|Gold earned
+Welle 35|Wave 35
+Endlos|Endless
+Kein Vertrag|No contract
+Doppelte Welle|Double wave
+Bossbesuch|Boss visit
+Ansturm|Rush
+Doppelte Deckung|Double protection
+Riesenparade|Giant parade
+Sechs zusätzliche schnelle Schwarmgegner.|Six additional fast swarm enemies.
+Ein Feldheiler und drei gepanzerte Begleiter.|One field healer and three armored escorts.
+Ein Elitegegner mit vierfachem Leben und beiden Schutzbalken.|One elite enemy with four times the health and both protection bars.
+Alle normalen Gegner dieser Welle kommen doppelt. Vertragskopien geben kein Killgold.|Every normal enemy in this wave appears twice. Contract copies award no kill gold.
+Ein zusätzlicher Boss mit sieben Basisschaden. Kein zusätzliches Bossgold.|One extra boss dealing seven base damage. No additional boss gold.
+Alle normalen Gegner bewegen sich 35 % schneller.|All normal enemies move 35% faster.
+Alle normalen Gegner erhalten zusätzlich je 35 % ihres Lebens als Rüstung und Magieresistenz.|All normal enemies gain 35% of their health as armor and magic resistance each.
+Alle normalen Gegner haben 80 % mehr Leben und verursachen mindestens zwei Basisschaden.|All normal enemies have 80% more health and deal at least two base damage.
+Unveränderte Gegner. Kein Vertragsgold.|Unchanged enemies. No contract gold.
+Erreiche Welle 35 und verdiene so viel Gold wie möglich. Wähle dein eigenes Loadout. Vor jeder Welle musst du einen von drei wechselnden Verträgen oder Kein Vertrag wählen.|Reach wave 35 and earn as much gold as possible. Choose your own loadout. Before each wave, choose one of three changing contracts or No contract.
+Verträge zahlen sofort Gold und verstärken nur den nächsten Angriff: etwa doppelte Gegnerzahl, einen zusätzlichen Boss oder mehr Schutz und Tempo. Ausgegebenes Gold zählt weiterhin, Startgold und Verkäufe nicht.|Contracts pay gold immediately and strengthen only the next attack: double enemies, an extra boss or more protection and speed. Spent gold still counts; starting gold and sales do not.
+Nach Welle 35 kannst du endlos weiterspielen. Die Goldwertung bis Welle 35 bleibt gespeichert; Endlos hat eine eigene Bestenliste. Gleicher Tag, gleicher Angebotsplan. Account erforderlich; neue Gier-Ergebnisse warten auf Freigabe.|Continue endlessly after wave 35. Your wave-35 gold score stays saved; Endless has its own leaderboard. Same day, same offers. Account required; new Greed scores await review.
+Freigegebene Bestwerte des gewählten Tages · Verdientes Gold.|Approved best scores for the selected day · Gold earned.`);
+
+HexTranslations.add(`Längere Missionen, neue Tagesvarianten|Longer missions, new daily variants
+Umweg und Drei Dörfer dauern länger. Neue Tagesvarianten, Gierverträge und eine getrennte Goldwertung sorgen für neue Entscheidungen.|Detour and Three Villages last longer. New daily variants, Greed contracts and separate gold scores add new decisions.
+NEU|NEW
+VERBESSERT|IMPROVED
+REDUZIERT|REDUCED
+ENTFERNT|REMOVED
+Tagesvarianten und Gierwertung|Daily variants and Greed scoring
+Längere Straßen- und Dorfmissionen|Longer road and village missions
+Weniger Draft-Nachschub|Less frequent draft supplies
+Umweg-Planungsbuttons|Detour planning buttons
+Tägliche Herausforderungen|Daily challenges
+Die Kunst des Umwegs|The Art of the Detour
+Mehr Strecke, zehn feste Türme und neue Straßen im laufenden Durchlauf.|More space, ten fixed towers and new roads during the run.
+Wellenziel|Wave target
+5 Wellen|5 waves
+15 Wellen|15 waves
+Feste Türme|Fixed towers
+5 Türme|5 towers
+10 Türme|10 towers
+Lange Straßen nach Welle 3, Y-Kreuzungen nach Welle 6 und seltene Seitenkreuzungen nach Welle 9 ergänzen den Vorrat.|Long roads after wave 3, Y-junctions after wave 6 and rare side junctions after wave 9 expand your stock.
+Ab Angriff 6 sind drei statt zwei neue Straßenplatzierungen möglich.|From attack 6, place three new roads instead of two.
+Die Erklärung steht größer bei den Karten. Welle starten schließt die Planung ab; Rücknahme, separater Planungsbutton und Turmleiste entfallen.|Instructions are larger and beside the cards. Start Wave ends planning; undo, the separate planning button and the tower rail are removed.
+Drei Dörfer|Three Villages
+Wähle deine fünf Türme und verteidige die Dörfer über 20 Wellen.|Choose your five towers and defend the villages for 20 waves.
+12 Wellen|12 waves
+20 Wellen|20 waves
+Oben stehen drei eigene Lebensbalken: N, M und S. Die Dörfer liegen von Norden über die Mitte bis Süden.|The HUD shows three separate health bars: N, M and S. Villages run from north through the middle to south.
+Die späteren Angriffe steigen langsamer in der Stärke; Welle 20 enthält einen Abschlussboss.|Later attacks increase in strength more gradually; wave 20 includes a final boss.
+Der Fluch der Gier|Curse of Greed
+Erreiche Welle 35 und sammle möglichst viel verdientes Gold – mit eigener Turmauswahl.|Reach wave 35 and earn as much gold as possible with your own tower loadout.
+35 Wellen|35 waves
+Drei wechselnde Risikokarten und Kein Vertrag stehen unten bei der Hand. Acht Vertragsarten reichen von schnelleren Gegnern bis Doppelwelle und Zusatzboss.|Three changing risk cards and No Contract appear beside your hand. Eight contract types range from faster enemies to double waves and an extra boss.
+Welle 35 und Endlos haben getrennte Gold-Bestenlisten pro Tag. Ausgaben senken die Wertung nicht; Startgold und Verkäufe zählen nicht. Neue Einträge werden geprüft.|Wave 35 and Endless have separate daily gold leaderboards. Spending does not lower your score; starting gold and sales do not count. New entries are reviewed.
+Abwechslung im Kalender|Calendar variety
+Gleicher Tag, gleiche Bedingungen. Beim nächsten Auftauchen ändern sich Tagesbedingungen.|Same day, same conditions. Daily conditions change when a mission returns.
+Je nach Mission variieren Gegnerzusammenstellung, Turminseln, Bauplätze, eingeschaltete Leitfelder, Festungswege, Reliktpositionen oder Draft- und Gierangebote.|Depending on the mission, enemy composition, tower islands, building sites, enabled power fields, fortress paths, relic positions or draft and Greed offers vary.
+Turm-Draft und Wandernde Festung|Tower Draft and Moving Fortress
+Weniger Draft-Nachschub, nutzbare Tickets im Kampf und gewundene Festungswege.|Less frequent draft supplies, upgrade tickets usable in combat and winding fortress paths.
+Nachschub|Supplies
+Jede Welle|Every wave
+Alle zwei Wellen|Every two waves
+Nach den drei Startangeboten gibt es ein Angebot nach jeder zweiten Welle. Gespeicherte Verbesserungstickets können auch im Kampf eingelöst werden.|After three initial picks, receive one offer after every second wave. Saved upgrade tickets can also be used during combat.
+Die Festung zieht über vier gewundene Strecken. Turmmenüs nutzen mehr freien Bildschirmplatz; die Turmleiste sitzt mittig am linken Rand.|The fortress travels along four winding routes. Tower menus use more available screen space; the tower rail is centered on the left edge.`);
+
+HexTranslations.add(`15 Angriffe, zehn feste Türme. Erst sechs, danach zwei Straßen; ab Welle 6 drei. Neue Karten nach Welle 3, 6 und 9. Karten bleiben im Vorrat. Starte direkt mit Welle starten; ungenutzte Platzierungen verfallen.|15 attacks, ten fixed towers. Place six roads initially, then two; three from wave 6. New cards arrive after waves 3, 6 and 9. Keep unused cards. Start directly with Start Wave; unused placements expire.
+Alle drei Dörfer müssen 20 Wellen überleben. Die Markierungen zeigen Eingang und Ziel. Gemeinsame Wege nutzen; zwischen Wellen zwei Türme kostenlos umsetzen.|All three villages must survive 20 waves. Markers show entrances and targets. Use shared routes; move two towers for free between waves.
+Karten bleiben im Vorrat. Nach jeder Welle gibt es Nachschub. Neue Karten nach Welle 3, 6 und 9. Starte den Angriff mit „Welle starten“, sobald deine Straße bereit ist.|Cards stay in your stock. Receive supplies after every wave. New cards arrive after waves 3, 6 and 9. Start the attack with Start Wave once your road is ready.
+15 Angriffe|15 attacks
+Angriff|Attack
+Straßen platzierbar|roads available to place
+Turmauswahl|Tower loadout`);
+
+HexTranslations.add(`Längere Missionen, direkter Turm-Draft und ein einfacheres Stromnetz. Neue Tagesvarianten und Gierverträge bringen Abwechslung.|Longer missions, direct tower drafting and a simpler power grid. Daily variants and Greed contracts add variety.
+Turm-Draft und Stromnetz|Tower Draft and Power Grid
+Je nach Mission variieren Gegnerzusammenstellung, Turminseln, Bauplätze, Festungswege, Reliktpositionen oder Draft- und Gierangebote.|Depending on the mission, enemy composition, tower islands, building sites, fortress paths, relic positions or draft and Greed offers vary.
+Turm-Draft geht bis Welle 35. Die Karte wächst nach Welle 5, 10, 15, 20, 25 und 30 um zwei Straßenhexe; der nächste Ausbau wird angekündigt.|Tower Draft lasts 35 waves. Two road hexes are added after waves 5, 10, 15, 20, 25 and 30; the next expansion is announced.
+Ziehe eine Draftkarte direkt auf einen Bauplatz. Die Auswahl der drei Starttürme ist deutlicher; während des Kampfes verschwindet das Draftfeld.|Drag a draft card directly onto a building site. The three starting picks are clearer; the draft panel disappears during combat.
+Die längere Mission hat eine flachere Gegnerkurve. Ticketangebote enthalten ab Welle 12 zwei, ab Welle 24 drei Verbesserungen.|The longer mission has a gentler enemy curve. Ticket offers contain two upgrades from wave 12 and three from wave 24.
+Stromnetz: direkt auf der Karte|Power Grid: directly on the map
+Eine klare Regel: verbundene gelbe Felder versorgen alle Türme darauf.|One clear rule: connected yellow fields power every tower on them.
+Grenze bei neuen Runs|Limit in new runs
+6 Leitfelder und 6 Türme|6 conducting fields and 6 towers
+6 Leitfelder; alle Türme darauf|6 conducting fields; every tower on them
+Generatoren und Leitfelder haben sichtbare Strommasten. Schalte Leitfelder am Blitzsymbol; Gelb bedeutet versorgt, Grau aus und Orange ohne Generatorverbindung.|Generators and conducting fields have visible power pylons. Toggle fields via the lightning icon; yellow means powered, grey off and orange disconnected.
+Die zusätzliche Turmbegrenzung und einzelne Turmschalter entfallen bei neuen Runs. Während eines Angriffs bleibt das Netz fest. Bestehende Runs behalten ihre Regeln.|New runs remove the additional tower cap and individual tower switches. The network stays fixed during attacks. Existing runs keep their rules.
+Versorgung und Anleitung stehen größer bei den Karten statt in der kleinen Ecke.|Power status and instructions are larger and beside the cards instead of in the small corner.
+Direkt auf einen Bauplatz ziehen oder antippen|Drag directly onto a building site or tap
+Am gebauten Turm einlösen|Use on a built tower
+Sofort +5 Leben|Instant +5 health
+WÄHLE DEINE 3 STARTTÜRME|CHOOSE YOUR 3 STARTING TOWERS
+WÄHLE 1 VERSTÄRKUNG|CHOOSE 1 REINFORCEMENT
+gewählt|chosen
+Vorbereitung|Preparation
+Karte wächst nach Welle|Map expands after wave
+um 2 Straßenhexe am Gegner-Eingang.|by 2 road hexes at the enemy entrance.
+Nachschub: alle 2 Wellen.|Supplies: every 2 waves.
+Karte vollständig erweitert.|Map fully expanded.
+Leitfelder|conducting fields
+Türme versorgt|towers powered
+Generator · Stromquelle|Generator · power source
+Strom umschalten|Toggle power
+⚡ Gelb = versorgt. Stromnetz während der Welle gesperrt.|⚡ Yellow = powered. Power grid locked during the wave.
+Klicke ⚡ auf der Karte. Verbinde bis zu 6 benachbarte Leitfelder mit einem Generator. Gelb: alle Türme darauf greifen an. Grau: kein Strom. Orange: eingeschaltet, aber nicht verbunden.|Click ⚡ on the map. Connect up to 6 neighboring conducting fields to a generator. Yellow: every tower on this field attacks. Grey: no power. Orange: on but disconnected.
+Überlebe zwölf Wellen. Klicke die Blitzsymbole auf der Karte: bis zu sechs benachbarte Leitfelder mit einem Generator verbinden. Gelbe Felder versorgen alle Türme darauf automatisch. Graue Felder sind aus; orange Felder sind eingeschaltet, aber nicht verbunden. Während der Welle bleibt die Auswahl fest.|Survive twelve waves. Click lightning icons on the map to connect up to six neighboring conducting fields to a generator. Yellow fields power every tower on them automatically. Grey fields are off; orange fields are on but disconnected. Your allocation is fixed during the wave.
+Überlebe zwölf Wellen. Die beiden großen Strommasten sind Generatoren. Klicke die Blitzsymbole der kleinen Masten, um bis zu sechs Leitfelder einzuschalten. Benachbarte Felder leiten den Strom weiter.|Survive twelve waves. The two large power pylons are generators. Click lightning icons on the small pylons to enable up to six conducting fields. Neighboring fields pass power along.
+Gelb: mit einem Generator verbunden – alle Türme auf diesem Feld kämpfen. Grau: ausgeschaltet. Orange: eingeschaltet, aber ohne Verbindung. Es gibt kein zusätzliches Turmlimit und keine einzelnen Turmschalter. Während einer Welle bleibt das Netz unverändert.|Yellow: connected to a generator, all towers on this field fight. Grey: off. Orange: on but disconnected. No additional tower cap or individual tower switches. The network remains fixed during waves.
+Wähle vor dem ersten Angriff drei Angebote, danach eines nach jeder zweiten Welle. Ziehe gewählte Türme direkt auf freie Bauplätze oder wähle sie links. Tickets am gebauten Turm auch während der Welle einlösen. Die Karte wächst alle fünf Wellen. Ziel: 35 Wellen; Gold ist hier nicht ausgebbar.|Choose three offers before the first attack, then one after every second wave. Drag chosen towers directly to free sites or select them on the left. Use tickets on built towers, even during waves. The map expands every five waves. Goal: 35 waves; gold cannot be spent here.
+Überlebe 35 Wellen. Die Karte wächst nach Welle 5, 10, 15, 20, 25 und 30 um je zwei Straßenhexe. Wähle jeweils eines von drei Angeboten: vor Welle 1 dreimal, danach nach jeder zweiten Welle.|Survive 35 waves. The map gains two road hexes after waves 5, 10, 15, 20, 25 and 30. Choose one of three offers: three times before wave 1, then after every second wave.
+Ziehe eine Turmkarte direkt auf einen freien Platz oder wähle sie erst aus und baue über die linke Turmleiste. Tickets erlauben eine normale Verbesserung deiner Wahl, auch während einer Welle. Reparaturen heilen fünf Basisleben. Unverbrauchte Türme und Tickets bleiben erhalten.|Drag a tower card to a free site or choose it and build via the left tower rail. Tickets grant a regular upgrade of your choice, even during waves. Repairs heal five base health. Unused towers and tickets are kept.
+Kein Gold-Shop, Verkauf, Basis-Ausbau, Verbrauchshilfen oder persönliche Arsenalboni. Neue Türme baust du zwischen Wellen. Kein Endlosmodus. Sieg: einmal täglich zehn Diamanten.|No gold shop, selling, base upgrades, consumables or personal arsenal bonuses. Build new towers between waves. No endless mode. Victory: ten diamonds once per day.
+35 Wellen mit deiner gedrafteten Verteidigung überlebt. Kein Endlosmodus.|Survived 35 waves with your drafted defenses. No endless mode.`);

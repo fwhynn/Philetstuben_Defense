@@ -3,6 +3,7 @@
  const KEY='autohex-guest-ranking-v1';let current=null,generation=0;
  function score(state,mode='single'){
   const e=state.earnedMeta||{};
+  if(state.challengeKind==='greed'){const endless=!!state.endless;return {runId:state.runId+(endless?':endless':':35'),mode:endless?'greedEndless':'greed35',day:state.challengeDay,gold:endless?root.HexWaves.greedGold(state):state.greedGold35,wave:endless?Math.max(35,state.lastCompletedWave||35):35,ruleset:root.AUTOHEX_VERSION||'unknown'};}
   return {runId:state.runId,mode,wave:Math.max(0,state.lastCompletedWave||0),kills:Math.max(0,(e.normalKills||0)+(e.periodicBosses||0)+(e.explorationBosses||0)),ruleset:root.AUTOHEX_VERSION||'unknown'};
  }
  function remember(run){try{const saved=JSON.parse(localStorage.getItem(KEY)||'[]');localStorage.setItem(KEY,JSON.stringify([...saved.filter(r=>r.runId!==run.runId),run].slice(-20)));}catch{}}
@@ -14,11 +15,11 @@
   host.replaceChildren(el('p','Platzierung wird ermittelt …'));
   if(!api?.isLoggedIn())remember(run);
   const title=el('h3',''),detail=el('p',''),note=el('p','');
-  const label=run.mode==='duo'?'Duo':run.mode==='dual'?'Solo · Zwei Fronten':'Solo · Eine Front';
-  host.replaceChildren(title,detail,note);detail.textContent=`${label} · Welle ${run.wave} abgeschlossen · ${run.kills} Kills`;
+  const label=run.mode.startsWith('greed')?(run.mode==='greed35'?'Gier · Welle 35':'Gier · Endlos'):run.mode==='duo'?'Duo':run.mode==='dual'?'Solo · Zwei Fronten':'Solo · Eine Front';
+  host.replaceChildren(title,detail,note);detail.textContent=`${label} · Welle ${run.wave} abgeschlossen · ${run.mode.startsWith('greed')?run.gold+' Gold verdient':run.kills+' Kills'}`;
   title.textContent='Platzierung wird ermittelt …';
   if(!api?.isLoggedIn()){
-   note.textContent='Erstelle einen Account oder melde dich an, um diesen Run einzureichen. Unauffällige Ergebnisse werden automatisch angenommen. Er bleibt dafür in diesem Browser gespeichert.';
+   note.textContent='Erstelle einen Account oder melde dich an, um diesen Run einzureichen. Gier-Ergebnisse werden vor Veröffentlichung geprüft. Er bleibt dafür in diesem Browser gespeichert.';
    for(const [text,mode] of [['Account erstellen und Run übernehmen','register'],['Ich habe bereits einen Account','login']]){
     const button=el('button',text);button.type='button';button.addEventListener('click',()=>onAccount(mode));host.appendChild(button);
    }
@@ -30,7 +31,7 @@
   try{const data=await api.previewRunRanking(run);if(token!==generation)return;
    if(data.mode!==run.mode||!Number.isSafeInteger(data.rank)||data.rank<1)throw Error();
    title.textContent=`Damit wärst du aktuell Platz ${data.rank}`;
-   host.appendChild(el('p','Vorläufiger Vergleich mit freigegebenen Bestwerten. Welle zählt zuerst, danach Kills. Die Platzierung kann sich ändern.'));
+   host.appendChild(el('p','Vorläufiger Vergleich mit freigegebenen Bestwerten. Bei Gier zählt verdientes Gold, sonst Welle und Kills. Die Platzierung kann sich ändern.'));
   }catch{if(token===generation)title.textContent='Platzierung momentan nicht verfügbar';}
  }
  async function refresh(){

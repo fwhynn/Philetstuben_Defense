@@ -1,6 +1,6 @@
 const HexWaves=(()=>{
   const economy={kill:3,completion:10,startGold:70};
-  const dailyMissions={movingFortress:{id:'movingFortress',name:'Wandernde Festung',target:12},towerDraft:{id:'towerDraft',name:'Turm-Draft',target:12},expedition:{id:'expedition',name:'Expedition ins Unbekannte',target:12},powerGrid:{id:'powerGrid',name:'Stromnetz',target:12},villages:{id:'villages',name:'Drei Dörfer',target:12},detour:{id:'detour',name:'Die Kunst des Umwegs',target:5},caravan:{id:'caravan',name:'Die letzte Karawane',target:20},garrison:{id:'garrison',name:'Die letzte Garnison',target:3},greed:{id:'greed',name:'Der Fluch der Gier',target:12}};
+  const dailyMissions={movingFortress:{id:'movingFortress',name:'Wandernde Festung',target:12},towerDraft:{id:'towerDraft',name:'Turm-Draft',target:35},expedition:{id:'expedition',name:'Expedition ins Unbekannte',target:12},powerGrid:{id:'powerGrid',name:'Stromnetz',target:12},villages:{id:'villages',name:'Drei Dörfer',target:20},detour:{id:'detour',name:'Die Kunst des Umwegs',target:15},caravan:{id:'caravan',name:'Die letzte Karawane',target:20},garrison:{id:'garrison',name:'Die letzte Garnison',target:3},greed:{id:'greed',name:'Der Fluch der Gier',target:35}};
   function daily(day){
     const time=Date.parse(day+'T00:00:00Z'),offset=Math.floor((time-Date.UTC(2026,8,22))/86400000);
     // Preserve already played days. New missions enter only at a UTC day boundary.
@@ -19,26 +19,29 @@ const HexWaves=(()=>{
     if(expanded>=0)return {...dailyMissions[['detour','greed','caravan','garrison'][expanded%4]]};
     return {...dailyMissions[next>=0?['greed','caravan','garrison'][next%3]:Math.abs(offset%2)===1?'garrison':'caravan']};
   }
+  const greedPool=[
+    {id:'swarm',icon:'🐜',name:'Schwarmvertrag',points:2,count:6,multiplier:1,description:'Sechs zusätzliche schnelle Schwarmgegner.'},
+    {id:'healers',icon:'✚',name:'Heilereskorte',points:3,count:4,multiplier:1.4,description:'Ein Feldheiler und drei gepanzerte Begleiter.'},
+    {id:'elite',icon:'🛡',name:'Elitevertrag',points:4,count:1,multiplier:1.8,description:'Ein Elitegegner mit vierfachem Leben und beiden Schutzbalken.'},
+    {id:'double',icon:'×2',name:'Doppelte Welle',points:5,multiplier:3,description:'Alle normalen Gegner dieser Welle kommen doppelt. Vertragskopien geben kein Killgold.'},
+    {id:'boss',icon:'☠',name:'Bossbesuch',points:6,multiplier:3.5,description:'Ein zusätzlicher Boss mit sieben Basisschaden. Kein zusätzliches Bossgold.'},
+    {id:'haste',icon:'ϟ',name:'Ansturm',points:3,multiplier:1.5,description:'Alle normalen Gegner bewegen sich 35 % schneller.'},
+    {id:'bulwark',icon:'⬡',name:'Doppelte Deckung',points:4,multiplier:2,description:'Alle normalen Gegner erhalten zusätzlich je 35 % ihres Lebens als Rüstung und Magieresistenz.'},
+    {id:'giants',icon:'◆',name:'Riesenparade',points:4,multiplier:2.2,description:'Alle normalen Gegner haben 80 % mehr Leben und verursachen mindestens zwei Basisschaden.'}
+  ];
   function greedOffers(state){
-    const wave=state.wave+1,gold=12+wave*2;
-    return [
-      {id:'swarm',name:'Schwarmvertrag',gold,points:2,count:6,description:'Sechs zusätzliche schnelle Schwarmgegner.'},
-      {id:'healers',name:'Heilervertrag',gold:gold+8,points:3,count:4,description:'Ein Feldheiler und drei zusätzliche gepanzerte Begleiter.'},
-      {id:'elite',name:'Elitevertrag',gold:gold+16,points:4,count:1,description:'Ein Elitegegner mit vierfachem Leben, Rüstung und Magieresistenz. Drei Basisschaden bei Durchbruch.'}
-    ];
+    const wave=state.wave+1,random=HexRandom.create(state.seed+'|greed-offers'),pool=[...greedPool];
+    for(let i=pool.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+    return [0,1,2].map(i=>{const o=pool[((wave-1)*3+i)%pool.length];return {...o,gold:Math.round((18+wave*4)*o.multiplier)};}).concat({id:'none',icon:'—',name:'Kein Vertrag',gold:0,points:0,description:'Unveränderte Gegner. Kein Vertragsgold.'});
   }
   function acceptGreed(state,id){
-    if(state.challengeKind!=='greed'||state.phase!=='build'||state.waveRunning||state.hp<=0||state.celebrationActive||state.endless||state.wave>=12||state.greedContract?.wave===state.wave+1)return false;
+    if(state.challengeKind!=='greed'||state.phase!=='build'||state.waveRunning||state.hp<=0||state.celebrationActive||state.greedContract?.wave===state.wave+1)return false;
     const offer=greedOffers(state).find(o=>o.id===id);if(!offer)return false;
     state.greedContract={id,wave:state.wave+1,points:offer.points};state.gold+=offer.gold;
-    state.goldEarned.greed=(state.goldEarned.greed||0)+offer.gold;
-    return true;
+    state.goldEarned.greed=(state.goldEarned.greed||0)+offer.gold;return true;
   }
-  function settleGreed(state){
-    const contract=state.greedContract;
-    if(state.challengeKind!=='greed'||!contract||contract.wave!==state.wave||contract.settled)return;
-    contract.settled=true;state.greedScore=(state.greedScore||0)+contract.points;
-  }
+  function greedGold(state){return ['kills','completion','income','boss','treasure','shrine','greed'].reduce((n,k)=>n+Math.max(0,Math.floor(state.goldEarned?.[k]||0)),0);}
+  function settleGreed(state){const c=state.greedContract;if(state.challengeKind!=='greed'||!c||c.wave!==state.wave||c.settled)return;c.settled=true;state.greedScore=greedGold(state);}
   // Preserve the opening curve; late health grows with 8 % rather than 10 %.
   function normalHealth(wave){return Math.round((28+wave*7)*Math.pow(1.10,Math.max(0,Math.min(wave,35)-3))*Math.pow(1.08,Math.max(0,wave-35))*(1+Math.min(.18,Math.max(0,wave-3)*.006)));}
   function bossProfile(wave){
@@ -59,8 +62,12 @@ const HexWaves=(()=>{
     caravan=caravan&&(!context.challengeKind||context.challengeKind==='caravan');
     const dev=typeof HexDevEnemies!=='undefined'&&HexDevEnemies.plan(wave,context);if(dev)return dev;
     if(['towerDraft','movingFortress'].includes(context.challengeKind)){
-      const p=plan(wave,income,false,{...context,challengeKind:null});
-      const factor=1+Math.max(0,wave-3)*(context.challengeKind==='towerDraft'?.10:.08);
+      const longDraft=context.challengeKind==='towerDraft'&&context.towerDraft?.rulesVersion===2;
+      const strength=longDraft&&wave>3?3+Math.floor((wave-3)*.5):wave;
+      const p=plan(strength,income,false,{...context,challengeKind:null});
+      if(longDraft){p.maxGold-=p.boss?.killGold||0;p.boss=[15,25,35].includes(wave)?bossProfile(wave===35?25:15):null;p.maxGold+=p.boss?.killGold||0;p.wave=wave;p.strength=strength;}
+      const factor=1+Math.max(0,Math.min(wave,12)-3)*(longDraft?.04:context.challengeKind==='towerDraft'?.10:.08);
+      // Draft growth adds space and supplies; do not compound the old twelve-wave modifier forever.
       for(const e of p.enemies)for(const field of ['hp','armorHp','magicHp'])if(e[field])e[field]=Math.ceil(e[field]*factor);
       return p;
     }
@@ -73,15 +80,15 @@ const HexWaves=(()=>{
       if(wave===12){p.boss=bossProfile(15);p.maxGold+=p.boss.killGold||0;}return p;
     }
     if(context.challengeKind==='villages'){
-      const strength=wave+Math.floor(wave/3),p=plan(strength,0,false,{...context,challengeKind:null}),targets=HexVillages.targets(wave);
-      if(wave===12){p.boss=bossProfile(15);p.maxGold+=p.boss.killGold||0;}
+      const strength=wave<=12?wave+Math.floor(wave/3):16+Math.floor((wave-12)*.5),p=plan(strength,0,false,{...context,challengeKind:null}),targets=HexVillages.targets(wave);
+      if(wave===12||wave===20){p.boss=bossProfile(wave===20?25:15);p.maxGold+=p.boss.killGold||0;}
       const enemies=Array.from({length:Math.ceil(p.enemies.length*(1+(targets.length-1)*.5))},(_,i)=>({...p.enemies[i%p.enemies.length]}));
       for(const e of enemies){e.hp=Math.ceil(e.hp*1.1);if(e.maxHp)e.maxHp=e.hp;if(e.armorHp)e.armorHp=Math.ceil(e.armorHp*1.25);}
       const killGold=enemies.reduce((n,e)=>n+(e.killGold??economy.kill),0);
       return {...p,wave,strength,enemies,count:enemies.length,killGold,maxGold:p.maxGold-p.killGold+killGold,villageTargets:targets};
     }
     if(context.challengeKind==='detour'){
-      const strength=[6,10,14,16,17][Math.min(4,Math.max(0,wave-1))],p=plan(strength,0,false,{...context,challengeKind:null});
+      const strength=wave<=5?[6,10,14,16,17][Math.max(0,wave-1)]:17+Math.floor((wave-5)*.8),p=plan(strength,0,false,{...context,challengeKind:null});
       for(const e of p.enemies)e.killGold=0;if(p.boss)p.boss.killGold=0;
       return {...p,wave,strength,killGold:0,completionGold:0,income:0,maxGold:0};
     }
@@ -94,7 +101,8 @@ const HexWaves=(()=>{
     const count=wave===1?5:5+wave*2,hp=normalHealth(wave);
     const speed=(.345+Math.min(.015,Math.max(0,wave-3)*.0007))*54*Math.sqrt(3)*(wave===1?.8:1);
     const enemies=Array.from({length:count},(_,i)=>{
-      const type=wave>=5&&i%5===0?'warded':wave>=4&&i%4===0?'armored':wave>=3&&i%3===0?'swarm':'normal';
+      const rosterIndex=i+(context.challengeDay?(context.dailyVariant||0)%60:0);
+      const type=wave>=5&&rosterIndex%5===0?'warded':wave>=4&&rosterIndex%4===0?'armored':wave>=3&&rosterIndex%3===0?'swarm':'normal';
       return {type,name:{normal:'Normal',armored:'Gepanzert',warded:'Magiegeschützt',swarm:'Schwarm'}[type],hp:type==='swarm'?Math.round(hp*.6):hp,armorHp:type==='armored'?Math.round(hp*.3):0,magicHp:type==='warded'?Math.round(hp*.25):0,speed:speed*(type==='swarm'?1.3:type==='armored'?.8:type==='warded'?.9:1)};
     });
     // A deterministic rotating roster; special enemies replace ordinary spawn slots.
@@ -129,6 +137,12 @@ const HexWaves=(()=>{
     if(caravan){let before=0;for(let w=1;w<wave;w++)before+=w===1?5:5+2*w;enemies.forEach((enemy,i)=>{enemy.speed*=.85;if((before+i+1)%10===0){enemy.caravan=true;enemy.name+=' · Karawanenkasse';enemy.killGold=18;enemy.goldLoss=10;}});if(boss)boss.speed*=.85;}
     if(context.challengeKind==='greed'&&context.greedContract?.wave===wave){
       const common={hp,armorHp:0,magicHp:0,speed,killGold:0,greed:true};
+      const id=context.greedContract.id;
+      if(id==='double')enemies.push(...enemies.map(e=>({...e,killGold:0,greed:true})));
+      if(id==='haste')for(const e of enemies)e.speed*=1.35;
+      if(id==='bulwark')for(const e of enemies){e.armorHp=(e.armorHp||0)+Math.round(e.hp*.35);e.magicHp=(e.magicHp||0)+Math.round(e.hp*.35);}
+      if(id==='giants')for(const e of enemies){e.hp=Math.round(e.hp*1.8);e.baseDamage=Math.max(2,e.baseDamage||1);}
+      if(id==='boss')enemies.push({...common,type:'boss',bossKind:'iron',name:'Vertragskoloss',hp:hp*6,armorHp:hp*2,magicHp:hp,baseDamage:7,speed:speed*.7});
       if(context.greedContract.id==='swarm')for(let i=0;i<6;i++)enemies.push({...common,type:'swarm',name:'Vertragsschwarm',hp:Math.round(hp*.6),speed:speed*1.3});
       if(context.greedContract.id==='healers'){
         enemies.push({...common,type:'healer',name:'Vertragsheiler',hp:Math.round(hp*.8),healRadius:50,healInterval:3000});
@@ -140,7 +154,7 @@ const HexWaves=(()=>{
     return {wave,count:enemies.length,hp,speed,enemies,boss,type:'Gegner',killGold,completionGold:economy.completion,income,maxGold:killGold+economy.completion+income+(boss?.killGold||0)};
   }
   const enemyAssets=Object.fromEntries(["shieldbearer", "moltingBeetle", "thornToad", "tarSnail", "mushroomColossus", "ramBeetle"].map(type=>[type,'assets/enemies-concepts/'+type+'.png']));
-  return {daily,dailyMissions,greedOffers,acceptGreed,settleGreed,economy,plan,bossProfile,elementFor,enemyAssets};
+  return {daily,dailyMissions,greedGold,greedOffers,acceptGreed,settleGreed,economy,plan,bossProfile,elementFor,enemyAssets};
 })();
 
 

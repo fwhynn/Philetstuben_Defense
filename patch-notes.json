@@ -1,5 +1,154 @@
 [
   {
+    "version": "next",
+    "title": "Längere Missionen, neue Tagesvarianten",
+    "summary": "Längere Missionen, direkter Turm-Draft und ein einfacheres Stromnetz. Neue Tagesvarianten und Gierverträge bringen Abwechslung.",
+    "overview": [
+      {
+        "kind": "new",
+        "title": "NEU",
+        "items": [
+          "Tagesvarianten und Gierwertung"
+        ]
+      },
+      {
+        "kind": "buff",
+        "title": "VERBESSERT",
+        "items": [
+          "Längere Straßen- und Dorfmissionen",
+          "Turm-Draft und Stromnetz"
+        ]
+      },
+      {
+        "kind": "nerf",
+        "title": "REDUZIERT",
+        "items": [
+          "Weniger Draft-Nachschub"
+        ]
+      },
+      {
+        "kind": "removed",
+        "title": "ENTFERNT",
+        "items": [
+          "Umweg-Planungsbuttons"
+        ]
+      }
+    ],
+    "sections": [
+      {
+        "title": "Tägliche Herausforderungen",
+        "entries": [
+          {
+            "title": "Die Kunst des Umwegs",
+            "summary": "Mehr Strecke, zehn feste Türme und neue Straßen im laufenden Durchlauf.",
+            "stats": [
+              {
+                "label": "Wellenziel",
+                "before": "5 Wellen",
+                "after": "15 Wellen"
+              },
+              {
+                "label": "Feste Türme",
+                "before": "5 Türme",
+                "after": "10 Türme"
+              }
+            ],
+            "bullets": [
+              "Lange Straßen nach Welle 3, Y-Kreuzungen nach Welle 6 und seltene Seitenkreuzungen nach Welle 9 ergänzen den Vorrat.",
+              "Ab Angriff 6 sind drei statt zwei neue Straßenplatzierungen möglich.",
+              "Die Erklärung steht größer bei den Karten. Welle starten schließt die Planung ab; Rücknahme, separater Planungsbutton und Turmleiste entfallen."
+            ]
+          },
+          {
+            "title": "Drei Dörfer",
+            "summary": "Wähle deine fünf Türme und verteidige die Dörfer über 20 Wellen.",
+            "stats": [
+              {
+                "label": "Wellenziel",
+                "before": "12 Wellen",
+                "after": "20 Wellen"
+              }
+            ],
+            "bullets": [
+              "Oben stehen drei eigene Lebensbalken: N, M und S. Die Dörfer liegen von Norden über die Mitte bis Süden.",
+              "Die späteren Angriffe steigen langsamer in der Stärke; Welle 20 enthält einen Abschlussboss."
+            ]
+          },
+          {
+            "title": "Der Fluch der Gier",
+            "summary": "Erreiche Welle 35 und sammle möglichst viel verdientes Gold – mit eigener Turmauswahl.",
+            "stats": [
+              {
+                "label": "Wellenziel",
+                "before": "12 Wellen",
+                "after": "35 Wellen"
+              }
+            ],
+            "bullets": [
+              "Drei wechselnde Risikokarten und Kein Vertrag stehen unten bei der Hand. Acht Vertragsarten reichen von schnelleren Gegnern bis Doppelwelle und Zusatzboss.",
+              "Welle 35 und Endlos haben getrennte Gold-Bestenlisten pro Tag. Ausgaben senken die Wertung nicht; Startgold und Verkäufe zählen nicht. Neue Einträge werden geprüft."
+            ]
+          },
+          {
+            "title": "Abwechslung im Kalender",
+            "summary": "Gleicher Tag, gleiche Bedingungen. Beim nächsten Auftauchen ändern sich Tagesbedingungen.",
+            "stats": [],
+            "bullets": [
+              "Je nach Mission variieren Gegnerzusammenstellung, Turminseln, Bauplätze, Festungswege, Reliktpositionen oder Draft- und Gierangebote."
+            ]
+          },
+          {
+            "title": "Turm-Draft und Wandernde Festung",
+            "summary": "Weniger Draft-Nachschub, nutzbare Tickets im Kampf und gewundene Festungswege.",
+            "stats": [
+              {
+                "label": "Nachschub",
+                "before": "Jede Welle",
+                "after": "Alle zwei Wellen"
+              },
+              {
+                "label": "Wellenziel",
+                "before": "12 Wellen",
+                "after": "35 Wellen"
+              }
+            ],
+            "bullets": [
+              "Nach den drei Startangeboten gibt es ein Angebot nach jeder zweiten Welle. Gespeicherte Verbesserungstickets können auch im Kampf eingelöst werden.",
+              "Die Festung zieht über vier gewundene Strecken. Turmmenüs nutzen mehr freien Bildschirmplatz; die Turmleiste sitzt mittig am linken Rand.",
+              "Turm-Draft geht bis Welle 35. Die Karte wächst nach Welle 5, 10, 15, 20, 25 und 30 um zwei Straßenhexe; der nächste Ausbau wird angekündigt.",
+              "Ziehe eine Draftkarte direkt auf einen Bauplatz. Die Auswahl der drei Starttürme ist deutlicher; während des Kampfes verschwindet das Draftfeld.",
+              "Die längere Mission hat eine flachere Gegnerkurve. Ticketangebote enthalten ab Welle 12 zwei, ab Welle 24 drei Verbesserungen."
+            ]
+          },
+          {
+            "title": "Stromnetz: direkt auf der Karte",
+            "summary": "Eine klare Regel: verbundene gelbe Felder versorgen alle Türme darauf.",
+            "stats": [
+              {
+                "label": "Grenze bei neuen Runs",
+                "before": "6 Leitfelder und 6 Türme",
+                "after": "6 Leitfelder; alle Türme darauf"
+              }
+            ],
+            "bullets": [
+              "Generatoren und Leitfelder haben sichtbare Strommasten. Schalte Leitfelder am Blitzsymbol; Gelb bedeutet versorgt, Grau aus und Orange ohne Generatorverbindung.",
+              "Die zusätzliche Turmbegrenzung und einzelne Turmschalter entfallen bei neuen Runs. Während eines Angriffs bleibt das Netz fest. Bestehende Runs behalten ihre Regeln.",
+              "Versorgung und Anleitung stehen größer bei den Karten statt in der kleinen Ecke."
+            ]
+          }
+        ]
+      }
+    ],
+    "changes": [
+      "Mehr Strecke, zehn feste Türme und neue Straßen im laufenden Durchlauf.",
+      "Wähle deine fünf Türme und verteidige die Dörfer über 20 Wellen.",
+      "Erreiche Welle 35 und sammle möglichst viel verdientes Gold – mit eigener Turmauswahl.",
+      "Gleicher Tag, gleiche Bedingungen. Beim nächsten Auftauchen ändern sich Tagesbedingungen.",
+      "Weniger Draft-Nachschub, nutzbare Tickets im Kampf und gewundene Festungswege.",
+      "Eine klare Regel: verbundene gelbe Felder versorgen alle Türme darauf."
+    ]
+  },
+  {
     "version": "1.1.8",
     "title": "Duo-Start nach Updates",
     "summary": "Duo-Seiten laden auch mit aktualisierten Spieldateien zuverlässig.",

@@ -1,7 +1,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),core=require('../headless-core.cjs'),{load}=require('./helpers/game.cjs');
 const day='2026-12-07',json=x=>JSON.parse(JSON.stringify(x));
 function setup(){const c=core();return {c,...c.session.create({seed:'movingFortress-v1|'+day,runId:'fortress-test',challengeDay:day,loadout:['archer','catapult','chain','freeze','mine']})};}
-const slot=(g,n=3,index=0)=>({q:g.q+n,r:g.r,index});
+const slot=(g,n=3,index=0)=>({...g.path?.[n-1]||{q:g.q+n,r:g.r},index});
 function finish(r){let result,steps=0;do{result=r.c.session.advance(r.state,r.random,.05);}while(result==='running'&&++steps<20000);return result;}
 test('four stations have valid slots and each stage routes actual enemies to the relocated base',()=>{
  const r=setup(),{c,state:s}=r;assert.equal(s.map.size,36);assert.equal(s.hp,20);assert.equal(s.gold,150);
@@ -20,7 +20,7 @@ test('stage transitions preserve life, towers, stats and upgrades; free moves ar
  assert.ok(c.flow.start(s,r.random));for(const paused of [false,true]){s.paused=paused;assert.equal(c.movingFortress.move(s,slot(g[1],4),to),false);assert.equal(c.towers.buy(s,'archer',[to]).ok,false);assert.equal(c.data.towerRefund(s,tw),null);}s.waveRunning=false;s.phase='build';s.wave=4;c.movingFortress.prepare(s);assert.equal(s.movingFortress.relocation,false);
 });
 test('a paid mixed defense can relocate through all four stages and win twelve waves',()=>{
- const r=setup(),{c,state:s}=r;let oldStage=0;const build=[['catapult',3,0],['freeze',4,0],['ballista',5,0],['archer',3,1],['mine',4,1],['catapult',5,1]];
+ const r=setup(),{c,state:s}=r;let oldStage=0;const build=[['catapult',1,0],['freeze',2,0],['ballista',3,0],['archer',4,0],['mine',5,0],['catapult',6,0]];
  for(let w=1;w<=12;w++){
   const f=s.movingFortress,g=f.stations[f.stage];if(f.stage!==oldStage){for(const [,n,i]of build){const from=slot(f.stations[oldStage],n,i);if(s.map.get(from.q+','+from.r).towers[i])assert.ok(c.movingFortress.move(s,from,slot(g,n,i)));}oldStage=f.stage;}
   for(const [type,n,i]of build){const p=slot(g,n,i);if(!s.map.get(p.q+','+p.r).towers[i])c.towers.buy(s,type,[p]);}
