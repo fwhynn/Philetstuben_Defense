@@ -27,9 +27,9 @@ test('grid setting persists and diamond HUD forecasts only unpaid run rewards', 
 });
 
 test('middle click rotates clockwise, R remains available, and building phase does not rotate', () => {
-  const { a, elements, documentListeners } = load(); a.state.selectedCard=0; let prevented = 0;
+  const { a, elements, documentListeners } = load(); a.state.hand=['straight']; a.state.selectedCard=0; let prevented = 0;
   const middle = () => elements.get('board').listeners.pointerdown({ button: 1, preventDefault() { prevented++; } });
-  assert.equal(a.state.rotation, 0); middle(); assert.equal(a.state.rotation, 5); assert.equal(prevented, 1);
+  assert.equal(a.state.rotation, 0); middle(); assert.equal(a.state.rotation, 3); assert.equal(prevented, 1);
   documentListeners.keydown({ key: 'r' }); assert.equal(a.state.rotation, 0);
   for (let i = 0; i < 6; i++)middle(); assert.equal(a.state.rotation, 0);
   a.state.phase = 'build'; middle(); assert.equal(a.state.rotation, 0);

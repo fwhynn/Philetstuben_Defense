@@ -13,7 +13,7 @@ const HexTowerCommands=(()=>{
     tile.towers[selected.index]={type,biome:HexBiomes.forTile(state,tile),rangeFactor:state.challengeDay&&state.challengeKind!=='garrison'?.85:1,tileType:tile.type,level:1,lastShot:-Infinity,targetPriority:HexData.defaultTargetPriority({type}),builtOnWave:['place','build'].includes(state.phase)?state.wave:null,paid:price};
     const built=tile.towers[selected.index];built.statId=++state.nextTowerStatId;state.runTowerDetails[built.statId]={type,q:tile.q,r:tile.r,index:selected.index,damage:0,kills:0,buildGold:0,upgradeGold:0,refundGold:0};HexData.recordTowerStat(state,built,'buildGold',price);
     const usage=state.runTowerStats[type]||{builds:0,upgrades:0};usage.builds++;state.runTowerStats[type]=usage;
-    state.gold-=price;}HexBuildings.refresh(state);
+    HexBuildings.recordDiscount(state,selected,tdef.cost,price);state.gold-=price;}HexBuildings.refresh(state);
     return {ok:true,total};
   }
   function upgrade(state,selected,branch){
@@ -23,7 +23,7 @@ const HexTowerCommands=(()=>{
     const allowed=isUltimate?tower.finalUpgrade&&!tower.ultimate&&HexData.ultimateAvailable(state,tower):HexData.availableUpgrades(tower).some(([id])=>id===branch),price=upgrade?HexBuildings.cost(state,selected,upgrade.cost):Infinity;
     if(!allowed||state.gold<price)return false;
     if(isUltimate){tower.ultimate=tower.type;tower.level=4;}else if(upgrade.requires){tower.finalUpgrade=branch;tower.level=3;}else{tower.branch=branch;tower.level=2;}
-    tower.paid+=price;state.gold-=price;HexData.recordTowerStat(state,tower,'upgradeGold',price);
+    HexBuildings.recordDiscount(state,selected,upgrade.cost,price);tower.paid+=price;state.gold-=price;HexData.recordTowerStat(state,tower,'upgradeGold',price);
     const usage=state.runTowerStats[tower.type]||{builds:0,upgrades:0};usage.upgrades++;state.runTowerStats[tower.type]=usage;
 
     return true;

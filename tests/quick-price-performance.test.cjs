@@ -19,11 +19,11 @@ test('quick-build pricing traverses the map twice instead of scanning it separat
 });
 test('quick buttons immediately follow gold, occupied slots and market target changes',()=>{
   const {a,elements}=load(),s=a.state;
-  s.phase='build';s.gold=19;s.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[null],buildings:[]});
+  s.phase='build';s.gold=17;s.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:1,towers:[null],buildings:[]});
   const market={type:'market',level:3,special:true,target:'1,0'};s.map.set('8,0',{q:8,r:0,type:'empty',roads:[],slots:0,towers:[],buildings:[market]});
   a.renderAll();const button=elements.get('quickLoadout').children[0];
-  assert.match(button._priceLabel,/19/);assert.equal(button.disabled,false);
-  s.gold=18;a.renderAll();assert.equal(button.disabled,true);
+  assert.match(button._priceLabel,/17/);assert.equal(button.disabled,false);
+  s.gold=16;a.renderAll();assert.equal(button.disabled,true);
   s.gold=25;market.target='8,0';a.renderAll();assert.match(button._priceLabel,/25/);assert.equal(button.disabled,false);
   s.map.get('1,0').towers[0]={type:'archer',lastShot:0};a.renderAll();assert.equal(button.disabled,true);assert.match(button.title,/Kein freier Turmplatz/);
   s.map.get('1,0').towers[0]=null;a.renderAll();assert.equal(button.disabled,false);

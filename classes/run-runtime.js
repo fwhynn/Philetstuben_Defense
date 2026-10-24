@@ -49,11 +49,14 @@ const HexRunRuntime=(()=>{
   function schedule(state,sources,enemies,spacing=20){
     if(!sources.length)throw new Error('Spawn sources required');
     let due=state.elapsedMs;
+    const offset=Math.max(0,Math.floor(state.spawnSourceCursor||0))%sources.length;
     state.spawnQueue=enemies.map((enemy,index)=>{
       if(index>0)due+=Math.max(320,spacing/enemy.speed*1000);
-      const source=sources[index%sources.length];
+      const source=sources[(offset+index)%sources.length];
       return {due,index,source:{q:source.tile.q,r:source.tile.r,dir:source.dir}};
     });
+    // Continue across waves so later entrances (including portals) cannot starve.
+    state.spawnSourceCursor=(offset+enemies.length)%sources.length;
     state.pendingSpawns=state.spawnQueue.length;
   }
   function drain(state,time,spawn){

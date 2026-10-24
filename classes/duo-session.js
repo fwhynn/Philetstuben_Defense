@@ -82,6 +82,7 @@ const HexDuoSession=(()=>{
       else if(action==='targetPriority'){const tower=slotAt(s,payload.slot)?.towers[payload.slot.index],allowed=['closestBase','furthestBase','mostHealth','leastHealth','mostArmor','mostMagic','boss','healer','closestTower','furthestTower'];if(tower&&tower.guestOwner===undefined&&Array.isArray(payload.priorities)&&payload.priorities.length===3&&new Set(payload.priorities).size===3&&payload.priorities.every(p=>allowed.includes(p))){tower.targetPriority=[...payload.priorities];ok=true;}}
       else if(action==='building')ok=HexBuildings.buy(s,payload.slot,payload.type);
       else if(action==='buildingUpgrade')ok=HexBuildings.upgrade(s,payload.slot);
+      else if(action==='extraHex'&&match.phase==='prepare')ok=HexRunSession.buyExtraHex(s,run.random);
       else if(action==='tunnel'&&match.phase==='prepare')ok=HexRunRuntime.rescueTunnel(s);
     }
     if(!ok)return false;

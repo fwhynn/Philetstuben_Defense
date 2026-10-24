@@ -13,7 +13,7 @@ test('immune enemies never consume targeted shots, chain jumps or piercing slots
 });
 test('trade posts retain distance gold, pay connected income only and cap at 20',()=>{
  const {c,s}=setup();s.map.clear();s.landmarks.clear();s.income=0;s.map.set('0,0',{q:0,r:0,type:'base',roads:[0],slots:0,towers:[]});
- for(let q=1;q<=12;q++){s.map.set(q+',0',{q,r:0,type:'straight',roads:[0,3],slots:0,towers:[]});s.landmarks.set(q+',0',{q,r:0,type:'treasure',claimed:false});assert.equal(c.exploration.claim(s,q,0),q*5);assert.equal(c.exploration.claim(s,q,0),0);}
+ for(let q=1;q<=12;q++){s.map.set(q+',0',{q,r:0,type:'straight',roads:[0,3],slots:0,towers:[]});s.landmarks.set(q+',0',{q,r:0,type:'treasure',claimed:false});assert.equal(c.exploration.claim(s,q,0),25+q*10);assert.equal(c.exploration.claim(s,q,0),0);}
  assert.equal(s.income,20);c.buildings.refresh(s);assert.equal(s.income,20);
  s.map.get('0,0').roads=[];c.buildings.refresh(s);assert.equal(s.income,0);
 });

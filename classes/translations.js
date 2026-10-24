@@ -564,6 +564,10 @@ Verstärkt Turm und Geister um 30 % Schaden.|Increases tower and spirit damage b
 Haus|House
 Schmiede|Forge
 Markt|Market
++16 Gold je Welle, dazu +2 je weiterem Patrizierhaus, maximal +4 Zusatzgold pro Haus.|+16 gold per wave, plus +2 per other Patrician House, up to +4 extra gold per house.
+Zusätzlich ein frei wählbares gelegtes Hex mit +40 % Schaden versorgen.|Also supply one placed hex of your choice with +40% damage.
+Zusätzlich ein frei wählbares gelegtes Hex mit 35 % Rabatt versorgen.|Also supply one placed hex of your choice with a 35% discount.
+Bereits gewährte Rabatte werden vom Verkaufserlös abgezogen.|Discounts already granted are deducted from the sale refund.
 Patrizierhaus|Patrician House
 Fernschmiede|Remote Forge
 Handelsnetz|Trade Network
@@ -1908,3 +1912,10 @@ Object.assign(globalThis.HexTranslations.en, {
   "Impressum und Datenschutzhinweise sind direkt aus dem Spiel erreichbar; Datenschutz- und Löschanfragen können per E-Mail gestellt werden.": "Legal and privacy information is accessible directly from the game; privacy and deletion requests can be sent by email.",
   "Updates bewahren bestehende Spielstände und Bestenlisten. Während der kurzen Vorbereitung kann die Account-Speicherung vorübergehend pausieren; der lokale Fortschritt bleibt erhalten.": "Updates preserve existing saves and leaderboards. Account saving may pause briefly during preparation; local progress is retained."
 });
+HexTranslations.add(`
+Zusatzhex kaufen|Buy extra hex
+Zusatzhex gekauft|Extra hex purchased
+Ein zusätzliches Hex je Bauphase ab Welle 35. Jeder Kauf erhöht den Preis um 100 Gold.|One extra hex per preparation phase from wave 35. Each purchase raises the price by 100 gold.
+Zusatzhex aktuell nicht möglich: Gold, Bauphase und freien Anschluss prüfen.|Cannot buy an extra hex now: check gold, preparation phase and an available connection.
+Zusatzhex gekauft. Wähle eine Karte und lege sie an.|Extra hex purchased. Choose a card and place it.
+`);

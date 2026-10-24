@@ -1,10 +1,10 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),{load}=require('./helpers/game.cjs');
-test('touch rotation needs a selected card and matches R in six steps',()=>{
+test('touch rotation needs a selected card and matches R while skipping invalid angles',()=>{
  const {a,elements,documentListeners}=load();const button=elements.get('rotateHexBtn');assert.equal(button.disabled,true);
  const rotation=a.state.rotation;button.listeners.click();assert.equal(a.state.rotation,rotation);
- a.state.selectedCard=0;a.renderAll();assert.equal(button.disabled,false);
- button.listeners.click();assert.equal(a.state.rotation,(rotation+1)%6);
- documentListeners.keydown({key:'r',preventDefault(){}});assert.equal(a.state.rotation,(rotation+2)%6);
+ a.state.hand=['straight'];a.state.selectedCard=0;a.renderAll();assert.equal(button.disabled,false);
+ button.listeners.click();assert.equal(a.state.rotation,3);
+ documentListeners.keydown({key:'r',preventDefault(){}});assert.equal(a.state.rotation,0);
  for(let n=0;n<4;n++)button.listeners.click();assert.equal(a.state.rotation,rotation);
 });
 test('tower buying and upgrading before placement preserve hand and block wave start',()=>{

@@ -47,7 +47,7 @@ test('drag hit areas match displayed screen circles and choose the nearest slot 
 });
 
 test('invalid placement remains visible below the active tutorial and clears after valid placement',()=>{
- const {a,elements}=load({initialStorage:{'tutorial-v1':'new'}});a.state.hand=['straight'];a.state.selectedCard=0;a.state.rotation=1;a.placeTile(1,0);assert.equal(elements.get('tutorialPanel').classList.contains('hidden'),false);assert.equal(elements.get('tutorialFeedback').classList.contains('hidden'),false);assert.match(elements.get('tutorialFeedback').textContent,/Nicht erlaubt/);
+ const {a,elements}=load({initialStorage:{'tutorial-v1':'new'}});a.state.hand=['straight'];a.state.selectedCard=0;a.state.rotation=1;a.placeTile(-1,0);assert.equal(elements.get('tutorialPanel').classList.contains('hidden'),false);assert.equal(elements.get('tutorialFeedback').classList.contains('hidden'),false);assert.match(elements.get('tutorialFeedback').textContent,/Nicht erlaubt/);
  a.state.rotation=0;a.placeTile(1,0);assert.equal(elements.get('tutorialFeedback').classList.contains('hidden'),true);
 });
 

@@ -2,9 +2,9 @@ const HexBuildings=(()=>{
   const definitions={house:{radius:0,color:'#f1d477',name:'Haus',cost:30,income:3,icon:'H',desc:'+3 Gold nach jeder überlebten Wave, zusätzlich zum automatischen Hex-Einkommen.'},forge:{radius:1,color:'#ffad66',damage:1.2,name:'Schmiede',cost:40,icon:'S',desc:'+20 % Tower-Schaden auf diesem Hex und direkt benachbarten Hexen. Nicht stapelbar.'},market:{radius:1,color:'#6ddac9',discount:.85,name:'Markt',cost:35,icon:'M',desc:'15 % Rabatt auf Towerbau und Upgrades auf diesem Hex und direkt benachbarten Hexen. Nicht stapelbar, keine Gebäuderabatte.'}};
   definitions.portal={radius:0,color:'#c991ff',name:'Gegnerportal',cost:250,icon:'◉',desc:'Ein zusätzlicher Gegnereingang. Die feste Gegnerzahl wird auf alle Eingänge verteilt. Bau und Verkauf nur zwischen Wellen.'};
   const allowedTypes=tile=>tile?.type==='deadEnd'?['portal']:['house','forge','market'];
-  const upgrades={house:[{cost:40,income:5},{cost:65,income:8}],forge:[{cost:45,damage:1.25},{cost:70,damage:1.3}],market:[{cost:45,discount:.8},{cost:70,discount:.75}]};
-  const specials={house:{name:'Patrizierhaus',cost:120,desc:'+16 Gold je Welle und +2 Gold für jedes weitere Patrizierhaus im Run.'},forge:{name:'Fernschmiede',cost:90,desc:'Zusätzlich ein frei wählbares gelegtes Hex mit +30 % Schaden versorgen.'},market:{name:'Handelsnetz',cost:90,desc:'Zusätzlich ein frei wählbares gelegtes Hex mit 25 % Rabatt versorgen.'}};
-  function definition(building,state){if(!building||!definitions[building.type])return null;if(building.type==='portal')return {...definitions.portal};const def={...definitions[building.type],...(upgrades[building.type][Math.min(3,building.level||1)-2]||{})};if(building.type==='house'&&building.special)def.income=16+(state?2*Math.max(0,patricianCount(state)-1):0);def.desc=building.type==='house'?'+'+def.income+' Gold je Wave.':building.type==='forge'?'+'+Math.round((def.damage-1)*100)+' % Turmschaden auf diesem Hex und seinen Nachbarhexen. Nicht stapelbar.':Math.round((1-def.discount)*100)+' % Rabatt auf Turmbau und Upgrades auf diesem Hex und seinen Nachbarhexen. Nicht stapelbar.';return def;}
+  const upgrades={house:[{cost:40,income:5},{cost:65,income:8}],forge:[{cost:40,damage:1.25},{cost:55,damage:1.3}],market:[{cost:35,discount:.75},{cost:45,discount:.65}]};
+  const specials={house:{name:'Patrizierhaus',cost:120,desc:'+16 Gold je Welle, dazu +2 je weiterem Patrizierhaus, maximal +4 Zusatzgold pro Haus.'},forge:{name:'Fernschmiede',cost:60,desc:'Zusätzlich ein frei wählbares gelegtes Hex mit +30 % Schaden versorgen.'},market:{name:'Handelsnetz',cost:55,desc:'Zusätzlich ein frei wählbares gelegtes Hex mit 35 % Rabatt versorgen.'}};
+  function definition(building,state){if(!building||!definitions[building.type])return null;if(building.type==='portal')return {...definitions.portal};const def={...definitions[building.type],...(upgrades[building.type][Math.min(3,building.level||1)-2]||{})};if(building.type==='house'&&building.special)def.income=16+(state?2*Math.min(2,Math.max(0,patricianCount(state)-1)):0);def.desc=building.type==='house'?'+'+def.income+' Gold je Wave.':building.type==='forge'?'+'+Math.round((def.damage-1)*100)+' % Turmschaden auf diesem Hex und seinen Nachbarhexen. Nicht stapelbar.':Math.round((1-def.discount)*100)+' % Rabatt auf Turmbau und Upgrades auf diesem Hex und seinen Nachbarhexen. Nicht stapelbar.';return def;}
   function applies(source,target,building,def=definition(building)){if(!def)return false;const dq=source.q-target.q,dr=source.r-target.r;return Math.max(Math.abs(dq),Math.abs(dr),Math.abs(dq+dr))<=def.radius||(building.special&&building.target===target.q+','+target.r);}
   function nextUpgrade(state,building){if(!building||!upgrades[building.type])return null;const level=building.level||1;if(level<3)return upgrades[building.type][level-1];if(!building.special&&state.buildingUnlocks?.includes('building:'+building.type))return specials[building.type];return null;}
   function upgrade(state,slot){const tile=slot&&state.map.get(slot.q+','+slot.r),b=tile?.buildings?.[slot.index],next=nextUpgrade(state,b);if(!next||state.hp<=0||!['place','build','wave'].includes(state.phase)||state.gold<next.cost)return false;const before=definition(b);if((b.level||1)<3)b.level=(b.level||1)+1;else b.special=true;b.paid+=next.cost;state.gold-=next.cost;state.income+=(definition(b).income||0)-(before.income||0);state.buildingVersion=(state.buildingVersion||0)+1;refresh(state);return true;}
@@ -49,6 +49,16 @@ const HexBuildings=(()=>{
     const covered=new Map();if(building.type!=='house')for(const t of state.map.values())for(const other of t.buildings||[])if(other&&other!==building&&other.type===building.type){const otherDef=definition(other);for(const target of state.map.values())if(applies(t,target,other,otherDef))covered.set(target.q+','+target.r,target);}
     return {...currentTarget(state,building),tiles,color:def.color,otherTiles:[...covered.values()],otherColor:building.type==='forge'?'#b8a5db':'#83a8df'};
   }
+  // Attribute a successful purchase to exactly one strongest market; previews stay read-only.
+  function recordDiscount(state,slot,base,price){
+    if(price>=base)return;
+    let selected=null,best=1;
+    for(const tile of state.map.values())for(const building of tile.buildings||[]){
+      if(building?.type!=='market')continue;const def=definition(building);
+      if(def.discount<best&&applies(tile,slot,building,def)){selected=building;best=def.discount;}
+    }
+    if(selected)selected.discountGranted=(selected.discountGranted||0)+base-price;
+  }
   function cost(state,slot,base){return Math.ceil(base*effects(state.map,slot).discount);}
   // Shared by all quick-build prices; recomputed so purchases, sales and remote
   // market targets always take effect immediately.
@@ -72,7 +82,7 @@ const HexBuildings=(()=>{
     const connected=posts.length?HexMap.routeGraph(state.map).distances:null;
     for(const tile of posts){tile.siteIncome=connected.has(tile.q+','+tile.r)&&tradeIncome<20?2:0;tradeIncome+=tile.siteIncome;}
     state.income=(state.income||0)+tradeIncome-(state.tradePostIncome||0);state.tradePostIncome=tradeIncome;
-const count=patricianCount(state),bonus=2*count*Math.max(0,count-1);state.income=(state.income||0)+bonus-(state.patricianBonusIncome||0);state.patricianBonusIncome=bonus;for(const tile of state.map.values()){if(!tile.towers?.some(Boolean))continue;const support=effects(state.map,tile),damage=support.damage;tile.towers.forEach((tower,index)=>{if(tower){tower.supportDamage=damage;tower.supportRange=(support.range||1)*(tile.site==='guardian'&&index===tile.siteSlot?1.2:1);}});}}
+const count=patricianCount(state),bonus=2*count*Math.min(2,Math.max(0,count-1));state.income=(state.income||0)+bonus-(state.patricianBonusIncome||0);state.patricianBonusIncome=bonus;for(const tile of state.map.values()){if(!tile.towers?.some(Boolean))continue;const support=effects(state.map,tile),damage=support.damage;tile.towers.forEach((tower,index)=>{if(tower){tower.supportDamage=damage;tower.supportRange=(support.range||1)*(tile.site==='guardian'&&index===tile.siteSlot?1.2:1);}});}}
   function buildBlockReason(tile,type){if(!['forge','market'].includes(type)||!tile?.buildings?.some(b=>b?.type===type))return '';return type==='forge'?'Auf diesem Hex steht bereits eine Schmiede. Der Schadensbonus ist nicht stapelbar.':'Auf diesem Hex steht bereits ein Markt. Der Rabatt ist nicht stapelbar.';}
   function buy(state,slot,type){
     const def=definitions[type],tile=slot?state.map.get(slot.q+','+slot.r):null;
@@ -81,12 +91,12 @@ const count=patricianCount(state),bonus=2*count*Math.max(0,count-1);state.income
     if(tile.buildings[slot.index]) return false;
     tile.buildings[slot.index]={type,level:1,paid:def.cost,builtOnWave:['place','build'].includes(state.phase)?state.wave:null};state.gold-=def.cost;state.income+=def.income||0;state.buildingVersion=(state.buildingVersion||0)+1;refresh(state);return true;
   }
-  function refund(state,building){if(building?.type==='portal'&&(!['place','build'].includes(state.phase)||state.waveRunning))return null;return HexData.towerRefund(state,building);}
+  function refund(state,building){if(building?.type==='portal'&&(!['place','build'].includes(state.phase)||state.waveRunning))return null;const refund=HexData.towerRefund(state,building);if(!refund||building?.type!=='market'||!building.discountGranted)return refund;const amount=Math.max(0,refund.amount-(building.discountGranted||0));return {...refund,amount,percent:building.paid?Math.floor(100*amount/building.paid):0};}
   function sell(state,slot){
     const tile=slot&&state.map.get(slot.q+','+slot.r),building=tile?.buildings?.[slot.index],value=refund(state,building);
     if(!value)return false;
     tile.buildings[slot.index]=null;state.gold+=value.amount;state.income-=definition(building).income||0;
     state.buildingVersion=(state.buildingVersion||0)+1;refresh(state);return true;
   }
-  return {redundantTarget,targetRemaining,rangeBonus,buildBlockReason,allowedTypes,upgrades,specials,definition,nextUpgrade,upgrade,canTarget,setTarget,definitions,highlight,buy,effects,cost,freeSlotDiscount,refresh,refund,sell};
+  return {recordDiscount,redundantTarget,targetRemaining,rangeBonus,buildBlockReason,allowedTypes,upgrades,specials,definition,nextUpgrade,upgrade,canTarget,setTarget,definitions,highlight,buy,effects,cost,freeSlotDiscount,refresh,refund,sell};
 })();

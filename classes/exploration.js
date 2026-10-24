@@ -1,7 +1,7 @@
 const HexExploration=(()=>{
   const clearRadius=2,fogRadius=6;
   const distance=(a,b)=>Math.max(Math.abs(a.q-b.q),Math.abs(a.r-b.r),Math.abs(a.q+a.r-b.q-b.r));
-  function treasureReward(position){return 5*distance({q:0,r:0},position);}
+  function treasureReward(position){return 25+10*distance({q:0,r:0},position);}
   function create(random,{sparse=false}={}){
     const landmarks=new Map();
     landmarks.sparse=sparse;landmarks.seed=Math.floor(random()*4294967296);landmarks.surveyed=new Set();

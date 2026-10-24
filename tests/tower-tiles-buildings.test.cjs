@@ -9,7 +9,7 @@ test('remote market allows an initial placement and one correction, preserved th
  assert.equal(c.buildings.setTarget(s,slot,'missing'),false);assert.equal(c.buildings.targetRemaining(building),2);
  assert.ok(c.buildings.setTarget(s,slot,'4,0'));assert.equal(c.buildings.setTarget(s,slot,'4,0'),false);assert.equal(c.buildings.targetRemaining(building),1);
  const restored=c.snapshot.restore(JSON.parse(JSON.stringify(c.snapshot.capture(s,run.random)))).state;
- assert.ok(c.buildings.setTarget(restored,slot,'5,0'));assert.equal(c.buildings.setTarget(restored,slot,'6,0'),false);assert.equal(c.buildings.cost(restored,{q:5,r:0},100),75);
+ assert.ok(c.buildings.setTarget(restored,slot,'5,0'));assert.equal(c.buildings.setTarget(restored,slot,'6,0'),false);assert.equal(c.buildings.cost(restored,{q:5,r:0},100),65);
  assert.equal(c.buildings.cost(restored,{q:4,r:0},100),100);
  delete building.targetUses;assert.equal(c.buildings.targetRemaining(building),1,'legacy targets count as the first placement');
 });
@@ -54,7 +54,7 @@ test('meta building upgrades affect exactly one remote hex and retargeting remov
     buildings.buy(s, slot, type); buildings.upgrade(s, slot); buildings.upgrade(s, slot); assert.equal(buildings.upgrade(s, slot), false);
     s.buildingUnlocks = ['building:' + type]; assert.ok(buildings.upgrade(s, slot)); assert.equal(buildings.upgrade(s, slot), false); assert.equal(buildings.setTarget(s, slot, 'missing'), false);
     buildings.setTarget(s, slot, '4,0'); assert.ok(buildings.highlight({ ...s, selectedBuilding: slot }).tiles.includes(a));
-    assert.equal(type === 'forge' ? a.towers[0].supportDamage : buildings.cost(s, a, 100), type === 'forge' ? 1.3 : 75);
+    assert.equal(type === 'forge' ? a.towers[0].supportDamage : buildings.cost(s, a, 100), type === 'forge' ? 1.3 : 65);
     buildings.setTarget(s, slot, '5,0'); assert.equal(type === 'forge' ? a.towers[0].supportDamage : buildings.cost(s, a, 100), type === 'forge' ? 1 : 100);
     buildings.sell(s, slot); assert.equal(type === 'forge' ? b.towers[0].supportDamage : buildings.cost(s, b, 100), type === 'forge' ? 1 : 100);
   }

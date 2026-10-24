@@ -45,6 +45,18 @@ const HexRunSession=(()=>{
   function place(state,random,command){
     const result=HexPlacementCommands.place(state,command);if(result&&!result.opening&&state.pendingShrine)shrine(state,random);return result;
   }
+  function extraHexPrice(state){return 200+100*Math.max(0,Math.floor(state.extraHexPurchases||0));}
+  function canBuyExtraHex(state){return state.wave>=34&&state.phase==='build'&&!state.waveRunning&&state.hp>0&&!state.celebrationActive&&!state.openingRemaining&&!state.pendingShrine&&!state.challengeDay&&state.extraHexWave!==state.wave&&state.gold>=extraHexPrice(state);}
+  function buyExtraHex(state,random){
+    if(!canBuyExtraHex(state))return false;
+    // Probe with isolated piles and RNG: blocked maps never spend gold or reroll the deck.
+    const probe={...state,phase:'place',hand:[...state.hand],drawPile:[...state.drawPile],discard:[...state.discard]};
+    const result=HexRunFlow.drawHand(probe,HexRandom.restore(random.snapshot()));
+    if(!['ready','rescue'].includes(result)||!probe.hand.length)return false;
+    const price=extraHexPrice(state);state.phase='place';state.drawResult=HexRunFlow.drawHand(state,random);
+    state.gold-=price;state.extraHexPurchases=(state.extraHexPurchases||0)+1;state.extraHexWave=state.wave;
+    return true;
+  }
   function create(options){const run=HexRunRuntime.create(options);run.state.drawPile=HexRunFlow.shuffle(run.state.deck,run.random);preparation(run.state,run.random);return run;}
   function advance(state,random,dt,best=0,emit=()=>{}){
     const result=HexRunRuntime.advance(state,random,dt,emit);
@@ -53,5 +65,5 @@ const HexRunSession=(()=>{
     return result;
   }
   function endless(state,random){if(state.phase!=='victory'||!(state.campaignWon||state.challengeDay&&state.challengeWon))return false;state.endless=true;waveRewards(state,random);return true;}
-  return {endless,create,place,choose,finish,advance,preparation,waveRewards,shrine,promoteCelebration,acknowledge};
+  return {extraHexPrice,canBuyExtraHex,buyExtraHex,endless,create,place,choose,finish,advance,preparation,waveRewards,shrine,promoteCelebration,acknowledge};
 })();

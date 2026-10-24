@@ -29,7 +29,7 @@
     hoverBuilding(slot) { state.hoverBuilding = slot; renderBoard(); },
     rotatePlacement() { return rotateSelected(-1); },
     viewChanged() { positionTowerPanel(); positionTutorialSpotlight(); if (state?.dragTower) renderDragShade(); if (state?.consumablePickUI) renderConsumablePreview(); },
-    hoverPlacement(id) { state.hoveredPlacement = id; },
+    hoverPlacement(id) { state.hoveredPlacement = id; const [q, r] = id.split(',').map(Number); if (orientPlacement(q, r)) renderBoard(); },
     leavePlacement(id) { if (state.hoveredPlacement === id) state.hoveredPlacement = null; },
     selectBuilding(q, r, index) { globalThis.HexCompact?.open(''); if (applyBuildingTarget(q, r)) return; closeBasePanel(); state.selectedBuilding = { q, r, index }; state.selectedSlot = null; state.selectedTower = null; renderAll(); },
     selectTower(q, r, index, multiple = false) {
@@ -203,11 +203,21 @@
   }
 
   function placementTargets(card) {
-    if (duoToken) return state.placements?.[state.selectedCard]?.[state.rotation || 0] || [];
+    if (duoToken) return [...new Map((state.placements?.[state.selectedCard] || []).flat().map(p => [key(p.q, p.r), p])).values()];
     if (card.roads.length) return openRoadTargets();
     const targets = new Map(); for (const tile of state.map.values()) for (let d = 0; d < 6; d++) { const n = neighbor(tile.q, tile.r, d); if (!state.map.has(key(n.q, n.r))) targets.set(key(n.q, n.r), n); } return [...targets.values()];
   }
   function canPlace(q, r, card, rot) { if (duoToken) return !!state.placements?.[state.selectedCard]?.[rot]?.find(p => p.q === q && p.r === r)?.legal; return HexPlacementCommands.canPlace(state, q, r, card, rot); }
+  function validRotations(q, r, card) {
+    return Array.from({ length: 6 }, (_, rotation) => rotation).filter(rotation => canPlace(q, r, card, rotation));
+  }
+  function orientPlacement(q, r) {
+    if (state.phase !== 'place' || state.waveRunning || state.buildingTarget || consumablePick) return false;
+    const card = HexPlacementCommands.card(state, state.hand[state.selectedCard]); if (!card) return false;
+    const valid = validRotations(q, r, card);
+    if (!valid.length || valid.includes(state.rotation)) return false;
+    state.rotation = valid[0]; return true;
+  }
   function buildGraph() { return HexMap.buildGraph(state.map); }
   const pathToBase = HexMap.pathToBase;
 
@@ -223,6 +233,7 @@
     if (state.phase !== 'place' || state.waveRunning || state.celebrationActive) return;
     const id = state.hand[state.selectedCard]; if (!id) return;
     const card = id === 'rescue' ? state.rescueCard : CARD_LIBRARY[id];
+    orientPlacement(q, r);
     if (!canPlace(q, r, card, state.rotation)) {
       if (!duoToken && !card.rescue && !state.openingRemaining && !state.hand.some(id => { const c = id === 'rescue' ? state.rescueCard : CARD_LIBRARY[id]; return c && Array.from({ length: 6 }, (_, rot) => rot).some(rot => openRoadTargets().some(n => canPlace(n.q, n.r, c, rot))); })) {
         state.discard.push(...state.hand.filter(id => id !== 'rescue')); state.hand = []; drawHand(); return;
@@ -506,9 +517,10 @@
     if (state.previewUpgrade) { const selected = state.selectedTower, tower = selected && state.map.get(key(selected.q, selected.r))?.towers[selected.index]; if (tower !== state.previewUpgrade.tower) state.previewUpgrade = null; }
     if (state.buildingTarget && (state.hp <= 0 || state.phase === 'gameover')) state.buildingTarget = null;
     const card = HexPlacementCommands.card(state, state.hand[state.selectedCard]);
-    const targets = state.phase === 'place' && !state.waveRunning && card ? placementTargets(card).filter(target => !state.landmarks.get(key(target.q, target.r))?.prefab).map(target => ({ ...target, legal: canPlace(target.q, target.r, card, state.rotation) })) : [];
+    if (state.hoveredPlacement) { const [q, r] = state.hoveredPlacement.split(',').map(Number); orientPlacement(q, r); }
+    const targets = state.phase === 'place' && !state.waveRunning && card ? placementTargets(card).filter(target => !state.landmarks.get(key(target.q, target.r))?.prefab).map(target => ({ ...target, legal: validRotations(target.q, target.r, card).length > 0 })) : [];
     if (globalThis.HexCompact?.small() && card && targets.length && !targets.some(t => key(t.q, t.r) === state.hoveredPlacement)) {
-      const preview = targets.find(t => t.legal) || targets[0]; state.hoveredPlacement = key(preview.q, preview.r);
+      const preview = targets.find(t => t.legal) || targets[0]; state.hoveredPlacement = key(preview.q, preview.r); orientPlacement(preview.q, preview.r);
     }
     if (state.buildingTarget) { targets.splice(0, targets.length, ...[...state.map.values()].map(t => ({ q: t.q, r: t.r, legal: HexBuildings.canTarget(state, state.buildingTarget, key(t.q, t.r)) }))); }
     if (consumablePick) targets.length = 0;
@@ -680,6 +692,11 @@ R dreht die Karte, dann Feld anklicken.`;
     renderTowerPanel();
     const refund = HexData.towerRefund(state, tower); sell.disabled = !refund || selections('Tower').length > 1;
     sell.textContent = selections('Tower').length > 1 ? 'Zum Verkaufen einen einzelnen Turm wählen' : refund ? `${refund.percent === 100 ? 'Bau rückgängig' : 'Verkaufen'} · ${refund.percent} % (+${refund.amount} Gold)` : 'Turm verkaufen';
+    const extraHexButton = document.getElementById('buyExtraHexBtn');
+    extraHexButton.classList.toggle('hidden', state.wave < 34 || !!state.challengeDay || state.waveRunning || !['place','build'].includes(state.phase));
+    extraHexButton.disabled = !HexRunSession.canBuyExtraHex(state) || !!state.consumablesLocked;
+    extraHexButton.textContent = state.extraHexWave === state.wave ? 'Zusatzhex gekauft' : 'Zusatzhex kaufen · ' + HexRunSession.extraHexPrice(state) + ' Gold';
+    extraHexButton.title = 'Ein zusätzliches Hex je Bauphase ab Welle 35. Jeder Kauf erhöht den Preis um 100 Gold.';
     startWaveBtn.disabled = state.phase !== 'build' || state.waveRunning || state.hp <= 0; startWaveBtn.dataset.state = state.waveRunning ? 'running' : startWaveBtn.disabled ? 'locked' : 'ready';
     startWaveBtn.title = state.phase === 'place' ? 'Lege zuerst dein Hex, bevor du die nächste Welle startest.' : '';
     startWaveBtn.textContent = state.phase === 'place' ? 'Zuerst Hex legen' : (!state.waveRunning && HexWaves.bossProfile(state.wave + 1) ? `Bosswelle ${state.wave + 1} starten` : 'Wave starten') + (touchControls ? '' : ' (Leertaste)');
@@ -854,6 +871,7 @@ R dreht die Karte, dann Feld anklicken.`;
     panel.classList.remove('hidden'); const building = tile.buildings?.[selected.index];
     document.getElementById('buildingPanelTitle').textContent = building ? HexBuildings.definitions[building.type].name + ' · Stufe ' + (building.special ? 4 : building.level || 1) : (tile.type === 'deadEnd' ? 'Gegnerportal-Platz' : 'Gebäudeslot');
     document.getElementById('buildingPanelInfo').textContent = `${CARD_LIBRARY[tile.type]?.name || 'Hex'}: automatisch +${tile.income || 0} Gold je überlebter Wave. ${building ? HexBuildings.definition(building, state).desc : tile.type === 'deadEnd' ? HexBuildings.definitions.portal.desc : 'Optional einen Gebäudetyp bauen. Haus: zusätzliches Einkommen, Schmiede: Tower-Schaden, Markt: Tower-Rabatte. Ein Gebäude pro Slot.'}`;
+    if(building?.type==='market') document.getElementById('buildingPanelInfo').textContent += ' Bereits gewährte Rabatte werden vom Verkaufserlös abgezogen.';
     const panelKey = JSON.stringify([selected, building, state.map.size, state.buildingVersion]);
     const buildingChanged = buildingPanelKey !== panelKey;
     if (buildingChanged) {
@@ -1036,7 +1054,12 @@ R dreht die Karte, dann Feld anklicken.`;
 
   function rotateSelected(direction = 1) {
     if (state.phase !== 'place' || !state.hand[state.selectedCard]) return false;
-    state.rotation = (state.rotation + direction + 6) % 6; tutorialEvent('rotate'); renderAll(); return true;
+    const card = HexPlacementCommands.card(state, state.hand[state.selectedCard]);
+    const target = state.hoveredPlacement ? state.hoveredPlacement.split(',').map(Number) : null;
+    const valid = target ? validRotations(...target, card) : Array.from({ length: 6 }, (_, rot) => rot).filter(rot => hasAnyPlacement(card, rot));
+    if (!valid.length) return false;
+    for (let step = 1; step <= 6; step++) { const rot = (state.rotation + direction * step + 12) % 6; if (valid.includes(rot)) { state.rotation = rot; break; } }
+    tutorialEvent('rotate'); renderAll(); return true;
   }
 
   const quickButtons = new Map(), biomeButtons = new Map(); let quickKey = '', biomeKey = '', quickPointer = null, pinnedBiome = null;
@@ -1451,6 +1474,12 @@ R dreht die Karte, dann Feld anklicken.`;
   document.getElementById('hotkeyHelp').addEventListener('toggle', renderHotkeyTip);
   document.addEventListener('click', () => renderHotkeyTip());
   document.getElementById('rotateHexBtn').addEventListener('click', () => rotateSelected());
+  document.getElementById('buyExtraHexBtn').addEventListener('click', () => {
+    if (duoToken) { duoAction('extraHex'); return; }
+    if (!HexRunSession.buyExtraHex(state, random)) { setMessage('Zusatzhex aktuell nicht möglich: Gold, Bauphase und freien Anschluss prüfen.'); return; }
+    state.selectedCard = null; state.rotation = 0; state.hoveredPlacement = null;
+    renderAll(); saveRunAutosave(); setMessage('Zusatzhex gekauft. Wähle eine Karte und lege sie an.');
+  });
   startWaveBtn.addEventListener('click', startWave);
   // ---- Hauptmenü ----
   const mainMenu = document.getElementById('mainMenu');
