@@ -1,6 +1,6 @@
 [
   {
-    "version": "next",
+    "version": "1.1.8",
     "title": "Duo-Start nach Updates",
     "summary": "Duo-Seiten laden auch mit aktualisierten Spieldateien zuverlässig.",
     "overview": [
@@ -27,7 +27,8 @@
     ],
     "changes": [
       "Duo-Seiten laden auch mit aktualisierten Spieldateien zuverlässig."
-    ]
+    ],
+    "date": "2026-10-24"
   },
   {
     "version": "1.1.7",
