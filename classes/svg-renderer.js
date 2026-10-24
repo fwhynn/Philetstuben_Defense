@@ -278,7 +278,7 @@ function create(svg,commands){
   }
   function clearSelection(e){if(!e||e.button===undefined||e.button===0)commands.clearSelection();}
   svg.addEventListener('click',clearSelection);
-  return {render,reset,project,consumableTarget,panView:camera.panView,zoom:camera.zoom,resetView(){camera.reset();const g=state?.movingFortress?.stations[state.movingFortress.stage];if(g){const p=axialToWorld(g.q,g.r),v=camera.getView();camera.panView(p.x/(v.w*.65),p.y/(v.h*.65));}},getView:camera.getView,destroy(){camera.destroy();svg.removeEventListener('click',consumeClick,true);svg.removeEventListener('click',clearSelection);for(const layer of [fogLayer,worldLayer,objectLayer,hintLayer]) layer.remove();}};
+  return {render,reset,project,consumableTarget,focusAt:camera.focusAt,panView:camera.panView,zoom:camera.zoom,resetView(){camera.reset();const g=state?.movingFortress?.stations[state.movingFortress.stage];if(g){const p=axialToWorld(g.q,g.r),v=camera.getView();camera.panView(p.x/(v.w*.65),p.y/(v.h*.65));}},getView:camera.getView,destroy(){camera.destroy();svg.removeEventListener('click',consumeClick,true);svg.removeEventListener('click',clearSelection);for(const layer of [fogLayer,worldLayer,objectLayer,hintLayer]) layer.remove();}};
 }
 return {create};
 })();

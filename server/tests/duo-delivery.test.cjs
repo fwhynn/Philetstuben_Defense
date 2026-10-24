@@ -11,8 +11,8 @@ test('delivery protocol hides partner choices and rejects forged, cross-seat and
  const {room,seats:[a,b]}=fixture(),av=room.view(a.token),bv=room.view(b.token),offer=av.delivery.offers[0],before=bv.boards[1].gold;
  assert.equal(av.delivery.offers[1].choices,undefined);assert.equal(av.delivery.offers[1].id,undefined);assert.ok(!JSON.stringify(av).includes('private-deliveries'));
  for(const payload of [{offerId:offer.id,index:0,amount:999},{offerId:offer.id,index:null},{offerId:bv.delivery.offers[1].id,index:0},{offerId:'forged',index:0}])assert.equal(room.receive(a.token,packet(room,a,payload)).ok,false);
- const gift=packet(room,a,{offerId:offer.id,index:0});assert.ok(room.receive(a.token,gift).ok);assert.equal(room.view(b.token).boards[1].gold,before+20);assert.equal(room.receive(a.token,gift).duplicate,true);
- assert.equal(room.receive(a.token,packet(room,a,gift.payload)).ok,false);assert.equal(room.view(b.token).boards[1].gold,before+20);
+ const gift=packet(room,a,{offerId:offer.id,index:0});assert.ok(room.receive(a.token,gift).ok);assert.equal(room.view(b.token).boards[1].gold,before+50);assert.equal(room.receive(a.token,gift).duplicate,true);
+ assert.equal(room.receive(a.token,packet(room,a,gift.payload)).ok,false);assert.equal(room.view(b.token).boards[1].gold,before+50);
 });
 test('real HTTP delivery retry after checkpoint restart applies only once; partner can finish',async t=>{
  let {room,seats:[a,b]}=fixture();const server=createTransport(room);await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));t.after(()=>new Promise(resolve=>{server.closeAllConnections();server.close(resolve);}));const url='http://127.0.0.1:'+server.address().port;

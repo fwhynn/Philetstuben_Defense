@@ -1,5 +1,105 @@
 [
   {
+    "version": "next",
+    "title": "Duo-Verbesserungen und Reliktjagd",
+    "summary": "Stärkere Partnergeschenke, sauberere Duo-Bewegung und mehr Orientierung und Spannung in der Expedition.",
+    "overview": [
+      {
+        "kind": "buff",
+        "title": "VERBESSERT",
+        "items": [
+          "Partnergeschenk: 50 Gold"
+        ]
+      },
+      {
+        "kind": "new",
+        "title": "NEU",
+        "items": [
+          "Relikteffekte und Fristwarnungen"
+        ]
+      },
+      {
+        "kind": "nerf",
+        "title": "SCHWIERIGER",
+        "items": [
+          "Spätere Expeditionswellen"
+        ]
+      },
+      {
+        "kind": "fixed",
+        "title": "KORRIGIERT",
+        "items": [
+          "Duo-Kurven und Speichersperren"
+        ]
+      }
+    ],
+    "sections": [
+      {
+        "title": "Duo",
+        "entries": [
+          {
+            "title": "Duo: Partnerhilfe und Korrekturen",
+            "summary": "Geschenke sind wertvoller, Verstärkung ist leichter zu finden und Gegner folgen Kurven sauberer.",
+            "bullets": [
+              "Das Goldgeschenk hat eine eigene goldene Geschenk-Karte. Bereits offene alte Angebote bleiben gültig.",
+              "Turmverstärkung und Partnerportal sind direkt über die Teamleiste erreichbar.",
+              "Die geglättete Gegnerbewegung folgt dem zurückgelegten Straßenverlauf statt Kurven abzukürzen."
+            ],
+            "stats": [
+              {
+                "label": "Partnergeschenk",
+                "before": "20 Gold",
+                "after": "50 Gold"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Tägliche Herausforderungen",
+        "entries": [
+          {
+            "title": "Expedition: Relikte und Zeitdruck",
+            "summary": "Das nächste Ziel wird klarer sichtbar, Relikte feiern ihren Fund und spätere Wellen werden stärker.",
+            "bullets": [
+              "Das erste Relikt ist markiert. Nach einer Bergung erscheint spätestens das nächste noch fehlende Relikt.",
+              "Neu sichtbare Relikte erhalten Sterne, einen Ton und einen Kamerafokus; die Bergung erhält einen eigenen goldenen Effekt.",
+              "Die Frist zählt nach jeder abgeschlossenen Welle herunter. Die letzten drei Warnsignale sind eindringlicher.",
+              "Turmmenüs nutzen mehr Bildschirmhöhe und die linke Turmleiste ist in der Expedition zentriert."
+            ],
+            "stats": [
+              {
+                "label": "Zusätzliche Lebens- und Schutzskalierung je Welle ab Welle 3",
+                "before": "12 %",
+                "after": "20 %"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Allgemeine Verbesserungen",
+        "entries": [
+          {
+            "title": "Menüs und Speichern",
+            "summary": "Fokusaktionen stehen beim Angriffsfokus; Popup-Positionen und die Speichersperre beim Seitenwechsel sind korrigiert.",
+            "bullets": [
+              "Fokus kopieren und einfügen stehen unter Angriffsfokus – auch im Solospiel.",
+              "Das Basismenü orientiert sich an seinem Button und wird nicht mehr durch die mittige Duo-Leiste nach unten verschoben.",
+              "Speichersperren werden beim Verlassen der Seite freigegeben und bei der Rückkehr erneut geprüft. Veraltete Daten dürfen weiterhin keinen neueren Spielstand überschreiben."
+            ],
+            "stats": []
+          }
+        ]
+      }
+    ],
+    "changes": [
+      "Geschenke sind wertvoller, Verstärkung ist leichter zu finden und Gegner folgen Kurven sauberer.",
+      "Das nächste Ziel wird klarer sichtbar, Relikte feiern ihren Fund und spätere Wellen werden stärker.",
+      "Fokusaktionen stehen beim Angriffsfokus; Popup-Positionen und die Speichersperre beim Seitenwechsel sind korrigiert."
+    ]
+  },
+  {
     "version": "1.1.9",
     "title": "Längere Missionen, neue Tagesvarianten",
     "summary": "Längere Missionen, direkter Turm-Draft und ein einfacheres Stromnetz. Neue Tagesvarianten und Gierverträge bringen Abwechslung.",

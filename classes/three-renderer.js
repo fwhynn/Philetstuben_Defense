@@ -1107,7 +1107,7 @@ function create(host0,commands){
     const box=wrap.getBoundingClientRect(),slots=[];
     for(const tile of state.map.values())slotPositions(tile).forEach((position,index)=>{if(tile.towers[index])return;const screen=project(position,2+slotLift(tile,index));if(screen)slots.push({q:tile.q,r:tile.r,index,...screen});});
     return HexUiLayout.pickScreenSlot(slots,event.clientX-box.left,event.clientY-box.top,box.width,box.height);
-  },rotateView,panView,zoom:factor=>zoom(factor),resetView:()=>resetView(true),getView,
+  },focusAt(p){cam.x=p.x;cam.z=p.y;applyCamera();commands.viewChanged?.();},rotateView,panView,zoom:factor=>zoom(factor),resetView:()=>resetView(true),getView,
     destroy(){
       destroyed=true;stopEditionWatch?.();cancelAnimationFrame(raf);resize.disconnect();for(const [name,fn,options] of listeners) dom.removeEventListener(name,fn,options);
       windPool.mesh.geometry.dispose();windPool.mesh.material.dispose();windPool.mesh.dispose();for(const pool of [flakePool,rainPool]){pool.mesh.geometry.dispose();pool.mesh.material.dispose();pool.mesh.dispose();}mistPool.mesh.geometry.dispose();mistPool.mesh.material.dispose();mistPool.mesh.dispose();

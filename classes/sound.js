@@ -29,6 +29,8 @@ const HexAudio=(()=>{
   toggle.addEventListener('change',()=>{persist();if(master) master.gain.value=toggle.checked?Number(volume.value)/100:0;if(toggle.checked) unlock();});
   volume.addEventListener('input',()=>{persist();if(master) master.gain.value=toggle.checked?Number(volume.value)/100:0;});
   const effects={
+    relicReveal:[520,1560,.65,'sine',.13],relicClaim:[660,1980,.95,'triangle',.16],
+    deadline:[130,55,.8,'triangle',.17],deadlineUrgent:[95,32,1.25,'sawtooth',.12],
     archer:[900,230,.09,'triangle',.13],catapult:[150,45,.20,'triangle',.28],
     freeze:[1800,850,.16,'sine',.09],
     chain:[1400,180,.13,'sawtooth',.07],kill:[520,150,.09,'sine',.15],

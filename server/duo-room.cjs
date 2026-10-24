@@ -37,6 +37,18 @@ function payloadValid(action, p) {
 const offerId = id => crypto.createHash('sha256').update(id).digest('hex');
 const copy = v => JSON.parse(JSON.stringify(v));
 const pick = (v, fields) => Object.fromEntries(fields.filter(k => v[k] !== undefined).map(k => [k, copy(v[k])]));
+// Bounded, already travelled path for presentation; no future route or private seed.
+function motionPath(e) {
+  const result=[{x:e.x,y:e.y}];let distance=0;
+  if(e.leaping||!Array.isArray(e.points))return result;
+  for(let i=e.index;i>=0&&result.length<64;i--){
+    const p=e.points[i],last=result[0];
+    if(e.points[i+1]?.tunnel)break;
+    distance+=Math.hypot(last.x-p.x,last.y-p.y);
+    result.unshift({x:p.x,y:p.y});if(distance>=160)break;
+  }
+  return result;
+}
 function createRoom({ seed = crypto.randomUUID(), loadouts, now = () => Date.now(), disconnectMs = 10000, reconnectMs = 120000, snapshot, lobbyRequired = false } = {}) {
   if (snapshot && (snapshot.format !== 'autohex-room' || snapshot.version !== 1 || snapshot.ruleset !== RULESET || typeof snapshot.epoch !== 'string' || !Array.isArray(snapshot.seats) || snapshot.seats.length !== 2 || snapshot.seats.some(s => s && (!/^[a-f0-9]{64}$/.test(s.token) || !Number.isSafeInteger(s.next) || s.next < 1)))) throw Error('Invalid room checkpoint');
   const core = loadCore(), match = snapshot ? core.duo.restore(snapshot.match) : core.duo.create(seed, loadouts), epoch = snapshot?.epoch || crypto.randomUUID(), seats = snapshot ? copy(snapshot.seats) : [null, null]; let revision = (snapshot?.revision || 0) + 1;
@@ -99,7 +111,7 @@ function createRoom({ seed = crypto.randomUUID(), loadouts, now = () => Date.now
       visibleBiomes: Object.fromEntries(core.biomes.visibleTiles(s).map(t => [t.q + ',' + t.r, core.biomes.forTile(s, t)])), player: index, phase: s.phase, gold: s.gold, income: s.income, wave: s.wave, elapsedMs: s.elapsedMs, ...pick(s, ['heroId', 'baseUpgrades', 'difficulty', 'openingRemaining', 'baseExits', 'lastCompletedWave', 'pendingSpawns', 'waveKills', 'buildingVersion', 'goldEarned', 'consumables', 'consumableUsage', 'extraHexPurchases', 'extraHexWave', 'augments', 'freeTowerBuilds', 'freeExtraHexes', 'redrawWave', 'merchantPurchases', 'merchantProtectionWave', 'merchantProtection']),
       map: [...s.map.values()].map(t => ({ ...pick(t, ['q', 'r', 'type', 'rotation', 'roads', 'slots', 'buildingSlots', 'buildings', 'income', 'tunnels', 'tunnelLabel', 'site', 'siteEffect', 'siteSlot', 'siteIncome']), biome: core.biomes.forTile(s, t), towers: (t.towers || []).map(tower => tower ? pick(tower, ['type', 'level', 'branch', 'finalUpgrade', 'ultimate', 'guestOwner', 'targetPriority', 'biome', 'tileType', 'rangeFactor', 'supportDamage', 'supportRange', 'paid', 'upgradeSpent', 'builtOnWave', 'statId', 'souls', 'aim', 'overloadUntil', 'overloadPending']) : null) })),
       landmarks: [...s.landmarks.values()].flatMap(l => { const visibility = core.exploration.visibility(s.map, l); return visibility === 'clear' ? [pick(l, ['q', 'r', 'type', 'claimed', 'status', 'consent', 'prefab', 'augment', 'merchant'])] : visibility === 'fog' ? [pick(l, ['q', 'r'])] : []; }),
-      enemies: s.enemies.map(e => pick(e, ['id', 'type', 'name', 'originBiome', 'bossKind', 'immunity', 'abilityIcon', 'description', 'color', 'caravan', 'splitOnDeath', 'killGold', 'x', 'y', 'hp', 'maxHp', 'armorHp', 'maxArmorHp', 'magicHp', 'maxMagicHp', 'alive', 'slowFactor', 'shieldHits', 'molted', 'sprinting', 'leaping', 'leapProgress', 'crouching', 'sporeHidden', 'charge'])),
+      enemies: s.enemies.map(e => ({motionPath:motionPath(e),...pick(e, ['id', 'type', 'name', 'originBiome', 'bossKind', 'immunity', 'abilityIcon', 'description', 'color', 'caravan', 'splitOnDeath', 'killGold', 'x', 'y', 'hp', 'maxHp', 'armorHp', 'maxArmorHp', 'magicHp', 'maxMagicHp', 'alive', 'slowFactor', 'shieldHits', 'molted', 'sprinting', 'leaping', 'leapProgress', 'crouching', 'sporeHidden', 'charge'])})),
       projectiles: (s.projectiles || []).map(p => pick(p, ['kind', 'x', 'y', 'x1', 'y1', 'x2', 'y2', 'r', 'ttl', 'max', 'fade', 'color', 'tower', 'variant', 'splash', 'id', 'hits', 'hitAt', 'pts'])),
       mines: (s.mines || []).map(m => pick(m, ['id', 'x', 'y', 'color'])),
       ...(index === player ? { ...pick(s, ['runTowerStats', 'runTowerDetails', 'baseKills', 'consumableKills', 'baseDamage', 'patricianBonusIncome']), duoDiamondEstimate: Math.floor(Math.min(...match.boards.map(r => r.state.lastCompletedWave || 0)) / 2) + (s.earnedMeta?.periodicBosses || 0) * 5 + match.boards.reduce((n, r) => n + (r.state.earnedMeta?.explorationBosses || 0), 0) * 3, hand: [...s.hand], placements: copy(placements(s)), rescueCard: s.rescueCard ? copy(s.rescueCard) : null, tunnelOffer: s.tunnelOffer ? copy(s.tunnelOffer) : null, ultimateUnlocks: [...s.ultimateUnlocks], buildingUnlocks: [...s.buildingUnlocks], wavePlans: [core.waves.plan(s.wave, s.income, !!s.challengeDay, s), core.waves.plan(s.wave + 1, s.income, !!s.challengeDay, s)], drawPile: [...s.drawPile], discard: [...s.discard], deckCounts: s.deck.reduce((a, id) => (a[id] = (a[id] || 0) + 1, a), {}), loadout: [...s.towerLoadout], rewardOffer: s.rewardOffer ? { ...pick(s.rewardOffer, ['kind', 'choices', 'skippable']), id: offerId(s.rewardOffer.id) } : null, celebration: s.activeCelebration ? copy(s.activeCelebration) : null } : {}),
@@ -110,4 +122,4 @@ function createRoom({ seed = crypto.randomUUID(), loadouts, now = () => Date.now
   function checkpoint() { if (ended || expired) return null; return { format: 'autohex-room', version: 1, ruleset: RULESET, lobby: copy(lobby), epoch, revision, seats: copy(seats), match: core.duo.capture(match) }; }
   return { get result() { return publicResult(); }, setMaintenance, connect, touch, claim, leave, receive, view, presence() { return connection(); }, checkpoint, tick() { if (!lobby.started || connection().paused) return; for (let i = 0; i < (match.speed || 1) * core.runtime.PLAYBACK_RATE; i++)core.duo.tick(match); revision++; } };
 }
-module.exports = { createRoom, payloadValid, RULESET };
+module.exports = { createRoom, payloadValid, RULESET, motionPath };

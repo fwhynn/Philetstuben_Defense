@@ -40,3 +40,13 @@ test('real game registration, logout and second account login preserve each prof
  api.user=2;api.server.profile.diamonds=99;await login('login');assert.equal(store.scope,'user-2');assert.equal(JSON.parse(store.getItem('hex-bastion-profile-v1')).diamonds,99);
  store.activate(1);assert.equal(JSON.parse(store.getItem('hex-bastion-profile-v1')).diamonds,17);store.activate();assert.equal(JSON.parse(store.getItem('hex-bastion-profile-v1')).diamonds,17);
 });
+
+test('same page initialization is idempotent and pagehide releases locks for Duo navigation',async()=>{
+ const f=fixture(),events={},c=vm.createContext({localStorage:f.storage,navigator:{locks:f.locks},addEventListener:(name,fn)=>{events[name]=fn;}});
+ vm.runInContext(source,c);await c.HexLocalStore.ready;const first=c.HexLocalStore;first.setItem('profile','saved');vm.runInContext(source,c);assert.equal(c.HexLocalStore,first);assert.equal(first.blocked,false);
+ events.pagehide();await new Promise(r=>setImmediate(r));const next=await tab(f);assert.equal(next.blocked,false);assert.equal(next.getItem('profile'),'saved');
+});
+test('released conflicting lock can recover but newer external data must never be overwritten',async()=>{
+ const f=fixture(),a=await tab(f),b=await tab(f);assert.equal(b.blocked,true);f.held.clear();void b.retry();await new Promise(r=>setImmediate(r));assert.equal(b.blocked,false);
+ const g=fixture(),old=await tab(g),blocked=await tab(g);old.setItem('profile','new cloud progress');g.held.clear();await blocked.retry();assert.equal(blocked.blocked,true);assert.throws(()=>blocked.setItem('profile','stale'));assert.equal(old.getItem('profile'),'new cloud progress');
+});

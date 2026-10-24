@@ -134,6 +134,7 @@
           <p id="duoTurnText"></p><button id="duoQuickMap" class="duoQuickMap hidden" type="button">⇄ Partnerkarte
             ansehen</button>
         </div>
+      <button id="duoSupportShortcut" class="duoSupportShortcut" type="button">⇄ Turmverstärkung &amp; Partnerportal</button>
       </section>
       <div id="duoTransfer" class="duoTransfer hidden" role="status"></div>
       <nav id="quickLoadout" class="mapRail loadoutRail" aria-label="Loadout: Turm auf einen freien Platz ziehen"></nav>
@@ -280,7 +281,7 @@
         <details id="challengeGuide" class="hidden"><summary id="challengeGoal"></summary><p id="challengeInstructions"></p></details>
 
         <section id="expeditionControls" class="hidden" aria-label="Expedition">
-          <p id="expeditionProgress" aria-live="polite"></p><p id="expeditionRelics"></p>
+          <strong id="expeditionDeadline" role="status"></strong><p id="expeditionProgress" aria-live="polite"></p><p id="expeditionRelics"></p>
           <button id="expeditionReadyBtn" class="secondary" type="button">Planung abschließen</button>
         </section>
         <section id="villageControls" class="hidden" aria-label="Dorfverteidigung">
@@ -634,7 +635,7 @@
             <div id="dailyGreedRules" class="hidden"><p>Erreiche Welle 35 und verdiene so viel Gold wie möglich. Wähle dein eigenes Loadout. Vor jeder Welle musst du einen von drei wechselnden Verträgen oder Kein Vertrag wählen.</p><p>Verträge zahlen sofort Gold und verstärken nur den nächsten Angriff: etwa doppelte Gegnerzahl, einen zusätzlichen Boss oder mehr Schutz und Tempo. Ausgegebenes Gold zählt weiterhin, Startgold und Verkäufe nicht.</p><p>Nach Welle 35 kannst du endlos weiterspielen. Die Goldwertung bis Welle 35 bleibt gespeichert; Endlos hat eine eigene Bestenliste. Gleicher Tag, gleicher Angebotsplan. Account erforderlich; neue Gier-Ergebnisse warten auf Freigabe.</p></div>
             <div id="dailyFortressRules" class="hidden"><p>Verteidige dieselbe Festung an vier Stationen für jeweils drei Wellen. Nach Welle 3, 6 und 9 zieht sie automatisch weiter. Verbleibende Leben und alle Türme bleiben erhalten.</p><p>In der Bauphase direkt nach einem Ortswechsel kannst du Türme kostenlos beliebig oft an die aktuelle Station umsetzen: Turm auswählen, Umsetzen anklicken, freien Bauplatz wählen. Upgrades und Angriffsfokus bleiben erhalten.</p><p>150 Startgold, normale Einnahmen. Kein Straßenbau, Basis-Ausbau, Verbrauchshilfen oder persönliche Arsenalboni. Türme bauen nur zwischen Wellen. Upgrade-Tickets auch während des Kampfes einlösen. Überlebe Welle 12 für einmal täglich zehn Diamanten. Kein Endlosmodus.</p></div>
             <div id="dailyDraftRules" class="hidden"><p>Überlebe 35 Wellen. Die Karte wächst nach Welle 5, 10, 15, 20, 25 und 30 um je zwei Straßenhexe. Wähle jeweils eines von drei Angeboten: vor Welle 1 dreimal, danach nach jeder zweiten Welle.</p><p>Ziehe eine Turmkarte direkt auf einen freien Platz oder wähle sie erst aus und baue über die linke Turmleiste. Tickets erlauben eine normale Verbesserung deiner Wahl, auch während einer Welle. Reparaturen heilen fünf Basisleben. Unverbrauchte Türme und Tickets bleiben erhalten.</p><p>Kein Gold-Shop, Verkauf, Basis-Ausbau, Verbrauchshilfen oder persönliche Arsenalboni. Neue Türme baust du zwischen Wellen. Kein Endlosmodus. Sieg: einmal täglich zehn Diamanten.</p></div>
-            <div id="dailyExpeditionRules" class="hidden">
+            <div id="dailyExpeditionRules" class="hidden"><p>Das erste Relikt ist von Anfang an markiert. Nach jeder Bergung wird das nächste sichtbar; beim Erkunden kannst du es auch früher entdecken. Die Frist sinkt nach jeder abgeschlossenen Welle um eins.</p>
               <p>Relikte sind die goldenen ◆-Missionsfelder im Norden, Osten und Süden. Verbinde alle drei über Straßen mit deiner Basis und überlebe danach eine Welle: Dann gewinnst du sofort. Je früher, desto besser! Welle 12 ist die Frist. Aufdecken allein zählt nicht.</p>
               <p>Bis zu zwei Hexe je Bauphase. Der feste Straßenbaukasten enthält Gerade, kleine und große Kurve, T-Kreuzung und Y-Kreuzung. Karten sind wiederverwendbar; ungenutzte Platzierungen werden nicht angespart. Nach der ersten Straße kannst du die Planung auch vorzeitig abschließen.</p>
               <p>100 Startgold. Jedes angeschlossene Relikt gibt einmalig 25 Gold, keinen weiteren Schreinbonus. Keine zufälligen Inseln oder Kartenbelohnungen. Persönliche Arsenalboni gelten nicht. Kein Endlosmodus; einmal täglich +10 Diamanten nur bei vollständig erfülltem Ziel.</p>
@@ -864,6 +865,7 @@
       await new Promise((done, fail) => { const s = document.createElement('script'); s.src = 'classes/game.js?v=bb88cf3c39fa4974'; s.onload = done; s.onerror = fail; document.body.appendChild(s); });
       window.dispatchEvent(new Event('autohex-ready'));
     </script>
-  </body>
+  <div id="relicEffects" aria-live="polite"></div>
+</body>
 
 </html>

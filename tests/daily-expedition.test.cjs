@@ -64,3 +64,22 @@ test('relic variations stay in their regions, are reachable by the deadline and 
  }assert.ok(variants.size>1);
  const normal=c.waves.plan(8),hard=c.waves.plan(8,0,false,{challengeKind:'expedition'});assert.equal(hard.maxGold,normal.maxGold);assert.ok(hard.enemies[0].hp>normal.enemies[0].hp);assert.equal(hard.enemies[0].speed,normal.enemies[0].speed);
 });
+
+
+test('first relic starts marked; each recovery reveals the next and events are not replayed on reload',()=>{
+ const r=setup(),{c,state:s}=r,ls=[...s.landmarks.values()];assert.notEqual(c.exploration.visibility(s.map,ls[0]),'hidden');assert.equal(c.exploration.visibility(s.map,ls[1]),'hidden');
+ let events=[];for(const [q,z,id,rotation]of route.slice(0,east-1)){if(!s.expedition.remaining){s.wave++;c.expedition.prepare(s);}const result=c.session.place(s,r.random,{q,r:z,index:s.hand.indexOf(id),rotation});assert.ok(result);events.push(...result.relicEvents);}
+ assert.equal(ls[0].claimed,true);assert.equal(ls[1].relicLocated,true);assert.notEqual(c.exploration.visibility(s.map,ls[1]),'hidden');assert.equal(events.filter(e=>e.kind==='claimed').length,1);assert.equal(events.filter(e=>e.name==='Relikt Nord'&&e.kind==='revealed').length,1);
+ const restored=c.snapshot.restore(json(c.snapshot.capture(s,r.random)));assert.ok([...restored.state.landmarks.values()][1].relicLocated);assert.equal(restored.state.expedition.relicEvents,undefined);
+});
+test('deadline only decreases after a completed wave and has urgent cues for the final three',()=>{
+ const sounds=[],h=load({labMission:'expedition',audio:{play:n=>sounds.push(n)}}),{a,elements}=h;
+ assert.match(elements.get('expeditionDeadline').textContent,/Noch 12 Wellen/);assert.equal(sounds.filter(n=>n==='relicReveal').length,1);
+ a.state.phase='build';a.startWave();assert.match(elements.get('expeditionDeadline').textContent,/Noch 12 Wellen/);
+ for(const wave of [1,9,10,11]){Object.assign(a.state,{wave,phase:'wave',waveRunning:true,enemies:[],pendingSpawns:0,spawnQueue:[]});a.endWave();assert.match(elements.get('expeditionDeadline').textContent,new RegExp('Noch '+(12-wave)+' Wellen'));}
+ assert.equal(sounds.filter(n=>n==='deadline').length,1);assert.equal(sounds.filter(n=>n==='deadlineUrgent').length,3);assert.ok(elements.get('expeditionDeadline').classList.contains('urgent'));
+ const count=sounds.length;a.renderAll();a.renderAll();assert.equal(sounds.length,count);assert.ok(elements.get('quickLoadout').classList.contains('draftRail'));
+});
+test('expedition v2 increases protection and life, not speed or gold; legacy snapshots keep their balance',()=>{
+ const c=core();for(const wave of [1,2,5,8,12]){const old=c.waves.plan(wave,0,false,{challengeKind:'expedition'}),modern=c.waves.plan(wave,0,false,{challengeKind:'expedition',expedition:{rulesVersion:2}});assert.equal(old.maxGold,modern.maxGold);assert.equal(old.count,modern.count);for(let i=0;i<old.enemies.length;i++){assert.equal(old.enemies[i].speed,modern.enemies[i].speed);assert.ok(modern.enemies[i].hp>=old.enemies[i].hp);}if(wave>2)assert.ok(modern.enemies[0].hp>old.enemies[0].hp);}
+});

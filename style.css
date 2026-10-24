@@ -898,3 +898,20 @@ body:has(#biomeIntro:not(.hidden)) .biomeTooltip{display:none!important}
 #draftStatus{font-size:20px;line-height:1.4;color:#ffe294}#draftGrowth{font-size:13px;line-height:1.5;margin:10px 0 0}.draftCard{touch-action:none;cursor:grab}.draftCard:active{cursor:grabbing}
 
 .handDock #powerControls{background:#16291ff5;border:1px solid #d8bf64;border-radius:12px;padding:12px 16px;font-size:15px;line-height:1.5;max-height:32dvh;overflow-y:auto}#powerStatus{font-size:17px;font-weight:750;margin:0 0 8px}#powerHint{margin:0;line-height:1.5}
+
+/* Expedition feedback uses wall-clock CSS animation, independent of game speed. */
+#relicEffects{position:fixed;inset:0;pointer-events:none;z-index:20;overflow:hidden}
+.relicBurst{position:absolute;pointer-events:none;color:#ffe38b;text-align:center;animation:relicHalo 2.6s ease-out both}
+.relicBurst::before{content:'';position:absolute;width:100px;height:100px;left:-50px;top:-50px;border:3px solid #ffe28b;border-radius:50%;box-shadow:0 0 36px #ffc94e99;animation:relicRing 2.2s ease-out both}
+.relicBurst strong{display:block;position:absolute;transform:translate(-50%,-130%);white-space:nowrap;padding:10px 16px;border:1px solid #e2b95d;border-radius:10px;background:#18281ff2;color:#fff2c2;font-size:17px;box-shadow:0 4px 22px #0008}
+.relicBurst.claimed strong{font-size:21px;background:#473718f5}.relicBurst i{font-style:normal;position:absolute;left:0;top:0;font-size:24px;text-shadow:0 0 12px #ffcc50;animation:relicStars 2.4s ease-out both}
+@keyframes relicStars{0%{opacity:0;transform:scale(.2)}15%{opacity:1}85%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.2) rotate(100deg)}}
+@keyframes relicRing{from{opacity:1;transform:scale(.3)}to{opacity:0;transform:scale(2)}}
+@keyframes relicHalo{0%{opacity:0}10%,75%{opacity:1}100%{opacity:0}}
+#expeditionDeadline{display:block;font-size:19px;line-height:1.35;color:#ffe18a;padding:8px;background:#102017;border-radius:7px;border:1px solid #b9a05b}
+#expeditionDeadline.urgent{color:#ffb7a5;border-color:#d85a40;background:#391d1b}
+.dockBR #expeditionControls{max-height:none;overflow:visible}#expeditionRelics{font-size:12px;white-space:pre-line}
+@media(min-width:1101px) and (min-height:601px){#towerPanel,#towerDrawer{width:440px;box-sizing:border-box}#towerPanel .towerUpgradeDescription{font-size:13px}#towerPanel .towerUpgradeActions button{min-height:44px;font-size:13px}}
+@media(prefers-reduced-motion:reduce){.relicBurst,.relicBurst::before,.relicBurst i{animation:none}.relicBurst::before,.relicBurst i{display:none}}
+
+.duoGoldGift{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:radial-gradient(circle at 50% 30%,#fff1b8,#e6c779);border:3px solid #d4a943;color:#35250c;text-align:center;padding:24px;min-height:260px}.duoGoldGift .duoGiftIcon{font-size:64px;filter:drop-shadow(0 5px 8px #ae7b3460)}.duoGoldGift strong{font-size:32px}.duoGoldGift:hover{box-shadow:0 0 0 3px #f9de8a80}.duoSupportShortcut{margin-left:8px}

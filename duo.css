@@ -108,3 +108,5 @@ html:has(.duoLobbyPage),.duoLobbyPage{height:auto;min-height:100%;overflow:auto}
 .lobbyStatus{min-height:24px;margin:14px 4px 0;text-align:center;color:var(--muted);font-size:14px}
 .lobbyFoot{margin:18px 4px 0;text-align:center;color:#8fa497;font-size:12px}
 @media(max-width:640px){.lobbyCard{padding:20px;border-radius:16px}.lobbyCard h1{font-size:28px}.lobbyChoices,.lobbySeats{grid-template-columns:1fr}.lobbySteps{grid-template-columns:1fr}.lobbyInviteRow{flex-direction:column}.lobbyInviteRow button{width:100%}}
+
+.duoTurn .duoSupportShortcut{display:block;pointer-events:auto;margin:0 auto 8px;min-height:32px;padding:5px 14px;border-radius:999px;font-size:12px}

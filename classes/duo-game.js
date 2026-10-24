@@ -1,5 +1,23 @@
 /* Adapter for the SINGLEPLAYER game screen. Only the server changes gameplay. */
 const HexDuoGame=(()=>{
+  // Follow only already traversed server path segments; never cut across a bend.
+  function motionAlongRoad(start, end, t) {
+    const points=end.motionPath;
+    if(!Array.isArray(points)||points.length<2||end.leaping)return {x:end.x,y:end.y};
+    let best=null;
+    for(let i=0;i<points.length-1;i++){
+      const a=points[i],b=points[i+1],dx=b.x-a.x,dy=b.y-a.y,l2=dx*dx+dy*dy;
+      const u=l2?Math.max(0,Math.min(1,((start.x-a.x)*dx+(start.y-a.y)*dy)/l2)):0;
+      const x=a.x+u*dx,y=a.y+u*dy,d=Math.hypot(start.x-x,start.y-y);
+      if(!best||d<best.d)best={i,x,y,d};
+    }
+    if(!best||best.d>2)return {x:end.x,y:end.y};
+    const path=[{x:best.x,y:best.y},...points.slice(best.i+1)];
+    let total=0;for(let i=1;i<path.length;i++)total+=Math.hypot(path[i].x-path[i-1].x,path[i].y-path[i-1].y);
+    let distance=total*Math.max(0,Math.min(1,t));
+    for(let i=1;i<path.length;i++){const a=path[i-1],b=path[i],length=Math.hypot(b.x-a.x,b.y-a.y);if(length&&distance<=length){const u=distance/length;return {x:a.x+(b.x-a.x)*u,y:a.y+(b.y-a.y)*u};}distance-=length;}
+    return {x:end.x,y:end.y};
+  }
   function mergeBoard(previous,next){
     // Preserve identity of unchanged selections/previews across 10 Hz snapshots.
     for(const [key,tile] of next.map){const old=previous.map?.get(key);if(!old)continue;
@@ -50,8 +68,8 @@ const HexDuoGame=(()=>{
     const motion={from:new Map(),to:new Map(),at:0,span:100};let settledKey='';
     function track(next,switched){const now=performance.now(),from=new Map();if(!switched)for(const e of api.getState().enemies||[])from.set(e.id,{x:e.x,y:e.y});
       if(motion.at)motion.span=Math.min(250,Math.max(50,motion.span*.7+(now-motion.at)*.3));motion.at=now;motion.to=new Map();motion.from=new Map();
-      for(const e of next.enemies||[]){const start=from.get(e.id);motion.to.set(e.id,{x:e.x,y:e.y});if(start&&Math.hypot(start.x-e.x,start.y-e.y)<120){motion.from.set(e.id,start);e.x=start.x;e.y=start.y;}}}
-    function animate(now){if(!motion.from.size)return false;const t=Math.min(1,(now-motion.at)/motion.span);for(const e of api.getState().enemies||[]){const a=motion.from.get(e.id),b=motion.to.get(e.id);if(a&&b){e.x=a.x+(b.x-a.x)*t;e.y=a.y+(b.y-a.y)*t;}}if(t>=1)motion.from.clear();return true;}
+      for(const e of next.enemies||[]){const start=from.get(e.id);motion.to.set(e.id,{x:e.x,y:e.y,motionPath:e.motionPath,leaping:e.leaping});if(start&&Math.hypot(start.x-e.x,start.y-e.y)<120){motion.from.set(e.id,start);e.x=start.x;e.y=start.y;}}}
+    function animate(now){if(!motion.from.size)return false;const t=Math.min(1,(now-motion.at)/motion.span);for(const e of api.getState().enemies||[]){const a=motion.from.get(e.id),b=motion.to.get(e.id);if(a&&b){Object.assign(e,motionAlongRoad(a,b,t));}}if(t>=1)motion.from.clear();return true;}
     async function send(action,payload={}){
       if(!view||!own()){api.setMessage('Partnerkarte · Nur anschauen.');return false;}
       try{await client.send(action,payload);api.commandAccepted?.(action,payload);return true;}catch(error){api.setMessage(error.message);return false;}
@@ -121,13 +139,14 @@ const HexDuoGame=(()=>{
     function beginSupport(kind){const state=api.getState(),slot=kind==='tower'?state.selectedTower:state.selectedSlot;if(slot){send(kind==='tower'?'reinforcement':'portal',{slot});return;}picking=picking===kind?null:kind;$('duoHud').open=false;globalThis.HexCompact?.open('');api.setMessage(picking?(kind==='tower'?'Verstärkung: Klicke jetzt einen eigenen Turm an. Escape bricht ab.':'Partnerportal: Klicke jetzt einen freien Turmplatz an. Escape bricht ab.'):'Auswahl abgebrochen.');}
     document.addEventListener('keydown',e=>{if(e.key==='Escape')picking=null;});
     const bridge={animate,pickSupport,render,send,offerKey:null,ready:()=>send('ready',{value:!view?.ready[view.player]}),pause:()=>send('pause',{value:!view?.paused}),async priorities(packets){for(const packet of packets)if(!await send('targetPriority',packet))break;},choose(kind,offer,index){if(kind==='result'){if(index===1)location.assign('/duo-lobby.html');else send('rematch',{value:!view.rematch?.[view.player]});}else send(kind==='delivery'?'delivery':'reward',{offerId:offer.id,index});}};
+    $('duoSupportShortcut').addEventListener('click',()=>{ $('duoHud').open=true; $('duoSendTower').focus?.(); });
     $('duoQuickMap').addEventListener('click',()=>switchBoard(own()?1-view.player:view.player));
     $('duoOwnMap').addEventListener('click',()=>switchBoard(view.player));$('duoPartnerMap').addEventListener('click',()=>switchBoard(1-view.player));
     $('duoReservePortal').addEventListener('click',()=>beginSupport('slot'));$('duoSendTower').addEventListener('click',()=>beginSupport('tower'));$('duoClearPortal').addEventListener('click',()=>send('portal',{slot:null}));$('duoClearTower').addEventListener('click',()=>send('reinforcement',{slot:null}));
     $('duoLeave').addEventListener('click',async()=>{if(!leaving){leaving=true;$('duoLeave').textContent='Wirklich verlassen? Partie endet für beide.';return;}try{await client.leave();forget();location.replace('/duo-lobby.html');}catch(e){api.setMessage(e.message);}});
     function forget(){try{if(localStorage.getItem('autohex-duo-session')===api.token)localStorage.removeItem('autohex-duo-session');}catch{}}
     $('duoTakeover').addEventListener('click',()=>client.takeover().catch(e=>api.setMessage(e.message)));
-    document.addEventListener('click',e=>{if(!e.target.closest('#duoHud'))$('duoHud').open=false;});
+    document.addEventListener('click',e=>{if(!e.target.closest('#duoHud,#duoSupportShortcut'))$('duoHud').open=false;});
     client=HexDuoClient.create({token:api.token,clientId,onStatus:(text,session)=>{if(session?.invalid){forget();location.replace('/duo-lobby.html#session='+api.token);return;}$('duoNetworkStatus').textContent=text;$('duoTakeover').classList.toggle('hidden',!session?.conflict);},onView:next=>{
       if(!next.lobbyState?.started){client.stop();location.replace('/duo-lobby.html#session='+api.token);return;}
       const first=!view;view=next;match=HexDuoClient.presentation(next,match);board??=next.player;
@@ -136,6 +155,6 @@ const HexDuoGame=(()=>{
     }});
     globalThis.addEventListener('pagehide',()=>client.stop());client.start();return bridge;
   }
-  return {mount,mergeBoard,guide,seatStatus};
+  return {mount,mergeBoard,guide,seatStatus,motionAlongRoad};
 })();
 if(typeof module!=='undefined')module.exports=HexDuoGame;

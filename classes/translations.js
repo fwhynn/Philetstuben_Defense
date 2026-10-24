@@ -2498,3 +2498,57 @@ Wähle vor dem ersten Angriff drei Angebote, danach eines nach jeder zweiten Wel
 Ziehe eine Turmkarte direkt auf einen freien Platz oder wähle sie erst aus und baue über die linke Turmleiste. Tickets erlauben eine normale Verbesserung deiner Wahl, auch während einer Welle. Reparaturen heilen fünf Basisleben. Unverbrauchte Türme und Tickets bleiben erhalten.|Drag a tower card to a free site or choose it and build via the left tower rail. Tickets grant a regular upgrade of your choice, even during waves. Repairs heal five base health. Unused towers and tickets are kept.
 Kein Gold-Shop, Verkauf, Basis-Ausbau, Verbrauchshilfen oder persönliche Arsenalboni. Neue Türme baust du zwischen Wellen. Kein Endlosmodus. Sieg: einmal täglich zehn Diamanten.|No gold shop, selling, base upgrades, consumables or personal arsenal bonuses. Build new towers between waves. No endless mode. Victory: ten diamonds once per day.
 35 Wellen mit deiner gedrafteten Verteidigung überlebt. Kein Endlosmodus.|Survived 35 waves with your drafted defenses. No endless mode.`);
+
+HexTranslations.add(`⌛ Noch|⌛ Remaining
+Wellen · Frist: Ende Welle 12|waves · Deadline: end of wave 12
+◆ Geborgen:|◆ Recovered:
+◆ Entdeckt:|◆ Discovered:
+Straße zu ◆ bauen und andocken.|Build a road to ◆ and connect it.
+Das erste Relikt ist von Anfang an markiert. Nach jeder Bergung wird das nächste sichtbar; beim Erkunden kannst du es auch früher entdecken. Die Frist sinkt nach jeder abgeschlossenen Welle um eins.|The first relic is marked from the start. Recovering it reveals the next; exploration can reveal it sooner. The deadline decreases by one after each completed wave.
+Das erste Relikt ist markiert; nach einer Bergung wird das nächste sichtbar. Relikte sind die goldenen ◆-Missionsfelder. Verbinde alle drei über Straßen mit der Basis und überlebe danach eine Welle. Je früher, desto besser; spätestens Welle 12. Aufdecken allein reicht nicht! Zwei Hexe pro Bauphase, Karten beliebig wiederverwendbar. Danach Planung abschließen.|The first relic is marked; recovering a relic reveals the next. Relics are the golden ◆ objective tiles. Connect all three to the base by road and survive one more wave. Earlier is better; wave 12 is the deadline. Revealing alone is not enough! Two hexes per preparation phase, with reusable cards. Then finish planning.`);
+
+HexTranslations.add(`
+Für deinen Partner · sofort verfügbar|For your partner · available immediately
+⇄ Turmverstärkung & Partnerportal|⇄ Tower reinforcement & partner portal
+Speichern gesperrt: Dieser Browser stellt keine sichere Speichersperre bereit. Öffne das Spiel über HTTPS in einem aktuellen Browser.|Saving disabled: This browser does not provide a safe storage lock. Open the game over HTTPS in a current browser.
+Speichern gesperrt: Der Browser-Speicher ist nicht verfügbar oder der Spielstand wurde außerhalb dieses Tabs geändert. Bitte lade die Seite neu.|Saving disabled: Browser storage is unavailable or the save changed outside this tab. Please reload.
+Nur-Lese-Modus: Ein anderer Spiel-Tab hält die Speichersperre. Schließe ihn. Die Sperre wird beim Zurückkehren automatisch erneut geprüft.|Read-only mode: Another game tab holds the storage lock. Close it. The lock is checked again when you return.
+`);
+
+HexTranslations.add(`
+Duo: Partnerhilfe und Korrekturen|Duo: partner support and fixes
+Geschenke sind wertvoller, Verstärkung ist leichter zu finden und Gegner folgen Kurven sauberer.|More valuable gifts, easier-to-find reinforcements and enemies that follow bends correctly.
+Das Goldgeschenk hat eine eigene goldene Geschenk-Karte. Bereits offene alte Angebote bleiben gültig.|The gold gift has its own golden gift card. Existing pending offers remain valid.
+Turmverstärkung und Partnerportal sind direkt über die Teamleiste erreichbar.|Tower reinforcements and the partner portal are accessible directly from the team bar.
+Die geglättete Gegnerbewegung folgt dem zurückgelegten Straßenverlauf statt Kurven abzukürzen.|Smoothed enemy movement follows the travelled road instead of cutting across bends.
+Partnergeschenk|Partner gift
+20 Gold|20 gold
+50 Gold|50 gold
+Expedition: Relikte und Zeitdruck|Expedition: relics and deadline
+Das nächste Ziel wird klarer sichtbar, Relikte feiern ihren Fund und spätere Wellen werden stärker.|The next objective is clearer, relics celebrate discovery and later waves grow stronger.
+Das erste Relikt ist markiert. Nach einer Bergung erscheint spätestens das nächste noch fehlende Relikt.|The first relic is marked. Recovering one reveals the next missing relic at the latest.
+Neu sichtbare Relikte erhalten Sterne, einen Ton und einen Kamerafokus; die Bergung erhält einen eigenen goldenen Effekt.|Newly visible relics get stars, a sound and camera focus; recovery gets its own golden effect.
+Die Frist zählt nach jeder abgeschlossenen Welle herunter. Die letzten drei Warnsignale sind eindringlicher.|The deadline counts down after each completed wave. The final three warning sounds are more urgent.
+Turmmenüs nutzen mehr Bildschirmhöhe und die linke Turmleiste ist in der Expedition zentriert.|Tower menus use more screen height and the left tower bar is centered in Expedition.
+Zusätzliche Lebens- und Schutzskalierung je Welle ab Welle 3|Additional health and protection scaling per wave from wave 3
+12 %|12%
+20 %|20%
+Menüs und Speichern|Menus and saving
+Fokusaktionen stehen beim Angriffsfokus; Popup-Positionen und die Speichersperre beim Seitenwechsel sind korrigiert.|Focus actions sit beside targeting settings; popup positioning and storage locks during navigation are fixed.
+Fokus kopieren und einfügen stehen unter Angriffsfokus – auch im Solospiel.|Copy and paste focus appear below targeting settings, including in solo play.
+Das Basismenü orientiert sich an seinem Button und wird nicht mehr durch die mittige Duo-Leiste nach unten verschoben.|The base menu anchors to its button without being pushed down by the central Duo bar.
+Speichersperren werden beim Verlassen der Seite freigegeben und bei der Rückkehr erneut geprüft. Veraltete Daten dürfen weiterhin keinen neueren Spielstand überschreiben.|Storage locks are released on page exit and checked again on return. Stale data still cannot overwrite a newer save.
+Duo-Verbesserungen und Reliktjagd|Duo improvements and relic hunt
+Stärkere Partnergeschenke, sauberere Duo-Bewegung und mehr Orientierung und Spannung in der Expedition.|Stronger partner gifts, cleaner Duo movement and more guidance and tension in Expedition.
+VERBESSERT|IMPROVED
+Partnergeschenk: 50 Gold|Partner gift: 50 gold
+NEU|NEW
+Relikteffekte und Fristwarnungen|Relic effects and deadline warnings
+SCHWIERIGER|HARDER
+Spätere Expeditionswellen|Later Expedition waves
+KORRIGIERT|FIXED
+Duo-Kurven und Speichersperren|Duo bends and storage locks
+Duo|Duo
+Tägliche Herausforderungen|Daily challenges
+Allgemeine Verbesserungen|General improvements
+`);

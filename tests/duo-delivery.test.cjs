@@ -14,8 +14,8 @@ test('deliveries only follow every fifth shared completion; no next hand before 
  assert.equal(send(0,'delivery',{offerId:offer.id,index:0}),false);
  const restored=c.duo.restore(json(c.duo.capture(m)));
  const packet={id:'finish',wave:5,action:'delivery',payload:{offerId:m.delivery.offers[1].id,index:0}};
- assert.ok(c.duo.command(m,1,packet));assert.ok(c.duo.command(restored,1,packet));assert.equal(a.gold,before.goldA+20);assert.equal(a.goldEarned.partner,20);assert.notEqual(a.phase,'duoDelivery');assert.notEqual(b.phase,'duoDelivery');assert.deepEqual(json(c.duo.capture(m)),json(c.duo.capture(restored)));
- assert.equal(c.duo.command(m,1,packet),false);assert.equal(send(1,'delivery',packet.payload),false);c.duo.tick(m);assert.equal(a.gold,before.goldA+20);
+ assert.ok(c.duo.command(m,1,packet));assert.ok(c.duo.command(restored,1,packet));assert.equal(a.gold,before.goldA+50);assert.equal(a.goldEarned.partner,50);assert.notEqual(a.phase,'duoDelivery');assert.notEqual(b.phase,'duoDelivery');assert.deepEqual(json(c.duo.capture(m)),json(c.duo.capture(restored)));
+ assert.equal(c.duo.command(m,1,packet),false);assert.equal(send(1,'delivery',packet.payload),false);c.duo.tick(m);assert.equal(a.gold,before.goldA+50);
  assert.equal(finished(4).m.delivery,undefined);
 });
 test('personal wave rewards finish first; deferred draw survives restore',()=>{
@@ -33,4 +33,13 @@ test('delivery cards use recipient loadout, configured rarities and deterministi
 test('version 2 checkpoints migrate without retroactive gifts and invalid delivery snapshots fail',()=>{
  const c=loadCore(),old=json(c.duo.capture(c.duo.create('legacy',[loadout,loadout])));old.version=2;delete old.duo.delivery;const restored=c.duo.restore(old);assert.equal(restored.delivery,null);assert.equal(c.duo.capture(restored).version,3);
  const h=finished(),snap=json(h.c.duo.capture(h.m));snap.duo.delivery.offers[0].choices[0].amount=999;assert.throws(()=>h.c.duo.restore(snap),/delivery/);
+});
+
+test('pending legacy 20 gold gifts survive restore and cannot be forged into new gifts',()=>{
+ const {c,m}=finished(),snap=json(c.duo.capture(m));delete snap.duo.delivery.rulesVersion;
+ for(const o of snap.duo.delivery.offers)o.choices[0].amount=20;
+ const restored=c.duo.restore(snap),before=restored.boards[1].state.gold;
+ assert.ok(c.duo.command(restored,0,{id:'legacy',wave:5,action:'delivery',payload:{offerId:restored.delivery.offers[0].id,index:0}}));
+ assert.equal(restored.boards[1].state.gold,before+20);assert.doesNotThrow(()=>c.duo.restore(json(c.duo.capture(restored))));
+ const bad=json(c.duo.capture(m));bad.duo.delivery.offers[0].choices[0].amount=20;assert.throws(()=>c.duo.restore(bad),/delivery/);
 });

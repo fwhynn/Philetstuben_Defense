@@ -72,7 +72,7 @@ const HexWaves=(()=>{
       return p;
     }
     if(context.challengeKind==='expedition'){
-      const p=plan(wave,0,false,{...context,challengeKind:null}),factor=1+Math.max(0,wave-2)*.12;
+      const p=plan(wave,0,false,{...context,challengeKind:null}),factor=1+Math.max(0,wave-2)*(context.expedition?.rulesVersion===2?.20:.12);
       for(const e of p.enemies)for(const field of ['hp','armorHp','magicHp'])if(e[field])e[field]=Math.ceil(e[field]*factor);return p;
     }
     if(context.challengeKind==='powerGrid'){

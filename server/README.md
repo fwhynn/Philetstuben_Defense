@@ -71,7 +71,7 @@ Update-Ablauf: Wartung einschalten und Speicherbestätigung abwarten; mit Strg+C
 
 ## Partner-Lieferungen
 
-Nach jeder fünften gemeinsamen Welle folgen auf die persönlichen Belohnungen zwei kostenlose Partner-Geschenke: je 20 Gold oder eine von zwei für den Empfänger passenden Karten. Vor beiden Zustellungen wird keine nächste Hand gezogen. Der Befehl delivery akzeptiert ausschließlich offerId und index (0–2); Angebots-IDs kommen aus der eigenen Serveransicht. Kein clientseitiger Goldbetrag, Kartentyp oder Empfänger.
+Nach jeder fünften gemeinsamen Welle folgen auf die persönlichen Belohnungen zwei kostenlose Partner-Geschenke: je 50 Gold oder eine von zwei für den Empfänger passenden Karten. Vor beiden Zustellungen wird keine nächste Hand gezogen. Der Befehl delivery akzeptiert ausschließlich offerId und index (0–2); Angebots-IDs kommen aus der eigenen Serveransicht. Kein clientseitiger Goldbetrag, Kartentyp oder Empfänger.
 
 Duo-Checkpoints verwenden jetzt Version 3. Die explizite Migration von Version 2 übernimmt laufende Partien ohne rückwirkende Geschenke. Teilzustellungen und letzte Bestätigungen werden gemeinsam gesichert; erneutes Senden nach Neustart zahlt nicht doppelt aus. Nur diese Migration ist erlaubt; andere Versionskonflikte bleiben Startfehler. Vor Updates weiter Checkpoint sichern, Wartung verwenden und für Rollbacks den passenden alten Stand behalten.
 

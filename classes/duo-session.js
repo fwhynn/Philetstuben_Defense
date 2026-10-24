@@ -2,13 +2,13 @@
 const HexDuoSession=(()=>{
   const VERSION=3;
   // Provisional Duo balance, independent from Solo reward weights.
-  const DELIVERY=Object.freeze({interval:5,gold:20,weights:Object.freeze({Common:55,Uncommon:30,Rare:15})});
-  function deliveryOffers(match){
+  const DELIVERY=Object.freeze({interval:5,gold:50,weights:Object.freeze({Common:55,Uncommon:30,Rare:15})});
+  function deliveryOffers(match, rulesVersion=2){
     return match.boards.map((_,sender)=>{
       const recipient=match.boards[1-sender].state;
       const library=HexDeck.forLoadout(Object.fromEntries(Object.entries(HexData.CARD_LIBRARY).filter(([,card])=>Object.hasOwn(DELIVERY.weights,card.rarity))),recipient.towerLoadout);
       const random=HexRandom.create(match.seed+'|delivery|'+match.wave+'|'+sender);
-      return {id:'delivery:'+match.wave+':'+sender,index:null,choices:[{kind:'gold',amount:DELIVERY.gold},...HexDeck.rewards(library,random,2,DELIVERY.weights).map(cardId=>({kind:'card',cardId}))]};
+      return {id:'delivery:'+match.wave+':'+sender,index:null,choices:[{kind:'gold',amount:rulesVersion===1?20:DELIVERY.gold},...HexDeck.rewards(library,random,2,DELIVERY.weights).map(cardId=>({kind:'card',cardId}))]};
     });
   }
   function deliver(match,player,payload){
@@ -113,7 +113,7 @@ const HexDuoSession=(()=>{
       const guardians=match.boards.flatMap((run,owner)=>run.state.bossRewards.filter(id=>!id.startsWith('wave:')).map(id=>'duo:'+owner+':'+id));
       for(const run of match.boards)run.state.bossRewards=[...run.state.bossRewards.filter(id=>id.startsWith('wave:')),...new Set(guardians)];
       if(match.wave===35){for(const run of match.boards){HexRunFlow.finish(run.state);run.state.phase='victory';}match.phase='victory';finishMatch(match,'victory');sync(match);return;}
-      if(match.wave>0&&match.wave%DELIVERY.interval===0){match.delivery={wave:match.wave,offers:deliveryOffers(match)};for(const run of match.boards)run.state.duoDeliveryPending=true;}
+      if(match.wave>0&&match.wave%DELIVERY.interval===0){match.delivery={wave:match.wave,rulesVersion:2,offers:deliveryOffers(match)};for(const run of match.boards)run.state.duoDeliveryPending=true;}
       for(const run of match.boards)HexRunSession.finish(run.state,run.random);
       sync(match);
     }
@@ -141,7 +141,8 @@ const HexDuoSession=(()=>{
     if(match.delivery){
       const d=match.delivery;
       if(!Number.isInteger(d.wave)||d.wave<=0||d.wave%DELIVERY.interval||d.wave>match.wave||!Array.isArray(d.offers)||d.offers.length!==2)throw new Error('Invalid Duo delivery');
-      const expected=deliveryOffers({...match,wave:d.wave});
+      if (![1,2].includes(d.rulesVersion??1)) throw new Error('Invalid Duo delivery rules');
+      const expected=deliveryOffers({...match,wave:d.wave},d.rulesVersion??1);
       if(d.offers.some((o,i)=>!o||o.id!==expected[i].id||JSON.stringify(o.choices)!==JSON.stringify(expected[i].choices)||o.index!==null&&(!Number.isInteger(o.index)||o.index<0||o.index>=o.choices.length)))throw new Error('Invalid Duo delivery');
       const unfinished=d.offers.some(o=>o.index===null);
       if(unfinished&&(match.phase!=='prepare'||d.wave!==match.wave||!match.boards.every(run=>run.state.duoDeliveryPending))||pending!==unfinished)throw new Error('Inconsistent Duo delivery');
