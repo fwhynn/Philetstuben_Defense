@@ -1,5 +1,279 @@
 [
   {
+    "version": "next",
+    "title": "Neue Entdeckungen & ausgewogenere Gebäude",
+    "summary": "Mehr Entscheidungen beim Erkunden, bessere Goldnutzung und ein ruhigeres Endgame.",
+    "overview": [
+      {
+        "kind": "buff",
+        "title": "VERSTÄRKT",
+        "items": [
+          "Markt & Handelsnetz",
+          "Schmiede: Kosten ↓",
+          "Schatzgold ↑",
+          "Gegner-Leben ↑"
+        ]
+      },
+      {
+        "kind": "nerf",
+        "title": "ABGESCHWÄCHT",
+        "items": [
+          "Patrizier-Netzwerk",
+          "Gegner-Tempo ↓",
+          "Markt-Verkaufserlös"
+        ]
+      },
+      {
+        "kind": "new",
+        "title": "NEU",
+        "items": [
+          "7 seltene Augments",
+          "Händler-Inseln",
+          "Zusatzhex ab Welle 35"
+        ]
+      },
+      {
+        "kind": "removed",
+        "title": "ENTFERNT",
+        "items": [
+          "Keine Spielinhalte entfernt"
+        ]
+      }
+    ],
+    "sections": [
+      {
+        "title": "Gebäude · Gold sinnvoll investieren",
+        "entries": [
+          {
+            "title": "Markt & Handelsnetz",
+            "summary": "Mehr Rabatt für weniger Gold. Der Markt soll sich früher lohnen.",
+            "stats": [
+              {
+                "label": "Kosten: Stufe 2 / 3",
+                "before": "45 / 70 Gold",
+                "after": "35 / 45 Gold"
+              },
+              {
+                "label": "Rabatt: Stufe 2 / 3",
+                "before": "20 / 25 %",
+                "after": "25 / 35 %"
+              },
+              {
+                "label": "Handelsnetz: Ausbaukosten",
+                "before": "90 Gold",
+                "after": "55 Gold"
+              },
+              {
+                "label": "Gesamtkosten inklusive Handelsnetz",
+                "before": "240 Gold",
+                "after": "170 Gold"
+              }
+            ],
+            "bullets": [
+              "Das Zusatzfeld des Handelsnetzes gewährt ebenfalls 35 % Rabatt. Gewährte Rabatte werden vom Verkaufserlös des Marktes abgezogen, mindestens bis auf 0 Gold."
+            ]
+          },
+          {
+            "title": "Schmiede & Fernschmiede",
+            "summary": "Günstigerer Ausbau bei unverändertem Schadensbonus.",
+            "stats": [
+              {
+                "label": "Kosten: Stufe 2 / 3",
+                "before": "45 / 70 Gold",
+                "after": "40 / 55 Gold"
+              },
+              {
+                "label": "Fernschmiede: Ausbaukosten",
+                "before": "90 Gold",
+                "after": "60 Gold"
+              },
+              {
+                "label": "Gesamtkosten inklusive Fernschmiede",
+                "before": "245 Gold",
+                "after": "195 Gold"
+              }
+            ],
+            "bullets": [
+              "Der Schadensbonus bleibt bei 20 / 25 / 30 %. Gleiche Schmiedeboni stapeln weiterhin nicht."
+            ]
+          },
+          {
+            "title": "Patrizierhaus",
+            "summary": "Das Grund-Einkommen bleibt erhalten; große Hausnetzwerke skalieren weniger stark.",
+            "stats": [
+              {
+                "label": "Zusatzgold je Haus durch andere Patrizierhäuser",
+                "before": "+2 je weiterem Haus, ohne Obergrenze",
+                "after": "+2 je weiterem Haus, maximal +4"
+              }
+            ],
+            "bullets": [
+              "Normale Häuser bleiben unverändert. Ein Patrizierhaus bringt weiterhin 16 Grund-Einkommen und mit Netzwerkbonus höchstens 20 Gold je Welle."
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Gegner & Erkundung",
+        "entries": [
+          {
+            "title": "Gegnerskalierung",
+            "summary": "Weniger Tempo-Eskalation im späteren Spiel. Dafür steigen die Lebenspunkte etwas stärker.",
+            "stats": [
+              {
+                "label": "Normale Gegner: Tempo ab Welle 25",
+                "before": "43,0 Einheiten/s",
+                "after": "33,7 Einheiten/s (−21,7 %)"
+              },
+              {
+                "label": "Zusätzlicher Lebensfaktor",
+                "before": "×1,00",
+                "after": "Bis ×1,18 ab Welle 33"
+              }
+            ],
+            "bullets": [
+              "Ab Welle 4 steigt der zusätzliche Lebensfaktor um 0,6 Prozentpunkte je Welle bis maximal 18 %. Gegner behalten ihre jeweiligen Tempo-Modifikatoren.",
+              "Die normale Gegnerzahl wird gleichmäßig auf offene Eingänge und gebaute Gegnerportale verteilt. Überzählige Gegner wechseln zwischen den Eingängen, damit keiner dauerhaft leer bleibt."
+            ]
+          },
+          {
+            "title": "Schatzinseln",
+            "summary": "Weiter entfernte Schätze belohnen Erkundung stärker.",
+            "stats": [
+              {
+                "label": "Gold beim Andocken",
+                "before": "25 + 5 × Hex-Distanz zur Basis",
+                "after": "25 + 10 × Hex-Distanz zur Basis"
+              },
+              {
+                "label": "Beispiel: Distanz 4",
+                "before": "45 Gold",
+                "after": "65 Gold"
+              }
+            ],
+            "bullets": []
+          }
+        ]
+      },
+      {
+        "title": "Neue Systeme",
+        "entries": [
+          {
+            "title": "Zusatzhex kaufen",
+            "summary": "Mehr Baufläche im Endgame gegen steigende Goldkosten.",
+            "stats": [],
+            "bullets": [
+              "Ab der Vorbereitung auf Welle 35 einmal je Bauphase verfügbar: 200 Gold beim ersten Kauf, danach +100 Gold je Kauf. Nicht in täglichen Herausforderungen.",
+              "Du erhältst eine zusätzliche Kartenhand und darfst ein weiteres Hex legen. Fehlt eine mögliche Platzierung, wird kein Gold abgezogen."
+            ]
+          },
+          {
+            "title": "Dauerhafte Händler-Inseln",
+            "summary": "Einmal verbinden, immer wieder einkaufen. Kaufen und Wirkung erhalten – ohne Zielauswahl.",
+            "stats": [],
+            "bullets": [
+              "Feldversorgung: bis zu 2 Basisleben sofort heilen, anfangs 60 Gold.",
+              "Schutzvorrat: in der nächsten Welle insgesamt 2 Basisschaden verhindern, anfangs 80 Gold; nicht für dieselbe Welle stapelbar.",
+              "Jeder Kauf verteuert dasselbe Angebot um 20 Gold. Alle Händler teilen diese Preise. Käufe sind nur zwischen Wellen möglich."
+            ]
+          },
+          {
+            "title": "Seltene Augment-Inseln",
+            "summary": "5 % Fundchance unter neu erzeugten „?“-Inseln. Wähle einen von bis zu drei Boni für diesen Durchlauf.",
+            "stats": [],
+            "bullets": [
+              "Kein zusätzliches Limit pro Durchlauf. Gewählte Augments verschwinden aus dem Pool; nicht gewählte bleiben verfügbar. Boni und Restladungen werden mit dem Durchlauf gespeichert.",
+              "Wenn kein passendes Augment mehr verfügbar ist, gibt die Insel 30 Gold."
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Die sieben Augments",
+        "entries": [
+          {
+            "title": "Wegweiser",
+            "summary": "Einmal je Welle die gesamte Hand kostenlos neu ziehen.",
+            "stats": [],
+            "bullets": []
+          },
+          {
+            "title": "Späher",
+            "summary": "Deckt unbekannte Inseln ein Hex früher auf; Turmreichweite bleibt unverändert.",
+            "stats": [],
+            "bullets": []
+          },
+          {
+            "title": "Schutzsiegel",
+            "summary": "Verhindert den ersten einzelnen Punkt Basisschaden jeder Welle, auch bei einem stärkeren Treffer.",
+            "stats": [],
+            "bullets": []
+          },
+          {
+            "title": "Veredelung",
+            "summary": "Ersetzt eine passende Deckkarte durch die nächsthöhere Seltenheit, etwa Späherbogen (Epic) → Drachenbogen (Legendary).",
+            "stats": [],
+            "bullets": []
+          },
+          {
+            "title": "Freies Zusatzhex",
+            "summary": "Der nächste Zusatzhex-Kauf ab Welle 35 kostet 0 Gold. Weitere Käufe steigen weiterhin im Preis.",
+            "stats": [],
+            "bullets": []
+          },
+          {
+            "title": "Mehr Auswahl",
+            "summary": "Vier statt drei Karten je Welle ziehen. Die Zahl platzierbarer Hexe bleibt unverändert.",
+            "stats": [],
+            "bullets": []
+          },
+          {
+            "title": "Bautrupp",
+            "summary": "Die nächsten drei neuen Türme sind kostenlos. Upgrades kosten weiterhin Gold; kostenlose Bauten erzeugen keinen Verkaufserlös.",
+            "stats": [],
+            "bullets": []
+          }
+        ]
+      },
+      {
+        "title": "Bedienung & Übersicht",
+        "entries": [
+          {
+            "title": "Hex-Platzierung",
+            "summary": "Beim Anvisieren eines Feldes dreht sich die Karte automatisch in eine gültige Richtung. Manuelles Drehen überspringt dort ungültige Rotationen.",
+            "stats": [],
+            "bullets": []
+          },
+          {
+            "title": "Neue Patchnotes-Ansicht",
+            "summary": "Buffs, Nerfs, neue Inhalte und entfernte Inhalte auf einen Blick; Werteänderungen mit Alt → Neu. Auch auf Englisch verfügbar.",
+            "stats": [],
+            "bullets": []
+          }
+        ]
+      }
+    ],
+    "changes": [
+      "Markt & Handelsnetz — Mehr Rabatt für weniger Gold. Der Markt soll sich früher lohnen. Kosten: Stufe 2 / 3: 45 / 70 Gold → 35 / 45 Gold. Rabatt: Stufe 2 / 3: 20 / 25 % → 25 / 35 %. Handelsnetz: Ausbaukosten: 90 Gold → 55 Gold. Gesamtkosten inklusive Handelsnetz: 240 Gold → 170 Gold. Das Zusatzfeld des Handelsnetzes gewährt ebenfalls 35 % Rabatt. Gewährte Rabatte werden vom Verkaufserlös des Marktes abgezogen, mindestens bis auf 0 Gold.",
+      "Schmiede & Fernschmiede — Günstigerer Ausbau bei unverändertem Schadensbonus. Kosten: Stufe 2 / 3: 45 / 70 Gold → 40 / 55 Gold. Fernschmiede: Ausbaukosten: 90 Gold → 60 Gold. Gesamtkosten inklusive Fernschmiede: 245 Gold → 195 Gold. Der Schadensbonus bleibt bei 20 / 25 / 30 %. Gleiche Schmiedeboni stapeln weiterhin nicht.",
+      "Patrizierhaus — Das Grund-Einkommen bleibt erhalten; große Hausnetzwerke skalieren weniger stark. Zusatzgold je Haus durch andere Patrizierhäuser: +2 je weiterem Haus, ohne Obergrenze → +2 je weiterem Haus, maximal +4. Normale Häuser bleiben unverändert. Ein Patrizierhaus bringt weiterhin 16 Grund-Einkommen und mit Netzwerkbonus höchstens 20 Gold je Welle.",
+      "Gegnerskalierung — Weniger Tempo-Eskalation im späteren Spiel. Dafür steigen die Lebenspunkte etwas stärker. Normale Gegner: Tempo ab Welle 25: 43,0 Einheiten/s → 33,7 Einheiten/s (−21,7 %). Zusätzlicher Lebensfaktor: ×1,00 → Bis ×1,18 ab Welle 33. Ab Welle 4 steigt der zusätzliche Lebensfaktor um 0,6 Prozentpunkte je Welle bis maximal 18 %. Gegner behalten ihre jeweiligen Tempo-Modifikatoren. Die normale Gegnerzahl wird gleichmäßig auf offene Eingänge und gebaute Gegnerportale verteilt. Überzählige Gegner wechseln zwischen den Eingängen, damit keiner dauerhaft leer bleibt.",
+      "Schatzinseln — Weiter entfernte Schätze belohnen Erkundung stärker. Gold beim Andocken: 25 + 5 × Hex-Distanz zur Basis → 25 + 10 × Hex-Distanz zur Basis. Beispiel: Distanz 4: 45 Gold → 65 Gold.",
+      "Zusatzhex kaufen — Mehr Baufläche im Endgame gegen steigende Goldkosten. Ab der Vorbereitung auf Welle 35 einmal je Bauphase verfügbar: 200 Gold beim ersten Kauf, danach +100 Gold je Kauf. Nicht in täglichen Herausforderungen. Du erhältst eine zusätzliche Kartenhand und darfst ein weiteres Hex legen. Fehlt eine mögliche Platzierung, wird kein Gold abgezogen.",
+      "Dauerhafte Händler-Inseln — Einmal verbinden, immer wieder einkaufen. Kaufen und Wirkung erhalten – ohne Zielauswahl. Feldversorgung: bis zu 2 Basisleben sofort heilen, anfangs 60 Gold. Schutzvorrat: in der nächsten Welle insgesamt 2 Basisschaden verhindern, anfangs 80 Gold; nicht für dieselbe Welle stapelbar. Jeder Kauf verteuert dasselbe Angebot um 20 Gold. Alle Händler teilen diese Preise. Käufe sind nur zwischen Wellen möglich.",
+      "Seltene Augment-Inseln — 5 % Fundchance unter neu erzeugten „?“-Inseln. Wähle einen von bis zu drei Boni für diesen Durchlauf. Kein zusätzliches Limit pro Durchlauf. Gewählte Augments verschwinden aus dem Pool; nicht gewählte bleiben verfügbar. Boni und Restladungen werden mit dem Durchlauf gespeichert. Wenn kein passendes Augment mehr verfügbar ist, gibt die Insel 30 Gold.",
+      "Wegweiser — Einmal je Welle die gesamte Hand kostenlos neu ziehen.",
+      "Späher — Deckt unbekannte Inseln ein Hex früher auf; Turmreichweite bleibt unverändert.",
+      "Schutzsiegel — Verhindert den ersten einzelnen Punkt Basisschaden jeder Welle, auch bei einem stärkeren Treffer.",
+      "Veredelung — Ersetzt eine passende Deckkarte durch die nächsthöhere Seltenheit, etwa Späherbogen (Epic) → Drachenbogen (Legendary).",
+      "Freies Zusatzhex — Der nächste Zusatzhex-Kauf ab Welle 35 kostet 0 Gold. Weitere Käufe steigen weiterhin im Preis.",
+      "Mehr Auswahl — Vier statt drei Karten je Welle ziehen. Die Zahl platzierbarer Hexe bleibt unverändert.",
+      "Bautrupp — Die nächsten drei neuen Türme sind kostenlos. Upgrades kosten weiterhin Gold; kostenlose Bauten erzeugen keinen Verkaufserlös.",
+      "Hex-Platzierung — Beim Anvisieren eines Feldes dreht sich die Karte automatisch in eine gültige Richtung. Manuelles Drehen überspringt dort ungültige Rotationen.",
+      "Neue Patchnotes-Ansicht — Buffs, Nerfs, neue Inhalte und entfernte Inhalte auf einen Blick; Werteänderungen mit Alt → Neu. Auch auf Englisch verfügbar."
+    ]
+  },
+  {
     "version": "1.1.1",
     "title": "Neue Hex-Oberfläche und sichere Spielstände",
     "changes": [
