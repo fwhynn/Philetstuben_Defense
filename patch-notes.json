@@ -1,6 +1,6 @@
 [
   {
-    "version": "next",
+    "version": "1.2.1",
     "title": "Duo: Gemeinsam besser vorbereitet",
     "summary": "Kompakte Teamleiste, bessere Bewegung und gemeinsame Planung von Geschenken und Türmen.",
     "overview": [
@@ -65,7 +65,8 @@
     "changes": [
       "Weniger Bildschirmfläche für Hinweise, stabilere Leisten und flüssigere Gegnerbewegung.",
       "Stimmt eure Geschenke und Türme vor dem nächsten Angriff ab."
-    ]
+    ],
+    "date": "2026-10-24"
   },
   {
     "version": "1.2.0",
