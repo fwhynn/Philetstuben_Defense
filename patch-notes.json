@@ -1,6 +1,6 @@
 [
   {
-    "version": "next",
+    "version": "1.2.4",
     "title": "Herausforderungen: Neue Wege, echte Risiken",
     "summary": "Mehr Abwechslung, stärkere Missionen und verlässliche Belohnungen.",
     "overview": [
@@ -91,7 +91,8 @@
       "Stärkerer Auftakt, keine Goldeinnahmen und Bauplatzmarker nur mit verfügbaren Türmen im Inventar.",
       "Vier sichtbare Stationen auf einer verbundenen Karte. Nach Welle 3, 6 und 9 teleportiert sich die Festung; Straßen und Türme bleiben erhalten.",
       "Freie Turmauswahl vor dem Start von Gier und Drei Dörfern. Türme lassen sich auch während erlaubter Kampfphasen per Drag-and-drop bauen."
-    ]
+    ],
+    "date": "2026-10-24"
   },
   {
     "version": "1.2.3",

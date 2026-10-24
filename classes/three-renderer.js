@@ -3,9 +3,9 @@
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
-import {MODEL_ENEMIES,isEnemyJoint,enemyPose,applyEnemyPose} from './enemy-motion.mjs?v=6c1e3c77f923b433';
-import {flameDetails,bossDetails} from './model-details.mjs?v=6c1e3c77f923b433';
-import {MineBatches} from './mine-batches.mjs?v=6c1e3c77f923b433';
+import {MODEL_ENEMIES,isEnemyJoint,enemyPose,applyEnemyPose} from './enemy-motion.mjs?v=659cfc688778a1bf';
+import {flameDetails,bossDetails} from './model-details.mjs?v=659cfc688778a1bf';
+import {MineBatches} from './mine-batches.mjs?v=659cfc688778a1bf';
 
 const S=54,STEP=Math.PI/3,TILT=55*Math.PI/180,PITCH_MIN=12*Math.PI/180,PITCH_MAX=88*Math.PI/180,DIST_MIN=220,DIST_MAX=3400,DIST_START=950,SKY='#a9cbd8';
 const PREFIX={tiles:'tile',landmarks:'landmark',towers:'tower',enemies:'enemy',buildings:'building',effects:'mine',bases:'base',consumables:'consumable'};
