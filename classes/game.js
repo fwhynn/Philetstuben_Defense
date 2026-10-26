@@ -897,7 +897,7 @@ R dreht die Karte, dann Feld anklicken.`;
     const area = menuArea(); for (const panel of document.querySelectorAll('.towerPanel:not(.hidden),.drawer:not(.hidden):not(.settingsWindow)')) {
       let bounds=area;
       if(document.documentElement.clientWidth>700){
-        const viewWidth=document.documentElement.clientWidth,zoom=cssZoom(panel),columnWidth=(panel.classList.contains('buildDrawer')?Math.min(540,Math.max(440,viewWidth*.3)):440)*zoom;// Turm bauen wie in hexwerk.css: clamp(440px,30vw,540px), mal Zoom
+        const viewWidth=document.documentElement.clientWidth,zoom=cssZoom(panel),columnWidth=440*zoom;// Spaltenbreite der Seitenmenüs, mal Zoom
         const left=viewWidth>1100?area.left:12,right=Math.min(viewWidth-12,left+columnWidth),height=document.documentElement.clientHeight;
         const obstacles=[...document.querySelectorAll('.compactToolbar,.dockTL,.hud,.dockBR,.dockBL,.mapControls,.handDock,.duoQuickMap')].map(el=>el.getBoundingClientRect()).filter(r=>r.right>left&&r.left<right);
         bounds=HexUiLayout.columnArea(document.documentElement.clientWidth,height,obstacles,left,right-left);

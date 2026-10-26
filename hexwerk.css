@@ -1811,3 +1811,37 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
   :root{--hx-cw:150px}
   .handDock .card{min-height:0!important;padding-top:22px!important}
 }
+
+/* ===== Kompakter und übersichtlicher (Rückmeldung 26.10.2026) ===== */
+/* Turm bauen: wieder 440 px breit, kleinere Porträts, Namen und Preise; Hinweise ruhiger */
+.boardWrap #towerDrawer.buildDrawer,#towerDrawer.buildDrawer{width:440px!important;padding:12px 16px!important}
+#towerDrawer .panelHead{grid-template-columns:48px minmax(0,1fr) auto!important;gap:12px!important;padding-bottom:10px!important;margin-bottom:8px!important}
+#towerDrawer .buildHeadIcon{width:48px;height:54px}#towerDrawer .buildHeadIcon .hxi{width:24px;height:24px}
+#towerDrawer .towerTitle h2{font-size:24px!important}
+#towerDrawer .towerStage{font-size:14px}
+#towerMenu.towerMenu{gap:6px!important}
+#towerMenu .towerBtn{grid-template-columns:56px minmax(0,1fr) auto!important;gap:2px 12px!important;padding:8px 10px!important;border-radius:10px!important}
+#towerMenu .towerBuildIcon{width:56px!important;height:63px}
+#towerMenu .towerBuildIcon .researchIcon.hxTowerIcon{width:34px!important}
+#towerMenu .towerOffer{gap:3px!important}
+#towerMenu .towerOfferName{font-size:17px!important}
+#towerMenu .towerUpgradeTag{font-size:11px;padding:1px 7px}
+#towerMenu .towerOfferStats{font-size:14px!important;gap:2px 10px!important}
+#towerMenu .towerOfferStats [data-stat=cooldown]::before{width:14px;height:14px}
+#towerMenu .towerOfferDescription{font-size:13px!important;line-height:1.3!important}
+#towerMenu .towerPriceTag{min-height:40px;min-width:66px;font-size:16px;padding:0 10px}
+#towerMenu .towerPriceTag .hxi{width:16px;height:16px}
+#towerMenu .towerOfferPrice kbd{font-size:12px;padding:1px 7px}
+#towerDrawer .buildNote{margin-top:8px;padding:8px 12px;font-size:12.5px!important;line-height:1.4}
+
+/* Belohnung: schmaleres Fenster, kleinere Überschrift, Karten wie in der Hand */
+#rewardOverlay:not(.inspectMap)>.rewardBox{width:min(760px,calc(100vw - 24px))}
+#rewardOverlay .rewardHeading{padding:14px 22px 12px 26px;margin-bottom:10px}
+#rewardOverlay .rewardHeading h2{font-size:clamp(24px,2.2vw,30px)!important}
+#rewardDescription{margin:0 26px 12px;font-size:15px}
+#rewardOverlay .rewardChoices{grid-template-columns:repeat(auto-fit,minmax(0,200px))!important;justify-content:center;gap:14px!important;margin:0 26px}
+#rewardChoices .card{min-height:0!important;padding:12px 10px 10px!important;gap:3px}
+#rewardChoices .card svg.hxCardArt{width:min(66%,96px)!important;margin:2px auto 0}
+#rewardChoices .card .deckCopyCount{font-size:13px!important;margin-top:4px}
+#rewardOverlay .rewardInspectActions button{min-height:42px;padding:0 18px!important;font-size:15px!important}
+#rewardOverlay #rewardDeck>h2{font-size:clamp(24px,2.2vw,30px)!important;padding:14px 22px 12px 26px}

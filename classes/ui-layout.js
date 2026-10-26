@@ -40,12 +40,12 @@ const HexUiLayout=(()=>{
   }
   return {safeArea,columnArea,freeArea,fit,dropRadius,pickScreenSlot};
 })();
-// Einheitliche Oberflächengröße am Desktop: Bezug 1920 × 1080, Faktor 0,8–2 als --hx-k.
+// Einheitliche Oberflächengröße am Desktop: 0,9 × (Bildschirm / 1920 × 1080), begrenzt auf 0,75–1,8, als --hx-k.
 // hexwerk.css skaliert damit HUD, Turmfenster und Fenster gleichmäßig (zoom); kompakte Ansichten bleiben bei 1.
 (function applyUiScale(){
   const root=globalThis.document?.documentElement;
   if(!root?.style?.setProperty||typeof globalThis.matchMedia!=='function')return;
   const desktop=globalThis.matchMedia('(min-width:1101px) and (min-height:601px)');
-  const apply=()=>{const k=desktop.matches?Math.max(.8,Math.min(2,globalThis.innerWidth/1920,globalThis.innerHeight/1080)):1;root.style.setProperty('--hx-k',String(Math.round(k*1000)/1000));};
+  const apply=()=>{const k=desktop.matches?Math.max(.75,Math.min(1.8,.9*Math.min(globalThis.innerWidth/1920,globalThis.innerHeight/1080))):1;root.style.setProperty('--hx-k',String(Math.round(k*1000)/1000));};
   apply();globalThis.addEventListener?.('resize',apply);desktop.addEventListener?.('change',apply);
 })();
