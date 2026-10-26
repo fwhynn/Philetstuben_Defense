@@ -432,7 +432,7 @@ button.hxHex:focus-visible,summary.hxHex:focus-visible{outline:none;filter:drop-
   .hud #waveDropdown{position:fixed;left:0;right:0;top:var(--hx-top);width:max-content;margin-inline:auto;z-index:8}
   .hud #waveDropdown .statPopup{translate:none}
   #quickLoadout{left:var(--hx-m);top:calc(var(--hx-top) + var(--hx-hs) + 26px);transform:none}
-  #biomeRail{right:var(--hx-m);top:34vh;transform:none}
+  #biomeRail{right:var(--hx-m);top:50%;transform:translateY(-50%)}
   .consumableMenu{left:var(--hx-m);bottom:calc(var(--hx-m) + var(--hx-hs) + 14px);max-width:none}
   .consumableMenu[open]{width:min(330px,calc(100vw - 48px))}
   .dockBL{left:var(--hx-m);bottom:var(--hx-m);top:auto}
@@ -1689,3 +1689,9 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 #loadoutOverlay .presetCard button{min-height:36px;font-size:14px!important}
 #preparationInfo{color:#e3e9e3}
 #loadoutOverlay .loadoutActions button{min-height:52px;padding:0 22px;font-size:17px!important}
+
+/* Welle 35 geschafft: alter ID-Stil setzte weiße Schrift auf den goldenen Hauptknopf */
+#campaignVictory #endlessBtn{color:#2a1f10}
+#campaignVictory .eyebrow{color:var(--hx-gold-text);font:700 14px var(--hx-font-ui);letter-spacing:.12em}
+#campaignVictory .gameOverBox>p{color:#e3e9e3;font-size:17px;line-height:1.55}
+#campaignVictory .loadoutActions button{min-height:54px;font-size:18px!important}

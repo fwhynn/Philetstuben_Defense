@@ -59,7 +59,7 @@
   let gameSpeed = 1; try { gameSpeed = Math.max(1, Math.min(8, Math.round(Number(gameStorage.getItem('gameSpeed')) || 1))); } catch { }
   const syncSpeedFill = () => speedToggle.style.setProperty?.('--fill', ((Number(speedToggle.value) - 1) / 7 * 100) + '%');
   speedToggle.value = String(gameSpeed); document.getElementById('speedValue').textContent = gameSpeed + '×'; syncSpeedFill(); speedToggle.addEventListener('input', syncSpeedFill);
-  function changeSpeed(value) { if (duoToken) { duoAction('speed', { value: Number(value) }); return; } advanceClock(performance.now()); gameSpeed = Math.max(1, Math.min(8, Math.round(Number(value) || 1))); speedToggle.value = String(gameSpeed); document.getElementById('speedValue').textContent = gameSpeed + '×'; try { gameStorage.setItem('gameSpeed', String(gameSpeed)); } catch { } saveGameSettings(); }
+  function changeSpeed(value) { if (duoToken) { duoAction('speed', { value: Number(value) }); return; } advanceClock(performance.now()); gameSpeed = Math.max(1, Math.min(8, Math.round(Number(value) || 1))); speedToggle.value = String(gameSpeed); syncSpeedFill(); document.getElementById('speedValue').textContent = gameSpeed + '×'; try { gameStorage.setItem('gameSpeed', String(gameSpeed)); } catch { } saveGameSettings(); }
   speedToggle.addEventListener('input', () => changeSpeed(speedToggle.value));
   const towerMenu = document.getElementById('towerMenu');
   let towerMenuNeedsFreshTouch = false;
@@ -1741,7 +1741,7 @@ R dreht die Karte, dann Feld anklicken.`;
       showSlotHints = slotToggle.checked; showHexGrid = gridToggle.checked; onboardingHints = hintsToggle.checked;
       if (state) { Object.assign(state, {showSlotHints, showHexGrid, showUpgradeStatus: document.getElementById('upgradeStatus').checked}); if (!onboardingHints) { tutorial.active = false; state.biomeIntro = null; } }
       document.getElementById('restartTutorialBtn').disabled = !onboardingHints;
-      if (Number.isInteger(settings.gameSpeed) && settings.gameSpeed >= 1 && settings.gameSpeed <= 8 && !duoToken) { gameSpeed = settings.gameSpeed; speedToggle.value = String(gameSpeed); document.getElementById('speedValue').textContent = gameSpeed + '×'; }
+      if (Number.isInteger(settings.gameSpeed) && settings.gameSpeed >= 1 && settings.gameSpeed <= 8 && !duoToken) { gameSpeed = settings.gameSpeed; speedToggle.value = String(gameSpeed); syncSpeedFill(); document.getElementById('speedValue').textContent = gameSpeed + '×'; }
       if (!testProfile) { if (['de','en'].includes(settings.language)) globalThis.HexI18n?.setLanguage(settings.language); if (typeof HexAssetEdition !== 'undefined' && (HexAssetEdition.EDITIONS || ['normal','sakura']).includes(settings.assetEdition)) HexAssetEdition.set(settings.assetEdition); }
       try { for (const [key,value] of Object.entries({slotHints:showSlotHints,hexGrid:showHexGrid,onboardingHints,gameSpeed})) gameStorage.setItem(key,String(value)); gameStorage.setItem('hex-game-settings-v1', JSON.stringify(readGameSettings())); } catch {}
       if (state) renderAll();
