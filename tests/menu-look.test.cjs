@@ -64,7 +64,7 @@ test('in-game grading runs only on high quality, renders both scenes once each a
  assert.match(source,/if\(!look\?\.render\(\)\)\{gl\.clear\(\);gl\.render\(backgroundScene,camera\);gl\.clearDepth\(\);gl\.render\(scene,camera\);\}/);
  assert.match(look,/new EffectComposer\(renderer,new THREE\.WebGLRenderTarget\(1,1,\{type:THREE\.HalfFloatType\}\)\)/,'kein MSAA im Zwischenbild');
  const {GAME_GRADE}=await import('../classes/game-look.mjs');
- assert.ok(GAME_GRADE.saturation>1&&GAME_GRADE.saturation<1.2,'zurückhaltender als das Hauptmenü');
+ assert.ok(GAME_GRADE.saturation>.8&&GAME_GRADE.saturation<1,'im Spiel leicht entsättigt, ruhiger als das Hauptmenü');
 });
 
 test('material polish makes meadow and foliage richer once, never touches fog tiles',async()=>{
@@ -77,5 +77,5 @@ test('material polish makes meadow and foliage richer once, never touches fog ti
  assert.ok(hsl(grass.material.color).s>hsl(before).s+.1,'Wiese satter');assert.ok(hsl(grass.material.color).l<hsl(before).l,'Wiese dunkler');
  assert.ok(Math.abs(hsl(grass.material.color).h-hsl(before).h)<.01,'Farbton bleibt');
  assert.ok(fog.material.color.equals(fogBefore),'Nebelkachel unverändert');assert.equal(stone.material.userData.polished,undefined);
- for(const file of ['three-renderer.js','menu-backdrop.js'])assert.match(fs.readFileSync(path.join(__dirname,'../classes',file),'utf8'),/polishMaterials\((gltf|g)\.scene\)/,file);
+ for(const file of ['three-renderer.js','menu-backdrop.js'])assert.match(fs.readFileSync(path.join(__dirname,'../classes',file),'utf8'),/polishMaterials\((gltf|g)\.scene(,GAME_POLISH)?\)/,file);
 });
