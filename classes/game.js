@@ -551,7 +551,8 @@
     renderer.render(state, targets); renderDragShade(); renderConsumablePreview();
   }
   // Kartenbild: Kachel in Schrägsicht wie cards/road_*_tilt.svg, Straßen aus der echten Kachelgeometrie (Drehung und Sonderformen stimmen).
-  // Feste IDs für Verläufe und Maske: gleiche Form auf allen Karten, Markup bleibt reproduzierbar.
+  // Verläufe und Maske stehen einmal als #hxCardDefs am Anfang von index.html: Doppelte IDs in jeder Karte
+  // brachen die Darstellung, sobald das erste Vorkommen in einem ausgeblendeten Fenster lag (Deck, Turmfenster).
   const CARD_TUFTS = [[250, 330, 1], [612, 296, 0], [300, 706, 0], [640, 690, 1], [433, 214, 1], [433, 800, 0], [170, 520, 0], [700, 540, 1], [540, 420, 0], [330, 590, 1]];
   function miniPathSvg(card, rot = 0) {
     const geometry = HexMap.roadGeometry({ q: 0, r: 0, type: card.id, roads: rotatedRoads(card, rot) });
@@ -559,10 +560,7 @@
     const legs = [...geometry.legs.values()], road = (color, width, extra = '') => legs.map(list => '<polyline points="' + points(list) + '" fill="none" stroke="' + color + '" stroke-width="' + width + '" stroke-linecap="round" stroke-linejoin="round"' + extra + '/>').join('');
     const tufts = CARD_TUFTS.map(([x, y, light]) => '<ellipse cx="' + x + '" cy="' + y + '" rx="30" ry="18" fill="' + (light ? '#b9e086' : '#6f9f45') + '"/>').join('')
       + '<ellipse cx="560" cy="760" rx="22" ry="15" fill="#c7c2b0"/><ellipse cx="250" cy="420" rx="16" ry="11" fill="#c7c2b0"/>';
-    return '<svg class="hxCardArt" viewBox="0 0 866 740" aria-label="Aktuelle Ausrichtung"><defs>'
-      + '<clipPath id="hxCardClip"><polygon points="433,60 814,280 814,720 433,940 52,720 52,280"/></clipPath>'
-      + '<radialGradient id="hxCardMeadow" cx=".5" cy=".32" r=".8"><stop offset="0" stop-color="#b3df7c"/><stop offset="1" stop-color="#76a84c"/></radialGradient>'
-      + '<linearGradient id="hxCardEarth" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c39a63"/><stop offset="1" stop-color="#7e5a33"/></linearGradient></defs>'
+    return '<svg class="hxCardArt" viewBox="0 0 866 740" aria-label="Aktuelle Ausrichtung">'
       + '<ellipse cx="433" cy="712" rx="370" ry="26" fill="#000" opacity=".18"/>'
       + '<path d="M17 459L433 608L433 703L17 554Z" fill="url(#hxCardEarth)"/><path d="M433 608L849 459L849 554L433 703Z" fill="#8f6a3e"/>'
       + '<path d="M17 459L433 608L433 630L17 481ZM433 608L849 459L849 481L433 630Z" fill="#5f8f3c"/>'

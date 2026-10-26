@@ -16,6 +16,12 @@
   </head>
 
   <body>
+    <!-- Gemeinsame Verläufe und Maske der Kartenbilder (miniPathSvg in game.js); nie ausblenden, sonst greifen die Verweise nicht. -->
+    <svg id="hxCardDefs" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute;overflow:hidden"><defs>
+      <clipPath id="hxCardClip"><polygon points="433,60 814,280 814,720 433,940 52,720 52,280"/></clipPath>
+      <radialGradient id="hxCardMeadow" cx=".5" cy=".32" r=".8"><stop offset="0" stop-color="#b3df7c"/><stop offset="1" stop-color="#76a84c"/></radialGradient>
+      <linearGradient id="hxCardEarth" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c39a63"/><stop offset="1" stop-color="#7e5a33"/></linearGradient>
+    </defs></svg>
     <button id="devToggleBtn" class="devToggle hidden" type="button" aria-pressed="false">Dev: aus</button>
     <div id="fpsCounter" class="fpsCounter hidden" data-no-translate aria-label="FPS">FPS: —</div>
     <div id="app">
