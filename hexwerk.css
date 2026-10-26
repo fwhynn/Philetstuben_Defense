@@ -1845,3 +1845,32 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 #rewardChoices .card .deckCopyCount{font-size:13px!important;margin-top:4px}
 #rewardOverlay .rewardInspectActions button{min-height:42px;padding:0 18px!important;font-size:15px!important}
 #rewardOverlay #rewardDeck>h2{font-size:clamp(24px,2.2vw,30px)!important;padding:14px 22px 12px 26px}
+
+/* Mittelweg zwischen großzügig und kompakt (Rückmeldung 26.10.2026): Turm bauen 490 px, Belohnung 900 px */
+.boardWrap #towerDrawer.buildDrawer,#towerDrawer.buildDrawer{width:490px!important;padding:14px 18px!important}
+#towerDrawer .panelHead{grid-template-columns:56px minmax(0,1fr) auto!important;gap:13px!important}
+#towerDrawer .buildHeadIcon{width:56px;height:63px}#towerDrawer .buildHeadIcon .hxi{width:28px;height:28px}
+#towerDrawer .towerTitle h2{font-size:clamp(26px,1.9vw,30px)!important}
+#towerDrawer .towerStage{font-size:15px}
+#towerMenu.towerMenu{gap:7px!important}
+#towerMenu .towerBtn{grid-template-columns:68px minmax(0,1fr) auto!important;gap:3px 14px!important;padding:11px 11px!important}
+#towerMenu .towerBuildIcon{width:68px!important;height:77px}
+#towerMenu .towerBuildIcon .researchIcon.hxTowerIcon{width:41px!important}
+#towerMenu .towerOfferName{font-size:19.5px!important}
+#towerMenu .towerUpgradeTag{font-size:12px;padding:2px 8px}
+#towerMenu .towerOfferStats{font-size:15.25px!important;gap:3px 11px!important}
+#towerMenu .towerOfferStats [data-stat=cooldown]::before{width:15.5px;height:15.5px}
+#towerMenu .towerOfferDescription{font-size:14px!important;line-height:1.32!important}
+#towerMenu .towerPriceTag{min-height:47px;min-width:78px;font-size:18.5px;padding:0 13px}
+#towerMenu .towerPriceTag .hxi{width:19px;height:19px}
+#towerMenu .towerOfferPrice kbd{font-size:13px;padding:2px 8px}
+#towerDrawer .buildNote{margin-top:9px;padding:9px 13px;font-size:13.25px!important}
+
+#rewardOverlay:not(.inspectMap)>.rewardBox{width:min(900px,calc(100vw - 24px))}
+#rewardOverlay .rewardHeading{padding:16px 24px 13px 28px;margin-bottom:11px}
+#rewardOverlay .rewardHeading h2,#rewardOverlay #rewardDeck>h2{font-size:clamp(26px,2.6vw,35px)!important}
+#rewardDescription{margin:0 28px 13px;font-size:16px}
+#rewardOverlay .rewardChoices{grid-template-columns:repeat(auto-fit,minmax(0,240px))!important;gap:15px!important;margin:0 28px}
+#rewardChoices .card{padding:14px 12px 12px!important}
+#rewardChoices .card svg.hxCardArt{width:min(76%,124px)!important}
+#rewardOverlay .rewardInspectActions button{min-height:45px;padding:0 20px!important;font-size:16px!important}
