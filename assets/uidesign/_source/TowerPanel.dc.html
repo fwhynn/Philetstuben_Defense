@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Turmfenster</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,800;9..144,900&amp;family=Barlow+Semi+Condensed:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+button,select{font:inherit;color:inherit}
+</style>
+</helmet>
+<section aria-label="{{aria}}" style="position: relative; width: {{w}}px; height: {{hh}}; box-sizing: border-box; padding: 2px; clip-path: polygon({{c}}px 0, calc(100% - {{c}}px) 0, 100% {{c}}px, 100% calc(100% - {{c}}px), calc(100% - {{c}}px) 100%, {{c}}px 100%, 0 calc(100% - {{c}}px), 0 {{c}}px); background: linear-gradient(170deg, #e9c46a, #8a6a26 60%, #c9a24a); filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.5)); font-family: 'Barlow Semi Condensed', 'Arial Narrow', system-ui, sans-serif; color: #f4ecd6">
+  <div style="height: 100%; box-sizing: border-box; overflow-y: auto; clip-path: polygon({{ci}}px 0, calc(100% - {{ci}}px) 0, 100% {{ci}}px, 100% calc(100% - {{ci}}px), calc(100% - {{ci}}px) 100%, {{ci}}px 100%, 0 calc(100% - {{ci}}px), 0 {{ci}}px); background: linear-gradient(180deg, #17301f 0%, #10231a 100%); padding: {{pad}}px; display: flex; flex-direction: column; gap: {{gap}}px">
+
+    <sc-if value="{{isStats}}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; align-items: center; justify-content: space-between">
+        <button style="display: inline-flex; align-items: center; gap: 4px; min-height: 40px; padding: 0 6px 0 0; border: 0; background: none; font-size: {{fs}}px; font-weight: 600"><dc-import name="Icon" glyph="chevronLeft" size="{{is}}" fill="currentColor" hint-size="20px,20px"></dc-import>Zurück</button>
+        <button aria-label="Schließen" style="padding: 0; border: 0; background: none"><dc-import name="Hex" family="green" h="{{closeH}}" icon="close" label="" sub="" hint-size="40px,46px"></dc-import></button>
+      </div>
+    </sc-if>
+
+    <header style="display: flex; align-items: center; gap: {{gap}}px">
+      <div style="position: relative; width: {{portW}}px; height: {{portW}}px; flex: none">
+        <svg viewBox="0 0 300 300" width="{{portW}}" height="{{portW}}" aria-hidden="true">
+          <path d="M46 177L150 210V250L46 217z" fill="#8d8574"></path>
+          <path d="M150 210L254 177V217L150 250z" fill="#6f6858"></path>
+          <path d="M46 177L150 210V220L46 187z" fill="#4f7a36"></path>
+          <path d="M150 210L254 177V187L150 220z" fill="#3f6a2c"></path>
+          <path d="M150 88L254 121V177L150 210L46 177V121z" fill="#7fb256"></path>
+          <path d="M150 102L238 130V170L150 196L62 170V130z" fill="#93c262"></path>
+        </svg>
+        <div style="position: absolute; left: 22%; top: 2%; color: #e9c27a"><dc-import name="Icon" glyph="tower_archer" size="{{portIcon}}" fill="currentColor" hint-size="44px,44px"></dc-import></div>
+      </div>
+      <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+        <h3 style="margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 900; font-size: {{titleFs}}px; line-height: 1.05; color: #f6efd8">{{title}}</h3>
+        <span style="font-size: {{fs}}px; font-weight: 600; color: #e7c66a">{{subtitle}}</span>
+      </div>
+      <sc-if value="{{isUpgrades}}" hint-placeholder-val="{{ true }}">
+        <button aria-label="Schließen" style="align-self: flex-start; padding: 0; border: 0; background: none"><dc-import name="Hex" family="green" h="{{closeH}}" icon="close" label="" sub="" hint-size="40px,46px"></dc-import></button>
+      </sc-if>
+    </header>
+
+    <sc-if value="{{isUpgrades}}" hint-placeholder-val="{{ true }}">
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px">
+        <sc-for list="{{core}}" as="cv" hint-placeholder-count="3">
+          <div style="display: flex; align-items: center; gap: 6px; min-width: 0">
+            <span style="display: inline-flex; color: #e9dcb8; flex: none"><dc-import name="Icon" glyph="{{cv.icon}}" size="{{iconL}}" fill="currentColor" hint-size="26px,26px"></dc-import></span>
+            <span style="display: flex; flex-direction: column; min-width: 0">
+              <b style="font-size: {{valFs}}px; font-weight: 700; line-height: 1.05">{{cv.value}}</b>
+              <span style="font-size: {{smallFs}}px; font-weight: 500; color: #cfd9cf; white-space: nowrap">{{cv.label}}</span>
+            </span>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
+        <label style="font-size: {{fs}}px; font-weight: 600; color: #e7c66a">Angriffsfokus</label>
+        <button aria-haspopup="listbox" style="flex: 1; min-width: 150px; display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 40px; padding: 0 10px 0 12px; border-radius: 6px; border: 1px solid #a68a45; background: #0d1d15; font-size: {{fs}}px; font-weight: 600; text-align: left">Nächster an der Basis<dc-import name="Icon" glyph="chevronDown" size="{{is}}" fill="#e9dcb8" hint-size="20px,20px"></dc-import></button>
+      </div>
+
+      <h4 style="margin: 2px 0 0; padding-top: 8px; border-top: 1px solid rgba(201, 162, 74, 0.35); font-size: {{headFs}}px; font-weight: 700; color: #f6efd8">Upgrades</h4>
+      <sc-for list="{{upgrades}}" as="u" hint-placeholder-count="2">
+        <div style="display: flex; align-items: center; gap: 10px; padding-bottom: 8px; border-bottom: 1px solid rgba(201, 162, 74, 0.25)">
+          <dc-import name="Hex" family="green" h="{{upHex}}" icon="{{u.icon}}" label="" sub="" hint-size="52px,60px"></dc-import>
+          <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+              <b style="font-size: {{valFs}}px; font-weight: 700">{{u.name}}</b>
+              <span style="padding: 1px 6px; border-radius: 4px; border: 1px solid {{u.chipLine}}; background: {{u.chipBg}}; color: {{u.chipInk}}; font-size: 12px; font-weight: 700; letter-spacing: 0.04em">{{u.type}}</span>
+            </div>
+            <span style="font-size: {{smallFs}}px; font-weight: 500; color: #dfe7df">{{u.line1}}</span>
+            <span style="display: inline-flex; align-items: center; gap: 4px; font-size: {{smallFs}}px; font-weight: 500; color: #dfe7df"><dc-import name="Icon" glyph="cooldown" size="{{ 14 }}" fill="currentColor" hint-size="14px,14px"></dc-import>{{u.line2}}</span>
+          </div>
+          <button aria-label="{{u.aria}}" style="display: inline-flex; align-items: center; gap: 5px; min-height: 44px; min-width: 64px; justify-content: center; padding: 0 10px; border-radius: 8px; border: 2px solid {{u.btnLine}}; background: {{u.btnBg}}; color: {{u.btnInk}}; font-size: {{valFs}}px; font-weight: 700; box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.4), 0 3px 0 {{u.btnDepth}}">
+            {{u.price}}<dc-import name="Icon" glyph="{{u.btnIcon}}" size="{{ 18 }}" fill="currentColor" hint-size="18px,18px"></dc-import>
+          </button>
+        </div>
+      </sc-for>
+
+      <button style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; border: 1px solid #a68a45; background: rgba(0, 0, 0, 0.2); font-size: {{valFs}}px; font-weight: 600; text-align: left">
+        <dc-import name="Icon" glyph="stats" size="{{is}}" fill="#e7c66a" hint-size="20px,20px"></dc-import><span style="flex: 1">Werte &amp; Einflüsse</span><dc-import name="Icon" glyph="chevronRight" size="{{is}}" fill="#e9dcb8" hint-size="20px,20px"></dc-import>
+      </button>
+
+      <button style="display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 12px; border-radius: 8px; border: 2px solid {{sell.line}}; background: {{sell.bg}}; color: #fff3ec; font-size: {{valFs}}px; font-weight: 700; box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.18), 0 3px 0 #3d120c">
+        <dc-import name="Icon" glyph="trash" size="{{is}}" fill="currentColor" hint-size="20px,20px"></dc-import>{{sell.text}}
+      </button>
+    </sc-if>
+
+    <sc-if value="{{isStats}}" hint-placeholder-val="{{ false }}">
+      <h4 style="margin: 4px 0 0; font-size: {{headFs}}px; font-weight: 700; color: #f6efd8">Aktuelle Werte</h4>
+      <div role="table" style="display: flex; flex-direction: column; border-top: 1px solid rgba(201, 162, 74, 0.35)">
+        <sc-for list="{{core}}" as="cv" hint-placeholder-count="3">
+          <div role="row" style="display: flex; align-items: center; gap: 10px; min-height: 38px; border-bottom: 1px solid rgba(201, 162, 74, 0.2); font-size: {{fs}}px">
+            <span style="display: inline-flex; color: #e9dcb8"><dc-import name="Icon" glyph="{{cv.icon}}" size="{{is}}" fill="currentColor" hint-size="20px,20px"></dc-import></span>
+            <span role="cell" style="flex: 1; font-weight: 500">{{cv.label}}</span>
+            <b role="cell" style="font-weight: 700; font-size: {{valFs}}px">{{cv.full}}</b>
+          </div>
+        </sc-for>
+      </div>
+      <h4 style="margin: 6px 0 0; font-size: {{headFs}}px; font-weight: 700; color: #f6efd8">Aktive Einflüsse</h4>
+      <div style="display: flex; gap: 12px; align-items: center; padding: 8px 0; border-top: 1px solid rgba(201, 162, 74, 0.35); border-bottom: 1px solid rgba(201, 162, 74, 0.35)">
+        <dc-import name="Road" kind="cross" view="tilt" h="{{inflH}}" hint-size="70px,62px"></dc-import>
+        <div style="display: flex; flex-direction: column; gap: 1px">
+          <b style="font-size: {{valFs}}px; font-weight: 700">Signalkreuzung</b>
+          <span style="font-size: {{valFs}}px; font-weight: 700; color: #7fe08a">+20 % Reichweite</span>
+          <span style="font-size: {{smallFs}}px; font-weight: 500; color: #cfd9cf">Bonus des bebauten Hexes</span>
+          <span style="font-size: {{smallFs}}px; font-weight: 600; color: #dfe7df">150 × 1,20 = 180</span>
+        </div>
+      </div>
+      <div style="display: flex; gap: 12px; align-items: center; padding-bottom: 8px; border-bottom: 1px solid rgba(201, 162, 74, 0.35)">
+        <dc-import name="Hex" family="green" h="{{inflH}}" icon="biome_ash" icon-color="#ff9a8a" label="" sub="" hint-size="60px,70px"></dc-import>
+        <div style="display: flex; flex-direction: column; gap: 1px">
+          <b style="font-size: {{valFs}}px; font-weight: 700">Aschefeld</b>
+          <span style="font-size: {{valFs}}px; font-weight: 700; color: #ff9a8a">−10 % Nachladetempo</span>
+          <span style="font-size: {{smallFs}}px; font-weight: 600; color: #dfe7df">0,50 s × 1,10 = 0,55 s</span>
+        </div>
+      </div>
+      <h4 style="margin: 4px 0 0; font-size: {{headFs}}px; font-weight: 700; color: #f6efd8">Schadensfaktoren</h4>
+      <div role="table" style="display: flex; flex-direction: column; border-top: 1px solid rgba(201, 162, 74, 0.35)">
+        <sc-for list="{{factors}}" as="fx" hint-placeholder-count="3">
+          <div role="row" style="display: flex; align-items: center; gap: 10px; min-height: 38px; border-bottom: 1px solid rgba(201, 162, 74, 0.2); font-size: {{fs}}px">
+            <span style="display: inline-flex; color: {{fx.color}}"><dc-import name="Icon" glyph="{{fx.icon}}" size="{{is}}" fill="currentColor" hint-size="20px,20px"></dc-import></span>
+            <span role="cell" style="flex: 1; font-weight: 500">{{fx.label}}</span>
+            <b role="cell" style="font-weight: 700; font-size: {{valFs}}px">{{fx.value}}</b>
+          </div>
+        </sc-for>
+      </div>
+      <button style="display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 12px; border-radius: 8px; border: 1.5px solid #c9a24a; background: transparent; font-size: {{valFs}}px; font-weight: 700"><dc-import name="Icon" glyph="chevronLeft" size="{{is}}" fill="currentColor" hint-size="20px,20px"></dc-import>Zurück zu Upgrades</button>
+    </sc-if>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"view":{"editor":"enum","default":"upgrades","options":["upgrades","stats"]},"w":{"editor":"int","default":430,"min":240,"max":520},"maxH":{"editor":"int","default":0,"min":0,"max":1200},"sellConfirm":{"editor":"boolean","default":false},"$preview":{"width":430,"height":640}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const view = this.props.view === 'stats' ? 'stats' : 'upgrades';
+    const w = this.props.w ?? 430;
+    const s = Math.max(0.78, Math.min(1, w / 430));
+    const maxH = this.props.maxH ?? 0;
+    const conf = !!this.props.sellConfirm;
+    const R = (n) => Math.round(n * s);
+    const gold = { btnBg: 'linear-gradient(180deg, #ffe48a, #e8ac38)', btnLine: '#9c6a17', btnInk: '#2a1f10', btnDepth: '#7a5414', btnIcon: 'coin' };
+    return {
+      aria: view === 'stats' ? 'Werte und Einflüsse' : 'Turmfenster',
+      isUpgrades: view === 'upgrades', isStats: view === 'stats',
+      w, hh: maxH ? maxH + 'px' : 'auto',
+      c: R(14), ci: R(13),
+      pad: R(16), gap: R(10),
+      fs: Math.max(13, R(17)), valFs: Math.max(14, R(18)), smallFs: Math.max(12, R(14)), headFs: Math.max(15, R(21)), titleFs: Math.max(18, R(28)),
+      is: Math.max(16, R(20)), iconL: Math.max(18, R(26)),
+      closeH: R(48), upHex: R(60), portW: R(96), portIcon: R(50), inflH: R(72),
+      title: view === 'stats' ? 'Werte & Einflüsse' : 'Bogenschütze',
+      subtitle: view === 'stats' ? 'Bogenschütze · Basisstufe' : 'Basisstufe',
+      core: [
+        { icon: 'damage', value: '9', full: '9', label: 'Schaden' },
+        { icon: 'range', value: '150', full: '180', label: 'Reichweite' },
+        { icon: 'cooldown', value: '0,55 s', full: '0,55 s', label: 'Nachladezeit' }
+      ],
+      upgrades: [
+        Object.assign({ icon: 'path_volley', name: 'Salve', type: 'FLÄCHE', chipBg: '#4a2a14', chipLine: '#c9783a', chipInk: '#ffcf9e', line1: '7 Schaden · Radius 55', line2: '0,65 s', price: '35', aria: 'Salve kaufen, 35 Gold' }, gold),
+        Object.assign({ icon: 'path_sniper', name: 'Scharfschütze', type: 'EINZELZIEL', chipBg: '#16304d', chipLine: '#5a8fd0', chipInk: '#bcd8ff', line1: '22 Schaden · Reichweite 190', line2: '0,85 s', price: '35', aria: 'Scharfschütze kaufen, 35 Gold' }, gold)
+      ],
+      sell: conf ? { text: 'Wirklich verkaufen? +45', bg: 'linear-gradient(180deg, #a3302a, #6e1c17)', line: '#ffb3a0' } : { text: 'Verkaufen', bg: 'linear-gradient(180deg, #7d2a22, #521812)', line: '#a8463a' },
+      factors: [
+        { icon: 'vsHealth', label: 'Gegen Leben', value: '×1,25', color: '#f26a6a' },
+        { icon: 'vsArmor', label: 'Gegen Rüstung', value: '×1,00', color: '#6aa8f2' },
+        { icon: 'vsMagic', label: 'Gegen Magieresistenz', value: '×0,65', color: '#b77cf0' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

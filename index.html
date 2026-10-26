@@ -9,6 +9,8 @@
     <link rel="icon" type="image/png" href="assets/favicon.png" />
     <link rel="stylesheet" href="style.css?v=3983d35af7833e8b" />
     <link rel="stylesheet" href="duo.css?v=3983d35af7833e8b" />
+    <link rel="stylesheet" href="assets/uidesign/tokens.css?v=3983d35af7833e8b" />
+    <link rel="stylesheet" href="hexwerk.css?v=3983d35af7833e8b" />
     <script
       type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js?v=3983d35af7833e8b","three/addons/":"./node_modules/three/examples/jsm/"}}</script>
   </head>
@@ -31,39 +33,51 @@
       <section class="boardWrap">
         <svg id="board" viewBox="-545 -375 1100 760" aria-label="Hex-Karte"></svg>
         <div class="mapControls">
-          <button id="zoomInBtn" class="secondary" aria-label="Map vergrößern">+</button>
-          <button id="zoomOutBtn" class="secondary" aria-label="Map verkleinern">−</button>
+          <button id="zoomOutBtn" class="secondary hxHex" aria-label="Map verkleinern" title="Map verkleinern">−</button>
+          <button id="zoomInBtn" class="secondary hxHex" aria-label="Map vergrößern" title="Map vergrößern">+</button>
           <button id="resetViewBtn" class="secondary">Zur Base</button>
           <span>Mausrad: Zoom · rechte Maustaste ziehen: verschieben</span>
         </div>
         <section id="towerPanel" class="towerPanel hidden" aria-label="Ausgewählter Turm">
           <div class="panelHead">
-            <h2 id="towerPanelTitle">Turm</h2><button id="closeTowerPanel" class="secondary"
+            <span id="towerPortrait" class="towerPortrait" aria-hidden="true"></span>
+            <div class="towerTitle">
+              <h2 id="towerPanelTitle">Turm</h2><small id="towerPanelStage" class="towerStage"></small>
+            </div><button id="closeTowerPanel" class="secondary hxHex"
               aria-label="Turminfos schließen" title="Schließen (Escape)"><small>Esc</small> ×</button>
           </div>
           <div id="towerPanelScroll" class="towerPanelScroll">
           <div class="towerPanelBody">
           <div class="towerOverview">
-          <p class="towerSectionLabel">Aktueller Turm</p>
+          <p class="towerSectionLabel sr-only">Aktueller Turm</p>
           <div id="selectedTowerInfo" class="towerCurrentStats"></div>
 
           </div>
           <div class="towerDevelopment">
-          <p class="towerSectionLabel">Ausbau wählen</p>
+          <p class="towerSectionLabel">Upgrades</p>
           <div id="towerUpgrades" class="towerUpgrades"></div>
           </div>
           </div>
           <details id="towerExtraDetails" class="towerDisclosure">
-            <summary>Werte &amp; Einflüsse</summary>
-            <div id="towerExtraValues"></div>
-            <div id="towerInfluences" class="hint"></div>
+            <summary><span class="hxi hxi-stats" aria-hidden="true"></span>Werte &amp; Einflüsse</summary>
+            <!-- Unteransicht: ersetzt beim Öffnen Upgrades und Verkaufen; Zurück schließt sie wieder. -->
+            <div class="towerSubview">
+              <button type="button" class="towerBack" data-close-tower-details>Zurück</button>
+              <h3 class="towerSubTitle">Werte &amp; Einflüsse</h3><p id="towerSubNote" class="towerSubNote"></p>
+              <p id="towerDescription" class="towerDescription"></p>
+              <div id="towerExtraValues"></div>
+              <h3>Aktive Einflüsse</h3>
+              <div id="towerInfluences" class="towerInfluenceList"></div>
+              <div id="towerFactors"></div>
+              <button type="button" class="towerBackWide secondary" data-close-tower-details>Zurück zu Upgrades</button>
+            </div>
           </details>
           </div>
-          <div class="towerPanelFooter"><button id="powerTowerBtn" class="secondary hidden" type="button">Stromversorgung</button><button id="villageMoveBtn" class="secondary hidden" type="button">Turm kostenlos umsetzen</button><button id="sellTowerBtn" class="secondary" disabled>Bau rückgängig</button></div>
+          <div class="towerPanelFooter"><button type="button" id="towerValuesBtn" class="secondary towerValuesBtn" aria-controls="towerExtraDetails"><span class="hxi hxi-stats" aria-hidden="true"></span>Werte &amp; Einflüsse</button><button id="powerTowerBtn" class="secondary hidden" type="button">Stromversorgung</button><button id="villageMoveBtn" class="secondary hidden" type="button">Turm kostenlos umsetzen</button><button id="sellTowerBtn" class="secondary" disabled>Bau rückgängig</button></div>
         </section>
         <section id="buildingPanel" class="towerPanel hidden" aria-label="Gebäudeslot">
           <div class="panelHead">
-            <h2 id="buildingPanelTitle">Gebäudeslot</h2><button id="closeBuildingPanel" class="secondary"
+            <h2 id="buildingPanelTitle">Gebäudeslot</h2><button id="closeBuildingPanel" class="secondary hxHex"
               aria-label="Gebäudeinfos schließen" title="Schließen (Escape)"><small>Esc</small> ×</button>
           </div>
           <button id="sellBuildingBtn" class="secondary" disabled>Gebäude verkaufen</button>
@@ -73,7 +87,7 @@
       </section>
 
       <details id="consumableMenu" class="consumableMenu">
-        <summary>Verbrauchshilfen</summary>
+        <summary class="hxHex" aria-label="Verbrauchshilfen" title="Verbrauchshilfen">Verbrauchshilfen</summary>
         <p>Nur für diese Welle. In der Bauphase: für die nächste Welle. Krähenfüße und Harz: frei auf der Straße platzieren, auch mehrfach.</p><button id="buySpikes">Krähenfüße · 25
           Gold</button><small id="spikesStats">20 Spitzen × 5 Schaden · Position auf der Straße wählen</small><button id="buyResin">Klebeharz · 30
           Gold</button><small id="resinStats">12 Gegner: −35 % Tempo für 4 Sekunden</small><button id="buyOverload">Überladung · 40
@@ -158,27 +172,27 @@
         <nav class="dockTL" aria-label="Menü">
           <h1>AutoHex TD <span data-app-version></span></h1>
           <div class="dockButtons">
-            <button class="secondary drawerBtn" data-drawer="rulesDrawer"><svg class="uiIcon" viewBox="0 0 24 24"
+            <button class="secondary drawerBtn hxHex" data-drawer="rulesDrawer" title="Spielregeln"><svg class="uiIcon" viewBox="0 0 24 24"
                 aria-hidden="true">
                 <path d="M6 3h12v18H6zM9 7h6M9 11h6M9 15h4" />
               </svg> Regeln</button>
-            <button id="settingsOpenBtn" class="secondary drawerBtn" data-drawer="settingsDrawer"><svg class="uiIcon"
+            <button id="settingsOpenBtn" class="secondary drawerBtn hxHex" data-drawer="settingsDrawer" title="Einstellungen (Escape)"><svg class="uiIcon"
                 viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M4 6h16M4 12h16M4 18h16" />
                 <circle cx="9" cy="6" r="2" />
                 <circle cx="15" cy="12" r="2" />
                 <circle cx="8" cy="18" r="2" />
               </svg> Einstellungen</button>
-            <button id="pauseBtn" class="secondary pauseBtn">⏸ Pause (P)</button>
+            <button id="pauseBtn" class="secondary pauseBtn hxHex" title="Pause (P)">⏸ Pause (P)</button>
           </div>
         </nav>
 
         <!-- Oben rechts: Leben, Gold, Wave, Deck -->
         <header class="hud">
-          <strong id="expeditionDeadline" class="hidden" role="status"></strong><div id="villageHud" class="hidden" aria-label="Dorf-Lebenspunkte"></div><div id="healthStat" class="hudStat"><svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M12 21 3 12C-3 3 8-1 12 6 16-1 27 3 21 12z" />
-            </svg> <strong id="hp">20/20</strong></div>
-          <details id="goldDetails" class="statDetails"><summary aria-label="Goldplanung öffnen">🪙 <strong id="gold">70</strong> <span id="bonusIncome">(+0)</span>
+          <strong id="expeditionDeadline" class="hidden" role="status"></strong><div id="villageHud" class="hidden" aria-label="Dorf-Lebenspunkte"></div><div id="healthStat" class="hudStat"><span class="hxi hxi-heart" aria-hidden="true"></span> <strong
+              id="hp">20/20</strong></div>
+          <details id="goldDetails" class="statDetails">
+            <summary aria-label="Goldplanung öffnen"><span class="hxi hxi-coin" aria-hidden="true"></span> <strong id="gold">70</strong> <span id="bonusIncome">(+0)</span>
               <span class="dropdownArrow" aria-hidden="true">▾</span>
             </summary>
             <div class="statPopup">
@@ -190,8 +204,9 @@
             </div>
           </details>
           <details id="waveDropdown" class="statDetails">
-            <summary aria-label="Waveplanung öffnen">🌊 <strong id="wave">0</strong> <span class="dropdownArrow"
-                aria-hidden="true">▾</span>
+            <summary aria-label="Waveplanung öffnen"><span id="phaseName" class="phaseName">Bauphase</span><span
+                class="phaseDot" aria-hidden="true">·</span><span class="phaseWave">Welle <strong id="wave">0</strong></span>
+              <span class="dropdownArrow" aria-hidden="true">▾</span>
               <div class="waveBarWrap"><i id="waveBar"></i></div>
             </summary>
             <div class="statPopup">
@@ -202,7 +217,8 @@
             </div>
           </details>
           <details id="deckDropdown" class="statDetails">
-            <summary aria-label="Deck und Kartenstapel öffnen">🃏 <strong id="deckCount">5</strong> <span
+            <summary aria-label="Deck und Kartenstapel öffnen"><span class="hxi hxi-deck" aria-hidden="true"></span> <strong
+                id="deckCount">5</strong> <span
                 class="dropdownArrow" aria-hidden="true">▾</span></summary>
             <div class="statPopup">
               <h2>Deck &amp; Kartenstapel</h2>
@@ -211,7 +227,8 @@
             </div>
           </details>
           <details class="statDetails">
-            <summary aria-label="Profilfortschritt öffnen">◆ <strong id="profileDiamonds">0</strong> <span
+            <summary aria-label="Profilfortschritt öffnen"><span class="hxi hxi-gem" aria-hidden="true"></span> <strong
+                id="profileDiamonds">0</strong> <span
                 id="runDiamonds" title="Diamanten bei Ende des aktuellen Durchlaufs">(+0)</span> <span
                 class="dropdownArrow" aria-hidden="true">▾</span></summary>
             <div class="statPopup">
@@ -223,7 +240,8 @@
             </div>
           </details>
           <details id="baseDropdown" class="statDetails">
-            <summary>🏰 Base <span class="dropdownArrow" aria-hidden="true">▾</span></summary>
+            <summary aria-label="Base-Ausbau öffnen"><span class="hxi hxi-build" aria-hidden="true"></span> Base <span
+                class="dropdownArrow" aria-hidden="true">▾</span></summary>
             <div class="statPopup">
               <h2 id="baseTitle">Base-Ausbau</h2>
               <p id="baseStats"></p>
@@ -248,8 +266,7 @@
       <section class="handDock" aria-label="Handkarten">
         <div class="handHead"><strong id="phaseLabel">Hex platzieren</strong><span id="handHint" class="hint">Karte
             wählen (1–3) · R dreht · Hex anklicken</span>
-          <button id="rotateHexBtn" class="secondary" type="button" disabled aria-label="Ausgewählte Hexkarte drehen">↻
-            Drehen (R)</button>
+          <button id="rotateHexBtn" class="secondary" type="button" disabled aria-label="Ausgewählte Hexkarte drehen">Drehen (R)</button>
         </div>
         <section id="detourControls" class="hidden" aria-label="Straßenplanung"><strong id="detourStatus" aria-live="polite"></strong><p id="detourStock"></p></section><div id="hand" class="hand"></div><section id="greedDock" class="hidden"><h2>35 Wellen · Verdiene so viel Gold wie möglich</h2><p id="greedDockStatus"></p><div id="greedDockChoices"></div></section>
         <section id="powerControls" class="hidden" aria-label="Stromnetz">
@@ -295,36 +312,32 @@
 
       <!-- Unten links: Turm-Shop -->
       <div class="dockBL">
-        <button class="secondary drawerBtn" data-drawer="towerDrawer"><svg class="uiIcon" viewBox="0 0 24 24"
+        <button class="secondary drawerBtn hxHex" data-drawer="towerDrawer" title="Türme bauen"><svg class="uiIcon" viewBox="0 0 24 24"
             aria-hidden="true">
             <path d="m5 20 9-11M11 5l4-3 6 6-3 4z" />
           </svg> Türme bauen</button>
       </div>
 
       <!-- Unterfelder -->
-      <aside id="towerDrawer" class="drawer hidden" aria-label="Türme">
+      <!-- Turm bauen: gleicher Aufbau wie das Turmfenster (Kopf, Zeilen mit Symbol, Kurzwerten und Preis, Hinweise unten). -->
+      <aside id="towerDrawer" class="drawer hidden buildDrawer" aria-labelledby="towerDrawerTitle">
         <div class="panelHead">
-          <h2>Türme</h2><button class="secondary drawerClose" aria-label="Schließen"
+          <span class="buildHeadIcon" aria-hidden="true"><span class="hxi hxi-build"></span></span>
+          <div class="towerTitle">
+            <h2 id="towerDrawerTitle">Turm bauen</h2><small id="towerSelectionHint" class="towerStage" role="status"></small>
+          </div><button class="secondary drawerClose hxHex" aria-label="Schließen"
             title="Schließen (Escape)"><small>Esc</small> ×</button>
         </div>
-        <details class="statLegend">
-          <summary>ⓘ Werte &amp; Symbole</summary>
-          <p>♥ Schaden gegen Leben · ⬟ Schaden gegen Rüstung · ✦ Schaden gegen Magieresistenz · ⚔ Schaden · ◎ Reichweite
-            · ◷ Sekunden je Angriff (kleiner = schneller) · ❄ Verlangsamung · ✹ Explosionsradius · ϟ
-            Blitzziele/Sprungweite · ➶ Durchschlagziele · ☽ Geister · ⌛ Dauer.</p>
-        </details>
-        <p id="towerSelectionHint" class="hint" role="status"></p><label class="hint"><input id="multiTowerSelection"
-            type="checkbox"> Mehrfachauswahl (Strg + Klick)</label>
         <div id="towerMenu" class="towerMenu"></div>
-        <p class="hint">↑ Upgrade bezahlbar · 2 Spezialisierung · 3 Zweigfinale · 4 freischaltbare Meta-Stufe. Turm
+        <p class="hint buildNote">↑ Upgrade bezahlbar · 2 Spezialisierung · 3 Zweigfinale · 4 freischaltbare Meta-Stufe. Turm
           anklicken für Werte und Upgrades.</p>
-        <p class="hint">Bauen auch während der Wave. Rückgabe in der aktuellen Bauphase: 100 %. Danach Verkauf: 50 %
+        <p class="hint buildNote">Bauen auch während der Wave. Rückgabe in der aktuellen Bauphase: 100 %. Danach Verkauf: 50 %
           inklusive Upgrades.</p>
       </aside>
 
       <aside id="rulesDrawer" class="drawer hidden rules" aria-label="Spielregeln">
         <div class="panelHead">
-          <h2>Spielregeln</h2><button class="secondary drawerClose" aria-label="Schließen"
+          <h2>Spielregeln</h2><button class="secondary drawerClose hxHex" aria-label="Schließen"
             title="Schließen (Escape)"><small>Esc</small> ×</button>
         </div>
         <ul>
@@ -353,116 +366,216 @@
         </ul>
       </aside>
 
-      <aside id="settingsDrawer" class="drawer hidden actions" aria-label="Einstellungen">
-        <div class="panelHead">
-          <h2>Einstellungen</h2><button class="secondary drawerClose" aria-label="Schließen"
-            title="Schließen (Escape)"><small>Esc</small> ×</button>
+      <!-- Einstellungen als Fenster mit Bereichen (classes/settings-window.js schaltet die Bereiche um). Alle IDs bleiben,
+           game.js und die Tests greifen weiter direkt darauf zu. -->
+      <aside id="settingsDrawer" class="drawer hidden actions hxWindow settingsWindow" aria-labelledby="settingsTitle" data-settings-window>
+        <header class="hxWinHead">
+          <div>
+            <h2 id="settingsTitle">Einstellungen</h2>
+            <p class="hxWinSub">Passe dein Spielerlebnis an.</p>
+          </div>
+          <button class="secondary drawerClose hxWinClose" aria-label="Schließen" title="Schließen (Escape)"><small>Esc<br>Schließen</small><span class="hxCloseHex" aria-hidden="true"><span class="hxi hxi-close"></span></span></button>
+        </header>
+        <div class="settingsLayout">
+          <nav class="settingsNav" role="tablist" aria-label="Bereiche">
+            <button type="button" role="tab" data-settings-tab="game" aria-selected="true"><span class="settingsNavIcon"><span class="hxi hxi-settings"></span></span>Spiel &amp; Anzeige</button>
+            <button type="button" role="tab" data-settings-tab="audio" aria-selected="false"><span class="settingsNavIcon"><span class="hxi hxi-language"></span></span>Audio &amp; Sprache</button>
+            <button type="button" role="tab" data-settings-tab="controls" aria-selected="false"><span class="settingsNavIcon"><span class="hxi hxi-build"></span></span>Steuerung</button>
+            <button type="button" role="tab" data-settings-tab="help" aria-selected="false"><span class="settingsNavIcon"><span class="hxi hxi-deck"></span></span>Hilfe</button>
+            <button id="newRunBtn" class="danger settingsNewRun"><span class="hxi hxi-rotate" aria-hidden="true"></span>Neuer Run</button>
+          </nav>
+          <div class="settingsPanes">
+            <section class="settingsPane" data-settings-pane="game" role="tabpanel">
+              <section class="hxGroup">
+                <h3 class="hxGroupTitle">Kartenübersicht</h3>
+                <label class="hxSwitchRow"><span><strong>Freie Bauplätze anzeigen</strong><small>Weiß: Türme · Türkis: Gebäude</small></span><input id="slotHints" type="checkbox" checked /></label>
+                <label class="hxSwitchRow"><span><strong>Upgrade-Markierungen (U)</strong><small>↑ zeigt, was im Run ausbaubar ist, unabhängig vom Gold.</small></span><input id="upgradeStatus" type="checkbox" /></label>
+                <label class="hxSwitchRow"><span><strong>Hex-Raster anzeigen (G)</strong><small>Kanten der Spielfelder hervorheben.</small></span><input id="hexGrid" type="checkbox" /></label>
+              </section>
+              <section class="hxGroup">
+                <h3 class="hxGroupTitle">Spielablauf</h3>
+                <label class="hxSwitchRow"><span><strong>Einsteigerhinweise</strong><small>Mini-Tutorial, Tastenbelegungs-Hinweis und Hinweise zu neu entdeckten Biomen. Spielregeln und wichtige Spielmeldungen bleiben verfügbar.</small></span><input id="onboardingHints" type="checkbox" checked></label>
+                <label class="hxSwitchRow"><span><strong>Wellen automatisch starten</strong><small>Nach dem Platzieren eines Hexes starten.</small></span><input id="autoStart" type="checkbox" /></label>
+                <label class="hxSelectRow"><strong>Grafikstil</strong><select data-asset-edition aria-label="Grafikstil">
+                    <option value="normal">Normal</option>
+                    <option value="sakura">Sakura-Edition</option>
+                    <option value="halloween">Halloween-Edition</option>
+                  </select></label>
+              </section>
+              <section class="hxGroup">
+                <h3 class="hxGroupTitle">Nächster Run</h3>
+                <label class="hxFieldRow"><span><strong>Startwert (Seed)</strong><small>Derselbe Startwert wiederholt bei gleichen Entscheidungen die Karten und Belohnungen.</small></span><input id="runSeed" type="text" maxlength="100" placeholder="Leer = zufälliger Run" /></label>
+                <p class="hxGroupNote">Aktueller Seed: <span id="activeSeed"></span> <span id="dailyRunStatus"></span></p>
+                <button id="exitFirstPlayerTestSettings" class="secondary hidden">Erstspieler-Test beenden · zum echten Spielstand</button>
+                <button id="skipIntroductionSettings" class="secondary hidden">Einführung überspringen · vollständige Welt ab nächstem Durchlauf</button>
+              </section>
+              <details id="settingsDeveloperTools" class="developerTools hxGroup hidden">
+                <summary>Entwicklermenü · lokale Tests</summary>
+                <p>Start und Zurücksetzen ersetzen nur den separaten Testspielstand.</p>
+                <label for="settingsDeveloperScenario">Spielsituation</label>
+                <select id="settingsDeveloperScenario">
+                  <option value="tutorial">Tutorial von Anfang</option>
+                  <option value="upgrade">Turm verbessern · 200 Gold</option>
+                  <option value="upgrade-poor">Turm verbessern · kein Gold</option>
+                  <option value="showcase">Designer-Lieferung testen</option>
+                </select>
+                <button id="settingsDeveloperStart" class="secondary">Szenario starten</button>
+                <button id="settingsDeveloperReset" class="secondary">Aktuelles Szenario zurücksetzen</button>
+                <fieldset>
+                  <legend>Gegner für die nächste Welle</legend>
+                  <p>Nur im isolierten Testprofil. Die Auswahl ersetzt einmalig die nächste normale Welle. Reihenfolge = Spawn-Reihenfolge. Normale Gegner skalieren mit der Welle; Bosse behalten ihre Stärke.</p>
+                  <button id="devEnemyTestStart" class="secondary">Gegnertest starten · separate Teststrecke</button>
+                  <label for="devEnemyType">Gegner</label><select id="devEnemyType"></select>
+                  <label for="devEnemyCount">Anzahl (1–20)</label><input id="devEnemyCount" type="number" min="1" max="20" value="1">
+                  <button id="devEnemyAdd" class="secondary">Für nächste Welle hinzufügen</button>
+                  <p id="devEnemyQueue" aria-live="polite"></p>
+                  <button id="devEnemyClear" class="secondary">Auswahl leeren · normale Welle</button>
+                  <button id="devGreedStart" class="secondary" type="button">Fluch der Gier testen · isoliertes Testprofil</button>
+                  <button id="devFortressStart" class="secondary" type="button">Wandernde Festung testen · isoliertes Testprofil</button>
+                  <button id="devDraftStart" class="secondary" type="button">Turm-Draft testen · isoliertes Testprofil</button>
+                  <button id="devExpeditionStart" class="secondary" type="button">Expedition testen · isoliertes Testprofil</button>
+                  <button id="devVillagesStart" class="secondary" type="button">Drei Dörfer testen · isoliertes Testprofil</button>
+                  <button id="devDetourStart" class="secondary" type="button">Kunst des Umwegs testen · isoliertes Testprofil</button>
+                </fieldset>
+              </details>
+            </section>
+            <section class="settingsPane" data-settings-pane="audio" role="tabpanel" hidden>
+              <section class="hxGroup">
+                <h3 class="hxGroupTitle">Audio</h3>
+                <label class="hxSwitchRow"><span><strong>Sounds aktiv</strong><small>Alle Spielgeräusche wiedergeben.</small></span><input id="soundEnabled" type="checkbox" checked /></label>
+                <label class="hxRangeRow"><span><strong>Lautstärke</strong><small>Lautstärke aller Spielgeräusche.</small></span><input id="soundVolume" type="range" min="0" max="100" value="35" aria-label="Sound-Lautstärke" /></label>
+                <label class="hxSwitchRow"><span><strong>Musik aktiv</strong><small>Hintergrundmusik im Menü und im Spiel.</small></span><input id="musicEnabled" type="checkbox" checked /></label>
+                <label class="hxRangeRow"><span><strong>Musiklautstärke</strong><small>Unabhängig von den Spielgeräuschen.</small></span><input id="musicVolume" type="range" min="0" max="100" value="40" aria-label="Musiklautstärke" /></label>
+                <p class="musicCredit" data-no-translate>Music by <a href="https://pixabay.com/de/users/leberch-42823964/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=375930" target="_blank" rel="noopener">Nikita Kondrashev</a> from <a href="https://pixabay.com/music//?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=375930" target="_blank" rel="noopener">Pixabay</a></p>
+              </section>
+              <section class="hxGroup">
+                <h3 class="hxGroupTitle">Sprache</h3>
+                <label class="hxSelectRow"><span><strong>Sprache</strong><small>Gilt für Menüs, Spieltexte und Hinweise.</small></span><select data-language-picker aria-label="Sprache">
+                    <option value="de">Deutsch</option>
+                    <option value="en">English</option>
+                  </select></label>
+              </section>
+            </section>
+            <section class="settingsPane" data-settings-pane="controls" role="tabpanel" hidden>
+              <details id="hotkeyHelp" class="hotkeyHelp hxGroup" data-keep-open>
+                <summary id="hotkeyHelpSummary" class="hxGroupTitle">Tastatur &amp; Maus</summary>
+                <p class="hxGroupNote">Die wichtigsten Eingaben auf einen Blick.</p>
+                <div class="keyColumns">
+                  <section class="hxGroup keyGroup">
+                    <h4 class="hxGroupTitle">Kamera</h4>
+                    <div class="keyRow"><span>Kamera bewegen</span><span class="keys"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span></div>
+                    <div class="keyRow"><span>Kamera drehen (halten)</span><span class="keys"><kbd>Q</kbd>/<kbd>E</kbd></span></div>
+                    <div class="keyRow"><span>Zoomen</span><span class="keys"><kbd>Mausrad</kbd></span></div>
+                    <div class="keyRow"><span>Kamera bewegen/drehen</span><span class="keys"><kbd>Ziehen</kbd></span></div>
+                  </section>
+                  <section class="hxGroup keyGroup">
+                    <h4 class="hxGroupTitle">Bauen &amp; Spielen</h4>
+                    <div class="keyRow"><span>Handkarte wählen</span><span class="keys"><kbd>1</kbd>–<kbd>3</kbd></span></div>
+                    <div class="keyRow"><span>Hex drehen</span><span class="keys"><kbd>R</kbd>/<kbd>Mausrad-Klick</kbd></span></div>
+                    <div class="keyRow"><span>Welle starten</span><span class="keys"><kbd>Leertaste</kbd></span></div>
+                    <div class="keyRow"><span>Tempo erhöhen</span><span class="keys"><kbd>F</kbd></span></div>
+                    <div class="keyRow"><span>Pause</span><span class="keys"><kbd>P</kbd></span></div>
+                    <div class="keyRow"><span>Mehrfachauswahl</span><span class="keys"><kbd>Strg</kbd>+<kbd>Klick</kbd></span></div>
+                    <div class="keyRow"><span>Einstellungen / Schließen</span><span class="keys"><kbd>Esc</kbd></span></div>
+                  </section>
+                  <section class="hxGroup keyGroup">
+                    <h4 class="hxGroupTitle">Anzeige</h4>
+                    <div class="keyRow"><span>Hex-Raster</span><span class="keys"><kbd>G</kbd></span></div>
+                    <div class="keyRow"><span>Upgrade-Markierungen</span><span class="keys"><kbd>U</kbd></span></div>
+                    <div class="keyRow"><span>FPS-Anzeige</span><span class="keys"><kbd>Strg</kbd>+<kbd>F</kbd></span></div>
+                  </section>
+                </div>
+                <p class="hxGroupNote keyNotes"><span>ⓘ Bei zwei Fronten am Anfang: Karten 1–5.</span><span>ⓘ Tempo: 1× bis 8×, danach wieder 1×.</span><span id="towerHotkeyHint"></span></p>
+              </details>
+            </section>
+            <section class="settingsPane" data-settings-pane="help" role="tabpanel" hidden>
+              <section class="hxGroup">
+                <h3 class="hxGroupTitle">Einstieg</h3>
+                <div class="hxActionRow"><span>Lerne das Platzieren von Hexen und den Turmbau.</span><button id="restartTutorialBtn" class="secondary hxOutline"><span class="hxi hxi-play" aria-hidden="true"></span>Mini-Tutorial starten</button></div>
+              </section>
+              <button class="hxGroup hxLinkRow drawerBtn" data-drawer="rulesDrawer" type="button"><span class="hxi hxi-deck" aria-hidden="true"></span>Spielregeln<span class="hxChevron" aria-hidden="true">›</span></button>
+              <details class="biomeRules hxGroup" open data-keep-open>
+                <summary class="hxGroupTitle"><span class="hxi hxi-biome_grass" aria-hidden="true"></span>Biome und ihre Effekte</summary>
+                <p class="hxGroupNote">Die Base startet im Grasland. Beim Erkunden frühestens ab vier Hexen Entfernung erscheinen Regionen; Effekte gelten lokal.</p>
+                <div class="biomeRow desert"><span class="biomeBadge"><span class="hxi hxi-biome_desert"></span></span><div><strong>Dünenmeer</strong><p>Gegner −15 % Tempo · Türme −15 % Reichweite.</p></div></div>
+                <div class="biomeRow storm"><span class="biomeBadge"><span class="hxi hxi-biome_storm"></span></span><div><strong>Sturmhochland</strong><p>Kettenblitz +25 % Sprungweite · Wind +1 Durchschlagziel · Archer/Balliste −15 % Angriffsrate.</p></div></div>
+                <div class="biomeRow ash"><span class="biomeBadge"><span class="hxi hxi-biome_ash"></span></span><div><strong>Aschelande</strong><p>Feuer +20 % Schaden · Freeze −15 % Reichweite · Wasser-Slow −25 % Dauer.</p></div></div>
+              </details>
+              <button class="hxGroup hxLinkRow" type="button" data-settings-goto="controls"><span class="hxi hxi-build" aria-hidden="true"></span>Steuerung nachschlagen<span class="hxChevron" aria-hidden="true">›</span></button>
+              <p class="hint">Escape öffnet die Einstellungen oder schließt offene Menüs und Infofenster.</p>
+            </section>
+          </div>
         </div>
-        <p class="hint">Escape öffnet die Einstellungen oder schließt offene Menüs und Infofenster.</p>
-        <details class="biomeRules">
-          <summary>Biome und ihre Effekte</summary>
-          <p>Die Base startet im Grasland. Beim Erkunden frühestens ab vier Hexen Entfernung erscheinen Regionen;
-            Effekte gelten
-            lokal.</p>
-          <p>🟨 Dünenmeer: Gegner −15 % Tempo, Türme −15 % Reichweite.</p>
-          <p>🟦 Sturmhochland: Kettenblitz +25 % Sprungweite, Wind +1 Durchschlagziel; Archer/Balliste −15 %
-            Angriffsrate.</p>
-          <p>🟥 Aschelande: Feuer +20 % Schaden; Freeze −15 % Reichweite, Wasser-Slow −25 % Dauer.</p>
-        </details>
-        <details id="hotkeyHelp" class="hotkeyHelp">
-          <summary id="hotkeyHelpSummary">Hotkeys</summary>
-          <p>W/A/S/D: Kamera vorwärts/links/rückwärts/rechts<br>Q/E: Kamera drehen (halten)<br>R oder Mausrad-Klick: Hex
-            drehen<br>1–3: Handkarte auswählen (bei zwei Fronten am Anfang 1–5)<br><span
-              id="towerHotkeyHint"></span><br>Leertaste: Wave starten<br>F: Tempo erhöhen, nach 8× zurück auf 1×<br>Strg
-            + F: FPS-Anzeige ein/aus<br>P: Pause<br>G: Hexgrid
-            ein/aus<br>U: Upgrade-Status ein/aus<br>Strg + Klick: mehrere Bauplätze oder Türme auswählen<br>Escape:
-            Einstellungen öffnen / Fenster schließen<br>Mausrad: Zoom · Ziehen: Kamera bewegen/drehen</p>
-        </details>
-        <label class="toggle"><input id="upgradeStatus" type="checkbox" /> Upgrade-Status (U): ↑ im Run ausbaubar
-          (unabhängig vom Gold)</label>
-        <label class="toggle"><input id="slotHints" type="checkbox" checked /> Freie Bauplätze: Weiß = Turm, Türkis =
-          Gebäude</label>
-        <button id="openMainMenuBtn" class="secondary">Speichern &amp; Hauptmenü</button>
-        <button id="exitFirstPlayerTestSettings" class="secondary hidden">Erstspieler-Test beenden · zum echten
-          Spielstand</button>
-        <button id="skipIntroductionSettings" class="secondary hidden">Einführung überspringen · vollständige Welt ab
-          nächstem Durchlauf</button>
-        <label><input id="onboardingHints" type="checkbox" checked> Einsteigerhinweise anzeigen</label>
-        <small>Mini-Tutorial, Tastenbelegungs-Hinweis und Hinweise zu neu entdeckten Biomen. Spielregeln und wichtige
-          Spielmeldungen bleiben verfügbar.</small>
-        <button id="restartTutorialBtn" class="secondary">Mini-Tutorial starten</button>
-        <details id="settingsDeveloperTools" class="developerTools hidden">
-          <summary>Entwicklermenü · lokale Tests</summary>
-          <p>Start und Zurücksetzen ersetzen nur den separaten Testspielstand.</p>
-          <label for="settingsDeveloperScenario">Spielsituation</label>
-          <select id="settingsDeveloperScenario">
-            <option value="tutorial">Tutorial von Anfang</option>
-            <option value="upgrade">Turm verbessern · 200 Gold</option>
-            <option value="upgrade-poor">Turm verbessern · kein Gold</option>
-            <option value="showcase">Designer-Lieferung testen</option>
-          </select>
-          <button id="settingsDeveloperStart" class="secondary">Szenario starten</button>
-          <button id="settingsDeveloperReset" class="secondary">Aktuelles Szenario zurücksetzen</button>
-          <fieldset>
-            <legend>Gegner für die nächste Welle</legend>
-            <p>Nur im isolierten Testprofil. Die Auswahl ersetzt einmalig die nächste normale Welle. Reihenfolge = Spawn-Reihenfolge. Normale Gegner skalieren mit der Welle; Bosse behalten ihre Stärke.</p>
-            <button id="devEnemyTestStart" class="secondary">Gegnertest starten · separate Teststrecke</button>
-            <label for="devEnemyType">Gegner</label><select id="devEnemyType"></select>
-            <label for="devEnemyCount">Anzahl (1–20)</label><input id="devEnemyCount" type="number" min="1" max="20" value="1">
-            <button id="devEnemyAdd" class="secondary">Für nächste Welle hinzufügen</button>
-            <p id="devEnemyQueue" aria-live="polite"></p>
-            <button id="devEnemyClear" class="secondary">Auswahl leeren · normale Welle</button>
-            <button id="devGreedStart" class="secondary" type="button">Fluch der Gier testen · isoliertes Testprofil</button>
-            <button id="devFortressStart" class="secondary" type="button">Wandernde Festung testen · isoliertes Testprofil</button>
-            <button id="devDraftStart" class="secondary" type="button">Turm-Draft testen · isoliertes Testprofil</button>
-            <button id="devExpeditionStart" class="secondary" type="button">Expedition testen · isoliertes Testprofil</button>
-            <button id="devVillagesStart" class="secondary" type="button">Drei Dörfer testen · isoliertes Testprofil</button>
-            <button id="devDetourStart" class="secondary" type="button">Kunst des Umwegs testen · isoliertes Testprofil</button>
-          </fieldset>
-        </details>
-        <label class="toggle"><input id="hexGrid" type="checkbox" /> Hex-Grid anzeigen (G)</label>
-        <label class="toggle"><input id="autoStart" type="checkbox" /> Wave nach Platzierung automatisch starten</label>
-        <label class="toggle"><input id="soundEnabled" type="checkbox" checked /> Sounds aktiv</label>
-        <label class="toggle">Lautstärke <input id="soundVolume" type="range" min="0" max="100" value="35"
-            aria-label="Sound-Lautstärke" /></label>
-        <label class="toggle">Sprache <select data-language-picker aria-label="Sprache">
-            <option value="de">Deutsch</option>
-            <option value="en">English</option>
-          </select></label>
-        <label class="toggle">Grafikstil <select data-asset-edition aria-label="Grafikstil">
-            <option value="normal">Normal</option>
-            <option value="sakura">Sakura-Edition</option>
-            <option value="halloween">Halloween-Edition</option>
-          </select></label>
-        <label class="toggle">Startwert für den nächsten Run (Seed) <input id="runSeed" type="text" maxlength="100"
-            placeholder="Leer = zufälliger Run" /></label>
-        <small class="hint">Derselbe Startwert wiederholt bei gleichen Entscheidungen die Karten und
-          Belohnungen.</small>
-        <small class="hint">Aktueller Seed: <span id="activeSeed"></span></small><small id="dailyRunStatus"
-          class="hint"></small>
-        <button id="newRunBtn" class="danger">Neuer Run</button>
+        <footer class="hxWinFoot">
+          <span class="settingsRunState"><span class="hxi hxi-pause" aria-hidden="true"></span><span data-settings-runstate>Welle 0</span></span>
+          <span class="settingsSaved"><span class="savedCheck" aria-hidden="true">✓</span><span>Änderungen werden automatisch gespeichert.<small data-settings-account></small></span></span>
+          <button id="openMainMenuBtn" class="secondary hxOutline">‹ Speichern &amp; Hauptmenü</button>
+          <button class="primary drawerClose settingsBackBtn" type="button">Zurück zum Spiel ›</button>
+        </footer>
       </aside>
     </div>
 
     <div id="mainMenu" class="overlay mainMenu hidden" role="dialog" aria-modal="true" aria-labelledby="mainMenuTitle">
-      <div class="menuBox">
-        <img class="menuLogo" src="assets/favicon.png" alt="" />
-        <p class="eyebrow">TOWER DEFENSE</p>
-        <h1 id="mainMenuTitle">AutoHex TD</h1>
-        <p class="menuTagline">Map bauen → Türme setzen → Wave überleben → Deck erweitern</p>
-        <div class="menuButtons">
-          <button id="menuContinueBtn" class="primary hidden">Weiterspielen</button>
-          <button id="menuPlayBtn" class="primary">Neuer Run</button>
-          <small id="introductionMenuNote">Starte mit Bogenschütze und Katapult. Neue Türme kommen nach Welle 5, 10 und
-            15 dazu.</small><button id="skipIntroductionBtn" class="secondary hidden">Ich kenne das Spiel – Einführung
-            überspringen</button>
-          <button id="menuArsenalBtn" class="secondary">◆ Arsenal</button>
-          <label class="menuLanguage"><span>Sprache</span> <select data-language-picker aria-label="Sprache">
+      <div class="hexMenu">
+        <header class="hexMenuBrand">
+          <h1 id="mainMenuTitle"><span class="sr-only">AutoHex TD</span><svg class="wordmark" viewBox="0 0 760 170"
+              aria-hidden="true">
+              <defs>
+                <linearGradient id="wmGold" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#fff6d6" />
+                  <stop offset="0.45" stop-color="#f3d58a" />
+                  <stop offset="0.78" stop-color="#d9a53c" />
+                  <stop offset="1" stop-color="#b9831f" />
+                </linearGradient>
+                <linearGradient id="wmShine" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0.12" stop-color="#fff" stop-opacity="0.75" />
+                  <stop offset="0.42" stop-color="#fff" stop-opacity="0" />
+                </linearGradient>
+              </defs>
+              <text x="380" y="132" text-anchor="middle" textLength="720" lengthAdjust="spacingAndGlyphs"
+                font-family="Tektur, Fraunces, Georgia, sans-serif" font-weight="900" font-size="122" fill="#3a2506" stroke="#1f1404"
+                stroke-width="12" stroke-linejoin="round" paint-order="stroke">AutoHex TD</text>
+              <text x="380" y="124" text-anchor="middle" textLength="720" lengthAdjust="spacingAndGlyphs"
+                font-family="Tektur, Fraunces, Georgia, sans-serif" font-weight="900" font-size="122" fill="url(#wmGold)" stroke="#4f350d"
+                stroke-width="7" stroke-linejoin="round" paint-order="stroke">AutoHex TD</text>
+              <text x="380" y="124" text-anchor="middle" textLength="720" lengthAdjust="spacingAndGlyphs"
+                font-family="Tektur, Fraunces, Georgia, sans-serif" font-weight="900" font-size="122" fill="url(#wmShine)">AutoHex TD</text>
+            </svg></h1>
+        </header>
+        <!-- Hex-Blüte: Mitte = Hauptaktion, sechs Ring-Hexe Kante an Kante im Uhrzeigersinn ab oben links.
+             Nebel-Hexe füllen freie oder ausgeblendete Plätze. -->
+        <nav id="hexCluster" class="hexCluster" aria-label="Hauptmenü">
+          <span class="hexFog" data-slot="ul" aria-hidden="true"></span><span class="hexFog" data-slot="ur"
+            aria-hidden="true"></span><span class="hexFog" data-slot="r" aria-hidden="true"></span><span class="hexFog"
+            data-slot="lr" aria-hidden="true"></span><span class="hexFog" data-slot="ll" aria-hidden="true"></span><span
+            class="hexFog" data-slot="l" aria-hidden="true"></span>
+          <button id="menuPlayBtn" class="hexBtn hexPrimary" data-slot="center"><span class="hexIcon hexIconPlay hxi hxi-play" aria-hidden="true"></span><span
+              class="hexIcon hexIconNew hxi hxi-newRun" aria-hidden="true"></span><span id="menuPlayLabel" class="hexLabel">Spielen</span><small id="menuPlayDetail"
+              class="hexDetail"></small></button>
+          <button id="menuArsenalBtn" class="hexBtn" data-slot="ul"><span class="hexIcon hxi hxi-arsenal" aria-hidden="true"></span><span class="hexLabel">Arsenal</span><small id="menuArsenalDetail" class="hexDetail"></small></button>
+          <button id="menuLeaderboardBtn" class="hexBtn" data-slot="ur"><span class="hexIcon hxi hxi-leaderboard" aria-hidden="true"></span><span class="hexLabel">Bestenliste</span></button>
+          <button id="menuSettingsBtn" class="hexBtn" data-slot="r" aria-haspopup="dialog"><span class="hexIcon hxi hxi-settings" aria-hidden="true"></span><span class="hexLabel">Einstellungen</span></button>
+          <button id="menuDuoBtn" class="hexBtn" data-slot="lr"><span class="hexIcon hxi hxi-duo" aria-hidden="true"></span><span class="hexLabel">Duo</span><small class="hexDetail hexLockNote">ab Welle 35</small></button>
+          <button id="menuDailyBtn" class="hexBtn" data-slot="ll"><span class="hexIcon hxi hxi-daily" aria-hidden="true"></span><span class="hexLabel">Tägliche Herausforderung</span><small
+              class="hexDetail hexLockNote">ab Welle 35</small></button>
+          <button id="menuAccountBtn" class="hexBtn" data-slot="l"><span class="hexIcon hxi hxi-account" aria-hidden="true"></span><span id="menuAccountLabel" class="hexLabel">Anmelden</span></button>
+        </nav>
+        <!-- Feste Fußleiste: Sprache unten links, Rechtliches in der Mitte, Version und Patch Notes unten rechts. -->
+        <footer class="hexMenuBar">
+          <label class="menuLanguage"><span class="hxi hxi-language" aria-hidden="true"></span><select data-language-picker aria-label="Sprache">
               <option value="de">Deutsch</option>
               <option value="en">English</option>
             </select></label>
-          <a href="challenge-lab.html" class="secondary">Herausforderungen testen</a>
-          <button id="menuPatchNotesBtn" class="secondary">Patch Notes · Was ist neu?</button>
+          <nav class="menuLegal" aria-label="Rechtliches"><a href="impressum.html?from=game" target="_blank"
+              rel="noopener">Impressum</a><span aria-hidden="true">·</span><a href="datenschutz.html?from=game" target="_blank"
+              rel="noopener">Datenschutz</a></nav>
+          <span class="menuBarEnd"><small class="menuVersion" data-app-version></small><a href="challenge-lab.html" class="secondary menuChallengeLab">Herausforderungen testen</a><button id="menuPatchNotesBtn"
+              class="secondary"><span class="hxi hxi-patchNotes" aria-hidden="true"></span> Patch Notes</button></span>
+        </footer>
+        <div class="hexMenuExtras">
+          <small id="introductionMenuNote">Starte mit Bogenschütze und Katapult. Neue Türme kommen nach Welle 5, 10 und
+            15 dazu.</small><button id="skipIntroductionBtn" class="secondary hidden">Ich kenne das Spiel – Einführung
+            überspringen</button>
           <button id="firstPlayerTestBtn" class="secondary hidden">Erstspieler-Test starten</button>
           <details id="menuDeveloperTools" class="developerTools hidden">
             <summary>Entwicklermenü · lokale Tests</summary>
@@ -478,13 +591,71 @@
             <button id="menuDeveloperReset" class="secondary">Aktuelles Szenario zurücksetzen</button>
           </details>
           <button id="exitFirstPlayerTestBtn" class="secondary hidden">Zurück zu meinem Spielstand</button>
-          <button id="menuAccountBtn" class="secondary">👤 Anmelden</button>
-          <button id="menuLeaderboardBtn" class="secondary">Bestenliste</button>
         </div>
-
-        <nav class="menuLegal" aria-label="Rechtliches"><a href="impressum.html?from=game" target="_blank" rel="noopener">Impressum</a><span aria-hidden="true">·</span><a href="datenschutz.html?from=game" target="_blank" rel="noopener">Datenschutz</a></nav>
-        <small class="menuVersion" data-app-version></small>
       </div>
+    </div>
+
+    <!-- Einstellungen aus dem Hauptmenü; die Schalter steuern dieselben Werte wie das Einstellungsmenü im Spiel. -->
+    <div id="menuSettingsOverlay" class="overlay hidden" role="dialog" aria-modal="true"
+      aria-labelledby="menuSettingsTitle">
+      <section class="hxWindow settingsWindow menuSettingsBox" data-settings-window>
+        <header class="hxWinHead">
+          <div>
+            <h2 id="menuSettingsTitle">Einstellungen</h2>
+            <p class="hxWinSub">Passe dein Spielerlebnis an.</p>
+          </div>
+          <button id="closeMenuSettingsBtn" class="secondary hxWinClose" aria-label="Schließen" title="Schließen (Escape)"><small>Esc<br>Schließen</small><span class="hxCloseHex" aria-hidden="true"><span class="hxi hxi-close"></span></span></button>
+        </header>
+        <div class="settingsLayout">
+          <nav class="settingsNav" role="tablist" aria-label="Bereiche">
+            <button type="button" role="tab" data-settings-tab="game" aria-selected="true"><span class="settingsNavIcon"><span class="hxi hxi-settings"></span></span>Spiel &amp; Anzeige</button>
+            <button type="button" role="tab" data-settings-tab="audio" aria-selected="false"><span class="settingsNavIcon"><span class="hxi hxi-language"></span></span>Audio &amp; Sprache</button>
+            <button type="button" role="tab" data-settings-tab="info" aria-selected="false"><span class="settingsNavIcon"><span class="hxi hxi-deck"></span></span>Hilfe &amp; Rechtliches</button>
+          </nav>
+          <div class="settingsPanes">
+            <section class="settingsPane" data-settings-pane="game" role="tabpanel">
+              <section class="hxGroup">
+                <h3 class="hxGroupTitle">Spielablauf</h3>
+                <label class="hxSwitchRow"><span><strong>Einsteigerhinweise anzeigen</strong><small>Tipps zu Steuerung, Bauen und neuen Biomen.</small></span><input id="menuOnboardingHints" type="checkbox" /></label>
+                <label class="hxSelectRow"><strong>Grafikstil</strong><select data-asset-edition aria-label="Grafikstil">
+                    <option value="normal">Normal</option>
+                    <option value="sakura">Sakura-Edition</option>
+                    <option value="halloween">Halloween-Edition</option>
+                  </select></label>
+              </section>
+              <p class="hint">Tastenbelegung, Hex-Grid und Spielhilfen findest du im Spiel unter Einstellungen (Escape).</p>
+            </section>
+            <section class="settingsPane" data-settings-pane="audio" role="tabpanel" hidden>
+              <section class="hxGroup">
+                <h3 class="hxGroupTitle">Audio</h3>
+                <label class="hxSwitchRow"><span><strong>Sounds aktiv</strong><small>Alle Spielgeräusche wiedergeben.</small></span><input id="menuSoundEnabled" type="checkbox" /></label>
+                <label class="hxRangeRow"><span><strong>Lautstärke</strong><small>Lautstärke aller Spielgeräusche.</small></span><input id="menuSoundVolume" type="range" min="0" max="100" aria-label="Sound-Lautstärke" /></label>
+                <label class="hxSwitchRow"><span><strong>Musik aktiv</strong><small>Hintergrundmusik im Menü und im Spiel.</small></span><input id="menuMusicEnabled" type="checkbox" /></label>
+                <label class="hxRangeRow"><span><strong>Musiklautstärke</strong><small>Unabhängig von den Spielgeräuschen.</small></span><input id="menuMusicVolume" type="range" min="0" max="100" aria-label="Musiklautstärke" /></label>
+                <p class="musicCredit" data-no-translate>Music by <a href="https://pixabay.com/de/users/leberch-42823964/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=375930" target="_blank" rel="noopener">Nikita Kondrashev</a> from <a href="https://pixabay.com/music//?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=375930" target="_blank" rel="noopener">Pixabay</a></p>
+              </section>
+              <section class="hxGroup">
+                <h3 class="hxGroupTitle">Sprache</h3>
+                <label class="hxSelectRow"><span><strong>Sprache</strong><small>Gilt für Menüs, Spieltexte und Hinweise.</small></span><select data-language-picker aria-label="Sprache">
+                    <option value="de">Deutsch</option>
+                    <option value="en">English</option>
+                  </select></label>
+              </section>
+            </section>
+            <section class="settingsPane" data-settings-pane="info" role="tabpanel" hidden>
+              <section class="hxGroup">
+                <h3 class="hxGroupTitle">Rechtliches</h3>
+                <p class="menuLegal"><a href="impressum.html?from=game" target="_blank" rel="noopener">Impressum</a><span
+                    aria-hidden="true">·</span><a href="datenschutz.html?from=game" target="_blank" rel="noopener">Datenschutz</a></p>
+              </section>
+            </section>
+          </div>
+        </div>
+        <footer class="hxWinFoot">
+          <span class="settingsSaved"><span class="savedCheck" aria-hidden="true">✓</span><span>Änderungen werden automatisch gespeichert.<small data-settings-account></small></span></span>
+          <button class="primary settingsBackBtn" type="button" data-settings-close>Zurück zum Hauptmenü ›</button>
+        </footer>
+      </section>
     </div>
 
     <div id="firstPlayerTestBadge" class="testProfileBadge hidden">Erstspieler-Test · separater Spielstand</div>
@@ -500,22 +671,30 @@
     </div>
     <div id="leaderboardOverlay" class="overlay hidden" role="dialog" aria-modal="true"
       aria-labelledby="leaderboardTitle">
-      <section class="modeBox leaderboardBox">
-        <div class="panelHead">
-          <h2 id="leaderboardTitle">🏆 Bestenliste</h2><button id="closeLeaderboardBtn" class="secondary">Schließen ·
-            Esc</button>
-        </div>
+      <section class="leaderboardBox hxWindow">
+        <header class="lbHead">
+          <button id="leaderboardBackBtn" type="button" class="lbBack hxWinClose" aria-label="Zurück" title="Zurück (Escape)"><span class="hxCloseHex"><span class="hxi hxi-back"></span></span></button>
+          <h2 id="leaderboardTitle">Bestenliste</h2>
+          <button id="closeLeaderboardBtn" class="secondary hxWinClose" aria-label="Schließen" title="Schließen (Escape)"><span class="hxCloseHex" aria-hidden="true"><span class="hxi hxi-close"></span></span></button>
+        </header>
         <div class="leaderboardModes" role="group" aria-label="Spielmodus">
           <button type="button" data-leaderboard-mode="single" aria-pressed="true">Eine Front</button>
           <button type="button" data-leaderboard-mode="dual" aria-pressed="false">Zwei Fronten</button>
           <button type="button" data-leaderboard-mode="daily" aria-pressed="false">Tägliche Herausforderung</button>
-          <button type="button" data-leaderboard-mode="duo" aria-pressed="false">Duo-Mode</button>
+          <button type="button" data-leaderboard-mode="duo" aria-pressed="false">Duo</button>
           <button type="button" data-leaderboard-mode="legacy" aria-pressed="false">Gesamtwerte</button>
         </div>
-        <p id="leaderboardStatus" class="leaderboardStatus" role="status" aria-live="polite"></p>
-        <details id="runReview" hidden><summary>Runs prüfen</summary><div id="runReviewEntries"></div></details>
-        <div id="greedBoardTabs" class="hidden"><strong>Der Fluch der Gier · Goldwertung</strong><button type="button" data-greed-board="greed35">Welle 35</button><button type="button" data-greed-board="greedEndless">Endlos</button><label>Tag <input id="greedBoardDay" type="date"></label></div><div id="leaderboardContent" class="leaderboardTable"></div>
-        <small class="leaderboardNote">Getrennte Run-Wertungen zeigen freigegebene Ergebnisse. Gesamtwerte stammen aus gespeicherten Account-Spielständen und sind ungeprüft.</small>
+        <div class="lbBody">
+          <div class="lbStage"><canvas id="leaderboardScene" class="lbScene" aria-hidden="true"></canvas><div id="leaderboardPodium" class="lbPodium" aria-label="Die besten drei"></div></div>
+          <p id="leaderboardStatus" class="leaderboardStatus" role="status" aria-live="polite"></p>
+          <details id="runReview" hidden><summary>Runs prüfen</summary><div id="runReviewEntries"></div></details>
+          <div id="greedBoardTabs" class="hidden"><strong>Der Fluch der Gier · Goldwertung</strong><button type="button" data-greed-board="greed35">Welle 35</button><button type="button" data-greed-board="greedEndless">Endlos</button><label>Tag <input id="greedBoardDay" type="date"></label></div><div id="leaderboardContent" class="leaderboardTable"></div>
+          <small class="leaderboardNote">Getrennte Run-Wertungen zeigen freigegebene Ergebnisse. Gesamtwerte stammen aus gespeicherten Account-Spielständen und sind ungeprüft.</small>
+        </div>
+        <footer class="hxWinFoot lbFoot">
+          <span id="leaderboardOwn" class="lbOwn"></span>
+          <span id="leaderboardPager" class="lbPager"></span>
+        </footer>
       </section>
     </div>
     <div id="saveOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="saveTitle">
@@ -532,76 +711,104 @@
       </div>
     </div>
     <div id="accountOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="accountTitle">
-      <div class="accountBox">
-        <button id="closeAccountBtn" class="accountClose" type="button" aria-label="Account schließen (Escape)"
-          title="Zurück (Escape)">×</button>
-        <header class="accountHeader">
-          <div id="accountAvatar" class="accountAvatar" aria-hidden="true">☁</div>
+      <div class="accountBox hxWindow">
+        <header class="hxWinHead">
           <div>
             <h2 id="accountTitle">Dein Account</h2>
-            <p id="accountSubtitle" class="accountSubtitle">Sichere deinen Fortschritt und spiele auf jedem Gerät
-              weiter.</p>
+            <p id="accountSubtitle" class="hxWinSub">Sichere deinen Fortschritt und spiele auf jedem Gerät weiter.</p>
           </div>
+          <button id="closeAccountBtn" class="accountClose hxWinClose" type="button" aria-label="Account schließen (Escape)"
+            title="Zurück (Escape)"><small>Esc<br>Schließen</small><span class="hxCloseHex" aria-hidden="true"><span class="hxi hxi-close"></span></span></button>
         </header>
-        <section id="accountLoggedOut">
-          <ul class="accountPerks">
-            <li><span aria-hidden="true">☁</span>Fortschritt sicher auf dem Server</li>
-            <li><span aria-hidden="true">⇄</span>Auf jedem Gerät weiterspielen</li>
-            <li><span aria-hidden="true">⟳</span>Automatisch nach jedem Spiel gesichert</li>
-          </ul>
-          <div class="accountTabs" role="tablist" aria-label="Anmelden oder registrieren">
-            <button id="accountTabLogin" class="active" type="button" role="tab" aria-selected="true">Anmelden</button>
-            <button id="accountTabRegister" type="button" role="tab" aria-selected="false">Registrieren</button>
-          </div>
-          <form id="accountForm" class="accountForm" novalidate>
-            <label class="accountField"><span>Benutzername</span>
-              <input id="accountUsername" type="text" autocomplete="username" maxlength="20"
-                spellcheck="false" /></label>
-            <label class="accountField"><span>Passwort</span>
-              <span class="accountPasswordWrap"><input id="accountPassword" type="password"
-                  autocomplete="current-password" />
-                <button id="accountShowPassword" type="button" aria-label="Passwort anzeigen"
-                  title="Passwort anzeigen">👁</button></span></label>
-            <p id="accountHint" class="accountHint">Nach der Anmeldung wird dein gespeicherter Spielstand automatisch
-              geladen.</p>
-            <button id="accountSubmitBtn" class="primary" type="submit">Anmelden</button>
-          </form>
-        </section>
-        <section id="accountLoggedIn" class="hidden">
-          <div class="accountCard">
-            <div class="accountSync"><span id="accountSyncDot" class="accountSyncDot" data-state="ok"
-                aria-hidden="true"></span>
-              <div><strong id="accountWhoami"></strong><small id="accountSyncInfo">Wird automatisch nach jedem Spiel
-                  gesichert.</small></div>
+        <div class="accountBody">
+          <section id="accountLoggedOut">
+            <div class="accountTabs" role="tablist" aria-label="Anmelden oder registrieren">
+              <button id="accountTabRegister" type="button" role="tab" aria-selected="false">Registrieren</button>
+              <button id="accountTabLogin" class="active" type="button" role="tab" aria-selected="true">Anmelden</button>
+            </div>
+            <!-- Anmeldung über Twitch und Google: folgt später, die Knöpfe sind bis dahin gesperrt. -->
+            <p class="accountDivider"><span>Mit Konto fortfahren</span></p>
+            <div class="accountSocial" role="group" aria-label="Mit Konto fortfahren">
+              <button type="button" class="socialTwitch" disabled aria-describedby="accountSocialSoon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#a970ff" d="M4.3 2 3 5.4v13.8h4.6V22h2.6l2.7-2.8h3.8L22 14V2zm15.9 11.1-2.9 2.9h-4.6l-2.6 2.6V16H6.3V3.8h13.9z"/><path fill="#a970ff" d="M17.4 6.9h-1.8v5.2h1.8zm-4.9 0h-1.8v5.2h1.8z"/></svg>Twitch</button>
+              <button type="button" class="socialGoogle" disabled aria-describedby="accountSocialSoon"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285f4" d="M22.6 12.3c0-.8-.1-1.5-.2-2.3H12v4.3h5.9a5 5 0 0 1-2.2 3.3v2.8h3.6c2.1-1.9 3.3-4.8 3.3-8.1z"/><path fill="#34a853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.6-2.8c-1 .7-2.2 1.1-3.7 1.1-2.9 0-5.3-1.9-6.2-4.5H2.1v2.9A11 11 0 0 0 12 23z"/><path fill="#fbbc05" d="M5.8 14.1a6.6 6.6 0 0 1 0-4.2V7H2.1a11 11 0 0 0 0 10z"/><path fill="#ea4335" d="M12 5.4c1.6 0 3.1.6 4.2 1.7l3.2-3.2A11 11 0 0 0 2.1 7l3.7 2.9C6.7 7.3 9.1 5.4 12 5.4z"/></svg>Google</button>
+            </div>
+            <p id="accountSocialSoon" class="accountSoon">Bald verfügbar</p>
+            <p class="accountDivider"><span>Mit Benutzername</span></p>
+            <form id="accountForm" class="accountForm" novalidate>
+              <label class="accountField"><span>Benutzername</span>
+                <input id="accountUsername" type="text" autocomplete="username" maxlength="20" spellcheck="false"
+                  placeholder="Dein Benutzername" /></label>
+              <label class="accountField"><span>Passwort</span>
+                <span class="accountPasswordWrap"><input id="accountPassword" type="password"
+                    autocomplete="current-password" placeholder="Dein Passwort" />
+                  <button id="accountShowPassword" type="button" aria-label="Passwort anzeigen"
+                    title="Passwort anzeigen">👁</button></span></label>
+              <p id="accountHint" class="accountHint">Nach der Anmeldung wird dein gespeicherter Spielstand automatisch
+                geladen.</p>
+              <button id="accountSubmitBtn" class="primary accountSubmit" type="submit">Anmelden</button>
+            </form>
+            <button type="button" class="accountGuest" data-account-close>Ohne Account weiterspielen.</button>
+          </section>
+          <section id="accountLoggedIn" class="hidden">
+            <div class="accountHello">
+              <div id="accountAvatar" class="accountAvatar" aria-hidden="true">☁</div>
+              <div class="accountHelloText">
+                <strong id="accountHelloName"></strong>
+                <span id="accountWhoami" class="accountWhoami"></span>
+              </div>
+              <div class="accountSync"><span id="accountSyncDot" class="accountSyncDot" data-state="ok"
+                  aria-hidden="true"></span><span id="accountSyncState">Auf dem neuesten Stand.</span></div>
             </div>
             <dl class="accountStats">
               <div>
+                <span class="accountStatIcon" aria-hidden="true"><span class="hxi hxi-gem"></span></span>
                 <dt>Diamanten</dt>
-                <dd>◆ <span id="accountDiamonds">0</span></dd>
+                <dd><span id="accountDiamonds">0</span></dd>
               </div>
               <div>
+                <span class="accountStatIcon" aria-hidden="true"><span class="hxi hxi-wave"></span></span>
                 <dt>Beste Welle</dt>
                 <dd id="accountBestWave">0</dd>
               </div>
               <div>
+                <span class="accountStatIcon" aria-hidden="true"><span class="hxi hxi-cooldown"></span></span>
                 <dt>Letzte Sicherung</dt>
                 <dd id="accountLastSync">–</dd>
               </div>
             </dl>
-          </div>
-          <div class="accountActions">
-            <button id="accountSaveServerBtn" class="primary" type="button">Spielstand hochladen</button>
-            <button id="accountLoadServerBtn" class="secondary" type="button">Spielstand herunterladen</button>
-          </div>
-          <button id="accountLogoutBtn" class="accountLogout" type="button">Abmelden</button>
-        </section>
-        <p id="accountStatus" class="accountStatus" role="status" aria-live="polite"></p>
+            <p class="accountAutoSave"><span class="savedCheck" aria-hidden="true">✓</span><span id="accountSyncInfo">Wird automatisch nach jedem Spiel gesichert.</span></p>
+            <section class="hxGroup accountManage">
+              <h3 class="hxGroupTitle">Spielstand verwalten</h3>
+              <div class="accountActions">
+                <div class="accountAction">
+                  <span class="accountFlow" aria-hidden="true"><span class="flowDevice"></span><span class="flowArrow"></span><span class="flowCloud"></span></span>
+                  <strong>Spielstand hochladen</strong><small>Aktuellen Fortschritt in deinem Account sichern.</small>
+                  <button id="accountSaveServerBtn" class="primary" type="button">Hochladen ›</button>
+                </div>
+                <div class="accountAction">
+                  <span class="accountFlow" aria-hidden="true"><span class="flowCloud"></span><span class="flowArrow"></span><span class="flowDevice"></span></span>
+                  <strong>Spielstand herunterladen</strong><small>Gespeicherten Account-Spielstand auf dieses Gerät laden.</small>
+                  <button id="accountLoadServerBtn" class="secondary hxOutline" type="button">Herunterladen ›</button>
+                  <small class="accountWarn">⚠ Ersetzt den lokalen Spielstand.</small>
+                </div>
+              </div>
+            </section>
+          </section>
+          <p id="accountStatus" class="accountStatus" role="status" aria-live="polite"></p>
+        </div>
+        <footer class="hxWinFoot accountFoot">
+          <button id="accountLogoutBtn" class="accountLogout" type="button"><span aria-hidden="true">⇥</span> Abmelden</button>
+          <button type="button" class="primary" data-account-close>Zurück zum Hauptmenü ›</button>
+        </footer>
       </div>
     </div>
     <div id="playModeOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="playModeTitle">
       <div class="modeBox">
         <h2 id="playModeTitle">Wie möchtest du spielen?</h2>
         <div id="playModeChoices" class="modeChoices">
+          <!-- Mit gespeichertem Run steht „Fortsetzen“ zuerst; alle anderen Karten starten einen neuen Run. -->
+          <button id="menuContinueBtn" class="modeChoice continueChoice hidden" type="button"><strong>Fortsetzen</strong><span
+              id="menuContinueDetail"></span><small>Gespeicherten Durchlauf weiterspielen</small></button>
           <button id="duoModeBtn" class="modeChoice" type="button"><strong>Duo · Freunde-Beta</strong><span
               id="duoServerStatus" class="duoServerStatus" data-state="checking" role="status" aria-live="polite"><span
                 class="duoServerDot" aria-hidden="true"></span><span id="duoServerStatusText">Server wird geprüft
@@ -730,30 +937,47 @@
       <button id="backToVictoryBtn" class="primary">Zurück zum Sieg · Esc</button>
     </div>
     <div id="gameOverOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle">
-      <div class="gameOverBox">
-        <p class="eyebrow">RUN BEENDET</p>
-        <h2 id="gameOverTitle">Die Bastion ist gefallen</h2>
-        <p id="gameOverResult"></p>
-        <div id="diamondBreakdown" class="diamondBreakdown"></div>
-        <div class="profileTotals"><span>◆ <strong id="gameOverDiamonds">0</strong> Diamanten
-            gesamt</span><span>Bestmarke: Wave <strong id="gameOverBest">0</strong></span></div>
-        <p id="cloudSaveNote" class="cloudSaveNote hidden" role="status" aria-live="polite"></p>
-        <section id="runRanking" aria-label="Bestenlistenplatzierung" aria-live="polite"></section>
-        <section id="runStatistics" aria-label="Statistik des abgeschlossenen Durchlaufs"></section>
-        <div class="loadoutActions"><button id="gameOverMapBtn" class="secondary">Map anschauen</button><button
-            id="gameOverMenuBtn" class="secondary">Zum Hauptmenü</button><button id="changeLoadoutBtn"
-            class="secondary">Loadout ändern</button><button id="retryLoadoutBtn" class="primary">Noch einmal mit diesem
-            Loadout</button></div>
+      <div class="gameOverBox hxWindow runEndWindow">
+        <header class="runEndHead">
+          <h2 id="gameOverTitle">Durchlauf beendet</h2>
+          <p id="runEndSubtitle" class="hxWinSub"></p>
+        </header>
+        <div class="runEndBody">
+          <div class="runEndHero">
+            <div class="runEndWave"><strong id="runEndWave">Welle 0</strong><span>erreicht</span><small id="runEndCompleted"></small></div>
+            <div class="runEndReward"><span class="runEndHex gem" aria-hidden="true"><span class="hxi hxi-gem"></span></span><div><strong id="runEndDiamonds">+0</strong><span>Diamanten</span></div></div>
+            <section id="runRanking" class="runEndRanking" aria-label="Bestenlistenplatzierung" aria-live="polite"></section>
+          </div>
+          <p id="gameOverResult" class="runEndResult"></p>
+          <div class="profileTotals runEndTotals"><span>◆ <strong id="gameOverDiamonds">0</strong> Diamanten
+              gesamt</span><span>Bestmarke: Wave <strong id="gameOverBest">0</strong></span></div>
+          <p id="cloudSaveNote" class="cloudSaveNote hidden" role="status" aria-live="polite"></p>
+          <details class="runEndDetails" open data-keep-open>
+            <summary><span class="whenClosed">Details einblenden</span><span class="whenOpen">Details ausblenden</span></summary>
+            <div id="diamondBreakdown" class="diamondBreakdown"></div>
+            <section id="runStatistics" aria-label="Statistik des abgeschlossenen Durchlaufs"></section>
+          </details>
+        </div>
+        <footer class="hxWinFoot runEndFoot">
+          <button id="gameOverMenuBtn" class="secondary hxOutline">‹ Hauptmenü</button>
+          <button id="gameOverMapBtn" class="secondary hxOutline">Map anschauen</button>
+          <button id="changeLoadoutBtn" class="secondary hxOutline">Loadout ändern</button>
+          <span class="runEndFootNote">Deine Belohnung ist unabhängig von der Ranglistenprüfung.</span>
+          <button id="retryLoadoutBtn" class="primary">Noch einmal mit diesem Loadout ›</button>
+        </footer>
       </div>
       <button id="backToRunResultBtn" class="primary">Zurück zum Ergebnis · Esc</button>
     </div>
 
-    <div id="arsenalOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="arsenalTitle">
+    <div id="arsenalOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="arsenalTitle" data-view="tree">
       <div class="loadoutBox">
         <header class="arsenalToolbar">
           <h2 id="arsenalTitle">Arsenal</h2><span class="arsenalBalance" title="Diamanten">◆ <strong
               id="arsenalDiamonds">0</strong></span>
           <p class="arsenalLegend">◆ schaltet dauerhaft frei · 🪙 Gold bezahlt den Ausbau im Run</p>
+          <div class="arsenalViewSwitch" role="group" aria-label="Ansicht"><button type="button" class="secondary" data-arsenal-view="tree"
+              aria-pressed="true">Baum (Test)</button><button type="button" class="secondary" data-arsenal-view="workshop"
+              aria-pressed="false">Werkstatt</button></div>
           <button id="resetDiamondsBtn" class="secondary">Reset</button><button id="closeArsenalBtn" class="secondary"
             aria-label="Arsenal schließen (Escape)" title="Zurück (Escape)">Zurück · Esc</button>
         </header>
@@ -762,6 +986,7 @@
             aria-orientation="vertical"></nav>
           <div id="arsenalChoices" class="arsenalDetail"></div>
         </div>
+        <div id="arsenalTree" class="skillTreeView"></div>
         <p id="arsenalMessage" class="loadoutWarning" aria-live="polite"></p>
       </div>
     </div>
@@ -798,7 +1023,10 @@
     <script src="classes/translations.js?v=3983d35af7833e8b"></script>
     <script src="classes/i18n.js?v=3983d35af7833e8b"></script>
     <script src="classes/patch-notes.js?v=3983d35af7833e8b"></script>
+    <script src="classes/menu-variant.js?v=3983d35af7833e8b"></script>
     <script src="classes/menu-controls.js?v=3983d35af7833e8b"></script>
+    <script src="classes/hex-menu.js?v=3983d35af7833e8b"></script>
+    <script src="classes/settings-window.js?v=3983d35af7833e8b"></script>
     <script src="classes/compact-controls.js?v=3983d35af7833e8b"></script>
     <script src="classes/dialog-focus.js?v=3983d35af7833e8b"></script>
     <script src="runtime-config.js?v=3983d35af7833e8b"></script>
@@ -844,6 +1072,7 @@
     <script src="classes/buildings.js?v=3983d35af7833e8b"></script>
     <script src="classes/tower-commands.js?v=3983d35af7833e8b"></script>
     <script src="classes/arsenal.js?v=3983d35af7833e8b"></script>
+    <script src="classes/arsenal-tree.js?v=3983d35af7833e8b"></script>
     <script src="classes/exploration.js?v=3983d35af7833e8b"></script>
     <script src="classes/duo-server-status.js?v=3983d35af7833e8b"></script>
     <script src="duo-client.js?v=3983d35af7833e8b"></script>
@@ -860,6 +1089,8 @@
       // 3D nur über http(s) (Modelle werden per fetch geladen); ?svg erzwingt den SVG-Prototyp, Doppelklick (file://) nutzt ihn automatisch.
       if (location.protocol.startsWith('http') && !new URLSearchParams(location.search).has('svg')) {
         import('./classes/menu-backdrop.js?v=3983d35af7833e8b').catch(error => console.warn('Menühintergrund nicht verfügbar:', error));
+        import('./classes/tower-portraits.mjs?v=3983d35af7833e8b').catch(error => console.warn('Turmporträts nicht verfügbar:', error));
+        import('./classes/boss-portraits.mjs?v=3983d35af7833e8b').catch(error => console.warn('Bossporträts nicht verfügbar:', error));
         try { await import('./classes/three-renderer.js?v=3983d35af7833e8b'); } catch (error) { console.warn('3D nicht verfügbar, verwende SVG:', error); }
       }
       await new Promise((done, fail) => { const s = document.createElement('script'); s.src = 'classes/game.js?v=3983d35af7833e8b'; s.onload = done; s.onerror = fail; document.body.appendChild(s); });

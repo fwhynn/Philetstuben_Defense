@@ -44,7 +44,7 @@ test('legal pages opened directly behave like normal links',()=>{
 
 test('game menu links and legal pages are wired up',()=>{
  const menu=fs.readFileSync(path.join(root,'index.html'),'utf8');
- assert.equal((menu.match(/href="(impressum|datenschutz)\.html\?from=game" target="_blank"/g)||[]).length,2);
+ assert.equal((menu.match(/href="(impressum|datenschutz)\.html\?from=game" target="_blank"/g)||[]).length,4);
  for(const name of ['impressum.html','datenschutz.html']){
   const html=fs.readFileSync(path.join(root,name),'utf8');
   assert.match(html,/<script src="legal\.js(?:\?v=[a-f0-9]+)?" defer><\/script>/);

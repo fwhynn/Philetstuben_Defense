@@ -199,16 +199,6 @@ html,body{height:100%;overflow:hidden}
 .mainMenu{z-index:40}#arsenalOverlay{z-index:45}
 #menuBackdrop{position:fixed;inset:0;z-index:9;display:none;background:radial-gradient(circle at 50% 35%,#2f4a36,#0b110d 75%);pointer-events:none}#menuBackdrop.on{display:block}#menuBackdrop canvas{width:100%;height:100%;display:block;opacity:.32}
 .menuBackdropOn .mainMenu,.menuBackdropOn #loadoutOverlay,.menuBackdropOn #arsenalOverlay{background:transparent}
-.menuBox{width:min(460px,94vw);text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}
-.menuBox h1{font-size:clamp(40px,8vw,68px);margin:0;letter-spacing:.02em;text-shadow:0 4px 24px #000c;color:#f5ecd0}
-.menuTagline{color:var(--muted);margin:0 0 22px;font-size:14px}
-.menuButtons{display:flex;flex-direction:column;gap:10px;width:100%}
-.menuButtons .primary,.menuButtons .secondary{width:100%;padding:14px;font-size:17px}
-.menuButtons .secondary{background:#2c3f33;border:1px solid #4d684f}
-.menuVersion{color:#6f7f70;margin-top:6px}
-.menuLegal{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:6px;font-size:13px}.menuLegal span{color:#6f7f70}
-.menuLegal a{display:inline-flex;align-items:center;min-height:44px;padding:0 4px;color:#c8d4c9;text-decoration:underline;text-decoration-color:#c8d4c966;text-underline-offset:3px}.menuLegal a:hover{color:#ffe198}.menuLegal a:focus-visible{outline:3px solid #ffe198;outline-offset:2px;border-radius:4px}
-.menuLogo{width:120px;height:120px;filter:drop-shadow(0 6px 14px #000a);margin-bottom:-4px}
 
 .rewardInspectActions{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:12px;margin-top:24px}
 #rewardDeck{max-height:60vh;overflow:auto}
@@ -226,13 +216,8 @@ html,body{height:100%;overflow:hidden}
 @keyframes victoryEnter{from{opacity:0;transform:scale(.8) translateY(25px)}to{opacity:1;transform:scale(1) translateY(0)}}
 @media(prefers-reduced-motion:reduce){.celebrationCard{animation:none}}
 
-.dailyChallenge{padding:16px;border:1px solid #b89958;border-radius:12px;background:#463b2380;text-align:left}.dailyChallenge p{font-size:12px;line-height:1.5}.mainMenu .menuBox{max-height:none;overflow:visible}
+.dailyChallenge{padding:16px;border:1px solid #b89958;border-radius:12px;background:#463b2380;text-align:left}.dailyChallenge p{font-size:12px;line-height:1.5}
 
-.mainMenu{overflow:hidden;box-sizing:border-box;padding:16px}
-.mainMenu .menuLogo{width:clamp(48px,12vh,104px);height:clamp(48px,12vh,104px)}
-.mainMenu .menuBox{gap:4px}
-.mainMenu .menuTagline{margin:8px 0}
-.mainMenu .eyebrow{margin:4px 0}
 .modeBox{width:min(780px,94vw);box-sizing:border-box;padding:28px;background:#1d2922f5;border:1px solid #607d65;border-radius:18px;max-height:90dvh;overflow:auto;text-align:center}
 #playModeOverlay{z-index:42}
 .modeChoices{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:24px 0}
@@ -240,8 +225,6 @@ html,body{height:100%;overflow:hidden}
 .modeChoice{display:flex;flex-direction:column;gap:14px;padding:28px 20px;border:1px solid #879a6c;border-radius:14px;background:#2c3f33;min-height:190px;text-align:left}
 .modeChoice strong{font-size:22px;color:#f5df9a}.modeChoice small{line-height:1.5;color:#c1cbbd}
 #playModeBackBtn{margin-top:20px}
-@media(max-height:700px){.mainMenu .menuLogo{width:58px;height:58px}.mainMenu .menuBox h1{font-size:40px}.mainMenu .menuButtons{gap:6px}.mainMenu .menuButtons button{padding:9px;font-size:15px}.mainMenu .menuTagline{margin:4px 0;font-size:11px}}
-@media(max-height:500px){.mainMenu .menuLogo,.mainMenu .eyebrow,.mainMenu .menuTagline,.mainMenu .menuVersion{display:none}.mainMenu .menuBox h1{font-size:30px}.mainMenu .menuButtons{display:grid;grid-template-columns:1fr 1fr}}
 @media(max-width:550px){.modeChoices{grid-template-columns:1fr}.modeChoice{min-height:0;padding:18px}}
 
 .biomeWind{opacity:.45;animation:biomeWindDrift 4s ease-in-out infinite alternate}@keyframes biomeWindDrift{from{transform:translateX(-8px);opacity:.15}to{transform:translateX(12px);opacity:.6}}@media(prefers-reduced-motion:reduce){.biomeWind{animation:none;opacity:.25}}
@@ -340,9 +323,6 @@ button.card{background:#efe3c2;color:#2b281f}button.card:disabled{opacity:.7}
 ::-webkit-scrollbar-thumb{background:#789180;border:2px solid #17251d;border-radius:8px}
 ::-webkit-scrollbar-thumb:hover{background:#a2baa7}
 ::-webkit-scrollbar-corner{background:#17251d}
-.menuButtons .menuLanguage{width:100%;min-height:48px;padding:10px 14px;display:flex;justify-content:space-between;gap:12px;background:#2c3f33;border:1px solid #4d684f;border-radius:9px;color:#eee1c2;font-size:17px}
-.menuButtons .menuLanguage select{min-width:0;max-width:65%;min-height:32px;padding:3px 24px 3px 8px;border:0;background:#2c3f33;color:#eee1c2;font-size:inherit;cursor:pointer}
-@media(max-height:700px){.menuButtons .menuLanguage{font-size:15px;padding:6px 12px;min-height:44px}}
 /* Hidden state always wins over a component's flex/grid/display rule. */
 .hidden{display:none!important}
 
@@ -697,9 +677,6 @@ body:has(#biomeIntro:not(.hidden)) .biomeTooltip{display:none!important}
 .consumableGhost small{font-size:11px}
 .consumableGhost.hidden,.consumableTargets.hidden{display:none}
 #healthStat #hp{display:inline-flex;align-items:center;justify-content:center;align-self:center;height:20px;line-height:1;margin:0;padding:0}
-.menuButtons .menuLanguage{display:grid;grid-template-columns:1fr 1fr;align-items:center;text-align:center;box-sizing:border-box}
-.menuButtons .menuLanguage>span{text-align:center}
-.menuButtons .menuLanguage select{width:100%;max-width:none;text-align:center;text-align-last:center}
 .consumableGhost.modelPreview{grid-template-columns:auto}
 #runRanking { margin: 18px 0; padding: 14px; border: 1px solid #55785e; border-radius: 12px; }
 #runRanking:empty { display: none; }

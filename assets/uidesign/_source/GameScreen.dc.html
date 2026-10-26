@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Spielbildschirm</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,800;9..144,900&amp;family=Barlow+Semi+Condensed:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+button,select{font:inherit;color:inherit}
+</style>
+</helmet>
+<div style="position: relative; width: {{L.w}}px; height: {{L.h}}px; overflow: hidden; background: #3f97cf; font-family: 'Barlow Semi Condensed', 'Arial Narrow', system-ui, sans-serif; color: #f4ecd6">
+  <div style="position: absolute; left: 0; top: 0">
+    <dc-import name="Board" w="{{L.w}}" h="{{L.h}}" r="{{L.br}}" cx="{{L.bx}}" cy="{{L.by}}" sel-tower="{{selTower}}" hint-size="1920px,1080px"></dc-import>
+  </div>
+
+  <!-- Oben links: Pause, Einstellungen -->
+  <sc-if value="{{L.full}}" hint-placeholder-val="{{ true }}">
+  <div style="position: absolute; left: {{L.m}}px; top: {{L.top}}px; display: flex; gap: {{L.hg}}px">
+    <button aria-label="Pause" style="padding: 0; border: 0; background: none"><dc-import name="Hex" family="green" h="{{L.hs}}" icon="pause" label="" sub="" hint-size="55px,64px"></dc-import></button>
+    <button aria-label="Einstellungen" aria-haspopup="dialog" style="padding: 0; border: 0; background: none"><dc-import name="Hex" family="green" h="{{L.hs}}" icon="settings" label="" sub="" hint-size="55px,64px"></dc-import></button>
+  </div>
+  </sc-if>
+
+  <!-- Kompakte Navigation unter 1100 × 600: vier Gruppen + Hilfen -->
+  <sc-if value="{{L.compact}}" hint-placeholder-val="{{ false }}">
+    <nav aria-label="Spielnavigation" style="position: absolute; left: {{L.gX}}px; top: {{L.gY}}px; display: flex; gap: {{L.gGap}}px">
+      <sc-for list="{{groups}}" as="gr" hint-placeholder-count="5">
+        <button aria-expanded="{{gr.open}}" style="display: flex; flex-direction: column; align-items: center; gap: 1px; width: {{L.gW}}px; padding: 0; border: 0; background: none">
+          <span style="position: relative; display: inline-flex">
+            <dc-import name="Hex" family="green" state="{{gr.state}}" h="{{L.gH}}" icon="{{gr.icon}}" icon-color="{{gr.color}}" label="" sub="" hint-size="35px,40px"></dc-import>
+            <span style="position: absolute; right: -5px; bottom: -1px; display: inline-flex; padding: 1px; border-radius: 50%; background: #0e1d16"><dc-import name="Icon" glyph="{{gr.chev}}" size="{{ 12 }}" fill="#e9dcb8" hint-size="12px,12px"></dc-import></span>
+          </span>
+          <span style="font-size: 12px; font-weight: 700; line-height: 1.1; color: {{gr.ink}}; white-space: nowrap; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8)">{{gr.label}}</span>
+        </button>
+      </sc-for>
+    </nav>
+    <sc-if value="{{navFly}}" hint-placeholder-val="{{ false }}">
+      <div role="group" aria-label="Türme" style="position: absolute; left: {{L.fX}}px; top: {{L.fY}}px; padding: 2px; clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px); background: linear-gradient(170deg, #e9c46a, #8a6a26 60%, #c9a24a)">
+        <div style="display: flex; gap: 6px; padding: 8px 10px 10px; clip-path: polygon(9px 0, calc(100% - 9px) 0, 100% 9px, 100% calc(100% - 9px), calc(100% - 9px) 100%, 9px 100%, 0 calc(100% - 9px), 0 9px); background: linear-gradient(180deg, #17301f, #0f2219)">
+          <sc-for list="{{rail}}" as="b" hint-placeholder-count="6">
+            <button aria-label="{{b.aria}}" style="display: flex; flex-direction: column; align-items: center; padding: 0; border: 0; background: none; opacity: {{b.opacity}}">
+              <dc-import name="Hex" family="{{b.family}}" state="{{b.state}}" h="{{L.fH}}" icon="{{b.icon}}" icon-color="{{b.iconColor}}" label="" sub="" hint-size="40px,46px"></dc-import>
+              <span style="margin-top: -9px; position: relative; display: inline-flex; align-items: center; gap: 2px; height: 18px; padding: 0 6px 0 3px; border-radius: 999px; background: #0e1d16; border: 1.5px solid {{b.plaqueLine}}; color: {{b.priceColor}}; font-size: 12px; font-weight: 700; white-space: nowrap"><dc-import name="Icon" glyph="{{b.plaqueIcon}}" size="{{ 12 }}" fill="{{b.plaqueIconColor}}" hint-size="12px,12px"></dc-import>{{b.price}}</span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+  </sc-if>
+
+  <!-- Oben Mitte: Phasenschild -->
+  <div role="status" style="position: absolute; left: {{L.shX}}px; top: {{L.top}}px; transform: translateX(-50%); height: {{L.shH}}px; padding: 2px; box-sizing: border-box; clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px); background: linear-gradient(170deg, #e9c46a, #8a6a26 60%, #c9a24a)">
+    <div style="height: 100%; box-sizing: border-box; display: flex; align-items: center; gap: 10px; padding: 0 {{L.shPad}}px; clip-path: polygon(9px 0, calc(100% - 9px) 0, 100% 9px, 100% calc(100% - 9px), calc(100% - 9px) 100%, 9px 100%, 0 calc(100% - 9px), 0 9px); background: linear-gradient(180deg, #17301f, #0f2219); white-space: nowrap; font-size: {{L.shFs}}px; font-weight: 700">
+      <span>{{phase}}</span><span aria-hidden="true" style="color: #c9a24a">·</span><span style="color: #f3c94c">{{wave}}</span>
+    </div>
+  </div>
+
+  <!-- Oben rechts: Ressourcen -->
+  <div style="position: absolute; left: {{L.capX}}px; right: {{L.capR}}px; top: {{L.capY}}px; display: flex; justify-content: {{L.capJ}}; gap: {{L.capGap}}px">
+    <sc-for list="{{capsShown}}" as="cp" hint-placeholder-count="4">
+      <button aria-label="{{cp.aria}}" style="display: inline-flex; align-items: center; gap: {{L.capIn}}px; height: {{L.capH}}px; padding: 0 {{L.capPad}}px; border-radius: 999px; border: 1.5px solid #46634f; background: linear-gradient(180deg, #172c21, #0e1d16); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 3px 8px rgba(0, 0, 0, 0.35); font-size: {{L.capFs}}px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap">
+        <span style="display: inline-flex; color: {{cp.color}}"><dc-import name="Icon" glyph="{{cp.icon}}" size="{{L.capIcon}}" fill="currentColor" hint-size="24px,24px"></dc-import></span>{{cp.main}}<span style="color: #f3c94c">{{cp.extra}}</span>
+        <sc-if value="{{cp.arrow}}" hint-placeholder-val="{{ false }}"><dc-import name="Icon" glyph="chevronDown" size="{{L.capArrow}}" fill="#e9dcb8" hint-size="14px,14px"></dc-import></sc-if>
+      </button>
+    </sc-for>
+  </div>
+
+  <!-- Linker Rand: Turmleiste -->
+  <sc-if value="{{L.full}}" hint-placeholder-val="{{ true }}">
+  <nav aria-label="Türme" style="position: absolute; left: {{L.m}}px; top: {{L.railTop}}px; display: flex; flex-direction: column; gap: {{L.railGap}}px">
+    <sc-for list="{{rail}}" as="b" hint-placeholder-count="6">
+      <button aria-label="{{b.aria}}" style="position: relative; display: flex; flex-direction: column; align-items: center; padding: 0; border: 0; background: none; opacity: {{b.opacity}}">
+        <dc-import name="Hex" family="{{b.family}}" state="{{b.state}}" h="{{L.rh}}" icon="{{b.icon}}" icon-color="{{b.iconColor}}" label="" sub="" hint-size="64px,74px"></dc-import>
+        <span style="margin-top: {{L.plaqueUp}}px; position: relative; display: inline-flex; align-items: center; gap: 3px; height: {{L.plaqueH}}px; padding: 0 7px 0 4px; border-radius: 999px; background: #0e1d16; border: 1.5px solid {{b.plaqueLine}}; color: {{b.priceColor}}; font-size: {{L.plaqueFs}}px; font-weight: 700; white-space: nowrap">
+          <dc-import name="Icon" glyph="{{b.plaqueIcon}}" size="{{L.plaqueIcon}}" fill="{{b.plaqueIconColor}}" hint-size="14px,14px"></dc-import>{{b.price}}
+        </span>
+      </button>
+    </sc-for>
+  </nav>
+
+  <!-- Rechter Rand: Biome -->
+  <div role="group" aria-label="Entdeckte Biome" style="position: absolute; right: {{L.m}}px; top: {{L.bioTop}}px; display: flex; flex-direction: column; gap: {{L.bioGap}}px">
+    <sc-for list="{{biomes}}" as="bi" hint-placeholder-count="3">
+      <button aria-label="{{bi.aria}}" style="padding: 0; border: 0; background: none"><dc-import name="Hex" family="green" h="{{L.bh}}" icon="{{bi.icon}}" icon-color="{{bi.color}}" label="" sub="" hint-size="64px,74px"></dc-import></button>
+    </sc-for>
+  </div>
+  </sc-if>
+
+  <!-- Unten links: Zoom -->
+  <sc-if value="{{L.zoom}}" hint-placeholder-val="{{ true }}">
+    <div role="group" aria-label="Zoom" style="position: absolute; left: {{L.m}}px; bottom: {{L.m}}px; display: flex; gap: {{L.hg}}px">
+      <button aria-label="Herauszoomen" style="padding: 0; border: 0; background: none"><dc-import name="Hex" family="green" h="{{L.hs}}" icon="zoomOut" label="" sub="" hint-size="55px,64px"></dc-import></button>
+      <button aria-label="Hineinzoomen" style="padding: 0; border: 0; background: none"><dc-import name="Hex" family="green" h="{{L.hs}}" icon="zoomIn" label="" sub="" hint-size="55px,64px"></dc-import></button>
+    </div>
+  </sc-if>
+
+  <!-- Turmfenster: dockt links an, über der Turmleiste -->
+  <sc-if value="{{showPanel}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; left: {{L.pX}}px; top: {{L.pY}}px; filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.55))">
+      <dc-import name="TowerPanel" view="{{panel}}" w="{{L.pW}}" max-h="{{L.pH}}" sell-confirm="{{sellConfirm}}" hint-size="430px,640px"></dc-import>
+    </div>
+  </sc-if>
+
+  <!-- Unten Mitte: Aktionsleiste und Handkarten -->
+  <div role="group" aria-label="Gewählte Karte" style="position: absolute; left: {{L.abX}}px; top: {{L.abY}}px; transform: translateX(-50%); height: {{L.abH}}px; padding: 2px; box-sizing: border-box; clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px); background: linear-gradient(170deg, #e9c46a, #8a6a26 60%, #c9a24a)">
+    <div style="height: 100%; box-sizing: border-box; display: flex; align-items: center; clip-path: polygon(9px 0, calc(100% - 9px) 0, 100% 9px, 100% calc(100% - 9px), calc(100% - 9px) 100%, 9px 100%, 0 calc(100% - 9px), 0 9px); background: linear-gradient(180deg, #17301f, #0f2219); white-space: nowrap">
+      <button style="height: 100%; padding: 0 {{L.abPad}}px; border: 0; background: none; color: #f3c94c; font-size: {{L.abFs}}px; font-weight: 700">Hex platzieren</button>
+      <span aria-hidden="true" style="width: 1px; align-self: stretch; margin: 8px 0; background: rgba(201, 162, 74, 0.6)"></span>
+      <button aria-keyshortcuts="R" style="height: 100%; display: inline-flex; align-items: center; gap: 8px; padding: 0 {{L.abPad}}px 0 8px; border: 0; background: none; font-size: {{L.abFs}}px; font-weight: 700">
+        <dc-import name="Hex" family="green" h="{{L.abHex}}" icon="rotate" label="" sub="" hint-size="38px,44px"></dc-import>Drehen (R)
+      </button>
+    </div>
+  </div>
+  <div role="list" aria-label="Handkarten" style="position: absolute; left: {{L.cardsX}}px; top: {{L.cardsY}}px; display: flex; gap: {{L.cg}}px; align-items: flex-end">
+    <sc-for list="{{cards}}" as="cd" hint-placeholder-count="5">
+      <button role="listitem" aria-keyshortcuts="{{cd.num}}" style="padding: 0; border: 0; background: none; text-align: center">
+        <dc-import name="Card" rarity="{{cd.rarity}}" num="{{cd.num}}" name-text="{{cd.name}}" kind="{{cd.kind}}" sub="{{cd.sub}}" lines="{{cd.lines}}" stats="{{cd.stats}}" state="{{cd.state}}" w="{{L.cw}}" hint-size="178px,231px"></dc-import>
+      </button>
+    </sc-for>
+  </div>
+
+  <!-- Unten rechts: Tempo und Wellenstart -->
+  <div style="position: absolute; left: {{L.tX}}px; top: {{L.tY}}px; width: {{L.tW}}px; height: {{L.tH}}px; padding: 2px; box-sizing: border-box; clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px); background: linear-gradient(170deg, #e9c46a, #8a6a26 60%, #c9a24a)">
+    <div style="height: 100%; box-sizing: border-box; padding: {{L.tPad}}px {{L.tPadX}}px; display: flex; flex-direction: {{L.tDir}}; justify-content: center; gap: {{L.tGap}}px; clip-path: polygon(9px 0, calc(100% - 9px) 0, 100% 9px, 100% calc(100% - 9px), calc(100% - 9px) 100%, 9px 100%, 0 calc(100% - 9px), 0 9px); background: linear-gradient(180deg, #17301f, #0f2219)">
+      <label style="display: flex; align-items: baseline; gap: 8px; font-size: {{L.tFs}}px; font-weight: 700; white-space: nowrap">Tempo <span style="color: #f3c94c">2×</span></label>
+      <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 2px">
+        <div role="slider" aria-label="Tempo" aria-valuemin="1" aria-valuemax="8" aria-valuenow="2" aria-valuetext="2×" style="position: relative; height: {{L.trackH}}px; border-radius: 999px; background: #0a1510; box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6), 0 0 0 1px #46634f">
+          <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 14.3%; border-radius: 999px; background: linear-gradient(90deg, #f3c94c, #e8ac38)"></div>
+          <div style="position: absolute; left: 14.3%; top: 50%; width: {{L.knob}}px; height: {{L.knob}}px; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle at 40% 35%, #fff3c4, #e9b949 55%, #9c6a17); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5)"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; color: #cfd9cf"><span>1×</span><span>8×</span></div>
+      </div>
+    </div>
+  </div>
+  <button aria-disabled="{{ws.disabled}}" aria-keyshortcuts="Space" style="position: absolute; left: {{L.wX}}px; top: {{L.wY}}px; width: {{L.wW}}px; height: {{L.wH}}px; padding: 2px; border: 0; box-sizing: border-box; clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px); background: {{ws.edge}}">
+    <span style="height: 100%; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 0 8px; clip-path: polygon(9px 0, calc(100% - 9px) 0, 100% 9px, 100% calc(100% - 9px), calc(100% - 9px) 100%, 9px 100%, 0 calc(100% - 9px), 0 9px); background: {{ws.bg}}; color: {{ws.ink}}; font-size: {{L.wFs}}px; font-weight: 700; line-height: 1.05; text-align: center">
+      <dc-import name="Icon" glyph="waveStart" size="{{L.wIcon}}" fill="currentColor" hint-size="28px,28px"></dc-import><span>{{ws.text}}</span>
+    </span>
+  </button>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"preset":{"editor":"enum","default":"desktop","options":["desktop","deck","landscape","portrait"]},"panel":{"editor":"enum","default":"none","options":["none","upgrades","stats"]},"cardCount":{"editor":"enum","default":"5","options":["3","5"]},"waveState":{"editor":"enum","default":"locked","options":["locked","ready","running"]},"sellConfirm":{"editor":"boolean","default":false},"navOpen":{"editor":"enum","default":"","options":["","menu","stats","towers","biomes","help"]},"$preview":{"width":1920,"height":1080}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const preset = ['deck', 'landscape', 'portrait'].includes(this.props.preset) ? this.props.preset : 'desktop';
+    const panel = ['upgrades', 'stats'].includes(this.props.panel) ? this.props.panel : 'none';
+    const n = String(this.props.cardCount ?? '5') === '3' ? 3 : 5;
+    const P = {
+      desktop: { w: 1920, h: 1080, m: 24, top: 18, hs: 64, hg: 8, shH: 60, shFs: 28, shPad: 26, capY: 18, capH: 52, capFs: 24, capIcon: 26, capArrow: 16, capGap: 10, capIn: 8, capPad: 16, capJ: 'flex-end',
+        rh: 74, railTop: 128, railGap: 8, plaqueUp: -16, plaqueH: 26, plaqueFs: 16, plaqueIcon: 16, bh: 74, bioTop: 400, bioGap: 10, zoom: true,
+        pX: 24, pY: 112, pW: 430, pH: 0, cw: n === 3 ? 196 : 178, cg: 12, cardsBottom: 16,
+        abH: 60, abFs: 26, abPad: 22, abHex: 46, tW: 340, tH: 112, tPad: 12, tPadX: 22, tGap: 10, tFs: 24, tDir: 'column', trackH: 12, knob: 28, wH: 82, wFs: 26, wIcon: 30, br: 64, by: 500 },
+      deck: { w: 1280, h: 800, m: 16, top: 12, hs: 52, hg: 6, shH: 48, shFs: 22, shPad: 20, capY: 12, capH: 42, capFs: 19, capIcon: 21, capArrow: 14, capGap: 8, capIn: 6, capPad: 12, capJ: 'flex-end',
+        rh: 58, railTop: 88, railGap: 6, plaqueUp: -13, plaqueH: 22, plaqueFs: 14, plaqueIcon: 14, bh: 56, bioTop: 300, bioGap: 8, zoom: true,
+        pX: 16, pY: 78, pW: 360, pH: 706, cw: 120, cg: 8, cardsBottom: 12,
+        abH: 46, abFs: 19, abPad: 14, abHex: 36, tW: 220, tH: 86, tPad: 8, tPadX: 14, tGap: 6, tFs: 18, tDir: 'column', trackH: 10, knob: 22, wH: 62, wFs: 19, wIcon: 22, br: 44, by: 370 },
+      landscape: { w: 844, h: 390, m: 8, top: 6, hs: 44, hg: 4, shH: 36, shFs: 15, shPad: 12, capY: 8, capH: 32, capFs: 14, capIcon: 16, capArrow: 12, capGap: 4, capIn: 4, capPad: 8, capJ: 'flex-end',
+        rh: 44, railTop: 56, railGap: 4, plaqueUp: -10, plaqueH: 18, plaqueFs: 12, plaqueIcon: 12, bh: 42, bioTop: 50, bioGap: 4, zoom: false,
+        pX: 8, pY: 48, pW: 264, pH: 334, cw: 82, cg: 6, cardsBottom: 6,
+        abH: 38, abFs: 14, abPad: 10, abHex: 30, tW: 116, tH: 62, tPad: 5, tPadX: 9, tGap: 3, tFs: 14, tDir: 'column', trackH: 8, knob: 16, wH: 50, wFs: 13, wIcon: 16, br: 24, by: 160 },
+      portrait: { w: 390, h: 844, m: 10, top: 10, hs: 44, hg: 4, shH: 38, shFs: 15, shPad: 12, capY: 60, capH: 36, capFs: 15, capIcon: 17, capArrow: 12, capGap: 6, capIn: 4, capPad: 9, capJ: 'center',
+        rh: 46, railTop: 108, railGap: 4, plaqueUp: -10, plaqueH: 18, plaqueFs: 12, plaqueIcon: 12, bh: 44, bioTop: 108, bioGap: 6, zoom: false,
+        pX: 10, pY: 252, pW: 300, pH: 372, cw: 70, cg: 5, cardsBottom: 10,
+        abH: 38, abFs: 15, abPad: 12, abHex: 30, tW: 176, tH: 44, tPad: 4, tPadX: 10, tGap: 10, tFs: 15, tDir: 'row', trackH: 8, knob: 16, wH: 44, wFs: 14, wIcon: 18, br: 22, by: 420 }
+    };
+    const L = Object.assign({}, P[preset]);
+    const ch = Math.round(L.cw * (L.cw < 130 ? 1.42 : 1.3));
+    const cardsW = n * L.cw + (n - 1) * L.cg;
+    // Handkarten mittig, aber nie unter dem Turmfenster
+    let cx = (L.w - cardsW) / 2;
+    if (panel !== 'none' && preset !== 'portrait') cx = Math.max(cx, L.pX + L.pW + 16);
+    if (preset === 'deck') cx = Math.max(cx, 392);
+    if (preset === 'landscape') cx = 280;
+    if (preset === 'portrait') cx = L.m;
+    L.cardsX = Math.round(cx);
+    L.cardsY = L.h - L.cardsBottom - ch;
+    L.abX = Math.round(cx + cardsW / 2);
+    L.abY = L.cardsY - 18 - L.abH - 6;
+    L.wW = L.tW;
+    if (preset === 'portrait') {
+      L.tX = L.m; L.tY = 632; L.wX = 194; L.wY = 632; L.wW = 186;
+      L.abY = 680; L.shX = 245; L.capX = 10; L.capR = 10;
+    } else {
+      L.tX = L.w - L.m - L.tW;
+      L.wX = L.tX;
+      L.wY = L.h - L.m - L.wH;
+      L.tY = L.wY - 10 - L.tH;
+      L.shX = L.w / 2;
+      L.capX = Math.round(L.w * 0.6); L.capR = L.m;
+    }
+    // Unter 1100 × 600: kompakte Navigation mit Gruppen Menü, Werte, Türme, Biome (+ Hilfen).
+    L.compact = preset === 'landscape' || preset === 'portrait';
+    L.full = !L.compact;
+    const navOpen = ['menu', 'stats', 'towers', 'biomes', 'help'].includes(this.props.navOpen) ? this.props.navOpen : '';
+    if (preset === 'landscape') {
+      Object.assign(L, { gX: 8, gY: 4, gH: 38, gW: 50, gGap: 4, fX: 8, fY: 66, fH: 46, pY: 66, pH: 316, shX: 440, capX: 560, capR: 8 });
+    }
+    if (preset === 'portrait') {
+      Object.assign(L, { gX: 16, gY: 6, gH: 42, gW: 66, gGap: 6, fX: 10, fY: 116, fH: 46, shX: 98, capX: 196, capR: 10, capY: 62, capJ: 'flex-end' });
+      L.top = 62;
+    }
+    L.bx = preset === 'landscape' ? 560 : L.w / 2;
+    if (preset === 'deck') L.bx = 700;
+    const coinRail = (icon, price, aria, extra) => Object.assign({ icon, price, aria, family: 'green', state: 'normal', iconColor: '', opacity: 1, priceColor: '#f6efd8', plaqueLine: '#c9a24a', plaqueIcon: 'coin', plaqueIconColor: '#f3c94c' }, extra || {});
+    const rail = [
+      coinRail('tower_archer', '25', 'Bogenschütze, 25 Gold', panel !== 'none' ? { state: 'selected' } : {}),
+      coinRail('tower_chain', '40', 'Kettenblitz, 40 Gold', { iconColor: '#ffd36a' }),
+      coinRail('tower_freeze', '30', 'Frost, 30 Gold', { iconColor: '#9fe4ff' }),
+      coinRail('tower_flame', '220', 'Flamme, 220 Gold, zu teuer', { iconColor: '#ff9a5a', opacity: 0.6, priceColor: '#ff8f80', plaqueLine: '#c0453a' }),
+      coinRail('lock', 'W 25', 'Nekromant, gesperrt bis Welle 25', { family: 'fog', plaqueIcon: 'lock', plaqueIconColor: '#c9d2cc', priceColor: '#c9d2cc', plaqueLine: '#56625b' }),
+      coinRail('consumables', '3', 'Hilfen, 3 Gegenstände', { iconColor: '#f3c94c', plaqueIcon: 'chevronDown', plaqueIconColor: '#e9dcb8' })
+    ];
+    const ln = (icon, text, color) => ({ icon, text, color });
+    const allCards = [
+      { rarity: 'common', name: 'Gerade', kind: 'straight', sub: '', lines: [], stats: [{ icon: 'towerSlot', value: '2', color: '#8a5a12' }, { icon: 'deck', value: '1', color: '#2f63b0' }] },
+      { rarity: 'epic', name: 'Signal­kreuzung', kind: 'cross', sub: 'Vier Straßenenden', lines: [ln('towerSlot', '2 Turmplätze', '#8a5a12'), ln('range', '+20 % Reichweite', '#c2362b')], stats: [], state: 'selected' },
+      { rarity: 'legendary', name: 'Kronen­kreuzung', kind: 'crown', sub: 'Sechs Anschlüsse', lines: [ln('towerSlot', '2 Turmplätze', '#8a5a12'), ln('damage', '+20 % Schaden', '#d0452a'), ln('range', '+20 % Reichweite', '#c2362b')], stats: [] },
+      { rarity: 'rare', name: 'Kurve', kind: 'curve', sub: 'Zwei Straßenenden', lines: [ln('coin', '+5 Gold je Welle', '#a8740c')], stats: [] },
+      { rarity: 'rare', name: 'T-Kreu­zung', kind: 'tee', sub: 'Drei Straßenenden', lines: [ln('towerSlot', '1 Turmplatz', '#8a5a12'), ln('cooldown', '−10 % Nachladezeit', '#2f6b8f')], stats: [] }
+    ];
+    const cards = allCards.slice(0, n).map((c, i) => Object.assign({ num: i + 1, state: 'normal' }, c));
+    const ws = {
+      locked: { text: 'Zuerst Hex legen', bg: 'linear-gradient(180deg, #3a4440, #2c3430)', ink: '#c9d2cc', edge: '#56625b', disabled: 'true' },
+      ready: { text: 'Welle starten', bg: 'linear-gradient(180deg, #ffe48a, #e8ac38)', ink: '#2a1f10', edge: '#9c6a17', disabled: 'false' },
+      running: { text: 'Welle 20 · 12 übrig', bg: 'linear-gradient(90deg, #2b5638 0%, #2b5638 60%, #17301f 60%)', ink: '#f4ecd6', edge: '#c9a24a', disabled: 'true' }
+    }[this.props.waveState || 'locked'] || null;
+    const out = {
+      L, panel, showPanel: panel !== 'none', selTower: panel !== 'none', sellConfirm: !!this.props.sellConfirm,
+      phase: 'Bauphase', wave: 'Welle 20',
+      caps: [
+        { icon: 'heart', color: '#f2555f', main: '29/30', extra: '', arrow: false, aria: 'Leben 29 von 30' },
+        { icon: 'coin', color: '#f3c94c', main: '192', extra: preset === 'portrait' || preset === 'landscape' ? '+31' : '(+31)', arrow: false, aria: 'Gold 192, Einkommen plus 31' },
+        { icon: 'deck', color: '#5aa0f0', main: '12', extra: '', arrow: true, aria: 'Deck, 12 Karten, Infofenster öffnen' },
+        { icon: 'gem', color: '#ffffff', main: '16', extra: '', arrow: true, aria: 'Diamanten 16, Infofenster öffnen' }
+      ],
+      rail,
+      biomes: [
+        { icon: 'biome_grass', color: '#8fe08a', aria: 'Wald-Biom' },
+        { icon: 'biome_desert', color: '#ffe08a', aria: 'Wüsten-Biom' },
+        { icon: 'biome_water', color: '#8fd8ff', aria: 'Wasser-Biom' }
+      ],
+      cards, ws,
+      navFly: navOpen === 'towers',
+      groups: [
+        ['menu', 'menu', 'Menü', ''], ['stats', 'stats', 'Werte', '#e7c66a'], ['towers', 'tower_archer', 'Türme', ''], ['biomes', 'biome_grass', 'Biome', '#8fe08a'], ['help', 'consumables', 'Hilfen', '#f3c94c']
+      ].map(([key, icon, label, color]) => ({ icon, label, color, open: navOpen === key ? 'true' : 'false', state: navOpen === key ? 'selected' : 'normal', chev: navOpen === key ? 'chevronDown' : 'chevronRight', ink: navOpen === key ? '#f3c94c' : '#f4ecd6' }))
+    };
+    // Kompakt: Leben und Gold bleiben sichtbar, Deck und Diamanten liegen in der Gruppe „Werte“.
+    out.capsShown = L.compact ? out.caps.slice(0, 2) : out.caps;
+    return out;
+  }
+}
+</script>
+</body>
+</html>

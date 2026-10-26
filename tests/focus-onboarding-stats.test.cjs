@@ -38,3 +38,12 @@ test('Arsenal has actual before/after values for every tower branch and ultimate
  const frost=trees.find(t=>t.type==='freeze');assert.ok(frost.paths.find(p=>p.steps[0].name==='Tiefenfrost').steps[0].changes.includes('Aura-Reichweite: 138 → 119'));assert.ok(frost.paths.find(p=>p.steps[0].name==='Frostfeld').steps[1].changes.includes('Aura-Reichweite: 190 → 238'));
  const volley=trees.find(t=>t.type==='archer').paths[0].steps[0];assert.ok(volley.changes.some(s=>s.startsWith('Schaden gegen Leben: 11,25 → 8,75')),'downgrades are explicit too');
 });
+test('run statistics show kills, bosses and gold on top, a compact tower table and the share card collapsed',()=>{
+ const ui=load();Object.assign(ui.a.state,{runTowerStats:{archer:{damage:4500,kills:42,buildGold:100,upgradeGold:400,refundGold:75},freeze:{damage:0,kills:0,buildGold:200}},runTowerDetails:{},earnedMeta:{...ui.a.state.earnedMeta,periodicBosses:2,explorationBosses:1}});
+ ui.a.renderRunStatistics();const html=ui.elements.get('runStatistics').innerHTML;
+ assert.match(html,/class="runEndStats"/);assert.match(html,/<strong>3<\/strong><span>Bosse besiegt<\/span>/);
+ assert.match(html,/<th>Gold gesamt 🪙<\/th><th>Schaden\/🪙<\/th>/);assert.doesNotMatch(html,/Bau 🪙/);
+ assert.match(html,/data-run-costs="Bau: <strong>100<\/strong> · Upgrades: <strong>400<\/strong> · Erstattet: <strong>75 Gold<\/strong>"/);
+ assert.match(html,/hxi-tower_archer/);assert.match(html,/<td class="runStatsRatio">Support<\/td>/);
+ assert.match(html,/<details class="runShareDetails"><summary>Ergebnis teilen<\/summary><section class="runShareCard">/);
+});

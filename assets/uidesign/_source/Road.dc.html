@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Straßenstück</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<svg viewBox="{{vb}}" width="{{w}}" height="{{h}}" role="img" aria-label="{{alt}}" style="display: block; overflow: visible">
+  <defs>
+    <clipPath id="rd-clip"><polygon points="433,60 814,280 814,720 433,940 52,720 52,280"></polygon></clipPath>
+    <radialGradient id="rd-meadow" cx="0.5" cy="0.3" r="0.8">
+      <stop offset="0" stop-color="#a8d672"></stop>
+      <stop offset="1" stop-color="#76a84c"></stop>
+    </radialGradient>
+    <linearGradient id="rd-earth" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c9a26b"></stop>
+      <stop offset="1" stop-color="#8f6a3e"></stop>
+    </linearGradient>
+  </defs>
+  <path d="{{sideL}}" fill="url(#rd-earth)"></path>
+  <path d="{{sideR}}" fill="#a07a4a"></path>
+  <path d="{{lip}}" fill="#5f8f3c"></path>
+  <g transform="{{topT}}">
+    <polygon points="433,20 848.7,260 848.7,740 433,980 17.3,740 17.3,260" fill="#5f8f3c" stroke="#5f8f3c" stroke-width="34" stroke-linejoin="round"></polygon>
+    <polygon points="433,60 814,280 814,720 433,940 52,720 52,280" fill="url(#rd-meadow)" stroke="#b5d38a" stroke-width="10" stroke-linejoin="round"></polygon>
+    <g clip-path="url(#rd-clip)">
+      <path d="{{d}}" fill="none" stroke="#b9874e" stroke-width="200" stroke-linecap="{{cap}}" stroke-linejoin="round"></path>
+      <path d="{{d}}" fill="none" stroke="#ecd19a" stroke-width="150" stroke-linecap="{{cap}}" stroke-linejoin="round"></path>
+    </g>
+  </g>
+</svg>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"kind":{"editor":"enum","default":"curve","options":["straight","curve","cross","tee","deadEnd","crown"]},"view":{"editor":"enum","default":"flat","options":["flat","tilt"]},"h":{"editor":"int","default":120,"min":24,"max":600},"$preview":{"width":104,"height":120}}'>
+class Component extends DCLogic {
+  renderVals() {
+    // Kantenmitten der spitzen Hex-Form: links (0,500), rechts (866,500), unten rechts (649.5,875), unten links (216.5,875), oben links (216.5,125), oben rechts (649.5,125).
+    const D = {
+      straight: { d: 'M0 500 H866', alt: 'Gerade', cap: 'butt' },
+      curve: { d: 'M0 500 Q433 500 649.5 875', alt: 'Kurve', cap: 'butt' },
+      cross: { d: 'M0 500 H866 M216.5 125 L649.5 875', alt: 'Kreuzung', cap: 'butt' },
+      tee: { d: 'M0 500 H866 M433 500 L216.5 875', alt: 'T-Kreuzung', cap: 'butt' },
+      deadEnd: { d: 'M0 500 H470', alt: 'Sackgasse', cap: 'round' },
+      crown: { d: 'M0 500 H866 M216.5 125 L649.5 875 M649.5 125 L216.5 875', alt: 'Kronenkreuzung', cap: 'butt' }
+    };
+    const kind = D[this.props.kind] ? this.props.kind : 'curve';
+    const tilt = this.props.view === 'tilt';
+    const h = this.props.h ?? 120;
+    // Schrägsicht: Deckfläche auf 62 % gestaucht, darunter Erdkante 150 u.
+    const k = 0.62, depth = 150;
+    const y = (v) => Math.round(v * k);
+    const side = (x1, y1, x2, y2, a, b) => 'M' + x1 + ' ' + (y(y1) + a) + 'L' + x2 + ' ' + (y(y2) + a) + 'L' + x2 + ' ' + (y(y2) + b) + 'L' + x1 + ' ' + (y(y1) + b) + 'Z';
+    return {
+      kind, ...D[kind],
+      vb: tilt ? '0 0 866 ' + (y(1000) + depth) : '0 0 866 1000',
+      w: tilt ? Math.round(h * 866 / (y(1000) + depth)) : Math.round(h * 0.866),
+      h,
+      topT: tilt ? 'scale(1 ' + k + ')' : 'scale(1 1)',
+      sideL: tilt ? side(0, 750, 433, 1000, -6, depth) : '',
+      sideR: tilt ? side(433, 1000, 866, 750, -6, depth) : '',
+      lip: tilt ? side(0, 750, 433, 1000, -6, 26) + side(433, 1000, 866, 750, -6, 26) : ''
+    };
+  }
+}
+</script>
+</body>
+</html>

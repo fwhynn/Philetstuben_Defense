@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Turm-Geist beim Ziehen">
+  <defs><clipPath id="fx-hex"><polygon points="128,10 230.2,69 230.2,187 128,246 25.8,187 25.8,69"/></clipPath></defs>
+  <path d="M58 128a70 70 0 1 0 140 0a70 70 0 1 0 -140 0Z" fill="#ffffff" opacity="0.28"/>
+  <path d="M58 128a70 70 0 1 0 140 0a70 70 0 1 0 -140 0Z" fill="none" opacity="0.9" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="12 9"/>
+  <path d="M128 12L228.5 70L228.5 186L128 244L27.5 186L27.5 70Z" fill="none" opacity="0.6" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6 10"/>
+  <path d="M128 70V40M116 52L128 40L140 52" fill="none" opacity="0.9" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

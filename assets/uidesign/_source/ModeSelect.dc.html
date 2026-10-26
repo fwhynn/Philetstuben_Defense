@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Spielmodus wählen</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&amp;family=Barlow+Semi+Condensed:wght@600;700&amp;family=Inter:wght@500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit}
+</style>
+</helmet>
+<div style="position: relative; width: 1440px; height: 900px; overflow: hidden; background: #0b110d; font-family: 'Barlow Semi Condensed', 'Arial Narrow', system-ui, sans-serif; color: #f6f2e4">
+  <div style="position: absolute; left: 0; top: 0">
+    <dc-import name="Backdrop" w="{{ 1440 }}" h="{{ 900 }}" islands="{{ false }}" hint-size="1440px,900px"></dc-import>
+  </div>
+
+  <header style="position: absolute; left: 40px; top: 30px; display: flex; align-items: center; gap: 18px">
+    <button aria-label="Zurück" style="padding: 0; border: 0; background: none"><dc-import name="Hex" family="green" h="{{ 64 }}" icon="back" label="" sub="" hint-size="55px,64px"></dc-import></button>
+    <h1 style="margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 900; font-size: 40px; color: #f3d58a; text-shadow: 0 3px 0 #4f350d">Spielmodus wählen</h1>
+  </header>
+
+  <div role="radiogroup" aria-label="Spielmodus" style="position: absolute; left: 165px; top: 150px; display: flex; gap: 60px">
+    <sc-for list="{{modes}}" as="m" hint-placeholder-count="3">
+      <button role="radio" aria-checked="{{m.checked}}" style="width: 330px; padding: 0; border: 0; background: none; display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center; cursor: pointer">
+        <div style="position: relative; width: 330px; height: 381px; filter: drop-shadow(0 8px 0 #0a160f) drop-shadow(0 18px 24px rgba(0, 0, 0, 0.55)) {{m.glow}}">
+          <div style="position: absolute; inset: 0; clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); background: {{m.rim}}"></div>
+          <div style="position: absolute; left: 4%; top: 3.5%; right: 4%; bottom: 3.5%; clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); background: #102117"></div>
+          <div style="position: absolute; left: 6.5%; top: 5.6%; right: 6.5%; bottom: 5.6%; overflow: hidden; clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); background: {{m.sky}}">
+            <sc-if value="{{m.sun}}" hint-placeholder-val="{{ false }}">
+              <div style="position: absolute; left: 50%; top: 18%; width: 90px; height: 90px; margin-left: -45px; border-radius: 50%; background: radial-gradient(circle, #fff3c4 0%, #f4c552 55%, rgba(244, 197, 82, 0) 72%)"></div>
+            </sc-if>
+            <div style="position: absolute; left: {{m.ax}}px; top: {{m.ay}}px">
+              <dc-import name="Island" variant="a" scale="{{m.is}}" mirror="{{m.mirrorA}}" dim="{{ 1 }}" hint-size="210px,245px"></dc-import>
+            </div>
+            <sc-if value="{{m.second}}" hint-placeholder-val="{{ false }}">
+              <div style="position: absolute; left: {{m.bx}}px; top: {{m.by}}px">
+                <dc-import name="Island" variant="a" scale="{{m.is}}" mirror="{{ true }}" dim="{{ 1 }}" hint-size="210px,245px"></dc-import>
+              </div>
+            </sc-if>
+            <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 30%)"></div>
+          </div>
+          <div style="position: absolute; right: 22px; top: 70px; width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #13201a; border: 2px solid #a9c98f; color: #f4ecd6">
+            <dc-import name="Icon" glyph="{{m.icon}}" size="{{ 26 }}" fill="currentColor" hint-size="26px,26px"></dc-import>
+          </div>
+        </div>
+        <span style="font-family: Fraunces, Georgia, serif; font-weight: 800; font-size: 28px; line-height: 1.1; color: #f6f2e4">{{m.title}}</span>
+        <span style="font-size: 15px; line-height: 1.45; color: #dfe8e2; max-width: 300px">{{m.text}}</span>
+        <span style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border-radius: 999px; background: rgba(19, 32, 26, 0.9); border: 1px solid #5d7d63; font-size: 13px; font-weight: 700; color: #cfe0c8">
+          <span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: {{m.dot}}"></span>{{m.status}}
+        </span>
+      </button>
+    </sc-for>
+  </div>
+
+  <button style="position: absolute; left: 1220px; top: 690px; padding: 0; border: 0; background: none"><dc-import name="Hex" family="gold" h="{{ 170 }}" emph="{{ true }}" icon="play" label="Starten" sub="Standardspiel" hint-size="147px,170px"></dc-import></button>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const greenRim = 'linear-gradient(170deg, #a9c98f, #5f8a5a 50%, #2e4b33)';
+    const focusRim = 'linear-gradient(170deg, #fffbe8, #ffe198)';
+    const modes = [
+      { title: 'Standardspiel', text: 'Schwierigkeit wählen · eigene Festung und Turmauswahl', status: 'Ausgewählt', dot: '#ffe198', icon: 'play', checked: 'true',
+        rim: focusRim, glow: 'drop-shadow(0 0 14px rgba(255, 225, 152, 0.7))', sky: 'radial-gradient(ellipse at 50% 30%, #6fa070 0%, #2b5638 60%, #1d3d28 100%)',
+        sun: false, second: false, is: 0.42, mirrorA: false, ax: 30, ay: 70, bx: 0, by: 0 },
+      { title: 'Tägliche Herausforderung', text: 'Tagesmission · Wechsel um 00:00 UTC', status: 'Heute noch offen', dot: '#a9c98f', icon: 'daily', checked: 'false',
+        rim: greenRim, glow: '', sky: 'linear-gradient(180deg, #e9b949 0%, #8a7a3e 35%, #2b5638 70%, #1d3d28 100%)',
+        sun: true, second: false, is: 0.42, mirrorA: true, ax: 50, ay: 90, bx: 0, by: 0 },
+      { title: 'Duo · Beta', text: 'Zwei Festungen, ein Team', status: 'Server bereit', dot: '#7fd18b', icon: 'duo', checked: 'false',
+        rim: greenRim, glow: '', sky: 'radial-gradient(ellipse at 50% 30%, #4f8a8a 0%, #24504a 55%, #163330 100%)',
+        sun: false, second: true, is: 0.3, mirrorA: false, ax: -10, ay: 120, bx: 140, by: 120 }
+    ];
+    return { modes };
+  }
+}
+</script>
+</body>
+</html>

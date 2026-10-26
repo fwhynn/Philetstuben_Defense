@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Auswahlring Turm">
+  <defs><clipPath id="fx-hex"><polygon points="128,10 230.2,69 230.2,187 128,246 25.8,187 25.8,69"/></clipPath></defs>
+  <path d="M128 16L225 72L225 184L128 240L31 184L31 72Z" fill="#ffd04a" opacity="0.16"/>
+  <path d="M128 16L225 72L225 184L128 240L31 184L31 72Z" fill="none" stroke="#ffd04a" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M154 19L128 4L102 19 M235.4 96L235.4 66L209.4 51 M209.4 205L235.4 190L235.4 160 M102 237L128 252L154 237 M20.6 160L20.6 190L46.6 205 M46.6 51L20.6 66L20.6 96" fill="none" stroke="#fff3c4" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

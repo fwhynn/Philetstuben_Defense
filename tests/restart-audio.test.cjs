@@ -22,3 +22,19 @@ test('audio persists volume and mute across reload and accepts bounded account s
  const next=boot();assert.equal(next.nodes.get('soundVolume').value,'12');assert.equal(next.nodes.get('soundEnabled').checked,false);
  next.audio.applySettings({volume:200,enabled:false});assert.equal(next.audio.settings().volume,100);
 });
+
+test('background music loops after the first input, pauses in a hidden tab and persists its own settings',()=>{
+ const storage=new Map(),tracks=[];
+ class FakeAudio{constructor(src){this.src=src;this.paused=true;this.loop=false;this.volume=1;tracks.push(this);}play(){this.paused=false;return Promise.resolve();}pause(){this.paused=true;}}
+ function boot(){const nodes=new Map(),docListeners={};const document={hidden:false,getElementById(id){if(!nodes.has(id))nodes.set(id,{checked:true,value:id==='musicVolume'?'40':'35',listeners:{},addEventListener(name,fn){this.listeners[name]=fn;}});return nodes.get(id);},addEventListener(name,fn){docListeners[name]=fn;}};
+  const context={document,window:{},Audio:FakeAudio,localStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v)}};vm.runInNewContext(fs.readFileSync(require.resolve('../classes/sound.js'),'utf8')+'\nglobalThis.audio=HexAudio;',context);return {nodes,document,docListeners,audio:context.audio};}
+ const first=boot();assert.equal(tracks.length,0,'kein Autoplay vor der ersten Eingabe');
+ first.docListeners.pointerdown();assert.equal(tracks.length,1);const track=tracks[0];
+ assert.match(track.src,/assets\/audio\/music\/.+\.mp3$/);assert.equal(track.loop,true);assert.equal(track.paused,false);assert.ok(Math.abs(track.volume-.24)<1e-9);
+ first.document.hidden=true;first.docListeners.visibilitychange();assert.equal(track.paused,true);
+ first.document.hidden=false;first.docListeners.visibilitychange();assert.equal(track.paused,false);
+ first.nodes.get('musicVolume').value='10';first.nodes.get('musicVolume').listeners.input();assert.ok(Math.abs(track.volume-.06)<1e-9);
+ first.nodes.get('musicEnabled').checked=false;first.nodes.get('musicEnabled').listeners.change();assert.equal(track.paused,true);
+ const next=boot();assert.equal(next.nodes.get('musicEnabled').checked,false);assert.equal(next.nodes.get('musicVolume').value,'10');
+ next.audio.applySettings({musicEnabled:true,musicVolume:500});assert.deepEqual({...next.audio.settings()},{enabled:true,volume:35,musicEnabled:true,musicVolume:100});
+});

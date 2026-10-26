@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Spiel-HUD</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&amp;family=Barlow+Semi+Condensed:wght@600;700&amp;family=Inter:wght@500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit}
+</style>
+</helmet>
+<div style="position: relative; width: 1440px; height: 900px; overflow: hidden; background: radial-gradient(ellipse 70% 70% at 50% 48%, #24402c 0%, #142219 55%, #0b110d 100%); font-family: 'Barlow Semi Condensed', 'Arial Narrow', system-ui, sans-serif; color: #f6f2e4">
+  <svg viewBox="0 0 1440 900" width="1440" height="900" aria-hidden="true" style="position: absolute; left: 0; top: 0">
+    <defs>
+      <radialGradient id="hud-meadow" cx="0.5" cy="0.35" r="0.9">
+        <stop offset="0" stop-color="#93c262"></stop>
+        <stop offset="1" stop-color="#6c9d48"></stop>
+      </radialGradient>
+    </defs>
+    <path d="{{shadowD}}" fill="#07100a" opacity="0.55"></path>
+    <path d="{{meadowD}}" fill="#4f7a36"></path>
+    <path d="{{meadowInnerD}}" fill="url(#hud-meadow)"></path>
+    <path d="{{fogD}}" fill="#2c3430" stroke="#1a201d" stroke-width="3"></path>
+    <path d="{{fogInnerD}}" fill="#3a4440"></path>
+    <path d="{{slotD}}" fill="rgba(169, 201, 143, 0.06)" stroke="#a9c98f" stroke-opacity="0.45" stroke-width="2" stroke-dasharray="7 6"></path>
+    <path d="{{targetD}}" fill="rgba(255, 225, 152, 0.14)" stroke="#ffe198" stroke-width="3" stroke-dasharray="10 6"></path>
+    <path d="{{roadD}}" fill="none" stroke="#a87a45" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="{{roadD}}" fill="none" stroke="#e0bc86" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="{{spawnD}}" fill="none" stroke="#c0453a" stroke-width="5"></path>
+  </svg>
+
+  <sc-for list="{{fogMarks}}" as="m" hint-placeholder-count="6">
+    <span aria-hidden="true" style="position: absolute; left: {{m.x}}px; top: {{m.y}}px; width: 40px; margin-left: -20px; margin-top: -24px; text-align: center; font-family: Fraunces, Georgia, serif; font-weight: 900; font-size: 34px; line-height: 48px; color: #8f9a94">?</span>
+  </sc-for>
+  <sc-for list="{{towers}}" as="t" hint-placeholder-count="4">
+    <div aria-label="{{t.name}}" role="img" style="position: absolute; left: {{t.x}}px; top: {{t.y}}px; width: {{t.size}}px; height: {{t.size}}px; margin-left: {{t.off}}px; margin-top: {{t.off}}px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: {{t.bg}}; color: {{t.ink}}; box-shadow: 0 0 0 3px {{t.ring}}, 0 6px 8px rgba(0, 0, 0, 0.5)">
+      <dc-import name="Icon" glyph="{{t.icon}}" size="{{t.icSize}}" fill="currentColor" hint-size="26px,26px"></dc-import>
+    </div>
+  </sc-for>
+
+  <header style="position: absolute; left: 28px; right: 28px; top: 22px; display: flex; align-items: center; justify-content: space-between; gap: 16px">
+    <div style="display: flex; align-items: center; height: 52px; padding: 0 16px; border-radius: 999px; background: rgba(19, 32, 26, 0.9); border: 1px solid #41594a">
+      <dc-import name="Wordmark" variant="compact" width="{{ 140 }}" hint-size="140px,40px"></dc-import>
+    </div>
+    <div style="display: flex; align-items: center; gap: 14px">
+      <div role="status" aria-label="Leben 29 von 30" style="display: flex; align-items: center; height: 44px; padding: 0 18px 0 0; border-radius: 999px; background: rgba(19, 32, 26, 0.92); border: 1px solid #6f8f6a; font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums">
+        <div style="margin: -8px 8px -8px -12px"><dc-import name="Hex" family="green" h="{{ 58 }}" icon="heart" icon-color="#f78390" label="" sub="" hint-size="50px,58px"></dc-import></div>29/30
+      </div>
+      <div role="status" aria-label="Gold 192" style="display: flex; align-items: center; height: 44px; padding: 0 18px 0 0; border-radius: 999px; background: rgba(19, 32, 26, 0.92); border: 1px solid #6f8f6a; font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums">
+        <div style="margin: -8px 8px -8px -12px"><dc-import name="Hex" family="gold" h="{{ 58 }}" icon="coin" label="" sub="" hint-size="50px,58px"></dc-import></div>192
+      </div>
+      <div role="status" aria-label="Diamanten 16" style="display: flex; align-items: center; height: 44px; padding: 0 18px 0 0; border-radius: 999px; background: rgba(19, 32, 26, 0.92); border: 1px solid #6f8f6a; font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums">
+        <div style="margin: -8px 8px -8px -12px"><dc-import name="Hex" family="green" h="{{ 58 }}" icon="gem" icon-color="#8fd3ff" label="" sub="" hint-size="50px,58px"></dc-import></div>16
+      </div>
+      <div role="status" aria-label="Welle 20" style="display: flex; align-items: center; height: 44px; padding: 0 18px 0 0; border-radius: 999px; background: rgba(19, 32, 26, 0.92); border: 1px solid #6f8f6a; font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums">
+        <div style="margin: -8px 8px -8px -12px"><dc-import name="Hex" family="green" h="{{ 58 }}" icon="wave" label="" sub="" hint-size="50px,58px"></dc-import></div>Welle 20
+      </div>
+      <button aria-label="Menü" style="padding: 0; border: 0; background: none; margin-left: 6px"><dc-import name="Hex" family="green" h="{{ 64 }}" icon="menu" label="" sub="" hint-size="55px,64px"></dc-import></button>
+    </div>
+  </header>
+
+  <p role="status" style="position: absolute; left: 50%; top: 96px; transform: translateX(-50%); margin: 0; padding: 8px 18px; border-radius: 999px; background: #f1e6c6; border: 1px solid #b8a274; color: #2b281f; font-size: 15px; font-weight: 700; white-space: nowrap; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4)">Kreuzung gewählt · freies Feld antippen</p>
+
+  <nav aria-label="Türme" style="position: absolute; left: 28px; top: 140px; display: flex; flex-direction: column; gap: 14px">
+    <sc-for list="{{rail}}" as="b" hint-placeholder-count="4">
+      <button aria-label="{{b.aria}}" style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 0; border: 0; background: none; opacity: {{b.opacity}}">
+        <dc-import name="Hex" family="{{b.family}}" state="{{b.state}}" h="{{ 80 }}" icon="{{b.icon}}" label="" sub="" hint-size="69px,80px"></dc-import>
+        <span style="display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 8px; border-radius: 999px; background: {{b.chipBg}}; border: 1px solid {{b.chipLine}}; color: {{b.chipInk}}; font-size: 12px; font-weight: 800; white-space: nowrap">
+          <dc-import name="Icon" glyph="{{b.chipIcon}}" size="{{ 13 }}" fill="currentColor" hint-size="13px,13px"></dc-import>{{b.chip}}
+        </span>
+      </button>
+    </sc-for>
+  </nav>
+
+  <div style="position: absolute; left: 28px; bottom: 28px; display: flex; align-items: center; gap: 12px">
+    <button aria-label="Pause" style="padding: 0; border: 0; background: none"><dc-import name="Hex" family="green" h="{{ 60 }}" icon="pause" label="" sub="" hint-size="52px,60px"></dc-import></button>
+    <div role="group" aria-label="Tempo" style="display: flex; height: 46px; padding: 3px; border-radius: 999px; background: rgba(19, 32, 26, 0.92); border: 1px solid #6f8f6a">
+      <button aria-pressed="false" style="display: inline-flex; align-items: center; gap: 4px; min-width: 56px; justify-content: center; border: 0; border-radius: 999px; background: none; font-size: 14px; font-weight: 800"><dc-import name="Icon" glyph="speed1" size="{{ 16 }}" fill="currentColor" hint-size="16px,16px"></dc-import>1×</button>
+      <button aria-pressed="true" style="display: inline-flex; align-items: center; gap: 4px; min-width: 56px; justify-content: center; border: 0; border-radius: 999px; background: #f4c552; color: #2a1f10; font-size: 14px; font-weight: 800"><dc-import name="Icon" glyph="speed2" size="{{ 16 }}" fill="currentColor" hint-size="16px,16px"></dc-import>2×</button>
+      <button aria-pressed="false" style="display: inline-flex; align-items: center; gap: 4px; min-width: 56px; justify-content: center; border: 0; border-radius: 999px; background: none; font-size: 14px; font-weight: 800"><dc-import name="Icon" glyph="speed3" size="{{ 16 }}" fill="currentColor" hint-size="16px,16px"></dc-import>3×</button>
+    </div>
+    <button style="display: inline-flex; align-items: center; gap: 8px; height: 46px; padding: 0 16px; border-radius: 999px; border: 1px solid #6f8f6a; background: rgba(19, 32, 26, 0.92); font-size: 14px; font-weight: 800"><dc-import name="Icon" glyph="deck" size="{{ 18 }}" fill="#bfd0c6" hint-size="18px,18px"></dc-import>Deck · 14</button>
+  </div>
+
+  <div role="list" aria-label="Handkarten" style="position: absolute; left: 491px; top: 741px; display: flex; gap: 14px; align-items: flex-end">
+    <button role="listitem" style="padding: 0; border: 0; background: none"><dc-import name="Card" kind="straight" label="Gerade" cost="{{ 1 }}" w="{{ 104 }}" hint-size="104px,135px"></dc-import></button>
+    <button role="listitem" style="padding: 0; border: 0; background: none"><dc-import name="Card" kind="curve" label="Kurve" cost="{{ 1 }}" w="{{ 104 }}" hint-size="104px,135px"></dc-import></button>
+    <button role="listitem" aria-pressed="true" style="padding: 0; border: 0; background: none"><dc-import name="Card" kind="cross" label="Kreuzung" cost="{{ 2 }}" selected="{{ true }}" w="{{ 104 }}" hint-size="104px,135px"></dc-import></button>
+    <button role="listitem" style="padding: 0; border: 0; background: none"><dc-import name="Card" kind="tee" label="T-Kreuzung" cost="{{ 2 }}" w="{{ 104 }}" hint-size="104px,135px"></dc-import></button>
+  </div>
+  <button aria-label="Karte drehen" style="position: absolute; left: 970px; top: 770px; padding: 0; border: 0; background: none"><dc-import name="Hex" family="green" h="{{ 84 }}" icon="rotate" label="Drehen" sub="" hint-size="73px,84px"></dc-import></button>
+
+  <button style="position: absolute; left: 1244px; top: 692px; padding: 0; border: 0; background: none"><dc-import name="Hex" family="gold" h="{{ 180 }}" emph="{{ true }}" icon="play" label="Welle starten" sub="Welle 20" hint-size="156px,180px"></dc-import></button>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const R = 42, cx = 720, cy = 440, sx = R * Math.sqrt(3), sy = 1.5 * R;
+    const f = (n) => Math.round(n * 10) / 10;
+    const px = (q, r) => [cx + sx * (q + r / 2), cy + sy * r];
+    const hex = (q, r, s) => {
+      const [x, y] = px(q, r);
+      const pts = [[0, -1], [0.866, -0.5], [0.866, 0.5], [0, 1], [-0.866, 0.5], [-0.866, -0.5]];
+      return 'M' + pts.map(([a, b]) => f(x + a * R * s) + ' ' + f(y + b * R * s)).join('L') + 'Z';
+    };
+    const key = (q, r) => q + ',' + r;
+    const dist = (q, r) => Math.max(Math.abs(q), Math.abs(r), Math.abs(q + r));
+    const extra = ['3,-3', '-3,2', '3,-2', '-3,3', '0,-3', '-1,-2', '1,2', '2,1'];
+    const fog = [[4, -3], [4, -1], [2, 2], [-2, -2], [-4, 2], [1, -4]];
+    const target = '3,-1';
+    let meadowD = '', meadowInnerD = '', slotD = '', targetD = '', fogD = '', fogInnerD = '', shadowD = '';
+    for (let q = -3; q <= 3; q++) {
+      for (let r = -3; r <= 3; r++) {
+        const d = dist(q, r);
+        if (d > 3) continue;
+        const k = key(q, r);
+        if (d <= 2 || extra.includes(k)) {
+          shadowD += hex(q, r + 0.12, 0.98);
+          meadowD += hex(q, r, 0.97);
+          meadowInnerD += hex(q, r, 0.86);
+        } else if (k === target) {
+          targetD += hex(q, r, 0.9);
+        } else {
+          slotD += hex(q, r, 0.88);
+        }
+      }
+    }
+    const fogMarks = fog.map(([q, r]) => {
+      fogD += hex(q, r, 0.95);
+      fogInnerD += hex(q, r, 0.8);
+      const [x, y] = px(q, r);
+      return { x: f(x), y: f(y) };
+    });
+    const pathOf = (list) => 'M' + list.map(([q, r]) => { const [x, y] = px(q, r); return f(x) + ' ' + f(y); }).join(' L');
+    const roadD = pathOf([[3.5, -3.5], [3, -3], [2, -2], [2, -1], [1, 0], [0, 0]]) + ' ' + pathOf([[-3.5, 2], [-3, 2], [-2, 2], [-1, 1], [0, 0]]);
+    const [ax, ay] = px(3.5, -3.5), [bx, by] = px(-3.5, 2);
+    const ring = (x, y) => 'M' + f(x - 14) + ' ' + f(y) + 'a14 14 0 1 0 28 0a14 14 0 1 0 -28 0Z';
+    const spawnD = ring(ax, ay) + ring(bx, by);
+    const tower = (q, r, icon, name, base) => {
+      const [x, y] = px(q, r);
+      const size = base ? 56 : 46;
+      return { x: f(x), y: f(y - 4), size, off: -size / 2, icon, name, icSize: base ? 30 : 26, bg: base ? '#f4c552' : '#1d2922', ink: base ? '#2a1f10' : '#f4ecd6', ring: base ? '#9c6a17' : '#cfc6b3' };
+    };
+    const towers = [
+      tower(0, 0, 'building_house', 'Festung', true),
+      tower(1, -1, 'tower_archer', 'Bogenschütze', false),
+      tower(-1, 2, 'tower_catapult', 'Katapult', false),
+      tower(2, 0, 'tower_freeze', 'Frost', false)
+    ];
+    const rail = [
+      { icon: 'tower_archer', family: 'green', state: 'focus', chip: '60', chipIcon: 'coin', chipBg: '#3a2c10', chipLine: '#9c6a17', chipInk: '#ffe9a8', opacity: 1, aria: 'Bogenschütze, 60 Gold, ausgewählt' },
+      { icon: 'tower_catapult', family: 'green', state: 'normal', chip: '90', chipIcon: 'coin', chipBg: '#3a2c10', chipLine: '#9c6a17', chipInk: '#ffe9a8', opacity: 1, aria: 'Katapult, 90 Gold' },
+      { icon: 'tower_chain', family: 'green', state: 'normal', chip: '220 · zu teuer', chipIcon: 'coin', chipBg: '#3b1d18', chipLine: '#c0453a', chipInk: '#ffc2b6', opacity: 0.62, aria: 'Kettenblitz, 220 Gold, zu teuer' },
+      { icon: 'lock', family: 'fog', state: 'normal', chip: 'ab Welle 25', chipIcon: 'lock', chipBg: '#232a27', chipLine: '#56625b', chipInk: '#c9d2cc', opacity: 1, aria: 'Minenleger, gesperrt bis Welle 25' }
+    ];
+    return { meadowD, meadowInnerD, slotD, targetD, fogD, fogInnerD, shadowD, roadD, spawnD, fogMarks, towers, rail };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Hex-Rahmen – Ebenen und Zustände</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&amp;family=Inter:wght@500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+th,td{text-align:left;vertical-align:top}
+</style>
+</helmet>
+<div style="width: 1640px; height: 1240px; box-sizing: border-box; padding: 40px 48px; background: #0f1a15; font-family: Inter, system-ui, sans-serif; color: #f6f2e4; display: flex; flex-direction: column; gap: 24px">
+  <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 24px">
+    <h2 style="margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 800; font-size: 32px; color: #f3d58a">#2 Hex-Rahmen in vier Familien · #3 Zustände</h2>
+    <p style="margin: 0; font-size: 14px; color: #bfd0c6">assets/ui/hex/hex_{gold|green|cream|fog}_{rim|groove|fill|shine}.svg · Vorlage 866 × 1000, spitze Oberseite</p>
+  </div>
+
+  <div style="display: flex; gap: 32px; align-items: flex-start">
+    <section style="flex: 1 1 860px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+      <div style="display: grid; grid-template-columns: 150px repeat(5, minmax(0, 1fr)); gap: 12px; font-size: 13px; font-weight: 700; color: #bfd0c6; text-transform: uppercase; letter-spacing: 0.06em">
+        <span>Familie</span><span>Außenrand</span><span>Rille</span><span>Füllung</span><span>Glanzlicht</span><span>Zusammen</span>
+      </div>
+      <sc-for list="{{fams}}" as="f" hint-placeholder-count="4">
+        <div style="display: grid; grid-template-columns: 150px repeat(5, minmax(0, 1fr)); gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid #2a4033">
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <b style="font-size: 17px">{{f.title}}</b>
+            <span style="font-size: 13px; line-height: 1.4; color: #bfd0c6">{{f.role}}</span>
+          </div>
+          <div style="display: flex; justify-content: center">
+            <svg viewBox="0 0 866 1000" width="104" height="120" role="img" aria-label="{{f.title}} Außenrand">
+              <defs>
+                <linearGradient id="hf-{{f.key}}-rim" x1="0.35" y1="0" x2="0.6" y2="1"><stop offset="0" stop-color="{{f.rim0}}"></stop><stop offset="{{f.rimMid}}" stop-color="{{f.rim1}}"></stop><stop offset="1" stop-color="{{f.rim2}}"></stop></linearGradient>
+                <radialGradient id="hf-{{f.key}}-fill" cx="0.5" cy="0.28" r="0.78"><stop offset="0" stop-color="{{f.fill0}}"></stop><stop offset="{{f.fillMid}}" stop-color="{{f.fill1}}"></stop><stop offset="1" stop-color="{{f.fill2}}"></stop></radialGradient>
+                <linearGradient id="hf-{{f.key}}-shine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity="{{f.shine}}"></stop><stop offset="1" stop-color="#ffffff" stop-opacity="0"></stop></linearGradient>
+              </defs>
+              <polygon points="433,20 848.7,260 848.7,740 433,980 17.3,740 17.3,260" fill="url(#hf-{{f.key}}-rim)" stroke="url(#hf-{{f.key}}-rim)" stroke-width="34" stroke-linejoin="round"></polygon>
+            </svg>
+          </div>
+          <div style="display: flex; justify-content: center">
+            <svg viewBox="0 0 866 1000" width="104" height="120" role="img" aria-label="{{f.title}} Rille">
+              <polygon points="433,60 814,280 814,720 433,940 52,720 52,280" fill="{{f.groove}}" stroke="{{f.groove}}" stroke-width="16" stroke-linejoin="round"></polygon>
+              <polygon points="433,80 796.7,290 796.7,710 433,920 69.3,710 69.3,290" fill="#0f1a15" stroke="#0f1a15" stroke-width="12" stroke-linejoin="round"></polygon>
+            </svg>
+          </div>
+          <div style="display: flex; justify-content: center">
+            <svg viewBox="0 0 866 1000" width="104" height="120" role="img" aria-label="{{f.title}} Füllung">
+              <polygon points="433,80 796.7,290 796.7,710 433,920 69.3,710 69.3,290" fill="url(#hf-{{f.key}}-fill)" stroke="url(#hf-{{f.key}}-fill)" stroke-width="12" stroke-linejoin="round"></polygon>
+            </svg>
+          </div>
+          <div style="display: flex; justify-content: center">
+            <svg viewBox="0 0 866 1000" width="104" height="120" role="img" aria-label="{{f.title}} Glanzlicht" style="background: #24302a; border-radius: 8px">
+              <polygon points="433,80 796.7,290 796.7,710 433,920 69.3,710 69.3,290" fill="none" stroke="#56625b" stroke-width="6" stroke-dasharray="20 18"></polygon>
+              <path d="M69.3 290 L433 80 L796.7 290 L796.7 430 Q433 345 69.3 430 Z" fill="url(#hf-{{f.key}}-shine)"></path>
+            </svg>
+          </div>
+          <div style="display: flex; justify-content: center">
+            <dc-import name="Hex" family="{{f.key}}" h="{{ 120 }}" icon="{{f.icon}}" label="" sub="" hint-size="104px,120px"></dc-import>
+          </div>
+        </div>
+      </sc-for>
+      <p style="margin: 4px 0 0; font-size: 13px; line-height: 1.5; color: #bfd0c6">Ebenen deckungsgleich im selben 866 × 1000-Rahmen: Rand = Sechseck 96 % + 34 u runde Kontur, Rille = 88 % + 16 u, Füllung = 84 % + 12 u, Glanz = obere 35 % der Füllung. Rand und Rille einfarbig umfärbbar (Fokus).</p>
+    </section>
+
+    <section style="flex: 0 0 640px; display: flex; flex-direction: column; gap: 10px">
+      <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; font-size: 13px; font-weight: 700; color: #bfd0c6; text-transform: uppercase; letter-spacing: 0.06em; text-align: center">
+        <span>Normal</span><span>Hover</span><span>Gedrückt</span><span>Fokus</span><span>Deaktiviert</span>
+      </div>
+      <sc-for list="{{states}}" as="row" hint-placeholder-count="4">
+        <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; justify-items: center; align-items: center; padding: 14px 0 18px; border-top: 1px solid #2a4033">
+          <dc-import name="Hex" family="{{row.key}}" state="normal" h="{{ 116 }}" icon="{{row.icon}}" label="{{row.label}}" sub="" hint-size="100px,116px"></dc-import>
+          <dc-import name="Hex" family="{{row.key}}" state="hover" h="{{ 116 }}" icon="{{row.icon}}" label="{{row.label}}" sub="" hint-size="100px,116px"></dc-import>
+          <dc-import name="Hex" family="{{row.key}}" state="pressed" h="{{ 116 }}" icon="{{row.icon}}" label="{{row.label}}" sub="" hint-size="100px,116px"></dc-import>
+          <dc-import name="Hex" family="{{row.key}}" state="focus" h="{{ 116 }}" icon="{{row.icon}}" label="{{row.label}}" sub="" hint-size="100px,116px"></dc-import>
+          <dc-import name="Hex" family="{{row.key}}" state="disabled" h="{{ 116 }}" icon="{{row.icon}}" label="{{row.label}}" sub="{{row.lockNote}}" hint-size="100px,116px"></dc-import>
+        </div>
+      </sc-for>
+      <div style="display: flex; gap: 20px; align-items: center; padding: 14px 16px; border-radius: 14px; background: #1a2d24; border: 1px solid #41594a">
+        <dc-import name="Hex" family="fog" h="{{ 116 }}" q="{{ true }}" label="" sub="" hint-size="100px,116px"></dc-import>
+        <dc-import name="Hex" family="fog" h="{{ 116 }}" icon="lock" label="Duo" sub="ab Welle 35" hint-size="100px,116px"></dc-import>
+        <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #dfe8e2"><b style="color: #f6f2e4">Nebel-Varianten.</b> „?“ für unentdeckte Plätze (kein Klickziel). Gesperrt: Schloss + Bedingung als Text – nie nur Farbe.</p>
+      </div>
+    </section>
+  </div>
+
+  <table style="width: 100%; border-collapse: collapse; font-size: 14px; line-height: 1.45">
+    <thead>
+      <tr style="color: #bfd0c6; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em">
+        <th style="padding: 8px 10px; border-bottom: 1px solid #41594a">Zustand</th>
+        <th style="padding: 8px 10px; border-bottom: 1px solid #41594a">Außenrand</th>
+        <th style="padding: 8px 10px; border-bottom: 1px solid #41594a">Rille</th>
+        <th style="padding: 8px 10px; border-bottom: 1px solid #41594a">Füllung + Glanz</th>
+        <th style="padding: 8px 10px; border-bottom: 1px solid #41594a">Lage und Schatten</th>
+        <th style="padding: 8px 10px; border-bottom: 1px solid #41594a">Zusatzsignal (nicht nur Farbe)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style="padding: 8px 10px; font-weight: 800">Normal</td><td style="padding: 8px 10px">Verlauf der Familie</td><td style="padding: 8px 10px">Gold #7a5414 · Grün #102117 · Creme #7b6c49 · Nebel #1a201d</td><td style="padding: 8px 10px">Glanz Weiß 55 / 22 / 50 / 8 % → 0</td><td style="padding: 8px 10px">Kante 3 % der Höhe in Tiefenfarbe, weicher Schatten 7 %</td><td style="padding: 8px 10px; color: #bfd0c6">–</td></tr>
+      <tr style="background: rgba(255, 255, 255, 0.03)"><td style="padding: 8px 10px; font-weight: 800">Hover</td><td style="padding: 8px 10px" colspan="3">alle Ebenen +8 % Helligkeit</td><td style="padding: 8px 10px">hebt um 2 % der Höhe, Kante +1 px</td><td style="padding: 8px 10px">Zeiger wird Hand</td></tr>
+      <tr><td style="padding: 8px 10px; font-weight: 800">Gedrückt</td><td style="padding: 8px 10px" colspan="3">alle Ebenen −7 % Helligkeit</td><td style="padding: 8px 10px">sinkt um 65 % der Kante, Kante auf 35 %</td><td style="padding: 8px 10px">Bewegung nach unten</td></tr>
+      <tr style="background: rgba(255, 255, 255, 0.03)"><td style="padding: 8px 10px; font-weight: 800">Fokus</td><td style="padding: 8px 10px">einfarbig #ffe198</td><td style="padding: 8px 10px">#c99a2e</td><td style="padding: 8px 10px">unverändert</td><td style="padding: 8px 10px">Glühen #ffe198, 75 %, Radius 5 % der Höhe</td><td style="padding: 8px 10px">heller Rand rundum</td></tr>
+      <tr><td style="padding: 8px 10px; font-weight: 800">Deaktiviert</td><td style="padding: 8px 10px" colspan="3">Graustufe 75 %, Helligkeit −22 %, Deckkraft 72 %</td><td style="padding: 8px 10px">wie normal</td><td style="padding: 8px 10px">Schloss-Abzeichen oben rechts + Bedingung</td></tr>
+    </tbody>
+  </table>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1640,"height":1240}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const fams = [
+      { key: 'gold', title: 'Gold', role: 'Genau eine Hauptaktion je Bildschirm', icon: 'play', rim0: '#fff3c4', rim1: '#e9b949', rimMid: 0.45, rim2: '#9c6a17', groove: '#7a5414', fill0: '#ffe9a0', fill1: '#f4c552', fillMid: 0.48, fill2: '#dc9c2c', shine: 0.55 },
+      { key: 'green', title: 'Grün', role: 'Navigation, helle Schrift', icon: 'arsenal', rim0: '#a9c98f', rim1: '#5f8a5a', rimMid: 0.5, rim2: '#2e4b33', groove: '#102117', fill0: '#4a8059', fill1: '#2b5638', fillMid: 0.52, fill2: '#1d3d28', shine: 0.22 },
+      { key: 'cream', title: 'Creme', role: 'Zweite Spielaktion, Karten', icon: 'newRun', rim0: '#fffaf0', rim1: '#d8c79c', rimMid: 0.55, rim2: '#9c8a5d', groove: '#7b6c49', fill0: '#fffaf0', fill1: '#f1e6c6', fillMid: 0.55, fill2: '#dfcd9f', shine: 0.5 },
+      { key: 'fog', title: 'Nebel', role: 'Gesperrt oder unentdeckt', icon: 'lock', rim0: '#56625b', rim1: '#414c46', rimMid: 0.5, rim2: '#323c37', groove: '#1a201d', fill0: '#46514b', fill1: '#3a4440', fillMid: 0.5, fill2: '#2c3430', shine: 0.08 }
+    ];
+    const states = [
+      { key: 'gold', icon: 'play', label: 'Spielen', lockNote: '' },
+      { key: 'green', icon: 'leaderboard', label: 'Besten­liste', lockNote: '' },
+      { key: 'cream', icon: 'newRun', label: 'Neuer Run', lockNote: '' },
+      { key: 'fog', icon: 'duo', label: 'Duo', lockNote: '' }
+    ];
+    return { fams, states };
+  }
+}
+</script>
+</body>
+</html>

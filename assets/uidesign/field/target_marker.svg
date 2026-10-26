@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Ziel für Verbrauchshilfe">
+  <defs><clipPath id="fx-hex"><polygon points="128,10 230.2,69 230.2,187 128,246 25.8,187 25.8,69"/></clipPath></defs>
+  <path d="M44 128a84 84 0 1 0 168 0a84 84 0 1 0 -168 0Z" fill="#ff8a5a" opacity="0.14"/>
+  <path d="M44 128a84 84 0 1 0 168 0a84 84 0 1 0 -168 0Z" fill="none" stroke="#ffb36a" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M114 16L142 16L128 42ZM240 114L240 142L214 128ZM142 240L114 240L128 214ZM16 142L16 114L42 128Z" fill="#ffe08a"/>
+  <path d="M118 128a10 10 0 1 0 20 0a10 10 0 1 0 -20 0Z" fill="#ffe08a"/>
+</svg>
