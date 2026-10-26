@@ -83,6 +83,20 @@ body{font-family:var(--hx-font-ui)}
 .hxi-tower_freeze{--i:url("assets/uidesign/towers/icon_tower_freeze.svg")}
 .hxi-tower_mine{--i:url("assets/uidesign/towers/icon_tower_mine.svg")}
 .hxi-tower_necromancer{--i:url("assets/uidesign/towers/icon_tower_necromancer.svg")}
+/* Nachlieferung (#3): bisher nur als Datei vorhanden, jetzt für Herausforderungen, Händler und Duo genutzt */
+.hxi-base{--i:url("assets/uidesign/icons/icon_base.svg")}
+.hxi-boss{--i:url("assets/uidesign/icons/icon_boss.svg")}
+.hxi-buildingSlot{--i:url("assets/uidesign/icons/icon_buildingSlot.svg")}
+.hxi-check{--i:url("assets/uidesign/icons/icon_check.svg")}
+.hxi-duoSwap{--i:url("assets/uidesign/icons/icon_duoSwap.svg")}
+.hxi-info{--i:url("assets/uidesign/icons/icon_info.svg")}
+.hxi-overload{--i:url("assets/uidesign/icons/icon_overload.svg")}
+.hxi-partner{--i:url("assets/uidesign/icons/icon_partner.svg")}
+.hxi-portal{--i:url("assets/uidesign/icons/icon_portal.svg")}
+.hxi-rules{--i:url("assets/uidesign/icons/icon_rules.svg")}
+.hxi-shrine{--i:url("assets/uidesign/icons/icon_shrine.svg")}
+.hxi-treasure{--i:url("assets/uidesign/icons/icon_treasure.svg")}
+.hxi-warning{--i:url("assets/uidesign/icons/icon_warning.svg")}
 /* ===== Hauptmenü: Hex-Blüte =====
    Mitte = Hauptaktion (Gold), sechs Ring-Hexe Kante an Kante um die Mitte, im Uhrzeigersinn ab oben links.
    Positionen in Einheiten --u (Höhe eines Ring-Hex): Ring-Mittelpunkte liegen bei 0°, 60° … im Abstand --d.
@@ -1303,3 +1317,69 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 #towerMenu .towerOfferPrice kbd{font-size:14px;padding:2px 9px}
 #towerDrawer .buildNote{margin-top:10px;padding:10px 14px;font-size:14px!important}
 @media(max-height:760px) and (min-width:701px){#towerMenu .towerBtn{padding:10px 10px!important}#towerMenu .towerBuildIcon{width:68px!important;height:76px}#towerMenu .towerBtn{grid-template-columns:68px minmax(0,1fr) auto!important}}
+
+/* ===== Herausforderungen an der Hand: Umweg, Turm-Draft, Giervertrag, Stromnetz (Hexwerk-Bausteine statt eigener Farben) ===== */
+#detourControls,#draftControls,#greedDock,.handDock #powerControls{border:2px solid transparent!important;border-radius:10px!important;
+  background:linear-gradient(180deg,#17301f,#0f2219) padding-box,var(--hx-panel-edge) border-box!important;box-shadow:inset 0 1px 0 #ffffff12!important;color:var(--hx-text)!important;font-family:var(--hx-font-ui)}
+#detourControls{padding:10px 18px!important;font-size:15px}
+#detourControls strong{display:flex;align-items:center;justify-content:center;gap:8px;font:700 18px/1.25 var(--hx-font-ui)!important;color:var(--hx-gold-text)!important}
+#detourControls strong::before{content:'';width:20px;height:20px;flex:none;background:currentColor;-webkit-mask:url("assets/uidesign/icons/icon_portal.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_portal.svg") center/contain no-repeat}
+#detourControls p{color:#cfd9cf}
+
+/* Turm-Draft: Kopfzeile in Gold, Angebote als Creme-Karten wie die Handkarten */
+#draftControls{padding:12px 16px!important}
+#draftStatus{font:700 19px/1.3 var(--hx-font-ui)!important;color:var(--hx-gold-text)!important;margin:0 0 10px!important}
+#draftGrowth{color:#b9c6bc;font-size:14px!important}
+#draftOffers{gap:12px!important}
+#draftOffers .draftCard{border:3px solid #c9a24a!important;border-radius:12px!important;background:linear-gradient(180deg,#fffaf0,#f6ecd3 55%,#eadbb4)!important;
+  box-shadow:inset 0 0 0 3px #fff8,0 6px 14px #0007!important;color:#2b281f!important;font-family:var(--hx-font-ui);transition:transform .14s ease}
+#draftOffers .draftCard[data-kind=tower]{border-color:var(--hx-common)!important}
+#draftOffers .draftCard[data-kind=upgrade]{border-color:var(--hx-rare)!important}
+#draftOffers .draftCard[data-kind=repair]{border-color:var(--hx-legendary)!important}
+#draftOffers .draftCard:not(:disabled):hover{transform:translateY(-6px);filter:none}
+#draftOffers .draftCard:focus-visible{outline:3px solid var(--hx-focus);outline-offset:2px}
+#draftOffers .draftCard:disabled{opacity:.6;cursor:not-allowed}
+#draftOffers .draftCard strong{font:700 17px/1.15 var(--hx-font-ui);color:#2b281f}
+#draftOffers .draftCard small{font-size:13px;line-height:1.3;color:#4a4232}
+#draftOffers .draftCard .researchIcon.hxTowerIcon{width:56px!important;height:auto!important}
+.draftSymbol,.greedIcon{position:relative;display:grid;place-items:center;flex:none;width:56px;aspect-ratio:.866;font-size:0;background:url("assets/uidesign/hex/hex_green.svg") center/100% 100% no-repeat;filter:drop-shadow(0 2px 3px #0006)}
+.draftSymbol .hxi,.greedIcon .hxi{width:46%;height:46%;color:#ffe198}
+
+/* Giervertrag: Paneel mit Titel, Verträge als Karten; „Kein Vertrag“ in Nebel-Optik */
+#greedDock{padding:12px 16px!important}
+#greedDock h2{margin:0 0 4px!important;font:900 clamp(18px,1.5vw,22px)/1.2 var(--hx-font-title)!important;color:#fbf2d6!important}
+#greedDockStatus{margin:0 0 10px;color:#cfd9cf;font-size:14px;line-height:1.4}
+#greedDockChoices{gap:10px!important}
+.greedCard{gap:6px!important;padding:12px 10px!important;border:3px solid var(--hx-legendary)!important;border-radius:12px!important;
+  background:linear-gradient(180deg,#fffaf0,#f6ecd3 55%,#eadbb4)!important;box-shadow:inset 0 0 0 3px #fff8,0 6px 14px #0007!important;color:#2b281f!important;font-family:var(--hx-font-ui);cursor:pointer;transition:transform .14s ease}
+.greedCard:not(:disabled):hover{transform:translateY(-6px)}
+.greedCard:focus-visible{outline:3px solid var(--hx-focus);outline-offset:2px}
+.greedCard>.greedIcon{font:900 18px/1 var(--hx-font-title);color:#ffe198}
+.greedCard>strong{font:700 17px/1.15 var(--hx-font-ui);color:#2b281f;text-align:center}
+.greedCard>small{font-size:13px!important;line-height:1.3!important;color:#4a4232;text-align:center}
+.greedCard>b{display:inline-flex;align-items:center;gap:5px;margin-top:auto;padding:3px 10px 3px 6px;border:1.5px solid #c9a24a;border-radius:999px;background:#0e1d16;color:var(--hx-gold-text);font:700 14px/1.2 var(--hx-font-ui);text-align:center}
+.greedCard>b::before{content:'';width:15px;height:15px;flex:none;background:#f3c94c;-webkit-mask:url("assets/uidesign/icons/icon_coin.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_coin.svg") center/contain no-repeat}
+.greedCard[data-offer=boss]{border-color:#d0574a!important}
+.greedCard[data-offer=none]{border-color:#6e766f!important;background:linear-gradient(180deg,#e9ece6,#d4d9d2)!important}
+.greedCard[data-offer=none]>.greedIcon{background-image:url("assets/uidesign/hex/hex_fog.svg");color:#c9d2cc}
+.greedCard[data-offer=none]>b{border-color:#6e766f;color:#c9d2cc}.greedCard[data-offer=none]>b::before{background:#9aa39e}
+
+/* Stromnetz: Statuspaneel an der Hand, Editor als Fenster im Referenzstil */
+.handDock #powerControls{padding:12px 16px!important}
+#powerStatus{font:700 18px/1.3 var(--hx-font-ui)!important;color:var(--hx-gold-text)}
+#powerHint{color:#cfd9cf}
+#powerEditor>summary{display:flex;align-items:center;gap:10px;min-height:44px;margin-top:8px;padding:0 14px!important;border:1.5px solid #46634f;border-radius:8px;background:#0e1d16;color:#fbf7ea!important;font:700 16px var(--hx-font-ui);list-style:none}
+#powerEditor>summary::-webkit-details-marker{display:none}
+#powerEditor>summary::before{content:'';width:20px;height:20px;flex:none;background:var(--hx-gold-text);-webkit-mask:url("assets/uidesign/icons/icon_overload.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_overload.svg") center/contain no-repeat}
+#powerEditor>summary:hover{border-color:#c9a24a}
+.powerEditorPanel{border:3px solid #e2b04a!important;border-radius:18px!important;padding:0!important;overflow:auto;color:#f4ecd6;font-family:var(--hx-font-ui);
+  background:radial-gradient(130% 70% at 50% 0,#1e3c29 0,#11261b 58%,#0b1912 100%)!important;box-shadow:inset 0 0 0 3px #0b1912,inset 0 0 0 4.5px #c9a24a99,0 0 26px #f6c95a40,0 22px 60px #000d!important}
+.powerEditorPanel header{position:sticky;top:0;z-index:1;padding:16px 20px 12px;border-bottom:1.5px solid #c9a24a80;background:linear-gradient(180deg,#1b3826,#132a1d)}
+.powerEditorPanel h2{font:900 clamp(22px,2vw,28px)/1.1 var(--hx-font-title)!important;color:#fbf7ea!important;text-shadow:0 2px 0 #0009}
+.powerEditorPanel>p,.powerEditorPanel>h3,.powerEditorPanel>#powerFields,.powerEditorPanel>#powerTowers{margin-left:20px;margin-right:20px}
+.powerEditorPanel>p{color:#cfd9cf}
+.powerEditorPanel>h3{margin-top:16px;margin-bottom:8px;padding-bottom:6px;border-bottom:1.5px solid #c9a24a66;font:900 19px var(--hx-font-title);color:#fbf2d6}
+.powerEditorPanel>#powerTowers{margin-bottom:20px}
+#powerFields button,#powerTowers button{border:1.5px solid #46634f!important;border-radius:10px!important;background:linear-gradient(180deg,#1b3324,#122419)!important;box-shadow:inset 0 1px 0 #ffffff12!important;color:#f4ecd6!important;font:600 15px/1.35 var(--hx-font-ui)!important}
+#powerFields button:not(:disabled):hover,#powerTowers button:not(:disabled):hover{border-color:#c9a24a!important}
+#powerFields button[aria-pressed="true"],#powerTowers button[aria-pressed="true"]{border-color:#e2b04a!important;background:linear-gradient(180deg,#3b3417,#241f0f)!important;box-shadow:0 0 12px #f6c95a44,inset 0 1px 0 #ffffff1a!important;color:#fff3c4!important}

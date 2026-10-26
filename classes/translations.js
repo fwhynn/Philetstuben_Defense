@@ -2674,3 +2674,7 @@ Startangebote enthalten Möglichkeiten für Einzelziel- und Flächenschaden. Sp�
 Keine doppelten Ticketoptionen in einem Angebot. Spätestens nach zwei Angeboten ohne Verbesserungsticket steht wieder eines zur Auswahl.|No duplicate ticket options in one offer. After at most two offers without an upgrade ticket, one becomes available again.
 Die Gegnerstärke bleibt unverändert. Bereits laufende Missionen behalten ihre bisherigen Regeln und Zufallsfolgen.|Enemy strength stays unchanged. Runs already in progress keep their existing rules and random sequences.
 `);
+
+// Hexwerk: Texte der neu gestalteten Herausforderungs-Oberflächen
+HexTranslations.add(`Verdient:|Earned:
+Gold nach der Welle|gold after the wave`);
