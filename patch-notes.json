@@ -28,6 +28,7 @@
             "title": "Hauptmenü und Spiel",
             "bullets": [
               "Das Hauptmenü ist wieder eine Hex-Blüte vor der 3D-Landschaft; Spielanzeigen, Turmfenster und Turmbau haben die Hexwerk-Gestaltung.",
+              "Belohnungen, Run-Vorbereitung, Mini-Tutorial, Spielmeldungen, Biom-Informationen und das Fenster nach geschaffter Stufe haben ebenfalls den neuen Stil.",
               "Das Arsenal zeigt jeden Turm als Fertigkeitenbaum. Die Einstellungen sind ein Fenster mit Bereichen für Spiel, Audio, Steuerung und Hilfe.",
               "Ruhige Klaviermusik im Hintergrund; Musik und Lautstärke lassen sich in den Einstellungen getrennt von den Spielgeräuschen einstellen."
             ],
@@ -62,6 +63,7 @@
     ],
     "changes": [
       "Das Hauptmenü ist wieder eine Hex-Blüte vor der 3D-Landschaft; Spielanzeigen, Turmfenster und Turmbau haben die Hexwerk-Gestaltung.",
+      "Belohnungen, Run-Vorbereitung, Mini-Tutorial, Spielmeldungen, Biom-Informationen und das Fenster nach geschaffter Stufe haben ebenfalls den neuen Stil.",
       "Das Arsenal zeigt jeden Turm als Fertigkeitenbaum. Die Einstellungen sind ein Fenster mit Bereichen für Spiel, Audio, Steuerung und Hilfe.",
       "Ruhige Klaviermusik im Hintergrund; Musik und Lautstärke lassen sich in den Einstellungen getrennt von den Spielgeräuschen einstellen.",
       "Umweg, Turm-Draft, Giervertrag, Stromnetz, Expedition und Drei Dörfer verwenden die Hexwerk-Paneele; Angebote und Verträge erscheinen als Karten mit Symbolen.",

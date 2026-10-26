@@ -2697,3 +2697,6 @@ Die Spielregeln sind größer geschrieben und stehen Regel für Regel untereinan
 Die Werte im Turmbau brechen nicht mehr mitten in einer Angabe um.|Tower stats in the build menu no longer wrap in the middle of a value.
 Kacheln und Himmel im Spiel sind weniger stark gesättigt.|Tiles and sky in the game are less saturated.
 Impressum, Datenschutz, die Bestenlisten-Seite, das Testlabor und die Duo-Lobby verwenden dieselbe Gestaltung; die Turmauswahl der Duo-Lobby zeigt die Turmsymbole.|Legal notice, privacy policy, the leaderboard page, the challenge lab and the Duo lobby share the same design; the Duo lobby's tower selection shows the tower icons.`);
+
+// Patch Notes: weitere Fenster im Hexwerk-Stil
+HexTranslations.add(`Belohnungen, Run-Vorbereitung, Mini-Tutorial, Spielmeldungen, Biom-Informationen und das Fenster nach geschaffter Stufe haben ebenfalls den neuen Stil.|Rewards, run preparation, the mini tutorial, game messages, biome info and the stage-complete window use the new style as well.`);
