@@ -14,7 +14,7 @@ test('both lobby seats must explicitly confirm before gameplay; readiness persis
 });
 test('local Duo server serves the shared game, 3D dependencies and lobby while private files remain inaccessible', async t => {
 	const server = createTransport(createLobbies(), { browser: true }); await new Promise(r => server.listen(0, '127.0.0.1', r)); t.after(() => new Promise(r => { server.closeAllConnections(); server.close(r); })); const base = 'http://127.0.0.1:' + server.address().port;
-	for (const file of ['/index.html', '/admin.html', '/runtime-config.js', '/admin.css', '/duo.css', '/style.css', '/classes/admin.js', '/classes/game.js', '/classes/duo-game.js', '/node_modules/three/build/three.module.js', '/duo-lobby.html']) { const r = await fetch(base + file); assert.equal(r.status, 200, file); if (file.endsWith('.css')) assert.match(r.headers.get('content-type'), /text\/css/); }
+	for (const file of ['/index.html', '/admin.html', '/runtime-config.js', '/admin.css', '/duo.css', '/style.css', '/hexwerk.css', '/hexwerk-pages.css', '/classes/admin.js', '/classes/game.js', '/classes/duo-game.js', '/node_modules/three/build/three.module.js', '/duo-lobby.html']) { const r = await fetch(base + file); assert.equal(r.status, 200, file); if (file.endsWith('.css')) assert.match(r.headers.get('content-type'), /text\/css/); }
 	for (const file of ['/server/duo-store.cjs', '/.git/config', '/assets/%2e%2e/server/duo-store.cjs']) assert.notEqual((await fetch(base + file)).status, 200, file);
 });
 test('shared-screen targeting and sale affect only the authenticated board and survive restore', () => {

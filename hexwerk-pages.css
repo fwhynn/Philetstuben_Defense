@@ -1,0 +1,111 @@
+/* ===== Hexwerk für eigenständige Seiten (Rechtliches, Bestenliste, Testlabor, Duo-Lobby, Administration, Modell-Viewer) =====
+   Gleiche Schriften, Farben und Bausteine wie hexwerk.css, aber ohne die Spiel-HUD-Anordnung. Nach der jeweiligen Seiten-CSS laden. */
+@font-face{font-family:'Tektur';font-weight:900;font-style:normal;font-display:swap;src:url("assets/fonts/Tektur-Black.woff2") format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Tektur';font-weight:900;font-style:normal;font-display:swap;src:url("assets/fonts/Tektur-Black-LatinExt.woff2") format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C4,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Fraunces';font-weight:900;font-style:normal;font-display:swap;src:local('Fraunces Black'),local('Fraunces-Black'),url("assets/fonts/Fraunces-Black.woff2") format('woff2')}
+@font-face{font-family:'Barlow Semi Condensed';font-weight:600;font-style:normal;font-display:swap;src:local('Barlow Semi Condensed SemiBold'),local('BarlowSemiCondensed-SemiBold'),url("assets/fonts/BarlowSemiCondensed-SemiBold.woff2") format('woff2')}
+@font-face{font-family:'Barlow Semi Condensed';font-weight:700;font-style:normal;font-display:swap;src:local('Barlow Semi Condensed Bold'),local('BarlowSemiCondensed-Bold'),url("assets/fonts/BarlowSemiCondensed-Bold.woff2") format('woff2')}
+:root{--hx-font-ui:'Barlow Semi Condensed',Inter,system-ui,'Segoe UI',Arial,sans-serif;--hx-font-title:'Tektur','Fraunces',Georgia,sans-serif;
+  --hx-text:#f6f2e4;--hx-muted:#cfd9cf;--hx-gold-text:#f3c94c;--hx-focus:#ffe198;--hx-line:#3c7a62;--hx-row:#24493a;
+  --hx-panel-edge:linear-gradient(170deg,#e9c46a,#8a6a26 60%,#c9a24a);--hx-capsule-fill:linear-gradient(180deg,#172c21,#0e1d16);--hx-capsule-line:#46634f;
+  --hx-danger-fill:linear-gradient(180deg,#7d2a22,#521812);--hx-danger-line:#a8463a}
+
+/* Turm- und Gebäude-Icons, wie sie HexArsenal.icon() liefert (Duo-Lobby) */
+.hxi{display:inline-block;flex:none;width:1.15em;height:1.15em;vertical-align:-.2em;background:currentColor;-webkit-mask:var(--i) center/contain no-repeat;mask:var(--i) center/contain no-repeat}
+.hxi-coin{--i:url("assets/uidesign/icons/icon_coin.svg")}.hxi-daily{--i:url("assets/uidesign/icons/icon_daily.svg")}.hxi-duo{--i:url("assets/uidesign/icons/icon_duo.svg")}
+.hxi-leaderboard{--i:url("assets/uidesign/icons/icon_leaderboard.svg")}.hxi-back{--i:url("assets/uidesign/icons/icon_back.svg")}
+.hxi-tower_archer{--i:url("assets/uidesign/towers/icon_tower_archer.svg")}.hxi-tower_ballista{--i:url("assets/uidesign/towers/icon_tower_ballista.svg")}
+.hxi-tower_catapult{--i:url("assets/uidesign/towers/icon_tower_catapult.svg")}.hxi-tower_chain{--i:url("assets/uidesign/towers/icon_tower_chain.svg")}
+.hxi-tower_element{--i:url("assets/uidesign/towers/icon_tower_element.svg")}.hxi-tower_flame{--i:url("assets/uidesign/towers/icon_tower_flame.svg")}
+.hxi-tower_freeze{--i:url("assets/uidesign/towers/icon_tower_freeze.svg")}.hxi-tower_mine{--i:url("assets/uidesign/towers/icon_tower_mine.svg")}
+.hxi-tower_necromancer{--i:url("assets/uidesign/towers/icon_tower_necromancer.svg")}
+.hxi-building_house{--i:url("assets/uidesign/towers/icon_building_house.svg")}.hxi-building_forge{--i:url("assets/uidesign/towers/icon_building_forge.svg")}.hxi-building_market{--i:url("assets/uidesign/towers/icon_building_market.svg")}
+.researchIcon.hxTowerIcon{display:inline-grid;place-items:center;aspect-ratio:.866;height:auto;background:url("assets/uidesign/hud/hex_small_normal.svg") center/100% 100% no-repeat}
+.researchIcon.hxTowerIcon .hxi{width:58%;height:58%}
+
+/* ===== Grundseite: dunkelgrüner Verlauf, Fenster mit Goldrahmen, Titel mit Raute ===== */
+body.hxPage{margin:0;min-height:100vh;color:#f4ecd6;font:600 17px/1.6 var(--hx-font-ui);
+  background:radial-gradient(130% 70% at 50% 0,#1e3c29 0,#11261b 58%,#0b1912 100%) fixed,#0b1912}
+.hxPage main{box-sizing:border-box;width:min(1050px,calc(100% - 24px));margin:24px auto 40px;padding:24px clamp(18px,3vw,36px) 32px;border:3px solid #e2b04a;border-radius:18px;
+  background:radial-gradient(130% 70% at 50% 0,#1e3c29 0,#11261b 58%,#0b1912 100%);box-shadow:inset 0 0 0 3px #0b1912,inset 0 0 0 4.5px #c9a24a99,0 0 26px #f6c95a40,0 22px 60px #000d}
+.hxPage h1{display:flex;align-items:center;gap:16px;margin:16px 0 12px;font:900 clamp(30px,4vw,46px)/1.08 var(--hx-font-title);color:#fbf7ea;text-shadow:0 3px 0 #0009}
+.hxPage h1::after{content:'';flex:1;min-width:40px;height:14px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M7 1l6 6-6 6-6-6z' fill='none' stroke='%23e9b949' stroke-width='2'/%3E%3C/svg%3E") 0 50%/14px 14px no-repeat,linear-gradient(90deg,#e9b949,#e9b94900) 20px 50%/calc(100% - 20px) 2px no-repeat}
+.hxPage h2{margin:28px 0 8px;padding-bottom:6px;border-bottom:1.5px solid #c9a24a66;font:900 clamp(19px,1.8vw,24px)/1.2 var(--hx-font-title);color:#fbf2d6}
+.hxPage p,.hxPage li{color:#e3e9e3}
+.hxPage a{color:#ffe198;text-decoration-color:#ffe19866;text-underline-offset:3px}
+.hxPage a:focus-visible,.hxPage button:focus-visible,.hxPage select:focus-visible,.hxPage input:focus-visible,.hxPage textarea:focus-visible{outline:3px solid var(--hx-focus);outline-offset:3px}
+/* Zurück-Link oben als Kapsel */
+.hxPage main>a:first-child,.hxPage main>header>a:first-child{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 18px;border:1.5px solid var(--hx-capsule-line);border-radius:999px;background:var(--hx-capsule-fill);
+  color:var(--hx-text);font:700 16px var(--hx-font-ui);text-decoration:none;box-shadow:inset 0 1px 0 #ffffff14}
+.hxPage main>a:first-child:hover,.hxPage main>header>a:first-child:hover{border-color:#c9a24a;color:#fff6d6}
+/* Knöpfe und Felder */
+.hxPage button,.hxPage select,.hxPage input:not([type=checkbox]):not([type=radio]),.hxPage textarea{min-height:44px;box-sizing:border-box;border:1.5px solid var(--hx-capsule-line);border-radius:8px;background:#0b1912;color:#fbf7ea;font:600 16px var(--hx-font-ui)}
+.hxPage button{padding:0 18px;background:var(--hx-capsule-fill);box-shadow:inset 0 1px 0 #ffffff14;font-weight:700;cursor:pointer}
+.hxPage button:not(:disabled):hover{border-color:#c9a24a;color:#fff6d6}
+.hxPage button:disabled{opacity:.55;cursor:default}
+.hxPage textarea{padding:10px 12px}
+/* Tabellen und Karten wie Bestenliste und Gruppen im Spiel */
+.hxPage .tableWrap{border:1.5px solid var(--hx-line);border-radius:12px;background:#0f2419;overflow:auto}
+.hxPage table{width:100%;border-collapse:collapse}
+.hxPage th,.hxPage td{padding:11px 16px;border-bottom:1px solid var(--hx-row);white-space:nowrap}
+.hxPage th{background:#132e20;color:#e3e9e3;font-weight:600}
+.hxPage td{color:#fbf7ea;font-weight:700}
+.hxPage caption{padding:12px 16px;text-align:left;color:var(--hx-muted)}
+.hxPage article{padding:18px 20px;border:1.5px solid var(--hx-line);border-radius:12px;background:#0f2419}
+
+/* ===== Rechtliches: schmaleres Fenster, ruhiger Fließtext ===== */
+.hxLegal main{width:min(820px,calc(100% - 24px))}
+.hxLegal p,.hxLegal li{font-weight:600;line-height:1.65}
+
+/* ===== Testlabor: Missionen als Karten mit Hex-Symbol ===== */
+.hxLab header p{max-width:75ch}
+.hxLab .note{padding:10px 16px;border:1.5px solid var(--hx-line);border-radius:12px;background:#0f2419;color:var(--hx-muted)}
+.hxLab #missions{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin:26px 0}
+.hxLab #missions article{display:flex;flex-direction:column;gap:10px;background:linear-gradient(180deg,#17301f,#0f2219) padding-box,var(--hx-panel-edge) border-box;border:2px solid transparent}
+.hxLab #missions h2{display:flex;align-items:center;gap:12px;margin:0;padding:0;border:0;font-size:21px}
+.hxLab #missions h2::before{content:'';width:40px;aspect-ratio:.866;flex:none;background:url("assets/uidesign/icons/icon_daily.svg") center/48% no-repeat,url("assets/uidesign/hex/hex_green.svg") center/100% 100% no-repeat}
+.hxLab #missions p{flex:1;margin:0;font-size:16px}
+.hxLab #missions article a{display:flex;align-items:center;justify-content:center;min-height:48px;border:2px solid #9c6a17;border-radius:8px;background:linear-gradient(180deg,#ffe48a,#e8ac38);color:#2a1f10;
+  font:700 17px var(--hx-font-ui);text-decoration:none;box-shadow:inset 0 2px 0 #fff6,0 3px 0 #7a5414}
+.hxLab #missions article a:hover{filter:brightness(1.06)}
+
+/* ===== Bestenliste (eigene Seite): Steuerleiste und Prüfbereich ===== */
+.hxBoard .controls,.hxBoard nav{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:22px 0}
+.hxBoard section{margin-top:36px}
+.hxBoard #page{color:var(--hx-muted)}
+
+/* ===== Duo-Lobby: Fenster mit Goldrahmen, Wahlbereiche als Gruppen, Bereit als Goldknopf ===== */
+.duoLobbyPage{font-family:var(--hx-font-ui);background:radial-gradient(130% 70% at 50% 0,#1e3c29 0,#11261b 58%,#0b1912 100%) fixed,#0b1912}
+.duoLobbyPage .lobbyTop a{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border:1.5px solid var(--hx-capsule-line);border-radius:999px;background:var(--hx-capsule-fill);color:var(--hx-text);font:700 16px var(--hx-font-ui)}
+.duoLobbyPage .lobbyTop a:hover{border-color:#c9a24a}
+.duoLobbyPage .lobbyTop select,.duoLobbyPage input{border:1.5px solid #cfd9cf99;border-radius:8px;background:#0b1912;color:#fbf7ea;font:600 16px var(--hx-font-ui)}
+.duoLobbyPage .lobbyCard{border:3px solid #e2b04a;border-radius:18px;background:radial-gradient(130% 70% at 50% 0,#1e3c29 0,#11261b 58%,#0b1912 100%);
+  box-shadow:inset 0 0 0 3px #0b1912,inset 0 0 0 4.5px #c9a24a99,0 0 26px #f6c95a40,0 22px 60px #000d}
+.duoLobbyPage .eyebrow{color:var(--hx-gold-text);font:700 13px var(--hx-font-ui);letter-spacing:.12em}
+.duoLobbyPage .lobbyCard h1{font:900 clamp(28px,4vw,40px)/1.1 var(--hx-font-title);color:#fbf7ea;text-shadow:0 3px 0 #0009}
+.duoLobbyPage .lobbyCard h2,.duoLobbyPage .lobbyChoice h2{font:900 20px/1.2 var(--hx-font-title);color:#fbf2d6}
+.duoLobbyPage .lobbyLead{color:#d5ddd4;font-size:17px}
+.duoLobbyPage .lobbyChoice,.duoLobbyPage .lobbyRules,.duoLobbyPage .lobbySteps li,.duoLobbyPage .lobbySeat{border:1.5px solid var(--hx-line);border-radius:12px;background:#0f2419}
+.duoLobbyPage .lobbyRules summary{color:#fbf2d6;font:700 17px var(--hx-font-ui)}
+.duoLobbyPage .lobbyRules strong{color:var(--hx-gold-text)}
+.duoLobbyPage .lobbySteps li[data-state=current]{border-color:#e2b04a}
+.duoLobbyPage .lobbySteps li[data-state=done]::before{background:#2b5638}
+.duoLobbyPage .lobbySeat{border-width:2px}
+.duoLobbyPage .lobbyAvatar{width:44px;height:50px;border-radius:0;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(180deg,#2b5638,#1d3d28);color:#ffe198;font:900 15px var(--hx-font-title)}
+.duoLobbyPage button{border:1.5px solid var(--hx-capsule-line);border-radius:8px;background:var(--hx-capsule-fill);color:var(--hx-text);font:700 16px var(--hx-font-ui);box-shadow:inset 0 1px 0 #ffffff14}
+.duoLobbyPage button:not(:disabled):hover{border-color:#c9a24a}
+.duoLobbyPage .lobbyPrimary{min-height:54px;border:2px solid #9c6a17;background:linear-gradient(180deg,#ffe48a,#e8ac38);color:#2a1f10;font-size:19px;box-shadow:inset 0 2px 0 #fff6,0 3px 0 #7a5414}
+.duoLobbyPage .lobbyPrimary:disabled{border-color:#56625b;background:linear-gradient(180deg,#3a4440,#2c3430);color:#c9d2cc;box-shadow:0 3px 0 #1a201d}
+.duoLobbyPage .lobbyGhost{background:transparent;border-color:#ffffff30;color:#cfd9cf}
+.duoLobbyPage .lobbyTowerChoice{border:1.5px solid var(--hx-capsule-line);border-radius:10px;background:linear-gradient(180deg,#1b3324,#122419);color:#f4ecd6;font:700 15px var(--hx-font-ui)}
+.duoLobbyPage .lobbyTowerChoice[aria-pressed=true]{border-color:#e2b04a;background:linear-gradient(180deg,#3b3417,#241f0f);box-shadow:0 0 12px #f6c95a44}
+.duoLobbyPage .lobbyTowerChoice .researchIcon.hxTowerIcon{width:40px;height:auto}
+.duoLobbyPage .lobbyCode strong{color:var(--hx-gold-text)}
+
+/* ===== Administration und Modell-Viewer: Hexwerk-Schriften und Goldton, Aufbau bleibt ===== */
+.hxAdmin{--gold:#e2b04a;--leaf:#8fe39b;--line:#3c7a62;font-family:var(--hx-font-ui)!important}
+.hxAdmin h1,.hxAdmin h2{font-family:var(--hx-font-title)!important;font-weight:900!important;letter-spacing:.01em}
+.hxAdmin button:focus-visible,.hxAdmin input:focus-visible,.hxAdmin a:focus-visible{outline:3px solid var(--hx-focus);outline-offset:3px}
+.hxViewer{font-family:var(--hx-font-ui)!important}
+.hxViewer #info{border:2px solid transparent!important;border-radius:10px!important;background:linear-gradient(180deg,#17301ff2,#0f2219f2) padding-box,var(--hx-panel-edge) border-box!important;font-size:15px}
+.hxViewer #info b{font:900 16px var(--hx-font-title);color:#fbf2d6!important}
