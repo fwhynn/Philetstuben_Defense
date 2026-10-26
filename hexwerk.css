@@ -1804,3 +1804,10 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 
 /* Dialog-Überschriften erhalten beim Öffnen den Fokus (Screenreader), sind aber nicht bedienbar: kein Fokusrahmen */
 [data-dialog-initial-focus]:focus,[data-dialog-initial-focus]:focus-visible{outline:none!important}
+
+/* Handkarten kompakter: kleineres Kachelbild, schmalere Karte, Höhe nach Inhalt; Schriftgrößen bleiben */
+#hand .card svg.hxCardArt,.hand .card svg.hxCardArt{width:min(66%,96px)!important;margin:2px auto 0}
+@media(min-width:1101px) and (min-height:601px){
+  :root{--hx-cw:150px}
+  .handDock .card{min-height:0!important;padding-top:22px!important}
+}
