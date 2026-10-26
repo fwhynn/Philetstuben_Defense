@@ -2700,3 +2700,7 @@ Impressum, Datenschutz, die Bestenlisten-Seite, das Testlabor und die Duo-Lobby 
 
 // Patch Notes: weitere Fenster im Hexwerk-Stil
 HexTranslations.add(`Belohnungen, Run-Vorbereitung, Mini-Tutorial, Spielmeldungen, Biom-Informationen und das Fenster nach geschaffter Stufe haben ebenfalls den neuen Stil.|Rewards, run preparation, the mini tutorial, game messages, biome info and the stage-complete window use the new style as well.`);
+
+// Patch Notes: Skalierung, Ausbau-Symbole und Schriften
+HexTranslations.add(`Die Oberfläche wächst gleichmäßig mit der Bildschirmgröße mit, damit sie auf großen und kleinen Monitoren gleich wirkt; Schrift und Bedienelemente bleiben im Verhältnis.|The interface scales evenly with your screen size, so it looks the same on large and small monitors; text and controls stay in proportion.
+Jede Turmverbesserung zeigt ein eigenes Symbol, und alle Texte im Spiel und auf der Karte verwenden dieselben zwei Schriften.|Every tower upgrade shows its own icon, and all text in the game and on the map uses the same two fonts.`);

@@ -54,7 +54,9 @@
               "Die Spielregeln sind größer geschrieben und stehen Regel für Regel untereinander.",
               "Die Werte im Turmbau brechen nicht mehr mitten in einer Angabe um.",
               "Kacheln und Himmel im Spiel sind weniger stark gesättigt.",
-              "Impressum, Datenschutz, die Bestenlisten-Seite, das Testlabor und die Duo-Lobby verwenden dieselbe Gestaltung; die Turmauswahl der Duo-Lobby zeigt die Turmsymbole."
+              "Impressum, Datenschutz, die Bestenlisten-Seite, das Testlabor und die Duo-Lobby verwenden dieselbe Gestaltung; die Turmauswahl der Duo-Lobby zeigt die Turmsymbole.",
+              "Die Oberfläche wächst gleichmäßig mit der Bildschirmgröße mit, damit sie auf großen und kleinen Monitoren gleich wirkt; Schrift und Bedienelemente bleiben im Verhältnis.",
+              "Jede Turmverbesserung zeigt ein eigenes Symbol, und alle Texte im Spiel und auf der Karte verwenden dieselben zwei Schriften."
             ],
             "stats": []
           }
@@ -72,7 +74,9 @@
       "Die Spielregeln sind größer geschrieben und stehen Regel für Regel untereinander.",
       "Die Werte im Turmbau brechen nicht mehr mitten in einer Angabe um.",
       "Kacheln und Himmel im Spiel sind weniger stark gesättigt.",
-      "Impressum, Datenschutz, die Bestenlisten-Seite, das Testlabor und die Duo-Lobby verwenden dieselbe Gestaltung; die Turmauswahl der Duo-Lobby zeigt die Turmsymbole."
+      "Impressum, Datenschutz, die Bestenlisten-Seite, das Testlabor und die Duo-Lobby verwenden dieselbe Gestaltung; die Turmauswahl der Duo-Lobby zeigt die Turmsymbole.",
+      "Die Oberfläche wächst gleichmäßig mit der Bildschirmgröße mit, damit sie auf großen und kleinen Monitoren gleich wirkt; Schrift und Bedienelemente bleiben im Verhältnis.",
+      "Jede Turmverbesserung zeigt ein eigenes Symbol, und alle Texte im Spiel und auf der Karte verwenden dieselben zwei Schriften."
     ]
   },
   {
