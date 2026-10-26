@@ -160,3 +160,15 @@ Grafiken, Farben und Schriften kommen aus dem Designer-Export `assets/uidesign/`
 - **Karten:** Straßenbild in Schrägsicht wird aus der echten Kachelgeometrie erzeugt (`miniPathSvg`), damit Drehung und Sonderformen stimmen. „Ungewöhnlich“ hat noch keinen Designer-Rahmen.
 - **Desktop-Anordnung** über 1100 × 600 px nach `_source/GameScreen.dc.html`; kleinere Bildschirme behalten die kompakte Gruppen-Navigation und erhalten nur den Stil.
 - Schriften: Titel, Wortmarke und Überschriften in **Tektur Black**, Bedienelemente in Barlow Semi Condensed 600/700; beide selbst gehostet in `assets/fonts/` mit OFL-Lizenztexten (`OFL-Tektur.txt`, `OFL.txt`). Fraunces bleibt nur als Ersatzschrift. Menü-Hintergrund mit Inselsockeln und Deko-Set aus `assets/decor/`. Offene Lieferungen: `artifacts/designer-menu/NACHLIEFERUNG.md`.
+
+## Hexwerk für Herausforderungen und Einzelseiten (26.10.2026)
+
+Alle seit v1.1.4 hinzugekommenen Oberflächen verwenden dieselben Hexwerk-Bausteine wie das übrige Spiel. Quellcodeprüfung mit automatisierten Tests; keine visuelle Browserabnahme.
+
+- Leisten an der Hand und in der Fußleiste (Umweg, Turm-Draft, Giervertrag, Stromnetz, Missionsziel, Expedition, Dörfer/Festung) sind Paneele mit Goldkante. Wählbare Angebote (Draft, Verträge, Partnergeschenke) sind Creme-Karten mit Seltenheitsrand und Hex-Symbol; Preise und Gold erscheinen als Plakette mit Münz-Maske statt als Emoji.
+- Händler und Giervertrag sind Fenster im Referenzstil. Wahlzeilen in Belohnungs-, Händler- und Duo-Fenstern teilen sich den Zeilenstil `.rewardBox .upgradeOption`.
+- Frist, Dorf-Leben, Testlabor-Leiste und Duo-Zugstatus liegen am Desktop unter dem Phasenschild, nie darüber.
+- Symbole kommen aus `assets/uidesign/icons` (`.hxi-*`). Die Icons der Nachlieferung (z. B. `treasure`, `portal`, `overload`, `partner`, `rules`) sind als Klassen angebunden. Textzeichen wie ◆, ✓ und ♥ in Statuszeilen bleiben, wo Tests oder Kartenmarker sie verwenden.
+- Barlow Semi Condensed liegt nur in 600 und 700 vor. Keine Stärken 800 oder 900 mit `--hx-font-ui` verwenden, sonst erzeugt der Browser eine künstliche Fettung.
+- Eigenständige Seiten laden `hexwerk-pages.css` nach ihrer eigenen CSS und setzen eine Klasse am `body`: `hxPage` (mit `hxLegal`, `hxBoard` oder `hxLab`), `duoLobbyPage`, `hxAdmin` oder `hxViewer`. Die Datei enthält Schriften, Farben, die Turm-Icons für `HexArsenal.icon()` und den Fensterrahmen.
+- Der Duo-Server liefert nur freigegebene Dateien aus; neue Stylesheets müssen in `server/duo-transport.cjs` ergänzt werden.

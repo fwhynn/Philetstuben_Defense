@@ -526,7 +526,7 @@ h1,h2,.loadoutBox h2,.gameOverBox h2,.arsenalToolbar h2,.accountHeader h2,.celeb
 .card.rarity-legendary{box-shadow:0 0 0 2px #2b281f66,inset 0 0 0 2px #fffc,0 0 16px #ef9a3a77,0 8px 16px #0008!important}
 .card.selected{box-shadow:0 0 0 2px #2b281f66,inset 0 0 0 2px #fffc,0 0 20px #f6c95a99,0 12px 20px #0009!important}
 .card .rarity{padding:3px 10px!important;border-radius:6px!important;font-size:13px!important;letter-spacing:.07em;box-shadow:inset 0 -2px 0 #0003}
-.card[data-key]::before{left:10px;top:8px;font-size:18px;font-weight:800}
+.card[data-key]::before{left:10px;top:8px;font-size:18px;font-weight:700}
 .card h3{font-size:18px}
 
 /* ===== Turmfenster nach Referenz: Porträt-Kopf, drei Kernwerte, Angriffsfokus, Upgrade-Zeilen, Unteransicht „Werte & Einflüsse“ ===== */
@@ -618,7 +618,7 @@ h1,h2,.loadoutBox h2,.gameOverBox h2,.arsenalToolbar h2,.accountHeader h2,.celeb
 .skillMain{display:flex;flex-direction:column;gap:12px;min-width:0;min-height:0}
 /* Reiter Türme / Gebäude */
 .skillGroups{display:flex;gap:10px;flex-shrink:0}
-.skillGroup{display:inline-flex;align-items:center;gap:10px;min-height:54px;padding:0 22px 0 16px;border:2px solid #46634f!important;border-radius:12px;background:#12241a!important;color:#cfd9cf;font:800 20px var(--hx-font-ui);box-shadow:none;cursor:pointer}
+.skillGroup{display:inline-flex;align-items:center;gap:10px;min-height:54px;padding:0 22px 0 16px;border:2px solid #46634f!important;border-radius:12px;background:#12241a!important;color:#cfd9cf;font:700 20px var(--hx-font-ui);box-shadow:none;cursor:pointer}
 .skillGroup .hxi{width:30px;height:30px;color:#a9c98f}
 .skillGroup small{padding:2px 9px;border-radius:999px;background:#0a150f;color:#a9b8ab;font:700 15px var(--hx-font-ui)}
 .skillGroup:hover{border-color:#a9c98f!important;color:#f4ecd6}
@@ -649,10 +649,10 @@ h1,h2,.loadoutBox h2,.gameOverBox h2,.arsenalToolbar h2,.accountHeader h2,.celeb
 .skillNode foreignObject{overflow:visible}
 .skillNode .hxi{display:block;width:100%;height:100%;color:#f4ecd6}
 .skillNode:not(.lit):not(.hub) .hxi{opacity:.45}
-.skillTier{fill:#f4ecd6;font-family:var(--hx-font-ui);font-weight:800;font-size:24px;text-anchor:middle;pointer-events:none}
+.skillTier{fill:#f4ecd6;font-family:var(--hx-font-ui);font-weight:700;font-size:24px;text-anchor:middle;pointer-events:none}
 .skillNode:not(.lit) .skillTier{fill:#8f9a94}
 /* Schriftgröße setzt arsenal-tree.js (font-size-Attribut), damit Layout-Test und Anzeige übereinstimmen */
-.skillLabel{fill:#efe3c2;font-family:var(--hx-font-ui);font-weight:800;text-anchor:middle;paint-order:stroke;stroke:#070d0a;stroke-width:7;stroke-linejoin:round;pointer-events:none}
+.skillLabel{fill:#efe3c2;font-family:var(--hx-font-ui);font-weight:700;text-anchor:middle;paint-order:stroke;stroke:#070d0a;stroke-width:7;stroke-linejoin:round;pointer-events:none}
 .skillNode.meta .skillLabel{font-weight:700;fill:#cfd9cf}
 .skillNode.meta.lit .skillLabel{fill:#f3d58a}
 .skillNode.root:not(.lit) .skillLabel{fill:#b9c4bb}
@@ -665,14 +665,14 @@ h1,h2,.loadoutBox h2,.gameOverBox h2,.arsenalToolbar h2,.accountHeader h2,.celeb
 .skillLegend .isOffer::before{border-color:#f3c94c;box-shadow:0 0 8px #f6c95a}
 .skillLegend .isRun::before{border-radius:50%;border-color:#a9c98f}
 .skillZoom{position:absolute;right:14px;bottom:14px;display:flex;gap:8px}
-.skillZoom button{width:48px;min-height:48px;padding:0;font:800 22px var(--hx-font-ui)}
+.skillZoom button{width:48px;min-height:48px;padding:0;font:700 22px var(--hx-font-ui)}
 /* Detailspalte */
 .skillDetail{min-height:0;overflow:auto;padding:22px 24px;border:2px solid transparent;border-radius:14px;background:linear-gradient(180deg,#17301f,#0f2219) padding-box,var(--hx-panel-edge) border-box;font-family:var(--hx-font-ui)}
 .skillDetail h3{margin:4px 0 12px;font:900 32px/1.1 var(--hx-font-title);color:#f6f2e4}
 .skillDetail p{margin:0 0 14px;font-size:17px;line-height:1.5;color:#cfd9cf}
-.skillKicker{margin:0!important;color:var(--hx-gold-text)!important;font:800 14px var(--hx-font-ui)!important;letter-spacing:.1em;text-transform:uppercase}
+.skillKicker{margin:0!important;color:var(--hx-gold-text)!important;font:700 14px var(--hx-font-ui)!important;letter-spacing:.1em;text-transform:uppercase}
 .skillStatus{color:#f4ecd6!important;font-weight:700}
-.skillBalance{color:var(--hx-gold-text)!important;font:800 24px var(--hx-font-ui)!important}
+.skillBalance{color:var(--hx-gold-text)!important;font:700 24px var(--hx-font-ui)!important}
 .skillHint{font-size:15px!important;color:#8fa092!important}
 .skillChanges{margin:0 0 16px;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
 .skillChanges li{padding:9px 12px;border:1px solid #2f4a39;border-radius:9px;background:#0e1d16;font:600 16px var(--hx-font-ui);color:#e6ebe7}
@@ -768,7 +768,7 @@ details.hxGroup>summary.hxGroupTitle .hxi{width:26px;height:26px;color:#f3c94c}
 .settingsRunState .hxi{width:30px;height:30px}
 .settingsSaved{display:flex;align-items:center;gap:12px;min-width:0;font-size:16px;color:#e3e9e3}
 .settingsSaved>span:last-child{display:flex;flex-direction:column}.settingsSaved small{font-size:14px;color:var(--win-muted)}
-.savedCheck{display:grid;place-items:center;flex:none;width:30px;height:30px;border-radius:50%;background:#2fae4e;color:#fff;font:900 17px/1 var(--hx-font-ui)}
+.savedCheck{display:grid;place-items:center;flex:none;width:30px;height:30px;border-radius:50%;background:#2fae4e;color:#fff;font:700 17px/1 var(--hx-font-ui)}
 .hxWinFoot #openMainMenuBtn{margin-left:auto}
 .hxWinFoot #openMainMenuBtn+.primary{margin-left:0}
 /* Steuerung */
@@ -839,7 +839,7 @@ details.hxGroup>summary.hxGroupTitle .hxi{width:26px;height:26px;color:#f3c94c}
 .accountHelloText{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
 .accountHelloText strong{font:900 clamp(26px,2.6vw,36px)/1.1 var(--hx-font-title);color:#fbf7ea}
 .accountWhoami{display:flex;align-items:center;gap:8px;font-size:18px;color:#e3e9e3}
-.accountWhoami::before{content:'✓';display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#2fae4e;color:#fff;font:900 14px/1 var(--hx-font-ui)}
+.accountWhoami::before{content:'✓';display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#2fae4e;color:#fff;font:700 14px/1 var(--hx-font-ui)}
 .accountBox .accountSync{display:flex;align-items:center;gap:12px;font-size:18px;color:#fbf7ea}
 .accountBox .accountSyncDot{width:20px;height:20px;border-radius:50%;background:#2fae4e;box-shadow:0 0 0 4px #2fae4e33}
 .accountBox .accountSyncDot[data-state=pending]{background:#e9b949;box-shadow:0 0 0 4px #e9b94933}
@@ -865,7 +865,7 @@ details.hxGroup>summary.hxGroupTitle .hxi{width:26px;height:26px;color:#f3c94c}
 .flowArrow{width:52px;height:18px;clip-path:polygon(0 30%,65% 30%,65% 0,100% 50%,65% 100%,65% 70%,0 70%);background:linear-gradient(90deg,#e9b94944,#f3c94c)}
 .flowCloud{position:relative;width:70px;height:44px;border-radius:24px;background:#f4f6f4;box-shadow:inset 0 -6px 0 #d9dedb}
 .flowCloud::before{content:'';position:absolute;left:14px;top:-18px;width:38px;height:38px;border-radius:50%;background:#f4f6f4}
-.flowCloud::after{content:'✓';position:absolute;right:-10px;bottom:-8px;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#2fae4e;color:#fff;font:900 17px/1 var(--hx-font-ui);box-shadow:0 0 0 3px #0b1d14}
+.flowCloud::after{content:'✓';position:absolute;right:-10px;bottom:-8px;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#2fae4e;color:#fff;font:700 17px/1 var(--hx-font-ui);box-shadow:0 0 0 3px #0b1d14}
 .accountBox .accountLogout{display:inline-flex;align-items:center;gap:10px;min-width:260px;justify-content:center;border:2px solid #e05a4f!important;border-radius:10px!important;background:linear-gradient(180deg,#2a1b17,#1c1210)!important;color:#ff9b8c!important;font:700 20px var(--hx-font-ui)!important;box-shadow:none!important}
 .accountFoot>.primary{margin-left:auto}
 @media(max-width:820px){
@@ -986,8 +986,8 @@ details.hxGroup>summary.hxGroupTitle .hxi{width:26px;height:26px;color:#f3c94c}
 .lbMedal::before{content:'';position:absolute;inset:5px;clip-path:inherit;background:linear-gradient(180deg,#24302b,#111a16)}
 .lbInitial{position:relative;font:900 38px/1 var(--hx-font-title);color:#f4f6f4}
 .lbPlace1 .lbInitial{color:#ffe198}.lbPlace3 .lbInitial{color:#ffc19c}
-.lbRankBadge{position:absolute;bottom:4px;left:50%;translate:-50% 0;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#e2b04a;color:#2a1f10;font:900 15px/1 var(--hx-font-ui)}
-.lbName{font:800 clamp(17px,1.6vw,22px)/1.15 var(--hx-font-ui);color:#fff;text-shadow:0 2px 0 #0007;overflow-wrap:anywhere}
+.lbRankBadge{position:absolute;bottom:4px;left:50%;translate:-50% 0;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#e2b04a;color:#2a1f10;font:700 15px/1 var(--hx-font-ui)}
+.lbName{font:700 clamp(17px,1.6vw,22px)/1.15 var(--hx-font-ui);color:#fff;text-shadow:0 2px 0 #0007;overflow-wrap:anywhere}
 .lbValue{font:900 clamp(30px,3.2vw,46px)/1 var(--hx-font-title);color:#fff;text-shadow:0 3px 0 #0007}
 .lbValueLabel{font:700 13px var(--hx-font-ui);color:#ffffffcc;text-transform:uppercase;letter-spacing:.06em}
 .leaderboardBox .leaderboardStatus{margin:0 0 10px;color:#cfd9cf;font-size:15px;text-align:center}
@@ -1105,13 +1105,13 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 .skillChanges>div{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:9px 14px;border-top:1px solid #24493a}
 .skillChanges>div:first-child{border-top:0}
 .skillChanges dt{font:600 16px/1.3 var(--hx-font-ui);color:#d5ddd6}
-.skillChanges dd{margin:0;flex:none;font:800 17px var(--hx-font-ui);color:#fbf7ea;white-space:nowrap}
+.skillChanges dd{margin:0;flex:none;font:700 17px var(--hx-font-ui);color:#fbf7ea;white-space:nowrap}
 .skillArrow{margin:0 6px;color:#f3c94c}
 .skillPaths{margin:0;padding:0;list-style:none}
 .skillPaths li{display:flex;flex-direction:column;gap:4px;padding:10px 14px;border-top:1px solid #24493a}
 .skillPaths li:first-child{border-top:0}
 .skillPathSteps{font:600 16px/1.3 var(--hx-font-ui);color:#d5ddd6}
-.skillPathMeta{font:800 17px var(--hx-font-ui);color:#b9c4bb}
+.skillPathMeta{font:700 17px var(--hx-font-ui);color:#b9c4bb}
 .skillPathMeta.owned,.skillPathMeta.active{color:#c9f5d2}.skillPathMeta.active::after{content:' · aktiv';color:#f3c94c}
 .skillProgress{height:12px;margin:12px 14px 6px;border-radius:999px;background:#24302a;overflow:hidden}
 .skillProgress span{display:block;height:100%;background:linear-gradient(90deg,#e2b04a,#ffe48a)}
@@ -1136,7 +1136,7 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 /* Kernwerte: drei Spalten mit Symbol, Wert, Bezeichnung */
 #towerPanel .towerHeadline{gap:6px!important;margin:4px 0 10px!important;padding-bottom:12px;border-bottom:1.5px solid #41594a}
 #towerPanel .towerHeadline>div::before{width:30px!important;height:30px!important;background:#f4ecd6!important}
-#towerPanel .towerHeadline strong{font:800 22px/1.1 var(--hx-font-ui)!important}
+#towerPanel .towerHeadline strong{font:700 22px/1.1 var(--hx-font-ui)!important}
 #towerPanel .towerHeadline small{font-size:14px!important;color:#d5ddd6!important}
 /* Angriffsfokus: Beschriftung links, Auswahl rechts */
 #towerPanel .targetPriorities .focusLabel{font:700 17px var(--hx-font-ui)!important}
@@ -1149,8 +1149,8 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 #towerPanel .towerUpgradeCard>.towerPathIcon{grid-area:icon;position:relative;display:grid;place-items:center;width:64px;height:72px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(180deg,#e9dcb8,#9da58f)}
 #towerPanel .towerUpgradeCard>.towerPathIcon::before{content:'';position:absolute;inset:3px;clip-path:inherit;background:linear-gradient(180deg,#1f3a29,#10221a)}
 #towerPanel .towerUpgradeCard>.towerPathIcon>*{position:relative}
-#towerPanel .towerUpgradeCard>strong{grid-area:name;font:800 19px/1.15 var(--hx-font-ui)!important;color:#fbf7ea!important}
-#towerPanel .towerUpgradeCard>.towerUpgradeTag{grid-area:tag;justify-self:start;padding:2px 8px;border-radius:6px;font:800 12px/1.4 var(--hx-font-ui);letter-spacing:.06em;text-transform:uppercase}
+#towerPanel .towerUpgradeCard>strong{grid-area:name;font:700 19px/1.15 var(--hx-font-ui)!important;color:#fbf7ea!important}
+#towerPanel .towerUpgradeCard>.towerUpgradeTag{grid-area:tag;justify-self:start;padding:2px 8px;border-radius:6px;font:700 12px/1.4 var(--hx-font-ui);letter-spacing:.06em;text-transform:uppercase}
 #towerPanel .towerUpgradeCard>.towerUpgradeStats{grid-area:stats;display:flex;flex-wrap:wrap;gap:2px 10px;font:600 15px/1.35 var(--hx-font-ui);color:#e3e9e3}
 #towerPanel .towerUpgradeCard>.towerPathProgress{grid-area:progress;font-size:13px;color:#b9c6bc}
 #towerPanel .towerUpgradeCard>.towerUpgradeDescription{grid-area:desc;margin:8px 0 0;font-size:15px;line-height:1.45;color:#e3e9e3}
@@ -1158,7 +1158,7 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 #towerPanel .towerUpgradeCard>.ultimateLocked{grid-area:lock;margin:6px 0 0;font-size:14px}
 #towerPanel .towerUpgradeCard:not(.comparing)>.towerUpgradeDescription,#towerPanel .towerUpgradeCard:not(.comparing)>.towerTradeoff{display:none}
 #towerPanel .towerUpgradeCard>.towerUpgradeActions{display:contents}
-#towerPanel .towerUpgradeCard .towerUpgradeActions>.towerBuy{grid-area:buy;align-self:center;min-width:92px;min-height:52px!important;padding:0 14px!important;font:800 18px/1.1 var(--hx-font-ui)!important;white-space:normal;text-align:center}
+#towerPanel .towerUpgradeCard .towerUpgradeActions>.towerBuy{grid-area:buy;align-self:center;min-width:92px;min-height:52px!important;padding:0 14px!important;font:700 18px/1.1 var(--hx-font-ui)!important;white-space:normal;text-align:center}
 #towerPanel .towerUpgradeCard .towerUpgradeActions>.towerDetailsToggle{grid-area:compare;justify-self:start;min-height:32px!important;padding:0 2px!important;border:0!important;background:none!important;box-shadow:none!important;
   color:var(--hx-gold-text)!important;font:700 14px var(--hx-font-ui)!important;text-decoration:underline;text-underline-offset:3px}
 #towerPanel .towerUpgradeCard.comparing{background:linear-gradient(180deg,#183322,#0f2219)!important;border-radius:10px!important;padding:12px 10px!important}
@@ -1181,12 +1181,12 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 #towerPanel .towerSubNote{margin:2px 0 10px;font:700 16px var(--hx-font-ui);color:var(--hx-gold-text)}
 #towerPanel .towerSubview>h3,#towerPanel #towerExtraValues>h3,#towerPanel #towerFactors>h3{margin:14px 0 6px!important;padding-bottom:6px;border-bottom:1.5px solid #c9a24a66;font:900 20px var(--hx-font-title)!important;color:#fbf2d6!important}
 #towerPanel .towerValueSheet>div{display:flex;justify-content:space-between;align-items:center;padding:8px 2px;border-bottom:1px solid #24493a;font-size:16px}
-#towerPanel .towerValueSheet dt{color:#e3e9e3}#towerPanel .towerValueSheet dd{margin:0;font:800 17px var(--hx-font-ui);color:#fbf7ea;font-variant-numeric:tabular-nums}
+#towerPanel .towerValueSheet dt{color:#e3e9e3}#towerPanel .towerValueSheet dd{margin:0;font:700 17px var(--hx-font-ui);color:#fbf7ea;font-variant-numeric:tabular-nums}
 #towerPanel .towerInfluence{display:grid;grid-template-columns:56px minmax(0,1fr);gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid #24493a}
 #towerPanel .towerInfluenceIcon{display:grid;place-items:center;width:56px;height:62px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(180deg,#e9c46a,#a8781f)}
 #towerPanel .towerInfluenceIcon>*{width:70%;height:70%;color:#2a1f10}
 #towerPanel .towerInfluence p{display:flex;flex-direction:column;gap:2px;margin:0}
-#towerPanel .towerInfluence strong{font:800 17px var(--hx-font-ui);color:#fbf7ea}
+#towerPanel .towerInfluence strong{font:700 17px var(--hx-font-ui);color:#fbf7ea}
 #towerPanel .towerInfluence span{font:700 16px var(--hx-font-ui);color:#8fe39b}
 #towerPanel .towerInfluence small{font-size:14px;color:#b9c6bc}
 #towerPanel .towerBackWide{width:100%;min-height:52px;margin-top:14px;font-size:17px!important}
@@ -1211,7 +1211,7 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 #towerPanel .towerUpgradeCard{grid-template-columns:64px auto auto minmax(0,1fr) auto!important;grid-template-areas:"icon name tag compare buy" "icon stats stats stats buy" "desc desc desc desc desc" "trade trade trade trade trade" "lock lock lock lock lock"!important;row-gap:4px!important}
 #towerPanel .towerUpgradeCard .towerUpgradeActions>.towerDetailsToggle{justify-self:start;display:grid;place-items:center;width:28px;min-width:28px;height:28px;min-height:28px!important;padding:0!important;border:1.5px solid #c9a24a!important;border-radius:50%!important;
   font-size:0!important;text-decoration:none;color:var(--hx-gold-text)!important}
-#towerPanel .towerUpgradeCard .towerUpgradeActions>.towerDetailsToggle::before{content:'i';font:800 15px/1 var(--hx-font-ui)}
+#towerPanel .towerUpgradeCard .towerUpgradeActions>.towerDetailsToggle::before{content:'i';font:700 15px/1 var(--hx-font-ui)}
 #towerPanel .towerUpgradeCard .towerUpgradeActions>.towerDetailsToggle[aria-expanded=true]{background:#c9a24a!important;color:#1a1408!important}
 #towerPanel .towerUpgradeCard .towerUpgradeActions>.towerDetailsToggle[aria-expanded=true]::before{content:'×'}
 #towerPanel .towerUpgradeCard>.towerUpgradeStats{font-size:14.5px!important}
@@ -1239,8 +1239,8 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 #towerPanel #towerExtraDetails:not([open]){display:none}
 #towerPanel .towerUpgradeCard{grid-template-columns:64px minmax(0,1fr) 28px auto!important;grid-template-areas:"icon title title buy" "icon stats compare buy" "desc desc desc desc" "trade trade trade trade" "lock lock lock lock"!important}
 #towerPanel .towerUpgradeTitle{grid-area:title;display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;min-width:0}
-#towerPanel .towerUpgradeTitle>strong{font:800 19px/1.15 var(--hx-font-ui);color:#fbf7ea}
-#towerPanel .towerUpgradeTitle>.towerUpgradeTag{padding:2px 8px;border-radius:6px;font:800 12px/1.4 var(--hx-font-ui);letter-spacing:.06em;text-transform:uppercase}
+#towerPanel .towerUpgradeTitle>strong{font:700 19px/1.15 var(--hx-font-ui);color:#fbf7ea}
+#towerPanel .towerUpgradeTitle>.towerUpgradeTag{padding:2px 8px;border-radius:6px;font:700 12px/1.4 var(--hx-font-ui);letter-spacing:.06em;text-transform:uppercase}
 #towerPanel .towerUpgradeCard .towerUpgradeActions>.towerDetailsToggle{align-self:start}
 #towerPanel .towerComparisonSheet{font-size:15px}#towerPanel .towerComparisonSheet h3{font:900 20px var(--hx-font-title)!important;color:#fbf2d6!important}
 /* Niedrige Bildschirme (Laptop): Upgrades zuerst; Kernwerte stehen in „Werte & Einflüsse“, der Angriffsfokus rückt nach unten */
@@ -1277,15 +1277,15 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 #towerMenu .towerBuildIcon.hasPortrait>*{visibility:hidden}
 #towerMenu .towerOffer{gap:3px!important}
 #towerMenu .towerOfferTitle{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}
-#towerMenu .towerOfferName{font:800 19px/1.15 var(--hx-font-ui)!important;color:#fbf7ea!important}
-#towerMenu .towerUpgradeTag{padding:2px 8px;border-radius:6px;font:800 12px/1.4 var(--hx-font-ui);letter-spacing:.06em;text-transform:uppercase;color:#fff;background:#2f6a4a}
+#towerMenu .towerOfferName{font:700 19px/1.15 var(--hx-font-ui)!important;color:#fbf7ea!important}
+#towerMenu .towerUpgradeTag{padding:2px 8px;border-radius:6px;font:700 12px/1.4 var(--hx-font-ui);letter-spacing:.06em;text-transform:uppercase;color:#fff;background:#2f6a4a}
 #towerMenu .towerUpgradeTag[data-kind=area]{background:#9a3a26}#towerMenu .towerUpgradeTag[data-kind=single]{background:#2e5a9c}#towerMenu .towerUpgradeTag[data-kind=aura],#towerMenu .towerUpgradeTag[data-kind=frost]{background:#2a7a8a}
 #towerMenu .towerUpgradeTag[data-kind=chain]{background:#8a6a10}#towerMenu .towerUpgradeTag[data-kind=mine]{background:#6b4f2a}#towerMenu .towerUpgradeTag[data-kind=soul]{background:#5b3b8f}#towerMenu .towerUpgradeTag[data-kind=pierce]{background:#6a5a2a}
 #towerMenu .towerOfferStats{display:flex!important;flex-wrap:wrap;gap:2px 10px!important;font:600 14.5px/1.35 var(--hx-font-ui)!important;color:#e3e9e3}
 #towerMenu .towerOfferStats [data-stat=cooldown]::before{width:15px;height:15px;margin-right:4px;vertical-align:-2px}
 #towerMenu .towerOfferDescription{font-size:13.5px!important;color:#b9c6bc!important}
 #towerMenu .towerOfferPrice{align-self:center!important;gap:6px!important}
-#towerMenu .towerPriceTag{min-height:46px;min-width:76px;justify-content:center;font:800 18px var(--hx-font-ui)}
+#towerMenu .towerPriceTag{min-height:46px;min-width:76px;justify-content:center;font:700 18px var(--hx-font-ui)}
 #towerMenu .towerBtn.unaffordable .towerPriceTag{color:#ffb3a8}
 #towerMenu .towerOfferPrice kbd{align-self:center}
 /* Mehrfachauswahl als Schalterzeile, Hinweise als ruhiger Infokasten */
@@ -1460,7 +1460,7 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 /* Wahlzeilen in Belohnungs-, Händler- und Duo-Fenstern (.upgradeOption) */
 .rewardBox .upgradeOption{gap:6px;padding:14px 16px!important;border:1.5px solid #46634f!important;border-radius:10px!important;background:linear-gradient(180deg,#1b3324,#122419)!important;
   box-shadow:inset 0 1px 0 #ffffff12;color:#f4ecd6!important;font:600 16px/1.35 var(--hx-font-ui);text-align:left;cursor:pointer;transition:border-color .14s,background .14s}
-.rewardBox .upgradeOption strong{font:800 18px/1.2 var(--hx-font-ui);color:#fbf7ea}
+.rewardBox .upgradeOption strong{font:700 18px/1.2 var(--hx-font-ui);color:#fbf7ea}
 .rewardBox .upgradeOption small{font-size:14px!important;line-height:1.4!important;color:#b9c6bc!important}
 .rewardBox .upgradeOption:not(:disabled):hover,.rewardBox .upgradeOption:focus-visible{border-color:#c9a24a!important;background:linear-gradient(180deg,#22402c,#16291d)!important}
 .rewardBox .upgradeOption:disabled{background:linear-gradient(180deg,#172a1f,#101e16)!important;color:#9aa39e!important;cursor:not-allowed}
@@ -1486,7 +1486,7 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 .duoHud>summary::before{content:'';width:20px;height:20px;flex:none;background:var(--hx-gold-text);-webkit-mask:url("assets/uidesign/icons/icon_duo.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_duo.svg") center/contain no-repeat}
 .dockTL .duoHudBody{border:2px solid transparent!important;border-radius:10px!important;background:linear-gradient(180deg,#17301f,#0f2219) padding-box,var(--hx-panel-edge) border-box!important}
 .duoHudSection{border-top-color:#24493a!important}
-.duoHudSection h3{display:flex;align-items:center;gap:8px;font:800 13px/1.3 var(--hx-font-ui)!important;letter-spacing:.08em!important;color:var(--hx-gold-text)!important}
+.duoHudSection h3{display:flex;align-items:center;gap:8px;font:700 13px/1.3 var(--hx-font-ui)!important;letter-spacing:.08em!important;color:var(--hx-gold-text)!important}
 .duoHudBody p,.duoHudBody small{color:#cfd9cf}
 .duoHudBody .duoDanger{border:2px solid var(--hx-danger-line)!important;border-radius:8px;background:var(--hx-danger-fill)!important;color:#fff3ec}
 .duoTurn{border:2px solid transparent!important;background:linear-gradient(180deg,#17301f,#0f2219) padding-box,var(--hx-panel-edge) border-box!important;color:var(--hx-text);font-family:var(--hx-font-ui)}
@@ -1534,11 +1534,11 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 .patchHighlight{--patch-accent:#9fb0a3;border:1.5px solid #3c7a62!important;border-top:4px solid var(--patch-accent)!important;border-radius:12px!important;background:linear-gradient(180deg,#132e20,#0f2419)!important}
 .patchHighlight.buff{--patch-accent:#8fe39b}.patchHighlight.nerf{--patch-accent:#ff9a85}.patchHighlight.new{--patch-accent:#f3c94c}
 .patchMark{font:900 32px/1 var(--hx-font-title)!important}
-#patchNotesContent .patchHighlight h4{font:800 13px/1.4 var(--hx-font-ui)!important}
+#patchNotesContent .patchHighlight h4{font:700 13px/1.4 var(--hx-font-ui)!important}
 .patchHighlight li{color:#e3e9e3}
 .patchSection>h4{display:flex;align-items:center;gap:12px;font:900 clamp(20px,2.2vw,26px)/1.25 var(--hx-font-title)!important;color:#fbf2d6!important;border-bottom:1.5px solid #c9a24a66!important}
 .patchEntry{border-bottom-color:#24493a!important}
-.patchEntry h5{font:800 19px/1.35 var(--hx-font-ui)!important;color:#fbf7ea!important}
+.patchEntry h5{font:700 19px/1.35 var(--hx-font-ui)!important;color:#fbf7ea!important}
 .patchReason{color:#cfd9cf!important}
 .patchStats{border:1.5px solid #3c7a62;border-radius:12px;border-collapse:separate!important;border-spacing:0;overflow:hidden;background:#0f2419;font-size:15px!important}
 .patchStats th,.patchStats td{border-bottom:1px solid #24493a!important}
