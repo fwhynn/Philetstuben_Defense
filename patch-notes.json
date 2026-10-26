@@ -1,5 +1,79 @@
 [
   {
+    "version": "next",
+    "title": "Hexwerk-Oberfläche",
+    "summary": "Die Hexwerk-Oberfläche kehrt zurück und gilt jetzt auch für alle Herausforderungen, Fenster und Seiten.",
+    "overview": [
+      {
+        "kind": "new",
+        "title": "NEU",
+        "items": [
+          "Neue Oberfläche",
+          "Herausforderungen im Hexwerk-Stil"
+        ]
+      },
+      {
+        "kind": "fixed",
+        "title": "VERBESSERT",
+        "items": [
+          "Lesbarere Fenster und ruhigere Farben"
+        ]
+      }
+    ],
+    "sections": [
+      {
+        "title": "Neue Oberfläche",
+        "entries": [
+          {
+            "title": "Hauptmenü und Spiel",
+            "bullets": [
+              "Das Hauptmenü ist wieder eine Hex-Blüte vor der 3D-Landschaft; Spielanzeigen, Turmfenster und Turmbau haben die Hexwerk-Gestaltung.",
+              "Das Arsenal zeigt jeden Turm als Fertigkeitenbaum. Die Einstellungen sind ein Fenster mit Bereichen für Spiel, Audio, Steuerung und Hilfe.",
+              "Ruhige Klaviermusik im Hintergrund; Musik und Lautstärke lassen sich in den Einstellungen getrennt von den Spielgeräuschen einstellen."
+            ],
+            "stats": []
+          },
+          {
+            "title": "Herausforderungen im Hexwerk-Stil",
+            "bullets": [
+              "Umweg, Turm-Draft, Giervertrag, Stromnetz, Expedition und Drei Dörfer verwenden die Hexwerk-Paneele; Angebote und Verträge erscheinen als Karten mit Symbolen.",
+              "Die Expeditionsfrist und die Leben der Dörfer stehen unter dem Wellenschild und verdecken es nicht mehr.",
+              "Händler, Giervertrag, Regeln der Tagesherausforderung, Partnergeschenke im Duo, Bestenliste und Patch Notes haben den neuen Fensterstil."
+            ],
+            "stats": []
+          }
+        ]
+      },
+      {
+        "title": "Lesbarkeit",
+        "entries": [
+          {
+            "title": "Lesbarere Fenster und ruhigere Farben",
+            "bullets": [
+              "Die Spielregeln sind größer geschrieben und stehen Regel für Regel untereinander.",
+              "Die Werte im Turmbau brechen nicht mehr mitten in einer Angabe um.",
+              "Kacheln und Himmel im Spiel sind weniger stark gesättigt.",
+              "Impressum, Datenschutz, die Bestenlisten-Seite, das Testlabor und die Duo-Lobby verwenden dieselbe Gestaltung; die Turmauswahl der Duo-Lobby zeigt die Turmsymbole."
+            ],
+            "stats": []
+          }
+        ]
+      }
+    ],
+    "changes": [
+      "Das Hauptmenü ist wieder eine Hex-Blüte vor der 3D-Landschaft; Spielanzeigen, Turmfenster und Turmbau haben die Hexwerk-Gestaltung.",
+      "Das Arsenal zeigt jeden Turm als Fertigkeitenbaum. Die Einstellungen sind ein Fenster mit Bereichen für Spiel, Audio, Steuerung und Hilfe.",
+      "Ruhige Klaviermusik im Hintergrund; Musik und Lautstärke lassen sich in den Einstellungen getrennt von den Spielgeräuschen einstellen.",
+      "Umweg, Turm-Draft, Giervertrag, Stromnetz, Expedition und Drei Dörfer verwenden die Hexwerk-Paneele; Angebote und Verträge erscheinen als Karten mit Symbolen.",
+      "Die Expeditionsfrist und die Leben der Dörfer stehen unter dem Wellenschild und verdecken es nicht mehr.",
+      "Händler, Giervertrag, Regeln der Tagesherausforderung, Partnergeschenke im Duo, Bestenliste und Patch Notes haben den neuen Fensterstil.",
+      "Die Spielregeln sind größer geschrieben und stehen Regel für Regel untereinander.",
+      "Die Werte im Turmbau brechen nicht mehr mitten in einer Angabe um.",
+      "Kacheln und Himmel im Spiel sind weniger stark gesättigt.",
+      "Impressum, Datenschutz, die Bestenlisten-Seite, das Testlabor und die Duo-Lobby verwenden dieselbe Gestaltung; die Turmauswahl der Duo-Lobby zeigt die Turmsymbole."
+    ]
+  },
+  {
     "version": "1.2.5",
     "title": "Herausforderungen: Fairer Zufall",
     "summary": "Abwechslung bleibt – fehlende Straßenformen und einseitige Angebote werden abgesichert.",

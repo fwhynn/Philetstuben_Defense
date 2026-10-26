@@ -2678,3 +2678,22 @@ Die Gegnerstärke bleibt unverändert. Bereits laufende Missionen behalten ihre 
 // Hexwerk: Texte der neu gestalteten Herausforderungs-Oberflächen
 HexTranslations.add(`Verdient:|Earned:
 Gold nach der Welle|gold after the wave`);
+
+// Patch Notes: Hexwerk-Oberfläche
+HexTranslations.add(`Hexwerk-Oberfläche|Hexwerk interface
+Die Hexwerk-Oberfläche kehrt zurück und gilt jetzt auch für alle Herausforderungen, Fenster und Seiten.|The Hexwerk interface returns and now also covers every challenge, window and page.
+Neue Oberfläche|New interface
+Herausforderungen im Hexwerk-Stil|Challenges in Hexwerk style
+Lesbarere Fenster und ruhigere Farben|More readable windows and calmer colours
+Hauptmenü und Spiel|Main menu and game
+Das Hauptmenü ist wieder eine Hex-Blüte vor der 3D-Landschaft; Spielanzeigen, Turmfenster und Turmbau haben die Hexwerk-Gestaltung.|The main menu is a hex blossom in front of the 3D landscape again; game displays, tower window and tower building use the Hexwerk design.
+Das Arsenal zeigt jeden Turm als Fertigkeitenbaum. Die Einstellungen sind ein Fenster mit Bereichen für Spiel, Audio, Steuerung und Hilfe.|The Arsenal shows each tower as a skill tree. Settings are a window with sections for game, audio, controls and help.
+Ruhige Klaviermusik im Hintergrund; Musik und Lautstärke lassen sich in den Einstellungen getrennt von den Spielgeräuschen einstellen.|Calm piano music plays in the background; music and its volume can be set in the settings separately from game sounds.
+Umweg, Turm-Draft, Giervertrag, Stromnetz, Expedition und Drei Dörfer verwenden die Hexwerk-Paneele; Angebote und Verträge erscheinen als Karten mit Symbolen.|Detour, Tower Draft, Greed contracts, Power Grid, Expedition and Three Villages use the Hexwerk panels; offers and contracts appear as cards with icons.
+Die Expeditionsfrist und die Leben der Dörfer stehen unter dem Wellenschild und verdecken es nicht mehr.|The expedition deadline and the villages' lives sit below the wave badge and no longer cover it.
+Händler, Giervertrag, Regeln der Tagesherausforderung, Partnergeschenke im Duo, Bestenliste und Patch Notes haben den neuen Fensterstil.|Merchant, Greed contracts, daily challenge rules, Duo partner gifts, leaderboard and patch notes use the new window style.
+Lesbarkeit|Readability
+Die Spielregeln sind größer geschrieben und stehen Regel für Regel untereinander.|The game rules use larger text and are listed one rule per row.
+Die Werte im Turmbau brechen nicht mehr mitten in einer Angabe um.|Tower stats in the build menu no longer wrap in the middle of a value.
+Kacheln und Himmel im Spiel sind weniger stark gesättigt.|Tiles and sky in the game are less saturated.
+Impressum, Datenschutz, die Bestenlisten-Seite, das Testlabor und die Duo-Lobby verwenden dieselbe Gestaltung; die Turmauswahl der Duo-Lobby zeigt die Turmsymbole.|Legal notice, privacy policy, the leaderboard page, the challenge lab and the Duo lobby share the same design; the Duo lobby's tower selection shows the tower icons.`);
