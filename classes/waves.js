@@ -42,12 +42,23 @@ const HexWaves=(()=>{
   }
   function greedGold(state){return ['kills','completion','income','boss','treasure','shrine','greed'].reduce((n,k)=>n+Math.max(0,Math.floor(state.goldEarned?.[k]||0)),0);}
   function settleGreed(state){const c=state.greedContract;if(state.challengeKind!=='greed'||!c||c.wave!==state.wave||c.settled||state.waveRunning||state.hp<=0||state.lastCompletedWave!==state.wave)return;c.settled=true;const gold=Math.max(0,c.pendingGold||0);state.gold+=gold;state.goldEarned.greed=(state.goldEarned.greed||0)+gold;state.greedScore=greedGold(state);}
-  // Preserve the opening curve; late health grows with 8 % rather than 10 %.
-  function normalHealth(wave){return Math.round((28+wave*7)*Math.pow(1.10,Math.max(0,Math.min(wave,35)-3))*Math.pow(1.08,Math.max(0,wave-35))*(1+Math.min(.18,Math.max(0,wave-3)*.006)));}
-  function bossProfile(wave){
+  function smoothStep(value){const t=Math.max(0,Math.min(1,value));return t*t*(3-2*t);}
+  // Missions have independently tuned multipliers, maps and resource budgets.
+  // Keep their validated curve separate from the standard/Duo rebalance.
+  function missionHealth(wave){return Math.round((28+wave*7)*Math.pow(1.10,Math.max(0,Math.min(wave,35)-3))*Math.pow(1.08,Math.max(0,wave-35))*(1+Math.min(.18,Math.max(0,wave-3)*.006)));}
+  function normalHealth(wave){
+    // Keep the first three waves. Introduce pressure gradually through W15,
+    // then ease compounding from 10% to 5% over W26–50, without a late cliff.
+    let growth=Math.pow(1.10,Math.max(0,Math.min(wave,25)-3));
+    for(let w=26;w<=Math.min(wave,50);w++)growth*=1.10-.05*smoothStep((w-25)/25);
+    growth*=Math.pow(1.05,Math.max(0,wave-50));
+    return Math.round((28+wave*7)*growth*(1+Math.min(.18,Math.max(0,wave-3)*.006))*(1+.40*smoothStep((wave-3)/12)));
+  }
+  function bossProfile(wave,mission=false){
     if(wave<15||(wave-15)%10!==0) return null;
-    // Gradually establish a boss floor after W35; no discontinuity in the opening bosses.
-    const hp=Math.max(Math.round(1200*Math.pow((wave-5)/10,1.8)),Math.round(normalHealth(wave)*Math.min(2,Math.max(0,(wave-35)/20))));
+    // Anchor to the campaign finale, then follow the same smooth curve as normal
+    // enemies. No second health floor suddenly overtakes the boss curve at W55.
+    const hp=mission?Math.max(Math.round(1200*Math.pow((wave-5)/10,1.8)),Math.round(missionHealth(wave)*Math.min(2,Math.max(0,(wave-35)/20)))):wave<=35?Math.round(1200*Math.pow((wave-5)/10,1.8)):Math.round(Math.round(1200*Math.pow(3,1.8))*normalHealth(wave)/normalHealth(35));
     const variants=[{bossKind:'iron',name:'Eisenkoloss',description:'Schwerer Belagerer: viel Rüstung, langsam, 7 Base-Schaden.',armor:.6,magic:.1,speed:23,baseDamage:7},{bossKind:'hunter',name:'Sturmjäger',description:'Schneller Boss: widersteht Verlangsamung, wenig Rüstung.',armor:.1,magic:.2,speed:48,minSpeedFactor:.8},{bossKind:'summoner',name:'Seelenmatriarchin',description:'Hohe Magieresistenz. Ruft alle 6 Sekunden an ihrer Position einen Diener, maximal sechs. Diener sind 20 % langsamer und geben kein Gold.',armor:.15,magic:.7,speed:26,summonInterval:6000,summonLimit:6}];
     const v=variants[((wave-15)/10)%3];return {type:'boss',hp,minSpeedFactor:.6,baseDamage:5,killGold:50,...v,armorHp:Math.round(hp*v.armor),magicHp:Math.round(hp*v.magic)};
   }
@@ -65,7 +76,7 @@ const HexWaves=(()=>{
       const modernDraft=context.challengeKind==='towerDraft'&&context.towerDraft?.rulesVersion>=3;
       const longDraft=context.challengeKind==='towerDraft'&&context.towerDraft?.rulesVersion>=2;
       const strength=modernDraft?Math.max(4,3+Math.floor((wave-3)*.5)):longDraft&&wave>3?3+Math.floor((wave-3)*.5):wave;
-      const p=plan(strength,income,false,{...context,challengeKind:null});
+      const p=plan(strength,income,false,{...context,challengeKind:null,missionBalance:true});
       if(longDraft){p.maxGold-=p.boss?.killGold||0;p.boss=[15,25,35].includes(wave)?bossProfile(wave===35?25:15):null;p.maxGold+=p.boss?.killGold||0;p.wave=wave;p.strength=strength;}
       const factor=(modernDraft?1.25:1)+Math.max(0,Math.min(wave,12)-3)*(longDraft?.04:context.challengeKind==='towerDraft'?.10:.08);
       // Draft growth adds space and supplies; do not compound the old twelve-wave modifier forever.
@@ -75,15 +86,15 @@ const HexWaves=(()=>{
     }
     if(context.challengeKind==='expedition'){
       const modern=context.expedition?.rulesVersion>=3;
-      const p=plan(modern?wave+2:wave,0,false,{...context,challengeKind:null}),factor=modern?1.3+wave*.12:1+Math.max(0,wave-2)*(context.expedition?.rulesVersion===2?.20:.12);p.wave=wave;
+      const p=plan(modern?wave+2:wave,0,false,{...context,challengeKind:null,missionBalance:true}),factor=modern?1.3+wave*.12:1+Math.max(0,wave-2)*(context.expedition?.rulesVersion===2?.20:.12);p.wave=wave;
       for(const e of p.enemies)for(const field of ['hp','armorHp','magicHp'])if(e[field])e[field]=Math.ceil(e[field]*factor);return p;
     }
     if(context.challengeKind==='powerGrid'){
-      const p=plan(wave,0,false,{...context,challengeKind:null});
+      const p=plan(wave,0,false,{...context,challengeKind:null,missionBalance:true});
       if(wave===12){p.boss=bossProfile(15);p.maxGold+=p.boss.killGold||0;}return p;
     }
     if(context.challengeKind==='villages'){
-      const strength=wave<=12?wave+Math.floor(wave/3):16+Math.floor((wave-12)*.5),p=plan(strength,0,false,{...context,challengeKind:null}),targets=HexVillages.targets(wave);
+      const strength=wave<=12?wave+Math.floor(wave/3):16+Math.floor((wave-12)*.5),p=plan(strength,0,false,{...context,challengeKind:null,missionBalance:true}),targets=HexVillages.targets(wave);
       if(wave===12||wave===20){p.boss=bossProfile(wave===20?25:15);p.maxGold+=p.boss.killGold||0;}
       const enemies=Array.from({length:Math.ceil(p.enemies.length*(1+(targets.length-1)*.5))},(_,i)=>({...p.enemies[i%p.enemies.length]}));
       for(const e of enemies){e.hp=Math.ceil(e.hp*1.1);if(e.maxHp)e.maxHp=e.hp;if(e.armorHp)e.armorHp=Math.ceil(e.armorHp*1.25);}
@@ -91,17 +102,18 @@ const HexWaves=(()=>{
       return {...p,wave,strength,enemies,count:enemies.length,killGold,maxGold:p.maxGold-p.killGold+killGold,villageTargets:targets};
     }
     if(context.challengeKind==='detour'){
-      const strength=wave<=5?[6,10,14,16,17][Math.max(0,wave-1)]:17+Math.floor((wave-5)*.8),p=plan(strength,0,false,{...context,challengeKind:null});
+      const strength=wave<=5?[6,10,14,16,17][Math.max(0,wave-1)]:17+Math.floor((wave-5)*.8),p=plan(strength,0,false,{...context,challengeKind:null,missionBalance:true});
       for(const e of p.enemies)e.killGold=0;if(p.boss)p.boss.killGold=0;
       return {...p,wave,strength,killGold:0,completionGold:0,income:0,maxGold:0};
     }
     if(context.challengeKind==='garrison'){
-      const strength=18+Math.max(0,wave-1)*3,p=plan(strength,0,false,{...context,challengeKind:null});
+      const strength=18+Math.max(0,wave-1)*3,p=plan(strength,0,false,{...context,challengeKind:null,missionBalance:true});
       for(const enemy of p.enemies)enemy.killGold=0;if(p.boss)p.boss.killGold=0;
       return {...p,wave,killGold:0,completionGold:0,income:0,maxGold:0};
     }
     // Keep the opening approachable; growing routes/defenses need compounding pressure.
-    const count=wave===1?5:5+wave*2,hp=normalHealth(wave);
+    const mission=!!(context.challengeKind||context.challengeDay||context.missionBalance);
+    const count=wave===1?5:5+wave*2,hp=mission?missionHealth(wave):normalHealth(wave);
     const speed=(.345+Math.min(.015,Math.max(0,wave-3)*.0007))*54*Math.sqrt(3)*(wave===1?.8:1);
     const enemies=Array.from({length:count},(_,i)=>{
       const rosterIndex=i+(context.challengeDay?(context.dailyVariant||0)%60:0);
@@ -109,14 +121,14 @@ const HexWaves=(()=>{
       return {type,name:{normal:'Normal',armored:'Gepanzert',warded:'Magiegeschützt',swarm:'Schwarm'}[type],hp:type==='swarm'?Math.round(hp*.6):hp,armorHp:type==='armored'?Math.round(hp*.3):0,magicHp:type==='warded'?Math.round(hp*.25):0,speed:speed*(type==='swarm'?1.3:type==='armored'?.8:type==='warded'?.9:1)};
     });
     // A deterministic rotating roster; special enemies replace ordinary spawn slots.
-    const boss=bossProfile(wave),immunity=elementFor(wave,context);
+    const boss=bossProfile(wave,mission),immunity=elementFor(wave,context);
     const catalog=[
       [6,'shieldbearer',{name:'Schildknecht',shieldHits:3,speed:speed*.85,abilityIcon:'▣',description:'Der Schild blockiert drei Treffer vollständig, auch Flächenschaden. Jeder Treffer entfernt nur einen Schildstack.'}],
       [12,'splitter',{name:'Splittergolem',speed:speed*.75,armorHp:Math.round(hp*.35),splitOnDeath:true,description:'Zerfällt in zwei kleine Golems. Das Gold verteilt sich auf alle drei.'}],
       [13,'thornToad',{name:'Donnerkröte',abilityIcon:'↟',description:'Bewegt sich nur springend. Kann gelegentlich auf eine nahe Straße im Nachbarhex abkürzen. Verlangsamung verkürzt die Sprünge.'}],
       [17,'moltingBeetle',{name:'Häutungskäfer',speed:speed*.7,armorHp:Math.round(hp*.4),abilityIcon:'⬡',description:'Nach dem Panzerbruch dauerhaft 40 % schneller.'}],
       [18,'healer',{name:'Feldheiler',hp:Math.round(hp*.8),speed:speed*.9,healRadius:50,healInterval:3000,description:'Heilt andere Gegner im kleinen Umkreis alle 3 Sekunden um bis zu 5 % (maximal 20 + 8 je Welle). Heiler heilen einander nicht.'}],
-      [21,'tarSnail',{name:'Pechschnecke',hp:hp*2,speed:speed*.8,abilityIcon:'≈',description:'Ihre Pechspur schützt andere Gegner: 20 % weniger Schaden, ohne Verlangsamung. Feuer entzündet das Pech.'}],
+      [21,'tarSnail',{name:'Pechschnecke',hp:hp*2,speed:speed*.8,abilityIcon:'≈',description:'Ihre Pechspur schützt andere Gegner: 20 % weniger Schaden, ohne Verlangsamung.'}],
       [26,'elementCarrier',{name:'Elementträger · '+({fire:'Feuer',water:'Wasser',lightning:'Blitz'})[immunity],immunity,abilityIcon:({fire:'🔥',water:'💧',lightning:'ϟ'})[immunity],color:({fire:'#ef7449',water:'#56c5ef',lightning:'#efd557'})[immunity],description:'Immun gegen '+({fire:'Feuer',water:'Wasser',lightning:'Blitz'})[immunity]+'. Andere Schadensarten wirken normal.'+(immunity==='water'?' Wasserverlangsamung wirkt nicht; Frost-Auren wirken weiterhin.':'')}],
       [28,'mushroomColossus',{name:'Pilzkoloss',hp:Math.round(hp*1.5),speed:speed*.65,abilityIcon:'♣',description:'Hinterlässt beim Tod vier Sekunden Sporen. Gegner darin können von Türmen nicht anvisiert werden.'}],
       [38,'ramBeetle',{name:'Rammbockkäfer',hp:Math.round(hp*1.25),speed:speed*.8,abilityIcon:'»',description:'Beschleunigt auf Geraden; Kurven und Verlangsamungen bremsen. Bei vollem Tempo drei Basisschaden.'}]

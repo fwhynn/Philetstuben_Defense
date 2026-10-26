@@ -33,6 +33,12 @@ test('arsenal is visible after the first lost run while introduction remains act
  const reloaded=load({initialStorage:Object.fromEntries(storage)});reloaded.elements.get('openMainMenuBtn').listeners.click();assert.equal(reloaded.elements.get('menuArsenalBtn').classList.contains('hidden'),false);
 });
 
+test('first settled Duo run also exposes Arsenal without changing Solo records',()=>{
+ const initialProfile={version:1,introduction:{version:1,bestWave:0,skipped:false,legacy:false},records:{runsPlayed:0,highestWave:0,bossesKilled:0},duoSettledRuns:['a'.repeat(64)]};
+ const {elements}=load({initialProfile,initialStorage:{'tutorial-v1':''}});elements.get('openMainMenuBtn').listeners.click();
+ assert.equal(elements.get('menuArsenalBtn').classList.contains('hidden'),false);
+});
+
 test('mobile Hilfen button opens and closes the consumable menu on successive taps',()=>{
  const {elements}=load({compact:{small:()=>true,open(){}}});const menu=elements.get('consumableMenu'),button=elements.get('compactConsumables');menu.open=false;
  button.listeners.click();assert.equal(menu.open,true);button.listeners.click();assert.equal(menu.open,false);

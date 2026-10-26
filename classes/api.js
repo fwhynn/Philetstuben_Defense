@@ -207,6 +207,9 @@
 		// Do not adopt this revision: doing so would bless a stale local profile.
 		const probe = await fetch(`${baseUrl}/saves`, { headers: { Accept: 'application/json', ...authHeaders() }, cache: 'no-store' });
 		const remote = await parseJson(probe);
+		if (getToken() !== token) throw saveError('Account wurde inzwischen gewechselt.');
+		if (body._augmentAction && remote?.augmentProtocol !== 1) throw saveError('Augment-Käufe sind auf diesem Server noch nicht freigeschaltet.', 428);
+		if (body._augmentAction && remote?.data?._augmentReceipt?.id === body._augmentAction.requestId) { rememberRevision(token, remote.revision); return { ...remote, status: 'ok' }; }
 		if (!remote?.revision) throw saveError('Die API unterstützt noch keine sichere Cloud-Speicherung.', 428);
 		if (remote.revision !== body._baseRevision) throw saveError('Cloud-Speicherung angehalten: Ein neuerer Account-Spielstand liegt vor. Dein lokaler Stand bleibt erhalten. Bitte den Account-Spielstand laden.');
 		if (getToken() !== token) throw saveError('Account wurde inzwischen gewechselt.');
@@ -342,6 +345,11 @@
  return parseJson(response);
  }
  globalThis.HexApi = {
+ async applyDuoAugments(session,clientId){
+   assertSession();const token=getToken();
+   const response=await fetch('/lobby/augments',{method:'POST',headers:{Authorization:'Bearer '+session,'X-Duo-Client':clientId,...(token?{'X-Account-Token':token}:{})},signal:AbortSignal.timeout(10000)});
+   const payload=await parseJson(response);if(getToken()!==token)throw saveError('Account wurde inzwischen gewechselt.');return payload;
+ },
  getGreedLeaderboard:(mode,day)=>runRankingRequest('?'+new URLSearchParams({mode,day}),undefined,true),
  getRunLeaderboard:mode=>runRankingRequest('?'+new URLSearchParams({mode})),
  previewRunRanking:run=>runRankingRequest('/preview?'+new URLSearchParams({mode:run.mode,wave:run.wave,kills:run.kills,...(run.day?{day:run.day,gold:run.gold}:{})}),undefined,run.mode.startsWith('greed')),

@@ -18,6 +18,8 @@ test('defeat result and rematch survive core checkpoint; corrupt reward values a
 test('endless requires both votes, survives restart and pays only additional diamonds',t=>{
  let {store,a,b,file}=fixture(t);store.tick();const victory=store.view(a.token);const map=JSON.stringify(victory.boards[0].map);
  assert.ok(store.receive(a.token,cmd(store,a,'endless',{value:true})).ok);assert.equal(store.view(a.token).phase,'victory');
+ assert.ok(store.receive(a.token,cmd(store,a,'endless',{value:false})).ok);assert.equal(store.view(a.token).phase,'victory');assert.deepEqual(store.view(a.token).endlessVotes,[false,false]);
+ assert.ok(store.receive(a.token,cmd(store,a,'endless',{value:true})).ok);
  store=createStore(file,{now:()=>1});store.touch(a.token);store.touch(b.token);assert.deepEqual(store.view(a.token).endlessVotes,[true,false]);
  assert.ok(store.receive(a.token,cmd(store,a,'rematch',{value:true})).ok);assert.equal(store.view(a.token).endlessVotes[0],false);
  assert.ok(store.receive(a.token,cmd(store,a,'endless',{value:true})).ok);assert.equal(store.view(a.token).rematch[0],false);

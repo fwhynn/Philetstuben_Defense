@@ -8,6 +8,24 @@ function fixture(type='archer'){
 }
 const cards=env=>env.elements.get('towerUpgrades').children.filter(n=>n.className==='towerUpgradeCard');
 const button=(node,match)=>walk(node).find(n=>match(n));
+
+test('tower influences explain the run card and refresh when its tier changes',()=>{
+ const e=fixture();e.a.state.metaAugments={version:1,cards:[{id:'archer',tier:0}]};e.a.renderAll();
+ assert.match(e.elements.get('towerInfluences').innerHTML,/Jagdfieber/);assert.match(e.elements.get('towerInfluences').innerHTML,/3 %/);
+ e.a.state.metaAugments.cards[0].tier=4;e.a.renderAll();assert.match(e.elements.get('towerInfluences').innerHTML,/8 Stapel/);
+ e.a.state.metaAugments.cards=[];e.a.renderAll();assert.doesNotMatch(e.elements.get('towerInfluences').innerHTML,/Jagdfieber/);
+});
+
+test('equipped tier four marks only the matching upgrade branch and follows run unlocks',()=>{
+ const e=fixture();e.a.state.ultimateUnlocks=['ultimate:archer:volley'];e.a.renderAll();
+ const marked=()=>cards(e).filter(n=>n.classList.contains('equippedUltimatePath'));
+ assert.equal(marked().length,1);assert.ok(button(marked()[0],n=>n.id==='compare-volley'));
+ assert.match(button(marked()[0],n=>n.className==='equippedUltimateBadge').textContent,/Stufe 4 dabei/);
+ e.a.state.ultimateUnlocks=['ultimate:archer:marksman'];e.a.renderAll();assert.equal(marked().length,1);assert.ok(button(marked()[0],n=>n.id==='compare-marksman'));
+ e.tower.branch='marksman';e.tower.level=2;e.a.renderAll();assert.equal(marked().length,1);
+ e.tower.finalUpgrade='eagleEye';e.tower.level=3;e.a.renderAll();assert.equal(marked().length,1);
+ e.a.state.ultimateUnlocks=[];e.a.renderAll();assert.equal(marked().length,0);
+});
 test('variant two keeps other paths and current values visible while switching comparison',()=>{
  const e=fixture();button(cards(e)[0],n=>n.id==='compare-volley').listeners.click();
  assert.equal(cards(e).length,2);assert.equal(e.elements.get('selectedTowerInfo').classList.contains('hidden'),false);

@@ -30,7 +30,7 @@ const HexProfile=(()=>{
     for(const id of unlocked) if(active.length<5&&!active.includes(id)) active.push(id);
     active=learning?[...starters]:active.slice(0,5);
     const presets=Array.from({length:3},(_,i)=>{const item=source.loadoutPresets?.[i],ids=validIds(item?.towers||item,definitions).filter(id=>unlocked.includes(id));return {name:String(item?.name||`Preset ${i+1}`).slice(0,30),towers:ids.length===5?ids:[...active]};});
-    return {...base,...source,introduction,duoSettledRuns:Array.isArray(source.duoSettledRuns)?source.duoSettledRuns.filter(id=>typeof id==='string'&&/^[a-f0-9]{64}$/.test(id)):[],version:1,difficulty:source.difficulty==='dual'&&source.milestones?.includes('standard35')?'dual':'normal',activeHero:heroUnlocked(source,source.activeHero)?source.activeHero:'standard',diamonds:Math.max(0,Number(source.diamonds)||0),unlockedTowers:unlocked,activeLoadout:active,
+    return {...base,...source,...(typeof HexAugmentCards!=='undefined'?{augmentCards:HexAugmentCards.clean(source.augmentCards)}:{}),introduction,duoSettledRuns:Array.isArray(source.duoSettledRuns)?source.duoSettledRuns.filter(id=>typeof id==='string'&&/^[a-f0-9]{64}$/.test(id)):[],version:1,difficulty:source.difficulty==='dual'&&source.milestones?.includes('standard35')?'dual':'normal',activeHero:heroUnlocked(source,source.activeHero)?source.activeHero:'standard',diamonds:Math.max(0,Number(source.diamonds)||0),unlockedTowers:unlocked,activeLoadout:active,
       loadoutPresets:presets,unlocks:[...new Set(Array.isArray(source.unlocks)?source.unlocks:[])],milestones:Array.isArray(source.milestones)?source.milestones:[],settledRuns:Array.isArray(source.settledRuns)?source.settledRuns.slice(-100):[],
       records:{...base.records,...(source.records||{})},lifetime:{...base.lifetime,...(source.lifetime||{}),towers:{...(source.lifetime?.towers||{})}}};
   }
@@ -76,7 +76,7 @@ const HexProfile=(()=>{
     const wave=Math.max(0,Math.floor(Number(summary.wave)||0)),periodic=Math.max(0,Math.floor(Number(summary.periodicBosses)||0)),exploration=Math.max(0,Math.floor(Number(summary.explorationBosses)||0));
     const oldBest=Math.max(0,Number(clean.records.highestWave)||0);
     const towers={...clean.lifetime.towers};for(const [id,usage] of Object.entries(summary.towers||{})){const old=towers[id]||{builds:0,upgrades:0,runsUsed:0,highestWave:0};towers[id]={builds:old.builds+Math.max(0,usage.builds||0),upgrades:old.upgrades+Math.max(0,usage.upgrades||0),runsUsed:old.runsUsed+(usage.builds>0?1:0),highestWave:Math.max(old.highestWave||0,usage.builds>0?wave:0)};}
-    const next={...clean,diamonds:clean.diamonds+total,settledRuns:[...clean.settledRuns,runId].slice(-100),records:{...clean.records,highestWave:Math.max(oldBest,wave),bossesKilled:clean.records.bossesKilled+periodic+exploration,runsPlayed:clean.records.runsPlayed+1},lifetime:{...clean.lifetime,normalKills:clean.lifetime.normalKills+Math.max(0,Math.floor(Number(summary.normalKills)||0)),diamondsEarned:clean.lifetime.diamondsEarned+total,towers}};
+    const next={...clean,...(typeof HexAugmentCards!=='undefined'?{augmentCards:{...HexAugmentCards.clean(clean.augmentCards),settledBestWave:Math.max(clean.augmentCards?.settledBestWave||0,clean.augmentCards?.bestWave||0,clean.introduction?.bestWave||0)}}:{}),diamonds:clean.diamonds+total,settledRuns:[...clean.settledRuns,runId].slice(-100),records:{...clean.records,highestWave:Math.max(oldBest,wave),bossesKilled:clean.records.bossesKilled+periodic+exploration,runsPlayed:clean.records.runsPlayed+1},lifetime:{...clean.lifetime,normalKills:clean.lifetime.normalKills+Math.max(0,Math.floor(Number(summary.normalKills)||0)),diamondsEarned:clean.lifetime.diamondsEarned+total,towers}};
     return {profile:save(next,definitions),reward:{wave:waveDiamonds,bosses:bossDiamonds,milestones:milestoneDiamonds,total,duplicate:false}};
   }
   function unlockTower(profile,id,definitions){
@@ -109,7 +109,7 @@ const HexProfile=(()=>{
     if(p.unlockCosts!==undefined)numbers(p.unlockCosts);
     if(p.loadoutPresets!==undefined&&(!Array.isArray(p.loadoutPresets)||p.loadoutPresets.some(v=>!object(v)||typeof v.name!=='string'||!Array.isArray(v.towers)||v.towers.some(id=>typeof id!=='string'))))invalid();
     if(p.dailyResults!==undefined){if(!object(p.dailyResults))invalid();for(const [day,result] of Object.entries(p.dailyResults))if(!/^\d{4}-\d{2}-\d{2}$/.test(day)||!object(result)||!Number.isSafeInteger(result.best)||result.best<0||typeof result.won!=='boolean')invalid();}
-    const allowed=['version','activeHero','difficulty','diamonds','unlockedTowers','activeLoadout','loadoutPresets','unlocks','milestones','settledRuns','records','lifetime','unlockCosts','dailyResults','duoSettledRuns','activeUltimates','introduction'];
+    const allowed=['version','activeHero','difficulty','diamonds','unlockedTowers','activeLoadout','loadoutPresets','unlocks','milestones','settledRuns','records','lifetime','unlockCosts','dailyResults','duoSettledRuns','activeUltimates','introduction','augmentCards'];
     return normalize(Object.fromEntries(allowed.filter(key=>p[key]!==undefined).map(key=>[key,p[key]])),definitions);
   }
   function importFile(text,definitions){
@@ -120,7 +120,7 @@ const HexProfile=(()=>{
   }
   function learning(profile){const intro=profile.introduction;return !!intro&&!intro.legacy&&!intro.skipped&&intro.bestWave<35;}
   function modesUnlocked(profile){return !!profile.introduction?.legacy||profile.milestones?.includes('standard35')||profile.introduction?.bestWave>=35;}
-  function recordIntroduction(profile,wave,definitions){const clean=normalize(profile,definitions);if(!Number.isInteger(wave)||wave<0)return clean;return save({...clean,introduction:{...clean.introduction,bestWave:Math.max(clean.introduction.bestWave,Math.min(35,wave))}},definitions);}
+  function recordIntroduction(profile,wave,definitions){const clean=normalize(profile,definitions);if(!Number.isInteger(wave)||wave<0)return clean;return save({...clean,...(typeof HexAugmentCards!=='undefined'?{augmentCards:{...HexAugmentCards.clean(clean.augmentCards),bestWave:Math.max(clean.augmentCards?.bestWave||0,wave)}}:{}),introduction:{...clean.introduction,bestWave:Math.max(clean.introduction.bestWave,Math.min(35,wave))}},definitions);}
   function skipIntroduction(profile,definitions){const clean=normalize(profile,definitions);return save({...clean,introduction:{...clean.introduction,skipped:true}},definitions);}
   return {get storageProblem(){return storageProblem;},learning,modesUnlocked,recordIntroduction,skipIntroduction,ULTIMATE_BRANCHES,ownsUltimate,activeUltimate,runUnlocks,activateUltimate,settleDuo,heroUnlocked,exportFile,readFile,importFile,resetValue,resetUnlocks,affordableUnlocks,BUILDING_UNLOCKS,unlockBuilding,STORAGE_KEY,START_TOWERS,TOWER_UNLOCKS,ULTIMATE_UNLOCKS,defaults,normalize,load,save,setLoadout,renamePreset,savePreset,runReward,settleRun,settleDaily,unlockTower,unlockUltimate};
 })();

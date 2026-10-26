@@ -98,25 +98,80 @@ const HexCombat=(()=>{
     }
     return best;
   }
+
+  const cardValue=(s,id)=>typeof HexAugmentCards==='undefined'?0:HexAugmentCards.value(s,id);
+  const cardLevel=(s,id)=>typeof HexAugmentCards==='undefined'?-1:HexAugmentCards.level(s,id);
+  function queueEcho(state,mine){
+    const factor=cardValue(state,'mine');if(!factor)return;
+    (state.augmentEchoes??=[]).push({at:state.elapsedMs+1000,x:mine.x,y:mine.y,r:mine.splash*(cardLevel(state,'mine')===4?1.2:1),damage:mine.damage*factor,multipliers:mine.damageMultipliers,source:mine.source||{type:'mine'}});
+  }
+  // Build once per batch; keep original enemy order for shield, kill and reward semantics.
+  function echoCandidates(enemies,due){
+    const valid=e=>Number.isSafeInteger(Math.floor(e.x/128))&&Number.isSafeInteger(Math.floor(e.y/128));
+    if(due.length<4||enemies.length<32||!enemies.every(valid))return ()=>enemies;
+    const cells=new Map();enemies.forEach((enemy,order)=>{
+      const key=Math.floor(enemy.x/128)+','+Math.floor(enemy.y/128);
+      if(!cells.has(key))cells.set(key,[]);cells.get(key).push({enemy,order});
+    });
+    return echo=>{
+      if(!valid(echo)||!Number.isFinite(echo.r)||echo.r<0||echo.r>512)return enemies;
+      const x0=Math.floor((echo.x-echo.r)/128),x1=Math.floor((echo.x+echo.r)/128),y0=Math.floor((echo.y-echo.r)/128),y1=Math.floor((echo.y+echo.r)/128);
+      if(![x0,x1,y0,y1].every(Number.isSafeInteger))return enemies;
+      const near=[];for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++)for(const entry of cells.get(x+','+y)||[])near.push(entry);
+      near.sort((a,b)=>a.order-b.order);return near.map(entry=>entry.enemy);
+    };
+  }
+  function augmentTicks(state,refs,dt,time,emit){
+    const pulse=cardLevel(state,'freeze')===4&&Math.floor(time/5000)>(state.augmentPulseCycle||0);
+    if(cardLevel(state,'freeze')===4)state.augmentPulseCycle=Math.floor(time/5000);
+    const due=(state.augmentEchoes||[]).filter(e=>e.at<=time),candidates=echoCandidates(state.enemies,due);
+    for(const echo of due){
+      for(const enemy of candidates(echo))if(enemy.alive&&Math.hypot(enemy.x-echo.x,enemy.y-echo.y)<=echo.r)damageEnemy(enemy,echo.damage,{damageType:'physical',damageMultipliers:echo.multipliers,augmentSecondary:true},state,emit,echo.source);
+      state.projectiles.push({kind:'blast',x:echo.x,y:echo.y,r:echo.r,ttl:.3,max:.3,color:'#e8bc68'});
+    }
+    if(state.augmentEchoes)state.augmentEchoes=state.augmentEchoes.filter(e=>e.at>time);
+    for(const enemy of state.enemies){
+      const burn=enemy.augmentBurn;
+      if(burn){while(enemy.alive&&burn.next<=time&&burn.next<=burn.until){damageEnemy(enemy,burn.damage,{damageType:'fire',damageMultipliers:burn.multipliers,bossMultiplier:burn.bossMultiplier,augmentSecondary:true},state,emit,burn.source);burn.next+=1000;}if(time>=burn.until)delete enemy.augmentBurn;}
+      if(!enemy.alive||!cardValue(state,'freeze'))continue;
+      const inRange=refs.some(r=>r.tw.type==='freeze'&&Math.hypot(enemy.x-r.pos.x,enemy.y-r.pos.y)<=r.definition.range);
+      if(!inRange){enemy.augmentCold=0;continue;}
+      const legendary=cardLevel(state,'freeze')===4;
+      enemy.augmentCold=(enemy.augmentCold||0)+dt;
+      if(time>=(enemy.augmentFreezeReady||0)&&(legendary?pulse:enemy.augmentCold>=3)){
+        enemy.augmentFrozen=time+cardValue(state,'freeze')*1000*(enemy.type==='boss'?.5:1);
+        enemy.augmentFreezeReady=time+5000;enemy.augmentCold=0;enemy.augmentPulse=Math.floor(time/5000);
+        state.projectiles.push({kind:'blast',x:enemy.x,y:enemy.y,r:18,ttl:.25,max:.25,color:'#bceeff'});
+      }
+    }
+  }
   function damageEnemy(e,raw,def,state,emit=()=>{},source=null){
     if(!e.alive||raw<=0)return;
     const time=state.elapsedMs||0,kind=def.damageType||'physical';
-    if(kind==='fire')for(const zone of state.enemyZones||[])if(zone.kind==='tar'&&!zone.burning&&zone.until>time&&Math.hypot(e.x-zone.x,e.y-zone.y)<=zone.r){zone.burning=true;zone.until=time+3000;}
     if(e.immunity&&e.immunity===kind)return;
+    // Count actual contacts per tower, including blocked hits, but never recurse.
+    const resonance=source?.type==='element'&&!def.augmentSecondary&&cardValue(state,'element');
+    if(resonance)source.augmentResonanceHits=((source.augmentResonanceHits||0)+1)%5;
+    const echo=resonance&&source.augmentResonanceHits===0;
     // Every damaging hit consumes at most one stack, with no overflow into defenses or life.
     if(e.shieldHits>0){e.shieldHits--;return;}
     const before=durability(e);
     const resistance=Math.max(0,Math.min(.95,e.resistances?.[def.damageType]||0));
     let budget=raw*(1-resistance)*(e.type==='boss'?(def.bossMultiplier||1):1);
     // Allied tar protection never stacks and never protects its own producer.
-    if((state.enemyZones||[]).some(z=>z.kind==='tar'&&!z.burning&&z.until>time&&z.ownerId!==e.id&&Math.hypot(e.x-z.x,e.y-z.y)<=z.r))budget*=.8;
+    if((state.enemyZones||[]).some(z=>z.kind==='tar'&&z.until>time&&z.ownerId!==e.id&&Math.hypot(e.x-z.x,e.y-z.y)<=z.r))budget*=.8;
     for(const [field,kind] of [['magicHp','magic'],['armorHp','armor'],['hp','hp']]){if(budget<=0||pool(e,field)<=0)continue;const multiplier=def.damageMultipliers?.[kind]??1,amount=Math.min(pool(e,field),budget*multiplier);e[field]=pool(e,field)-amount;budget-=amount/multiplier;}
     if(e.type==='moltingBeetle'&&!e.molted&&pool(e,'armorHp')===0){e.molted=true;e.speed*=1.4;}
+    if(e.alive&&durability(e)>0&&source?.type==='flame'&&!def.augmentSecondary&&cardValue(state,'flame')){
+      const damage=raw*cardValue(state,'flame'),old=e.augmentBurn?.until>time?e.augmentBurn:null,keep=old&&old.damage>damage;
+      e.augmentBurn={damage:Math.max(damage,old?.damage||0),next:old?.next||time+1000,until:time+(cardLevel(state,'flame')===4?5000:3000),multipliers:keep?old.multipliers:def.damageMultipliers,bossMultiplier:keep?old.bossMultiplier:def.bossMultiplier,source:keep?old.source:{type:source.type,statId:source.statId,guestOwner:source.guestOwner}};
+    }
     HexData.recordTowerStat(state,source,'damage',Math.max(0,before-durability(e)));
     if(durability(e)<=1e-8&&e.alive){e.hp=e.armorHp=e.magicHp=0;e.alive=false;HexData.recordTowerStat(state,source,'kills',1);(state.soulDeaths??=[]).push({x:e.x,y:e.y});let gold=e.killGold??HexWaves.economy.kill;
       if(e.type==='mushroomColossus')(state.enemyZones??=[]).push({kind:'spores',x:e.x,y:e.y,r:65,until:time+6000});
       if(e.splitOnDeath){const childGold=Math.floor(gold/3);gold-=childGold*2;const hp=Math.max(1,Math.round(e.maxHp*.25));for(let i=0;i<2;i++)(state.splitChildren??=[]).push({id:state.nextEnemyId++,type:'shard',name:'Golemsplitter',...(e.villageId===undefined?{}:{villageId:e.villageId}),hp,maxHp:hp,armorHp:0,magicHp:0,maxArmorHp:0,maxMagicHp:0,speed:e.speed,killGold:childGold,baseDamage:1,alive:true,points:e.points,index:e.index,t:e.t,x:e.x,y:e.y});}
       if(['garrison','detour','towerDraft'].includes(state.challengeKind)||def.noKillGold)gold=0;state.gold+=gold;if(e.type==='boss'){state.goldEarned.boss=(state.goldEarned.boss||0)+gold;const landmark=state.landmarks?.get(e.landmarkId);if(landmark){landmark.status='defeated';if(typeof HexExploration!=='undefined')HexExploration.defeatGuardian(state,e.landmarkId);}if(!e.noBossReward)(state.bossRewards??=[]).push(e.landmarkId||'wave:'+state.wave);if(state.earnedMeta){if(String(e.landmarkId).startsWith('wave:'))state.earnedMeta.periodicBosses++;else state.earnedMeta.explorationBosses++;}emit('collect');}else{state.goldEarned.kills+=gold;state.waveKills++;if(state.earnedMeta)state.earnedMeta.normalKills++;emit('kill');}}
+    if(echo&&e.alive){damageEnemy(e,raw*resonance,{...def,augmentSecondary:true},state,emit,source);state.projectiles.push({kind:'blast',x:e.x,y:e.y,r:18,ttl:.25,max:.25,color:def.color||'#b8a0ff'});}
   }
   // One derived range entry per live tower; never serialized or stored on it.
   const mineRangeCache=new WeakMap();
@@ -186,7 +241,7 @@ const HexCombat=(()=>{
             }
           }
           for(const e of candidates)if(e.alive&&Math.hypot(e.x-mine.x,e.y-mine.y)<=mine.splash)damageEnemy(e,mine.damage,def,state,emit,mine.source||{type:'mine'});
-          state.projectiles.push({kind:'blast',x:mine.x,y:mine.y,r:mine.splash,ttl:.22,color:mine.color});emit('mine');removed.add(mine);dirtyCells.add(record.key);
+          state.projectiles.push({kind:'blast',x:mine.x,y:mine.y,r:mine.splash,ttl:.22,color:mine.color});queueEcho(state,mine);emit('mine');removed.add(mine);dirtyCells.add(record.key);
         }
         for(const key of dirtyCells){const bucket=index.grid.get(key).filter(r=>!hits.has(r));if(bucket.length)index.grid.set(key,bucket);else index.grid.delete(key);}
         state.mines=state.mines.filter(m=>!removed.has(m));index.count=state.mines.length;index.last=state.mines.at(-1);mineTriggerCache.set(state.mines,index);return;
@@ -221,7 +276,7 @@ const HexCombat=(()=>{
     // Capture every trigger before dealing damage: stacked mines all fire even
     // when the first one kills their shared triggering enemy.
     const triggered=new Set(grid?state.mines.filter(triggeredByEnemy):state.mines.filter(mine=>state.enemies.some(e=>e.alive&&durability(e)>0&&Math.hypot(e.x-mine.x,e.y-mine.y)<=14))),remaining=[];
-    for(const mine of state.mines){const trigger=triggered.has(mine);if(!trigger){remaining.push(mine);continue;}const def={damageType:'physical',area:true,damageMultipliers:mine.damageMultipliers};state.enemies.filter(e=>e.alive&&Math.hypot(e.x-mine.x,e.y-mine.y)<=mine.splash).forEach(e=>damageEnemy(e,mine.damage,def,state,emit,mine.source||{type:'mine'}));state.projectiles.push({kind:'blast',x:mine.x,y:mine.y,r:mine.splash,ttl:.22,color:mine.color});emit('mine');}state.mines=remaining;
+    for(const mine of state.mines){const trigger=triggered.has(mine);if(!trigger){remaining.push(mine);continue;}const def={damageType:'physical',area:true,damageMultipliers:mine.damageMultipliers};state.enemies.filter(e=>e.alive&&Math.hypot(e.x-mine.x,e.y-mine.y)<=mine.splash).forEach(e=>damageEnemy(e,mine.damage,def,state,emit,mine.source||{type:'mine'}));state.projectiles.push({kind:'blast',x:mine.x,y:mine.y,r:mine.splash,ttl:.22,color:mine.color});queueEcho(state,mine);emit('mine');}state.mines=remaining;
   }
   // Nur für die Darstellung: Kennung, Turmtyp, Trefferpositionen und Lebensdauer eines Geschosses. Der Schaden wird sofort beim Schuss verrechnet.
   const nextProjectileId=state=>state.nextProjectileId=(state.nextProjectileId||0)+1;
@@ -229,18 +284,19 @@ const HexCombat=(()=>{
   function step(state,towerRefs,definitions,dt,time,emit=()=>{}){
     state.enemyZones=(state.enemyZones||[]).filter(zone=>zone.until>time);
     for(const zone of state.enemyZones){
-      state.projectiles.push({kind:zone.kind==='spores'?'enemySpores':'enemyTar',x:zone.x,y:zone.y,r:zone.r,ttl:dt+.001,max:dt+.001,fade:Math.min(1,(zone.until-time)/1000),color:zone.burning?'#e78235':'#30291f'});
+      state.projectiles.push({kind:zone.kind==='spores'?'enemySpores':'enemyTar',x:zone.x,y:zone.y,r:zone.r,ttl:dt+.001,max:dt+.001,fade:Math.min(1,(zone.until-time)/1000),color:'#30291f'});
     }
     // Tick-local values: upgrades and support/biome changes apply on the next step.
-    towerRefs=towerRefs.map(ref=>{if(ref.tw.overloadPending){delete ref.tw.overloadPending;ref.tw.overloadUntil=time+(ref.tw.overloadDuration??12000);}const definition={...(ref.definition||HexData.towerDefinition(ref.tw,definitions))};if(ref.tw.overloadUntil>time)definition.cooldown/=1.5;return {...ref,definition};});
+    towerRefs=towerRefs.map(ref=>{if(ref.tw.overloadPending){delete ref.tw.overloadPending;ref.tw.overloadUntil=time+(ref.tw.overloadDuration??12000);}let definition={...(ref.definition||HexData.towerDefinition(ref.tw,definitions))};if(typeof HexAugmentCards!=='undefined')definition=HexAugmentCards.definition(state,ref.tw,definition);if(ref.tw.overloadUntil>time)definition.cooldown/=1.5;return {...ref,definition};});
     state.soulDeaths=[];
+    augmentTicks(state,towerRefs,dt,time,emit);
     applyConsumables(state,time,emit);
     const auraRefs=towerRefs.filter(ref=>ref.definition.aura);
     // Movement finishes before targeting. Only path distance is shared: health,
     // armor and magic values must stay live between consecutive tower hits.
     const pathDistances=new Map();
     const targetDistance=e=>{if(!pathDistances.has(e))pathDistances.set(e,remainingDistance(e));return pathDistances.get(e);};
-    const TOWERS=definitions;state.mines??=[];const arrive=e=>{e.alive=false;let damage=e.type==='ramBeetle'&&e.charge>=.95?3:(e.baseDamage??1);if(damage>0&&state.augments?.includes('seal')&&state.sealWave!==state.wave){state.sealWave=state.wave;damage--;}if(damage>0&&state.merchantProtectionWave===state.wave&&state.merchantProtection>0){const blocked=Math.min(damage,state.merchantProtection);state.merchantProtection-=blocked;damage-=blocked;}if(state.challengeKind==='villages')HexVillages.damage(state,e.villageId,damage);else state.hp-=damage;if(e.goldLoss)state.gold=Math.max(0,state.gold-e.goldLoss);const landmark=state.landmarks?.get(e.landmarkId);if(landmark)landmark.status='escaped';emit('hit');};
+    const TOWERS=definitions;state.mines??=[];const arrive=e=>{e.alive=false;let damage=e.type==='ramBeetle'&&e.charge>=.95?3:(e.baseDamage??1);if(damage>0&&state.augments?.includes('seal')&&state.sealWave!==state.wave){state.sealWave=state.wave;damage--;}if(damage>0&&state.merchantProtectionWave===state.wave&&state.merchantProtection>0){const blocked=Math.min(damage,state.merchantProtection);state.merchantProtection-=blocked;damage-=blocked;}if(cardValue(state,'base')&&!state.augmentBaseUsed&&state.hp-damage<=(state.maxHp||20)*.25){state.augmentBaseUsed=true;state.augmentBaseUntil=time+cardValue(state,'base')*1000;if(cardLevel(state,'base')===4)state.hp=Math.min(state.maxHp||20,state.hp+2);}else if(state.augmentBaseUntil>time)damage=0;if(state.challengeKind==='villages')HexVillages.damage(state,e.villageId,damage);else state.hp-=damage;if(e.goldLoss)state.gold=Math.max(0,state.gold-e.goldLoss);const landmark=state.landmarks?.get(e.landmarkId);if(landmark)landmark.status='escaped';emit('hit');};
     for(const e of state.enemies){if(!e.alive)continue;if(e.index>=e.points.length-1){arrive(e);continue;}e.slowEffects=(e.slowEffects||[]).filter(effect=>effect.until>time);e.slowFactor=Math.min(1,...e.slowEffects.map(effect=>effect.factor));for(const ref of auraRefs){const def=ref.definition;if(Math.hypot(e.x-ref.pos.x,e.y-ref.pos.y)<=def.range)e.slowFactor=Math.min(e.slowFactor,def.slow);}e.slowFactor=Math.max(e.minSpeedFactor||0,e.slowFactor);const terrainSpeed=typeof HexBiomes!=='undefined'&&state.biomeSeed!=null&&HexBiomes.atWorld(state,e.x,e.y)==='desert'?.85:1;
       const slowResistance=Math.max(0,Math.min(1,e.slowResistance||0));
       e.spawnedAt??=time;const age=Math.max(0,time-e.spawnedAt),cycle=age%4000;let motion=1;
@@ -249,18 +305,17 @@ const HexCombat=(()=>{
         if(!e.shortcutFlight&&e.leaping&&e.lastHop!==hop){e.lastHop=hop;e.shortcutJump=false;if(hop%4===3)toadShortcut(state,e,HexMap.HEX*Math.sqrt(3)*e.slowFactor);}
       }
       if(e.type==='ramBeetle'){e.charge=straightSegment(e)&&e.slowFactor>=.95?Math.min(1,(e.charge||0)+dt/1.5):0;motion=1+e.charge;}
+      if(e.augmentFrozen>time){if(e.shortcutFlight)e.shortcutFlight.start+=dt*1000;continue;}
       if(e.shortcutFlight){const f=e.shortcutFlight,u=Math.min(1,Math.max(0,(time-f.start)/700));e.leaping=u<1;e.crouching=false;e.leapProgress=u;e.x=f.from.x+(f.to.x-f.from.x)*u;e.y=f.from.y+(f.to.y-f.from.y)*u;e.t=u;if(u===1){e.index=1;e.t=0;delete e.shortcutFlight;}continue;}
-      if(motion===0)continue;
+      if(motion===0||e.augmentFrozen>time)continue;
       let distance=e.speed*dt*motion*(1-(1-e.slowFactor*terrainSpeed)*(1-slowResistance));while(e.index<e.points.length-1){const a=e.points[e.index],b=e.points[e.index+1],length=b.tunnel?0:Math.hypot(b.x-a.x,b.y-a.y),remaining=length*(1-e.t);if(length>0&&distance<remaining){e.t+=distance/length;break;}distance-=remaining;e.t=0;
         if(e.type==='ramBeetle'&&e.points[e.index+2]&&!straightSegment({...e,index:e.index+1})){distance/=1+(e.charge||0);e.charge=0;}
         e.index++;if(e.index>=e.points.length-1){arrive(e);break;}}if(e.alive){const a=e.points[e.index],b=e.points[e.index+1];e.x=a.x+(b.x-a.x)*e.t;e.y=a.y+(b.y-a.y)*e.t;}}
     for(const e of state.enemies){
       if(!e.alive)continue;
       if(e.type==='tarSnail'&&(!e.lastTar||Math.hypot(e.x-e.lastTar.x,e.y-e.lastTar.y)>=18)){
-        e.lastTar={x:e.x,y:e.y};state.enemyZones.push({kind:'tar',ownerId:e.id,x:e.x,y:e.y,r:12,until:time+5000,damage:e.maxHp*.007});
+        e.lastTar={x:e.x,y:e.y};state.enemyZones.push({kind:'tar',ownerId:e.id,x:e.x,y:e.y,r:12,until:time+5000});
       }
-      const burning=state.enemyZones.filter(z=>z.kind==='tar'&&z.burning&&Math.hypot(e.x-z.x,e.y-z.y)<=z.r);
-      if(burning.length)damageEnemy(e,Math.max(...burning.map(z=>z.damage))*dt,{damageType:'fire',area:true},state,emit);
     }
     for(const healer of state.enemies){
       if(!healer.alive||!healer.healInterval)continue;
@@ -270,10 +325,18 @@ const HexCombat=(()=>{
     }
     triggerMines(state,emit);state.enemies=state.enemies.filter(e=>e.alive&&durability(e)>0);
     const mineLayout={}; // Shared lazily by all mine layers in this simulation step.
-    for(const ref of towerRefs){const def=ref.definition||HexData.towerDefinition(ref.tw,TOWERS);if(def.aura)continue;if(def.mine){layMine(state,ref,def,time,mineLayout);continue;}if(time-ref.tw.lastShot<def.cooldown*1000)continue;const inRange=state.enemies.filter(e=>e.alive&&durability(e)>0&&!hiddenBySpores(state,e)&&(!e.immunity||e.immunity!==def.damageType)&&Math.hypot(e.x-ref.pos.x,e.y-ref.pos.y)<=def.range);if(!inRange.length)continue;const primary=targetByPriority(inRange,ref.tw,ref.pos,targetDistance);ref.tw.lastShot=time;ref.tw.aim={x:primary.x,y:primary.y,time};emit(ref.tw.type);
+    for(const ref of towerRefs){const def=ref.definition||HexData.towerDefinition(ref.tw,TOWERS);if(def.aura)continue;if(def.mine){layMine(state,ref,def,time,mineLayout);continue;}if(time-ref.tw.lastShot<def.cooldown*1000)continue;const inRange=state.enemies.filter(e=>e.alive&&durability(e)>0&&!hiddenBySpores(state,e)&&(!e.immunity||e.immunity!==def.damageType)&&Math.hypot(e.x-ref.pos.x,e.y-ref.pos.y)<=def.range);if(!inRange.length)continue;const primary=targetByPriority(inRange,ref.tw,ref.pos,targetDistance);if(ref.tw.type==='archer'&&cardValue(state,'archer')){
+        const max=cardLevel(state,'archer')===4?8:5,streak=Math.min(max,ref.tw.augmentStreak||0);
+        if(ref.tw.augmentTarget!==primary.id){
+          // The previous target's haste must not accelerate the first shot at a new target.
+          def.cooldown*=1+streak*cardValue(state,'archer');ref.tw.augmentStreak=0;
+          if(time-ref.tw.lastShot<def.cooldown*1000)continue;
+          ref.tw.augmentTarget=primary.id;
+        }else ref.tw.augmentStreak=Math.min(max,streak+1);
+      }if(cardValue(state,'ballista')&&ref.tw.type==='ballista')ref.tw.augmentShots=(ref.tw.augmentShots||0)+1;ref.tw.lastShot=time;ref.tw.aim={x:primary.x,y:primary.y,time};emit(ref.tw.type);
       if(def.chain){const hit=[primary];while(hit.length<def.chain){const last=hit.at(-1),next=nextChainTarget(state.enemies,hit,last,def.jumpRange,def.damageType,state);if(!next)break;hit.push(next);}hit.forEach((e,i)=>damageEnemy(e,def.damage*Math.max(.25,1-i*.18),def,state,emit,ref.tw));state.projectiles.push({kind:'chain',pts:[ref.pos,...hit.map(e=>({x:e.x,y:e.y}))],ttl:.24,max:.24,color:def.color,tower:ref.tw.type,id:nextProjectileId(state),hits:hit.map(e=>e.id),hitAt:hit.map(e=>({x:e.x,y:e.y}))});}
       else if(def.pierce){const vx=primary.x-ref.pos.x,vy=primary.y-ref.pos.y,mag=Math.hypot(vx,vy)||1,ux=vx/mag,uy=vy/mag,hit=[];for(const e of state.enemies){if(!e.alive||durability(e)<=0||(e.immunity&&e.immunity===def.damageType))continue;const ex=e.x-ref.pos.x,ey=e.y-ref.pos.y,along=ex*ux+ey*uy,perp=Math.abs(ex*uy-ey*ux);if(along>0&&along<def.range&&perp<20)hit.push({enemy:e,along});}const struck=hit.sort((a,b)=>a.along-b.along).slice(0,def.pierceTargets||3);struck.forEach(({enemy})=>damageEnemy(enemy,def.damage,def,state,emit,ref.tw));state.projectiles.push({kind:'line',x1:ref.pos.x,y1:ref.pos.y,x2:ref.pos.x+ux*def.range,y2:ref.pos.y+uy*def.range,ttl:.38,max:.38,color:def.color,tower:ref.tw.type,variant:ref.tw.branch,id:nextProjectileId(state),hits:struck.map(h=>h.enemy.id),hitAt:struck.map(h=>({x:h.enemy.x,y:h.enemy.y,along:h.along/def.range}))});}
-      else{const hit=def.splash?state.enemies.filter(e=>e.alive&&Math.hypot(e.x-primary.x,e.y-primary.y)<=def.splash):[primary];const life=FLIGHT_TTL[ref.tw.type]||.1;hit.forEach(e=>{damageEnemy(e,def.damage,def,state,emit,ref.tw);if(e.alive&&def.hitSlow&&e.immunity!==def.damageType){e.slowEffects??=[];const effect=e.slowEffects.find(item=>item.factor===def.hitSlow);if(effect)effect.until=time+def.slowDuration*1000;else e.slowEffects.push({factor:def.hitSlow,until:time+def.slowDuration*1000});}});state.projectiles.push({kind:'line',x1:ref.pos.x,y1:ref.pos.y,x2:primary.x,y2:primary.y,ttl:life,max:life,color:def.color,tower:ref.tw.type,variant:ref.tw.branch,splash:def.splash,id:nextProjectileId(state),hits:hit.map(e=>e.id),hitAt:[{x:primary.x,y:primary.y}]});}
+      else{const hit=def.splash?state.enemies.filter(e=>e.alive&&Math.hypot(e.x-primary.x,e.y-primary.y)<=def.splash):[primary];if(ref.tw.type==='catapult'&&cardValue(state,'catapult')){const radius=(def.splash||0)+(cardLevel(state,'catapult')===4?60:35);for(const e of state.enemies)if(e.alive&&Math.hypot(e.x-primary.x,e.y-primary.y)>(def.splash||0)&&Math.hypot(e.x-primary.x,e.y-primary.y)<=radius)damageEnemy(e,def.damage*cardValue(state,'catapult'),{...def,augmentSecondary:true},state,emit,ref.tw);state.projectiles.push({kind:'blast',x:primary.x,y:primary.y,r:radius,ttl:.2,max:.2,color:'#ddbd80'});}const life=FLIGHT_TTL[ref.tw.type]||.1;hit.forEach(e=>{damageEnemy(e,def.damage,def,state,emit,ref.tw);if(e.alive&&def.hitSlow&&e.immunity!==def.damageType){e.slowEffects??=[];const effect=e.slowEffects.find(item=>item.factor===def.hitSlow);if(effect)effect.until=time+def.slowDuration*1000;else e.slowEffects.push({factor:def.hitSlow,until:time+def.slowDuration*1000});}});state.projectiles.push({kind:'line',x1:ref.pos.x,y1:ref.pos.y,x2:primary.x,y2:primary.y,ttl:life,max:life,color:def.color,tower:ref.tw.type,variant:ref.tw.branch,splash:def.splash,id:nextProjectileId(state),hits:hit.map(e=>e.id),hitAt:[{x:primary.x,y:primary.y}]});}
     }
     // Geister gehören ihrem Turm, blockieren keine Wege und verschwinden am Wave-Ende.
     const necromancers=towerRefs.map(ref=>({...ref,def:ref.definition||HexData.towerDefinition(ref.tw,TOWERS)})).filter(ref=>ref.def.soulLimit);

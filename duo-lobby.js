@@ -18,9 +18,11 @@
    const own=next.lobbyState?.loadouts?.[next.player]||next.boards[next.player].loadout||[],partner=next.lobbyState?.loadouts?.[1-next.player]||[];
    const key=own.join('|');if(key!==loadoutKey||!draftLoadout){loadoutKey=key;draftLoadout=[...own];}
    const ready=!!next.lobbyState?.ready?.[next.player],available=new Set(['archer','catapult','chain','freeze','mine',...HexProfile.load(HexData.TOWERS).unlockedTowers||[],...own]);
-   const dirty=draftLoadout.join('|')!==key,renderKey=JSON.stringify([draftLoadout,partner,savingLoadout,next.lobby.players,dirty,ready,[...available]]);
+   const dirty=draftLoadout.join('|')!==key,renderKey=JSON.stringify([draftLoadout,partner,savingLoadout,next.lobby.players,dirty,ready,next.lobbyState?.augments,[...available]]);
    $('lobbyApplyLoadout').disabled=savingLoadout||ready||draftLoadout.length!==5||!dirty;
    if(renderKey===loadoutRenderKey)return;loadoutRenderKey=renderKey;
+   const labels=(next.lobbyState?.augments||[[],[]]).map(cards=>cards.length?cards.map(c=>HexAugmentCards.catalog[c.id].name+' · '+HexAugmentCards.rarities[c.tier]).join(' · '):'Keine Augments');
+   $('lobbyAugments').textContent='Deine Augments: '+labels[next.player]+' | Partner: '+labels[1-next.player]+'. Beim Bereitmelden wird deine Account-Auswahl übernommen. Gäste spielen ohne Account-Augments.';
    $('lobbyLoadoutCount').textContent=draftLoadout.length+'/5';$('lobbyLoadoutChoices').replaceChildren();$('lobbyPartnerLoadout').replaceChildren();
    function tower(id,selected,interactive){const def=HexData.TOWERS[id],button=document.createElement(interactive?'button':'div');button.className='lobbyTowerChoice';button.innerHTML=HexArsenal.icon(id,def.color);const name=document.createElement('span');name.textContent=def.name+(interactive&&!available.has(id)?' · Gesperrt':'');button.appendChild(name);if(interactive){button.type='button';button.setAttribute('aria-pressed',String(selected));button.disabled=savingLoadout||ready||!available.has(id)||(!selected&&draftLoadout.length>=5);button.addEventListener('click',()=>{draftLoadout=selected?draftLoadout.filter(t=>t!==id):[...draftLoadout,id];renderLoadouts(view);$('lobbyReady').disabled=true;});}return button;}
    for(const id of Object.keys(HexData.TOWERS))$('lobbyLoadoutChoices').appendChild(tower(id,draftLoadout.includes(id),true));
@@ -48,7 +50,11 @@
  // Expired or removed rooms answer 401 forever; drop the stale link instead of retrying.
  function closed(token){client?.stop();client=null;view=null;if(localStorage.getItem('autohex-duo-session')===token)localStorage.removeItem('autohex-duo-session');$('resumeDuo')?.remove();history.replaceState(null,'',location.pathname);$('waitingLobby').hidden=true;$('lobbyEntry').hidden=false;notice('Diese Duo-Lobby existiert nicht mehr oder ist abgelaufen.');}
  $('lobbyApplyLoadout').addEventListener('click',async()=>{if(!client||!view||savingLoadout||draftLoadout?.length!==5)return;savingLoadout=true;renderLoadouts(view);try{await client.send('lobbyLoadout',{towers:[...draftLoadout]});notice('Turmauswahl übernommen. Melde dich anschließend erneut bereit.');}catch(e){notice(e.message);}finally{savingLoadout=false;show(view);}});
- $('lobbyReady').addEventListener('click',async()=>{if(!view)return;try{await client.send('lobbyReady',{value:!view.lobbyState.ready[view.player]});}catch(error){notice(error.message);}});
+ $('lobbyReady').addEventListener('click',async()=>{
+   if(!view||savingLoadout)return;const ready=!view.lobbyState.ready[view.player];savingLoadout=true;show(view);
+   try{if(ready){const token=localStorage.getItem('autohex-duo-session')||new URLSearchParams(location.hash.slice(1)).get('session'),clientId=sessionStorage.getItem('autohex-duo-client:'+token);await HexApi.applyDuoAugments(token,clientId);}await client.send('lobbyReady',{value:ready});}
+   catch(error){notice(error.message);}finally{savingLoadout=false;show(view);}
+ });
  $('lobbyTakeover').addEventListener('click',()=>client.takeover().catch(e=>notice(e.message)));
  $('lobbyLeave').addEventListener('click',async()=>{try{await client.leave();localStorage.removeItem('autohex-duo-session');location.replace('/duo-lobby.html');}catch(e){notice(e.message);}});
  $('copyInvite').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('invite').value);notice('Einladungslink kopiert – schick ihn jetzt deinem Partner.');$('copyInvite').textContent='Kopiert ✓';setTimeout(()=>$('copyInvite').textContent='Link kopieren',2000);}catch{$('invite').select();notice('Link markieren und kopieren.');}});

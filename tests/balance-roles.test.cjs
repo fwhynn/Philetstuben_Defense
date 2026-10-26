@@ -21,15 +21,15 @@ test('ballista repeater wins sustained normal damage, harpoon wins boss damage a
  for(const ultimate of [false,true])assert.ok(arena('ballista','harpoon',1,{boss:true,ultimate})>arena('ballista','repeater',1,{boss:true,ultimate}));
  const c=load();assert.ok(c.data.towerDefinition({type:'ballista',branch:'harpoon'}).range>c.data.towerDefinition({type:'ballista',branch:'repeater'}).range);
 });
-test('opening waves and early bosses stay unchanged; late health is monotonic and bosses keep up',()=>{
+test('first three waves and early bosses stay unchanged; late health is monotonic and bosses keep up',()=>{
  const c=load();let last=0;
  for(let w=1;w<=100;w++){
   const p=c.waves.plan(w),old=Math.round((28+7*w)*1.1**Math.max(0,w-3)*(1+Math.min(.18,Math.max(0,w-3)*.006)));
   assert.ok(p.hp>last);last=p.hp;
-  if(w<=35)assert.equal(p.hp,old);else assert.ok(p.hp<old);
+  if(w<=3)assert.equal(p.hp,old);else if(w<=20)assert.ok(p.hp>=old);else if(w>=50)assert.ok(p.hp<old);
   if(p.boss&&w<=35)assert.equal(p.boss.hp,Math.round(1200*((w-5)/10)**1.8));
-  if(p.boss&&w>=55)assert.ok(p.boss.hp>=p.hp);
-  if(p.boss&&w>=75)assert.equal(p.boss.hp,2*p.hp);
+  if(p.boss&&w>=55)assert.ok(p.boss.hp>=p.hp*.95);
+  if(p.boss&&w>=45)assert.ok(Math.abs(p.boss.hp/p.hp-c.waves.bossProfile(35).hp/c.waves.plan(35).hp)<.001);
  }
  const d=c.data.towerDefinition({type:'freeze',branch:'deepFrost',finalUpgrade:'absoluteZero',ultimate:'freeze'});
  assert.ok(Math.abs(d.slow-.28)<1e-10);

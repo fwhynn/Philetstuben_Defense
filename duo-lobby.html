@@ -35,7 +35,7 @@
   <div id="seatFriend" class="lobbySeat" data-state="open"><span class="lobbyAvatar">P</span><div><strong>Dein Partner</strong><p id="friendReady">Wartet auf Beitritt …</p></div></div>
  </div>
  <section class="lobbyLoadouts" aria-label="Turmauswahl">
-  <div><h2>Deine Turmauswahl <span id="lobbyLoadoutCount"></span></h2><p>Wähle fünf Türme für diese Duo-Partie. Änderungen heben deine Bereitschaft auf.</p><div id="lobbyLoadoutChoices" class="lobbyTowerChoices"></div><button id="lobbyApplyLoadout" type="button">Turmauswahl übernehmen</button></div>
+  <div><h2>Deine Turmauswahl <span id="lobbyLoadoutCount"></span></h2><p>Wähle fünf Türme für diese Duo-Partie. Änderungen heben deine Bereitschaft auf.</p><div id="lobbyLoadoutChoices" class="lobbyTowerChoices"></div><p id="lobbyAugments" role="status"></p><button id="lobbyApplyLoadout" type="button">Turmauswahl übernehmen</button></div>
   <div><h2>Turmauswahl deines Partners</h2><div id="lobbyPartnerLoadout" class="lobbyTowerChoices"></div></div>
  </section>
  <button id="lobbyReady" class="lobbyPrimary" disabled>Bereit</button>
@@ -45,6 +45,6 @@
 <p id="status" role="status" class="lobbyStatus"></p>
 <p class="lobbyFoot">Freunde-Beta: Zwei getrennte Browser oder Geräte nutzen. Die Partie wird auf dem Server gespeichert. Diamanten werden nach dem gemeinsamen Abschluss deinem lokalen Spielstand gutgeschrieben.</p>
 </main>
-<script src="runtime-config.js?v=3983d35af7833e8b"></script><script src="classes/api.js?v=3983d35af7833e8b"></script><script src="classes/local-store.js?v=3983d35af7833e8b"></script><script src="classes/biomes.js?v=3983d35af7833e8b"></script><script src="classes/data.js?v=3983d35af7833e8b"></script><script src="classes/arsenal.js?v=3983d35af7833e8b"></script><script src="classes/profile.js?v=3983d35af7833e8b"></script><script src="/socket.io/socket.io.js"></script><script src="duo-client.js?v=3983d35af7833e8b"></script><script src="duo-lobby.js?v=3983d35af7833e8b"></script><script src="classes/site-visit.js?v=3983d35af7833e8b"></script>
+<script src="runtime-config.js?v=3983d35af7833e8b"></script><script src="classes/api.js?v=3983d35af7833e8b"></script><script src="classes/local-store.js?v=3983d35af7833e8b"></script><script src="classes/biomes.js?v=3983d35af7833e8b"></script><script src="classes/data.js?v=3983d35af7833e8b"></script><script src="classes/arsenal.js?v=3983d35af7833e8b"></script><script src="classes/augment-cards.js"></script><script src="classes/profile.js?v=3983d35af7833e8b"></script><script src="/socket.io/socket.io.js"></script><script src="duo-client.js?v=3983d35af7833e8b"></script><script src="duo-lobby.js?v=3983d35af7833e8b"></script><script src="classes/site-visit.js?v=3983d35af7833e8b"></script>
 </body>
 </html>

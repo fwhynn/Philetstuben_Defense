@@ -3,11 +3,11 @@
   "checks": {
     "test_database_integration": {
       "status": "passed",
-      "evidence": "2026-10-24: 83 real database checks passed in namespaced test fixtures, including Greed table backup/migration/restore, Composer rollout and worker. Original test save/stat/leaderboard checksums unchanged. 18 additional Greed endpoint checks passed in temporary tables."
+      "evidence": "2026-10-24: 83 real database checks passed in namespaced test fixtures, including Greed table backup/migration/restore, Composer rollout and worker. Original test save/stat/leaderboard checksums unchanged. 18 additional Greed endpoint checks passed in temporary tables. 2026-10-26: 112 real database checks passed, including augment purchase/fusion/equip, locking, idempotent retries, archive rollback, worker recovery and unchanged original table inventory/checksums after fixture cleanup."
     },
     "automatic_rollout": {
       "status": "passed",
-      "evidence": "2026-10-24: Actual Composer hook and HTTP readiness/maintenance/retry passed in isolated deployment fixtures with four additive migrations. Existing records preserved."
+      "evidence": "2026-10-24: Actual Composer hook and HTTP readiness/maintenance/retry passed in isolated deployment fixtures with four additive migrations. Existing records preserved. 2026-10-26: Repeated rollout with augment-bearing saves, actual Composer hook, HTTP readiness and failure recovery passed in isolated fixtures; no production rollout performed."
     },
     "production_backup": {
       "status": "enforced_on_deploy",

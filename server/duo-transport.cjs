@@ -10,7 +10,7 @@ function clientAddress(req, trustProxy) {
   const real = String(req.headers['x-real-ip'] || '').trim(), forwarded = String(req.headers['x-forwarded-for'] || '').split(',').map(part => part.trim()).filter(Boolean);
   return real || forwarded[forwarded.length - 1] || socket;
 }
-function createTransport(room, { browser = false, autoTick = false, publicOrigin = null, liveSecret = null, visits = null, verifyAdmin = null, trustProxy = false, rankingOptions = {} } = {}) {
+function createTransport(room, { browser = false, autoTick = false, publicOrigin = null, liveSecret = null, visits = null, verifyAdmin = null, trustProxy = false, rankingOptions = {}, loadAugmentProfile = null } = {}) {
   const rankings = require('./leaderboard-http.cjs').createLeaderboardHandler(rankingOptions);
   let closing = false; const attempts = new Map();
   const server = http.createServer(async (req, res) => {
@@ -49,6 +49,22 @@ function createTransport(room, { browser = false, autoTick = false, publicOrigin
     const token = req.headers.authorization?.replace(/^Bearer /, '');
     if (room.healthy === false) return send(503, { error: 'storage-unavailable' });
     if (req.method === 'GET' && req.url === '/results' && room.receipts) { const receipts = room.receipts(token); return receipts ? send(200, { receipts }) : send(401, { error: 'unauthorized' }); }
+    if(req.method==='POST'&&req.url==='/lobby/augments') {
+      if(!token||!room.hasSeat?.(token))return send(401,{error:'unauthorized'});
+      const clientId=req.headers['x-duo-client'],access=room.claim?.(token,clientId);
+      if(access&&!access.ok)return send(409,{error:access.reason});
+      const key='augments:'+token,now=Date.now();
+      if(now-(attempts.get(key)?.at||0)<1000)return send(429,{error:'rate-limit'});
+      attempts.set(key,{at:now,count:1});
+      const accountToken=req.headers['x-account-token'];
+      try {
+        if(accountToken&&typeof loadAugmentProfile!=='function')return send(503,{error:'Augments sind auf diesem Duo-Server noch nicht verfügbar.'});
+        const profile=accountToken?await loadAugmentProfile(accountToken):null;
+        if(closing)return send(503,{error:'server-restarting'});
+        const accessAfter=room.claim?.(token,clientId);if(accessAfter&&!accessAfter.ok)return send(409,{error:accessAfter.reason});
+        const result=room.applyAugments(token,profile);return send(result.ok?200:409,result);
+      }catch{return send(503,{error:'Account-Augments konnten nicht geladen werden. Bitte erneut versuchen.'});}
+    }
     const lobbyAction = req.method === 'POST' && room.create && ['/lobby/create', '/lobby/join'].includes(req.url);
     if (!lobbyAction && (!token || !(room.hasSeat?room.hasSeat(token):room.view(token)))) return send(401, { error: 'unauthorized' });
     if (lobbyAction) { const ip = req.socket.remoteAddress, time = Date.now(), old = attempts.get(ip); if (!old || time - old.at > 60000) attempts.set(ip, { at: time, count: 1 }); else if (++old.count > 20) return send(429, { error: 'rate-limit' }); if (attempts.size > 1024) for (const [key, value] of attempts) if (time - value.at > 60000) attempts.delete(key); }

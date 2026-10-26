@@ -23,12 +23,13 @@ const HexRunRuntime=(()=>{
     }
     return entry.plan;
   }
-  function create({seed,runId,loadout,unlocks=[],heroId='standard',difficulty='normal',challengeDay=null,introduction=null}){
+  function create({seed,runId,loadout,unlocks=[],heroId='standard',difficulty='normal',challengeDay=null,introduction=null,metaAugments=null}){
     if(typeof seed!=='string'||!seed||typeof runId!=='string'||!runId)throw new Error('Seed and run ID required');
     const learning=!!introduction&&!introduction.skipped&&!introduction.legacy&&(introduction.bestWave||0)<35&&!challengeDay;
     if(!Array.isArray(loadout)||(!learning&&loadout.length!==5)||(learning&&(loadout.length<2||loadout.length>5))||new Set(loadout).size!==loadout.length||loadout.some(id=>!Object.hasOwn(HexData.TOWERS,id)))throw new Error('Invalid run loadout');
     if(challengeDay){difficulty='dual';heroId='standard';}
     const state={hp:20,gold:HexWaves.economy.startGold,wave:0,goldEarned:{kills:0,completion:0,income:0},waveKills:0,map:new Map(),deck:['straight','straight','smallCurve','bigCurve','tee'],drawPile:[],discard:[],hand:[],phase:'place',enemies:[],mines:[],projectiles:[],waveRunning:false,bossRewards:[],towerLoadout:[...loadout],buildingUnlocks:unlocks.filter(id=>id.startsWith('building:')),ultimateUnlocks:unlocks.filter(id=>id.startsWith('ultimate:')),runTowerStats:{},runTowerDetails:{},nextTowerStatId:0,runId,earnedMeta:{normalKills:0,periodicBosses:0,explorationBosses:0},metaSettled:false,income:0,nextEnemyId:1,pendingSpawns:0,elapsedMs:0,spawnQueue:[],seed,challengeDay,biomeLayoutVersion:2,biomeSeed:challengeDay?null:seed};
+    if(!challengeDay&&metaAugments){if(metaAugments.version!==1||!Array.isArray(metaAugments.cards)||metaAugments.cards.length>5||new Set(metaAugments.cards.map(c=>c.id)).size!==metaAugments.cards.length||metaAugments.cards.some(c=>!HexAugmentCards.catalog[c.id]||!Number.isInteger(c.tier)||c.tier<0||c.tier>4))throw Error('Invalid augment loadout');state.metaAugments=JSON.parse(JSON.stringify(metaAugments));}
     if(learning){state.introduction={bestWave:Math.max(0,introduction.bestWave||0),notices:[],biomeUnlocked:introduction.bestWave>=20};state.towerLoadout=HexData.INTRO_TOWERS.filter(t=>t.wave<=state.introduction.bestWave).map(t=>t.id);}
     if(challengeDay){state.deck=['straight','straight','longRoad','treasury','village'];state.ultimateUnlocks=[];state.buildingUnlocks=[];state.towerLoadout=['archer','ballista','catapult','mine','freeze'];}
     state.difficulty=difficulty==='dual'?'dual':'normal';state.openingRemaining=state.difficulty==='dual'?2:0;

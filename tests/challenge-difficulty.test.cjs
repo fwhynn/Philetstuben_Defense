@@ -3,13 +3,13 @@ const json=x=>JSON.parse(JSON.stringify(x));
 test('late draft and fortress pressure grows smoothly without extra gold, speed or tougher opening waves',()=>{
  const c=core();
  for(const kind of ['towerDraft','movingFortress'])for(let wave=1;wave<=12;wave++){
-  const normal=c.waves.plan(wave),p=c.waves.plan(wave,0,false,{challengeKind:kind}),factor=1+Math.max(0,wave-3)*(kind==='towerDraft'?.10:.08);
+  const normal=c.waves.plan(wave,0,false,{missionBalance:true}),p=c.waves.plan(wave,0,false,{challengeKind:kind}),factor=1+Math.max(0,wave-3)*(kind==='towerDraft'?.10:.08);
   assert.equal(p.count,normal.count);assert.equal(p.maxGold,normal.maxGold);assert.equal(p.wave,wave);
   for(let i=0;i<p.enemies.length;i++){assert.equal(p.enemies[i].speed,normal.enemies[i].speed);for(const field of ['hp','armorHp','magicHp'])if(normal.enemies[i][field])assert.equal(p.enemies[i][field],Math.ceil(normal.enemies[i][field]*factor));}
  }
 });
 test('village armor increase changes the actual armor health pool',()=>{
- const c=core(),p=c.waves.plan(4,0,false,{challengeKind:'villages'}),normal=c.waves.plan(5);
+ const c=core(),p=c.waves.plan(4,0,false,{challengeKind:'villages'}),normal=c.waves.plan(5,0,false,{missionBalance:true});
  assert.ok(p.enemies.some(e=>e.armorHp>0));for(let i=0;i<p.enemies.length;i++)if(normal.enemies[i].armorHp)assert.equal(p.enemies[i].armorHp,Math.ceil(normal.enemies[i].armorHp*1.25));
 });
 test('all practice missions expose the victory target and actionable rules',()=>{

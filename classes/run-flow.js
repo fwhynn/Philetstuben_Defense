@@ -109,6 +109,8 @@ const HexRunFlow=(()=>{
   function finish(state){
     if(state.hp<=0||state.wave<1||state.pendingSpawns>0||state.enemies.some(e=>e.alive)||state.lastCompletedWave===state.wave)return null;
     state.lastCompletedWave=state.wave;state.waveRunning=false;HexRunRuntime.advanceIntroduction(state);
+    if(typeof HexAugmentCards!=='undefined'&&HexAugmentCards.value(state,'house')&&HexAugmentCards.hasBuilding(state,'house')){const gold=HexAugmentCards.value(state,'house')+(HexAugmentCards.level(state,'house')===4?1:0);state.gold+=gold;state.goldEarned.income+=gold;}
+    if(state.augmentEchoes)state.augmentEchoes=[];
     HexWaves.settleGreed(state);
     HexCombat.clearConsumables(state);
     if(!['garrison','detour','towerDraft'].includes(state.challengeKind))state.gold+=HexWaves.economy.completion+state.income;state.projectiles=[];state.mines=[];

@@ -1,5 +1,17 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
 const source=fs.readFileSync(require('node:path').join(__dirname,'../classes/api.js'),'utf8');
+
+test('account augment transactions fail closed on legacy API without charging or PUT',async()=>{
+ const s=cloud(),api=client(s.fetch);await api.getSave();
+ await assert.rejects(api.putSave({_augmentAction:{kind:'buy',requestId:'test'}}),e=>e.status===428);assert.equal(s.puts,0);
+});
+test('confirmed augment request recovery returns the server inventory without another PUT',async()=>{
+ let committed=false,puts=0;const id='11111111-1111-4111-8111-111111111111',api=client(async(u,o)=>{
+  if(o.method==='PUT'){puts++;throw Error('must not PUT');}
+  return {ok:true,status:200,json:async()=>({augmentProtocol:1,revision:(committed?'b':'a').repeat(64),data:committed?{_augmentReceipt:{id},profile:{diamonds:50,augmentCards:{packs:1}}}:{} })};
+ });
+ await api.getSave();committed=true;const result=await api.putSave({_augmentAction:{kind:'buy',requestId:id}});assert.equal(result.data.profile.diamonds,50);assert.equal(puts,0);
+});
 function client(server, storage=new Map([['hex-bastion-auth-token','TEST']])) {
   const context=vm.createContext({localStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},fetch:server});
   vm.runInContext(source,context);return context.HexApi;

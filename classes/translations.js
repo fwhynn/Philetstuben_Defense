@@ -1599,7 +1599,7 @@ Der Schild blockiert drei Treffer vollständig, auch Flächenschaden. Jeder Tref
 Schleicht drei Sekunden und sprintet danach eine Sekunde.|Sneaks for three seconds, then sprints for one second.
 Bewegt sich nur springend. Kann gelegentlich auf eine nahe Straße im Nachbarhex abkürzen. Verlangsamung verkürzt die Sprünge.|Moves only by hopping. Occasionally shortcuts to a nearby road on an adjacent hex. Slows shorten its jumps.
 Nach dem Panzerbruch dauerhaft 40 % schneller.|Permanently 40% faster after its armor breaks.
-Ihre Pechspur schützt andere Gegner: 20 % weniger Schaden, ohne Verlangsamung. Feuer entzündet das Pech.|Its tar trail protects other enemies: 20% less damage, without slowing them. Fire ignites the tar.
+Ihre Pechspur schützt andere Gegner: 20 % weniger Schaden, ohne Verlangsamung.|Its tar trail protects other enemies: 20% less damage, without slowing them.
 Hinterlässt beim Tod vier Sekunden Sporen. Gegner darin können von Türmen nicht anvisiert werden.|Leaves spores for four seconds on death. Towers cannot target enemies inside.
 Beschleunigt auf Geraden; Kurven und Verlangsamungen bremsen. Bei vollem Tempo drei Basisschaden.|Accelerates on straights; turns and slows reduce momentum. Deals three base damage at full speed.
 `);
@@ -2674,3 +2674,141 @@ Startangebote enthalten Möglichkeiten für Einzelziel- und Flächenschaden. Sp�
 Keine doppelten Ticketoptionen in einem Angebot. Spätestens nach zwei Angeboten ohne Verbesserungsticket steht wieder eines zur Auswahl.|No duplicate ticket options in one offer. After at most two offers without an upgrade ticket, one becomes available again.
 Die Gegnerstärke bleibt unverändert. Bereits laufende Missionen behalten ihre bisherigen Regeln und Zufallsfolgen.|Enemy strength stays unchanged. Runs already in progress keep their existing rules and random sequences.
 `);
+
+HexTranslations.add(`
+◆ Stufe 4 dabei:|◆ Tier 4 equipped:
+Endlos startet erst, wenn ihr beide zustimmt.|Endless starts only when you both agree.
+/2 bereit|/2 ready
+`);
+HexTranslations.add('◆ Stufe 4 aktiv:|◆ Tier 4 active:');
+HexTranslations.add(`
+Augment-Karten|Augment cards
+Nachbeben|Aftershock
+Brandöl|Burning Oil
+Kälteschock|Cold Shock
+Durchschlagbolzen|Piercing Bolt
+Leitfunke|Conductive Spark
+Seelenerbe|Soul Legacy
+Splittergeschoss|Fragmentation Shot
+Jagdfieber|Hunting Frenzy
+Notversorgung|Emergency Supplies
+Vorratskammer|Storehouse
+Erstkundschaft|First Customer
+Weitsicht|Far Sight
+Ausrüsten|Equip
+Ablegen|Unequip
+Noch nicht gesammelt.|Not collected yet.
+Zuletzt erhalten:|Last received:
+Booster öffnen · 50 ◆ · 2 Karten|Open booster · 50 ◆ · 2 cards
+Drei gleiche Karten dieser Seltenheit benötigt.|Three identical cards of this rarity required.
+Alle Augment-Plätze belegt.|All augment slots are occupied.
+Karte nicht verfügbar.|Card unavailable.
+Booster nicht verfügbar.|Booster unavailable.
+Legendär: zweite Explosion hat 20 % mehr Radius.|Legendary: the second explosion has 20% more radius.
+Legendär: Brand hält 5 statt 3 Sekunden.|Legendary: burn lasts 5 instead of 3 seconds.
+Legendär: alle 5 Sekunden Frostimpuls statt Aufbau; Bosse frieren halb so lang ein.|Legendary: frost pulse every 5 seconds instead of buildup; bosses freeze for half as long.
+Legendär: jeder fünfte Schuss verursacht 25 % zusätzlichen Schaden.|Legendary: every fifth shot deals 25% extra damage.
+Legendär: 20 % mehr Sprungweite.|Legendary: 20% more jump range.
+Legendär: ein zusätzlicher Geist gleichzeitig.|Legendary: one additional simultaneous spirit.
+Legendär: Splitterring reicht 60 statt 35 Einheiten weiter.|Legendary: the fragment ring extends 60 instead of 35 units.
+Legendär: bis zu 8 Stapel.|Legendary: up to 8 stacks.
+Legendär: beim Auslösen zusätzlich 2 LP heilen.|Legendary: also heals 2 health on activation.
+Legendär: zusätzlich 1 Gold pro Welle.|Legendary: 1 additional gold per wave.
+Legendär: zusätzlich 1 Gold Rabatt.|Legendary: 1 additional gold discount.
+Legendär: zusätzlich 2 % Reichweite.|Legendary: 2% additional range.
+`);
+
+HexTranslations.add(`
+Zweite Explosion nach 1 Sekunde: 15 % Minenschaden.|Second explosion after 1 second: 15% mine damage.
+Zweite Explosion nach 1 Sekunde: 25 % Minenschaden.|Second explosion after 1 second: 25% mine damage.
+Zweite Explosion nach 1 Sekunde: 35 % Minenschaden.|Second explosion after 1 second: 35% mine damage.
+Zweite Explosion nach 1 Sekunde: 45 % Minenschaden.|Second explosion after 1 second: 45% mine damage.
+Zweite Explosion nach 1 Sekunde: 60 % Minenschaden.|Second explosion after 1 second: 60% mine damage.
+Brand: 10 % Trefferschaden pro Sekunde für 3 Sekunden. Erneuert sich, stapelt nicht.|Burn: 10% of hit damage per second for 3 seconds. Refreshes without stacking.
+Brand: 15 % Trefferschaden pro Sekunde für 3 Sekunden. Erneuert sich, stapelt nicht.|Burn: 15% of hit damage per second for 3 seconds. Refreshes without stacking.
+Brand: 20 % Trefferschaden pro Sekunde für 3 Sekunden. Erneuert sich, stapelt nicht.|Burn: 20% of hit damage per second for 3 seconds. Refreshes without stacking.
+Brand: 25 % Trefferschaden pro Sekunde für 3 Sekunden. Erneuert sich, stapelt nicht.|Burn: 25% of hit damage per second for 3 seconds. Refreshes without stacking.
+Brand: 35 % Trefferschaden pro Sekunde für 3 Sekunden. Erneuert sich, stapelt nicht.|Burn: 35% of hit damage per second for 3 seconds. Refreshes without stacking.
+Nach 3 Sekunden in Frostreichweite: 0.2 Sekunden einfrieren. 5 Sekunden Wiederholungssperre.|After 3 seconds in frost range: freeze for 0.2 seconds. 5-second immunity between freezes.
+Nach 3 Sekunden in Frostreichweite: 0.3 Sekunden einfrieren. 5 Sekunden Wiederholungssperre.|After 3 seconds in frost range: freeze for 0.3 seconds. 5-second immunity between freezes.
+Nach 3 Sekunden in Frostreichweite: 0.4 Sekunden einfrieren. 5 Sekunden Wiederholungssperre.|After 3 seconds in frost range: freeze for 0.4 seconds. 5-second immunity between freezes.
+Nach 3 Sekunden in Frostreichweite: 0.5 Sekunden einfrieren. 5 Sekunden Wiederholungssperre.|After 3 seconds in frost range: freeze for 0.5 seconds. 5-second immunity between freezes.
+Nach 3 Sekunden in Frostreichweite: 0.6 Sekunden einfrieren. 5 Sekunden Wiederholungssperre.|After 3 seconds in frost range: freeze for 0.6 seconds. 5-second immunity between freezes.
+Bolzen durchschlagen 1 zusätzliche Ziele.|Bolts pierce 1 additional targets.
+Bolzen durchschlagen 2 zusätzliche Ziele.|Bolts pierce 2 additional targets.
+Bolzen durchschlagen 3 zusätzliche Ziele.|Bolts pierce 3 additional targets.
+Bolzen durchschlagen 4 zusätzliche Ziele.|Bolts pierce 4 additional targets.
+Bolzen durchschlagen 5 zusätzliche Ziele.|Bolts pierce 5 additional targets.
+Blitze springen auf 1 zusätzliche Ziele.|Lightning jumps to 1 additional targets.
+Blitze springen auf 2 zusätzliche Ziele.|Lightning jumps to 2 additional targets.
+Blitze springen auf 3 zusätzliche Ziele.|Lightning jumps to 3 additional targets.
+Blitze springen auf 4 zusätzliche Ziele.|Lightning jumps to 4 additional targets.
+Blitze springen auf 5 zusätzliche Ziele.|Lightning jumps to 5 additional targets.
+Geister bleiben 1 Sekunden länger.|Spirits last 1 seconds longer.
+Geister bleiben 2 Sekunden länger.|Spirits last 2 seconds longer.
+Geister bleiben 3 Sekunden länger.|Spirits last 3 seconds longer.
+Geister bleiben 4 Sekunden länger.|Spirits last 4 seconds longer.
+Geister bleiben 6 Sekunden länger.|Spirits last 6 seconds longer.
+Splitter verursachen 10 % Schaden im äußeren Ring der Explosion.|Fragments deal 10% damage in the outer explosion ring.
+Splitter verursachen 15 % Schaden im äußeren Ring der Explosion.|Fragments deal 15% damage in the outer explosion ring.
+Splitter verursachen 20 % Schaden im äußeren Ring der Explosion.|Fragments deal 20% damage in the outer explosion ring.
+Splitter verursachen 25 % Schaden im äußeren Ring der Explosion.|Fragments deal 25% damage in the outer explosion ring.
+Splitter verursachen 35 % Schaden im äußeren Ring der Explosion.|Fragments deal 35% damage in the outer explosion ring.
+Je Folgetreffer auf dasselbe Ziel +3 % Angriffstempo, maximal 5 Stapel.|Consecutive hits on the same target grant +3% attack speed, up to 5 stacks.
+Je Folgetreffer auf dasselbe Ziel +4 % Angriffstempo, maximal 5 Stapel.|Consecutive hits on the same target grant +4% attack speed, up to 5 stacks.
+Je Folgetreffer auf dasselbe Ziel +5 % Angriffstempo, maximal 5 Stapel.|Consecutive hits on the same target grant +5% attack speed, up to 5 stacks.
+Je Folgetreffer auf dasselbe Ziel +6 % Angriffstempo, maximal 5 Stapel.|Consecutive hits on the same target grant +6% attack speed, up to 5 stacks.
+Je Folgetreffer auf dasselbe Ziel +8 % Angriffstempo, maximal 5 Stapel.|Consecutive hits on the same target grant +8% attack speed, up to 5 stacks.
+Einmal pro Run bei höchstens 25 % Basis-LP: 1 Sekunden Schutz vor weiteren Treffern.|Once per run at 25% base health or less: 1 seconds of protection against subsequent hits.
+Einmal pro Run bei höchstens 25 % Basis-LP: 1.5 Sekunden Schutz vor weiteren Treffern.|Once per run at 25% base health or less: 1.5 seconds of protection against subsequent hits.
+Einmal pro Run bei höchstens 25 % Basis-LP: 2 Sekunden Schutz vor weiteren Treffern.|Once per run at 25% base health or less: 2 seconds of protection against subsequent hits.
+Einmal pro Run bei höchstens 25 % Basis-LP: 2.5 Sekunden Schutz vor weiteren Treffern.|Once per run at 25% base health or less: 2.5 seconds of protection against subsequent hits.
+Einmal pro Run bei höchstens 25 % Basis-LP: 3 Sekunden Schutz vor weiteren Treffern.|Once per run at 25% base health or less: 3 seconds of protection against subsequent hits.
++1 Gold pro abgeschlossenem Angriff mit mindestens einem Haus. Nicht pro Haus.|+1 gold per completed wave with at least one house. Not per house.
++2 Gold pro abgeschlossenem Angriff mit mindestens einem Haus. Nicht pro Haus.|+2 gold per completed wave with at least one house. Not per house.
++3 Gold pro abgeschlossenem Angriff mit mindestens einem Haus. Nicht pro Haus.|+3 gold per completed wave with at least one house. Not per house.
++4 Gold pro abgeschlossenem Angriff mit mindestens einem Haus. Nicht pro Haus.|+4 gold per completed wave with at least one house. Not per house.
++5 Gold pro abgeschlossenem Angriff mit mindestens einem Haus. Nicht pro Haus.|+5 gold per completed wave with at least one house. Not per house.
+Beim ersten bezahlten Turmbau je Welle mit einem Markt: 1 Gold Rabatt, maximal der Baupreis.|First paid tower build each wave with a market: 1 gold discount, capped at the build price.
+Beim ersten bezahlten Turmbau je Welle mit einem Markt: 2 Gold Rabatt, maximal der Baupreis.|First paid tower build each wave with a market: 2 gold discount, capped at the build price.
+Beim ersten bezahlten Turmbau je Welle mit einem Markt: 3 Gold Rabatt, maximal der Baupreis.|First paid tower build each wave with a market: 3 gold discount, capped at the build price.
+Beim ersten bezahlten Turmbau je Welle mit einem Markt: 4 Gold Rabatt, maximal der Baupreis.|First paid tower build each wave with a market: 4 gold discount, capped at the build price.
+Beim ersten bezahlten Turmbau je Welle mit einem Markt: 5 Gold Rabatt, maximal der Baupreis.|First paid tower build each wave with a market: 5 gold discount, capped at the build price.
+Von einer Schmiede verstärkte Türme erhalten +2 % Reichweite. Nicht stapelbar.|Towers affected by a forge gain +2% range. Does not stack.
+Von einer Schmiede verstärkte Türme erhalten +4 % Reichweite. Nicht stapelbar.|Towers affected by a forge gain +4% range. Does not stack.
+Von einer Schmiede verstärkte Türme erhalten +6 % Reichweite. Nicht stapelbar.|Towers affected by a forge gain +6% range. Does not stack.
+Von einer Schmiede verstärkte Türme erhalten +8 % Reichweite. Nicht stapelbar.|Towers affected by a forge gain +8% range. Does not stack.
+Von einer Schmiede verstärkte Türme erhalten +10 % Reichweite. Nicht stapelbar.|Towers affected by a forge gain +10% range. Does not stack.
+`);
+
+HexTranslations.add(`
+Neu · Augment-Karten|New · Augment cards
+Neu: Deine Augment-Sammlung|New: Your augment collection
+Öffne ein Paket mit zwei Karten, rüste eine Karte aus und starte deinen nächsten Run. Drei gleiche Karten kannst du zu einer stärkeren verschmelzen. Die Karten bleiben dauerhaft in deiner Sammlung.|Open a pack of two cards, equip a card and start your next run. Fuse three identical cards into a stronger one. Your cards remain in your collection permanently.
+Deine neuen Karten|Your new cards
+Zuletzt erhalten|Last received
+Augments für diesen Run|Augments for this run
+Augments ändern|Change augments
+Nicht aktiv – passender Turm fehlt im Loadout:|Inactive – matching tower missing from loadout:
+Noch keine passenden Augments ausgerüstet.|No matching augments equipped yet.
+In diesem Run bereits ausgelöst.|Already triggered in this run.
+Wird gespeichert …|Saving …
+Vor dem Run ausrüsten|Equip before starting a run
+Plätze. Nächste Plätze: Welle 20, 25, 35 und 50 abgeschlossen. Höchste besessene Seltenheit wird ausgerüstet. Laufende Runs bleiben unverändert.|slots. Unlock more by completing waves 20, 25, 35 and 50. The highest owned rarity is equipped. Active runs keep their original cards.
+Spätestens jedes 10. Paket enthält Selten oder besser.|At least one Rare or better card within every 10 packs.
+Nur verfügbare Türme und Basis/Gebäude.|Available towers, base and buildings only.
+Drei gleiche Karten gleicher Seltenheit → nächsthöhere Seltenheit.|Three identical cards of the same rarity → the next rarity.
+Noch nicht gesammelt.|Not collected yet.
+Deine Augments:|Your augments:
+Keine Augments|No augments
+Beim Bereitmelden wird deine Account-Auswahl übernommen. Gäste spielen ohne Account-Augments.|Your account selection is loaded when you ready up. Guests play without account augments.
+`);
+
+HexTranslations.add(`Elementare Resonanz|Elemental Resonance
+Jeder fünfte Treffer: zusätzlicher Treffer desselben Elements mit 20 % Schaden. Kein zusätzlicher Schildabbau.|Every fifth hit: an additional hit of the same element dealing 20% damage. No additional shield removal.
+Jeder fünfte Treffer: zusätzlicher Treffer desselben Elements mit 35 % Schaden. Kein zusätzlicher Schildabbau.|Every fifth hit: an additional hit of the same element dealing 35% damage. No additional shield removal.
+Jeder fünfte Treffer: zusätzlicher Treffer desselben Elements mit 50 % Schaden. Kein zusätzlicher Schildabbau.|Every fifth hit: an additional hit of the same element dealing 50% damage. No additional shield removal.
+Jeder fünfte Treffer: zusätzlicher Treffer desselben Elements mit 75 % Schaden. Kein zusätzlicher Schildabbau.|Every fifth hit: an additional hit of the same element dealing 75% damage. No additional shield removal.
+Jeder fünfte Treffer: zusätzlicher Treffer desselben Elements mit 100 % Schaden. Kein zusätzlicher Schildabbau.|Every fifth hit: an additional hit of the same element dealing 100% damage. No additional shield removal.`);
+
+HexTranslations.add("Augment-Karten und eine sanftere Schwierigkeitskurve|Augment cards and a smoother difficulty curve\nNeue Karten für dein Loadout, mehr Druck im Mittelspiel und weniger abrupte Härte im Endlosmodus.|New loadout cards, more mid-game pressure and a less abrupt endless difficulty curve.\nNEU|NEW\n13 Augment-Kartenfamilien|13 augment card families\nBooster und Kartenfusion|Boosters and card fusion\nSCHWERER|HARDER\nRobustere Gegner im Mittelspiel|Tougher mid-game enemies\nENTLASTET|EASIER\nGeglättete späte Gegner- und Bosskurve|Smoother late enemy and boss scaling\nVERBESSERT|IMPROVED\nMinen-Nachbeben und Zielwechsel|Mine aftershocks and target switches\nArsenal und Turmübersicht|Arsenal and tower overview\nAugment-Karten|Augment Cards\nSammeln, verschmelzen, ausrüsten|Collect, fuse, equip\nAugment-Karten werden nach abgeschlossener Welle 15 und einer gekauften Arsenal-Freischaltung verfügbar.|Augment cards unlock after completing wave 15 and purchasing an Arsenal unlock.\nEin Booster kostet 50 Diamanten und enthält zwei unterschiedliche Kartenfamilien. Drei gleiche Karten derselben Seltenheit verschmelzen zu einer Karte der nächsthöheren Seltenheit.|A booster costs 50 diamonds and contains two different card families. Fuse three identical cards of the same rarity into one card of the next rarity.\nZiehchancen: Gewöhnlich 60 %, Ungewöhnlich 25 %, Selten 10 %, Episch 4 %, Legendär 1 %. Spätestens das zehnte Paket ohne Selten oder besser enthält eine solche Karte.|Drop chances: Common 60%, Uncommon 25%, Rare 10%, Epic 4%, Legendary 1%. After nine packs without Rare or better, the tenth guarantees one.\nEin Augment-Platz zum Start; weitere Plätze nach Welle 20, 25, 35 und 50. Ausgerüstet wird die höchste besessene Seltenheit. Laufende Runs behalten ihre Startauswahl.|Start with one augment slot; unlock more after waves 20, 25, 35 and 50. Equip the highest owned rarity. Active runs retain their starting selection.\nKarten für neun Türme sowie Basis, Haus, Markt und Schmiede. Die Sammlung wird mit deinem Account gespeichert; Gäste speichern im Browser.|Cards cover nine towers plus the base, house, market and forge. Collections save to your account; guests save in their browser.\nIm Duo werden die Account-Augments beim Bereitmelden übernommen und dem Partner angezeigt. Gäste spielen im Duo ohne Augments; tägliche Herausforderungen bleiben ohne Meta-Augments.|Duo loads account augments when you ready up and shows them to your partner. Duo guests have no augments; daily challenges remain free of meta augments.\nNeue Möglichkeiten für deine Verteidigung|New options for your defense\nMinen können nach einer Sekunde erneut explodieren, Flammentürme Brand hinterlassen und Frosttürme Gegner kurz einfrieren. Ballisten durchschlagen mehr Ziele, Blitze springen weiter und Geister bleiben länger.|Mines can explode again after one second, flame towers apply burns and frost towers briefly freeze enemies. Ballistas pierce more targets, lightning gains jumps and spirits last longer.\nDer Elementturm erhält Elementare Resonanz: jeder fünfte Treffer löst Zusatzschaden desselben Elements aus. Je Seltenheit 20/35/50/75/100 %; Schilde verlieren weiterhin höchstens einen Stapel pro Angriff.|Elemental Resonance adds same-element damage on every fifth hit: 20/35/50/75/100% by rarity. Shields still lose at most one stack per attack.\nGegner-Balancing|Enemy balance\nBasis-LP normaler Gegner · Welle 10|Normal enemy base HP · Wave 10\n199 LP|199 HP\n249 LP|249 HP\nBasis-LP normaler Gegner · Welle 20|Normal enemy base HP · Wave 20\n936 LP|936 HP\n1.310 LP|1,310 HP\nBasis-LP normaler Gegner · Welle 35|Normal enemy base HP · Wave 35\n6.802 LP|6,802 HP\n8.907 LP|8,907 HP\nBasis-LP normaler Gegner · Welle 50|Normal enemy base HP · Wave 50\n29.874 LP|29,874 HP\n30.187 LP|30,187 HP\nBasis-LP normaler Gegner · Welle 80|Normal enemy base HP · Wave 80\n467.621 LP|467,621 HP\n202.950 LP|202,950 HP\nBasis-LP normaler Gegner · Welle 100|Normal enemy base HP · Wave 100\n2.698.506 LP|2,698,506 HP\n666.698 LP|666,698 HP\nFrüher gefordert, später gleichmäßiger|Earlier pressure, smoother late waves\nDie ersten drei Wellen bleiben unverändert. Danach steigt die Widerstandskraft früher an; ab Welle 26 wird das weitere Wachstum schrittweise geglättet.|The first three waves remain unchanged. Enemy durability rises earlier afterwards; growth gradually smooths out from wave 26.\nNach Welle 35 folgen Bosse der geglätteten Lebenskurve. Das Endlosspiel wird weiterhin immer schwerer. Die separat abgestimmten Kurven täglicher Herausforderungen bleiben erhalten.|After wave 35, bosses follow the smoother health curve. Endless mode continues to get harder. Daily challenges retain their separately tuned curves.\nPechschnecke|Tar Snail\nDie Pechspur lässt sich nicht mehr entzünden. Ihr Schutz für andere Gegner bleibt bestehen.|The tar trail can no longer ignite. Its protection for other enemies remains.\nKomfort und Fehlerbehebungen|Quality of life and fixes\nMehr Klarheit im Run|Clearer run information\nDie Duo-Siegübersicht zeigt ausdrücklich, dass Endlos die Zustimmung beider Spieler benötigt, einschließlich Bereitschaftszähler.|The Duo victory screen explicitly states that endless mode requires both players to agree, with a ready counter.\nDas Arsenal erscheint nach der ersten abgerechneten Partie auch dann, wenn diese im Duo gespielt wurde.|The Arsenal appears after the first settled match, including Duo matches.\nDie linke Turmauswahl ist nach Baukosten aufsteigend sortiert. Mitgenommene Stufe-4-Ausbaupfade sind im Turmmenü hervorgehoben.|The left tower selection is sorted by ascending build cost. Equipped tier-4 upgrade paths are highlighted in the tower menu.\nAugment-Kampfkorrekturen|Augment combat fixes\nJagdfieber übernimmt beim Zielwechsel keinen Tempobonus des vorherigen Gegners. Ein stärkerer bestehender Brand behält seine korrekte Schadenszuordnung.|Hunting Fever no longer carries the previous target’s attack-speed bonus into a target switch. An existing stronger burn retains correct damage attribution.\nViele gleichzeitige Minen-Nachbeben benötigen weniger Distanzprüfungen. Anzahl, Schaden, Radius und Trefferreihenfolge bleiben gleich.|Large simultaneous mine aftershock batches require fewer distance checks. Their count, damage, radius and hit order are unchanged.");

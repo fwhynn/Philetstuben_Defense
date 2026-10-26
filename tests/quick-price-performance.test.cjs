@@ -1,6 +1,12 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const loadCore=require('../headless-core.cjs'),{load}=require('./helpers/game.cjs');
 const prices=[25,45,40,30,35];
+test('rail sorts towers by cost without changing the saved loadout order',()=>{
+ const {a,elements,data}=load();const order=['ballista','chain','catapult','mine','freeze','archer'];a.state.towerLoadout=[...order];a.renderAll();
+ assert.deepEqual([...a.state.towerLoadout],order);
+ const names=elements.get('quickLoadout').children.map(b=>b.title.split(' · ')[0]);
+ assert.deepEqual(names,order.slice().sort((a,b)=>data.TOWERS[a].cost-data.TOWERS[b].cost).map(t=>data.TOWERS[t].name));
+});
 function oldPrices(buildings,map){return prices.map(base=>{let best=Infinity;for(const tile of map.values())if(Array.from({length:tile.slots},(_,i)=>tile.towers[i]).some(t=>!t))best=Math.min(best,buildings.cost({map},tile,base));return best;});}
 test('shared quick-build discount matches original prices across occupancy, upgrades and remote markets',()=>{
   const {buildings}=loadCore();

@@ -1,5 +1,160 @@
 [
   {
+    "version": "next",
+    "title": "Augment-Karten und eine sanftere Schwierigkeitskurve",
+    "summary": "Neue Karten für dein Loadout, mehr Druck im Mittelspiel und weniger abrupte Härte im Endlosmodus.",
+    "overview": [
+      {
+        "kind": "new",
+        "title": "NEU",
+        "items": [
+          "13 Augment-Kartenfamilien",
+          "Booster und Kartenfusion"
+        ]
+      },
+      {
+        "kind": "nerf",
+        "title": "SCHWERER",
+        "items": [
+          "Robustere Gegner im Mittelspiel"
+        ]
+      },
+      {
+        "kind": "buff",
+        "title": "ENTLASTET",
+        "items": [
+          "Geglättete späte Gegner- und Bosskurve"
+        ]
+      },
+      {
+        "kind": "fixed",
+        "title": "VERBESSERT",
+        "items": [
+          "Minen-Nachbeben und Zielwechsel",
+          "Arsenal und Turmübersicht"
+        ]
+      }
+    ],
+    "sections": [
+      {
+        "title": "Augment-Karten",
+        "entries": [
+          {
+            "title": "Sammeln, verschmelzen, ausrüsten",
+            "bullets": [
+              "Augment-Karten werden nach abgeschlossener Welle 15 und einer gekauften Arsenal-Freischaltung verfügbar.",
+              "Ein Booster kostet 50 Diamanten und enthält zwei unterschiedliche Kartenfamilien. Drei gleiche Karten derselben Seltenheit verschmelzen zu einer Karte der nächsthöheren Seltenheit.",
+              "Ziehchancen: Gewöhnlich 60 %, Ungewöhnlich 25 %, Selten 10 %, Episch 4 %, Legendär 1 %. Spätestens das zehnte Paket ohne Selten oder besser enthält eine solche Karte.",
+              "Ein Augment-Platz zum Start; weitere Plätze nach Welle 20, 25, 35 und 50. Ausgerüstet wird die höchste besessene Seltenheit. Laufende Runs behalten ihre Startauswahl.",
+              "Karten für neun Türme sowie Basis, Haus, Markt und Schmiede. Die Sammlung wird mit deinem Account gespeichert; Gäste speichern im Browser.",
+              "Im Duo werden die Account-Augments beim Bereitmelden übernommen und dem Partner angezeigt. Gäste spielen im Duo ohne Augments; tägliche Herausforderungen bleiben ohne Meta-Augments."
+            ],
+            "stats": []
+          },
+          {
+            "title": "Neue Möglichkeiten für deine Verteidigung",
+            "bullets": [
+              "Minen können nach einer Sekunde erneut explodieren, Flammentürme Brand hinterlassen und Frosttürme Gegner kurz einfrieren. Ballisten durchschlagen mehr Ziele, Blitze springen weiter und Geister bleiben länger.",
+              "Der Elementturm erhält Elementare Resonanz: jeder fünfte Treffer löst Zusatzschaden desselben Elements aus. Je Seltenheit 20/35/50/75/100 %; Schilde verlieren weiterhin höchstens einen Stapel pro Angriff."
+            ],
+            "stats": []
+          }
+        ]
+      },
+      {
+        "title": "Gegner-Balancing",
+        "entries": [
+          {
+            "title": "Früher gefordert, später gleichmäßiger",
+            "bullets": [
+              "Die ersten drei Wellen bleiben unverändert. Danach steigt die Widerstandskraft früher an; ab Welle 26 wird das weitere Wachstum schrittweise geglättet.",
+              "Nach Welle 35 folgen Bosse der geglätteten Lebenskurve. Das Endlosspiel wird weiterhin immer schwerer. Die separat abgestimmten Kurven täglicher Herausforderungen bleiben erhalten."
+            ],
+            "stats": [
+              {
+                "label": "Basis-LP normaler Gegner · Welle 10",
+                "before": "199 LP",
+                "after": "249 LP"
+              },
+              {
+                "label": "Basis-LP normaler Gegner · Welle 20",
+                "before": "936 LP",
+                "after": "1.310 LP"
+              },
+              {
+                "label": "Basis-LP normaler Gegner · Welle 35",
+                "before": "6.802 LP",
+                "after": "8.907 LP"
+              },
+              {
+                "label": "Basis-LP normaler Gegner · Welle 50",
+                "before": "29.874 LP",
+                "after": "30.187 LP"
+              },
+              {
+                "label": "Basis-LP normaler Gegner · Welle 80",
+                "before": "467.621 LP",
+                "after": "202.950 LP"
+              },
+              {
+                "label": "Basis-LP normaler Gegner · Welle 100",
+                "before": "2.698.506 LP",
+                "after": "666.698 LP"
+              }
+            ]
+          },
+          {
+            "title": "Pechschnecke",
+            "bullets": [
+              "Die Pechspur lässt sich nicht mehr entzünden. Ihr Schutz für andere Gegner bleibt bestehen."
+            ],
+            "stats": []
+          }
+        ]
+      },
+      {
+        "title": "Komfort und Fehlerbehebungen",
+        "entries": [
+          {
+            "title": "Mehr Klarheit im Run",
+            "bullets": [
+              "Die Duo-Siegübersicht zeigt ausdrücklich, dass Endlos die Zustimmung beider Spieler benötigt, einschließlich Bereitschaftszähler.",
+              "Das Arsenal erscheint nach der ersten abgerechneten Partie auch dann, wenn diese im Duo gespielt wurde.",
+              "Die linke Turmauswahl ist nach Baukosten aufsteigend sortiert. Mitgenommene Stufe-4-Ausbaupfade sind im Turmmenü hervorgehoben."
+            ],
+            "stats": []
+          },
+          {
+            "title": "Augment-Kampfkorrekturen",
+            "bullets": [
+              "Jagdfieber übernimmt beim Zielwechsel keinen Tempobonus des vorherigen Gegners. Ein stärkerer bestehender Brand behält seine korrekte Schadenszuordnung.",
+              "Viele gleichzeitige Minen-Nachbeben benötigen weniger Distanzprüfungen. Anzahl, Schaden, Radius und Trefferreihenfolge bleiben gleich."
+            ],
+            "stats": []
+          }
+        ]
+      }
+    ],
+    "changes": [
+      "Augment-Karten werden nach abgeschlossener Welle 15 und einer gekauften Arsenal-Freischaltung verfügbar.",
+      "Ein Booster kostet 50 Diamanten und enthält zwei unterschiedliche Kartenfamilien. Drei gleiche Karten derselben Seltenheit verschmelzen zu einer Karte der nächsthöheren Seltenheit.",
+      "Ziehchancen: Gewöhnlich 60 %, Ungewöhnlich 25 %, Selten 10 %, Episch 4 %, Legendär 1 %. Spätestens das zehnte Paket ohne Selten oder besser enthält eine solche Karte.",
+      "Ein Augment-Platz zum Start; weitere Plätze nach Welle 20, 25, 35 und 50. Ausgerüstet wird die höchste besessene Seltenheit. Laufende Runs behalten ihre Startauswahl.",
+      "Karten für neun Türme sowie Basis, Haus, Markt und Schmiede. Die Sammlung wird mit deinem Account gespeichert; Gäste speichern im Browser.",
+      "Im Duo werden die Account-Augments beim Bereitmelden übernommen und dem Partner angezeigt. Gäste spielen im Duo ohne Augments; tägliche Herausforderungen bleiben ohne Meta-Augments.",
+      "Minen können nach einer Sekunde erneut explodieren, Flammentürme Brand hinterlassen und Frosttürme Gegner kurz einfrieren. Ballisten durchschlagen mehr Ziele, Blitze springen weiter und Geister bleiben länger.",
+      "Der Elementturm erhält Elementare Resonanz: jeder fünfte Treffer löst Zusatzschaden desselben Elements aus. Je Seltenheit 20/35/50/75/100 %; Schilde verlieren weiterhin höchstens einen Stapel pro Angriff.",
+      "Die ersten drei Wellen bleiben unverändert. Danach steigt die Widerstandskraft früher an; ab Welle 26 wird das weitere Wachstum schrittweise geglättet.",
+      "Nach Welle 35 folgen Bosse der geglätteten Lebenskurve. Das Endlosspiel wird weiterhin immer schwerer. Die separat abgestimmten Kurven täglicher Herausforderungen bleiben erhalten.",
+      "Die Pechspur lässt sich nicht mehr entzünden. Ihr Schutz für andere Gegner bleibt bestehen.",
+      "Die Duo-Siegübersicht zeigt ausdrücklich, dass Endlos die Zustimmung beider Spieler benötigt, einschließlich Bereitschaftszähler.",
+      "Das Arsenal erscheint nach der ersten abgerechneten Partie auch dann, wenn diese im Duo gespielt wurde.",
+      "Die linke Turmauswahl ist nach Baukosten aufsteigend sortiert. Mitgenommene Stufe-4-Ausbaupfade sind im Turmmenü hervorgehoben.",
+      "Jagdfieber übernimmt beim Zielwechsel keinen Tempobonus des vorherigen Gegners. Ein stärkerer bestehender Brand behält seine korrekte Schadenszuordnung.",
+      "Viele gleichzeitige Minen-Nachbeben benötigen weniger Distanzprüfungen. Anzahl, Schaden, Radius und Trefferreihenfolge bleiben gleich."
+    ]
+  },
+  {
     "version": "1.2.5",
     "title": "Herausforderungen: Fairer Zufall",
     "summary": "Abwechslung bleibt – fehlende Straßenformen und einseitige Angebote werden abgesichert.",
