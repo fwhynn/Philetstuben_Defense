@@ -1574,3 +1574,11 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
   box-shadow:inset 0 1px 0 #ffffff14,0 3px 8px #00000059;color:var(--hx-green-ink,#f4ecd6);font:700 16px/1.2 var(--hx-font-ui);text-decoration:none}
 .hexMenuBar .menuChallengeLab:hover{border-color:#c9a24a;color:#fff6d6}
 @media(max-width:900px){.hexMenuBar .menuChallengeLab{font-size:0;gap:0;padding:4px 12px}.hexMenuBar .menuChallengeLab .hxi{font-size:16px}}
+
+/* ===== Turm beim Ziehen: Hex-Symbol mit Preisplakette wie in der Turmleiste ===== */
+#towerDragGhost{padding:0!important;border:0!important;background:none!important;filter:drop-shadow(0 4px 6px #0009)}
+#towerDragGhost .researchIcon.hxTowerIcon{width:58px!important;height:auto!important}
+#towerDragGhost small{display:inline-flex!important;align-items:center;gap:4px;margin:-6px auto 0;height:24px;box-sizing:border-box;padding:0 9px 0 5px;border:1.5px solid #c9a24a;border-radius:999px;background:#0e1d16;color:var(--hx-gold-text);font:700 15px/1 var(--hx-font-ui);white-space:nowrap}
+#towerDragGhost small::before{content:'';width:15px;height:15px;flex:none;background:#f3c94c;-webkit-mask:url("assets/uidesign/icons/icon_coin.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_coin.svg") center/contain no-repeat}
+#towerDragGhost{display:flex;flex-direction:column;align-items:center}
+#towerDragGhost.hidden{display:none}
