@@ -2194,22 +2194,21 @@ R dreht die Karte, dann Feld anklicken.`;
    } else if(challengeLab) {
     newRun(undefined,undefined,undefined,challengeLab.mission.day,true);
     mainMenu.classList.add('hidden');
-    const bar=document.createElement('aside');bar.id='challengeLabBar';
-    bar.style.cssText='position:fixed;left:50%;top:64px;transform:translateX(-50%);z-index:950;background:#172c21;color:#fff3cf;padding:8px 12px;border:1px solid #d6b660;border-radius:10px;max-width:90vw;font:13px system-ui;display:flex;gap:10px;align-items:center;flex-wrap:wrap';
+    const bar=document.createElement('aside');bar.id='challengeLabBar';bar.className='challengeLabBar';
     const label=document.createElement('span');label.textContent='Testlabor · '+challengeLab.mission.name+' · Ohne Belohnungen';bar.appendChild(label);
-    const back=document.createElement('a');back.href='challenge-lab.html';back.textContent='Mission wechseln';back.style.color='#f2d47b';bar.appendChild(back);
+    const back=document.createElement('a');back.href='challenge-lab.html';back.textContent='Mission wechseln';bar.appendChild(back);
     const saved=readRunAutosave();
     if(saved)restoreRunCheckpoint(saved.checkpoint);
     if(!saved&&['greed','villages'].includes(challengeLab.mission.id))openLoadout();
-    const restart=document.createElement('button');restart.textContent='Neu starten';restart.addEventListener('click',()=>{if(['greed','villages'].includes(challengeLab.mission.id)){openLoadout();return;}if(confirmRunRestart()){newRun();mainMenu.classList.add('hidden');saveRunAutosave(true);}});bar.appendChild(restart);
+    const restart=document.createElement('button');restart.className='secondary';restart.textContent='Neu starten';restart.addEventListener('click',()=>{if(['greed','villages'].includes(challengeLab.mission.id)){openLoadout();return;}if(confirmRunRestart()){newRun();mainMenu.classList.add('hidden');saveRunAutosave(true);}});bar.appendChild(restart);
     back.addEventListener('click',()=>saveRunAutosave(true));
     globalThis.addEventListener('pagehide',()=>saveRunAutosave(true));
-    const report=document.createElement('button');report.textContent='Testbericht';report.addEventListener('click',()=>{
+    const report=document.createElement('button');report.className='secondary';report.textContent='Testbericht';report.addEventListener('click',()=>{
       const wasPaused=state.paused;state.paused=true;
-      const dialog=document.createElement('dialog');dialog.addEventListener('close',()=>{state.paused=wasPaused;dialog.remove();});dialog.style.cssText='max-width:85vw;background:#193022;color:#fff3cf;border:1px solid #d6b660;border-radius:12px';
-      const text=document.createElement('textarea');text.readOnly=true;text.rows=12;text.style.cssText='width:65ch;max-width:75vw';
+      const dialog=document.createElement('dialog');dialog.addEventListener('close',()=>{state.paused=wasPaused;dialog.remove();});dialog.className='challengeLabReport';
+      const text=document.createElement('textarea');text.readOnly=true;text.rows=12;
       text.value=['AutoHex TD – Testlabor', 'Version: '+(document.querySelector('[data-app-version]')?.textContent||document.title),'Mission: '+state.challengeKind,'Seed: '+state.seed,'Welle: '+state.wave,'Phase: '+state.phase,'Abgeschlossen: '+(state.lastCompletedWave||0),'','Letzte Schritte:','Erwartetes Verhalten:','Beobachteter Fehler:'].join('\n');
-      const close=document.createElement('button');close.textContent='Schließen';close.addEventListener('click',()=>dialog.close());dialog.append(text,close);document.body.appendChild(dialog);dialog.showModal();text.select();
+      const close=document.createElement('button');close.className='primary';close.textContent='Schließen';close.addEventListener('click',()=>dialog.close());dialog.append(text,close);document.body.appendChild(dialog);dialog.showModal();text.select();
     });bar.appendChild(report);document.body.appendChild(bar);requestAnimationFrame(frame);
   } else { newRun(undefined, undefined, undefined, null, true); hasActiveRun = false; openMainMenu(); applyDeveloperScenario(); requestAnimationFrame(frame); }
 })();

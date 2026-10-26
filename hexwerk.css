@@ -1513,3 +1513,64 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 .card.duoGoldGift strong{font:900 30px/1.1 var(--hx-font-title);color:#2b281f}
 #duoGifts #duoGiftHistory{display:grid;gap:6px;font-size:14px;color:#e3e9e3}
 .duoSupportShortcut{font-family:var(--hx-font-ui)}
+
+/* ===== Bestenliste: Goldwertung des Fluchs der Gier als Reiterzeile ===== */
+#greedBoardTabs:not(.hidden){display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 12px;padding:10px 14px;border:1.5px solid #3c7a62;border-radius:12px;background:#0f2419;font-family:var(--hx-font-ui)}
+#greedBoardTabs>strong{display:flex;align-items:center;gap:8px;margin-right:auto;font:900 clamp(17px,1.5vw,21px)/1.2 var(--hx-font-title);color:#fbf2d6}
+#greedBoardTabs>strong::before{content:'';width:22px;height:22px;flex:none;background:#f3c94c;-webkit-mask:url("assets/uidesign/icons/icon_coin.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_coin.svg") center/contain no-repeat}
+#greedBoardTabs button{min-height:44px;padding:0 18px;border:2px solid #3c7a62!important;border-radius:10px!important;background:linear-gradient(180deg,#143024,#0d2219)!important;box-shadow:none!important;color:#fbf7ea!important;font:700 16px var(--hx-font-ui)!important;cursor:pointer}
+#greedBoardTabs button[aria-pressed=true]{border-color:#e2b04a!important;background:linear-gradient(180deg,#3b3417,#241f0f)!important;box-shadow:0 0 14px #f6c95a44,inset 0 1px 0 #ffffff1a!important}
+#greedBoardTabs label{display:inline-flex;align-items:center;gap:8px;color:#e3e9e3;font:600 16px var(--hx-font-ui)}
+#greedBoardTabs input[type=date]{min-height:44px;padding:0 10px;border:1.5px solid #cfd9cf99;border-radius:8px;background:#0b1912;color:#fbf7ea;font:600 16px var(--hx-font-ui);color-scheme:dark}
+
+/* ===== Patch Notes: Überblick als Kacheln, Einträge mit Titelschrift, Werte-Tabelle wie die Bestenliste ===== */
+#patchNotesOverlay .patchNotesBox{font-family:var(--hx-font-ui)}
+#patchNotesOverlay .panelHead{display:flex;align-items:center;gap:16px}
+#patchNotesOverlay .panelHead h2{display:flex;align-items:center;gap:14px;flex:1;margin:0}
+#patchNotesOverlay .panelHead h2::after{content:'';flex:1;min-width:40px;height:14px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M7 1l6 6-6 6-6-6z' fill='none' stroke='%23e9b949' stroke-width='2'/%3E%3C/svg%3E") 0 50%/14px 14px no-repeat,linear-gradient(90deg,#e9b949,#e9b94900) 20px 50%/calc(100% - 20px) 2px no-repeat}
+#closePatchNotesBtn{flex:none;min-height:46px;padding:0 18px;border:2px solid #e2b04a!important;border-radius:10px!important;background:linear-gradient(180deg,#183322,#0f2219)!important;color:#fff3c4!important;font:700 16px var(--hx-font-ui)!important}
+#patchNotesContent h3{font:900 clamp(24px,2.6vw,34px)/1.1 var(--hx-font-title)!important;color:#fbf7ea;text-shadow:0 2px 0 #0009}
+#patchNotesContent .patchIntro{color:#d5ddd4!important;font-size:17px}
+.patchHighlight{--patch-accent:#9fb0a3;border:1.5px solid #3c7a62!important;border-top:4px solid var(--patch-accent)!important;border-radius:12px!important;background:linear-gradient(180deg,#132e20,#0f2419)!important}
+.patchHighlight.buff{--patch-accent:#8fe39b}.patchHighlight.nerf{--patch-accent:#ff9a85}.patchHighlight.new{--patch-accent:#f3c94c}
+.patchMark{font:900 32px/1 var(--hx-font-title)!important}
+#patchNotesContent .patchHighlight h4{font:800 13px/1.4 var(--hx-font-ui)!important}
+.patchHighlight li{color:#e3e9e3}
+.patchSection>h4{display:flex;align-items:center;gap:12px;font:900 clamp(20px,2.2vw,26px)/1.25 var(--hx-font-title)!important;color:#fbf2d6!important;border-bottom:1.5px solid #c9a24a66!important}
+.patchEntry{border-bottom-color:#24493a!important}
+.patchEntry h5{font:800 19px/1.35 var(--hx-font-ui)!important;color:#fbf7ea!important}
+.patchReason{color:#cfd9cf!important}
+.patchStats{border:1.5px solid #3c7a62;border-radius:12px;border-collapse:separate!important;border-spacing:0;overflow:hidden;background:#0f2419;font-size:15px!important}
+.patchStats th,.patchStats td{border-bottom:1px solid #24493a!important}
+.patchStats tr:last-child>*{border-bottom:0!important}
+.patchStats thead{background:#132e20!important;color:#e3e9e3!important}
+.patchStats thead th{font:600 15px var(--hx-font-ui)}
+.patchStats tbody th{color:#e3e9e3!important}
+.patchBefore{color:#9fb0a3!important}
+.patchAfter{color:#f3c94c!important;background:#f3c94c0d!important}
+.patchArchive{border-top:1.5px solid #c9a24a66!important}
+.patchArchive>summary{display:inline-flex;align-items:center;gap:8px;margin:16px 0;min-height:46px;padding:0 20px!important;border:2px solid #e2b04a;border-radius:10px;background:linear-gradient(180deg,#183322,#0f2219);color:#fbf7ea;font:700 17px var(--hx-font-ui)!important;list-style:none}
+.patchArchive>summary::-webkit-details-marker{display:none}
+.patchArchive>summary::after{content:'';width:14px;height:14px;background:#e9dcb8;-webkit-mask:url("assets/uidesign/icons/icon_chevronDown.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_chevronDown.svg") center/contain no-repeat;transition:transform .15s}
+.patchArchive[open]>summary::after{transform:rotate(180deg)}
+
+/* ===== Testlabor im Spiel: Leiste unter dem Phasenschild, Testbericht als Fenster ===== */
+.challengeLabBar{position:fixed;left:50%;top:64px;transform:translateX(-50%);z-index:950;display:flex;flex-wrap:wrap;align-items:center;gap:10px;max-width:90vw;padding:6px 8px 6px 16px;
+  border:2px solid transparent;border-radius:999px;background:var(--hx-capsule-fill) padding-box,var(--hx-panel-edge) border-box;box-shadow:0 3px 10px #0008;color:#fbf7ea;font:600 14px/1.3 var(--hx-font-ui)}
+.challengeLabBar>span{display:inline-flex;align-items:center;gap:8px;color:var(--hx-gold-text);font-weight:700}
+.challengeLabBar>span::before{content:'';width:18px;height:18px;flex:none;background:currentColor;-webkit-mask:url("assets/uidesign/icons/icon_daily.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_daily.svg") center/contain no-repeat}
+.challengeLabBar a{color:#ffe198;text-decoration:underline;text-decoration-color:#ffe19866;text-underline-offset:3px}
+.challengeLabBar button{min-height:36px;padding:0 14px;border-radius:999px;font-size:14px}
+@media(min-width:1101px) and (min-height:601px){.challengeLabBar{top:calc(var(--hx-top) + var(--hx-phase-h) + 12px)}}
+@media(max-width:700px){.challengeLabBar{border-radius:14px}}
+.challengeLabReport{max-width:min(720px,90vw);padding:20px;border:3px solid #e2b04a;border-radius:18px;color:#f4ecd6;font-family:var(--hx-font-ui);
+  background:radial-gradient(130% 70% at 50% 0,#1e3c29 0,#11261b 58%,#0b1912 100%);box-shadow:inset 0 0 0 3px #0b1912,inset 0 0 0 4.5px #c9a24a99,0 22px 60px #000d}
+.challengeLabReport::backdrop{background:#050806cc}
+.challengeLabReport textarea{display:block;box-sizing:border-box;width:min(65ch,75vw);margin:0 0 14px;padding:12px;border:1.5px solid #3c7a62;border-radius:10px;background:#0b1912;color:#fbf7ea;font:600 15px/1.5 var(--hx-font-ui)}
+.challengeLabReport button{min-height:46px;padding:0 22px}
+
+/* Hauptmenü: Testlabor-Link wie die übrigen Kapseln der Fußleiste */
+.hexMenuBar .menuChallengeLab{display:inline-flex;align-items:center;gap:8px;min-height:44px;margin:0;padding:4px 16px;border:1.5px solid var(--hx-capsule-line,#46634f);border-radius:999px;background:var(--hx-capsule-fill,#0f1a14);
+  box-shadow:inset 0 1px 0 #ffffff14,0 3px 8px #00000059;color:var(--hx-green-ink,#f4ecd6);font:700 16px/1.2 var(--hx-font-ui);text-decoration:none}
+.hexMenuBar .menuChallengeLab:hover{border-color:#c9a24a;color:#fff6d6}
+@media(max-width:900px){.hexMenuBar .menuChallengeLab{font-size:0;gap:0;padding:4px 12px}.hexMenuBar .menuChallengeLab .hxi{font-size:16px}}
