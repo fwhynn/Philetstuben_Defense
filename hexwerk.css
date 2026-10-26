@@ -1442,3 +1442,74 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
   background:linear-gradient(180deg,#17301f,#0f2219) padding-box,linear-gradient(170deg,#fff3c4,#e9b949 50%,#f3d58a) border-box!important;color:#fbf7ea!important;font:900 18px/1.2 var(--hx-font-title)!important;box-shadow:0 0 18px #f6c95a55,0 6px 22px #0009!important}
 .relicBurst strong::before{content:'';width:22px;height:22px;flex:none;background:#ffe198;-webkit-mask:url("assets/uidesign/icons/icon_treasure.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_treasure.svg") center/contain no-repeat}
 .relicBurst.claimed strong{font-size:22px!important;background:linear-gradient(180deg,#3b3417,#241f0f) padding-box,linear-gradient(170deg,#fff3c4,#e9b949 50%,#f3d58a) border-box!important}
+
+/* ===== Händler und Giervertrag als Fenster im Referenzstil ===== */
+#merchantOverlay>.rewardBox,#greedOverlay>.rewardBox{width:min(820px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;padding:0 0 18px!important;border:3px solid #e2b04a!important;border-radius:18px!important;
+  background:radial-gradient(130% 70% at 50% 0,#1e3c29 0,#11261b 58%,#0b1912 100%)!important;box-shadow:inset 0 0 0 3px #0b1912,inset 0 0 0 4.5px #c9a24a99,0 0 26px #f6c95a40,0 22px 60px #000d!important;font-family:var(--hx-font-ui)}
+#merchantOverlay .rewardHeading,#greedOverlay .rewardHeading{display:flex;align-items:center;gap:16px;margin:0 0 12px;padding:18px 22px 14px 28px;border-bottom:1.5px solid #c9a24a80;background:linear-gradient(180deg,#1b3826,#132a1d)}
+#merchantOverlay .rewardHeading h2,#greedOverlay .rewardHeading h2{display:flex;align-items:center;gap:14px;flex:1;margin:0;font:900 clamp(28px,3vw,40px)/1.05 var(--hx-font-title)!important;color:#fbf7ea!important;text-shadow:0 3px 0 #0009}
+#merchantOverlay .rewardHeading h2::before,#greedOverlay .rewardHeading h2::before{content:'';width:34px;height:34px;flex:none;background:#f3c94c;-webkit-mask:var(--ti) center/contain no-repeat;mask:var(--ti) center/contain no-repeat}
+#merchantOverlay{--ti:url("assets/uidesign/icons/icon_treasure.svg")}#greedOverlay{--ti:url("assets/uidesign/icons/icon_coin.svg")}
+#merchantOverlay .rewardHeading>button,#greedOverlay .rewardHeading>button{flex:none;min-height:46px;padding:0 18px;border:2px solid #e2b04a;border-radius:10px;background:linear-gradient(180deg,#183322,#0f2219);color:#fff3c4;font:700 16px var(--hx-font-ui);box-shadow:inset 0 1px 0 #ffffff14;cursor:pointer}
+#merchantOverlay .rewardHeading>button:hover,#greedOverlay .rewardHeading>button:hover{background:#1f3d2a}
+#merchantOverlay .rewardBox>p,#greedOverlay .rewardBox>p{margin:0 28px 10px;color:#d5ddd4;font-size:16px;line-height:1.5}
+#merchantStatus,#greedStatus{display:inline-flex!important;align-items:center;gap:8px;padding:6px 16px;border:1.5px solid var(--hx-capsule-line);border-radius:999px;background:var(--hx-capsule-fill);color:var(--hx-gold-text)!important;font:700 17px/1.2 var(--hx-font-ui)}
+#merchantStatus:empty,#greedStatus:empty{display:none!important}
+#merchantChoices,#greedChoices{gap:10px!important;margin:6px 28px 0}
+
+/* Wahlzeilen in Belohnungs-, Händler- und Duo-Fenstern (.upgradeOption) */
+.rewardBox .upgradeOption{gap:6px;padding:14px 16px!important;border:1.5px solid #46634f!important;border-radius:10px!important;background:linear-gradient(180deg,#1b3324,#122419)!important;
+  box-shadow:inset 0 1px 0 #ffffff12;color:#f4ecd6!important;font:600 16px/1.35 var(--hx-font-ui);text-align:left;cursor:pointer;transition:border-color .14s,background .14s}
+.rewardBox .upgradeOption strong{font:800 18px/1.2 var(--hx-font-ui);color:#fbf7ea}
+.rewardBox .upgradeOption small{font-size:14px!important;line-height:1.4!important;color:#b9c6bc!important}
+.rewardBox .upgradeOption:not(:disabled):hover,.rewardBox .upgradeOption:focus-visible{border-color:#c9a24a!important;background:linear-gradient(180deg,#22402c,#16291d)!important}
+.rewardBox .upgradeOption:disabled{background:linear-gradient(180deg,#172a1f,#101e16)!important;color:#9aa39e!important;cursor:not-allowed}
+.rewardBox .upgradeOption:disabled strong{color:#b9c6bc}
+#merchantChoices>button:not(.upgradeOption){grid-column:1/-1;min-height:42px;border:1.5px solid #3c7a62;border-radius:10px;background:linear-gradient(180deg,#143024,#0d2219);color:#fbf7ea;font:700 15px var(--hx-font-ui)}
+#merchantChoices>button[aria-pressed=true]{border-color:#e2b04a;background:linear-gradient(180deg,#3b3417,#241f0f);color:#fff3c4;opacity:1}
+
+/* ===== Tagesherausforderung: Missionskopf, Regeln als Gruppe, Fortschritt als Kapsel ===== */
+#dailyModeDetails .dailyChallenge{display:flex;flex-direction:column;gap:12px;font-family:var(--hx-font-ui)}
+#dailyMissionTitle{display:flex;align-items:center;gap:12px;font:900 clamp(22px,2.2vw,30px)/1.15 var(--hx-font-title);color:#fbf2d6}
+#dailyMissionTitle::before{content:'';width:40px;aspect-ratio:.866;flex:none;background:url("assets/uidesign/icons/icon_daily.svg") center/48% no-repeat,url("assets/uidesign/hex/hex_green.svg") center/100% 100% no-repeat}
+#dailyModeDetails .dailyChallenge>div:not(.hidden){padding:6px 20px;border:1.5px solid #3c7a62;border-radius:12px;background:#0f2419}
+#dailyModeDetails .dailyChallenge>div p{margin:10px 0;color:#e3e9e3;font-size:16px;line-height:1.55}
+#dailyModeDetails .dailyChallenge>div p+p{padding-top:10px;border-top:1px solid #24493a}
+#dailyProgress{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;margin:0;padding:6px 16px;border:1.5px solid var(--hx-capsule-line);border-radius:999px;background:var(--hx-capsule-fill);color:var(--hx-gold-text);font:700 16px/1.3 var(--hx-font-ui)}
+#dailyProgress:empty{display:none}
+#dailyStartBtn{min-height:54px;font-size:19px!important}
+
+/* ===== Duo: Team-Menü, Zugstatus und Partnergeschenke ===== */
+.duoHud{border:2px solid transparent!important;border-radius:10px!important;background:linear-gradient(180deg,#17301f,#0f2219) padding-box,var(--hx-panel-edge) border-box!important;color:var(--hx-text);font-family:var(--hx-font-ui)}
+.duoHud>summary{display:flex;align-items:center;gap:8px;font:700 16px var(--hx-font-ui)!important;color:#fbf7ea;list-style:none}
+.duoHud>summary::-webkit-details-marker{display:none}
+.duoHud>summary::before{content:'';width:20px;height:20px;flex:none;background:var(--hx-gold-text);-webkit-mask:url("assets/uidesign/icons/icon_duo.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_duo.svg") center/contain no-repeat}
+.dockTL .duoHudBody{border:2px solid transparent!important;border-radius:10px!important;background:linear-gradient(180deg,#17301f,#0f2219) padding-box,var(--hx-panel-edge) border-box!important}
+.duoHudSection{border-top-color:#24493a!important}
+.duoHudSection h3{display:flex;align-items:center;gap:8px;font:800 13px/1.3 var(--hx-font-ui)!important;letter-spacing:.08em!important;color:var(--hx-gold-text)!important}
+.duoHudBody p,.duoHudBody small{color:#cfd9cf}
+.duoHudBody .duoDanger{border:2px solid var(--hx-danger-line)!important;border-radius:8px;background:var(--hx-danger-fill)!important;color:#fff3ec}
+.duoTurn{border:2px solid transparent!important;background:linear-gradient(180deg,#17301f,#0f2219) padding-box,var(--hx-panel-edge) border-box!important;color:var(--hx-text);font-family:var(--hx-font-ui)}
+.duoTurn #duoTurnTitle{font:900 18px/1.2 var(--hx-font-title);color:#fbf2d6}
+.duoTurn .duoQuickMap,.duoTurn .duoSupportShortcut{border:1.5px solid var(--hx-capsule-line)!important;background:var(--hx-capsule-fill)!important;color:var(--hx-green-ink)!important;font-family:var(--hx-font-ui);font-weight:700}
+.duoTurn .duoQuickMap:hover,.duoTurn .duoSupportShortcut:hover{border-color:#c9a24a!important}
+@media(min-width:1101px) and (min-height:601px){.duoGame .duoTurn{top:calc(var(--hx-top) + var(--hx-phase-h) + 10px);border-radius:12px}}
+.duoGiftReceived,.duoGiftReceipt{display:flex;align-items:center;justify-content:center;gap:6px;color:var(--hx-gold-text)!important;font:700 14px/1.35 var(--hx-font-ui)!important}
+.duoGiftReceived.hidden{display:none}
+.duoGiftReceived::before,.duoGiftReceipt::before{content:'';width:16px;height:16px;flex:none;background:currentColor;-webkit-mask:url("assets/uidesign/icons/icon_partner.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_partner.svg") center/contain no-repeat}
+.duoGiftReceipt{justify-content:flex-start}
+.duoGiftPreview{border-top:1.5px solid #c9a24a66!important}
+.duoGiftPreview>strong{display:block;margin:4px 0 2px;font:900 18px var(--hx-font-title);color:#fbf2d6}
+.duoPartnerGift{align-items:center;text-align:center;border:3px solid var(--hx-common)!important;border-radius:12px!important;background:linear-gradient(180deg,#fffaf0,#f6ecd3 55%,#eadbb4)!important;
+  box-shadow:inset 0 0 0 3px #fff8,0 4px 10px #0006;color:#2b281f}
+.duoPartnerGift strong{font:700 16px/1.2 var(--hx-font-ui);color:#2b281f}
+.duoPartnerGift small{color:#4a4232}
+.duoPartnerGift.chosen{border-color:#e2b04a!important;outline:3px solid var(--hx-focus);outline-offset:2px}
+.duoPartnerGiftIcon,.duoGoldGift .duoGiftIcon{display:grid;place-items:center;width:48px;aspect-ratio:.866;background:url("assets/uidesign/hex/hex_green.svg") center/100% 100% no-repeat;font-size:0!important;filter:drop-shadow(0 2px 3px #0006)}
+.duoPartnerGiftIcon .hxi,.duoGoldGift .duoGiftIcon .hxi{width:46%;height:46%;color:#ffe198}
+.duoGoldGift .duoGiftIcon{width:84px;background-image:url("assets/uidesign/hex/hex_gold.svg")}
+.duoGoldGift .duoGiftIcon .hxi{color:#5b4316}
+.card.duoGoldGift{border-color:var(--hx-legendary)!important;background:radial-gradient(circle at 50% 28%,#fffaf0,#f6e3b0 60%,#eacb7f)!important}
+.card.duoGoldGift strong{font:900 30px/1.1 var(--hx-font-title);color:#2b281f}
+#duoGifts #duoGiftHistory{display:grid;gap:6px;font-size:14px;color:#e3e9e3}
+.duoSupportShortcut{font-family:var(--hx-font-ui)}

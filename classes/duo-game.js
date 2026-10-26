@@ -117,7 +117,7 @@ const HexDuoGame=(()=>{
       if(!delivery)return;
       const describe=choice=>choice?.kind==='gold'?'+'+choice.amount+' Gold':HexData.CARD_LIBRARY[choice?.cardId]?.name||'Karte';
       const received=partnerOffer?.index!==null&&partnerOffer?.index!==undefined?partnerOffer.choices?.[partnerOffer.index]:null;
-      const receipt=received?'🎁 Vom Partner erhalten: '+describe(received)+' · Welle '+delivery.wave:'Dein Partner hat noch kein Geschenk gewählt.';
+      const receipt=received?'Vom Partner erhalten: '+describe(received)+' · Welle '+delivery.wave:'Dein Partner hat noch kein Geschenk gewählt.';
       $('duoGiftReceived').textContent=receipt;
       function fill(box){
         const status=document.createElement('p');status.className='duoGiftReceipt';status.textContent=receipt;box.appendChild(status);
@@ -125,7 +125,7 @@ const HexDuoGame=(()=>{
         const choices=document.createElement('div');choices.className='duoPartnerOffers';
         for(const [index,choice] of (partnerOffer?.choices||[]).entries()){
           const item=document.createElement('div');item.className='duoPartnerGift';item.classList.toggle('chosen',partnerOffer.index===index);
-          const icon=document.createElement('span');icon.setAttribute('aria-hidden','true');icon.textContent=choice.kind==='gold'?'🎁':'⬡';item.appendChild(icon);
+          const icon=document.createElement('span');icon.className='duoPartnerGiftIcon';icon.setAttribute('aria-hidden','true');const glyph=document.createElement('span');glyph.className='hxi hxi-'+(choice.kind==='gold'?'coin':'deck');icon.appendChild(glyph);item.appendChild(icon);
           const name=document.createElement('strong');name.textContent=describe(choice);item.appendChild(name);
           const detail=document.createElement('small');detail.textContent=choice.cardId?HexData.CARD_LIBRARY[choice.cardId].desc:'Sofort verfügbares Gold';item.appendChild(detail);
           if(partnerOffer.index===index){const selected=document.createElement('small');selected.textContent='✓ Erhalten';item.appendChild(selected);}choices.appendChild(item);
