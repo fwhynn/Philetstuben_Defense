@@ -1604,24 +1604,14 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 #rulesDrawer li:last-child{border-bottom:0}
 #rulesDrawer li::before{content:'';position:absolute;left:6px;top:19px;width:10px;height:10px;transform:rotate(45deg);border:2px solid #e9b949;box-sizing:border-box}
 
-/* Hauptmenü-Kacheln als Platten mit Dicke: unter der Fläche (oben) liegt eine Seitenfläche --e in der Rillenfarbe der Familie.
-   Die Fläche behält Größe und Mittelpunkt; der Umriss (clip-path) umfasst Fläche plus Seite. */
-.hexCluster>.hexFog,.hexCluster>.hexBtn{--e:calc(var(--u)*var(--h,1)*.075);--face:calc(100% - var(--e));
-  height:calc(var(--h,1)*var(--u) + var(--e));translate:-50% calc(-50% + var(--e)/2);
-  clip-path:polygon(50% 0,100% calc(var(--face)*.25),100% calc(var(--face)*.75 + var(--e)),50% 100%,0 calc(var(--face)*.75 + var(--e)),0 calc(var(--face)*.25))}
-.hexCluster .hexBtn,.hexCluster .hexBtn.locked,.hexCluster .hexFog{background-image:var(--hexbg),var(--hexside);background-position:top,bottom;background-size:100% var(--face);background-repeat:no-repeat}
-.hexCluster .hexBtn{--hexside:url("assets/uidesign/hex/hex_green_groove.svg");padding-bottom:calc(var(--h,1)*var(--u)*.18 + var(--e))}
-.hexCluster .hexPrimary{--hexside:url("assets/uidesign/hex/hex_gold_groove.svg")}
-.hexCluster .hexBtn.locked,.hexCluster .hexFog{--hexbg:url("assets/uidesign/hex/hex_fog.svg");--hexside:url("assets/uidesign/hex/hex_fog_groove.svg")}
-.hexCluster .hexFog{padding-bottom:var(--e)}
-/* Schatten: knapp unter den Platten dunkel, darunter weich und weit, damit die Blüte über der Landschaft schwebt */
+/* Tiefe der Hauptmenü-Kacheln nur über Schatten: knapp darunter dunkel, darunter weich und weit, damit die Blüte über der Landschaft schwebt */
 .hexCluster{filter:drop-shadow(0 calc(var(--u)*.03) calc(var(--u)*.025) #000a) drop-shadow(0 calc(var(--u)*.12) calc(var(--u)*.14) #0009)}
 .hexCluster .hexBtn:not(:disabled):hover{transform:translateY(calc(var(--u)*-.045)) scale(1.03)}
 
 /* Tastaturfokus: gelber Rand als unterste Ebene der Fläche statt eines Überzugs (der ::before-Rand lag wegen isolation über der Fläche) */
 .hexCluster .hexBtn::before,.hexCluster .hexBtn:focus-visible::before{display:none}
 .hexCluster .hexBtn:focus-visible{--hxrim:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 866 1000'%3E%3Cpolygon points='433,20 848.7,260 848.7,740 433,980 17.3,740 17.3,260' fill='%23ffe198' stroke='%23ffe198' stroke-width='34' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-image:var(--hexparts),var(--hxrim),var(--hexside);background-position:top,top,top,top,bottom;background-size:100% var(--face);background-repeat:no-repeat}
+  background-image:var(--hexparts),var(--hxrim);background-position:center;background-size:100% 100%;background-repeat:no-repeat}
 
 /* ===== Belohnung („Deck erweitern“) als Fenster im Referenzstil, wie Händler und Giervertrag ===== */
 #merchantOverlay>.rewardBox,#greedOverlay>.rewardBox{clip-path:none!important}
