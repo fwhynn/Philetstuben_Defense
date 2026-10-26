@@ -1777,3 +1777,30 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 
 /* Patch Notes: Überblickskacheln füllen die Zeile, auch wenn es nur zwei Gruppen gibt */
 .patchOverview{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))!important}
+
+/* Tagesherausforderung: ein Rahmen statt zwei; der Missionstitel ersetzt die Frage „Wie möchtest du spielen?“ */
+#dailyModeDetails .dailyChallenge{padding:0!important;border:0!important;background:none!important;box-shadow:none!important}
+#playModeOverlay:has(#dailyModeDetails:not(.hidden))>.modeBox>h2{display:none}
+#playModeOverlay:has(#dailyModeDetails:not(.hidden)) #dailyMissionTitle{font-size:clamp(26px,2.6vw,36px);text-shadow:0 3px 0 #0009}
+
+/* Deckansicht: gleiche Kopfleiste wie „Deck erweitern“, lesbare Gruppen und Mini-Karten */
+#rewardOverlay #rewardDeck>h2{display:flex;align-items:center;gap:16px;margin:0 -30px 14px;padding:18px 26px 14px 30px;border-bottom:1.5px solid #c9a24a80;background:linear-gradient(180deg,#1b3826,#132a1d);
+  font:900 clamp(28px,3vw,40px)/1.05 var(--hx-font-title)!important;color:#fbf7ea!important;text-shadow:0 3px 0 #0009}
+#rewardOverlay #rewardDeck>h2::after{content:'';flex:1;min-width:40px;height:14px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M7 1l6 6-6 6-6-6z' fill='none' stroke='%23e9b949' stroke-width='2'/%3E%3C/svg%3E") 0 50%/14px 14px no-repeat,linear-gradient(90deg,#e9b949,#e9b94900) 20px 50%/calc(100% - 20px) 2px no-repeat}
+#rewardDeck:not(.hidden){margin-top:0!important}
+#rewardOverlay:has(#rewardDeck:not(.hidden)) .rewardInspectActions{margin:16px 30px 0}
+.deckOverview h3{font:900 18px/1.2 var(--hx-font-title)!important;color:#fbf2d6!important;margin:6px 0 10px!important}
+.deckHexGrid{grid-template-columns:repeat(auto-fill,108px)!important;gap:10px!important}
+.deckHexCard{width:108px!important;height:auto!important;min-height:136px;padding:10px 6px 24px!important}
+.deckHexCard svg.hxCardArt{width:72px!important}
+.deckHexCard small{height:auto!important;font:700 13px/1.25 var(--hx-font-ui)!important}
+.deckHexCard .deckHexCount{font:700 13px/18px var(--hx-font-ui)!important}
+#rewardOverlay #rewardDeck{margin-left:0!important;margin-right:0!important;padding:0 30px;overflow-x:hidden}
+
+/* Rundenende: Aufklapp-Knöpfe mit Innenabstand; Testlabor-Leiste liegt unter Fenstern (Ebene 39 statt 950) */
+.runStatsSingles>summary,.runShareDetails>summary{padding:0 18px!important;list-style:none}
+.runStatsSingles>summary::-webkit-details-marker,.runShareDetails>summary::-webkit-details-marker{display:none}
+.challengeLabBar{z-index:39}
+
+/* Dialog-Überschriften erhalten beim Öffnen den Fokus (Screenreader), sind aber nicht bedienbar: kein Fokusrahmen */
+[data-dialog-initial-focus]:focus,[data-dialog-initial-focus]:focus-visible{outline:none!important}

@@ -1739,7 +1739,7 @@ Minen|Mines
 Durchschlag|Pierce
 Frost|Frost
 Radius|Radius
-Baum (Test)|Tree (test)
+Baum|Tree
 Werkstatt|Workshop
 Ganzen Baum zeigen|Show whole tree
 Vergrößern|Zoom in

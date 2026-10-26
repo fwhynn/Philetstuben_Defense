@@ -1518,7 +1518,7 @@ R dreht die Karte, dann Feld anklicken.`;
   }
   document.getElementById('resetDiamondsBtn').addEventListener('click', () => { if (!resetArsenalPending) { resetArsenalPending = true; renderArsenal('Alle Turm- und Meta-Freischaltungen werden entfernt; Loadouts werden auf die fünf Starttürme zurückgesetzt. Ein bereits laufender Run behält seine Startauswahl. Erneut klicken zum Bestätigen.'); return; } const result = HexProfile.resetUnlocks(profile, TOWERS); profile = result.profile; scheduleCloudSave(); pendingLoadout = [...profile.activeLoadout]; resetArsenalPending = false; renderLoadout(); renderArsenal(result.refund + ' Diamanten erstattet. Du kannst dich neu entscheiden.'); renderUI(); });
   function openArsenal() { resetArsenalPending = false; renderArsenal(); arsenalOverlay.classList.remove('hidden'); }
-  // Ansicht im Arsenal: Baum (Test) oder Werkstatt; gilt für diese Sitzung.
+  // Ansicht im Arsenal: Baum oder Werkstatt; gilt für diese Sitzung.
   for (const button of document.querySelectorAll?.('[data-arsenal-view]') || []) button.addEventListener('click', () => { arsenalOverlay.dataset.view = button.dataset.arsenalView; for (const other of document.querySelectorAll('[data-arsenal-view]')) other.setAttribute('aria-pressed', String(other === button)); });
 
   function toggleUpgradeStatus(value = !state.showUpgradeStatus) { state.showUpgradeStatus = value; document.getElementById('upgradeStatus').checked = value; saveGameSettings(); renderBoard(); }
@@ -1673,7 +1673,7 @@ R dreht die Karte, dann Feld anklicken.`;
     newRun(undefined,undefined,undefined,'2026-11-01');mainMenu.classList.add('hidden');document.getElementById('settingsDrawer').classList.add('hidden');renderAll();
   });
   // Vertragssymbole aus dem Hexwerk-Iconsatz; „×2“ und „—“ bleiben als Schrift.
-  const GREED_ICONS={swarm:'wave',healers:'heart',elite:'vsArmor',boss:'boss',haste:'speed3',bulwark:'vsMagic',giants:'vsHealth'};
+  const GREED_ICONS={swarm:'wave',healers:'heart',elite:'vsArmor',boss:'boss',haste:'speed3',bulwark:'vsMagic',giants:'upgrade'};
   function renderGreed(){
     const active=state.challengeKind==='greed'&&state.hp>0&&state.phase==='build'&&!state.waveRunning&&!state.celebrationActive&&state.greedContract?.wave!==state.wave+1;
     document.getElementById('greedOpenBtn').classList.add('hidden');document.getElementById('greedOverlay').classList.add('hidden');
