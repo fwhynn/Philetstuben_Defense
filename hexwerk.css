@@ -1622,3 +1622,70 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 .hexCluster .hexBtn::before,.hexCluster .hexBtn:focus-visible::before{display:none}
 .hexCluster .hexBtn:focus-visible{--hxrim:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 866 1000'%3E%3Cpolygon points='433,20 848.7,260 848.7,740 433,980 17.3,740 17.3,260' fill='%23ffe198' stroke='%23ffe198' stroke-width='34' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-image:var(--hexparts),var(--hxrim),var(--hexside);background-position:top,top,top,top,bottom;background-size:100% var(--face);background-repeat:no-repeat}
+
+/* ===== Belohnung („Deck erweitern“) als Fenster im Referenzstil, wie Händler und Giervertrag ===== */
+#merchantOverlay>.rewardBox,#greedOverlay>.rewardBox{clip-path:none!important}
+#rewardOverlay:not(.inspectMap)>.rewardBox{width:min(1040px,calc(100vw - 24px));max-height:calc(100dvh - 24px);padding:0 0 20px!important;clip-path:none!important;border:3px solid #e2b04a!important;border-radius:18px!important;
+  background:radial-gradient(130% 70% at 50% 0,#1e3c29 0,#11261b 58%,#0b1912 100%)!important;box-shadow:inset 0 0 0 3px #0b1912,inset 0 0 0 4.5px #c9a24a99,0 0 26px #f6c95a40,0 22px 60px #000d!important;font-family:var(--hx-font-ui)}
+#rewardOverlay .rewardHeading{display:flex;align-items:center;gap:16px;margin:0 0 12px;padding:18px 26px 14px 30px;border-bottom:1.5px solid #c9a24a80;background:linear-gradient(180deg,#1b3826,#132a1d)!important;border-radius:0}
+#rewardOverlay .rewardHeading h2{display:flex;align-items:center;gap:16px;flex:1;margin:0;font:900 clamp(28px,3vw,40px)/1.05 var(--hx-font-title)!important;color:#fbf7ea!important;text-shadow:0 3px 0 #0009}
+#rewardOverlay .rewardHeading h2::after{content:'';flex:1;min-width:40px;height:14px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M7 1l6 6-6 6-6-6z' fill='none' stroke='%23e9b949' stroke-width='2'/%3E%3C/svg%3E") 0 50%/14px 14px no-repeat,linear-gradient(90deg,#e9b949,#e9b94900) 20px 50%/calc(100% - 20px) 2px no-repeat}
+#rewardDescription{margin:0 30px 14px;color:#d5ddd4;font-size:17px;line-height:1.5}
+#rewardOverlay .rewardChoices{gap:16px;margin:0 30px}
+#rewardOverlay #skipRemovalBtn,#rewardOverlay #rewardDeck{margin-left:30px;margin-right:30px}
+#rewardDeck>h2{font:900 24px/1.2 var(--hx-font-title)!important;color:#fbf2d6!important}
+.rewardInspectActions{gap:12px}
+.rewardInspectActions button{min-height:48px;padding:0 22px!important;font:700 17px var(--hx-font-ui)!important;width:auto}
+#rewardOverlay.inspectMap .rewardInspectActions{border:2px solid transparent!important;border-radius:12px!important;background:linear-gradient(180deg,#17301ff2,#0f2219f2) padding-box,var(--hx-panel-edge) border-box!important;box-shadow:0 8px 22px #0009}
+
+/* Deckansicht: Mini-Karten wie die Handkarten (Creme, Seltenheitsrand, Kartenbild) */
+.deckHexCard{border-radius:10px!important;background:linear-gradient(180deg,#fffaf0,#f6ecd3 55%,#eadbb4)!important;box-shadow:inset 0 0 0 2px #fff8,0 3px 8px #0006;color:#2b281f;font-family:var(--hx-font-ui)}
+.deckHexCard small{font-weight:700;color:#2b281f}
+.deckHexCard .deckHexCount{color:#5b4316!important}
+
+/* ===== Spielmeldung und Mini-Tutorial ===== */
+.message{border:2px solid transparent!important;border-radius:12px!important;background:linear-gradient(180deg,#17301ff2,#0f2219f2) padding-box,var(--hx-panel-edge) border-box!important;
+  box-shadow:0 8px 22px #0009!important;color:#fbf7ea!important;font:600 16px/1.45 var(--hx-font-ui)!important}
+.message.consumableActive{background:linear-gradient(180deg,#17301ff2,#0f2219f2) padding-box,var(--hx-panel-edge) border-box!important}
+.tutorialPanel:not(.hidden){font-family:var(--hx-font-ui)}
+.tutorialPanel:not(.hidden):not(.message .tutorialPanel){border:2px solid transparent!important;border-radius:12px!important;background:linear-gradient(180deg,#17301f,#0f2219) padding-box,linear-gradient(170deg,#fff3c4,#e9b949 50%,#f3d58a) border-box!important;box-shadow:0 0 18px #f6c95a55,0 12px 28px #000a!important}
+#tutorialTitle{display:block;font:900 clamp(18px,1.6vw,22px)/1.2 var(--hx-font-title);color:#fbf2d6}
+.tutorialPanel p{font-size:16px!important;line-height:1.5!important;color:#e3e9e3}
+.message .tutorialPanel button,.tutorialPanel button{min-height:40px;padding:0 16px!important;font:700 15px var(--hx-font-ui)!important}
+.tutorialFeedback{border:2px solid #d0574a;border-radius:10px;background:linear-gradient(180deg,#3a1a16,#22100d);color:#ffd9cf;font:700 15px/1.4 var(--hx-font-ui)}
+
+/* ===== Biom-Information ===== */
+.biomeInfoPanel{border:2px solid transparent!important;border-radius:12px!important;background:linear-gradient(180deg,#17301f,#0f2219) padding-box,var(--hx-panel-edge) border-box!important;box-shadow:0 12px 32px #000a!important;color:var(--hx-text);font:600 16px/1.5 var(--hx-font-ui)}
+.biomeInfoPanel .panelHead{display:flex;align-items:center;gap:12px;margin-bottom:8px;padding-bottom:8px;border-bottom:1.5px solid #c9a24a66}
+.biomeInfoPanel h2{flex:1;margin:0;font:900 22px/1.15 var(--hx-font-title)!important;color:#fbf2d6!important}
+.biomeInfoPanel small{display:block;margin-top:8px;color:#b9c6bc;font-size:14px}
+
+/* ===== Feier (Stufe geschafft): Fenster im Referenzstil, Pokal als Gold-Hex statt Emoji ===== */
+.celebrationCard{border:3px solid #e2b04a!important;border-radius:18px!important;background:radial-gradient(130% 70% at 50% 0,#1e3c29 0,#11261b 58%,#0b1912 100%)!important;
+  box-shadow:inset 0 0 0 3px #0b1912,inset 0 0 0 4.5px #c9a24a99,0 0 40px #f6c95a55,0 22px 60px #000d!important;font-family:var(--hx-font-ui)}
+.celebrationTrophy{display:grid;place-items:center;width:96px;height:110px;margin:0 auto 12px!important;font-size:0!important;text-shadow:none!important;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(180deg,#ffe48a,#c58d27)}
+.celebrationTrophy::before{content:'';width:46px;height:46px;background:#2a1f10;-webkit-mask:url("assets/uidesign/icons/icon_leaderboard.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_leaderboard.svg") center/contain no-repeat}
+#celebrationWave{color:var(--hx-gold-text);font:700 17px var(--hx-font-ui);letter-spacing:.06em;text-transform:uppercase}
+.celebrationCard h2{color:#fbf7ea!important;text-shadow:0 3px 0 #0009!important}
+#celebrationText{color:#e3e9e3;font-size:17px;line-height:1.55}
+#celebrationContinue{min-height:54px;font-size:19px}
+
+/* ===== Run-Vorbereitung ===== */
+#loadoutOverlay>.loadoutBox{clip-path:none!important;border:3px solid #e2b04a!important;border-radius:18px!important;background:radial-gradient(130% 70% at 50% 0,#1e3c29 0,#11261b 58%,#0b1912 100%)!important;
+  box-shadow:inset 0 0 0 3px #0b1912,inset 0 0 0 4.5px #c9a24a99,0 0 26px #f6c95a40,0 22px 60px #000d!important;font-family:var(--hx-font-ui)}
+#loadoutOverlay .eyebrow{color:var(--hx-gold-text);font:700 14px var(--hx-font-ui);letter-spacing:.12em}
+#loadoutTitle{font:900 clamp(28px,3vw,40px)/1.1 var(--hx-font-title)!important;color:#fbf7ea!important;text-shadow:0 3px 0 #0009}
+#loadoutOverlay>.loadoutBox>p{color:#d5ddd4;font-size:16px}
+#loadoutOverlay .loadoutChoice{border:1.5px solid #46634f!important;border-radius:12px!important;background:linear-gradient(180deg,#1b3324,#122419)!important;box-shadow:inset 0 1px 0 #ffffff12;color:#f4ecd6;font-family:var(--hx-font-ui)}
+#loadoutOverlay .loadoutChoice:not(:disabled):hover{border-color:#c9a24a!important}
+#loadoutOverlay .loadoutChoice.selected{border:2px solid #e2b04a!important;background:linear-gradient(180deg,#3b3417,#241f0f)!important;box-shadow:0 0 14px #f6c95a44,inset 0 1px 0 #ffffff1a!important}
+#loadoutOverlay .loadoutChoice strong{font:700 18px/1.2 var(--hx-font-ui)!important;color:#fbf7ea}
+#loadoutOverlay .loadoutChoice small{color:#b9c6bc;font-size:14px}
+#loadoutOverlay .loadoutChoice .loadoutRole{color:var(--hx-gold-text);font-weight:700}
+#loadoutOverlay .loadoutChoice .loadoutCheck{color:#8fe39b}
+#loadoutOverlay .prepPresets>summary{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border:1.5px solid var(--hx-capsule-line);border-radius:999px;background:var(--hx-capsule-fill);color:var(--hx-green-ink);font:700 16px var(--hx-font-ui);list-style:none;cursor:pointer}
+#loadoutOverlay .prepPresets>summary::-webkit-details-marker{display:none}
+#loadoutOverlay .presetCard{border:1.5px solid #3c7a62!important;border-radius:10px!important;background:#0f2419!important}
+#loadoutOverlay .presetCard button{min-height:36px;font-size:14px!important}
+#preparationInfo{color:#e3e9e3}
+#loadoutOverlay .loadoutActions button{min-height:52px;padding:0 22px;font-size:17px!important}
