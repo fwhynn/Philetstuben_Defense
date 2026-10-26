@@ -887,10 +887,12 @@ R dreht die Karte, dann Feld anklicken.`;
     }
     measureChrome(); positionTutorialSpotlight(); const raw = menuArea(false); if (!raw) return;
     messageEl.style.position = 'fixed'; messageEl.style.left = ((raw.left + raw.right) / 2) + 'px'; messageEl.style.top = raw.top + 'px'; messageEl.style.bottom = 'auto'; messageEl.style.maxHeight = (tutorial.active ? Math.max(120, Math.min(280, document.documentElement.clientHeight - 180)) : Math.max(0, Math.min(240, (raw.bottom - raw.top) * .65))) + 'px'; if (document.documentElement.style?.setProperty) document.documentElement.style.setProperty('--tutorial-bottom', messageEl.getBoundingClientRect().bottom + 'px');
-    const area = menuArea(); for (const panel of document.querySelectorAll('.towerPanel:not(.hidden),.drawer:not(.hidden)')) {
+    // Das Einstellungsfenster ist ein mittiges Hexwerk-Fenster und behält seine eigene Größe (hexwerk.css).
+    const area = menuArea(); for (const panel of document.querySelectorAll('.towerPanel:not(.hidden),.drawer:not(.hidden):not(.settingsWindow)')) {
       let bounds=area;
       if(document.documentElement.clientWidth>700){
-        const left=document.documentElement.clientWidth>1100?area.left:12,right=Math.min(document.documentElement.clientWidth-12,left+440),height=document.documentElement.clientHeight;
+        const viewWidth=document.documentElement.clientWidth,columnWidth=panel.classList.contains('buildDrawer')?Math.min(540,Math.max(440,viewWidth*.3)):440;// Turm bauen wie in hexwerk.css: clamp(440px,30vw,540px)
+        const left=viewWidth>1100?area.left:12,right=Math.min(viewWidth-12,left+columnWidth),height=document.documentElement.clientHeight;
         const obstacles=[...document.querySelectorAll('.compactToolbar,.dockTL,.hud,.dockBR,.dockBL,.mapControls,.handDock,.duoQuickMap')].map(el=>el.getBoundingClientRect()).filter(r=>r.right>left&&r.left<right);
         bounds=HexUiLayout.columnArea(document.documentElement.clientWidth,height,obstacles,left,right-left);
         if(tutorial.active)bounds.top=Math.max(bounds.top,area.top);

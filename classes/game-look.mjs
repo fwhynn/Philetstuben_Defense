@@ -11,7 +11,7 @@ import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
 import {SMAAPass} from 'three/addons/postprocessing/SMAAPass.js';
 import {gradeShader} from './grade-shader.mjs';
 
-export const GAME_GRADE={saturation:1.18,contrast:1.07,vignette:.26,shadowTint:[.93,.98,1.07],lightTint:[1.05,1,.93]};
+export const GAME_GRADE={saturation:1.04,contrast:1.07,vignette:.26,shadowTint:[.93,.98,1.07],lightTint:[1.05,1,.93]};
 
 // Hintergrund und Spielfeld nacheinander in dasselbe Zwischenbild; dazwischen nur die Tiefe löschen (wie bisher auf dem Bildschirm).
 class SceneStackPass extends Pass{

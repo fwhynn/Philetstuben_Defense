@@ -1582,3 +1582,24 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 #towerDragGhost small::before{content:'';width:15px;height:15px;flex:none;background:#f3c94c;-webkit-mask:url("assets/uidesign/icons/icon_coin.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_coin.svg") center/contain no-repeat}
 #towerDragGhost{display:flex;flex-direction:column;align-items:center}
 #towerDragGhost.hidden{display:none}
+
+/* ===== Nachbesserungen nach Sichtprüfung (26.10.2026) ===== */
+/* Hauptmenü-Leiste: Rechtliches bleibt mittig, auch wenn rechts mehr Kapseln stehen als links */
+@media(min-width:641px){
+  .hexMenuBar{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
+  .hexMenuBar .menuLanguage{justify-self:start}
+  .hexMenuBar .menuLegal{justify-self:center}
+  .hexMenuBar .menuBarEnd{justify-self:end}
+}
+
+/* Turm bauen: Kurzwerte brechen nur zwischen den Angaben um, nicht mitten in „46 Schaden · Reichweite 235“; Abklingzeit mit Symbol */
+#towerMenu .towerOfferStats .towerUpgradeMain{white-space:nowrap}
+#towerMenu .towerOfferStats [data-stat=cooldown]{display:inline-flex;align-items:center;white-space:nowrap}
+#towerMenu .towerOfferStats [data-stat=cooldown]::before{content:'';display:inline-block;flex:none;background:#e9dcb8;-webkit-mask:url("assets/uidesign/icons/icon_cooldown.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_cooldown.svg") center/contain no-repeat}
+
+/* Spielregeln: lesbare Größe, jede Regel als eigene Zeile mit Goldraute */
+#rulesDrawer{font-family:var(--hx-font-ui)}
+#rulesDrawer ul{margin:4px 0 0;padding:0;list-style:none;font-size:16px!important;line-height:1.5!important}
+#rulesDrawer li{position:relative;margin:0;padding:12px 4px 12px 30px;border-bottom:1px solid #24493a;color:#e3e9e3}
+#rulesDrawer li:last-child{border-bottom:0}
+#rulesDrawer li::before{content:'';position:absolute;left:6px;top:19px;width:10px;height:10px;transform:rotate(45deg);border:2px solid #e9b949;box-sizing:border-box}

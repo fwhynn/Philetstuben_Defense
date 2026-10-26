@@ -9,7 +9,7 @@ import {MineBatches} from './mine-batches.mjs?v=3983d35af7833e8b';
 import {createGameLook} from './game-look.mjs?v=3983d35af7833e8b';
 import {polishMaterials} from './material-polish.mjs?v=3983d35af7833e8b';
 
-const S=54,STEP=Math.PI/3,TILT=55*Math.PI/180,PITCH_MIN=12*Math.PI/180,PITCH_MAX=88*Math.PI/180,DIST_MIN=220,DIST_MAX=3400,DIST_START=950,SKY='#3384bd';                 // Himmel etwas dunkler als früher (#3f97cf), passend zur kräftigeren Farbkorrektur
+const S=54,STEP=Math.PI/3,TILT=55*Math.PI/180,PITCH_MIN=12*Math.PI/180,PITCH_MAX=88*Math.PI/180,DIST_MIN=220,DIST_MAX=3400,DIST_START=950,SKY='#4a86ad';                 // Himmel gedämpfter (vorher #3384bd), passend zur zurückhaltenderen Farbkorrektur im Spiel
 const PREFIX={tiles:'tile',landmarks:'landmark',towers:'tower',enemies:'enemy',buildings:'building',effects:'mine',bases:'base',consumables:'consumable'};
 const FOLDER={consumables:'effects'};                                // Ordner unter assets/, falls abweichend von der Modellart
 const LIMBS=['leg_l','leg_r','arm_l','arm_r'];
