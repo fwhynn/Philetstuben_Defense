@@ -10,9 +10,13 @@
 @font-face{font-family:'Fraunces';font-weight:900;font-style:normal;font-display:swap;src:local('Fraunces Black'),local('Fraunces-Black'),url("assets/fonts/Fraunces-Black.woff2") format('woff2')}
 @font-face{font-family:'Barlow Semi Condensed';font-weight:600;font-style:normal;font-display:swap;src:local('Barlow Semi Condensed SemiBold'),local('BarlowSemiCondensed-SemiBold'),url("assets/fonts/BarlowSemiCondensed-SemiBold.woff2") format('woff2')}
 @font-face{font-family:'Barlow Semi Condensed';font-weight:700;font-style:normal;font-display:swap;src:local('Barlow Semi Condensed Bold'),local('BarlowSemiCondensed-Bold'),url("assets/fonts/BarlowSemiCondensed-Bold.woff2") format('woff2')}
+/* Nur 600 und 700 liegen vor: leichtere Stärken nutzen SemiBold, 800/900 die echte Bold-Datei statt künstlicher Fettung. */
+@font-face{font-family:'Barlow Semi Condensed';font-weight:100 500;font-style:normal;font-display:swap;src:local('Barlow Semi Condensed SemiBold'),local('BarlowSemiCondensed-SemiBold'),url("assets/fonts/BarlowSemiCondensed-SemiBold.woff2") format('woff2')}
+@font-face{font-family:'Barlow Semi Condensed';font-weight:800 900;font-style:normal;font-display:swap;src:local('Barlow Semi Condensed Bold'),local('BarlowSemiCondensed-Bold'),url("assets/fonts/BarlowSemiCondensed-Bold.woff2") format('woff2')}
 :root{--hx-font-ui:'Barlow Semi Condensed',Inter,system-ui,'Segoe UI',Arial,sans-serif;--hx-font-title:'Tektur','Fraunces',Georgia,sans-serif;
   --hx-asset:"assets/uidesign";--hx-hs:56px;--hx-edge-w:2px}
-body{font-family:var(--hx-font-ui)}
+body{font-family:var(--hx-font-ui);font-synthesis-weight:none}
+button,input,select,textarea,option{font-family:inherit}
 .sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 
 /* --- Icons: einfarbige Masken aus icons/ und towers/, Farbe über currentColor --- */
@@ -1573,7 +1577,8 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 .hexMenuBar .menuChallengeLab{display:inline-flex;align-items:center;gap:8px;min-height:44px;margin:0;padding:4px 16px;border:1.5px solid var(--hx-capsule-line,#46634f);border-radius:999px;background:var(--hx-capsule-fill,#0f1a14);
   box-shadow:inset 0 1px 0 #ffffff14,0 3px 8px #00000059;color:var(--hx-green-ink,#f4ecd6);font:700 16px/1.2 var(--hx-font-ui);text-decoration:none}
 .hexMenuBar .menuChallengeLab:hover{border-color:#c9a24a;color:#fff6d6}
-@media(max-width:900px){.hexMenuBar .menuChallengeLab{font-size:0;gap:0;padding:4px 12px}.hexMenuBar .menuChallengeLab .hxi{font-size:16px}}
+.hexMenuBar .menuLanguage,.hexMenuBar #menuPatchNotesBtn,.hexMenuBar .menuChallengeLab{white-space:nowrap}
+@media(max-width:1279px){.hexMenuBar .menuChallengeLab{font-size:0;gap:0;padding:4px 12px}.hexMenuBar .menuChallengeLab .hxi{font-size:16px}}
 
 /* ===== Turm beim Ziehen: Hex-Symbol mit Preisplakette wie in der Turmleiste ===== */
 #towerDragGhost{padding:0!important;border:0!important;background:none!important;filter:drop-shadow(0 4px 6px #0009)}
@@ -1593,7 +1598,6 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 }
 
 /* Turm bauen: Kurzwerte brechen nur zwischen den Angaben um, nicht mitten in „46 Schaden · Reichweite 235“; Abklingzeit mit Symbol */
-#towerMenu .towerOfferStats .towerUpgradeMain{white-space:nowrap}
 #towerMenu .towerOfferStats [data-stat=cooldown]{display:inline-flex;align-items:center;white-space:nowrap}
 #towerMenu .towerOfferStats [data-stat=cooldown]::before{content:'';display:inline-block;flex:none;background:#e9dcb8;-webkit-mask:url("assets/uidesign/icons/icon_cooldown.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_cooldown.svg") center/contain no-repeat}
 
@@ -1691,8 +1695,8 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
    vergrößert, Schrift eingeschlossen; die Maße unten sind die Werte bei 1920 × 1080. Unter zoom werden auch vw/vh mit k
    multipliziert, darum teilen Begrenzungen relativ zum Bildschirm durch k. Positionen aus fitMenu() rechnen den Zoom heraus. */
 @media(min-width:1101px) and (min-height:601px){
-  :root{--hx-m:24px;--hx-top:18px;--hx-hs:64px;--hx-rail-h:69px;--hx-cap-h:52px;--hx-cap-fs:23px;--hx-phase-h:59px;--hx-phase-fs:27px;--hx-cw:177px;--hx-br-w:336px;
-    --hx-ab-h:58px;--hx-ab-fs:24px;--hx-t-fs:22px;--hx-w-h:80px;--hx-w-fs:25px}
+  :root{--hx-m:20px;--hx-top:14px;--hx-hs:54px;--hx-rail-h:58px;--hx-cap-h:44px;--hx-cap-fs:19px;--hx-phase-h:50px;--hx-phase-fs:22px;--hx-cw:168px;--hx-br-w:300px;
+    --hx-ab-h:48px;--hx-ab-fs:19px;--hx-t-fs:18px;--hx-w-h:64px;--hx-w-fs:20px}
   .gameHeader,#quickLoadout,#biomeRail,.handDock,.dockBR,.dockBL,.boardWrap .mapControls,.consumableMenu,#villageHud,#expeditionDeadline,.challengeLabBar,.duoTurn,
   .boardWrap .towerPanel,#towerDrawer,#rulesDrawer,#settingsDrawer.settingsWindow,.biomeInfoPanel,.celebrationCard,.hexMenuBar,
   .overlay:not(.mainMenu)>*{zoom:var(--hx-k,1)}
@@ -1719,3 +1723,57 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 .card p{font-size:14.5px!important;line-height:1.3!important}
 .card .slots{font-size:15.5px!important}
 .card .rarity{font-size:13px!important}
+
+/* ===== UI/UX-Durchgang (26.10.2026) ===== */
+/* Turmfenster: Pfad-Symbole groß und hell auf dunklem Hex statt kleinem Modellporträt */
+#towerPanel .towerUpgradeCard>.towerPathIcon .hxPathIcon{width:72%!important;height:auto!important;background:none!important;aspect-ratio:1}
+#towerPanel .towerUpgradeCard>.towerPathIcon .hxPathIcon .hxi{width:100%;height:100%;color:#ffe198;filter:drop-shadow(0 2px 0 #0008)}
+#towerPanel .towerUpgradeCard.locked>.towerPathIcon .hxPathIcon .hxi,#towerPanel .towerUpgradeCard:has(.towerBuy:disabled[data-locked])>.towerPathIcon .hxPathIcon .hxi{color:#9aa39e}
+/* Kurzwerte brechen nur zwischen den Angaben um */
+.towerUpgradeMain{white-space:normal!important}.towerUpgradeSecond,.towerUpgradeTime{white-space:nowrap}
+/* Fokus kopieren / einfügen nebeneinander und kompakt */
+#towerPanel .towerDevelopment{flex-flow:row wrap!important}
+#towerPanel .towerDevelopment>*,#towerPanel .towerDevelopment>.towerUpgrades>*{flex:1 1 100%;min-width:0}
+#towerPanel .towerDevelopment>.towerUpgrades>.towerFocusCopy{flex:1 1 calc(50% - 4px);min-height:40px;padding:0 10px;border:1.5px solid #46634f;border-radius:8px;background:linear-gradient(180deg,#183322,#0f2219);color:#e3e9e3;font:700 14px var(--hx-font-ui)}
+#towerPanel .towerDevelopment>.towerUpgrades>.towerFocusCopy:not(:disabled):hover{border-color:#c9a24a;color:#fff6d6}
+#towerPanel .towerDevelopment>.towerUpgrades>.towerFocusCopy:disabled{color:#8f9a94;cursor:default}
+/* Fußzeile: Beschriftungen ausgewogen umbrechen */
+#towerPanel .towerPanelFooter button,#buildingPanel .towerPanelFooter button{text-wrap:balance;line-height:1.2}
+
+/* Aktionsleiste über der Hand nur mit Karten: ohne Karten wiederholt sie nur die Phase aus dem Phasenschild */
+.handDock:not(:has(#hand>.card)) .handHead{display:none!important}
+
+/* Hauptmenü-Zusätze unter der Blüte: kompakte Kapseln nebeneinander statt breiter Balken; Hinweis darüber */
+.hexMenuExtras{flex-flow:row wrap!important;justify-content:center;gap:8px 10px!important;width:min(980px,100%)!important}
+.hexMenuExtras>#introductionMenuNote{flex-basis:100%;text-align:center;color:#e3e9e3;font-size:14px;text-shadow:0 1px 3px #000c}
+.hexMenuExtras>button,.hexMenuExtras>.developerTools>summary{width:auto!important;min-height:40px;padding:0 18px;border:1.5px solid var(--hx-capsule-line)!important;border-radius:999px!important;
+  background:var(--hx-capsule-fill)!important;box-shadow:inset 0 1px 0 #ffffff14,0 3px 8px #00000059!important;color:var(--hx-green-ink)!important;font:700 14px/1.2 var(--hx-font-ui)!important}
+.hexMenuExtras>button:not(:disabled):hover,.hexMenuExtras>.developerTools>summary:hover{border-color:#c9a24a!important;color:#fff6d6!important}
+.hexMenuExtras>.developerTools>summary{display:inline-flex;align-items:center;list-style:none;cursor:pointer}
+.hexMenuExtras>.developerTools>summary::-webkit-details-marker{display:none}
+.hexMenuExtras>.developerTools:not([open]){padding:0!important;border:0!important;background:none!important}
+.hexMenuExtras>.developerTools[open]{flex-basis:100%;display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;border:1.5px solid #3c7a62;border-radius:12px;background:#0f2419e6}
+
+/* Seitenmenüs (Turm bauen, Spielregeln): Höhe nach Inhalt, die Spaltenhöhe aus layoutMenus() bleibt Obergrenze */
+#towerDrawer,#rulesDrawer{height:auto!important}
+#rulesDrawer{width:440px;box-sizing:border-box;padding:16px 20px!important}
+#rulesDrawer .panelHead{display:flex;align-items:center;gap:14px;padding-bottom:12px!important;margin-bottom:6px!important;border-bottom:1.5px solid #41594a!important;background:none!important}
+#rulesDrawer .panelHead::before{content:'';flex:none;width:64px;height:72px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23ffe198' d='M3 5c3-1 6-1 8.2.8V20c-2.2-1.6-5.2-1.8-8.2-.8z M21 5c-3-1-6-1-8.2.8V20c2.2-1.6 5.2-1.8 8.2-.8z'/%3E%3C/svg%3E") center/30px no-repeat,linear-gradient(180deg,#1d3a28,#0d1d14) center/calc(100% - 8px) calc(100% - 8px) no-repeat,linear-gradient(180deg,#ffe48a,#c58d27)}
+#rulesDrawer .panelHead h2{flex:1;margin:0;font:900 clamp(28px,2vw,34px)/1.05 var(--hx-font-title)!important;color:#fbf7ea!important}
+
+/* Spielauswahl: Karten füllen die Zeile (ausgeblendete Modi lassen keine Lücke), lesbare Texte, gleich große Zurück-Aktion */
+#playModeOverlay>.modeBox{width:min(1000px,calc(100vw - 24px))}
+#playModeChoices:not(.hidden){display:flex!important;flex-wrap:wrap;gap:16px!important}
+#playModeChoices>.modeChoice{flex:1 1 260px}
+#playModeChoices>.continueChoice{flex-basis:100%}
+#playModeChoices .modeChoice{padding:22px 22px!important;gap:10px!important;min-height:0!important}
+#playModeChoices .modeChoice>span{font:700 17px/1.3 var(--hx-font-ui);color:#fbf7ea}
+#playModeChoices .modeChoice>small{font:600 15px/1.45 var(--hx-font-ui);color:#cfd9cf}
+#playModeChoices .continueChoice>span{color:#2a1f10}
+#playModeChoices .continueChoice>small{color:#4a3510}
+#playModeChoices .modeChoice .duoServerStatus{font-size:14px!important}
+#playModeBackBtn{min-height:48px;padding:0 26px!important;font-size:17px!important;width:auto}
+
+/* Patch Notes: Überblickskacheln füllen die Zeile, auch wenn es nur zwei Gruppen gibt */
+.patchOverview{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))!important}

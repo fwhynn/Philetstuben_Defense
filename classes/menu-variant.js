@@ -1,7 +1,7 @@
 /* Entwürfe für das Hauptmenü zum Vergleichen im Browser (?menu=insel | ?menu=seite | ?menu=gespiegelt, ohne Parameter: insel)
    und Look des Hintergrunds (?look=klassisch, ohne Parameter: pracht).
    Setzt <html data-menu-variant> und <html data-menu-look>; menu-backdrop.js und hexwerk.css richten sich danach.
-   Der Umschalter erscheint lokal (localhost) oder wenn ?menu= gesetzt ist. */
+   Der Umschalter erscheint nur, wenn ?menu= oder ?look= gesetzt ist (Vergleich der Entwürfe). */
 (()=>{
  const VARIANTS={insel:'1 · Karten links und rechts',seite:'2 · Menü links, Karte rechts',gespiegelt:'3 · Karte links, Menü rechts'};
  const LOOKS={pracht:'Pracht',klassisch:'Klassisch'};
@@ -10,8 +10,7 @@
  document.documentElement.dataset.menuVariant=variant;
  const look=LOOKS[params.get('look')]?params.get('look'):'pracht';
  document.documentElement.dataset.menuLook=look;
- const local=/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
- if(!local&&!params.has('menu')&&!params.has('look'))return;
+ if(!params.has('menu')&&!params.has('look'))return;
  const mount=()=>{
    const menu=document.getElementById('mainMenu');if(!menu)return;
    const bar=document.createElement('nav');bar.className='menuVariantSwitch';bar.setAttribute('aria-label','Hauptmenü-Entwurf');bar.dataset.noTranslate='';

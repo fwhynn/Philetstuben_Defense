@@ -123,8 +123,8 @@ function create(host0,commands){
   const host=document.createElement('div');host.className='board3d';host.style.cssText='position:absolute;inset:0;touch-action:none;background:'+SKY;
   wrap.insertBefore(host,wrap.firstChild);
   const labelLayer=document.createElement('div');labelLayer.style.cssText='position:absolute;inset:0;overflow:hidden;pointer-events:none';
-  const loading=document.createElement('div');loading.textContent='Lade 3D-Modelle …';loading.style.cssText='position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:10px 16px;border-radius:10px;background:rgba(20,30,24,.85);color:#eee1c2;font:14px Inter,system-ui,sans-serif';
-  const rotateHint=document.createElement('div');rotateHint.textContent='R / Mausrad-Klick · Drehen';rotateHint.style.cssText='position:absolute;display:none;transform:translate(-50%,0);padding:2px 9px;border-radius:6px;background:rgba(23,39,30,.95);border:1px solid #718a6c;color:#eee1c2;font:600 11px Inter,system-ui,sans-serif;pointer-events:none;white-space:nowrap';
+  const loading=document.createElement('div');loading.textContent='Lade 3D-Modelle …';loading.style.cssText='position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:10px 16px;border-radius:10px;background:rgba(20,30,24,.85);color:#eee1c2;font:600 16px "Barlow Semi Condensed",system-ui,sans-serif';
+  const rotateHint=document.createElement('div');rotateHint.textContent='R / Mausrad-Klick · Drehen';rotateHint.style.cssText='position:absolute;display:none;transform:translate(-50%,0);padding:2px 9px;border-radius:6px;background:rgba(23,39,30,.95);border:1px solid #718a6c;color:#eee1c2;font:600 13px "Barlow Semi Condensed",system-ui,sans-serif;pointer-events:none;white-space:nowrap';
   labelLayer.append(rotateHint);
   let rotateAnchor=null;
 
@@ -905,7 +905,7 @@ function create(host0,commands){
   // ---- Beschriftungen (HTML über der Szene) ----
   function label(id,x,z,text,cls='',lift=0){
     usedLabels.add(id);let entry=labels.get(id);
-    if(!entry){const el=document.createElement('div');el.style.cssText='position:absolute;transform:translate(-50%,-50%);color:#fff4c3;text-shadow:0 1px 3px #000,0 0 2px #000;font:700 11px Inter,system-ui,sans-serif;white-space:nowrap;pointer-events:none';labelLayer.appendChild(el);entry={el,pos:new THREE.Vector3()};labels.set(id,entry);}
+    if(!entry){const el=document.createElement('div');el.style.cssText='position:absolute;transform:translate(-50%,-50%);color:#fff4c3;text-shadow:0 1px 3px #000,0 0 2px #000;font:700 14px "Barlow Semi Condensed",system-ui,sans-serif;white-space:nowrap;pointer-events:none';labelLayer.appendChild(el);entry={el,pos:new THREE.Vector3()};labels.set(id,entry);}
     if(entry.text!==text||entry.cls!==cls){entry.text=text;entry.cls=cls;entry.el.textContent=text;entry.el.style.fontSize=cls==='big'?'26px':cls==='relic'?'15px':'11px';entry.el.style.color=id.startsWith('upgrade:')?'#14532d':cls==='relic'?'#ffe08a':cls==='big'?'#e6ecf2':'#fff4c3';if(id.startsWith('upgrade:')){entry.el.style.textShadow='none';entry.el.innerHTML='<svg width="28" height="32" viewBox="0 0 28 32" aria-label="Ausbaubar"><polygon points="14,2 26,14 19,14 19,30 9,30 9,14 2,14" fill="#ffffff" stroke="#172019" stroke-width="2" stroke-linejoin="round"/></svg>';}}
     entry.pos.set(x,lift+6,z);return entry;
   }

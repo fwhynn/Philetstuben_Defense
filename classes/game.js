@@ -721,7 +721,7 @@ R dreht die Karte, dann Feld anklicken.`;
     info.innerHTML = tower ? HexTowerView.headline(towerPanelDefinition(tower)) : '';
     renderTowerPanel();
     const refund = HexData.towerRefund(state, tower); sell.disabled = !refund || selections('Tower').length > 1;
-    sell.textContent = selections('Tower').length > 1 ? 'Zum Verkaufen einen einzelnen Turm wählen' : refund ? `${refund.percent === 100 ? 'Bau rückgängig' : 'Verkaufen'} · ${refund.percent} % (+${refund.amount} Gold)` : 'Turm verkaufen';
+    sell.textContent = selections('Tower').length > 1 ? 'Zum Verkaufen einen einzelnen Turm wählen' : refund ? `${refund.percent === 100 ? 'Bau rückgängig' : 'Verkaufen'} · ${refund.percent} % (+${refund.amount} Gold)` : 'Turm verkaufen';
     const redrawBtn=document.getElementById('redrawHandBtn');redrawBtn.classList.toggle('hidden',!state.augments?.includes('wayfinder'));redrawBtn.disabled=!HexRewards.canRedraw(state)||!!state.consumablesLocked;
     const merchantBtn=document.getElementById('merchantOpenBtn');merchantBtn.classList.toggle('hidden',!merchantSite());merchantBtn.disabled=!['place','build'].includes(state.phase)||!!state.consumablesLocked;
     if(!document.getElementById('merchantOverlay').classList.contains('hidden')){if(!['place','build'].includes(state.phase)||!hasActiveRun||!mainMenu.classList.contains('hidden'))closeMerchant();else renderMerchant();}
@@ -941,7 +941,7 @@ R dreht die Karte, dann Feld anklicken.`;
     }
     if (panel._targetButton) panel._targetButton.disabled = HexBuildings.targetRemaining(building)<=0 || state.hp <= 0 || !['place', 'build', 'wave'].includes(state.phase);
     for (const [type, button] of buildingButtons) button.disabled = !!HexBuildings.buildBlockReason(tile, type) || (type === 'portal' && (!['place', 'build'].includes(state.phase) || state.waveRunning)) || !['place', 'build', 'wave'].includes(state.phase) || state.hp <= 0 || state.gold < (button._cost || HexBuildings.definitions[type].cost);
-    const sell = document.getElementById('sellBuildingBtn'), refund = HexBuildings.refund(state, building); sell.disabled = !refund; sell.textContent = refund ? `Verkaufen · ${refund.percent} % (+${refund.amount} Gold)` : 'Gebäude verkaufen';
+    const sell = document.getElementById('sellBuildingBtn'), refund = HexBuildings.refund(state, building); sell.disabled = !refund; sell.textContent = refund ? `Verkaufen · ${refund.percent} % (+${refund.amount} Gold)` : 'Gebäude verkaufen';
     positionTowerPanel();
   }
   function towerPanelDefinition(tower) {
@@ -957,8 +957,9 @@ R dreht die Karte, dann Feld anklicken.`;
   function towerUpgradeCard(content, tower, id, upgrade, next, locked = false) {
     const current = towerPanelDefinition(tower), comparing = towerComparison === id;
     const card = document.createElement('section'); card.className = 'towerUpgradeCard'; card.classList.toggle('comparing', comparing);
-    const icon = document.createElement('span'); icon.className = 'towerPathIcon'; icon.setAttribute('aria-hidden', 'true'); icon.innerHTML = HexArsenal.pathIcon?.(id, next.color) || HexArsenal.icon(tower.type, next.color); card.appendChild(icon);
-    syncTowerPortrait(icon, upgradeModelNames(tower, id));
+    const icon = document.createElement('span'); icon.className = 'towerPathIcon'; icon.setAttribute('aria-hidden', 'true'); const pathArt = HexArsenal.pathIcon?.(id, next.color); icon.innerHTML = pathArt || HexArsenal.icon(tower.type, next.color); card.appendChild(icon);
+    // Eigenes Pfad-Symbol unterscheidet die Ausbauten besser als das kleine Modellporträt; das Porträt bleibt nur Ersatz.
+    if (!pathArt) syncTowerPortrait(icon, upgradeModelNames(tower, id));
     // Name und Typ als eine Titelzeile, die bei schmalem Fenster umbricht, statt den Preis zu verdrängen.
     const title = document.createElement('div'); title.className = 'towerUpgradeTitle'; card.appendChild(title);
     const heading = document.createElement('strong'); heading.textContent = upgrade.name; title.appendChild(heading);

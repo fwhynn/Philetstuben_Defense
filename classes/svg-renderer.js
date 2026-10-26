@@ -265,7 +265,7 @@ function create(svg,commands){
   }
   function line(x1,y1,x2,y2,stroke,w){const l=document.createElementNS(NS,'line');l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);l.setAttribute('stroke',stroke);l.setAttribute('stroke-width',w);l.setAttribute('stroke-linecap','round');return l;}
   function drawPoly(cx,cy,size,fill,stroke,opacity=1){const p=document.createElementNS(NS,'polygon');p.setAttribute('points',hexPoints(cx,cy,size));p.setAttribute('fill',fill);p.setAttribute('stroke',stroke);p.setAttribute('stroke-width',2);p.setAttribute('opacity',opacity);scene.appendChild(p);return p;}
-  function text(x,y,str,size,fill,weight='400'){const t=document.createElementNS(NS,'text');t.setAttribute('x',x);t.setAttribute('y',y);t.setAttribute('text-anchor','middle');t.setAttribute('font-size',size);t.setAttribute('font-family','Inter,system-ui,sans-serif');t.setAttribute('font-weight',weight);t.setAttribute('fill',fill);t.textContent=str;return t;}
+  function text(x,y,str,size,fill,weight='400'){const t=document.createElementNS(NS,'text');t.setAttribute('x',x);t.setAttribute('y',y);t.setAttribute('text-anchor','middle');t.setAttribute('font-size',size);t.setAttribute('font-family','Barlow Semi Condensed,system-ui,sans-serif');t.setAttribute('font-weight',weight);t.setAttribute('fill',fill);t.textContent=str;return t;}
 
   function reset(){objectKey='';fogRun=null;fogSize=-1;camera.reset(false);}
   function project(position){return camera.project(position);}

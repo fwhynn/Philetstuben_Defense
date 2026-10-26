@@ -5,6 +5,9 @@
 @font-face{font-family:'Fraunces';font-weight:900;font-style:normal;font-display:swap;src:local('Fraunces Black'),local('Fraunces-Black'),url("assets/fonts/Fraunces-Black.woff2") format('woff2')}
 @font-face{font-family:'Barlow Semi Condensed';font-weight:600;font-style:normal;font-display:swap;src:local('Barlow Semi Condensed SemiBold'),local('BarlowSemiCondensed-SemiBold'),url("assets/fonts/BarlowSemiCondensed-SemiBold.woff2") format('woff2')}
 @font-face{font-family:'Barlow Semi Condensed';font-weight:700;font-style:normal;font-display:swap;src:local('Barlow Semi Condensed Bold'),local('BarlowSemiCondensed-Bold'),url("assets/fonts/BarlowSemiCondensed-Bold.woff2") format('woff2')}
+/* Nur 600 und 700 liegen vor: leichtere Stärken nutzen SemiBold, 800/900 die echte Bold-Datei statt künstlicher Fettung. */
+@font-face{font-family:'Barlow Semi Condensed';font-weight:100 500;font-style:normal;font-display:swap;src:local('Barlow Semi Condensed SemiBold'),local('BarlowSemiCondensed-SemiBold'),url("assets/fonts/BarlowSemiCondensed-SemiBold.woff2") format('woff2')}
+@font-face{font-family:'Barlow Semi Condensed';font-weight:800 900;font-style:normal;font-display:swap;src:local('Barlow Semi Condensed Bold'),local('BarlowSemiCondensed-Bold'),url("assets/fonts/BarlowSemiCondensed-Bold.woff2") format('woff2')}
 :root{--hx-font-ui:'Barlow Semi Condensed',Inter,system-ui,'Segoe UI',Arial,sans-serif;--hx-font-title:'Tektur','Fraunces',Georgia,sans-serif;
   --hx-text:#f6f2e4;--hx-muted:#cfd9cf;--hx-gold-text:#f3c94c;--hx-focus:#ffe198;--hx-line:#3c7a62;--hx-row:#24493a;
   --hx-panel-edge:linear-gradient(170deg,#e9c46a,#8a6a26 60%,#c9a24a);--hx-capsule-fill:linear-gradient(180deg,#172c21,#0e1d16);--hx-capsule-line:#46634f;
@@ -109,3 +112,9 @@ body.hxPage{margin:0;min-height:100vh;color:#f4ecd6;font:600 17px/1.6 var(--hx-f
 .hxViewer{font-family:var(--hx-font-ui)!important}
 .hxViewer #info{border:2px solid transparent!important;border-radius:10px!important;background:linear-gradient(180deg,#17301ff2,#0f2219f2) padding-box,var(--hx-panel-edge) border-box!important;font-size:15px}
 .hxViewer #info b{font:900 16px var(--hx-font-title);color:#fbf2d6!important}
+
+/* Duo-Lobby: etwas breiter, Texte in den Wahlbereichen lesbar (15–16 px statt 13–14 px) */
+.duoLobbyPage .lobbyTop,.duoLobbyPage .lobbyMain{max-width:860px}
+.duoLobbyPage .lobbyChoice p,.duoLobbyPage .lobbyRules ol,.duoLobbyPage .lobbySeat p,.duoLobbyPage .lobbyHint,.duoLobbyPage .lobbyStatus{font-size:15px}
+.duoLobbyPage .lobbyChoice label,.duoLobbyPage .lobbyInvite label{font-size:14px}
+.duoLobbyPage .lobbyFoot{font-size:13px}

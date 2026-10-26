@@ -30,7 +30,7 @@ body {
   background:
     radial-gradient(circle at 78% 0%, rgba(123, 157, 112, .16), transparent 34rem),
     linear-gradient(135deg, var(--ground) 0%, #121c16 52%, var(--ground-deep) 100%);
-  font-family: "Trebuchet MS", Candara, sans-serif;
+  font-family: var(--hx-font-ui);
 }
 
 button,
@@ -79,7 +79,7 @@ input {
 
 .brand strong {
   display: block;
-  font: 800 clamp(22px, 3vw, 32px)/1 Rockwell, "Roboto Slab", Georgia, serif;
+  font: 800 clamp(22px, 3vw, 32px)/1 var(--hx-font-title);
   letter-spacing: .055em;
 }
 
@@ -134,7 +134,7 @@ main {
 .commandDeck h1,
 h2 {
   margin: 0;
-  font-family: Rockwell, "Roboto Slab", Georgia, serif;
+  font-family: var(--hx-font-title);
 }
 
 .gate h1 {
@@ -337,7 +337,7 @@ input:focus {
 
 .liveRow strong {
   display: block;
-  font: 800 12px Rockwell, Georgia, serif;
+  font: 800 12px var(--hx-font-title);
   letter-spacing: .13em;
   text-transform: uppercase;
 }
@@ -400,7 +400,7 @@ input:focus {
   display: block;
   margin-top: 14px;
   color: var(--ink);
-  font: 800 clamp(30px, 4vw, 50px)/1 Rockwell, Georgia, serif;
+  font: 800 clamp(30px, 4vw, 50px)/1 var(--hx-font-title);
 }
 
 .metric small {
@@ -677,7 +677,7 @@ label.toggle {
 .visitStat strong {
   display: block;
   margin-top: 10px;
-  font: 800 clamp(28px, 3.4vw, 42px)/1 Rockwell, Georgia, serif;
+  font: 800 clamp(28px, 3.4vw, 42px)/1 var(--hx-font-title);
   font-variant-numeric: tabular-nums;
 }
 
@@ -707,7 +707,7 @@ label.toggle {
 }
 
 .chartCard figcaption strong {
-  font: 800 13px Rockwell, Georgia, serif;
+  font: 800 13px var(--hx-font-title);
   letter-spacing: .1em;
   text-transform: uppercase;
 }

@@ -57,7 +57,7 @@ const HexTowerView = (() => {
   function upgradeStats(def) {
     const first = def.aura ? number((1 - def.slow) * 100) + ' % Verlangsamung' : number(def.damage) + ' Schaden';
     const second = def.splash ? 'Radius ' + number(def.splash) : def.chain ? def.chain + ' Ziele' : 'Reichweite ' + number(def.range);
-    return '<span class="towerUpgradeMain">' + first + ' · ' + second + '</span>' + (def.aura ? '' : '<span class="towerUpgradeTime" data-stat="cooldown">' + number(def.cooldown) + ' s</span>');
+    return '<span class="towerUpgradeMain">' + first + ' · <span class="towerUpgradeSecond">' + second + '</span></span>' + (def.aura ? '' : '<span class="towerUpgradeTime" data-stat="cooldown">' + number(def.cooldown) + ' s</span>');
   }
   function valueSheet(def) {
     const list = rows(def).filter(r => !['hp', 'armor', 'magic'].includes(r.id));
