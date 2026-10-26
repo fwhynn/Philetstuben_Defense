@@ -1685,3 +1685,37 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 #campaignVictory .eyebrow{color:var(--hx-gold-text);font:700 14px var(--hx-font-ui);letter-spacing:.12em}
 #campaignVictory .gameOverBox>p{color:#e3e9e3;font-size:17px;line-height:1.55}
 #campaignVictory .loadoutActions button{min-height:54px;font-size:18px!important}
+
+/* ===== Einheitliche Skalierung am Desktop (26.10.2026) =====
+   ui-layout.js setzt --hx-k = Bildschirm / 1920 × 1080 (0,8–2). HUD, Turmfenster und Fenster werden mit zoom gleichmäßig
+   vergrößert, Schrift eingeschlossen; die Maße unten sind die Werte bei 1920 × 1080. Unter zoom werden auch vw/vh mit k
+   multipliziert, darum teilen Begrenzungen relativ zum Bildschirm durch k. Positionen aus fitMenu() rechnen den Zoom heraus. */
+@media(min-width:1101px) and (min-height:601px){
+  :root{--hx-m:24px;--hx-top:18px;--hx-hs:64px;--hx-rail-h:69px;--hx-cap-h:52px;--hx-cap-fs:23px;--hx-phase-h:59px;--hx-phase-fs:27px;--hx-cw:177px;--hx-br-w:336px;
+    --hx-ab-h:58px;--hx-ab-fs:24px;--hx-t-fs:22px;--hx-w-h:80px;--hx-w-fs:25px}
+  .gameHeader,#quickLoadout,#biomeRail,.handDock,.dockBR,.dockBL,.boardWrap .mapControls,.consumableMenu,#villageHud,#expeditionDeadline,.challengeLabBar,.duoTurn,
+  .boardWrap .towerPanel,#towerDrawer,#rulesDrawer,#settingsDrawer.settingsWindow,.biomeInfoPanel,.celebrationCard,.hexMenuBar,
+  .overlay:not(.mainMenu)>*{zoom:var(--hx-k,1)}
+  .handDock{max-width:calc(100vw / var(--hx-k,1) - 2*(var(--hx-br-w) + var(--hx-m) + 24px))}
+  /* Seitenleisten: Biome senkrecht mittig (ohne den gemessenen unteren Rand aus style.css), Türme enden über der Fußleiste */
+  #biomeRail{bottom:auto;max-height:calc(100dvh / var(--hx-k,1) - 2*(var(--hx-top) + var(--hx-hs)))}
+  #quickLoadout{bottom:calc(var(--play-bottom,200px) / var(--hx-k,1) + 12px)}.duoGame #quickLoadout{bottom:auto}
+  .overlay:not(.mainMenu)>*{max-height:calc((100dvh - 24px) / var(--hx-k,1))!important;max-width:calc((100vw - 24px) / var(--hx-k,1))!important}
+  #arsenalOverlay[data-view=tree] .loadoutBox{height:calc((100dvh - 32px) / var(--hx-k,1))}
+  .consumableMenu[open]{max-height:calc(100dvh / var(--hx-k,1) - 220px)}
+  #quickLoadout.draftRail{max-height:calc(65vh / var(--hx-k,1))}
+  .duoGame .mapRail{max-height:calc(100dvh / var(--hx-k,1) - 260px)}
+  .handDock #powerControls{max-height:calc(32dvh / var(--hx-k,1))}
+  .handDock:has(#detourControls:not(.hidden)) .hand{max-height:calc(42dvh / var(--hx-k,1))}
+  /* Nicht gezoomt (Position aus game.js in Bildschirmpixeln): nur die Schrift wächst mit */
+  .message{font-size:calc(16px * var(--hx-k,1))!important;max-width:calc(520px * var(--hx-k,1))}
+  .tutorialPanel p{font-size:calc(16px * var(--hx-k,1))!important}
+  #tutorialTitle{font-size:calc(20px * var(--hx-k,1))}
+  .introductionNotice,.hotkeyTip,.biomeIntro{font-size:calc(15px * var(--hx-k,1))}
+}
+
+/* Handkarten: etwas größere Schrift (Name, Beschreibung, Plätze, Seltenheit) */
+.card h3{font-size:19px!important}
+.card p{font-size:14.5px!important;line-height:1.3!important}
+.card .slots{font-size:15.5px!important}
+.card .rarity{font-size:13px!important}

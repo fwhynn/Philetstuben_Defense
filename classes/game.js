@@ -866,11 +866,19 @@ R dreht die Karte, dann Feld anklicken.`;
     if (includeTutorial && tutorial.active && state.phase !== 'gameover') { const hint = messageEl.getBoundingClientRect(); area.top = Math.min(area.bottom, Math.max(area.top, hint.bottom + 12)); }
     return area;
   }
+  // Wirksamer CSS-Zoom (hexwerk.css skaliert Fenster am Desktop mit --hx-k). Positionen und Größen in Bildschirmpixeln
+  // werden durch ihn geteilt, weil der Browser Längen eines gezoomten Elements selbst noch einmal mit dem Zoom multipliziert.
+  function cssZoom(el) {
+    if (typeof el?.currentCSSZoom === 'number') return el.currentCSSZoom || 1;
+    let zoom = 1; try { for (let node = el; node && node.nodeType === 1; node = node.parentElement) { const value = parseFloat(getComputedStyle(node).zoom); if (value > 0) zoom *= value; } } catch { }
+    return zoom || 1;
+  }
   function fitMenu(panel, area, x, y) {
+    const zoom = cssZoom(panel);
     panel.style.position = 'fixed'; panel.style.right = 'auto'; panel.style.bottom = 'auto';
-    panel.style.maxHeight = Math.max(0, area.bottom - area.top) + 'px'; panel.style.maxWidth = Math.max(0, area.right - area.left) + 'px';
+    panel.style.maxHeight = Math.max(0, area.bottom - area.top) / zoom + 'px'; panel.style.maxWidth = Math.max(0, area.right - area.left) / zoom + 'px';
     const box = panel.getBoundingClientRect(), fit = HexUiLayout.fit(area, box.width, box.height, x ?? box.left, y ?? area.top);
-    panel.style.left = fit.x + 'px'; panel.style.top = fit.y + 'px';
+    panel.style.left = fit.x / zoom + 'px'; panel.style.top = fit.y / zoom + 'px';
   }
   function measureChrome() {
     if (!document.documentElement?.style?.setProperty || !document.querySelector) return;
@@ -889,12 +897,12 @@ R dreht die Karte, dann Feld anklicken.`;
     const area = menuArea(); for (const panel of document.querySelectorAll('.towerPanel:not(.hidden),.drawer:not(.hidden):not(.settingsWindow)')) {
       let bounds=area;
       if(document.documentElement.clientWidth>700){
-        const viewWidth=document.documentElement.clientWidth,columnWidth=panel.classList.contains('buildDrawer')?Math.min(540,Math.max(440,viewWidth*.3)):440;// Turm bauen wie in hexwerk.css: clamp(440px,30vw,540px)
+        const viewWidth=document.documentElement.clientWidth,zoom=cssZoom(panel),columnWidth=(panel.classList.contains('buildDrawer')?Math.min(540,Math.max(440,viewWidth*.3)):440)*zoom;// Turm bauen wie in hexwerk.css: clamp(440px,30vw,540px), mal Zoom
         const left=viewWidth>1100?area.left:12,right=Math.min(viewWidth-12,left+columnWidth),height=document.documentElement.clientHeight;
         const obstacles=[...document.querySelectorAll('.compactToolbar,.dockTL,.hud,.dockBR,.dockBL,.mapControls,.handDock,.duoQuickMap')].map(el=>el.getBoundingClientRect()).filter(r=>r.right>left&&r.left<right);
         bounds=HexUiLayout.columnArea(document.documentElement.clientWidth,height,obstacles,left,right-left);
         if(tutorial.active)bounds.top=Math.max(bounds.top,area.top);
-        panel.style.height=Math.max(0,bounds.bottom-bounds.top)+'px';
+        panel.style.height=Math.max(0,bounds.bottom-bounds.top)/zoom+'px';
       }else panel.style.height='';
       fitMenu(panel,bounds);
     }
@@ -904,7 +912,7 @@ R dreht die Karte, dann Feld anklicken.`;
   function positionTowerPanel() {
     if (!state.selectedTower && !state.selectedBuilding) return;
     const panel = document.getElementById(state.selectedTower ? 'towerPanel' : 'buildingPanel'), area = menuArea();
-    if (area && document.documentElement.clientWidth>700) { const left=document.documentElement.clientWidth>1100?area.left:12,right=Math.min(document.documentElement.clientWidth-12,left+440),height=document.documentElement.clientHeight;const obstacles=[...document.querySelectorAll('.compactToolbar,.dockTL,.hud,.dockBL,.mapControls,.handDock,.duoQuickMap,#quickLoadout,#biomeRail')].map(el=>el.getBoundingClientRect()).filter(r=>r.right>left&&r.left<right);const bounds=HexUiLayout.columnArea(document.documentElement.clientWidth,height,obstacles,left,right-left);if(tutorial.active)bounds.top=Math.max(bounds.top,area.top);panel.style.height=Math.max(0,bounds.bottom-bounds.top)+'px';fitMenu(panel,bounds,bounds.left,bounds.top);return;}
+    if (area && document.documentElement.clientWidth>700) { const zoom=cssZoom(panel),left=document.documentElement.clientWidth>1100?area.left:12,right=Math.min(document.documentElement.clientWidth-12,left+440*zoom),height=document.documentElement.clientHeight;const obstacles=[...document.querySelectorAll('.compactToolbar,.dockTL,.hud,.dockBL,.mapControls,.handDock,.duoQuickMap,#quickLoadout,#biomeRail')].map(el=>el.getBoundingClientRect()).filter(r=>r.right>left&&r.left<right);const bounds=HexUiLayout.columnArea(document.documentElement.clientWidth,height,obstacles,left,right-left);if(tutorial.active)bounds.top=Math.max(bounds.top,area.top);panel.style.height=Math.max(0,bounds.bottom-bounds.top)/zoom+'px';fitMenu(panel,bounds,bounds.left,bounds.top);return;}
     if (area) { const narrow = document.documentElement.clientWidth <= 700; fitMenu(panel, area, area.left, narrow ? area.bottom - panel.getBoundingClientRect().height : area.top); }
   }
   function renderBuildingPanel() {
