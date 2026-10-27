@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>HUD-Bausteine 6–13</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&amp;family=Barlow+Semi+Condensed:wght@500;600;700&amp;family=Inter:wght@500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+button{font:inherit;color:inherit}
+.po{padding:2px;box-sizing:border-box;clip-path:polygon(10px 0,calc(100% - 10px) 0,100% 10px,100% calc(100% - 10px),calc(100% - 10px) 100%,10px 100%,0 calc(100% - 10px),0 10px);background:linear-gradient(170deg,#e9c46a,#8a6a26 60%,#c9a24a)}
+.pi{height:100%;box-sizing:border-box;clip-path:polygon(9px 0,calc(100% - 9px) 0,100% 9px,100% calc(100% - 9px),calc(100% - 9px) 100%,9px 100%,0 calc(100% - 9px),0 9px);background:linear-gradient(180deg,#17301f,#0f2219)}
+.cap{display:inline-flex;align-items:center;gap:8px;height:48px;padding:0 16px;border-radius:999px;border:1.5px solid #46634f;background:linear-gradient(180deg,#172c21,#0e1d16);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 3px 8px rgba(0,0,0,.35);font:700 22px 'Barlow Semi Condensed',sans-serif;color:#f4ecd6;white-space:nowrap}
+</style>
+</helmet>
+<div style="width: 1600px; height: 1240px; box-sizing: border-box; padding: 36px 44px; background: #0f1a15; font-family: Inter, system-ui, sans-serif; color: #f6f2e4; display: flex; flex-direction: column; gap: 20px">
+  <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 24px">
+    <h2 style="margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 800; font-size: 32px; color: #f3d58a">P2 · Lieferelemente 6–13</h2>
+    <p style="margin: 0; font-size: 14px; color: #bfd0c6">assets/ui/hud/ · Texte und Zahlen setzt der Code · Bedienelemente in Barlow Semi Condensed</p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px">
+    <section style="display: flex; flex-direction: column; gap: 10px; padding: 18px; border-radius: 14px; background: #1a2d24; border: 1px solid #2f4a3a">
+      <h3 style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 21px; color: #f3d58a">#6 Paneel-Rahmen</h3>
+      <div style="display: flex; gap: 14px">
+        <div class="po" style="width: 200px; height: 120px"><div class="pi" style="padding: 12px 14px; font-family: 'Barlow Semi Condensed', sans-serif; font-size: 18px; font-weight: 700">Normal<br><span style="font-size: 14px; font-weight: 500; color: #cfd9cf">Goldkante 2 px, Ecken 10 px abgeschrägt</span></div></div>
+        <div class="po" style="width: 200px; height: 120px; background: linear-gradient(170deg, #fff3c4, #e9b949 50%, #f3d58a); filter: drop-shadow(0 0 10px rgba(246, 201, 90, 0.55))"><div class="pi" style="padding: 12px 14px; font-family: 'Barlow Semi Condensed', sans-serif; font-size: 18px; font-weight: 700; background: linear-gradient(180deg, #1f3d28, #13291d)">Hervorgehoben<br><span style="font-size: 14px; font-weight: 500; color: #cfd9cf">hellere Kante + Schein</span></div></div>
+      </div>
+      <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #dfe8e2">panel_normal.svg / panel_highlight.svg als 9-Slice: Ecken fest, Kanten dehnbar. Füllung #17301f → #0f2219, Kante #e9c46a → #8a6a26.</p>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 10px; padding: 18px; border-radius: 14px; background: #1a2d24; border: 1px solid #2f4a3a">
+      <h3 style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 21px; color: #f3d58a">#7 Ressourcen-Kapseln</h3>
+      <div style="display: flex; flex-wrap: wrap; gap: 10px">
+        <span class="cap" role="status" aria-label="Leben 29 von 30"><span style="display: inline-flex; color: #f2555f"><dc-import name="Icon" glyph="heart" size="{{ 24 }}" fill="currentColor" hint-size="24px,24px"></dc-import></span>29/30</span>
+        <span class="cap" role="status" aria-label="Gold 192, Einkommen plus 31"><span style="display: inline-flex; color: #f3c94c"><dc-import name="Icon" glyph="coin" size="{{ 24 }}" fill="currentColor" hint-size="24px,24px"></dc-import></span>192<span style="color: #f3c94c">(+31)</span></span>
+        <button class="cap" aria-label="Deck, 12 Karten"><span style="display: inline-flex; color: #5aa0f0"><dc-import name="Icon" glyph="deck" size="{{ 24 }}" fill="currentColor" hint-size="24px,24px"></dc-import></span>12<dc-import name="Icon" glyph="chevronDown" size="{{ 16 }}" fill="#e9dcb8" hint-size="16px,16px"></dc-import></button>
+        <button class="cap" aria-label="Diamanten 16"><dc-import name="Icon" glyph="gem" size="{{ 22 }}" fill="#ffffff" hint-size="22px,22px"></dc-import>16<dc-import name="Icon" glyph="chevronDown" size="{{ 16 }}" fill="#e9dcb8" hint-size="16px,16px"></dc-import></button>
+      </div>
+      <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #dfe8e2">capsule.svg und capsule_dropdown.svg (mit Pfeil, öffnet Infofenster). Einkommen in Gold #f3c94c. Kapsel wächst mit der Zahl.</p>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 10px; padding: 18px; border-radius: 14px; background: #1a2d24; border: 1px solid #2f4a3a">
+      <h3 style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 21px; color: #f3d58a">#8 Phasenschild</h3>
+      <div style="display: flex; flex-direction: column; gap: 10px; align-items: flex-start; font-family: 'Barlow Semi Condensed', sans-serif">
+        <div class="po" style="height: 52px"><div class="pi" style="display: flex; align-items: center; gap: 10px; padding: 0 22px; font-size: 24px; font-weight: 700; white-space: nowrap">Bauphase<span style="color: #c9a24a">·</span><span style="color: #f3c94c">Welle 20</span></div></div>
+        <div class="po" style="height: 52px"><div class="pi" style="display: flex; align-items: center; gap: 10px; padding: 0 22px; font-size: 24px; font-weight: 700; white-space: nowrap"><span style="color: #f3c94c">Welle 20</span><span style="color: #c9a24a">·</span>14 Gegner übrig</div></div>
+        <div class="po" style="height: 52px; background: linear-gradient(170deg, #ff9a7a, #8a2a1c 60%, #d0574a)"><div class="pi" style="display: flex; align-items: center; gap: 10px; padding: 0 22px; font-size: 24px; font-weight: 700; white-space: nowrap; background: linear-gradient(180deg, #3a1a16, #22100d)"><dc-import name="Icon" glyph="tower_necromancer" size="{{ 22 }}" fill="#ffb3a0" hint-size="22px,22px"></dc-import><span style="color: #ffb3a0">Bosswelle 25</span><span style="color: #d0574a">·</span>Steinriese</div></div>
+      </div>
+      <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #dfe8e2">phase_build / phase_wave / phase_boss.svg. Breite folgt dem Text (EN „Build phase · Wave 20“). Boss: rote Kante + Schädel, nicht nur Farbe.</p>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 10px; padding: 18px; border-radius: 14px; background: #1a2d24; border: 1px solid #2f4a3a">
+      <h3 style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 21px; color: #f3d58a">#9 Kleiner Hex-Knopf · 56–64 px</h3>
+      <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; justify-items: center; font-size: 12px; font-weight: 700; color: #bfd0c6; text-align: center">
+        <sc-for list="{{smallStates}}" as="st" hint-placeholder-count="6">
+          <figure style="margin: 0; display: flex; flex-direction: column; align-items: center; gap: 8px">
+            <dc-import name="Hex" family="{{st.family}}" state="{{st.state}}" h="{{ 64 }}" icon="{{st.icon}}" icon-color="{{st.color}}" label="" sub="" hint-size="55px,64px"></dc-import>
+            <figcaption>{{st.label}}</figcaption>
+          </figure>
+        </sc-for>
+      </div>
+      <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #dfe8e2">hex_small_{normal|hover|pressed|selected|disabled}.svg: vereinfachte P1-Rahmen ohne Glanzlicht, Rand 6 %. Ausgewählt = Goldrand, gesperrt = Nebel + Schloss.</p>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 10px; padding: 18px; border-radius: 14px; background: #1a2d24; border: 1px solid #2f4a3a">
+      <h3 style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 21px; color: #f3d58a">#10 Preis-Plakette und Preis-Knopf</h3>
+      <div style="display: flex; gap: 14px; align-items: flex-end; font-family: 'Barlow Semi Condensed', sans-serif">
+        <sc-for list="{{plaques}}" as="pq" hint-placeholder-count="3">
+          <figure style="margin: 0; display: flex; flex-direction: column; align-items: center; opacity: {{pq.opacity}}">
+            <dc-import name="Hex" family="{{pq.family}}" h="{{ 64 }}" icon="{{pq.icon}}" icon-color="{{pq.color}}" label="" sub="" hint-size="55px,64px"></dc-import>
+            <span style="margin-top: -14px; position: relative; display: inline-flex; align-items: center; gap: 3px; height: 24px; padding: 0 8px 0 4px; border-radius: 999px; background: #0e1d16; border: 1.5px solid {{pq.line}}; color: {{pq.ink}}; font-size: 15px; font-weight: 700"><dc-import name="Icon" glyph="{{pq.pi}}" size="{{ 15 }}" fill="{{pq.pc}}" hint-size="15px,15px"></dc-import>{{pq.price}}</span>
+            <figcaption style="margin-top: 6px; font-family: Inter, sans-serif; font-size: 12px; font-weight: 700; color: #bfd0c6">{{pq.label}}</figcaption>
+          </figure>
+        </sc-for>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px; font-family: 'Barlow Semi Condensed', sans-serif">
+        <sc-for list="{{priceBtns}}" as="pb" hint-placeholder-count="4">
+          <span style="display: flex; flex-direction: column; align-items: center; gap: 4px">
+            <button aria-disabled="{{pb.disabled}}" style="display: inline-flex; align-items: center; gap: 5px; min-height: 44px; min-width: 70px; justify-content: center; padding: 0 10px; border-radius: 8px; border: 2px solid {{pb.line}}; background: {{pb.bg}}; color: {{pb.ink}}; font-size: 18px; font-weight: 700; box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.35), 0 3px 0 {{pb.depth}}">{{pb.text}}<dc-import name="Icon" glyph="{{pb.icon}}" size="{{ 18 }}" fill="currentColor" hint-size="18px,18px"></dc-import></button>
+            <span style="font-family: Inter, sans-serif; font-size: 12px; font-weight: 700; color: #bfd0c6">{{pb.label}}</span>
+          </span>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 10px; padding: 18px; border-radius: 14px; background: #1a2d24; border: 1px solid #2f4a3a">
+      <h3 style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 21px; color: #f3d58a">#11 Tempo-Regler</h3>
+      <div class="po" style="width: 340px; height: 112px"><div class="pi" style="padding: 12px 22px; display: flex; flex-direction: column; justify-content: center; gap: 10px; font-family: 'Barlow Semi Condensed', sans-serif">
+        <span style="font-size: 24px; font-weight: 700">Tempo <span style="color: #f3c94c">2×</span></span>
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <div role="slider" aria-label="Tempo" aria-valuemin="1" aria-valuemax="8" aria-valuenow="2" style="position: relative; height: 12px; border-radius: 999px; background: #0a1510; box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6), 0 0 0 1px #46634f">
+            <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 14.3%; border-radius: 999px; background: linear-gradient(90deg, #f3c94c, #e8ac38)"></div>
+            <div style="position: absolute; left: 14.3%; top: 50%; width: 28px; height: 28px; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle at 40% 35%, #fff3c4, #e9b949 55%, #9c6a17); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5)"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; color: #cfd9cf"><span>1×</span><span>8×</span></div>
+        </div>
+      </div></div>
+      <div style="display: flex; gap: 16px; align-items: center; font-size: 12px; font-weight: 700; color: #bfd0c6">
+        <span style="display: flex; flex-direction: column; gap: 4px; align-items: center"><span style="width: 110px; height: 12px; border-radius: 999px; background: #0a1510; box-shadow: 0 0 0 1px #46634f"></span>speed_track</span>
+        <span style="display: flex; flex-direction: column; gap: 4px; align-items: center"><span style="width: 60px; height: 12px; border-radius: 999px; background: linear-gradient(90deg, #f3c94c, #e8ac38)"></span>speed_fill</span>
+        <span style="display: flex; flex-direction: column; gap: 4px; align-items: center"><span style="width: 28px; height: 28px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #fff3c4, #e9b949 55%, #9c6a17)"></span>speed_knob</span>
+      </div>
+      <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #dfe8e2">Griff mindestens 28 px (Ziehfläche 44 px). Stufen 1×–8×, aktueller Wert in Gold. Tastatur: ← →.</p>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 10px; padding: 18px; border-radius: 14px; background: #1a2d24; border: 1px solid #2f4a3a; grid-column: span 2">
+      <h3 style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 21px; color: #f3d58a">#12 Wellenstart</h3>
+      <div style="display: flex; gap: 16px; font-family: 'Barlow Semi Condensed', sans-serif">
+        <sc-for list="{{waves}}" as="wv" hint-placeholder-count="3">
+          <figure style="margin: 0; display: flex; flex-direction: column; gap: 6px">
+            <span class="po" style="display: block; width: 300px; height: 76px; background: {{wv.edge}}">
+              <span class="pi" style="position: relative; display: flex; align-items: center; justify-content: center; gap: 10px; overflow: hidden; background: {{wv.bg}}; color: {{wv.ink}}; font-size: 24px; font-weight: 700">
+                <span style="position: absolute; left: 0; top: 0; bottom: 0; width: {{wv.progress}}; background: rgba(127, 224, 138, 0.22)"></span>
+                <span style="position: relative; display: inline-flex"><dc-import name="Icon" glyph="waveStart" size="{{ 28 }}" fill="currentColor" hint-size="28px,28px"></dc-import></span><span style="position: relative">{{wv.text}}</span>
+                <span style="position: relative; padding: 1px 6px; border-radius: 4px; border: 1px solid {{wv.keyLine}}; font-size: 14px; font-weight: 700; opacity: {{wv.keyOp}}">Leertaste</span>
+              </span>
+            </span>
+            <figcaption style="font-family: Inter, sans-serif; font-size: 13px; color: #bfd0c6"><b style="color: #f6f2e4">{{wv.label}}</b> · {{wv.note}}</figcaption>
+          </figure>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 10px; padding: 18px; border-radius: 14px; background: #1a2d24; border: 1px solid #2f4a3a">
+      <h3 style="margin: 0; font-family: Fraunces, Georgia, serif; font-size: 21px; color: #f3d58a">#13 Aktionsleiste</h3>
+      <div class="po" style="height: 60px; align-self: flex-start"><div class="pi" style="display: flex; align-items: center; white-space: nowrap; font-family: 'Barlow Semi Condensed', sans-serif">
+        <button style="height: 100%; padding: 0 20px; border: 0; background: none; color: #f3c94c; font-size: 24px; font-weight: 700">Hex platzieren</button>
+        <span aria-hidden="true" style="width: 1px; align-self: stretch; margin: 10px 0; background: rgba(201, 162, 74, 0.6)"></span>
+        <button aria-keyshortcuts="R" style="height: 100%; display: inline-flex; align-items: center; gap: 8px; padding: 0 20px 0 8px; border: 0; background: none; font-size: 24px; font-weight: 700"><dc-import name="Hex" family="green" h="{{ 46 }}" icon="rotate" label="" sub="" hint-size="40px,46px"></dc-import>Drehen (R)</button>
+      </div></div>
+      <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #dfe8e2">action_bar.svg: zweigeteilte Kapsel. Erscheint nur bei gewählter Karte, Drehen-Fläche mindestens 44 px hoch. EN „Place hex · Rotate (R)“.</p>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1600,"height":1240}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      smallStates: [
+        { family: 'green', state: 'normal', icon: 'tower_archer', color: '', label: 'Normal' },
+        { family: 'green', state: 'hover', icon: 'tower_archer', color: '', label: 'Hover' },
+        { family: 'green', state: 'pressed', icon: 'tower_archer', color: '', label: 'Gedrückt' },
+        { family: 'green', state: 'focus', icon: 'tower_archer', color: '', label: 'Fokus' },
+        { family: 'green', state: 'selected', icon: 'tower_archer', color: '', label: 'Ausgewählt' },
+        { family: 'fog', state: 'normal', icon: 'lock', color: '', label: 'Gesperrt' }
+      ],
+      plaques: [
+        { family: 'green', icon: 'tower_chain', color: '#ffd36a', price: '40', pi: 'coin', pc: '#f3c94c', ink: '#f6efd8', line: '#c9a24a', opacity: 1, label: 'Bezahlbar' },
+        { family: 'green', icon: 'tower_flame', color: '#ff9a5a', price: '220', pi: 'coin', pc: '#f3c94c', ink: '#ff8f80', line: '#c0453a', opacity: 0.6, label: 'Zu teuer' },
+        { family: 'fog', icon: 'lock', color: '', price: 'W 25', pi: 'lock', pc: '#c9d2cc', ink: '#c9d2cc', line: '#56625b', opacity: 1, label: 'Gesperrt' }
+      ],
+      priceBtns: [
+        { text: '35', icon: 'coin', label: 'Bezahlbar', bg: 'linear-gradient(180deg, #ffe48a, #e8ac38)', line: '#9c6a17', ink: '#2a1f10', depth: '#7a5414', disabled: 'false' },
+        { text: '120', icon: 'coin', label: 'Zu teuer', bg: 'linear-gradient(180deg, #4a524e, #343b37)', line: '#6e766f', ink: '#e6ebe7', depth: '#222826', disabled: 'true' },
+        { text: 'Stufe 3', icon: 'lock', label: 'Gesperrt', bg: 'linear-gradient(180deg, #3a4440, #2c3430)', line: '#56625b', ink: '#c9d2cc', depth: '#1a201d', disabled: 'true' },
+        { text: 'Gewählt', icon: 'upgradeBadge', label: 'Bereits gewählt', bg: 'linear-gradient(180deg, #2b5638, #1d3d28)', line: '#7fe08a', ink: '#d8f5d8', depth: '#102117', disabled: 'true' }
+      ],
+      waves: [
+        { label: 'Gesperrt', note: 'grau, Grund im Knopf', text: 'Zuerst Hex legen', bg: 'linear-gradient(180deg, #3a4440, #2c3430)', ink: '#c9d2cc', edge: '#56625b', progress: '0%', keyLine: 'transparent', keyOp: 0 },
+        { label: 'Bereit', note: 'Gold mit Tastenhinweis', text: 'Welle starten', bg: 'linear-gradient(180deg, #ffe48a, #e8ac38)', ink: '#2a1f10', edge: '#9c6a17', progress: '0%', keyLine: '#7a5414', keyOp: 1 },
+        { label: 'Läuft', note: 'Fortschritt als Füllung', text: '18 / 30 Gegner', bg: 'linear-gradient(180deg, #17301f, #0f2219)', ink: '#f4ecd6', edge: 'linear-gradient(170deg, #e9c46a, #8a6a26 60%, #c9a24a)', progress: '60%', keyLine: 'transparent', keyOp: 0 }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

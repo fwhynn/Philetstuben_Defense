@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Menügrund</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="position: relative; width: {{w}}px; height: {{h}}px; overflow: hidden; background: radial-gradient(ellipse 75% 70% at 50% 42%, #24402c 0%, #16261b 46%, #0a100c 100%)">
+  <sc-if value="{{showGround}}" hint-placeholder-val="{{ true }}">
+    <svg width="{{w}}" height="{{h}}" aria-hidden="true" style="position: absolute; left: 0; top: 0">
+      <defs>
+        <pattern id="bd-comb" width="48.5" height="84" patternUnits="userSpaceOnUse" patternTransform="{{combTransform}}">
+          <path d="M24.25 0L48.5 14V42L24.25 56 0 42V14z M24.25 56V84" fill="none" stroke="#a9c98f" stroke-opacity="0.07" stroke-width="1.1"></path>
+        </pattern>
+      </defs>
+      <rect x="0" y="0" width="{{w}}" height="{{h}}" fill="url(#bd-comb)"></rect>
+      <path d="{{forestFar}}" fill="#142319"></path>
+      <path d="{{forestNear}}" fill="#0f1a13"></path>
+    </svg>
+  </sc-if>
+  <sc-if value="{{showIslands}}" hint-placeholder-val="{{ true }}">
+    <div style="position: absolute; left: {{lx}}px; top: {{ly}}px">
+      <dc-import name="Island" variant="a" edition="{{edition}}" scale="{{is}}" mirror="{{ false }}" dim="{{dim}}" hint-size="480px,656px"></dc-import>
+    </div>
+    <div style="position: absolute; left: {{rx}}px; top: {{ry}}px">
+      <dc-import name="Island" variant="b" edition="{{edition}}" scale="{{is}}" mirror="{{ true }}" dim="{{dim}}" hint-size="480px,656px"></dc-import>
+    </div>
+  </sc-if>
+  <sc-if value="{{showFog}}" hint-placeholder-val="{{ true }}">
+    <div style="position: absolute; inset: 0; background: radial-gradient(ellipse 70% 30% at 50% 104%, rgba(196, 222, 205, 0.14), rgba(196, 222, 205, 0) 70%), linear-gradient(180deg, rgba(10, 16, 12, 0) 60%, rgba(10, 16, 12, 0.5) 100%)"></div>
+    <div style="position: absolute; left: 0; right: 0; top: 56%; height: 16%; background: linear-gradient(180deg, rgba(190, 215, 200, 0) 0%, rgba(190, 215, 200, 0.05) 50%, rgba(190, 215, 200, 0) 100%)"></div>
+    <div style="position: absolute; left: 30%; width: 40%; top: 0; bottom: 0; background: radial-gradient(ellipse 60% 55% at 50% 50%, rgba(6, 10, 8, 0.28), rgba(6, 10, 8, 0) 100%)"></div>
+    <div style="position: absolute; inset: 0; background: radial-gradient(ellipse 85% 80% at 50% 45%, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.45) 100%)"></div>
+  </sc-if>
+  <sc-if value="{{showCalm}}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; top: 0; bottom: 0; left: 30%; width: 40%; border-left: 2px dashed rgba(255, 225, 152, 0.75); border-right: 2px dashed rgba(255, 225, 152, 0.75); background: rgba(255, 225, 152, 0.04)"></div>
+    <span style="position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); padding: 3px 10px; border-radius: 999px; background: rgba(15, 26, 21, 0.85); color: #ffe198; font: 700 13px Inter, system-ui, sans-serif; white-space: nowrap">mittlere 40 % ruhig</span>
+    <span style="position: absolute; left: 15%; bottom: 14px; transform: translateX(-50%); padding: 3px 10px; border-radius: 999px; background: rgba(15, 26, 21, 0.85); color: #ffe198; font: 700 13px Inter, system-ui, sans-serif; white-space: nowrap">Insel 30 %</span>
+    <span style="position: absolute; left: 85%; bottom: 14px; transform: translateX(-50%); padding: 3px 10px; border-radius: 999px; background: rgba(15, 26, 21, 0.85); color: #ffe198; font: 700 13px Inter, system-ui, sans-serif; white-space: nowrap">Insel 30 %</span>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"w":{"editor":"int","default":960,"min":200,"max":2600},"h":{"editor":"int","default":540,"min":200,"max":2600},"portrait":{"editor":"boolean","default":false},"layers":{"editor":"enum","default":"all","options":["all","ground","islands","fog"]},"islands":{"editor":"boolean","default":true},"edition":{"editor":"enum","default":"base","options":["base","sakura","halloween"]},"calm":{"editor":"boolean","default":false},"$preview":{"width":960,"height":540}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const w = this.props.w ?? 960;
+    const h = this.props.h ?? 540;
+    const portrait = !!this.props.portrait;
+    const layers = this.props.layers || 'all';
+    const islands = this.props.islands ?? true;
+    // Waldsilhouette nur in den äußeren 30 %, die Mitte bleibt dunkel und ruhig.
+    let seed = 7;
+    const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+    const f = (n) => Math.round(n * 10) / 10;
+    const band = (baseY, hMin, hMax, density) => {
+      let d = '';
+      const edge = w * 0.3;
+      for (let x = -20; x < w + 20; x += density * (0.7 + rnd() * 0.6)) {
+        if (x > edge && x < w - edge) continue;
+        const th = hMin + rnd() * (hMax - hMin);
+        const tw = th * 0.38;
+        const y = baseY + rnd() * th * 0.25;
+        d += 'M' + f(x - tw) + ' ' + f(y) + 'L' + f(x) + ' ' + f(y - th) + 'L' + f(x + tw) + ' ' + f(y) + 'Z';
+      }
+      d += 'M-20 ' + f(baseY + 10) + 'H' + f(edge) + 'V' + f(h + 20) + 'H-20Z';
+      d += 'M' + f(w - edge) + ' ' + f(baseY + 10) + 'H' + f(w + 20) + 'V' + f(h + 20) + 'H' + f(w - edge) + 'Z';
+      return d;
+    };
+    const unit = portrait ? w / 390 : h / 900;
+    const forestFar = band(h * (portrait ? 0.5 : 0.4), 60 * unit, 120 * unit, 26 * unit);
+    const forestNear = band(h * (portrait ? 0.62 : 0.52), 80 * unit, 150 * unit, 34 * unit);
+    const is = portrait ? Math.max(0.15, w / 390 * 0.4) : Math.max(0.15, Math.min(h / 900, w / 1440) * 0.8);
+    const iw = 600 * is, ih = 820 * is;
+    const lx = portrait ? -iw * 0.3 : -iw * 0.05;
+    const ly = portrait ? h - ih * 0.6 : h * 0.26;
+    return {
+      w, h,
+      combTransform: 'scale(' + f(Math.max(0.5, unit)) + ')',
+      forestFar, forestNear,
+      showGround: layers === 'all' || layers === 'ground',
+      showIslands: islands && (layers === 'all' || layers === 'islands'),
+      showFog: layers === 'all' || layers === 'fog',
+      showCalm: !!this.props.calm,
+      edition: this.props.edition || 'base',
+      is, lx, ly,
+      rx: w - iw - lx, ry: ly,
+      dim: portrait ? 0.62 : 0.92
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -77,7 +77,7 @@ test('draft offers drag directly onto a slot once, retain cancelled picks and hi
  assert.match(elements.get('draftStatus').textContent,/3 STARTTÜRME.*0\/3/);
  const down={button:0,pointerId:4,clientX:10,clientY:10,preventDefault(){},stopPropagation(){}};
  card.listeners.pointerdown(down);assert.equal(s.towerDraft.picks,3);assert.ok(!s.dragTower);
- documentListeners.pointermove({pointerId:4,clientX:300,clientY:200});assert.match(elements.get('towerDragGhost').innerHTML,/0 🪙/);
+ documentListeners.pointermove({pointerId:4,clientX:300,clientY:200});assert.match(elements.get('towerDragGhost').innerHTML,/<small>0<span class="sr-only"> Gold<\/span><\/small>/);
  documentListeners.pointerup({pointerId:4,clientX:300,clientY:200});card.listeners.click();assert.equal(s.towerDraft.picks,2);assert.equal(s.map.get('1,0').towers[0].type,type);assert.equal(s.towerDraft.inventory[type],0);
  hit=null;const second=elements.get('draftOffers').children[0],secondType=s.towerDraft.offers[0].type;second.listeners.pointerdown({...down,pointerId:5});documentListeners.pointermove({pointerId:5,clientX:300,clientY:200});documentListeners.pointercancel({});assert.equal(s.towerDraft.inventory[secondType],1);assert.equal(s.towerDraft.picks,1);
  elements.get('draftOffers').children[0].listeners.click();a.startWave();assert.equal(s.waveRunning,true);assert.ok(elements.get('draftControls').classList.contains('hidden'));

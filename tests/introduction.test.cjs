@@ -62,6 +62,6 @@ test('fresh guests can enter a Duo invitation without a five-tower local profile
 test('fresh menu starts Standard directly and hides locked modes until a successful wave 35',()=>{
  const {a,elements}=load({initialStorage:{'tutorial-v1':''}});elements.get('openMainMenuBtn').listeners.click();
  for(const id of ['dailyModeBtn','duoModeBtn'])assert.equal(elements.get(id).classList.contains('hidden'),true);
- assert.equal(elements.get('skipIntroductionBtn').classList.contains('hidden'),false);elements.get('menuPlayBtn').listeners.click();assert.equal(a.state.towerLoadout.length,2);assert.equal(elements.get('playModeOverlay')?.classList.contains('hidden')??true,true);
+ assert.equal(elements.get('skipIntroductionBtn').classList.contains('hidden'),false);elements.get('menuPlayBtn').listeners.click();assert.equal(elements.get('menuContinueBtn').classList.contains('hidden'),false,'laufender Run: Spielen zeigt Fortsetzen');elements.get('standardModeBtn').listeners.click();assert.equal(a.state.towerLoadout.length,2);assert.equal(elements.get('playModeOverlay').classList.contains('hidden'),true);
  a.state.wave=35;a.endWave();elements.get('openMainMenuBtn').listeners.click();for(const id of ['dailyModeBtn','duoModeBtn'])assert.equal(elements.get(id).classList.contains('hidden'),false);assert.equal(elements.get('skipIntroductionBtn').classList.contains('hidden'),true);
 });

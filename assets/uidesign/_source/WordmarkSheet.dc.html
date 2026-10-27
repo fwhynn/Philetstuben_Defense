@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Wortmarke – Varianten</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&amp;family=Barlow+Semi+Condensed:wght@600;700&amp;family=Inter:wght@500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 1200px; height: 820px; box-sizing: border-box; padding: 40px 48px; background: #0f1a15; font-family: Inter, system-ui, sans-serif; color: #f6f2e4; display: flex; flex-direction: column; gap: 24px">
+  <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 24px">
+    <h2 style="margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 800; font-size: 32px; color: #f3d58a">#1 Wortmarke „AutoHex TD“</h2>
+    <p style="margin: 0; font-size: 14px; color: #bfd0c6">assets/ui/brand/wordmark_full.svg · wordmark_compact.svg · wordmark_mono.svg · je PNG @2x</p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+    <figure style="grid-column: span 3; margin: 0; height: 250px; border-radius: 16px; background: radial-gradient(ellipse at 50% 40%, #2f4a36, #0b110d 80%); border: 1px solid #41594a; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px">
+      <dc-import name="Wordmark" variant="full" width="{{ 760 }}" hint-size="760px,170px"></dc-import>
+      <figcaption style="font-size: 13px; color: #bfd0c6">Voll · Desktop · Goldverlauf #fff6d6 → #f3d58a → #b9831f, Kontur #4f350d 7 u, Prägung #3a2506 8 u nach unten, Glanz Weiß 75 % → 0 im oberen Drittel</figcaption>
+    </figure>
+    <figure style="margin: 0; height: 230px; border-radius: 16px; background: #13201a; border: 1px solid #41594a; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px">
+      <dc-import name="Wordmark" variant="compact" width="{{ 300 }}" hint-size="300px,85px"></dc-import>
+      <figcaption style="font-size: 13px; color: #bfd0c6">Kompakt · Handy, Querformat, HUD</figcaption>
+    </figure>
+    <figure style="margin: 0; height: 230px; border-radius: 16px; background: #1d3d28; border: 1px solid #41594a; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px">
+      <dc-import name="Wordmark" variant="mono" width="{{ 300 }}" mono-color="#f6f2e4" hint-size="300px,67px"></dc-import>
+      <figcaption style="font-size: 13px; color: #dfe8e2">Einfarbig hell #f6f2e4</figcaption>
+    </figure>
+    <figure style="margin: 0; height: 230px; border-radius: 16px; background: #f1e6c6; border: 1px solid #b8a274; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px">
+      <dc-import name="Wordmark" variant="mono" width="{{ 300 }}" mono-color="#1b2a21" hint-size="300px,67px"></dc-import>
+      <figcaption style="font-size: 13px; color: #4d4635">Einfarbig dunkel #1b2a21 (für Pergament)</figcaption>
+    </figure>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+    <div style="padding: 16px 18px; border-radius: 14px; background: #1a2d24; border: 1px solid #41594a">
+      <h3 style="margin: 0 0 6px; font-size: 15px; font-weight: 800; color: #f6f2e4">Schrift</h3>
+      <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #dfe8e2">Auf Basis von Fraunces Black gezeichnet (Alternative: Grenze ExtraBold), als Vektor geliefert. Buchstaben leicht enger als Standard.</p>
+    </div>
+    <div style="padding: 16px 18px; border-radius: 14px; background: #1a2d24; border: 1px solid #41594a">
+      <h3 style="margin: 0 0 6px; font-size: 15px; font-weight: 800; color: #f6f2e4">Mindestgröße</h3>
+      <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #dfe8e2">Voll ab 240 px Breite, darunter Kompakt (ab 140 px). Unter 160 px Breite Prägung weglassen, nur Kontur.</p>
+    </div>
+    <div style="padding: 16px 18px; border-radius: 14px; background: #1a2d24; border: 1px solid #41594a">
+      <h3 style="margin: 0 0 6px; font-size: 15px; font-weight: 800; color: #f6f2e4">Schutzraum</h3>
+      <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #dfe8e2">Rundum ½ Versalhöhe frei. Kein Hintergrund im Export; die Prägung steckt in der Datei.</p>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1200,"height":820}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

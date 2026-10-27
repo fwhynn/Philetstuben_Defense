@@ -74,7 +74,7 @@ test('arsenal acknowledgements upload automatically and follow the account to an
  const remote=fakeApi(api.server),second=load({accountApi:remote,bootToMenu:true});
  await submit(second.document,'login');
  assert.equal(second.elements.get('menuArsenalBtn').classList.contains('upgradeAvailable'),false);
- assert.match(second.elements.get('menuArsenalBtn').textContent,/Upgrade verfügbar/);
+ assert.match(second.elements.get('menuArsenalDetail').textContent,/Upgrade verfügbar/);
  assert.deepEqual(JSON.parse(second.storage.get('hex-arsenal-seen-v1')),api.server.gameSettings.arsenalSeen);
 });
 test('arsenal acknowledgement survives deferred restore and remains local for guests',async()=>{
@@ -126,7 +126,7 @@ test('registering uploads the local progress and the menu shows the account name
   const api = fakeApi(), { elements, document } = load({ accountApi: api });
   await submit(document, 'register', 'neu');
   assert.equal(api.puts.length, 1); assert.equal(api.puts[0].format, 'autohex-profile');
-  assert.equal(elements.get('menuAccountBtn').textContent, '👤 neu');
+  assert.equal(elements.get('menuAccountLabel').textContent, 'neu');
   assert.equal(elements.get('accountStatus').dataset.kind, 'success');
 });
 
@@ -157,9 +157,9 @@ test('account upload includes completed-wave checkpoint and another browser can 
 test('game preferences persist locally, upload to the account and restore in another browser', async()=>{
  const api=fakeApi(), first=load({accountApi:api});
  const set=(id,value)=>{const el=first.elements.get(id);el.checked=value;el.listeners.change({target:el});};
- set('slotHints',false);set('onboardingHints',false);set('hexGrid',true);set('upgradeStatus',true);set('autoStart',true);set('multiTowerSelection',true);
+ set('slotHints',false);set('onboardingHints',false);set('hexGrid',true);set('upgradeStatus',true);set('autoStart',true);
  await submit(first.document,'register');
- assert.deepEqual(api.server.gameSettings,{slotHints:false,onboardingHints:false,hexGrid:true,upgradeStatus:true,autoStart:true,multiTowerSelection:true,arsenalSeen:[],gameSpeed:1});
+ assert.deepEqual(api.server.gameSettings,{slotHints:false,onboardingHints:false,hexGrid:true,upgradeStatus:true,autoStart:true,arsenalSeen:[],gameSpeed:1});
  const reload=load({initialStorage:Object.fromEntries(first.storage)});
  for(const [key,value] of Object.entries(api.server.gameSettings))if(typeof value==='boolean')assert.equal(reload.elements.get(key).checked,value,key);
  const second=load({accountApi:api});await flush();await flush();

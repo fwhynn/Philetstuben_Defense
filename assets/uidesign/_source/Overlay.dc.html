@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Kartenmotiv-Overlay</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<svg viewBox="0 0 200 200" width="{{size}}" height="{{size}}" role="img" aria-label="{{alt}}" style="display: block; overflow: visible">
+  <path d="{{l0.d}}" fill="{{l0.f}}" opacity="{{l0.o}}"></path>
+  <path d="{{l1.d}}" fill="{{l1.f}}" opacity="{{l1.o}}"></path>
+  <path d="{{l2.d}}" fill="{{l2.f}}" opacity="{{l2.o}}"></path>
+  <path d="{{l3.d}}" fill="{{l3.f}}" opacity="{{l3.o}}"></path>
+  <path d="{{l4.d}}" fill="{{l4.f}}" opacity="{{l4.o}}"></path>
+  <path d="{{l5.d}}" fill="{{l5.f}}" opacity="{{l5.o}}"></path>
+  <path d="{{l6.d}}" fill="{{l6.f}}" opacity="{{l6.o}}"></path>
+  <path d="{{l7.d}}" fill="{{l7.f}}" opacity="{{l7.o}}"></path>
+  <path d="{{l8.d}}" fill="{{l8.f}}" opacity="{{l8.o}}"></path>
+  <path d="{{l9.d}}" fill="{{l9.f}}" opacity="{{l9.o}}"></path>
+  <path d="{{l10.d}}" fill="{{l10.f}}" opacity="{{l10.o}}"></path>
+  <path d="{{l11.d}}" fill="{{l11.f}}" opacity="{{l11.o}}"></path>
+  <path d="{{l12.d}}" fill="{{l12.f}}" opacity="{{l12.o}}"></path>
+  <path d="{{l13.d}}" fill="{{l13.f}}" opacity="{{l13.o}}"></path>
+  <path d="{{l14.d}}" fill="{{l14.f}}" opacity="{{l14.o}}"></path>
+  <path d="{{l15.d}}" fill="{{l15.f}}" opacity="{{l15.o}}"></path>
+</svg>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"kind":{"editor":"enum","default":"village","options":["village","grove","watchtower","treasury","citadel","battlefield","highGround","buildingPlot","goldRoad","signal","mirror","soulFork"]},"size":{"editor":"int","default":160,"min":24,"max":400},"$preview":{"width":160,"height":160}}'>
+class Component extends DCLogic {
+  renderVals() {
+    // Piktogramme im Schrägstil der Karten, Fuß bei y ≈ 140, Licht von vorne rechts.
+    const f = (n) => Math.round(n * 10) / 10;
+    const P = (pts) => 'M' + pts.map((p) => f(p[0]) + ' ' + f(p[1])).join('L') + 'Z';
+    const E = (x, y, rx, ry) => 'M' + f(x - rx) + ' ' + f(y) + 'a' + f(rx) + ' ' + f(ry) + ' 0 1 0 ' + f(2 * rx) + ' 0a' + f(rx) + ' ' + f(ry) + ' 0 1 0 ' + f(-2 * rx) + ' 0Z';
+    const C = {
+      shadow: '#1f3a12', wallFront: '#e6d9b6', wallLit: '#f8efd2', roof: '#c93b34', roofLit: '#e8605a', wood: '#8a6440', woodDark: '#5e4129', woodLit: '#a87a4c',
+      stone: '#bdb5a2', stoneDark: '#8f8877', stoneLit: '#d9d2c0', pineD: '#2f6a3a', pineL: '#4c9145', crownD: '#3d7a3a', crownL: '#68a84e', gold: '#f3c94c', goldDark: '#b8860b', goldLit: '#fff1a8',
+      steel: '#c8d2da', steelDark: '#7f8c96', banner: '#2f4f8f', bannerLit: '#4065a8', fire: '#ff8a2a', fireCore: '#ffe08a', glow: 'rgba(255,190,90,0.28)', grass: '#7fb256', grassLit: '#93c262', earth: '#8a6440',
+      soul: '#b9a6ff', soulLit: '#e2d8ff', soulDark: '#6a52c8', glass: '#bfe6ff', glassLit: '#ffffff'
+    };
+    const L = [];
+    const add = (d, fill, o) => { if (d) L.push({ d, f: fill, o: o == null ? 1 : o }); };
+    const acc = {};
+    const put = (key, d) => { acc[key] = (acc[key] || '') + d; };
+    const flush = (order) => order.forEach(([key, fill, o]) => add(acc[key], fill, o));
+    const house = (cx, by, s) => {
+      put('shadow', E(cx + 2 * s, by + 1 * s, 15 * s, 5 * s));
+      put('wallFront', P([[cx - 10 * s, by], [cx - 10 * s, by - 12 * s], [cx + 4 * s, by - 12 * s], [cx + 4 * s, by]]));
+      put('wallLit', P([[cx + 4 * s, by], [cx + 4 * s, by - 12 * s], [cx + 12 * s, by - 16 * s], [cx + 12 * s, by - 4 * s]]) + P([[cx + 4 * s, by - 12 * s], [cx + 8 * s, by - 22 * s], [cx + 12 * s, by - 16 * s]]));
+      put('roof', P([[cx - 12 * s, by - 11 * s], [cx + 4.5 * s, by - 11 * s], [cx + 8.5 * s, by - 22.5 * s], [cx - 8 * s, by - 22.5 * s]]));
+      put('roofLit', P([[cx + 4.5 * s, by - 11 * s], [cx + 8.5 * s, by - 22.5 * s], [cx + 9.5 * s, by - 21 * s], [cx + 6 * s, by - 11 * s]]));
+      put('woodDark', P([[cx - 5 * s, by], [cx - 5 * s, by - 6.5 * s], [cx - 1.5 * s, by - 6.5 * s], [cx - 1.5 * s, by]]));
+    };
+    const pine = (x, by, H) => {
+      put('shadow', E(x + H * 0.08, by + 1, H * 0.3, H * 0.09));
+      put('woodDark', P([[x - H * 0.05, by], [x + H * 0.05, by], [x + H * 0.05, by - H * 0.2], [x - H * 0.05, by - H * 0.2]]));
+      put('pineD', P([[x, by - H], [x + H * 0.3, by - H * 0.42], [x - H * 0.3, by - H * 0.42]]) + P([[x, by - H * 0.7], [x + H * 0.4, by - H * 0.14], [x - H * 0.4, by - H * 0.14]]));
+      put('pineL', P([[x, by - H], [x + H * 0.3, by - H * 0.42], [x + H * 0.03, by - H * 0.42]]) + P([[x, by - H * 0.7], [x + H * 0.4, by - H * 0.14], [x + H * 0.03, by - H * 0.14]]));
+    };
+    const leafy = (x, by, H) => {
+      put('shadow', E(x + H * 0.1, by + 1, H * 0.38, H * 0.1));
+      put('woodDark', P([[x - H * 0.06, by], [x + H * 0.06, by], [x + H * 0.04, by - H * 0.45], [x - H * 0.04, by - H * 0.45]]));
+      const cy = by - H * 0.66, R = H * 0.34;
+      put('crownD', P([-90, -40, 0, 40, 90, 140, 180, 220].map((a) => [x + Math.cos(a * Math.PI / 180) * R * 1.1, cy + Math.sin(a * Math.PI / 180) * R])));
+      put('crownL', P([[x, cy - R], [x + R * 0.84, cy - R * 0.64], [x + R * 1.1, cy], [x + R * 0.84, cy + R * 0.64], [x, cy + R * 0.9]]));
+    };
+    const rock = (x, by, w, hs) => {
+      put('shadow', E(x + w * 0.1, by + 1, w * 0.55, w * 0.16));
+      put('stoneDark', P([[x - w / 2, by], [x - w * 0.42, by - w * 0.42 * hs], [x - w * 0.1, by - w * 0.62 * hs], [x + w * 0.3, by - w * 0.55 * hs], [x + w / 2, by - w * 0.2 * hs], [x + w * 0.45, by]]));
+      put('stone', P([[x - w * 0.1, by - w * 0.62 * hs], [x + w * 0.3, by - w * 0.55 * hs], [x + w / 2, by - w * 0.2 * hs], [x + w * 0.45, by], [x + w * 0.05, by], [x, by - w * 0.35 * hs]]));
+      put('stoneLit', P([[x - w * 0.42, by - w * 0.42 * hs], [x - w * 0.1, by - w * 0.62 * hs], [x + w * 0.3, by - w * 0.55 * hs], [x, by - w * 0.35 * hs]]));
+    };
+    const coin = (x, y, r) => { put('goldDark', E(x, y + r * 0.25, r, r * 0.45)); put('gold', E(x, y, r, r * 0.45)); };
+    const stack = (x, by, n, r) => { for (let i = 0; i < n; i++) coin(x, by - i * r * 0.32, r); };
+    const kind = this.props.kind || 'village';
+    const ORDER = [['shadow', C.shadow, 0.35], ['earth', C.earth], ['glow', '#ffbe5a', 0.3], ['stoneDark', C.stoneDark], ['stone', C.stone], ['stoneLit', C.stoneLit], ['grass', C.grass], ['grassLit', C.grassLit], ['woodDark', C.woodDark], ['wood', C.wood], ['woodLit', C.woodLit], ['wallFront', C.wallFront], ['wallLit', C.wallLit], ['roof', C.roof], ['roofLit', C.roofLit], ['banner', C.banner], ['bannerLit', C.bannerLit], ['steel', C.steel], ['steelDark', C.steelDark], ['goldDark', C.goldDark], ['gold', C.gold], ['goldLit', C.goldLit], ['glass', C.glass], ['glassLit', C.glassLit], ['soulDark', C.soulDark], ['soul', C.soul, 0.9], ['soulLit', C.soulLit], ['fire', C.fire], ['fireCore', C.fireCore], ['pineD', C.pineD], ['pineL', C.pineL], ['crownD', C.crownD], ['crownL', C.crownL]];
+    const ALT = { village: 'Dorf', grove: 'Wald', watchtower: 'Wachturm', treasury: 'Schatzkammer', citadel: 'Zitadelle', battlefield: 'Schlachtfeld', highGround: 'Anhöhe', buildingPlot: 'Bauplatz', goldRoad: 'Goldroute', signal: 'Signal', mirror: 'Spiegel', soulFork: 'Seelengabel' };
+    if (kind === 'village') { house(78, 124, 2.1); house(122, 144, 2.3); pine(158, 110, 30); pine(50, 152, 26); }
+    if (kind === 'grove') { pine(70, 118, 56); leafy(112, 108, 54); pine(128, 150, 62); pine(84, 160, 40); leafy(60, 156, 34); }
+    if (kind === 'watchtower') {
+      put('shadow', E(104, 148, 34, 9));
+      put('woodDark', P([[80, 148], [86, 148], [94, 70], [90, 70]]) + P([[114, 148], [120, 148], [110, 70], [106, 70]]) + P([[86, 120], [114, 104], [115, 108], [87, 124]]));
+      put('wood', P([[82, 70], [118, 70], [118, 54], [82, 54]]));
+      put('woodLit', P([[118, 70], [126, 64], [126, 48], [118, 54]]));
+      put('roof', P([[76, 56], [124, 56], [100, 24]]));
+      put('roofLit', P([[124, 56], [132, 50], [100, 24]]));
+      put('banner', P([[100, 24], [100, 8], [116, 13], [100, 18]]));
+    }
+    if (kind === 'treasury') {
+      put('shadow', E(102, 146, 46, 11));
+      put('woodDark', P([[64, 146], [64, 110], [122, 110], [122, 146]]));
+      put('woodLit', P([[122, 146], [122, 110], [138, 102], [138, 138]]));
+      put('wood', P([[62, 112], [122, 112], [138, 104], [126, 88], [70, 88]]));
+      put('goldDark', P([[90, 110], [98, 110], [98, 146], [90, 146]]));
+      put('gold', P([[88, 112], [100, 112], [100, 124], [88, 124]]));
+      stack(60, 158, 4, 9); stack(144, 156, 3, 9); coin(76, 166, 8); coin(124, 168, 7);
+      put('goldLit', P([[148, 120], [151, 128], [159, 131], [151, 134], [148, 142], [145, 134], [137, 131], [145, 128]]));
+    }
+    if (kind === 'citadel') {
+      put('shadow', E(102, 150, 62, 13));
+      put('stone', P([[52, 150], [52, 100], [152, 100], [152, 150]]));
+      put('stoneLit', P([[152, 150], [152, 100], [162, 94], [162, 144]]));
+      put('stoneDark', P([[52, 100], [52, 92], [60, 92], [60, 98], [68, 98], [68, 92], [76, 92], [76, 98], [84, 98], [84, 92], [120, 92], [120, 98], [128, 98], [128, 92], [136, 92], [136, 98], [144, 98], [144, 92], [152, 92], [152, 100]]) + P([[92, 150], [92, 128], [102, 120], [112, 128], [112, 150]]));
+      [[46, 152], [138, 152]].forEach(([x, by]) => {
+        put('stone', P([[x, by], [x, by - 78], [x + 20, by - 78], [x + 20, by]]));
+        put('stoneLit', P([[x + 20, by], [x + 20, by - 78], [x + 26, by - 82], [x + 26, by - 4]]));
+        put('roof', P([[x - 4, by - 78], [x + 24, by - 78], [x + 10, by - 104]]));
+        put('roofLit', P([[x + 24, by - 78], [x + 30, by - 82], [x + 10, by - 104]]));
+      });
+      put('stone', P([[84, 100], [84, 52], [120, 52], [120, 100]]));
+      put('stoneLit', P([[120, 100], [120, 52], [128, 48], [128, 96]]));
+      put('roof', P([[80, 52], [124, 52], [102, 18]]));
+      put('roofLit', P([[124, 52], [132, 48], [102, 18]]));
+      put('banner', P([[102, 18], [102, 4], [120, 9], [102, 14]]));
+    }
+    if (kind === 'battlefield') {
+      put('shadow', E(100, 150, 50, 10));
+      put('steel', P([[60, 60], [66, 56], [118, 140], [112, 144]]) + P([[140, 60], [134, 56], [82, 140], [88, 144]]));
+      put('steelDark', P([[66, 56], [118, 140], [115, 142]]) + P([[134, 56], [82, 140], [85, 142]]));
+      put('woodDark', P([[104, 126], [126, 112], [130, 118], [108, 132]]) + P([[96, 126], [74, 112], [70, 118], [92, 132]]));
+      put('gold', E(112, 130, 6, 6) + E(88, 130, 6, 6));
+      put('wood', P([[146, 150], [150, 150], [150, 76], [146, 76]]));
+      put('banner', P([[150, 78], [174, 78], [174, 110], [162, 102], [150, 110]]));
+      put('bannerLit', P([[162, 78], [174, 78], [174, 110], [162, 102]]));
+      put('gold', P([[162, 86], [167, 92], [162, 98], [157, 92]]));
+      put('woodLit', E(54, 148, 18, 6) + P([[38, 148], [40, 128], [54, 120], [68, 128], [70, 148]]));
+      put('gold', E(54, 136, 5, 5));
+    }
+    if (kind === 'highGround') {
+      put('shadow', E(100, 156, 70, 14));
+      put('earth', P([[30, 156], [44, 118], [156, 118], [170, 156]]));
+      put('stoneDark', P([[30, 156], [44, 118], [100, 118], [100, 156]]));
+      put('stone', P([[100, 156], [100, 118], [156, 118], [170, 156]]));
+      put('stoneLit', P([[52, 118], [70, 82], [130, 82], [148, 118]]));
+      put('grass', P([[48, 120], [68, 84], [132, 84], [152, 120], [140, 124], [120, 118], [100, 124], [80, 118], [60, 124]]));
+      put('grassLit', P([[100, 84], [132, 84], [152, 120], [140, 124], [120, 118], [100, 124]]));
+      put('banner', P([[100, 84], [100, 52], [120, 58], [100, 64]]));
+      pine(66, 98, 28);
+    }
+    if (kind === 'buildingPlot') {
+      put('shadow', E(100, 140, 58, 14));
+      put('stoneDark', P([[46, 130], [100, 108], [154, 130], [100, 152]]));
+      put('grass', P([[58, 130], [100, 113], [142, 130], [100, 147]]));
+      put('stone', [[46, 130], [100, 108], [154, 130], [100, 152]].map(([x, y]) => P([[x - 7, y], [x, y - 4], [x + 7, y], [x, y + 4]])).join(''));
+      [[46, 130], [100, 108], [154, 130], [100, 152]].forEach(([x, y]) => put('wood', P([[x - 2, y], [x + 2, y], [x + 2, y - 26], [x - 2, y - 26]])));
+      put('woodLit', P([[46, 106], [100, 84], [100, 86], [46, 108]]) + P([[100, 84], [154, 106], [154, 108], [100, 86]]) + P([[154, 106], [100, 128], [100, 130], [154, 108]]) + P([[100, 128], [46, 106], [46, 108], [100, 130]]));
+      put('steel', P([[96, 138], [104, 138], [104, 124], [96, 124]]));
+    }
+    if (kind === 'goldRoad') {
+      stack(58, 150, 3, 13); stack(100, 134, 5, 15); stack(142, 150, 3, 13); coin(80, 164, 11); coin(122, 166, 11);
+      put('goldLit', [[100, 72], [70, 108], [134, 104]].map(([x, y]) => P([[x, y - 8], [x + 2.5, y - 2.5], [x + 8, y], [x + 2.5, y + 2.5], [x, y + 8], [x - 2.5, y + 2.5], [x - 8, y], [x - 2.5, y - 2.5]])).join(''));
+    }
+    if (kind === 'signal') {
+      put('glow', E(100, 52, 46, 38));
+      put('shadow', E(102, 150, 30, 8));
+      put('woodDark', P([[94, 150], [100, 150], [100, 70], [94, 70]]));
+      put('woodLit', P([[100, 150], [106, 150], [106, 70], [100, 70]]));
+      put('stoneDark', P([[78, 72], [122, 72], [116, 58], [84, 58]]));
+      put('fire', P([[100, 16], [112, 38], [116, 56], [84, 56], [88, 38]]));
+      put('fireCore', P([[100, 32], [107, 46], [108, 56], [92, 56], [93, 46]]));
+      put('banner', P([[106, 96], [134, 96], [134, 120], [120, 114], [106, 120]]));
+    }
+    if (kind === 'mirror') {
+      put('shadow', E(102, 152, 32, 8));
+      put('woodDark', P([[90, 152], [96, 120], [104, 120], [110, 152]]));
+      put('wood', E(100, 76, 32, 46));
+      put('glass', E(100, 76, 25, 38));
+      put('glassLit', P([[86, 58], [96, 48], [100, 52], [88, 66]]) + P([[106, 96], [114, 86], [116, 90], [108, 100]]));
+      put('gold', P([[100, 26], [106, 34], [100, 40], [94, 34]]));
+      put('goldLit', P([[30, 140], [74, 112], [76, 116], [32, 144]]) + P([[170, 140], [126, 112], [124, 116], [168, 144]]));
+    }
+    if (kind === 'soulFork') {
+      put('shadow', E(100, 154, 30, 8));
+      put('stoneDark', P([[88, 154], [92, 96], [100, 88], [108, 96], [112, 154]]));
+      put('stoneLit', P([[100, 88], [108, 96], [112, 154], [100, 154]]));
+      put('soulDark', P([[100, 90], [76, 62], [56, 50], [62, 44], [84, 56], [100, 74], [116, 56], [138, 44], [144, 50], [124, 62]]));
+      put('soul', E(56, 44, 13, 15) + E(144, 44, 13, 15) + P([[43, 44], [43, 60], [48, 56], [52, 62], [56, 56], [60, 62], [64, 56], [69, 60], [69, 44]]) + P([[131, 44], [131, 60], [136, 56], [140, 62], [144, 56], [148, 62], [152, 56], [157, 60], [157, 44]]));
+      put('soulLit', E(52, 42, 2.4, 3.2) + E(60, 42, 2.4, 3.2) + E(140, 42, 2.4, 3.2) + E(148, 42, 2.4, 3.2));
+      put('soul', P([[100, 110], [104, 118], [100, 130], [96, 118]]));
+    }
+    flush(ORDER);
+    const out = { size: this.props.size ?? 160, alt: ALT[kind] || kind, layers: L };
+    for (let i = 0; i < 16; i++) out['l' + i] = L[i] || { d: '', f: 'none', o: 1 };
+    return out;
+  }
+}
+</script>
+</body>
+</html>

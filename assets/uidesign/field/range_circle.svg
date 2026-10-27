@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Reichweitenkreis">
+  <defs><clipPath id="fx-hex"><polygon points="128,10 230.2,69 230.2,187 128,246 25.8,187 25.8,69"/></clipPath></defs>
+  <path d="M4 128a124 124 0 1 0 248 0a124 124 0 1 0 -248 0Z" fill="#ffffff" opacity="0.12"/>
+  <path d="M4 128a124 124 0 1 0 248 0a124 124 0 1 0 -248 0Z" fill="none" opacity="0.85" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="14 10"/>
+  <path d="M10 128a118 118 0 1 0 236 0a118 118 0 1 0 -236 0Z" fill="none" opacity="0.35" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
