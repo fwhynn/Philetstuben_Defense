@@ -1,6 +1,6 @@
 [
   {
-    "version": "next",
+    "version": "1.2.7",
     "title": "Hexwerk-Oberfläche",
     "summary": "Die Hexwerk-Oberfläche kehrt zurück und gilt jetzt auch für alle Herausforderungen, Fenster und Seiten.",
     "overview": [
@@ -90,7 +90,8 @@
       "Impressum, Datenschutz, die Bestenlisten-Seite, das Testlabor und die Duo-Lobby verwenden dieselbe Gestaltung; die Turmauswahl der Duo-Lobby zeigt die Turmsymbole.",
       "Die Oberfläche wächst gleichmäßig mit der Bildschirmgröße mit, damit sie auf großen und kleinen Monitoren gleich wirkt; Schrift und Bedienelemente bleiben im Verhältnis.",
       "Jede Turmverbesserung zeigt ein eigenes Symbol, und alle Texte im Spiel und auf der Karte verwenden dieselben zwei Schriften."
-    ]
+    ],
+    "date": "2026-10-27"
   },
   {
     "version": "1.2.6",
