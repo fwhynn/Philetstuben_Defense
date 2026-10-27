@@ -2841,3 +2841,21 @@ HexTranslations.add(`Belohnungen, Run-Vorbereitung, Mini-Tutorial, Spielmeldunge
 // Patch Notes: Skalierung, Ausbau-Symbole und Schriften
 HexTranslations.add(`Die Oberfläche wächst gleichmäßig mit der Bildschirmgröße mit, damit sie auf großen und kleinen Monitoren gleich wirkt; Schrift und Bedienelemente bleiben im Verhältnis.|The interface scales evenly with your screen size, so it looks the same on large and small monitors; text and controls stay in proportion.
 Jede Turmverbesserung zeigt ein eigenes Symbol, und alle Texte im Spiel und auf der Karte verwenden dieselben zwei Schriften.|Every tower upgrade shows its own icon, and all text in the game and on the map uses the same two fonts.`);
+
+// Hexwerk: Augment-Sammlung und Run-Vorbereitung
+HexTranslations.add(`Standard / zwei Fronten / Duo|Standard / two fronts / Duo
+Türme & Gebäude|Towers & buildings
+Ausgerüstet:|Equipped:
+Ausgerüstet|Equipped
+Nächster Platz nach Welle|Next slot after wave
+Alle Plätze freigeschaltet|All slots unlocked
+Augment-Plätze:|Augment slots:
+Ziehchancen|Draw chances
+Vor dem Run ausrüsten. Höchste besessene Seltenheit wird ausgerüstet. Laufende Runs bleiben unverändert.|Equip before starting a run. The highest owned rarity is equipped. Active runs keep their original cards.`);
+HexTranslations.add(`◆ Neu: Augment-Karten|◆ New: augment cards`);
+
+// Patch Notes: Augment-Karten im Hexwerk-Stil
+HexTranslations.add(`Augment-Karten im Hexwerk-Stil|Augment cards in Hexwerk style
+Die Augment-Sammlung im Arsenal zeigt Karten mit Seltenheitsrand und Turm- oder Gebäudesymbol; belegte und freie Plätze sowie der nächste freigeschaltete Platz stehen im Kopfbereich.|The augment collection in the Arsenal shows cards with a rarity border and tower or building icon; used and free slots and the next slot to unlock are shown at the top.
+Run-Vorbereitung und Duo-Lobby zeigen die mitgenommenen Augments als Karten-Chips mit Symbol und Seltenheitsfarbe.|Run preparation and the Duo lobby show your equipped augments as card chips with icon and rarity colour.
+Mitgenommene Stufe-4-Ausbaupfade erscheinen im Turmfenster als goldenes Abzeichen unter den Kurzwerten.|Equipped tier 4 upgrade paths appear in the tower window as a gold badge below the short stats.`);

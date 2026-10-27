@@ -21,8 +21,13 @@
    const dirty=draftLoadout.join('|')!==key,renderKey=JSON.stringify([draftLoadout,partner,savingLoadout,next.lobby.players,dirty,ready,next.lobbyState?.augments,[...available]]);
    $('lobbyApplyLoadout').disabled=savingLoadout||ready||draftLoadout.length!==5||!dirty;
    if(renderKey===loadoutRenderKey)return;loadoutRenderKey=renderKey;
-   const labels=(next.lobbyState?.augments||[[],[]]).map(cards=>cards.length?cards.map(c=>HexAugmentCards.catalog[c.id].name+' · '+HexAugmentCards.rarities[c.tier]).join(' · '):'Keine Augments');
-   $('lobbyAugments').textContent='Deine Augments: '+labels[next.player]+' | Partner: '+labels[1-next.player]+'. Beim Bereitmelden wird deine Account-Auswahl übernommen. Gäste spielen ohne Account-Augments.';
+   // Hexwerk: je Spieler eine Zeile mit Karten-Chips (Symbol und Seltenheit per CSS aus data-augment/data-tier).
+   const augments=next.lobbyState?.augments||[[],[]],augmentBox=$('lobbyAugments');augmentBox.replaceChildren();
+   for(const [label,cards] of [['Deine Augments:',augments[next.player]||[]],['Partner:',augments[1-next.player]||[]]]){const row=document.createElement('span');row.className='lobbyAugmentRow';const head=document.createElement('strong');head.textContent=label;row.appendChild(head);
+    if(!cards.length){const none=document.createElement('span');none.className='lobbyAugmentNone';none.textContent='Keine Augments';row.appendChild(none);}
+    for(const c of cards){const chip=document.createElement('span');chip.className='augmentLoadoutChip';chip.dataset.augment=c.id;chip.dataset.tier=String(c.tier);chip.textContent=HexAugmentCards.catalog[c.id].name+' · '+HexAugmentCards.rarities[c.tier];row.appendChild(chip);}
+    augmentBox.appendChild(row);}
+   const augmentNote=document.createElement('small');augmentNote.textContent='Beim Bereitmelden wird deine Account-Auswahl übernommen. Gäste spielen ohne Account-Augments.';augmentBox.appendChild(augmentNote);
    $('lobbyLoadoutCount').textContent=draftLoadout.length+'/5';$('lobbyLoadoutChoices').replaceChildren();$('lobbyPartnerLoadout').replaceChildren();
    function tower(id,selected,interactive){const def=HexData.TOWERS[id],button=document.createElement(interactive?'button':'div');button.className='lobbyTowerChoice';button.innerHTML=HexArsenal.icon(id,def.color);const name=document.createElement('span');name.textContent=def.name+(interactive&&!available.has(id)?' · Gesperrt':'');button.appendChild(name);if(interactive){button.type='button';button.setAttribute('aria-pressed',String(selected));button.disabled=savingLoadout||ready||!available.has(id)||(!selected&&draftLoadout.length>=5);button.addEventListener('click',()=>{draftLoadout=selected?draftLoadout.filter(t=>t!==id):[...draftLoadout,id];renderLoadouts(view);$('lobbyReady').disabled=true;});}return button;}
    for(const id of Object.keys(HexData.TOWERS))$('lobbyLoadoutChoices').appendChild(tower(id,draftLoadout.includes(id),true));

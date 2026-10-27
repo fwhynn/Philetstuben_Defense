@@ -9,7 +9,8 @@
         "title": "NEU",
         "items": [
           "Neue Oberfläche",
-          "Herausforderungen im Hexwerk-Stil"
+          "Herausforderungen im Hexwerk-Stil",
+          "Augment-Karten im Hexwerk-Stil"
         ]
       },
       {
@@ -42,6 +43,15 @@
               "Händler, Giervertrag, Regeln der Tagesherausforderung, Partnergeschenke im Duo, Bestenliste und Patch Notes haben den neuen Fensterstil."
             ],
             "stats": []
+          },
+          {
+            "title": "Augment-Karten im Hexwerk-Stil",
+            "bullets": [
+              "Die Augment-Sammlung im Arsenal zeigt Karten mit Seltenheitsrand und Turm- oder Gebäudesymbol; belegte und freie Plätze sowie der nächste freigeschaltete Platz stehen im Kopfbereich.",
+              "Run-Vorbereitung und Duo-Lobby zeigen die mitgenommenen Augments als Karten-Chips mit Symbol und Seltenheitsfarbe.",
+              "Mitgenommene Stufe-4-Ausbaupfade erscheinen im Turmfenster als goldenes Abzeichen unter den Kurzwerten."
+            ],
+            "stats": []
           }
         ]
       },
@@ -71,6 +81,9 @@
       "Umweg, Turm-Draft, Giervertrag, Stromnetz, Expedition und Drei Dörfer verwenden die Hexwerk-Paneele; Angebote und Verträge erscheinen als Karten mit Symbolen.",
       "Die Expeditionsfrist und die Leben der Dörfer stehen unter dem Wellenschild und verdecken es nicht mehr.",
       "Händler, Giervertrag, Regeln der Tagesherausforderung, Partnergeschenke im Duo, Bestenliste und Patch Notes haben den neuen Fensterstil.",
+      "Die Augment-Sammlung im Arsenal zeigt Karten mit Seltenheitsrand und Turm- oder Gebäudesymbol; belegte und freie Plätze sowie der nächste freigeschaltete Platz stehen im Kopfbereich.",
+      "Run-Vorbereitung und Duo-Lobby zeigen die mitgenommenen Augments als Karten-Chips mit Symbol und Seltenheitsfarbe.",
+      "Mitgenommene Stufe-4-Ausbaupfade erscheinen im Turmfenster als goldenes Abzeichen unter den Kurzwerten.",
       "Die Spielregeln sind größer geschrieben und stehen Regel für Regel untereinander.",
       "Die Werte im Turmbau brechen nicht mehr mitten in einer Angabe um.",
       "Kacheln und Himmel im Spiel sind weniger stark gesättigt.",

@@ -118,3 +118,23 @@ body.hxPage{margin:0;min-height:100vh;color:#f4ecd6;font:600 17px/1.6 var(--hx-f
 .duoLobbyPage .lobbyChoice p,.duoLobbyPage .lobbyRules ol,.duoLobbyPage .lobbySeat p,.duoLobbyPage .lobbyHint,.duoLobbyPage .lobbyStatus{font-size:15px}
 .duoLobbyPage .lobbyChoice label,.duoLobbyPage .lobbyInvite label{font-size:14px}
 .duoLobbyPage .lobbyFoot{font-size:13px}
+
+/* Duo-Lobby: Augments beider Spieler als Karten-Chips (wie in der Run-Vorbereitung) */
+.duoLobbyPage #lobbyAugments{display:flex;flex-direction:column;gap:8px;padding:12px 14px;border:1.5px solid var(--hx-line);border-radius:12px;background:#0f2419}
+.duoLobbyPage .lobbyAugmentRow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}
+.duoLobbyPage .lobbyAugmentRow>strong{min-width:120px;color:var(--hx-gold-text);font:700 15px var(--hx-font-ui)}
+.duoLobbyPage .lobbyAugmentNone{color:#b9c6bc;font-size:15px}
+.duoLobbyPage #lobbyAugments small{font-size:14px;line-height:1.45;color:#cfd9cf}
+.duoLobbyPage .augmentLoadoutChip{--rar:#6e766f;--badge:#4b544f;--i:url("assets/uidesign/icons/icon_ultimate.svg");display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:0 12px 0 9px;
+  border:2px solid var(--rar);border-radius:999px;background:linear-gradient(180deg,#fffaf0,#eadbb4);color:#2b281f;font:700 15px var(--hx-font-ui)}
+.duoLobbyPage .augmentLoadoutChip::before{content:'';flex:none;width:20px;height:20px;background:var(--badge);-webkit-mask:var(--i) center/contain no-repeat;mask:var(--i) center/contain no-repeat}
+.duoLobbyPage .augmentLoadoutChip[data-tier="0"]{--rar:#4fa35a;--badge:#2f7d3a}.duoLobbyPage .augmentLoadoutChip[data-tier="1"]{--rar:#3fae9c;--badge:#237a6c}
+.duoLobbyPage .augmentLoadoutChip[data-tier="2"]{--rar:#4f8fe0;--badge:#2f63b0}.duoLobbyPage .augmentLoadoutChip[data-tier="3"]{--rar:#9b4fe0;--badge:#7a32b8}
+.duoLobbyPage .augmentLoadoutChip[data-tier="4"]{--rar:#ef9a3a;--badge:#a8530c}
+.duoLobbyPage [data-augment=mine]{--i:url("assets/uidesign/towers/icon_tower_mine.svg")}.duoLobbyPage [data-augment=flame]{--i:url("assets/uidesign/towers/icon_tower_flame.svg")}
+.duoLobbyPage [data-augment=freeze]{--i:url("assets/uidesign/towers/icon_tower_freeze.svg")}.duoLobbyPage [data-augment=ballista]{--i:url("assets/uidesign/towers/icon_tower_ballista.svg")}
+.duoLobbyPage [data-augment=chain]{--i:url("assets/uidesign/towers/icon_tower_chain.svg")}.duoLobbyPage [data-augment=necromancer]{--i:url("assets/uidesign/towers/icon_tower_necromancer.svg")}
+.duoLobbyPage [data-augment=catapult]{--i:url("assets/uidesign/towers/icon_tower_catapult.svg")}.duoLobbyPage [data-augment=archer]{--i:url("assets/uidesign/towers/icon_tower_archer.svg")}
+.duoLobbyPage [data-augment=element]{--i:url("assets/uidesign/towers/icon_tower_element.svg")}.duoLobbyPage [data-augment=base]{--i:url("assets/uidesign/icons/icon_base.svg")}
+.duoLobbyPage [data-augment=house]{--i:url("assets/uidesign/towers/icon_building_house.svg")}.duoLobbyPage [data-augment=market]{--i:url("assets/uidesign/towers/icon_building_market.svg")}
+.duoLobbyPage [data-augment=forge]{--i:url("assets/uidesign/towers/icon_building_forge.svg")}

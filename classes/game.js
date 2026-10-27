@@ -1407,10 +1407,11 @@ R dreht die Karte, dann Feld anklicken.`;
     }
     const augmentSummary=document.getElementById('loadoutAugments');augmentSummary.replaceChildren();augmentSummary.hidden=!HexAugmentCards.unlocked(profile)||!!pendingChallengeDay||!!challengeLab;
     if(!augmentSummary.hidden){const cards=HexAugmentCards.run(profile,pendingLoadout).cards,owned=HexAugmentCards.clean(profile.augmentCards),head=document.createElement('strong');head.textContent='Augments für diesen Run · '+cards.length+'/'+HexAugmentCards.slots(profile);augmentSummary.appendChild(head);
-      for(const card of cards){const item=document.createElement('span');item.className='augmentLoadoutChip';item.textContent=HexAugmentCards.label(card.id,card.tier);item.title=HexAugmentCards.describe(card.id,card.tier);augmentSummary.appendChild(item);}
+      // Symbol und Seltenheitsfarbe kommen per CSS aus data-augment/data-tier (Hexwerk).
+      for(const card of cards){const item=document.createElement('span');item.className='augmentLoadoutChip';item.dataset.augment=card.id;item.dataset.tier=String(card.tier);item.textContent=HexAugmentCards.catalog[card.id].name+' · '+HexAugmentCards.rarities[card.tier];item.title=HexAugmentCards.describe(card.id,card.tier);augmentSummary.appendChild(item);}
       const inactive=owned.equipped.filter(id=>!cards.some(c=>c.id===id));if(inactive.length){const hint=document.createElement('small');hint.textContent='Nicht aktiv – passender Turm fehlt im Loadout: '+inactive.map(id=>HexAugmentCards.catalog[id].name).join(', ');augmentSummary.appendChild(hint);}
       if(!cards.length){const hint=document.createElement('small');hint.textContent='Noch keine passenden Augments ausgerüstet.';augmentSummary.appendChild(hint);}
-      const change=document.createElement('button');change.textContent='Augments ändern';change.addEventListener('click',()=>{arsenalOverlay._augmentsOpen=true;openArsenal();});augmentSummary.appendChild(change);
+      const change=document.createElement('button');change.className='secondary';change.textContent='Augments ändern';change.addEventListener('click',()=>{arsenalOverlay._augmentsOpen=true;openArsenal();});augmentSummary.appendChild(change);
     }
     const warnings = loadoutWarnings(pendingLoadout); document.getElementById('loadoutWarning').title = warnings.join(' '); document.getElementById('loadoutWarning').textContent = pendingLoadout.length === 5 ? '5/5 Türme gewählt.' : 'Wähle genau fünf Türme.';
     document.getElementById('confirmLoadoutBtn').disabled = pendingLoadout.length !== 5; document.getElementById('confirmLoadoutBtn').textContent = loadoutEdit ? 'Loadout speichern' : 'Run starten';
