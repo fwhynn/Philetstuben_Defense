@@ -2903,3 +2903,15 @@ Lautstärken zeigen Prozentwerte; 0 % schaltet Sound oder Musik aus. Die separat
 Die Spielregeln öffnen als eigenes Fenster mit nummerierten Regeln.|The game rules open in their own window with numbered rules.
 Die Turmstatistik am Rundenende ist zunächst eingeklappt. Angemeldete Spieler sehen „Damit bist du aktuell Platz …“.|Tower statistics at the end of a run start collapsed. Signed-in players see “You are currently rank …”.
 Der Startwert für den nächsten Durchlauf wird wieder richtig dargestellt; Biom-Symbole sind zentriert.|The seed for the next run displays correctly again; biome icons are centred.`);
+
+// Gebäudefenster: Bau- und Ausbau-Karten
+HexTranslations.add(`Haus bauen|Build house
+Schmiede bauen|Build forge
+Markt bauen|Build market
+Gegnerportal bauen|Build enemy portal
+Ausbauen auf Stufe|Upgrade to tier`);
+
+// Patch Notes: Gebäudefenster, Regler, Kartentitel
+HexTranslations.add(`Titel und Texte der Hexkarten im Belohnungsfenster stehen mittig.|Titles and text of hex cards in the reward window are centred.
+Das Gebäudefenster zeigt Bau und Ausbau als Karten mit Goldpreis-Knopf; der Titel bricht nicht mehr um und Verkaufen steht unten.|The building window shows building and upgrading as cards with a gold price button; the title no longer wraps and selling sits at the bottom.
+Lautstärkeregler haben eine eigene Leiste mit Goldfüllung; der Griff sitzt mittig.|Volume sliders have their own bar with a gold fill; the knob sits centred.`);

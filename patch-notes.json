@@ -35,7 +35,8 @@
               "Handkarten sind etwas breiter und zeigen bis zu drei Zeilen Beschreibung.",
               "Bastionssegen, Handelspakt und Schrein-Segen erscheinen als eigene Karten.",
               "Bei Belohnungskarten stehen Plätze und Anzahl im Deck immer auf gleicher Höhe; die Deckansicht zeigt Turm- und Gebäudeplätze in der Farbleiste.",
-              "„Belohnung überspringen“, „Keine Karte entfernen“ und die Schließen-Knöpfe von Händler und Giervertrag stehen unten rechts."
+              "„Belohnung überspringen“, „Keine Karte entfernen“ und die Schließen-Knöpfe von Händler und Giervertrag stehen unten rechts.",
+              "Titel und Texte der Hexkarten im Belohnungsfenster stehen mittig."
             ],
             "stats": []
           }
@@ -51,7 +52,8 @@
               "„Turm bauen“ zeigt Turmsymbole; die Taste steht am Symbol, rechts nur der Preis.",
               "Im Turmfenster zeigen die Stufen 1–4 über dem Preis den Fortschritt; eine mitgenommene Stufe 4 ist hervorgehoben.",
               "Details zu einer Verbesserung zu öffnen verschiebt die Karte nicht mehr.",
-              "Am Desktop entfallen der Turmbau-Knopf unten links und die Zoom-Knöpfe; Verbrauchsmaterial liegt unten links. Turm- und Biomleiste sind etwas größer."
+              "Am Desktop entfallen der Turmbau-Knopf unten links und die Zoom-Knöpfe; Verbrauchsmaterial liegt unten links. Turm- und Biomleiste sind etwas größer.",
+              "Das Gebäudefenster zeigt Bau und Ausbau als Karten mit Goldpreis-Knopf; der Titel bricht nicht mehr um und Verkaufen steht unten."
             ],
             "stats": []
           }
@@ -67,7 +69,8 @@
               "Lautstärken zeigen Prozentwerte; 0 % schaltet Sound oder Musik aus. Die separaten An/Aus-Schalter entfallen.",
               "Die Spielregeln öffnen als eigenes Fenster mit nummerierten Regeln.",
               "Die Turmstatistik am Rundenende ist zunächst eingeklappt. Angemeldete Spieler sehen „Damit bist du aktuell Platz …“.",
-              "Der Startwert für den nächsten Durchlauf wird wieder richtig dargestellt; Biom-Symbole sind zentriert."
+              "Der Startwert für den nächsten Durchlauf wird wieder richtig dargestellt; Biom-Symbole sind zentriert.",
+              "Lautstärkeregler haben eine eigene Leiste mit Goldfüllung; der Griff sitzt mittig."
             ],
             "stats": []
           }
@@ -81,16 +84,19 @@
       "Bastionssegen, Handelspakt und Schrein-Segen erscheinen als eigene Karten.",
       "Bei Belohnungskarten stehen Plätze und Anzahl im Deck immer auf gleicher Höhe; die Deckansicht zeigt Turm- und Gebäudeplätze in der Farbleiste.",
       "„Belohnung überspringen“, „Keine Karte entfernen“ und die Schließen-Knöpfe von Händler und Giervertrag stehen unten rechts.",
+      "Titel und Texte der Hexkarten im Belohnungsfenster stehen mittig.",
       "Ein Klick auf die Basis öffnet am Desktop ein Basis-Fenster im Stil des Turmfensters; die Basis-Schaltfläche oben entfällt.",
       "„Turm bauen“ zeigt Turmsymbole; die Taste steht am Symbol, rechts nur der Preis.",
       "Im Turmfenster zeigen die Stufen 1–4 über dem Preis den Fortschritt; eine mitgenommene Stufe 4 ist hervorgehoben.",
       "Details zu einer Verbesserung zu öffnen verschiebt die Karte nicht mehr.",
       "Am Desktop entfallen der Turmbau-Knopf unten links und die Zoom-Knöpfe; Verbrauchsmaterial liegt unten links. Turm- und Biomleiste sind etwas größer.",
+      "Das Gebäudefenster zeigt Bau und Ausbau als Karten mit Goldpreis-Knopf; der Titel bricht nicht mehr um und Verkaufen steht unten.",
       "Augment-Karten sind ein eigener Reiter neben Türmen und Gebäuden; die mitgenommene Stufe 4 leuchtet im Baum.",
       "Lautstärken zeigen Prozentwerte; 0 % schaltet Sound oder Musik aus. Die separaten An/Aus-Schalter entfallen.",
       "Die Spielregeln öffnen als eigenes Fenster mit nummerierten Regeln.",
       "Die Turmstatistik am Rundenende ist zunächst eingeklappt. Angemeldete Spieler sehen „Damit bist du aktuell Platz …“.",
-      "Der Startwert für den nächsten Durchlauf wird wieder richtig dargestellt; Biom-Symbole sind zentriert."
+      "Der Startwert für den nächsten Durchlauf wird wieder richtig dargestellt; Biom-Symbole sind zentriert.",
+      "Lautstärkeregler haben eine eigene Leiste mit Goldfüllung; der Griff sitzt mittig."
     ]
   },
   {
