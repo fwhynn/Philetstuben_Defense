@@ -1,6 +1,6 @@
 [
   {
-    "version": "next",
+    "version": "1.2.8",
     "title": "Feinschliff der Oberfläche",
     "summary": "Deutlichere Seltenheiten, Bauplätze direkt auf den Hexkarten und aufgeräumte Fenster für Basis, Turmbau und Einstellungen.",
     "overview": [
@@ -97,7 +97,8 @@
       "Die Turmstatistik am Rundenende ist zunächst eingeklappt. Angemeldete Spieler sehen „Damit bist du aktuell Platz …“.",
       "Der Startwert für den nächsten Durchlauf wird wieder richtig dargestellt; Biom-Symbole sind zentriert.",
       "Lautstärkeregler haben eine eigene Leiste mit Goldfüllung; der Griff sitzt mittig."
-    ]
+    ],
+    "date": "2026-10-28"
   },
   {
     "version": "1.2.7",
