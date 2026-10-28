@@ -30,7 +30,8 @@
   }
   try{const data=await api.previewRunRanking(run);if(token!==generation)return;
    if(data.mode!==run.mode||!Number.isSafeInteger(data.rank)||data.rank<1)throw Error();
-   title.textContent=`Damit wärst du aktuell Platz ${data.rank}`;
+   // Eingereichte Account-Runs stehen schon in der Wertung; Gäste sehen nur, wo sie stünden.
+   title.textContent=api?.isLoggedIn()?`Damit bist du aktuell Platz ${data.rank}`:`Damit wärst du aktuell Platz ${data.rank}`;
    host.appendChild(el('p','Vorläufiger Vergleich mit freigegebenen Bestwerten. Bei Gier zählt verdientes Gold, sonst Welle und Kills. Die Platzierung kann sich ändern.'));
   }catch{if(token===generation)title.textContent='Platzierung momentan nicht verfügbar';}
  }

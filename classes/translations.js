@@ -2859,3 +2859,47 @@ HexTranslations.add(`Augment-Karten im Hexwerk-Stil|Augment cards in Hexwerk sty
 Die Augment-Sammlung im Arsenal zeigt Karten mit Seltenheitsrand und Turm- oder Gebäudesymbol; belegte und freie Plätze sowie der nächste freigeschaltete Platz stehen im Kopfbereich.|The augment collection in the Arsenal shows cards with a rarity border and tower or building icon; used and free slots and the next slot to unlock are shown at the top.
 Run-Vorbereitung und Duo-Lobby zeigen die mitgenommenen Augments als Karten-Chips mit Symbol und Seltenheitsfarbe.|Run preparation and the Duo lobby show your equipped augments as card chips with icon and rarity colour.
 Mitgenommene Stufe-4-Ausbaupfade erscheinen im Turmfenster als goldenes Abzeichen unter den Kurzwerten.|Equipped tier 4 upgrade paths appear in the tower window as a gold badge below the short stats.`);
+
+// Rückmeldung 28.10.2026: Segen-Karten, Basis-Fenster, Stufe-4-Abzeichen, Lautstärke
+HexTranslations.add(`Segen|Blessing
+Stufe 4 dabei:|Tier 4 equipped:
+Stufe 4 aktiv:|Tier 4 active:
+Basis · Ausbau für diesen Run|Base · upgrades for this run
+Ausbauten|Upgrades
+Basis schließen|Close base
+Lautstärke aller Spielgeräusche. 0 % schaltet sie aus.|Volume of all game sounds. 0 % turns them off.
+Unabhängig von den Spielgeräuschen. 0 % schaltet sie aus.|Independent of the game sounds. 0 % turns it off.`);
+HexTranslations.add(`Damit bist du aktuell Platz|You are currently rank
+Damit wärst du aktuell Platz|You would currently be rank`);
+
+// Patch Notes: Feinschliff der Oberfläche
+HexTranslations.add(`Feinschliff der Oberfläche|Interface polish
+Deutlichere Seltenheiten, Bauplätze direkt auf den Hexkarten und aufgeräumte Fenster für Basis, Turmbau und Einstellungen.|Clearer rarities, build slots shown right on the hex cards and tidier windows for the base, tower building and settings.
+Bauplätze auf den Hexkarten|Build slots on hex cards
+Basis-Fenster wie das Turmfenster|Base window like the tower window
+Augment-Karten als Arsenal-Reiter|Augment cards as an Arsenal tab
+Klarere Seltenheitsfarben|Clearer rarity colours
+Einheitliche Fensteraktionen|Consistent window actions
+Aufgeräumte Einstellungen|Tidier settings
+Karten und Belohnungen|Cards and rewards
+Klarer auf einen Blick|Clearer at a glance
+Seltenheiten haben deutlich unterscheidbare Farben: Gewöhnlich grau, Ungewöhnlich grün, Selten blau, Episch violett, Legendär gold. Legendäre Karten leuchten und glänzen.|Rarities use clearly distinct colours: Common grey, Uncommon green, Rare blue, Epic purple, Legendary gold. Legendary cards glow and shine.
+Hexkarten zeigen ihre Turm- und Gebäudeplätze als kleine Symbole direkt auf dem Kartenbild; sie drehen sich mit der Karte.|Hex cards show their tower and building slots as small icons right on the card art; they rotate with the card.
+Handkarten sind etwas breiter und zeigen bis zu drei Zeilen Beschreibung.|Hand cards are slightly wider and show up to three lines of description.
+Bastionssegen, Handelspakt und Schrein-Segen erscheinen als eigene Karten.|Bastion Blessing, Trade Pact and shrine blessings appear as cards of their own.
+Bei Belohnungskarten stehen Plätze und Anzahl im Deck immer auf gleicher Höhe; die Deckansicht zeigt Turm- und Gebäudeplätze in der Farbleiste.|On reward cards, slots and copies in the deck always sit at the same height; the deck view shows tower and building slots in the colour bar.
+„Belohnung überspringen“, „Keine Karte entfernen“ und die Schließen-Knöpfe von Händler und Giervertrag stehen unten rechts.|“Skip reward”, “Remove no card” and the close buttons of the merchant and Greed contracts sit at the bottom right.
+Türme und Basis|Towers and base
+Bauen und Ausbauen|Building and upgrading
+Ein Klick auf die Basis öffnet am Desktop ein Basis-Fenster im Stil des Turmfensters; die Basis-Schaltfläche oben entfällt.|On desktop, clicking the base opens a base window styled like the tower window; the base button at the top is gone.
+„Turm bauen“ zeigt Turmsymbole; die Taste steht am Symbol, rechts nur der Preis.|“Build tower” shows tower icons; the hotkey sits on the icon, the price alone on the right.
+Im Turmfenster zeigen die Stufen 1–4 über dem Preis den Fortschritt; eine mitgenommene Stufe 4 ist hervorgehoben.|In the tower window, tiers 1–4 above the price show your progress; an equipped tier 4 is highlighted.
+Details zu einer Verbesserung zu öffnen verschiebt die Karte nicht mehr.|Opening the details of an upgrade no longer shifts the card.
+Am Desktop entfallen der Turmbau-Knopf unten links und die Zoom-Knöpfe; Verbrauchsmaterial liegt unten links. Turm- und Biomleiste sind etwas größer.|On desktop, the build button at the bottom left and the zoom buttons are gone; consumables sit at the bottom left. Tower and biome rails are slightly larger.
+Arsenal, Einstellungen und Rundenende|Arsenal, settings and run end
+Aufgeräumt|Tidied up
+Augment-Karten sind ein eigener Reiter neben Türmen und Gebäuden; die mitgenommene Stufe 4 leuchtet im Baum.|Augment cards have their own tab next to towers and buildings; the equipped tier 4 glows in the tree.
+Lautstärken zeigen Prozentwerte; 0 % schaltet Sound oder Musik aus. Die separaten An/Aus-Schalter entfallen.|Volume sliders show percentages; 0 % turns sound or music off. The separate on/off switches are gone.
+Die Spielregeln öffnen als eigenes Fenster mit nummerierten Regeln.|The game rules open in their own window with numbered rules.
+Die Turmstatistik am Rundenende ist zunächst eingeklappt. Angemeldete Spieler sehen „Damit bist du aktuell Platz …“.|Tower statistics at the end of a run start collapsed. Signed-in players see “You are currently rank …”.
+Der Startwert für den nächsten Durchlauf wird wieder richtig dargestellt; Biom-Symbole sind zentriert.|The seed for the next run displays correctly again; biome icons are centred.`);

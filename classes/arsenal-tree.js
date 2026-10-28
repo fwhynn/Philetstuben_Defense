@@ -1,5 +1,5 @@
 /* Arsenal als Fertigkeitenbaum (Test-Ansicht, angelehnt an den Passivbaum in Path of Exile).
-   Zwei Reiter: Türme und Gebäude, je ein eigener Baum. Mitte: Arsenal. Ring: die Türme bzw. Gebäude.
+   Reiter: Türme und Gebäude (je ein eigener Baum), nach Freischaltung zusätzlich Augment-Karten (Sammlung aus augment-cards-ui.js). Mitte: Arsenal. Ring: die Türme bzw. Gebäude.
    Nach außen je Zweig Stufe 2 → Stufe 3 → Ultimate bzw. Spezial. Der Baum liegt auf einer Ellipse, damit breite
    Beschriftungen im Querformat Platz haben; die viewBox passt sich dem Inhalt an.
    Daten kommen unverändert aus HexArsenal.trees(profile); Freischaltungen laufen über denselben Callback wie die Werkstatt.
@@ -93,20 +93,21 @@ const HexArsenalTree=(()=>{
     const text=action.kind==='activateUltimate'?'Für den nächsten Run aktivieren':'◆ '+action.cost+' freischalten';
     return '<button type="button" class="'+(ok?'primary':'secondary')+' skillBuy" data-unlock-kind="'+esc(action.kind)+'" data-unlock-id="'+esc(action.id||fallback)+'"'+(ok?'':' disabled')+'>'+esc(text)+'</button>';
   }
-  function groupTabs(all){
+  // augments (optional, aus game.js): dritter Reiter „Augment-Karten“; die Sammlung selbst zeichnet HexAugmentCardsUI.
+  function groupTabs(all,augments){
     return '<div class="skillGroups" role="tablist" aria-label="Arsenal-Bereiche">'+GROUPS.map(g=>{
       const trees=all.filter(t=>t.kind===g.id),owned=trees.filter(t=>t.owned).length,open=trees.some(t=>t.affordable);
-      return '<button type="button" role="tab" class="skillGroup'+(open?' hasOffer':'')+'" data-group="'+g.id+'" aria-selected="'+(state.group===g.id)+'"><span class="hxi hxi-'+g.icon+'"></span><span>'+esc(g.label)+'</span><small>'+owned+'/'+trees.length+'</small></button>';
-    }).join('')+'</div>';
+      return '<button type="button" role="tab" class="skillGroup'+(open?' hasOffer':'')+'" data-group="'+g.id+'" aria-selected="'+(!augments?.open&&state.group===g.id)+'"><span class="hxi hxi-'+g.icon+'"></span><span>'+esc(g.label)+'</span><small>'+owned+'/'+trees.length+'</small></button>';
+    }).join('')+(augments?'<button type="button" role="tab" class="skillGroup'+(augments.fresh?' hasOffer':'')+'" data-augments aria-selected="'+!!augments.open+'"><span class="hxi hxi-deck"></span><span>Augment-Karten</span><small>'+esc(augments.count)+'</small></button>':'')+'</div>';
   }
-  function render(host,all,profile,onUnlock){
+  function render(host,all,profile,onUnlock,augments=null){
     if(!host)return;
     const list=all.filter(t=>t.kind===state.group);
     const {nodes,edges,byId,box}=layout(list,profile,RADII[state.group]);
     if(!byId.has(state.selected))state.selected='hub';
     const lines=edges.map(e=>{const a=byId.get(e.from),b=byId.get(e.to);return '<line class="skillEdge'+(e.lit?' lit':'')+'" x1="'+a.x.toFixed(1)+'" y1="'+a.y.toFixed(1)+'" x2="'+b.x.toFixed(1)+'" y2="'+b.y.toFixed(1)+'"/>';}).join('');
     const r=RADII[state.group],rings=[r.root,r.step[0],r.step[1],r.meta].map(v=>'<ellipse class="skillRing" rx="'+(v*r.ex).toFixed(1)+'" ry="'+v+'"/>').join('');
-    host.innerHTML='<div class="skillMain">'+groupTabs(all)
+    host.innerHTML='<div class="skillMain">'+groupTabs(all,augments)
       +'<div class="skillCanvas"><svg class="skillSvg" viewBox="'+[box.x,box.y,box.w,box.h].map(v=>v.toFixed(0)).join(' ')+'" aria-label="Arsenal als Baum"><g class="skillWorld">'+rings+lines+nodes.map(nodeMarkup).join('')+'</g></svg>'
       +'<ul class="skillLegend"><li class="isOwned">freigeschaltet</li><li class="isOffer">jetzt freischaltbar</li><li class="isLocked">gesperrt</li><li class="isRun">II · III im Run mit Gold</li></ul>'
       +'<div class="skillZoom"><button type="button" class="secondary" data-zoom="1.25" aria-label="Vergrößern">+</button><button type="button" class="secondary" data-zoom="0.8" aria-label="Verkleinern">−</button><button type="button" class="secondary" data-zoom="0" aria-label="Ganzen Baum zeigen">⌂</button></div></div></div>'
@@ -118,7 +119,8 @@ const HexArsenalTree=(()=>{
     // Bildschirm → viewBox-Koordinaten (preserveAspectRatio: xMidYMid meet).
     const toView=event=>{const rect=svg.getBoundingClientRect(),s=Math.max(box.w/rect.width,box.h/rect.height);return {x:cx+(event.clientX-rect.left-rect.width/2)*s,y:cy+(event.clientY-rect.top-rect.height/2)*s,s};};
     apply();
-    for(const b of host.querySelectorAll('[data-group]'))b.addEventListener('click',()=>{if(state.group===b.dataset.group)return;state.group=b.dataset.group;state.selected='hub';view.x=0;view.y=0;view.scale=1;render(host,all,profile,onUnlock);host.querySelector('[data-group][aria-selected=true]')?.focus();});
+    host.querySelector('[data-augments]')?.addEventListener('click',()=>{if(!augments.open)augments.select(true);});
+    for(const b of host.querySelectorAll('[data-group]'))b.addEventListener('click',()=>{if(augments?.open){state.group=b.dataset.group;state.selected='hub';augments.select(false);return;}if(state.group===b.dataset.group)return;state.group=b.dataset.group;state.selected='hub';view.x=0;view.y=0;view.scale=1;render(host,all,profile,onUnlock);host.querySelector('[data-group][aria-selected=true]')?.focus();});
     const choose=id=>{state.selected=id;for(const g of host.querySelectorAll('.skillNode'))g.classList.toggle('selected',g.dataset.node===id);detail.innerHTML=details(byId.get(id),profile,list);bindButtons();};
     function bindButtons(){for(const b of detail.querySelectorAll('[data-unlock-kind]'))b.addEventListener('click',()=>onUnlock(b.dataset.unlockKind,b.dataset.unlockId));}
     bindButtons();

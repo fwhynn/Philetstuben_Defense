@@ -13,7 +13,7 @@ import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
 import {ShaderPass} from 'three/addons/postprocessing/ShaderPass.js';
 import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
 import {SMAAPass} from 'three/addons/postprocessing/SMAAPass.js';
-import {gradeShader} from './grade-shader.mjs?v=1a4fe274b68d51fe';
+import {gradeShader} from './grade-shader.mjs?v=40a79d48fbcf7b92';
 
 const DECOR=['pine_l','pine_m','pine_s','tree_a','tree_b','rock_a','rock_b','bush','grass','flowers','torch'];
 export const LOOK_FILES=DECOR.map(name=>'decor/deco_'+name);

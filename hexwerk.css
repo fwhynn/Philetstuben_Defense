@@ -1988,3 +1988,207 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 #towerPanel .towerUpgradeCard.equippedUltimatePath>.towerPathIcon{filter:drop-shadow(0 0 7px #f6c95a)}
 @media(max-width:540px){.augmentShop{align-items:stretch;width:100%}#arsenalOverlay .augmentPackCards{grid-template-columns:1fr}#loadoutOverlay .loadoutAugments button{width:100%;margin-left:0}}
 @media(prefers-reduced-motion:reduce){#augmentCollectionToggle[data-fresh="1"]{animation:none}}
+.augmentBadges{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.augmentBadges .augmentEquippedTag{position:static}
+.augmentCardHead{padding-right:0!important}
+
+/* ===== Rückmeldung 28.10.2026 ===== */
+
+/* Seltenheiten klar unterscheidbar: Gewöhnlich grau, Ungewöhnlich grün, Selten blau, Episch violett, Legendär gold mit Glanz */
+:root{--hx-common:#9aa3a6;--hx-common-badge:#5f6a6e;--hx-uncommon:#4cb84a;--hx-uncommon-badge:#2d7f2b;--hx-rare:#3f8ff2;--hx-rare-badge:#2563c7;
+  --hx-epic:#a95cf2;--hx-epic-badge:#7b33c9;--hx-legendary:#f5a623;--hx-legendary-badge:#b0600a}
+.card.rarity-uncommon,.deckHexCard.rarity-uncommon{--rar:var(--hx-uncommon);--badge:var(--hx-uncommon-badge)}
+.card.rarity-common,.deckHexCard.rarity-common{--rar:var(--hx-common);--badge:var(--hx-common-badge)}
+.deckHexCard.rarity-rare{--rar:var(--hx-rare);--badge:var(--hx-rare-badge)}.deckHexCard.rarity-epic{--rar:var(--hx-epic);--badge:var(--hx-epic-badge)}
+.deckHexCard.rarity-legendary{--rar:var(--hx-legendary);--badge:var(--hx-legendary-badge)}
+:is(.augmentCollection,.loadoutAugments) [data-tier="1"]{--rar:var(--hx-uncommon);--badge:var(--hx-uncommon-badge)}
+.card.rarity-epic{filter:drop-shadow(0 0 8px #a95cf266)}
+.card.rarity-legendary{animation:hxLegendGlow 2.4s ease-in-out infinite}
+.card.rarity-legendary::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(115deg,#fff0 38%,#fff9 50%,#fff0 62%) 150% 0/260% 100% no-repeat;animation:hxSheen 3.4s ease-in-out infinite}
+.card.rarity-legendary .rarity{background:linear-gradient(90deg,#b0600a,#f5a623,#ffe08a,#f5a623,#b0600a)!important;background-size:220% 100%!important;color:#2a1405!important;animation:hxBadgeShine 2.6s linear infinite}
+@keyframes hxLegendGlow{0%,100%{filter:drop-shadow(0 0 8px #ffbf4d99) drop-shadow(0 0 22px #f5a62355)}50%{filter:drop-shadow(0 0 14px #ffd36acc) drop-shadow(0 0 36px #f5a62388)}}
+@keyframes hxSheen{0%,45%{background-position:150% 0}100%{background-position:-60% 0}}
+@keyframes hxBadgeShine{to{background-position:-220% 0}}
+@media(prefers-reduced-motion:reduce){.card.rarity-legendary,.card.rarity-legendary::after,.card.rarity-legendary .rarity{animation:none}.card.rarity-legendary{filter:drop-shadow(0 0 12px #ffbf4daa)}}
+
+/* Handkarten etwas breiter und höher, Beschreibung bis drei Zeilen */
+@media(min-width:1101px) and (min-height:601px){
+  :root{--hx-cw:172px;--hx-rail-h:66px}
+  .handDock .card p{-webkit-line-clamp:3}
+}
+
+/* Belohnungskarten: Plätze und „bereits im Deck“ immer unten auf gleicher Höhe */
+.rewardChoices .card{display:flex!important;flex-direction:column;align-items:center}
+.rewardChoices .card>.rarity{align-self:center}
+.rewardChoices .card>.slots{margin-top:auto;padding-top:6px}
+.rewardChoices .card>.deckCopyCount{margin-top:4px}
+
+/* Segen (Bastionssegen, Handelspakt, Schreine) als Karten im Stil der Hexkarten, Rahmen in Segen-Gold */
+.rewardChoices .blessingCard{--rar:#c9a24a;--badge:#7a5414;position:relative;display:flex!important;flex-direction:column;align-items:center;justify-content:flex-start;gap:6px;
+  min-height:0;padding:14px 12px 16px!important;border:5px solid var(--rar)!important;border-radius:14px!important;
+  background:linear-gradient(180deg,#fffaf0,#f6ecd3 55%,#eadbb4)!important;box-shadow:0 0 0 2px #2b281f66,inset 0 0 0 2px #fffc,0 8px 16px #0008!important;
+  color:#2b281f!important;font-family:var(--hx-font-ui);text-align:center;cursor:pointer}
+.rewardChoices .blessingCard .rarity{padding:3px 10px;border-radius:6px;background:var(--badge);color:#fff;font:700 13px/1.3 var(--hx-font-ui);letter-spacing:.07em;text-transform:uppercase;box-shadow:inset 0 -2px 0 #0003}
+.blessingArt{display:grid;place-items:center;width:96px;aspect-ratio:.866;margin:4px 0;background:url("assets/uidesign/hex/hex_gold.svg") center/100% 100% no-repeat;filter:drop-shadow(0 3px 0 #0003)}
+.blessingArt .hxi{width:44%;height:44%;color:#2a1f10}
+.rewardChoices .blessingCard strong{font:700 18px/1.15 var(--hx-font-ui)!important;color:#2b281f!important}
+.rewardChoices .blessingCard small{font-size:14px!important;line-height:1.35;color:#4a4232!important}
+.rewardChoices .blessingCard:not(:disabled):hover{transform:translateY(-6px)}
+.rewardChoices .blessingCard:focus-visible{outline:3px solid var(--hx-focus);outline-offset:3px}
+
+/* Fenster-Aktionen einheitlich; Überspringen / Schließen immer unten rechts */
+.rewardInspectActions button,#skipRemovalBtn,#skipRemovalTopBtn,#greedCloseBtn,#merchantCloseBtn,.loadoutActions button,.hxWinFoot button{
+  min-height:48px!important;padding:0 22px!important;border-radius:10px!important;font:700 16px/1.2 var(--hx-font-ui)!important}
+#greedCloseBtn,#merchantCloseBtn{border:1.5px solid var(--hx-capsule-line)!important;background:var(--hx-capsule-fill)!important;color:var(--hx-green-ink)!important;box-shadow:inset 0 1px 0 #ffffff14;cursor:pointer}
+#greedCloseBtn:hover,#merchantCloseBtn:hover{border-color:#c9a24a!important}
+/* Fußzeile: Ansichten links, Überspringen / Keine Karte entfernen / Schließen rechts */
+.rewardFooter{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:18px 0 0;padding:0 28px}
+.rewardFooter>.rewardInspectActions{display:flex;flex-wrap:wrap;gap:12px;flex:1 1 auto;margin:0!important;padding:0!important;justify-content:flex-start!important}
+.rewardFooter>.rewardInspectActions.hidden{display:none!important}
+.rewardFooter>#skipRemovalBtn,.rewardFooter>#skipRemovalTopBtn,.rewardFooter>#greedCloseBtn,.rewardFooter>#merchantCloseBtn{margin:0 0 0 auto!important}
+.rewardFooter>.hidden{display:none!important}
+#rewardOverlay:has(#rewardSelection.hidden) :is(#skipRemovalBtn,#skipRemovalTopBtn){display:none!important}
+#rewardOverlay.inspectMap .rewardFooter{display:contents}
+
+/* Turmfenster: Stufen 1–4 über dem Preis, Abzeichen für die mitgenommene Stufe 4 in eigener Zeile unter den Kurzwerten */
+#towerPanel .towerUpgradeCard{grid-template-areas:"icon title title steps" "icon stats compare buy" "desc desc desc desc" "trade trade trade trade" "lock lock lock lock"!important}
+#towerPanel .towerUpgradeCard.equippedUltimatePath{grid-template-areas:"icon title title steps" "icon stats compare buy" "icon badge badge badge" "desc desc desc desc" "trade trade trade trade" "lock lock lock lock"!important}
+#towerPanel .towerUpgradeCard>.towerPathProgress{display:flex!important;grid-area:steps;justify-self:center;align-self:end;margin:0 0 2px}
+#towerPanel .towerUpgradeCard>.towerPathProgress .towerPathLabel{display:none}
+#towerPanel .towerUpgradeCard .towerUpgradeActions>.towerBuy{align-self:start}
+.towerPathSteps{display:flex;gap:3px}
+.towerPathSteps>span{display:grid!important;place-items:center;width:20px!important;height:23px!important;border:0!important;border-radius:0!important;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+  background:#1c2c22!important;color:#6f8276!important;font:700 12px/1 var(--hx-font-ui)!important}
+.towerPathSteps>.owned{background:#2f6b44!important;color:#e9f5ea!important}
+.towerPathSteps>.next{background:linear-gradient(180deg,#9df0a5,#4cb84a)!important;color:#0f2a12!important}
+.towerPathSteps>.meta{background:linear-gradient(180deg,#fff3c4,#f5a623)!important;color:#2a1405!important;animation:hxReady 2.4s ease-in-out infinite}
+#towerPanel .towerUpgradeCard>.equippedUltimateBadge{grid-area:badge;justify-self:stretch;width:auto;margin:6px 0 0}
+.equippedUltimateBadge{display:flex!important;width:auto;max-width:none;border-radius:10px!important;padding:6px 10px!important;line-height:1.3!important;text-align:left}
+
+/* Turm bauen: Turmsymbol auf Hex mit Taste in der Ecke; rechts nur der Preis */
+#towerMenu .towerBuildIcon{clip-path:none!important;background:none!important;overflow:visible}
+#towerMenu .towerBuildIcon::before{content:'';position:absolute;inset:0;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(180deg,#e9dcb8,#9da58f)}
+#towerMenu .towerBuildIcon::after{content:'';position:absolute;inset:3px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(180deg,#1f3a29,#10221a)}
+#towerMenu .towerBuildIcon>*{z-index:1}
+#towerMenu .towerBuildIcon>kbd{position:absolute;right:-7px;bottom:-3px;z-index:2;min-width:22px;height:22px;box-sizing:border-box;padding:0 5px;border:1.5px solid #c9a24a;border-radius:6px;
+  background:#0b1912;color:#ffe198;font:700 13px/19px var(--hx-font-ui);text-align:center;box-shadow:0 2px 0 #0008}
+#towerMenu .towerOfferPrice kbd{display:none}
+
+/* Desktop: kein Turmbau-Knopf unten links (Bauen über das Bauplatz-Feld), Basis-Ausbau über die Basis auf der Karte */
+@media(min-width:1101px) and (min-height:601px){
+  .dockBL{display:none!important}
+  #baseDropdown>summary{display:none!important}
+  #baseDropdown>.basePanel{width:clamp(400px,27vw,480px)!important;height:auto!important;padding:16px 18px 14px!important;box-sizing:border-box}
+}
+/* Zoom-Knöpfe nur bei Touch-Bedienung; Reihenfolge + / − */
+@media(hover:hover) and (pointer:fine){.boardWrap .mapControls #zoomInBtn,.boardWrap .mapControls #zoomOutBtn{display:none!important}}
+
+/* Basis-Fenster im Aufbau des Turmfensters */
+.basePanel{font-family:var(--hx-font-ui)}
+.basePanelHead{display:grid!important;grid-template-columns:64px minmax(0,1fr) auto;align-items:center;gap:12px;padding-bottom:10px;margin-bottom:10px;border-bottom:1.5px solid #41594a}
+.basePanelIcon{display:grid;place-items:center;width:64px;height:72px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(180deg,#ffe48a,#c58d27)}
+.basePanelIcon .hxi{width:34px;height:34px;color:#2a1f10}
+.basePanel #baseTitle{margin:0;font:900 26px/1.1 var(--hx-font-title)!important;color:#fbf7ea!important}
+.basePanel .towerStage{display:block;margin-top:4px;font:700 15px var(--hx-font-ui);color:var(--hx-gold-text)}
+.baseHeadline{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:0 0 10px;padding:10px 6px;border:1.5px solid #c9a24a66;border-radius:12px;background:#0e1d16}
+.baseHeadline>div{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;text-align:center}
+.baseHeadline .hxi{width:20px;height:20px;color:#e9dcb8}.baseHeadline .hxi-heart{color:#ef5a62}
+.baseHeadline strong{font:700 19px/1.1 var(--hx-font-ui);color:#fbf7ea;font-variant-numeric:tabular-nums}
+.baseHeadline small{font:600 13px var(--hx-font-ui);color:#b9c6bc}
+.basePanel #baseWeaponStats{margin:0;font-size:15px;line-height:1.45;color:#cfd9cf}
+.basePanel .towerSectionLabel{margin:14px 0 8px;padding-bottom:6px;border-bottom:1.5px solid #c9a24a66;font:900 22px/1.1 var(--hx-font-title);color:#f3d58a}
+.basePanel .baseUpgrade{--i:url("assets/uidesign/icons/icon_base.svg");position:relative;display:flex!important;align-items:center;width:100%;min-height:66px;margin:0 0 8px!important;padding:8px 14px 8px 72px!important;
+  border:1.5px solid #46634f!important;border-radius:12px!important;background:linear-gradient(180deg,#1b3324,#122419)!important;color:#f4ecd6!important;font:700 15px/1.35 var(--hx-font-ui)!important;text-align:left;white-space:normal}
+.basePanel .baseUpgrade[data-kind=weapon]{--i:url("assets/uidesign/icons/icon_damage.svg")}
+.basePanel .baseUpgrade::before{content:'';position:absolute;left:10px;top:50%;translate:0 -50%;width:48px;height:54px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+  background:linear-gradient(180deg,#1f3a29,#10221a) center/calc(100% - 6px) calc(100% - 6px) no-repeat,linear-gradient(180deg,#e9dcb8,#9da58f)}
+.basePanel .baseUpgrade::after{content:'';position:absolute;left:23px;top:50%;translate:0 -50%;width:22px;height:22px;background:#ffe198;-webkit-mask:var(--i) center/contain no-repeat;mask:var(--i) center/contain no-repeat}
+.basePanel .baseUpgrade:not(:disabled):hover{border-color:#c9a24a!important}
+.basePanel .baseUpgrade:disabled{color:#b9c6bc!important;cursor:not-allowed}.basePanel .baseUpgrade:disabled::after{background:#8f9a94}
+.basePanel .baseNote{margin:8px 0 0;font-size:13px;line-height:1.4;color:#8fa092}
+
+/* Deckansicht: Turm-/Gebäudeplätze links in der Farbleiste, Anzahl rechts */
+.deckHexCard{border-color:var(--rar,#9aa3a6)!important}
+.deckHexCard .deckHexCount{background:var(--badge,#5f6a6e)!important;color:#fff!important}
+.deckHexCard .deckHexSlots{position:absolute;left:6px;bottom:0;z-index:1;display:inline-flex;align-items:center;gap:2px;height:18px;font:700 13px/18px var(--hx-font-ui);color:#fff}
+.deckHexCard .deckHexSlots .hxi{width:12px;height:12px;vertical-align:0}
+
+/* Einstellungen */
+.settingsWindow [hidden]{display:none!important}
+.hxFieldRow #runSeed{display:block;flex:none;width:min(340px,48%)!important;margin:0!important;min-height:46px;box-sizing:border-box}
+.hxRangeValue{flex:none;min-width:56px;text-align:right;font:700 17px var(--hx-font-ui);color:var(--hx-gold-text);font-variant-numeric:tabular-nums}
+.hxRangeRow input[type=range]{width:min(320px,40%)}
+/* Esc-Schließen: nur das Hex reagiert, die Beschriftung daneben nicht */
+.hxWinClose{pointer-events:none}.hxWinClose .hxCloseHex{pointer-events:auto}
+/* Biom-Symbole: zentriert, mit Goldrand und etwas Tiefe */
+.biomeRules .biomeRow .biomeBadge{position:relative;background:linear-gradient(170deg,#fff3c4,#e9b949 45%,#7a5414)!important}
+.biomeRules .biomeRow .biomeBadge::before{content:'';position:absolute;inset:3px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:var(--biome-fill)}
+.biomeRules .biomeRow.desert .biomeBadge{--biome-fill:radial-gradient(circle at 50% 30%,#ffe2a0,#e0a040 60%,#a8641c)}
+.biomeRules .biomeRow.storm .biomeBadge{--biome-fill:radial-gradient(circle at 50% 30%,#b5d3ff,#4f86e0 60%,#244c9c)}
+.biomeRules .biomeRow.ash .biomeBadge{--biome-fill:radial-gradient(circle at 50% 30%,#ffbf9a,#e0603c 60%,#8a2a14)}
+.biomeRules .biomeRow .biomeBadge .hxi{position:relative;z-index:1;display:block;margin:0;vertical-align:0;filter:drop-shadow(0 1px 0 #fff8)}
+/* Aufklapp-Pfeile als Symbole statt Schriftzeichen */
+details.biomeRules>summary.hxGroupTitle::before{content:''!important;width:18px;height:18px;font-size:0!important;background:#fbf2d6;-webkit-mask:url("assets/uidesign/icons/icon_chevronDown.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_chevronDown.svg") center/contain no-repeat;translate:0 -50%!important;rotate:0deg}
+details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 -50%!important}
+.hxLinkRow .hxChevron{flex:none;width:18px;height:18px;font-size:0!important;background:#fbf2d6;-webkit-mask:url("assets/uidesign/icons/icon_chevronRight.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_chevronRight.svg") center/contain no-repeat}
+.settingsNav [data-settings-tab]::after{content:''!important;width:16px;height:16px;font-size:0!important;background:currentColor;-webkit-mask:url("assets/uidesign/icons/icon_chevronRight.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_chevronRight.svg") center/contain no-repeat;translate:0 -50%!important}
+#towerPanel #towerExtraDetails:not([open])>summary::after{content:''!important;width:16px;height:16px;font-size:0!important;background:currentColor;-webkit-mask:url("assets/uidesign/icons/icon_chevronRight.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_chevronRight.svg") center/contain no-repeat}
+.runEndDetails>summary::after{content:''!important;width:16px;height:16px;font-size:0!important;background:currentColor;-webkit-mask:url("assets/uidesign/icons/icon_chevronDown.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_chevronDown.svg") center/contain no-repeat}
+.runEndDetails:not([open])>summary::after{transform:none!important}.runEndDetails[open]>summary::after{transform:rotate(180deg)!important}
+
+/* Spielregeln als mittiges Fenster mit nummerierten Regeln in zwei Spalten */
+#rulesDrawer{position:fixed!important;left:50%!important;top:50%!important;right:auto!important;bottom:auto!important;translate:-50% -50%;z-index:70;
+  display:flex;flex-direction:column;width:min(920px,calc((100vw - 24px) / var(--hx-k,1)))!important;max-width:none!important;height:auto!important;max-height:min(780px,calc((100dvh - 24px) / var(--hx-k,1)))!important;
+  padding:0!important;overflow:hidden;border:3px solid #e2b04a!important;border-radius:18px!important;background:radial-gradient(130% 70% at 50% 0,#1e3c29 0,#11261b 58%,#0b1912 100%)!important;
+  box-shadow:inset 0 0 0 3px #0b1912,inset 0 0 0 4.5px #c9a24a99,0 0 26px #f6c95a40,0 0 0 100vmax #050b08b3!important}
+#rulesDrawer.hidden{display:none!important}
+#rulesDrawer .panelHead{flex-shrink:0;padding:18px 22px 14px!important;margin:0!important;background:linear-gradient(180deg,#1b3826,#132a1d)!important;border-bottom:1.5px solid #c9a24a80!important}
+#rulesDrawer ul{flex:1;min-height:0;overflow:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0!important;padding:18px 22px 22px!important;counter-reset:rule}
+#rulesDrawer li{counter-increment:rule;margin:0;padding:12px 14px 12px 52px!important;border:1.5px solid #24493a!important;border-radius:12px;background:#0f2419;font-size:15px;line-height:1.5}
+#rulesDrawer li:last-child{border-bottom:1.5px solid #24493a!important}
+#rulesDrawer li::before{content:counter(rule)!important;left:12px!important;top:12px!important;display:grid;place-items:center;width:28px!important;height:32px!important;transform:none!important;border:0!important;
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(180deg,#ffe48a,#c58d27);color:#2a1f10;font:700 14px/1 var(--hx-font-ui)}
+@media(max-width:760px){#rulesDrawer ul{grid-template-columns:1fr}}
+
+/* Arsenal: die mitgenommene Stufe 4 leuchtet, freigeschaltete aber nicht mitgenommene bleiben ruhig */
+.skillNode.meta.lit:not(.active) polygon{fill:#16291d;stroke:#8a7a4a}
+.skillNode.meta.lit:not(.active) .hxi{opacity:.5}
+.skillNode.active polygon{fill:#2b5638!important;stroke:#ffe48a!important;stroke-width:7!important;filter:drop-shadow(0 0 14px #f6c95a)!important}
+.skillNode.active .hxi{color:#ffe48a!important;opacity:1!important;filter:drop-shadow(0 0 6px #ffd76a) drop-shadow(0 0 2px #fff)}
+
+/* Rundenende: Turmstatistik eingeklappt, Aufklapper im Stil der übrigen Abschnitte */
+.runStatsTowers{margin-top:14px}
+.runStatsTowers>summary{display:inline-flex;align-items:center;gap:10px;min-height:48px;padding:0 20px;border:2px solid #e2b04a;border-radius:10px;background:#0f2219;color:#fbf7ea;font:900 20px var(--hx-font-title);list-style:none;cursor:pointer}
+.runStatsTowers>summary::-webkit-details-marker{display:none}
+.runStatsTowers>summary::after{content:'';width:16px;height:16px;background:currentColor;-webkit-mask:url("assets/uidesign/icons/icon_chevronDown.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_chevronDown.svg") center/contain no-repeat;transition:transform .15s}
+.runStatsTowers[open]>summary::after{transform:rotate(180deg)}
+.runStatsTowers[open]>summary{margin-bottom:10px}
+
+/* Arsenal-Baum: Augment-Karten als dritter Reiter. Offen bleiben die Reiter stehen, Baum und Details weichen der Sammlung. */
+#arsenalOverlay[data-view=tree] #augmentCollectionToggle{display:none!important}
+#arsenalOverlay[data-view=tree].augmentsOpen .skillTreeView{display:block!important;flex:0 0 auto;padding-bottom:0}
+#arsenalOverlay[data-view=tree].augmentsOpen .skillTreeView .skillCanvas,#arsenalOverlay[data-view=tree].augmentsOpen .skillTreeView .skillDetail{display:none}
+#arsenalOverlay[data-view=tree].augmentsOpen .augmentCollection{border-top:0;padding-top:12px}
+.skillGroup[data-augments] .hxi{color:#c9a7ff}
+.skillGroup[data-augments][aria-selected=true] .hxi{color:#f3c94c}
+
+/* Hex-Symbole aus der Designer-Grafik statt Rechteck im Hex (Basis-Ausbauten, Spielregeln) */
+.basePanel .baseUpgrade::before{clip-path:none!important;background:url("assets/uidesign/hud/hex_small_normal.svg") center/100% 100% no-repeat!important}
+.basePanel .baseUpgrade:disabled::before{background-image:url("assets/uidesign/hud/hex_small_disabled.svg")!important}
+#rulesDrawer .panelHead::before{width:58px!important;height:66px!important;clip-path:none!important;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23ffe198' d='M3 5c3-1 6-1 8.2.8V20c-2.2-1.6-5.2-1.8-8.2-.8z M21 5c-3-1-6-1-8.2.8V20c2.2-1.6 5.2-1.8 8.2-.8z'/%3E%3C/svg%3E") center/28px no-repeat,url("assets/uidesign/hud/hex_small_normal.svg") center/100% 100% no-repeat!important}
+
+/* Turmausbau: Info-Knopf mit zentrierten Symbolen; geöffnete Details ändern Breite und Abstände der Karte nicht */
+#towerPanel .towerUpgradeCard .towerUpgradeActions>.towerDetailsToggle{border:0!important;background:none!important;box-shadow:none!important}
+#towerPanel .towerUpgradeCard .towerUpgradeActions>.towerDetailsToggle::before{content:''!important;width:26px;height:26px;background:currentColor;
+  -webkit-mask:url("assets/uidesign/icons/icon_info.svg") center/contain no-repeat;mask:url("assets/uidesign/icons/icon_info.svg") center/contain no-repeat}
+#towerPanel .towerUpgradeCard .towerUpgradeActions>.towerDetailsToggle[aria-expanded=true]{background:#c9a24a!important;color:#1a1408!important}
+#towerPanel .towerUpgradeCard .towerUpgradeActions>.towerDetailsToggle[aria-expanded=true]::before{width:14px;height:14px;-webkit-mask-image:url("assets/uidesign/icons/icon_close.svg");mask-image:url("assets/uidesign/icons/icon_close.svg")}
+#towerPanel .towerUpgradeCard.comparing{margin:0 -10px!important;padding:6px 10px!important;border-radius:10px!important}
+
+/* Verbrauchsmaterial ganz unten links (der Turmbau-Knopf dort entfällt am Desktop) */
+@media(min-width:1101px) and (min-height:601px){
+  .consumableMenu{left:var(--hx-m)!important;bottom:var(--hx-m)!important;top:auto!important}
+}
+#towerPanel .towerPanelScroll{scrollbar-gutter:stable}

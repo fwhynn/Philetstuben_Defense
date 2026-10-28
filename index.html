@@ -5,14 +5,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>AutoHex TD</title>
-    <script src="classes/boot-guard.js?v=1a4fe274b68d51fe"></script>
+    <script src="classes/boot-guard.js?v=40a79d48fbcf7b92"></script>
     <link rel="icon" type="image/png" href="assets/favicon.png" />
-    <link rel="stylesheet" href="style.css?v=1a4fe274b68d51fe" />
-    <link rel="stylesheet" href="duo.css?v=1a4fe274b68d51fe" />
-    <link rel="stylesheet" href="assets/uidesign/tokens.css?v=1a4fe274b68d51fe" />
-    <link rel="stylesheet" href="hexwerk.css?v=1a4fe274b68d51fe" />
+    <link rel="stylesheet" href="style.css?v=40a79d48fbcf7b92" />
+    <link rel="stylesheet" href="duo.css?v=40a79d48fbcf7b92" />
+    <link rel="stylesheet" href="assets/uidesign/tokens.css?v=40a79d48fbcf7b92" />
+    <link rel="stylesheet" href="hexwerk.css?v=40a79d48fbcf7b92" />
     <script
-      type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js?v=1a4fe274b68d51fe","three/addons/":"./node_modules/three/examples/jsm/"}}</script>
+      type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js?v=40a79d48fbcf7b92","three/addons/":"./node_modules/three/examples/jsm/"}}</script>
   </head>
 
   <body>
@@ -39,8 +39,8 @@
       <section class="boardWrap">
         <svg id="board" viewBox="-545 -375 1100 760" aria-label="Hex-Karte"></svg>
         <div class="mapControls">
-          <button id="zoomOutBtn" class="secondary hxHex" aria-label="Map verkleinern" title="Map verkleinern">−</button>
           <button id="zoomInBtn" class="secondary hxHex" aria-label="Map vergrößern" title="Map vergrößern">+</button>
+          <button id="zoomOutBtn" class="secondary hxHex" aria-label="Map verkleinern" title="Map verkleinern">−</button>
           <button id="resetViewBtn" class="secondary">Zur Base</button>
           <span>Mausrad: Zoom · rechte Maustaste ziehen: verschieben</span>
         </div>
@@ -248,12 +248,19 @@
           <details id="baseDropdown" class="statDetails">
             <summary aria-label="Base-Ausbau öffnen"><span class="hxi hxi-build" aria-hidden="true"></span> Base <span
                 class="dropdownArrow" aria-hidden="true">▾</span></summary>
-            <div class="statPopup">
-              <h2 id="baseTitle">Base-Ausbau</h2>
-              <p id="baseStats"></p>
-              <p id="baseWeaponStats" class="hint"></p><button id="baseWallsBtn" class="secondary"></button><button
-                id="baseWeaponBtn" class="secondary"></button>
-              <p class="hint">Mit Run-Gold ausbauen. Käufe sind beim Hex-Platzieren, in der Bauphase und während einer
+            <!-- Am Desktop öffnet ein Klick auf die Basis dieses Fenster wie das Turmfenster; die Kapsel in der Kopfzeile ist dort ausgeblendet. -->
+            <div class="statPopup basePanel">
+              <div class="panelHead basePanelHead">
+                <span class="basePanelIcon" aria-hidden="true"><span class="hxi hxi-base"></span></span>
+                <div class="towerTitle"><h2 id="baseTitle">Base-Ausbau</h2><small class="towerStage">Basis · Ausbau für diesen Run</small></div>
+                <button id="closeBasePanel" type="button" class="secondary hxHex" aria-label="Basis schließen" title="Schließen (Escape)"><small>Esc</small> ×</button>
+              </div>
+              <div id="baseStats" class="baseHeadline"></div>
+              <p id="baseWeaponStats" class="hint"></p>
+              <p class="towerSectionLabel">Ausbauten</p>
+              <button id="baseWallsBtn" class="secondary baseUpgrade" data-kind="walls"></button><button
+                id="baseWeaponBtn" class="secondary baseUpgrade" data-kind="weapon"></button>
+              <p class="hint baseNote">Mit Run-Gold ausbauen. Käufe sind beim Hex-Platzieren, in der Bauphase und während einer
                 Wave möglich. Ausbau gilt nur für diesen Run.</p>
             </div>
           </details>
@@ -410,7 +417,7 @@
               </section>
               <section class="hxGroup">
                 <h3 class="hxGroupTitle">Nächster Run</h3>
-                <label class="hxFieldRow"><span><strong>Startwert (Seed)</strong><small>Derselbe Startwert wiederholt bei gleichen Entscheidungen die Karten und Belohnungen.</small></span><input id="runSeed" type="text" maxlength="100" placeholder="Leer = zufälliger Run" /></label>
+                <label class="hxFieldRow"><span><strong>Startwert</strong><small>Derselbe Startwert wiederholt bei gleichen Entscheidungen die Karten und Belohnungen.</small></span><input id="runSeed" type="text" maxlength="100" placeholder="Leer = zufälliger Run" /></label>
                 <p class="hxGroupNote">Aktueller Seed: <span id="activeSeed"></span> <span id="dailyRunStatus"></span></p>
                 <button id="exitFirstPlayerTestSettings" class="secondary hidden">Erstspieler-Test beenden · zum echten Spielstand</button>
                 <button id="skipIntroductionSettings" class="secondary hidden">Einführung überspringen · vollständige Welt ab nächstem Durchlauf</button>
@@ -448,10 +455,10 @@
             <section class="settingsPane" data-settings-pane="audio" role="tabpanel" hidden>
               <section class="hxGroup">
                 <h3 class="hxGroupTitle">Audio</h3>
-                <label class="hxSwitchRow"><span><strong>Sounds aktiv</strong><small>Alle Spielgeräusche wiedergeben.</small></span><input id="soundEnabled" type="checkbox" checked /></label>
-                <label class="hxRangeRow"><span><strong>Lautstärke</strong><small>Lautstärke aller Spielgeräusche.</small></span><input id="soundVolume" type="range" min="0" max="100" value="35" aria-label="Sound-Lautstärke" /></label>
-                <label class="hxSwitchRow"><span><strong>Musik aktiv</strong><small>Hintergrundmusik im Menü und im Spiel.</small></span><input id="musicEnabled" type="checkbox" checked /></label>
-                <label class="hxRangeRow"><span><strong>Musiklautstärke</strong><small>Unabhängig von den Spielgeräuschen.</small></span><input id="musicVolume" type="range" min="0" max="100" value="40" aria-label="Musiklautstärke" /></label>
+                <label class="hxSwitchRow" hidden><span><strong>Sounds aktiv</strong><small>Alle Spielgeräusche wiedergeben.</small></span><input id="soundEnabled" type="checkbox" checked /></label>
+                <label class="hxRangeRow"><span><strong>Lautstärke</strong><small>Lautstärke aller Spielgeräusche. 0 % schaltet sie aus.</small></span><input id="soundVolume" type="range" min="0" max="100" value="35" aria-label="Sound-Lautstärke" /></label>
+                <label class="hxSwitchRow" hidden><span><strong>Musik aktiv</strong><small>Hintergrundmusik im Menü und im Spiel.</small></span><input id="musicEnabled" type="checkbox" checked /></label>
+                <label class="hxRangeRow"><span><strong>Musiklautstärke</strong><small>Unabhängig von den Spielgeräuschen. 0 % schaltet sie aus.</small></span><input id="musicVolume" type="range" min="0" max="100" value="40" aria-label="Musiklautstärke" /></label>
                 <p class="musicCredit" data-no-translate>Music by <a href="https://pixabay.com/de/users/leberch-42823964/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=375930" target="_blank" rel="noopener">Nikita Kondrashev</a> from <a href="https://pixabay.com/music//?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=375930" target="_blank" rel="noopener">Pixabay</a></p>
               </section>
               <section class="hxGroup">
@@ -491,11 +498,12 @@
                     <div class="keyRow"><span>FPS-Anzeige</span><span class="keys"><kbd>Strg</kbd>+<kbd>F</kbd></span></div>
                   </section>
                 </div>
-                <p class="hxGroupNote keyNotes"><span>ⓘ Bei zwei Fronten am Anfang: Karten 1–5.</span><span>ⓘ Tempo: 1× bis 8×, danach wieder 1×.</span><span id="towerHotkeyHint"></span></p>
+                <p class="hxGroupNote keyNotes" hidden><span>ⓘ Bei zwei Fronten am Anfang: Karten 1–5.</span><span>ⓘ Tempo: 1× bis 8×, danach wieder 1×.</span><span id="towerHotkeyHint"></span></p>
               </details>
             </section>
             <section class="settingsPane" data-settings-pane="help" role="tabpanel" hidden>
-              <section class="hxGroup">
+              <!-- Mini-Tutorial im laufenden Spiel ausgeblendet; Knopf bleibt für die Einsteigerhinweise-Logik bestehen. -->
+              <section class="hxGroup" hidden>
                 <h3 class="hxGroupTitle">Einstieg</h3>
                 <div class="hxActionRow"><span>Lerne das Platzieren von Hexen und den Turmbau.</span><button id="restartTutorialBtn" class="secondary hxOutline"><span class="hxi hxi-play" aria-hidden="true"></span>Mini-Tutorial starten</button></div>
               </section>
@@ -634,10 +642,10 @@
             <section class="settingsPane" data-settings-pane="audio" role="tabpanel" hidden>
               <section class="hxGroup">
                 <h3 class="hxGroupTitle">Audio</h3>
-                <label class="hxSwitchRow"><span><strong>Sounds aktiv</strong><small>Alle Spielgeräusche wiedergeben.</small></span><input id="menuSoundEnabled" type="checkbox" /></label>
-                <label class="hxRangeRow"><span><strong>Lautstärke</strong><small>Lautstärke aller Spielgeräusche.</small></span><input id="menuSoundVolume" type="range" min="0" max="100" aria-label="Sound-Lautstärke" /></label>
-                <label class="hxSwitchRow"><span><strong>Musik aktiv</strong><small>Hintergrundmusik im Menü und im Spiel.</small></span><input id="menuMusicEnabled" type="checkbox" /></label>
-                <label class="hxRangeRow"><span><strong>Musiklautstärke</strong><small>Unabhängig von den Spielgeräuschen.</small></span><input id="menuMusicVolume" type="range" min="0" max="100" aria-label="Musiklautstärke" /></label>
+                <label class="hxSwitchRow" hidden><span><strong>Sounds aktiv</strong><small>Alle Spielgeräusche wiedergeben.</small></span><input id="menuSoundEnabled" type="checkbox" /></label>
+                <label class="hxRangeRow"><span><strong>Lautstärke</strong><small>Lautstärke aller Spielgeräusche. 0 % schaltet sie aus.</small></span><input id="menuSoundVolume" type="range" min="0" max="100" aria-label="Sound-Lautstärke" /></label>
+                <label class="hxSwitchRow" hidden><span><strong>Musik aktiv</strong><small>Hintergrundmusik im Menü und im Spiel.</small></span><input id="menuMusicEnabled" type="checkbox" /></label>
+                <label class="hxRangeRow"><span><strong>Musiklautstärke</strong><small>Unabhängig von den Spielgeräuschen. 0 % schaltet sie aus.</small></span><input id="menuMusicVolume" type="range" min="0" max="100" aria-label="Musiklautstärke" /></label>
                 <p class="musicCredit" data-no-translate>Music by <a href="https://pixabay.com/de/users/leberch-42823964/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=375930" target="_blank" rel="noopener">Nikita Kondrashev</a> from <a href="https://pixabay.com/music//?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=375930" target="_blank" rel="noopener">Pixabay</a></p>
               </section>
               <section class="hxGroup">
@@ -873,33 +881,36 @@
 
     <div id="celebration" class="celebration hidden" role="dialog" aria-modal="true" aria-labelledby="celebrationTitle">
       <div class="celebrationCard">
-        <div class="celebrationTrophy" aria-hidden="true">✦ 🏆 ✦</div>
+        <div class="celebrationTrophy" aria-hidden="true"></div>
         <p id="celebrationWave"></p>
         <h2 id="celebrationTitle"></h2>
         <p id="celebrationText"></p><button id="celebrationContinue" class="primary">Weiter geht’s!</button>
       </div>
     </div>
-    <div id="greedOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="greedTitle"><div class="rewardBox"><div class="rewardHeading"><h2 id="greedTitle" tabindex="-1" data-dialog-initial-focus>Der Fluch der Gier</h2><button id="greedCloseBtn" type="button">Zurück zur Vorbereitung</button></div><p>Wähle einen Vertrag oder Kein Vertrag. Gold gibt es sofort; die Wahl gilt für den nächsten Angriff. Erreiche Welle 35 und verdiene so viel Gold wie möglich.</p><p id="greedStatus" aria-live="polite"></p><div id="greedChoices" class="rewardChoices"></div></div></div>
-    <div id="merchantOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="merchantTitle"><div class="rewardBox"><div class="rewardHeading"><h2 id="merchantTitle" tabindex="-1" data-dialog-initial-focus>Händler</h2><button id="merchantCloseBtn" type="button">Schließen</button></div><p>Kaufen und fertig. Jeder Kauf verdoppelt den Preis dieses Angebots bei diesem Händler. Neue Händler starten beim Grundpreis.</p><p id="merchantStatus" aria-live="polite"></p><div id="merchantChoices" class="rewardChoices"></div></div></div>
+    <div id="greedOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="greedTitle"><div class="rewardBox"><div class="rewardHeading"><h2 id="greedTitle" tabindex="-1" data-dialog-initial-focus>Der Fluch der Gier</h2></div><p>Wähle einen Vertrag oder Kein Vertrag. Gold gibt es sofort; die Wahl gilt für den nächsten Angriff. Erreiche Welle 35 und verdiene so viel Gold wie möglich.</p><p id="greedStatus" aria-live="polite"></p><div id="greedChoices" class="rewardChoices"></div><div class="rewardFooter"><button id="greedCloseBtn" type="button">Zurück zur Vorbereitung</button></div></div></div>
+    <div id="merchantOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="merchantTitle"><div class="rewardBox"><div class="rewardHeading"><h2 id="merchantTitle" tabindex="-1" data-dialog-initial-focus>Händler</h2></div><p>Kaufen und fertig. Jeder Kauf verdoppelt den Preis dieses Angebots bei diesem Händler. Neue Händler starten beim Grundpreis.</p><p id="merchantStatus" aria-live="polite"></p><div id="merchantChoices" class="rewardChoices"></div><div class="rewardFooter"><button id="merchantCloseBtn" type="button">Schließen</button></div></div></div>
     <div id="rewardOverlay" class="overlay hidden" role="dialog" aria-modal="true">
       <div class="rewardBox">
         <div id="rewardSelection">
           <div class="rewardHeading">
-            <h2 id="rewardTitle" tabindex="-1" data-dialog-initial-focus>Deck erweitern</h2><button
-              id="skipRemovalTopBtn" class="secondary hidden">Keine Karte entfernen</button>
+            <h2 id="rewardTitle" tabindex="-1" data-dialog-initial-focus>Deck erweitern</h2>
           </div>
           <p id="rewardDescription">Wähle 1 von 3 Hexkarten.</p>
           <div id="rewardChoices" class="rewardChoices"></div><section id="duoGiftPreview" class="duoGiftPreview hidden"></section>
-          <button id="skipRemovalBtn" class="secondary hidden">Keine Karte entfernen</button>
         </div>
         <section id="rewardDeck" class="hidden" aria-label="Deckübersicht">
           <h2>Dein Deck</h2>
           <div id="rewardDeckOverview" class="deckOverview"></div>
         </section>
-        <div id="rewardInspectActions" class="rewardInspectActions">
-          <button id="rewardBackBtn" class="primary hidden">Zurück zur Auswahl</button>
-          <button id="rewardDeckBtn" class="secondary">Deck anschauen</button>
-          <button id="rewardMapBtn" class="secondary">Map anschauen</button>
+        <!-- Fußzeile: Ansichten links, Überspringen / Keine Karte entfernen immer unten rechts -->
+        <div class="rewardFooter">
+          <div id="rewardInspectActions" class="rewardInspectActions">
+            <button id="rewardBackBtn" class="primary hidden">Zurück zur Auswahl</button>
+            <button id="rewardDeckBtn" class="secondary">Deck anschauen</button>
+            <button id="rewardMapBtn" class="secondary">Map anschauen</button>
+          </div>
+          <button id="skipRemovalTopBtn" class="secondary hidden">Keine Karte entfernen</button>
+          <button id="skipRemovalBtn" class="secondary hidden">Keine Karte entfernen</button>
         </div>
       </div>
     </div>
@@ -1025,27 +1036,27 @@
           .catch(() => { });
       })();
     </script>
-    <script src="classes/challenge-lab.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/first-player-test.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/translations.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/i18n.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/patch-notes.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/menu-variant.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/menu-controls.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/hex-menu.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/settings-window.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/compact-controls.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/dialog-focus.js?v=1a4fe274b68d51fe"></script>
-    <script src="runtime-config.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/api.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/local-store.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/leaderboard-ui.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/run-ranking.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/public-leaderboard.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/run-review.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/site-visit.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/sound.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/camera.js?v=1a4fe274b68d51fe"></script>
+    <script src="classes/challenge-lab.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/first-player-test.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/translations.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/i18n.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/patch-notes.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/menu-variant.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/menu-controls.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/hex-menu.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/settings-window.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/compact-controls.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/dialog-focus.js?v=40a79d48fbcf7b92"></script>
+    <script src="runtime-config.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/api.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/local-store.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/leaderboard-ui.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/run-ranking.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/public-leaderboard.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/run-review.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/site-visit.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/sound.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/camera.js?v=40a79d48fbcf7b92"></script>
     <aside id="biomeInfoPanel" class="biomeInfoPanel hidden" aria-labelledby="biomeInfoTitle">
       <div class="panelHead">
         <h2 id="biomeInfoTitle">Biom</h2><button id="closeBiomeInfo" class="secondary"
@@ -1053,56 +1064,56 @@
       </div>
       <p id="biomeInfoText"></p><small>Effekte gelten lokal. Turmwerte enthalten die Boni und Nachteile bereits.</small>
     </aside>
-    <script src="classes/biomes.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/run-share.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/data.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/tower-view.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/ui-layout.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/tutorial.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/heroes.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/augment-cards.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/augment-cards-ui.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/profile.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/map.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/random.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/detour.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/villages.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/power-grid.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/expedition.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/tower-draft.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/moving-fortress.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/run-runtime.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/run-snapshot.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/waves.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/dev-enemies.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/combat.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/rewards.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/deck.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/buildings.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/tower-commands.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/arsenal.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/arsenal-tree.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/exploration.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/duo-server-status.js?v=1a4fe274b68d51fe"></script>
-    <script src="duo-client.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/duo-game.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/placement-commands.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/run-flow.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/run-session.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/svg-renderer.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/model-map.js?v=1a4fe274b68d51fe"></script>
-    <script src="classes/asset-edition.js?v=1a4fe274b68d51fe"></script>
+    <script src="classes/biomes.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/run-share.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/data.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/tower-view.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/ui-layout.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/tutorial.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/heroes.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/augment-cards.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/augment-cards-ui.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/profile.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/map.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/random.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/detour.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/villages.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/power-grid.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/expedition.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/tower-draft.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/moving-fortress.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/run-runtime.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/run-snapshot.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/waves.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/dev-enemies.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/combat.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/rewards.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/deck.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/buildings.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/tower-commands.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/arsenal.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/arsenal-tree.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/exploration.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/duo-server-status.js?v=40a79d48fbcf7b92"></script>
+    <script src="duo-client.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/duo-game.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/placement-commands.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/run-flow.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/run-session.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/svg-renderer.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/model-map.js?v=40a79d48fbcf7b92"></script>
+    <script src="classes/asset-edition.js?v=40a79d48fbcf7b92"></script>
     <script type="module">
       await globalThis.HexLocalStore?.ready;
       if (new URLSearchParams(location.hash.slice(1)).has('duo')) await new Promise(resolve => { const script = document.createElement('script'); script.src = '/socket.io/socket.io.js'; script.onload = resolve; script.onerror = resolve; document.head.appendChild(script); });
       // 3D nur über http(s) (Modelle werden per fetch geladen); ?svg erzwingt den SVG-Prototyp, Doppelklick (file://) nutzt ihn automatisch.
       if (location.protocol.startsWith('http') && !new URLSearchParams(location.search).has('svg')) {
-        import('./classes/menu-backdrop.js?v=1a4fe274b68d51fe').catch(error => console.warn('Menühintergrund nicht verfügbar:', error));
-        import('./classes/tower-portraits.mjs?v=1a4fe274b68d51fe').catch(error => console.warn('Turmporträts nicht verfügbar:', error));
-        import('./classes/boss-portraits.mjs?v=1a4fe274b68d51fe').catch(error => console.warn('Bossporträts nicht verfügbar:', error));
-        try { await import('./classes/three-renderer.js?v=1a4fe274b68d51fe'); } catch (error) { console.warn('3D nicht verfügbar, verwende SVG:', error); }
+        import('./classes/menu-backdrop.js?v=40a79d48fbcf7b92').catch(error => console.warn('Menühintergrund nicht verfügbar:', error));
+        import('./classes/tower-portraits.mjs?v=40a79d48fbcf7b92').catch(error => console.warn('Turmporträts nicht verfügbar:', error));
+        import('./classes/boss-portraits.mjs?v=40a79d48fbcf7b92').catch(error => console.warn('Bossporträts nicht verfügbar:', error));
+        try { await import('./classes/three-renderer.js?v=40a79d48fbcf7b92'); } catch (error) { console.warn('3D nicht verfügbar, verwende SVG:', error); }
       }
-      await new Promise((done, fail) => { const s = document.createElement('script'); s.src = 'classes/game.js?v=1a4fe274b68d51fe'; s.onload = done; s.onerror = fail; document.body.appendChild(s); });
+      await new Promise((done, fail) => { const s = document.createElement('script'); s.src = 'classes/game.js?v=40a79d48fbcf7b92'; s.onload = done; s.onerror = fail; document.body.appendChild(s); });
       window.dispatchEvent(new Event('autohex-ready'));
     </script>
   <div id="relicEffects" aria-live="polite"></div>

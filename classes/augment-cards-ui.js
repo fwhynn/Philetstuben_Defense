@@ -58,8 +58,9 @@ const HexAugmentCardsUI=(()=>{
   for(const [id,def] of Object.entries(HexAugmentCards.catalog)){
    const t=HexAugmentCards.tier(a.cards,id),equipped=a.equipped.includes(id),card=el('article','augmentCard'+(equipped?' equipped':'')+(t<0?' missing':''));card.dataset.tier=String(t);
    card.appendChild(cardHead(id,def));
-   card.appendChild(el('strong','augmentRarity',t<0?'Noch nicht gesammelt.':HexAugmentCards.rarities[t]));
-   if(equipped)card.appendChild(el('span','augmentEquippedTag','Ausgerüstet'));
+   // Seltenheit und „Ausgerüstet“ teilen sich eine Zeile, damit nichts über Name oder Symbol liegt.
+   const badges=el('div','augmentBadges');badges.appendChild(el('strong','augmentRarity',t<0?'Noch nicht gesammelt.':HexAugmentCards.rarities[t]));
+   if(equipped)badges.appendChild(el('span','augmentEquippedTag','Ausgerüstet'));card.appendChild(badges);
    card.appendChild(el('p','augmentEffect',HexAugmentCards.describe(id,Math.max(t,0))));
    if(t>=0){
     const copies=el('div','augmentCopies');

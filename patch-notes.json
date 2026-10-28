@@ -1,5 +1,99 @@
 [
   {
+    "version": "next",
+    "title": "Feinschliff der Oberfläche",
+    "summary": "Deutlichere Seltenheiten, Bauplätze direkt auf den Hexkarten und aufgeräumte Fenster für Basis, Turmbau und Einstellungen.",
+    "overview": [
+      {
+        "kind": "new",
+        "title": "NEU",
+        "items": [
+          "Bauplätze auf den Hexkarten",
+          "Basis-Fenster wie das Turmfenster",
+          "Augment-Karten als Arsenal-Reiter"
+        ]
+      },
+      {
+        "kind": "fixed",
+        "title": "VERBESSERT",
+        "items": [
+          "Klarere Seltenheitsfarben",
+          "Einheitliche Fensteraktionen",
+          "Aufgeräumte Einstellungen"
+        ]
+      }
+    ],
+    "sections": [
+      {
+        "title": "Karten und Belohnungen",
+        "entries": [
+          {
+            "title": "Klarer auf einen Blick",
+            "bullets": [
+              "Seltenheiten haben deutlich unterscheidbare Farben: Gewöhnlich grau, Ungewöhnlich grün, Selten blau, Episch violett, Legendär gold. Legendäre Karten leuchten und glänzen.",
+              "Hexkarten zeigen ihre Turm- und Gebäudeplätze als kleine Symbole direkt auf dem Kartenbild; sie drehen sich mit der Karte.",
+              "Handkarten sind etwas breiter und zeigen bis zu drei Zeilen Beschreibung.",
+              "Bastionssegen, Handelspakt und Schrein-Segen erscheinen als eigene Karten.",
+              "Bei Belohnungskarten stehen Plätze und Anzahl im Deck immer auf gleicher Höhe; die Deckansicht zeigt Turm- und Gebäudeplätze in der Farbleiste.",
+              "„Belohnung überspringen“, „Keine Karte entfernen“ und die Schließen-Knöpfe von Händler und Giervertrag stehen unten rechts."
+            ],
+            "stats": []
+          }
+        ]
+      },
+      {
+        "title": "Türme und Basis",
+        "entries": [
+          {
+            "title": "Bauen und Ausbauen",
+            "bullets": [
+              "Ein Klick auf die Basis öffnet am Desktop ein Basis-Fenster im Stil des Turmfensters; die Basis-Schaltfläche oben entfällt.",
+              "„Turm bauen“ zeigt Turmsymbole; die Taste steht am Symbol, rechts nur der Preis.",
+              "Im Turmfenster zeigen die Stufen 1–4 über dem Preis den Fortschritt; eine mitgenommene Stufe 4 ist hervorgehoben.",
+              "Details zu einer Verbesserung zu öffnen verschiebt die Karte nicht mehr.",
+              "Am Desktop entfallen der Turmbau-Knopf unten links und die Zoom-Knöpfe; Verbrauchsmaterial liegt unten links. Turm- und Biomleiste sind etwas größer."
+            ],
+            "stats": []
+          }
+        ]
+      },
+      {
+        "title": "Arsenal, Einstellungen und Rundenende",
+        "entries": [
+          {
+            "title": "Aufgeräumt",
+            "bullets": [
+              "Augment-Karten sind ein eigener Reiter neben Türmen und Gebäuden; die mitgenommene Stufe 4 leuchtet im Baum.",
+              "Lautstärken zeigen Prozentwerte; 0 % schaltet Sound oder Musik aus. Die separaten An/Aus-Schalter entfallen.",
+              "Die Spielregeln öffnen als eigenes Fenster mit nummerierten Regeln.",
+              "Die Turmstatistik am Rundenende ist zunächst eingeklappt. Angemeldete Spieler sehen „Damit bist du aktuell Platz …“.",
+              "Der Startwert für den nächsten Durchlauf wird wieder richtig dargestellt; Biom-Symbole sind zentriert."
+            ],
+            "stats": []
+          }
+        ]
+      }
+    ],
+    "changes": [
+      "Seltenheiten haben deutlich unterscheidbare Farben: Gewöhnlich grau, Ungewöhnlich grün, Selten blau, Episch violett, Legendär gold. Legendäre Karten leuchten und glänzen.",
+      "Hexkarten zeigen ihre Turm- und Gebäudeplätze als kleine Symbole direkt auf dem Kartenbild; sie drehen sich mit der Karte.",
+      "Handkarten sind etwas breiter und zeigen bis zu drei Zeilen Beschreibung.",
+      "Bastionssegen, Handelspakt und Schrein-Segen erscheinen als eigene Karten.",
+      "Bei Belohnungskarten stehen Plätze und Anzahl im Deck immer auf gleicher Höhe; die Deckansicht zeigt Turm- und Gebäudeplätze in der Farbleiste.",
+      "„Belohnung überspringen“, „Keine Karte entfernen“ und die Schließen-Knöpfe von Händler und Giervertrag stehen unten rechts.",
+      "Ein Klick auf die Basis öffnet am Desktop ein Basis-Fenster im Stil des Turmfensters; die Basis-Schaltfläche oben entfällt.",
+      "„Turm bauen“ zeigt Turmsymbole; die Taste steht am Symbol, rechts nur der Preis.",
+      "Im Turmfenster zeigen die Stufen 1–4 über dem Preis den Fortschritt; eine mitgenommene Stufe 4 ist hervorgehoben.",
+      "Details zu einer Verbesserung zu öffnen verschiebt die Karte nicht mehr.",
+      "Am Desktop entfallen der Turmbau-Knopf unten links und die Zoom-Knöpfe; Verbrauchsmaterial liegt unten links. Turm- und Biomleiste sind etwas größer.",
+      "Augment-Karten sind ein eigener Reiter neben Türmen und Gebäuden; die mitgenommene Stufe 4 leuchtet im Baum.",
+      "Lautstärken zeigen Prozentwerte; 0 % schaltet Sound oder Musik aus. Die separaten An/Aus-Schalter entfallen.",
+      "Die Spielregeln öffnen als eigenes Fenster mit nummerierten Regeln.",
+      "Die Turmstatistik am Rundenende ist zunächst eingeklappt. Angemeldete Spieler sehen „Damit bist du aktuell Platz …“.",
+      "Der Startwert für den nächsten Durchlauf wird wieder richtig dargestellt; Biom-Symbole sind zentriert."
+    ]
+  },
+  {
     "version": "1.2.7",
     "title": "Hexwerk-Oberfläche",
     "summary": "Die Hexwerk-Oberfläche kehrt zurück und gilt jetzt auch für alle Herausforderungen, Fenster und Seiten.",

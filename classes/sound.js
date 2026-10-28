@@ -15,6 +15,9 @@ const HexAudio=(()=>{
     if(typeof value?.volume==='number'&&Number.isFinite(value.volume))volume.value=String(Math.max(0,Math.min(100,value.volume)));
     if(typeof value?.musicEnabled==='boolean')musicToggle.checked=value.musicEnabled;
     if(typeof value?.musicVolume==='number'&&Number.isFinite(value.musicVolume))musicVolume.value=String(Math.max(0,Math.min(100,value.musicVolume)));
+    // Ohne eigene Schalter: „aus“ ist Lautstärke 0. Ältere Einstellungen mit ausgeschaltetem Ton werden zu 0 %.
+    if(!toggle.checked){volume.value='0';toggle.checked=true;}
+    if(!musicToggle.checked){musicVolume.value='0';musicToggle.checked=true;}
     if(master)master.gain.value=toggle.checked?Number(volume.value)/100:0;
     updateMusic();
     persist();

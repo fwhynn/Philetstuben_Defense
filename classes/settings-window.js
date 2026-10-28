@@ -27,8 +27,9 @@
   // Hinweis „Tastenbelegung ansehen“: game.js markiert die Zusammenfassung, sichtbar ist hier der Reiter.
   const summary=win.querySelector('#hotkeyHelpSummary'),controls=win.querySelector('[data-settings-tab=controls]');
   if(summary&&controls)new MutationObserver(()=>controls.classList.toggle('hotkeyGuide',summary.classList.contains('hotkeyGuide'))).observe(summary,{attributes:true,attributeFilter:['class']});
-  new MutationObserver(()=>{if(!host.classList.contains('hidden'))footer(win);}).observe(host,{attributes:true,attributeFilter:['class']});
-  footer(win);
+  // Lautstärkeregler zeigen ihren Wert in Prozent; 0 % bedeutet aus (eigene An/Aus-Schalter gibt es nicht mehr).
+  const ranges=[...win.querySelectorAll('input[type=range]')].map(input=>{const out=document.createElement('output');out.className='hxRangeValue';out.setAttribute('aria-hidden','true');input.insertAdjacentElement?.('afterend',out);const show=()=>{out.textContent=input.value+' %';};input.addEventListener('input',show);input.addEventListener('change',show);show();return show;});
+  new MutationObserver(()=>{if(!host.classList.contains('hidden')){footer(win);ranges.forEach(show=>show());}}).observe(host,{attributes:true,attributeFilter:['class']});  footer(win);
  }
  const start=()=>{for(const win of document.querySelectorAll('[data-settings-window]'))install(win);};
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();

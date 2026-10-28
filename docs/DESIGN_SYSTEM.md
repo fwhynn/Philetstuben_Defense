@@ -176,3 +176,14 @@ Alle seit v1.1.4 hinzugekommenen Oberflächen verwenden dieselben Hexwerk-Bauste
 - Schriften: nur `--hx-font-title` (Tektur Black, Titel) und `--hx-font-ui` (Barlow Semi Condensed, alles andere), auch für Kartenbeschriftungen im 3D- und SVG-Renderer und auf Einzelseiten. Keine Georgia-, Inter- oder Systemschrift-Stapel mehr in den Stylesheets. Barlow liegt in 600/700 vor; 100–500 nutzen SemiBold, 800/900 die Bold-Datei, künstliche Fettung ist abgeschaltet.
 - Ausbaupfade im Turmfenster zeigen das Designer-Symbol `towers/icon_path_<id>.svg` (hell auf dunklem Hex); das Modellporträt bleibt nur Ersatz. Kurzwerte brechen nur zwischen den Angaben um.
 - Augment-Karten (Arsenal-Sammlung, Booster-Ergebnis, Run-Vorbereitung, Duo-Lobby) sind Creme-Karten bzw. Chips mit Seltenheitsrand. Symbol über `data-augment="<id>"` (Turm-, Gebäude- oder Basis-Icon), Farbe über `data-tier` (0 Gewöhnlich … 4 Legendär, −1 nicht gesammelt). Mitgenommene Stufe-4-Pfade tragen das goldene Abzeichen `.equippedUltimateBadge` in einer eigenen Zeile unter den Kurzwerten.
+
+## Rückmeldung 28.10.2026
+
+- **Seltenheiten** (Rand / Abzeichen, weiße Schrift auf dem Abzeichen): Gewöhnlich grau `#9aa3a6`/`#5f6a6e`, Ungewöhnlich grün `#4cb84a`/`#2d7f2b`, Selten blau `#3f8ff2`/`#2563c7`, Episch violett `#a95cf2`/`#7b33c9`, Legendär gold `#f5a623`/`#b0600a`. Die Werte überschreiben in `hexwerk.css` die Token aus `tokens.css`. Episch hat einen leichten Schein, Legendär ein pulsierendes Leuchten, einen Glanzstreifen und ein glänzendes Abzeichen (bei reduzierter Bewegung statisch).
+- **Segen** (Bastionssegen, Handelspakt, Schreine) sind Creme-Karten mit Segen-Gold-Rand und Symbol auf Gold-Hex, nicht legendär.
+- **Fensteraktionen:** 48 px hoch, 22 px Innenabstand, Barlow 700 16 px. Überspringen und Schließen stehen in Belohnungs-, Händler- und Gierfenster immer unten rechts.
+- **Turmfenster:** Stufen 1–4 als kleine Hexe über dem Preis (erreicht grün, diese Verbesserung hellgrün, mitgenommene Stufe 4 gold).
+- **Turm bauen:** nur Turmsymbole, keine Modellporträts. Die Taste steht als kleine Plakette am Symbol, rechts nur der Preis.
+- **Basis:** Am Desktop gibt es keine Basis-Kapsel in der Kopfzeile. Ein Klick auf die Basis öffnet das Basis-Fenster in der linken Spalte, aufgebaut wie das Turmfenster. Der Turmbau-Knopf unten links entfällt am Desktop; Zoom-Knöpfe gibt es nur bei Touch-Bedienung.
+- **Lautstärke:** keine An/Aus-Schalter, 0 % bedeutet aus; der Wert steht in Prozent neben dem Regler.
+- **Aufklapp-Pfeile** sind Symbole (`icon_chevronDown`/`icon_chevronRight`), keine Schriftzeichen.

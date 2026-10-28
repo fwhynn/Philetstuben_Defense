@@ -6,7 +6,8 @@ test('Play opens a mode choice without starting a run; standard opens preparatio
   elements.get('standardModeBtn').listeners.click();assert.equal(a.state,initial);assert.equal(elements.get('difficultyChoices').children.length,2);
   elements.get('confirmLoadoutBtn').listeners.click();assert.notEqual(a.state,initial);assert.equal(a.state.challengeDay,null);
   const normal=a.state;elements.get('menuPlayBtn').listeners.click();elements.get('dailyModeBtn').listeners.click();assert.equal(a.state,normal);
-  elements.get('dailyStartBtn').listeners.click();assert.ok(a.state.challengeDay);
+  // Gier und Drei Dörfer öffnen zuerst die Run-Vorbereitung; der Start folgt dort.
+  elements.get('dailyStartBtn').listeners.click();if(!a.state.challengeDay)elements.get('confirmLoadoutBtn').listeners.click();assert.ok(a.state.challengeDay);
 });
 test('daily uses fixed seeded conditions and lends towers without changing profile ownership',()=>{
   const {a,elements,storage,selectSlot,buyTower,data}=load();

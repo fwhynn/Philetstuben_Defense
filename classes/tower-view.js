@@ -38,9 +38,9 @@ const HexTowerView = (() => {
     if (after.slow > before.slow) hints.push('Schwächere Verlangsamung');
     return hints.join(' · ');
   }
-  function pathProgress(tower) {
+  function pathProgress(tower, metaReady = false) {
     const level = tower.ultimate ? 4 : tower.finalUpgrade ? 3 : tower.branch ? 2 : 1;
-    return '<span class="towerPathLabel">Stufe ' + level + ' → ' + Math.min(4, level + 1) + '</span><span class="towerPathSteps" aria-hidden="true">' + [1,2,3,4].map(n => '<span class="' + (n <= level ? 'owned' : n === level + 1 ? 'next' : '') + '">' + n + '</span>').join('') + '</span>';
+    return '<span class="towerPathLabel">Stufe ' + level + ' → ' + Math.min(4, level + 1) + '</span><span class="towerPathSteps" aria-hidden="true">' + [1,2,3,4].map(n => '<span class="' + [n <= level ? 'owned' : n === level + 1 ? 'next' : '', n === 4 && metaReady ? 'meta' : ''].filter(Boolean).join(' ') + '">' + n + '</span>').join('') + '</span>';
   }
   // Turmfenster (Hexwerk): drei Kernwerte im Kopf, Typ-Chip und Kurzwerte je Upgrade, Werteblatt und Schadensfaktoren der Unteransicht.
   const stat = (id, value, label) => '<div data-stat="' + id + '"><strong>' + value + '</strong><small>' + label + '</small></div>';
