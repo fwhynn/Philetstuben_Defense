@@ -1,6 +1,6 @@
 [
   {
-    "version": "next",
+    "version": "1.2.9",
     "title": "Zwei Festungen, zwei Arsenale",
     "summary": "Nimm dein Arsenal mit ins Duo, schau vor einer Belohnung auf deine Karte und entdecke vier neue Wächtersegen.",
     "overview": [
@@ -87,7 +87,8 @@
       "Wellenplanung, Goldplanung, Diamantenübersicht und Spielregeln zeigen die wichtigsten Angaben kompakter. Beim Blick auf die Karte schweben die Auswahlknöpfe einzeln.",
       "Baum und Werkstatt haben dieselbe Fenstergröße. Der Augment-Reiter bleibt beim Wechsel zu Gebäuden erreichbar. Hauptmenü-Hexe bieten mehr Platz für lange Beschriftungen.",
       "Das Auge zum Einblenden des Passworts sitzt mittig im Eingabefeld."
-    ]
+    ],
+    "date": "2026-11-12"
   },
   {
     "version": "1.2.8",
