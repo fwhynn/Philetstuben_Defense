@@ -40,3 +40,15 @@ test('intro acknowledgement is persisted in the profile, then stays hidden after
  ui.render(root,p,next=>saved=next);const welcome=root.querySelector('.augmentWelcome');assert.ok(welcome);welcome.querySelector('button').listeners.click();assert.equal(saved.augmentCards.introSeen,true);
  ui.render(root,JSON.parse(JSON.stringify(saved)),()=>{});assert.equal(root.querySelector('.augmentWelcome'),undefined);
 });
+
+test('unlocked collection remains accessible after selecting a building in the Arsenal',()=>{
+ const {load}=require('./helpers/game.cjs');
+ const {elements}=load({initialProfile:{version:1,augmentCards:{version:1,cards:{},unlocked:true}}});
+ elements.get('menuArsenalBtn').listeners.click();
+ const tabs=elements.get('arsenalTabs').children;
+ tabs.find(tab=>tab.attributes['aria-controls']==='research-archer').listeners.click();
+ tabs.find(tab=>tab.attributes['aria-controls']==='research-house').listeners.click();
+ const toggle=elements.get('augmentCollectionToggle');
+ assert.equal(toggle.hidden,false);toggle.onclick();
+ assert.equal(elements.get('arsenalOverlay').classList.contains('augmentsOpen'),true);
+});

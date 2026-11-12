@@ -10,6 +10,16 @@ function clientAddress(req, trustProxy) {
   const real = String(req.headers['x-real-ip'] || '').trim(), forwarded = String(req.headers['x-forwarded-for'] || '').split(',').map(part => part.trim()).filter(Boolean);
   return real || forwarded[forwarded.length - 1] || socket;
 }
+// Guest saves supply catalog identifiers only. Account augments always come from the account API.
+async function guestProgress(req){
+  let length=0;const chunks=[];
+  for await(const chunk of req){length+=chunk.length;if(length>8192)throw Error('Guest selection too large');chunks.push(chunk);}
+  if(!length)return null;
+  const data=JSON.parse(Buffer.concat(chunks).toString('utf8'));
+  const ids=(values,max)=>Array.isArray(values)&&values.length<=max&&values.every(id=>typeof id==='string'&&/^[A-Za-z0-9:_-]{1,80}$/.test(id));
+  if(!data||typeof data!=='object'||!ids(data.towers,16)||!ids(data.loadout,5)||!ids(data.milestones,2)||!ids(data.unlocks,32))throw Error('Invalid guest selection');
+  return {activeHero:typeof data.hero==='string'?data.hero:'standard',difficulty:data.difficulty,unlockedTowers:data.towers,activeLoadout:data.loadout,milestones:data.milestones,unlocks:data.unlocks};
+}
 function createTransport(room, { browser = false, autoTick = false, publicOrigin = null, liveSecret = null, visits = null, verifyAdmin = null, trustProxy = false, rankingOptions = {}, loadAugmentProfile = null } = {}) {
   const rankings = require('./leaderboard-http.cjs').createLeaderboardHandler(rankingOptions);
   let closing = false; const attempts = new Map();
@@ -56,13 +66,14 @@ function createTransport(room, { browser = false, autoTick = false, publicOrigin
       const key='augments:'+token,now=Date.now();
       if(now-(attempts.get(key)?.at||0)<1000)return send(429,{error:'rate-limit'});
       attempts.set(key,{at:now,count:1});
-      const accountToken=req.headers['x-account-token'];
+      const accountToken=req.headers['x-account-token'];let guest=null;
+      if(!accountToken){try{guest=await guestProgress(req);}catch{return send(400,{error:'invalid-guest-selection'});}}
       try {
         if(accountToken&&typeof loadAugmentProfile!=='function')return send(503,{error:'Augments sind auf diesem Duo-Server noch nicht verfügbar.'});
         const profile=accountToken?await loadAugmentProfile(accountToken):null;
         if(closing)return send(503,{error:'server-restarting'});
         const accessAfter=room.claim?.(token,clientId);if(accessAfter&&!accessAfter.ok)return send(409,{error:accessAfter.reason});
-        const result=room.applyAugments(token,profile);return send(result.ok?200:409,result);
+        const result=room.applyAugments(token,profile,guest);return send(result.ok?200:409,result);
       }catch{return send(503,{error:'Account-Augments konnten nicht geladen werden. Bitte erneut versuchen.'});}
     }
     const lobbyAction = req.method === 'POST' && room.create && ['/lobby/create', '/lobby/join'].includes(req.url);

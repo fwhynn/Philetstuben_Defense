@@ -90,7 +90,6 @@ const HexAugmentCards=(()=>{
    if(tower.type==='necromancer'){d.soulDuration+=n;if(t===4)d.soulLimit++;}
    if(tower.type==='archer')d.cooldown/=1+Math.min(t===4?8:5,tower.augmentStreak||0)*n;
   }
-  if(tower.supportDamage>1&&value(s,'forge'))d.range*=1+value(s,'forge')+(level(s,'forge')===4?.02:0);
   return d;
  }
  return {label,activeDescription,hasBuilding,marketDiscount,catalog,rarities,weights,cost,clean,progress,unlocked,slots,tier,describe,buy,fuse,equip,run,level,value,definition};

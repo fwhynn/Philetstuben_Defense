@@ -5,7 +5,7 @@ function load(reference=false){
  const ctx=vm.createContext({Math:math});
  for(const name of ['augment-cards','data','waves'])vm.runInContext(fs.readFileSync('classes/'+name+'.js','utf8'),ctx);
  let src=fs.readFileSync('classes/combat.js','utf8').replace('return {step,durability','return {augmentTicks,step,durability');
- if(reference)src=src.replace('candidates=echoCandidates(state.enemies,due)','candidates=()=>state.enemies');
+ if(reference)src=src.replace('candidates=echoCandidates(state.enemies,due)','candidates=()=>state.enemies').replace('withinMineRadius(enemy,echo,echo.r)','Math.hypot(enemy.x-echo.x,enemy.y-echo.y)<=echo.r');
  vm.runInContext(src,ctx);return {run:vm.runInContext('HexCombat.augmentTicks',ctx),get checks(){return checks;}};
 }
 function setup(kind){const s=fixture(kind);s.elapsedMs=1000;s.augmentEchoes=s.mines.map((m,i)=>({...m,r:m.splash,at:i%7===0?2000:1000,source:{type:'mine'}}));delete s.mines;return s;}

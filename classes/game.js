@@ -186,7 +186,7 @@
 
   function shuffle(arr) { return HexRunFlow.shuffle(arr, random); }
   function drawHand() {
-    const result = HexRunFlow.drawHand(state, random); state.selectedCard = null; state.rotation = 0;
+    const result = state.drawResult = HexRunFlow.drawHand(state, random); state.selectedCard = null; state.rotation = 0;
     if (result === 'rescue') setMessage('Deck blockiert: Lege das kostenlose Rettungshex. Es hat keine Turmplätze und kommt nicht ins Deck.');
     if (result === 'tunnel') setMessage('Straße eingeschlossen. Ein kostenloser Rettungstunnel öffnet eine neue Front.');
     if (result === 'blocked') setMessage('Keine Erweiterung möglich. Du kannst bauen und die nächste Wave starten.');
@@ -371,11 +371,12 @@
   function finishRemoval() { if (['removal', 'shrineReward'].includes(state.phase)) takeReward(state.rewardOffer?.id, null); }
   // Mit Symbol wird die Wahl eine Segen-Karte im Stil der Hexkarten (Hexwerk), ohne Symbol eine Wahlzeile.
   function rewardAction(title, description, action, icon) {
-    const button = document.createElement('button'); button.type = 'button'; button.className = icon ? 'upgradeOption blessingCard' : 'upgradeOption';
+    const button = document.createElement('button'); button.type = 'button'; button.className = icon ? 'card blessingCard' : 'upgradeOption';
     button.innerHTML = (icon ? '<div class="rarity">Segen</div><span class="blessingArt" aria-hidden="true"><span class="hxi hxi-' + icon + '"></span></span>' : '') + '<strong>' + title + '</strong><small>' + description + '</small>'; button.addEventListener('click', action); rewardChoices.appendChild(button);
   }
   let rewardView = 'selection';
   function inspectReward(view) {
+    const previousView=rewardView;
     rewardView = view;
     if (view === 'selection' && !state?.workshopPicking) rewardChoices.classList.remove('workshopChoices');
     document.getElementById('rewardInspectActions').classList.remove('hidden'); document.getElementById('skipRemovalBtn').textContent = 'Belohnung überspringen';
@@ -385,8 +386,9 @@
     document.getElementById('rewardDeck').classList.toggle('hidden', view !== 'deck');
     document.getElementById('rewardBackBtn').classList.toggle('hidden', view === 'selection');
     document.getElementById('rewardMapBtn').setAttribute('aria-pressed', String(view === 'map'));
-    document.getElementById('rewardDeckBtn').setAttribute('aria-pressed', String(view === 'deck'));
+    document.getElementById('rewardDeckBtn').classList.toggle('hidden',view === 'deck');
     if (view === 'deck') renderDeckOverview('rewardDeckOverview');
+    if(view==='selection'&&previousView==='deck')document.getElementById('rewardDeckBtn').focus?.();
   }
   function showPendingCelebration() {
     HexRunSession.promoteCelebration(state); if (!state.celebrationActive || !state.activeCelebration) return;
@@ -399,30 +401,36 @@
   }
   function closeCelebration() { if (duoToken) { duoAction('acknowledge'); return; } HexRunSession.acknowledge(state); document.getElementById('celebration').classList.add('hidden'); renderHotkeyTip(); startWaveBtn.focus?.(); }
 
-  function showBossReward() {
+  function showBossReward(remoteOffer) {
     inspectReward('selection');
-    state.phase = 'bossReward'; state.bossRewards=state.bossRewards.map(id=>typeof id==='string'?id:'wave:'+state.wave); const id = state.bossRewards[0], rarity = HexExploration.bossRewardRarity(state.seed, id);
+    state.phase = 'bossReward';
+    if(!remoteOffer)state.bossRewards=state.bossRewards.map(id=>typeof id==='string'?id:'wave:'+state.wave);
+    const id=state.bossRewards?.[0],rarity=remoteOffer?.rarity||HexExploration.bossRewardRarity(state.seed,id);
     document.getElementById('rewardTitle').textContent = 'Wächter besiegt · ' + rarity + '-Beute';
     document.getElementById('rewardDescription').textContent = 'Zusätzlich zu den 50 Gold: Wähle genau eine Karte oder einen Run-Segen. Normale Wave-Belohnungen folgen danach.';
     document.getElementById('skipRemovalBtn').classList.remove('hidden'); rewardChoices.innerHTML = '';
-    const offer = HexRewards.offer(state, 'boss', random), picks = offer.choices.filter(c => c.kind === 'card').map(c => c.cardId);
+    const offer = remoteOffer || HexRewards.offer(state, 'boss', random), picks = offer.choices.filter(c => c.kind === 'card').map(c => c.cardId);
     for (const cardId of picks) {
       const card = cardElement(cardId, false); card.addEventListener('click', () => {
-        if (state.phase !== 'bossReward' || state.bossRewards[0] !== id) return;
+        if (state.phase !== 'bossReward' || !remoteOffer && state.bossRewards[0] !== id) return;
         takeReward(offer.id, offer.choices.findIndex(c => c.kind === 'card' && c.cardId === cardId));
       }); rewardChoices.appendChild(card);
     }
-    for (const [kind, title, description, icon] of [['bastion', 'Bastionssegen', '+5 maximale und aktuelle Base-HP für diesen Run.', 'heart'], ['income', 'Handelspakt', '+2 Gold nach jeder künftig überlebten Wave in diesem Run.', 'coin']]) rewardAction(title, description, () => { if (state.phase !== 'bossReward' || state.bossRewards[0] !== id) return; takeReward(offer.id, offer.choices.findIndex(c => c.blessing === kind)); }, icon);
+    for (const [index,choice] of offer.choices.entries()) {
+      if(choice.kind!=='blessing')continue;
+      const {label,desc,icon}=HexRewards.bossBlessings[choice.blessing];
+      rewardAction(label,desc,()=>takeReward(offer.id,index),icon);
+    }
     openRewardSelection();
   }
 
-  function showRewards() {
+  function showRewards(remoteOffer) {
     inspectReward('selection');
     state.phase = 'reward';
     document.getElementById('rewardTitle').textContent = 'Deck erweitern';
-    document.getElementById('rewardDescription').textContent = 'Wähle 1 von 3 Hexkarten. Common ist häufiger als Uncommon und Rare.';
+    document.getElementById('rewardDescription').textContent = 'Wähle 1 von 3 Hexkarten.';
     document.getElementById('skipRemovalBtn').classList.add('hidden');
-    const offer = HexRewards.offer(state, 'normal', random), picks = offer.choices.map(c => c.cardId);
+    const offer = remoteOffer || HexRewards.offer(state, 'normal', random), picks = offer.choices.map(c => c.cardId);
     rewardChoices.innerHTML = '';
     picks.forEach(id => {
       const el = cardElement(id, false); el.addEventListener('click', () => {
@@ -446,11 +454,12 @@
     for (const c of choices) rewardAction(c.choice.name, 'Kostenlos · Verkaufswert bleibt unverändert.', () => takeReward(offer.id, c.offerIndex));
     rewardAction('Anderen Turm wählen', 'Zurück zur Karte.', () => startWorkshop(offer)); return true;
   }
-  function showShrine() {
+  function showShrine(remoteOffer) {
     inspectReward('selection');
-    const effect = HexExploration.shrineEffect(state.landmarks, state.pendingShrine);
+    const choice=remoteOffer?.choices[0];
+    const effect = remoteOffer ? remoteOffer.shrineEffect || ({site:'aura',augment:'augment',upgrade:'upgrade',blessing:choice?.blessing==='repair'?'repair':'upgrade'})[choice?.kind] || 'card' : HexExploration.shrineEffect(state.landmarks, state.pendingShrine);
     if (effect === 'augment') {
-      state.phase='shrineReward';rewardChoices.innerHTML='';const offer=HexRewards.offer(state,'shrine',random);
+      state.phase='shrineReward';rewardChoices.innerHTML='';const offer=remoteOffer || HexRewards.offer(state,'shrine',random);
       document.getElementById('rewardTitle').textContent='Seltenes Augment wählen';
       document.getElementById('rewardDescription').textContent='Wähle einen Bonus für diesen Durchlauf. Gewählte Augments erscheinen nicht erneut.';
       offer.choices.forEach((choice,index)=>rewardAction(choice.label,choice.desc,()=>{if(takeReward(offer.id,index))saveRunAutosave();}));
@@ -458,29 +467,29 @@
     }
     if (effect === 'remove') { showRemoval('shrine'); return; }
     if (effect === 'aura') {
-      state.phase = 'shrineReward'; rewardChoices.innerHTML = ''; const offer = HexRewards.offer(state, 'shrine', random);
+      state.phase = 'shrineReward'; rewardChoices.innerHTML = ''; const offer = remoteOffer || HexRewards.offer(state, 'shrine', random);
       document.getElementById('rewardTitle').textContent = 'Schrein · dauerhaften Segen wählen';
       document.getElementById('rewardDescription').textContent = 'Wirkt auf diesem Hex und allen direkten Nachbarhexen. Gleiche Schreinboni sind nicht stapelbar.';
       offer.choices.forEach((choice, index) => rewardAction(choice.label, choice.desc, () => takeReward(offer.id, index), 'shrine'));
-      document.getElementById('skipRemovalBtn').classList.add('hidden'); document.getElementById('rewardInspectActions').classList.add('hidden'); openRewardSelection(); return;
+      document.getElementById('skipRemovalBtn').classList.add('hidden'); document.getElementById('rewardInspectActions').classList.toggle('hidden',!remoteOffer); openRewardSelection(); return;
     }
     if (effect === 'repair' || effect === 'upgrade') {
       const shrineId = state.pendingShrine; state.removalSource = 'shrine'; state.phase = 'shrineReward'; rewardChoices.innerHTML = '';
       document.getElementById('rewardTitle').textContent = effect === 'repair' ? 'Shrine erschlossen · Heilquelle' : 'Shrine erschlossen · Werksegen';
       document.getElementById('rewardDescription').textContent = effect === 'repair' ? 'Heile bis zu 5 HP. Bei voller Gesundheit erhältst du stattdessen 30 Gold.' : 'Wähle ein kostenloses Upgrade für einen bereits gebauten Loadout-Turm. Ist keines möglich, erhältst du 30 Gold.';
-      const offer = HexRewards.offer(state, 'shrine', random);
+      const offer = remoteOffer || HexRewards.offer(state, 'shrine', random);
       const take = index => { if (state.phase !== 'shrineReward' || state.pendingShrine !== shrineId) return; if (takeReward(offer.id, index)) sound.play('collect'); };
       const choices = offer.choices.filter(c => c.kind === 'upgrade').map(c => c.choice);
       if (choices.length) for (const choice of choices) rewardAction(TOWERS[choice.type].name + ' → ' + choice.name, 'Hex ' + choice.q + ',' + choice.r + ' · Platz ' + (choice.index + 1) + ' · kostenlos; Verkaufswert bleibt unverändert.', () => take(offer.choices.findIndex(c => c.choice === choice)));
       else rewardAction(effect === 'repair' && state.hp < state.maxHp ? 'Bis zu +5 HP' : 'Vorräte · +30 Gold', 'Einmaliger Shrine-Segen.', () => take(0), effect === 'repair' && state.hp < state.maxHp ? 'heart' : 'coin');
       if (choices.length) { rewardChoices.classList.add('workshopChoices'); rewardAction('Turm auf der Karte wählen', 'Klicke danach den gewünschten Turm an und wähle sein kostenloses Upgrade.', () => startWorkshop(offer)); }
-      document.getElementById('skipRemovalBtn').classList.add('hidden'); document.getElementById('rewardInspectActions').classList.add('hidden'); openRewardSelection(); return;
+      document.getElementById('skipRemovalBtn').classList.add('hidden'); document.getElementById('rewardInspectActions').classList.toggle('hidden',!remoteOffer); openRewardSelection(); return;
     }
     state.removalSource = 'shrine'; state.phase = 'shrineReward'; rewardChoices.innerHTML = '';
     document.getElementById('rewardTitle').textContent = 'Shrine erschlossen · Effekt: ' + (effect === 'legendary' ? 'Legendary-Karte erhalten' : effect === 'epic' ? 'Epic-Karte erhalten' : 'Zusätzliche Karte wählen');
     document.getElementById('rewardDescription').textContent = 'Wähle eine Karte für dein Deck. Danach geht es zurück in die Bauphase. Dieser Shrine ist einmalig; Überspringen verbraucht ihn ebenfalls.';
     document.getElementById('skipRemovalBtn').classList.remove('hidden');
-    const offer = HexRewards.offer(state, 'shrine', random), picks = offer.choices.map(c => c.cardId);
+    const offer = remoteOffer || HexRewards.offer(state, 'shrine', random), picks = offer.choices.map(c => c.cardId);
     for (const id of picks) {
       const card = cardElement(id, false); card.addEventListener('click', () => {
         if (state.phase !== 'shrineReward') return;
@@ -502,14 +511,14 @@
       card.classList.add('removalPending'); card.setAttribute('aria-pressed', 'true');
     });
   }
-  function showRemoval(source = 'reward') {
+  function showRemoval(source = 'reward', remoteOffer) {
     inspectReward('selection');
     state.removalSource = source;
     state.phase = 'removal'; rewardChoices.innerHTML = '';
     document.getElementById('rewardTitle').textContent = 'Deck ausdünnen (optional)';
     document.getElementById('rewardDescription').textContent = 'Optional: Entferne eine Kartenkopie aus deinem Deck. Mindestens 5 Karten bleiben erhalten. Bereits gelegte Hexe bleiben bestehen.' + (source === 'shrine' ? ' Dieser Shrine ist einmalig; Überspringen verbraucht ihn ebenfalls.' : '');
     document.getElementById('skipRemovalBtn').classList.add('hidden');
-    const offer = HexRewards.offer(state, 'removal', random);
+    const offer = remoteOffer || HexRewards.offer(state, 'removal', random);
     const counts = new Map(); state.deck.forEach(id => counts.set(id, (counts.get(id) || 0) + 1));
     const rarityOrder = { Common: 0, Uncommon: 1, Rare: 2, Epic: 3, Legendary: 4 };
     for (const [id, count] of [...counts].sort(([a], [b]) => (rarityOrder[CARD_LIBRARY[a]?.rarity] ?? 99) - (rarityOrder[CARD_LIBRARY[b]?.rarity] ?? 99) || CARD_LIBRARY[a].name.localeCompare(CARD_LIBRARY[b].name, 'de'))) {
@@ -677,8 +686,8 @@ R dreht die Karte, dann Feld anklicken.`;
     document.getElementById('rotateHexBtn').textContent = touchControls ? 'Drehen' : 'Drehen (R)';
     const tunnelAvailable=!!state.tunnelOffer&&state.phase==='build'&&!state.waveRunning&&state.hp>0;
     document.getElementById('tunnelRescuePanel').classList.toggle('hidden',!tunnelAvailable);
-    const tunnelButton = document.getElementById('tunnelRescueBtn'); tunnelButton.classList.toggle('hidden',!tunnelAvailable); tunnelButton.textContent = state.tunnelConfirmed ? 'Tunnel kostenlos bauen' : 'Rettungstunnel ansehen';
-    document.getElementById('tunnelRescueText').textContent=state.tunnelConfirmed?'Kostenlos eine neue Front öffnen. Bestehende Hexe und Gebäude bleiben erhalten.':'Keine passende Straße? Öffne kostenlos eine neue Front.';
+    const tunnelButton = document.getElementById('tunnelRescueBtn'); tunnelButton.classList.toggle('hidden',!tunnelAvailable); tunnelButton.textContent = duoToken || state.tunnelConfirmed ? 'Tunnel kostenlos bauen' : 'Rettungstunnel ansehen';
+    document.getElementById('tunnelRescueText').textContent=state.tunnelConfirmed?'Kostenlos eine neue Front öffnen. Bestehende Hexe und Gebäude bleiben erhalten.':'Kein Rettungshex passt. Ein kostenloser Tunnel öffnet einen neuen Straßenanfang.';
     renderQuickControls(); renderIntroductionNotice();
     uxFeedback();
     renderBasePanel(); renderTutorial();
@@ -688,8 +697,15 @@ R dreht die Karte, dann Feld anklicken.`;
     updateArsenalHint();
     document.getElementById('upgradeStatus').checked = !!state.showUpgradeStatus;
     document.getElementById('profileDiamonds').textContent = profile.diamonds;
-    document.getElementById('runDiamonds').textContent = `(+${state.metaSettled ? 0 : state.challengeDay ? (state.challengeWon && !profile.dailyResults?.[state.challengeDay]?.won ? 10 : 0) : HexProfile.runReward(profile, { wave: state.wave, ...state.earnedMeta }).total})`;
-    document.getElementById('profileStats').textContent = `${profile.records.runsPlayed} Runs · Bestmarke Wave ${profile.records.highestWave} · ${profile.records.bossesKilled} Bosse besiegt · ${profile.lifetime.normalKills} normale Gegner besiegt.`;
+    const payout = state.metaSettled ? 0 : duoToken ? (state.duoDiamondEstimate || 0) : state.challengeDay ? (state.challengeWon && !profile.dailyResults?.[state.challengeDay]?.won ? 10 : 0) : HexProfile.runReward(profile, { wave: state.wave, ...state.earnedMeta }).total;
+    document.getElementById('runDiamonds').textContent = '(+' + payout + ')';
+    document.getElementById('diamondPayout').textContent = '+' + payout;
+    document.getElementById('diamondRates').hidden = !!state.challengeDay;
+    document.getElementById('diamondDaily').hidden = !state.challengeDay;
+    document.getElementById('diamondMilestone').hidden = !!duoToken;
+    document.getElementById('diamondWaves').textContent = duoToken ? 'Alle 2 gemeinsam überlebten Wellen' : 'Alle 2 erreichten Wellen';
+    document.getElementById('diamondBoss').textContent = duoToken ? 'Wellenboss auf deiner Karte' : 'Wellenboss besiegt';
+    document.getElementById('diamondGuardian').textContent = duoToken ? 'Erkundungswächter im Team besiegt' : 'Erkundungswächter besiegt';
     document.getElementById('bonusIncome').textContent = `(+${state.income})`;
     renderBuildingPanel();
     handEl.classList.toggle('openingHand', state.hand.length > 3); handEl.classList.toggle('singleCard', state.hand.length === 1);
@@ -709,7 +725,7 @@ R dreht die Karte, dann Feld anklicken.`;
       towerMenuKey = menuKey; towerMenu.innerHTML = ''; towerButtons.clear();
       state.towerLoadout.map(id => [id, TOWERS[id]]).filter(([, tower]) => tower).forEach(([id, t]) => {
         const selectedTile = state.selectedSlot ? state.map.get(key(state.selectedSlot.q, state.selectedSlot.r)) : null;
-        const effective = HexData.towerDefinition({ type: id, biome: selectedTile ? HexBiomes.forTile(state, selectedTile) : 'grass', rangeFactor: state.challengeDay && (!state.challengeKind || state.challengeKind === 'caravan') ? .85 : 1, tileType: selectedTile?.type, supportRange: HexBuildings.rangeBonus(state.map, state.selectedSlot), supportDamage: HexBuildings.effects(state.map, selectedTile).damage });
+        const effective = HexData.towerDefinition({ type: id, biome: selectedTile ? HexBiomes.forTile(state, selectedTile) : 'grass', rangeFactor: state.challengeDay && (!state.challengeKind || state.challengeKind === 'caravan') ? .85 : 1, tileType: selectedTile?.type, supportRange: HexBuildings.rangeBonus(state, state.selectedSlot), supportDamage: HexBuildings.effects(state.map, selectedTile).damage });
         const price = buildPrices.get(id);
         const b = document.createElement('button'); b.className = 'towerBtn'; b.title = t.desc + '\n' + towerStats(effective) + (selections('Slot').length > 1 ? '\nGesamtpreis für alle markierten Plätze inklusive lokaler Rabatte. Werte zeigen den zuletzt gewählten Platz.' : '');
         // Zeile wie die Upgrade-Karten im Turmfenster: Turmsymbol mit Taste, Name mit Typ, Kurzwerte, Stärke, Preis.
@@ -790,21 +806,48 @@ R dreht die Karte, dann Feld anklicken.`;
     const boss = HexExploration.bossProfile(plan.wave), bossGold = readyBossCount * boss.killGold;
     const groups = new Map();
     plan.enemies.forEach(enemy => { const entry = groups.get(enemy.type) || { count: 0, profile: enemy }; entry.count++; groups.set(enemy.type, entry); });
+    const bossCount = readyBossCount + (plan.boss ? 1 : 0);
+    document.getElementById('waveHeadline').textContent = 'Welle ' + plan.wave + ' · ' + plan.count + ' Gegner' + (bossCount ? ' + ' + bossCount + (bossCount === 1 ? ' Boss' : ' Bosse') : '');
+    const roster = document.getElementById('waveRoster');
+    roster.replaceChildren();
+    for (const {count,profile} of groups.values()) {
+      const item = document.createElement('li');
+      item.textContent = count + ' × ' + profile.name;
+      roster.appendChild(item);
+    }
     const defenses = p => `${p.hp} Leben${p.armorHp ? ` + ${p.armorHp} Rüstung` : ''}${p.magicHp ? ` + ${p.magicHp} Magieresistenz` : ''}`;
-    document.getElementById('waveForecast').textContent = 'Wave ' + plan.wave + ': ' + plan.count + ' Gegner. ' + [...groups.values()].map(({ count, profile }) => count + ' × ' + profile.name + ' (' + defenses(profile) + (profile.description ? ', ' + profile.description : profile.type === 'swarm' ? ', schnell' : '') + ')').join(' · ') + '. Gelb = Leben, Orange = Rüstung, Blau = Magieresistenz.';
+    document.getElementById('waveForecast').textContent = 'Wave ' + plan.wave + ': ' + plan.count + ' Gegner\n' + [...groups.values()].map(({ count, profile }) => count + ' × ' + profile.name + ' (' + defenses(profile) + (profile.description ? ', ' + profile.description : profile.type === 'swarm' ? ', schnell' : '') + ')').join('\n');
     if (state.challengeDay && state.challengeKind === 'caravan') document.getElementById('waveForecast').textContent += ' · Geldtransport: Besiegen bringt 15 Gold extra. Erreicht er die Basis, verlierst du 10 Gold.';
     if (readyBossCount) document.getElementById('waveForecast').textContent += ` Zusätzlich ${readyBossCount} Wächter: je ${defenses(boss)}, ${boss.baseDamage} Basisschaden, +${boss.killGold} Gold plus Kartenbeute (90 % Epic, 10 % Legendary).`;
     if (plan.boss) document.getElementById('waveForecast').textContent += ` Bosswelle: ${plan.boss.name} mit ${defenses(plan.boss)} und ${plan.boss.baseDamage} Basisschaden an einem zufälligen Eingang. ${plan.boss.description} +${plan.boss.killGold} Gold und Kartenbeute bei Sieg.`;
-    document.getElementById('goldForecast').textContent = `Maximal +${plan.maxGold + bossGold} Gold: ${plan.count} Kills inklusive Karawanenboni = ${plan.killGold}, Bossloot +${bossGold + (plan.boss?.killGold || 0)}, Wave-Abschluss +${plan.completionGold}, Hex-Bonus +${plan.income}. Nur wenn alle Gegner besiegt werden und die Wave überlebt wird. Mit aktuellem Gold: maximal ${state.gold + plan.maxGold + bossGold} vor Bauausgaben und weiteren Einnahmen der laufenden Wave.`;
+    const waveGold = plan.maxGold + bossGold;
+    document.getElementById('goldForecast').textContent = [
+      'Maximal +' + waveGold + ' Gold',
+      'Gegner +' + plan.killGold,
+      'Bossloot +' + (bossGold + (plan.boss?.killGold || 0)),
+      'Wellenabschluss +' + plan.completionGold,
+      'Hex-Bonus +' + plan.income,
+      ...(!state.waveRunning ? ['Mit aktuellem Gold: maximal ' + (state.gold + waveGold)] : [])
+    ].join('\n');
     const earned = state.goldEarned;
-    document.getElementById('goldSources').textContent = `Startgold ${HexHeroes.hero(state.heroId).gold} · Hero-Einkommen +${HexHeroes.hero(state.heroId).income} · regulärer Gegner +${HexWaves.economy.kill} (Splittergolem: auf drei Einheiten verteilt) · pro überlebter Wave +${HexWaves.economy.completion} · Dorf +2, Handelsstraße +4, Haus zusätzlich +3 pro Wave. Im Run verdient: Kills ${earned.kills}, Abschlüsse ${earned.completion}, Hex-/Haus-/Hero-/Beuteboni ${earned.income}, Shrines ${earned.shrine || 0}, Schätze ${earned.treasure || 0}, Bosse ${earned.boss || 0}. Undo erstattet nur den Kaufpreis, erzeugt kein Einkommen.`;
+    document.getElementById('goldSources').textContent = [
+      'Startgold ' + HexHeroes.hero(state.heroId).gold,
+      'Gegner +' + earned.kills,
+      'Wellenabschlüsse +' + earned.completion,
+      'Einkommen +' + earned.income,
+      'Schreine +' + (earned.shrine || 0),
+      'Schätze +' + (earned.treasure || 0),
+      'Bosse +' + (earned.boss || 0)
+    ].join('\n');
     const remainingGold = state.challengeKind === 'garrison' ? 0 : uiWavePlan(state.wave).enemies.slice(-state.pendingSpawns || Infinity).reduce((sum, e) => sum + (e.killGold ?? HexWaves.economy.kill), 0) + aliveGold + HexWaves.economy.completion + state.income;
-    document.getElementById('liveWaveInfo').textContent = state.waveRunning ? `Laufende Wave ${state.wave}: ${state.pendingSpawns} Gegner kommen noch, ${alive.length} sind auf der Map (davon ${alive.filter(e => e.type === 'boss').length} Wächter), ${state.waveKills} normale Gegner besiegt. Noch maximal +${remainingGold} Gold bis Wave-Ende.` : 'Vor dem Platzieren des Hexes ist der Einkommensbonus vorläufig; danach wird er aktualisiert.';
+    document.getElementById('liveWaveInfo').textContent = state.waveRunning ? `Laufende Wave ${state.wave}: ${state.pendingSpawns} Gegner kommen noch, ${alive.length} sind auf der Map (davon ${alive.filter(e => e.type === 'boss').length} Wächter), ${state.waveKills} normale Gegner besiegt. Noch maximal +${remainingGold} Gold bis Wave-Ende.` : '';
+    const possibleGold = state.waveRunning ? remainingGold : plan.maxGold + bossGold;
+    document.getElementById('goldHeadline').textContent = state.challengeKind==='towerDraft' ? 'Turm-Draft · Upgrade-Tickets' : state.challengeKind==='garrison' ? 'Restbudget · ' + state.gold + ' Gold' : 'Bis Wellenende · bis zu +' + possibleGold + ' Gold';
     if(state.challengeKind==='towerDraft'){document.getElementById('goldSources').textContent='Gold kann im Turm-Draft nicht ausgegeben werden. Verwende dein Inventar und Upgrade-Tickets.';}
     if (state.challengeKind === 'garrison') document.getElementById('goldSources').textContent = '1.200 Startgold für die gesamte Mission. Keine Einnahmen und keine Verkäufe. Restbudget: ' + state.gold + ' Gold.';
     if (state.challengeKind === 'garrison') { document.getElementById('goldForecast').textContent = 'Keine Goldeinnahmen in dieser Mission.'; if (!state.waveRunning) document.getElementById('liveWaveInfo').textContent = 'Feste Karte. Alle drei Angriffe sind vorab planbar; Restgold bleibt zwischen den Wellen erhalten.'; }
     const budgetSlot = state.selectedSlot || state.selectedTower || state.selectedBuilding;
-    document.getElementById('towerBudget').textContent = (budgetSlot ? 'Preise am ausgewählten Hex: ' : 'Loadoutpreise: ') + state.towerLoadout.map(id => TOWERS[id]).filter(Boolean).map(t => { const price = HexTowerCommands.buildPrice(state, budgetSlot, t.cost); return t.name + ': ' + price + ' Gold' + (state.gold < price ? ' (noch ' + (price - state.gold) + ' nötig)' : ' (bezahlbar)'); }).join(' · ');
+    document.getElementById('towerBudget').textContent = (budgetSlot ? 'Preise am ausgewählten Hex: ' : 'Loadoutpreise: ') + state.towerLoadout.map(id => TOWERS[id]).filter(Boolean).map(t => { const price = HexTowerCommands.buildPrice(state, budgetSlot, t.cost); return t.name + ': ' + price + ' Gold' + (state.gold < price ? ' (noch ' + (price - state.gold) + ' nötig)' : ' (bezahlbar)'); }).join('\n');
 
   }
   function renderAll() { renderBoard(); renderUI(); }
@@ -961,9 +1004,9 @@ R dreht die Karte, dann Feld anklicken.`;
       const content = document.getElementById('buildingOptions'); content.innerHTML = ''; const next = HexBuildings.nextUpgrade(state, building);
       if (next) { const label = document.createElement('p'); label.className = 'towerSectionLabel'; label.textContent = 'Verbesserung'; content.appendChild(label); const button = document.createElement('button'); button.className = 'upgradeOption buildingOffer'; button._cost = next.cost; buildingButtons.set('upgrade', button); const after = HexBuildings.definition({ ...building, level: (building.level || 1) + 1 }); button.innerHTML = buildingOfferMarkup(building.type, next.name || 'Ausbauen auf Stufe ' + ((building.level || 1) + 1), next.desc || after.desc, next.cost); button.disabled = state.gold < next.cost || state.hp <= 0 || !['place', 'build', 'wave'].includes(state.phase); button.addEventListener('click', () => { if (duoToken) { duoAction('buildingUpgrade', { slot: state.selectedBuilding }); return; } if (HexBuildings.upgrade(state, state.selectedBuilding)) renderAll(); }); content.appendChild(button); }
       else if ((building.level || 1) === 3 && !building.special && HexBuildings.specials[building.type]) { const hint = document.createElement('p'); hint.textContent = 'Spezialausbau im Arsenal für 40 Diamanten freischalten. Ab dem nächsten Run verfügbar.'; content.appendChild(hint); }
-      if (building.special && building.type !== 'house') { const choose = document.createElement('button'); panel._targetButton = choose; choose.textContent = HexBuildings.redundantTarget(state,building) ? 'Zusatz-Hex bereits gleich stark versorgt · neu wählen' : HexBuildings.targetRemaining(building)===0 ? 'Zusatz-Hex festgelegt · keine Änderung mehr möglich' : state.buildingTarget ? 'Hex auf der Map anklicken · Abbrechen' : (building.target ? 'Zusatz-Hex ändern' : 'Zusatz-Hex auf der Map auswählen'); choose.title = building.type==='market' ? 'Zusatz-Hex: einmal wählen, einmal korrigieren. Noch '+HexBuildings.targetRemaining(building)+' Platzierungen.' : building.target ? 'Aktuelles Zusatzhex: ' + building.target + ' · kräftig markiert' : 'Zusatzhex auswählen'; choose.addEventListener('pointerenter', () => renderBoard()); choose.addEventListener('focus', () => renderBoard()); choose.disabled = state.hp <= 0 || !['place', 'build', 'wave'].includes(state.phase); choose.addEventListener('click', () => { state.buildingTarget = state.buildingTarget ? null : { ...state.selectedBuilding }; state.selectedBuilding = null; setMessage('Zusatzwirkung: ein erkundetes Hex anklicken · Escape: abbrechen'); renderAll(); }); content.appendChild(choose); }
+      if (building.special && building.type !== 'house') { const choose = document.createElement('button'); panel._targetButton = choose; choose.textContent = HexBuildings.redundantTarget(state,building) ? 'Zusatz-Hex bereits gleich stark versorgt · neu wählen' : HexBuildings.targetRemaining(building,state)===0 ? 'Zusatz-Hex festgelegt · keine Änderung mehr möglich' : state.buildingTarget ? 'Hex auf der Map anklicken · Abbrechen' : (building.target ? 'Zusatz-Hex ändern' : 'Zusatz-Hex auf der Map auswählen'); choose.title = building.type==='market' ? 'Neu wählen, sobald ein anderer Markt auf dem Zusatz-Hex denselben Rabatt gewährt.' : building.target ? 'Aktuelles Zusatzhex: ' + building.target + ' · kräftig markiert' : 'Zusatzhex auswählen'; choose.addEventListener('pointerenter', () => renderBoard()); choose.addEventListener('focus', () => renderBoard()); choose.disabled = state.hp <= 0 || !['place', 'build', 'wave'].includes(state.phase); choose.addEventListener('click', () => { state.buildingTarget = state.buildingTarget ? null : { ...state.selectedBuilding }; state.selectedBuilding = null; setMessage('Zusatzwirkung: ein erkundetes Hex anklicken · Escape: abbrechen'); renderAll(); }); content.appendChild(choose); }
     }
-    if (panel._targetButton) panel._targetButton.disabled = HexBuildings.targetRemaining(building)<=0 || state.hp <= 0 || !['place', 'build', 'wave'].includes(state.phase);
+    if (panel._targetButton) panel._targetButton.disabled = HexBuildings.targetRemaining(building,state)<=0 || state.hp <= 0 || !['place', 'build', 'wave'].includes(state.phase);
     for (const [type, button] of buildingButtons) button.disabled = !!HexBuildings.buildBlockReason(tile, type) || (type === 'portal' && (!['place', 'build'].includes(state.phase) || state.waveRunning)) || !['place', 'build', 'wave'].includes(state.phase) || state.hp <= 0 || state.gold < (button._cost || HexBuildings.definitions[type].cost);
     const sell = document.getElementById('sellBuildingBtn'), refund = HexBuildings.refund(state, building); sell.disabled = !refund; sell.textContent = refund ? `Verkaufen · ${refund.percent} % (+${refund.amount} Gold)` : 'Gebäude verkaufen';
     positionTowerPanel();
@@ -1054,8 +1097,9 @@ R dreht die Karte, dann Feld anklicken.`;
   function renderTowerPanel() {
     const panel = document.getElementById('towerPanel'), selected = state.selectedTower, tower = selected ? state.map.get(key(selected.q, selected.r))?.towers[selected.index] : null;
     if (!tower) { panel.classList.add('hidden'); towerPanelKey = ''; towerSelectionKey = ''; towerComparison = null; state.previewUpgrade = null; return; }
-    const selectionKey = JSON.stringify(selections('Tower'));
-    if (towerSelectionKey !== selectionKey) { towerSelectionKey = selectionKey; towerComparison = null; towerFocusOpen = false; document.getElementById('towerExtraDetails').open = false; }
+    const fullyUpgraded = !!(tower.ultimate || tower.finalUpgrade && (state.challengeKind === 'towerDraft' || !HexData.ultimateAvailable(state,tower)));
+    const selectionKey = JSON.stringify([selections('Tower'),fullyUpgraded]);
+    if (towerSelectionKey !== selectionKey) { towerSelectionKey = selectionKey; towerComparison = null; towerFocusOpen = false; document.getElementById('towerExtraDetails').open = fullyUpgraded; }
     panel.classList.remove('hidden'); document.getElementById('towerPanelTitle').textContent = HexData.towerDefinition(tower).name;
     document.getElementById('towerPanelStage').textContent = tower.ultimate ? 'Ultimate' : tower.finalUpgrade ? 'Stufe 3 · Zweigfinale' : tower.branch ? 'Stufe 2 · Spezialisierung' : 'Basisstufe';
     document.getElementById('towerSubNote').textContent = HexData.towerDefinition(tower).name + ' · ' + document.getElementById('towerPanelStage').textContent;
@@ -1088,7 +1132,7 @@ R dreht die Karte, dann Feld anklicken.`;
         }
       }
       const cardEffect=HexAugmentCards.activeDescription(state,tower.type);if(cardEffect)influences.push(cardEffect);
-      if(tower.supportDamage>1){const forgeCard=HexAugmentCards.activeDescription(state,'forge');if(forgeCard)influences.push(forgeCard);}
+      if(tower.forgeSupported){const forgeCard=HexAugmentCards.activeDescription(state,'forge');if(forgeCard)influences.push(forgeCard);}
       if (tower.overloadPending) influences.push('Überladung: für die nächste Welle vorgemerkt.');
       if (tower.overloadUntil > state.elapsedMs) influences.push('Überladung aktiv: +50 % Angriffstempo.');
       if (tower.supportDamage && tower.supportDamage !== 1) influences.push('Unterstützung · Schaden ×' + HexTowerView.number(tower.supportDamage));
@@ -1370,9 +1414,6 @@ R dreht die Karte, dann Feld anklicken.`;
     const restored = HexRunSnapshot.restore(checkpoint); HexDeck.recoverMissing(restored.state); closeSale();
     cancelQuickTower(); clearRunTimers(); resetCameraKeys(); inspectReward('selection');
     state = restored.state; random = restored.random;
-    if(!duoToken&&state.hp>0&&!state.waveRunning&&state.phase==='build'&&!state.tunnelOffer&&['tunnel','blocked'].includes(state.drawResult)){
-      state.tunnelOffer=HexMap.tunnelPlan(state.map,state.landmarks,true);state.tunnelConfirmed=false;
-    }
     Object.assign(state, { selectedCard: null, rotation: 0, selectedSlots: [], selectedTowers: [], showHexGrid, showSlotHints, showUpgradeStatus: document.getElementById('upgradeStatus').checked });
     handRenderKey = forecastRenderKey = ''; deckRenderKeys.clear(); uiWavePlans.clear();
     towerMenuKey = ''; towerPanelKey = ''; buildingPanelKey = ''; pinnedBiome = null; hasActiveRun = true; startSoloPresence();
@@ -1553,7 +1594,7 @@ R dreht die Karte, dann Feld anklicken.`;
     document.getElementById('diamondBreakdown').innerHTML = `<div><strong>+${reward.wave}</strong>Wave-Fortschritt</div><div><strong>+${reward.bosses}</strong>Boss-Siege</div><div><strong>+${reward.milestones}</strong>Neue Bestmarken</div>`;
     document.getElementById('gameOverDiamonds').textContent = profile.diamonds; document.getElementById('gameOverBest').textContent = profile.records.highestWave;
     renderRunEndHero(reward.total);
-    document.getElementById('profileDiamonds').textContent = profile.diamonds; document.getElementById('runDiamonds').textContent = '(+0)'; gameOverOverlay.classList.remove('hidden'); saveRunToCloud();
+    document.getElementById('profileDiamonds').textContent = profile.diamonds; document.getElementById('runDiamonds').textContent = '(+0)'; document.getElementById('diamondPayout').textContent = '+0'; gameOverOverlay.classList.remove('hidden'); saveRunToCloud();
   }
   let resetArsenalPending = false;
   function renderArsenal(message = '') {
@@ -1834,6 +1875,8 @@ R dreht die Karte, dann Feld anklicken.`;
     document.getElementById('accountSyncInfo').textContent = cloudSaveError || (dirty ? 'Nicht gesicherte Änderungen – werden beim nächsten Mal übertragen.' : accountApi()?.statsStatus==='pending' ? 'Spielstand gesichert. Die Bestenliste wird noch aktualisiert.' : 'Wird nach jeder abgeschlossenen Welle und nach jedem Spiel gesichert.');
     document.getElementById('accountDiamonds').textContent = profile.diamonds;
     document.getElementById('accountBestWave').textContent = profile.records?.highestWave || 0;
+    document.getElementById('accountDuoBest').textContent = profile.records?.duoHighestWave || 0;
+    document.getElementById('accountDuoWins').textContent = profile.records?.duoVictories || 0;
     document.getElementById('accountLastSync').textContent = formatSyncTime(cloudStore.get(CLOUD_LAST));
   }
   function setAccountMode(mode) {
@@ -2071,7 +2114,14 @@ R dreht die Karte, dann Feld anklicken.`;
   function openPlayChoices() { mainMenu.classList.add('hidden'); document.getElementById('playModeChoices').classList.remove('hidden'); document.getElementById('dailyModeDetails').classList.add('hidden'); document.getElementById('playModeOverlay').classList.remove('hidden'); }
   document.getElementById('dailyStartBtn').addEventListener('click', () => { if (!HexProfile.modesUnlocked(profile) || !confirmRunRestart()) return; mainMenu.classList.add('hidden'); document.getElementById('playModeOverlay').classList.add('hidden'); const day=new Date().toISOString().slice(0,10);if(['greed','villages'].includes(HexWaves.daily(day).id)){openLoadout();pendingChallengeDay=day;renderLoadout();}else newRun(undefined,'standard','dual',day); });
   document.getElementById('menuPlayBtn').addEventListener('click', () => { if (menuResume) { openPlayChoices(); return; } if (!HexProfile.modesUnlocked(profile) && !confirmRunRestart()) return; mainMenu.classList.add('hidden'); if (!HexProfile.modesUnlocked(profile)) { if (HexProfile.learning(profile)) newRun(); else openLoadout(); return; } document.getElementById('playModeChoices').classList.remove('hidden'); document.getElementById('dailyModeDetails').classList.add('hidden'); document.getElementById('playModeOverlay').classList.remove('hidden'); });
-  function openDuoLobby() { if (!HexProfile.modesUnlocked(profile) || !suspendSoloRun()) return; location.href = 'duo-lobby.html'; }
+  async function openDuoLobby() {
+    if (!HexProfile.modesUnlocked(profile) || !suspendSoloRun()) return;
+    if (accountApi()?.isLoggedIn() && cloudStore.get(CLOUD_DIRTY) === '1') {
+      if (cloudUpload) await cloudUpload;
+      if (cloudStore.get(CLOUD_DIRTY) === '1') await pushToServer();
+    }
+    location.href = 'duo-lobby.html';
+  }
   for (const id of ['duoModeBtn', 'menuDuoBtn']) document.getElementById(id).addEventListener('click', openDuoLobby);
   document.getElementById('menuDailyBtn').addEventListener('click', () => { if (!HexProfile.modesUnlocked(profile)) return; mainMenu.classList.add('hidden'); renderDailyMission(); document.getElementById('playModeChoices').classList.add('hidden'); document.getElementById('dailyModeDetails').classList.remove('hidden'); document.getElementById('playModeOverlay').classList.remove('hidden'); });
   document.getElementById('standardModeBtn').addEventListener('click', () => {
@@ -2151,8 +2201,8 @@ R dreht die Karte, dann Feld anklicken.`;
   document.getElementById('closeBuildingPanel').addEventListener('click', () => { state.selectedBuilding = null; renderAll(); });
   document.getElementById('celebrationContinue').addEventListener('click', closeCelebration);
   document.getElementById('rewardMapBtn').addEventListener('click', () => inspectReward(rewardView === 'map' ? 'selection' : 'map'));
-  document.getElementById('rewardDeckBtn').addEventListener('click', () => inspectReward(rewardView === 'deck' ? 'selection' : 'deck'));
-  document.getElementById('rewardBackBtn').addEventListener('click', () => { if (state.workshopPicking) { state.workshopPicking = false; showShrine(); } else inspectReward('selection'); });
+  document.getElementById('rewardDeckBtn').addEventListener('click', () => {inspectReward('deck');document.getElementById('rewardBackBtn').focus?.();});
+  document.getElementById('rewardBackBtn').addEventListener('click', () => { if (state.workshopPicking) { state.workshopPicking = false; showShrine(duoToken?state.rewardOffer:null); } else inspectReward('selection'); });
   document.getElementById('skipRemovalBtn').addEventListener('click', () => takeReward(state.rewardOffer?.id, null));
   document.getElementById('skipRemovalTopBtn').addEventListener('click', () => takeReward(state.rewardOffer?.id, null));
   document.getElementById('closeTowerPanel').addEventListener('click', () => { state.selectedTower = null; renderAll(); });
@@ -2253,9 +2303,12 @@ R dreht die Karte, dann Feld anklicken.`;
   document.addEventListener('visibilitychange', () => { fpsStart = null; if (fpsVisible) fpsEl.textContent = 'FPS: —'; cancelQuickTower(); resetCameraKeys(); advanceClock(performance.now()); });
   if (duoToken) {
     document.getElementById('openMainMenuBtn').textContent='Duo-Lobby';
+    document.getElementById('autoWaveTitle').textContent='Automatisch bereitmelden';
+    document.getElementById('autoWaveHint').textContent='Nach deiner Platzierung. Die Welle startet, sobald ihr beide bereit seid.';
     newRun(); tutorial.active = false; mainMenu.classList.add('hidden'); document.body.classList.add('duoGame');
     duoBridge = HexDuoGame.mount({
       token: duoToken, getState: () => state, render: renderAll, renderer, cardElement, setMessage,
+      profileSettled(nextProfile){profile=nextProfile;scheduleCloudSave();},
       accept(next, switched = false, profileChanged = true) {
         if (switched) { consumablePick = null; closeSale(); cancelQuickTower(); state.selectedSlot = state.selectedTower = state.selectedBuilding = null; state.selectedSlots = []; state.selectedTowers = []; state.previewUpgrade = state.previewTower = state.previewBuilding = state.buildingTarget = state.hoveredPlacement = null; state.selectedCard = null; state.rotation = 0; towerMenuKey = towerPanelKey = buildingPanelKey = ''; renderer.reset(); }
         if (state.waveRunning && !next.waveRunning || state.phase !== next.phase) clearBuildingInteraction();
@@ -2267,13 +2320,30 @@ R dreht die Karte, dann Feld anklicken.`;
         if (profileChanged) profile = HexProfile.load(TOWERS); tutorial.active = false; hasActiveRun = true; mainMenu.classList.add('hidden'); renderAll();
       }, commandAccepted(action) { if (action === 'tower' && globalThis.HexCompact?.small()) { document.getElementById('towerDrawer').classList.add('hidden'); HexCompact.open(''); } if (['tower', 'upgrade', 'building', 'buildingUpgrade', 'sellTower', 'sellBuilding', 'baseUpgrade'].includes(action)) { state.previewTower = state.previewUpgrade = null; sound.play('build'); renderAll(); } }, reward(offer, kind) {
         const signature = JSON.stringify([offer, kind]); if (duoBridge?.offerKey === signature) return; if (duoBridge) duoBridge.offerKey = signature;
-        rewardChoices.innerHTML = ''; rewardChoices.classList.remove('workshopChoices'); if (!offer) { rewardOverlay.classList.add('hidden'); return; }
+        rewardChoices.innerHTML = ''; rewardChoices.classList.remove('workshopChoices'); state.workshopPicking=false;
+        if (!offer) { rewardOverlay.classList.add('hidden'); return; }
+        if(kind==='reward'){
+          state.rewardOffer=offer;
+          if(offer.kind==='normal')return showRewards(offer);
+          if(offer.kind==='boss')return showBossReward(offer);
+          if(offer.kind==='shrine')return showShrine(offer);
+          if(offer.kind==='removal')return showRemoval(state.removalSource,offer);
+        }
         inspectReward('selection');
-        document.getElementById('rewardTitle').textContent = kind === 'delivery' ? 'Geschenk für deinen Partner' : kind === 'result' ? 'Gemeinsamer Durchlauf beendet' : offer.kind === 'removal' ? 'Deck ausdünnen (optional)' : 'Belohnung wählen';
-        document.getElementById('rewardDescription').textContent = kind === 'delivery' ? 'Wähle eine Karte oder Gold für deinen Partner.' : kind === 'result' ? offer.description : 'Wähle deine Belohnung.';
-        document.getElementById('skipRemovalBtn').classList.toggle('hidden', !offer.skippable || offer.kind === 'removal'); document.getElementById('rewardInspectActions').classList.add('hidden');
-        for (const [index, choice] of offer.choices.entries()) { const button = choice.cardId ? cardElement(choice.cardId, false) : document.createElement('button'); if (!choice.cardId) { button.className = 'upgradeOption'; button.textContent = (choice.label ? choice.label + (choice.desc ? ' · ' + choice.desc : '') : '') || choice.choice?.name || ({ bastion: '+5 Team-Leben', income: '+2 Einkommen', repair: 'Heilquelle', supplies: '+30 Gold' })[choice.blessing] || '+' + choice.amount + ' Gold'; } if (kind === 'delivery' && choice.kind === 'gold') { button.className = 'card duoGoldGift'; const icon=document.createElement('span'); icon.className='duoGiftIcon'; icon.setAttribute('aria-hidden','true'); const giftCoin=document.createElement('span'); giftCoin.className='hxi hxi-coin'; icon.appendChild(giftCoin); const title=document.createElement('strong'); title.textContent='+'+choice.amount+' Gold'; const hint=document.createElement('span'); hint.textContent='Für deinen Partner · sofort verfügbar'; button.textContent=''; button.appendChild(icon); button.appendChild(title); button.appendChild(hint); } if (offer.kind === 'removal' && choice.cardId) bindRemovalConfirmation(button, () => duoBridge.choose(kind, offer, index)); else button.addEventListener('click', () => duoBridge.choose(kind, offer, index)); rewardChoices.appendChild(button); }
-        if (offer.choices.some(c => c.kind === 'upgrade')) { rewardChoices.classList.add('workshopChoices'); rewardAction('Turm auf der Karte wählen', 'Klicke einen eigenen Turm an, um sein kostenloses Upgrade zu wählen.', () => startWorkshop(offer)); }
+        document.getElementById('rewardTitle').textContent = kind === 'delivery' ? 'Geschenk für deinen Partner' : 'Gemeinsamer Durchlauf beendet';
+        document.getElementById('rewardDescription').textContent = kind === 'delivery' ? 'Wähle eine Karte oder Gold für deinen Partner.' : offer.description;
+        document.getElementById('skipRemovalBtn').classList.add('hidden');
+        for (const [index, choice] of offer.choices.entries()) {
+          const button = choice.cardId ? cardElement(choice.cardId, false) : document.createElement('button');
+          if (kind === 'delivery' && choice.kind === 'gold') {
+            button.className='card duoGoldGift';
+            const icon=document.createElement('span'),coin=document.createElement('span');
+            icon.className='duoGiftIcon';coin.className='hxi hxi-coin';icon.appendChild(coin);
+            const title=document.createElement('strong'),hint=document.createElement('span');
+            title.textContent='+'+choice.amount+' Gold';hint.textContent='Für deinen Partner · sofort verfügbar';button.appendChild(icon);button.appendChild(title);button.appendChild(hint);
+          }else if(!choice.cardId){button.className='upgradeOption';button.textContent=choice.label;}
+          button.addEventListener('click',()=>duoBridge.choose(kind,offer,index));rewardChoices.appendChild(button);
+        }
         if (kind === 'result') { renderRunStatistics(); const stats = document.createElement('section'); stats.className = 'duoResultStats'; stats.innerHTML = document.getElementById('runStatistics').innerHTML; rewardChoices.appendChild(stats); const ranking=document.createElement('section');rewardChoices.appendChild(ranking);showRunRanking(ranking,offer.ranking); } state.rewardOffer = kind === 'result' ? null : offer; openRewardSelection();
       }
     });

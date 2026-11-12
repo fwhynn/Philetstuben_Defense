@@ -67,7 +67,10 @@ const HexProfile=(()=>{
     const clean=normalize(profile,definitions);
     if(!receipt||!/^[a-f0-9]{64}$/.test(receipt.id)||!Number.isSafeInteger(receipt.diamonds)||receipt.diamonds<0||receipt.diamonds>100000)throw Error('Ungültige Duo-Abrechnung');
     if(clean.duoSettledRuns.includes(receipt.id))return clean;
-    const next=normalize({...clean,diamonds:clean.diamonds+receipt.diamonds,duoSettledRuns:[...clean.duoSettledRuns,receipt.id],lifetime:{...clean.lifetime,diamondsEarned:clean.lifetime.diamondsEarned+receipt.diamonds}},definitions);profileStorage.setItem(STORAGE_KEY,JSON.stringify(next));return next;
+    const records={...clean.records};
+    if(Number.isSafeInteger(receipt.wave)&&receipt.wave>=0)records.duoHighestWave=Math.max(records.duoHighestWave||0,receipt.wave);
+    if(receipt.outcome==='victory')records.duoVictories=(records.duoVictories||0)+1;
+    const next=normalize({...clean,records,diamonds:clean.diamonds+receipt.diamonds,duoSettledRuns:[...clean.duoSettledRuns,receipt.id],lifetime:{...clean.lifetime,diamondsEarned:clean.lifetime.diamondsEarned+receipt.diamonds}},definitions);profileStorage.setItem(STORAGE_KEY,JSON.stringify(next));return next;
   }
   function settleRun(profile,summary,definitions){
     const clean=normalize(profile,definitions),runId=String(summary.runId||'');

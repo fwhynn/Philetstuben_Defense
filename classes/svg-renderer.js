@@ -165,7 +165,7 @@ function create(svg,commands){
     const selected=state.dragTower?state.dragSlot:state.selectedTower||(state.previewTower?state.selectedSlot:null);if(!selected) return;
     const tile=state.map.get(key(selected.q,selected.r)),tw=tile?.towers[selected.index];
     const type=state.dragTower||tw?.type||state.previewTower;if(!tile||!type) return;
-    const p=slotPositions(tile)[selected.index],def=HexData.towerDefinition(tw||{type,biome:HexBiomes.forTile(state,tile),rangeFactor:state.challengeDay?.85:1,tileType:tile.type,supportRange:HexBuildings.rangeBonus(state.map,selected)});
+    const p=slotPositions(tile)[selected.index],def=HexData.towerDefinition(tw||{type,biome:HexBiomes.forTile(state,tile),rangeFactor:state.challengeDay?.85:1,tileType:tile.type,supportRange:HexBuildings.rangeBonus(state,selected)});
     const circle=document.createElementNS(NS,'circle');
     circle.setAttribute('cx',p.x);circle.setAttribute('cy',p.y);circle.setAttribute('r',def.range);
     circle.setAttribute('fill',def.color);circle.setAttribute('fill-opacity','.18');

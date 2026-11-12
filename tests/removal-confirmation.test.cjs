@@ -28,11 +28,11 @@ test('minimum-size decks cannot arm or confirm removal',()=>{
 });
 
 test('duo removal sends no command before confirmation; normal rewards stay single-click',()=>{
-  const calls=[],duo={choose(...args){calls.push(args);}};const {elements}=load({duo});
+  const calls=[],duo={send(action,payload){calls.push([action,payload.offerId,payload.index]);}};const {elements}=load({duo});duo.api.getState().deck=Array(6).fill('straight');
   const offer={id:'remove-test',kind:'removal',choices:[{cardId:'straight'}],skippable:true};
   duo.api.reward(offer,'reward');let card=elements.get('rewardChoices').children[0];
   card.listeners.click();assert.equal(calls.length,0);card.listeners.click();assert.equal(calls.length,1);
-  assert.deepEqual(calls[0],['reward',offer,0]);
-  duo.api.reward({...offer,id:'add-test',kind:'card'},'reward');card=elements.get('rewardChoices').children[0];
+  assert.deepEqual(calls[0],['reward',offer.id,0]);
+  duo.api.reward({...offer,id:'add-test',kind:'normal'},'reward');card=elements.get('rewardChoices').children[0];
   card.listeners.click();assert.equal(calls.length,2);
 });

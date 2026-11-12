@@ -1,9 +1,9 @@
 /* Adapter for the SINGLEPLAYER game screen. Only the server changes gameplay. */
 const HexDuoGame=(()=>{
   // Follow only already traversed server path segments; never cut across a bend.
-  function motionAlongRoad(start, end, t) {
+  function prepareRoad(start, end) {
     const points=end.motionPath;
-    if(!Array.isArray(points)||points.length<2||end.leaping)return {x:end.x,y:end.y};
+    if(!Array.isArray(points)||points.length<2||end.leaping)return null;
     let best=null;
     for(let i=0;i<points.length-1;i++){
       const a=points[i],b=points[i+1],dx=b.x-a.x,dy=b.y-a.y,l2=dx*dx+dy*dy;
@@ -11,15 +11,39 @@ const HexDuoGame=(()=>{
       const x=a.x+u*dx,y=a.y+u*dy,d=Math.hypot(start.x-x,start.y-y);
       if(!best||d<best.d)best={i,x,y,d};
     }
-    if(!best||best.d>2)return {x:end.x,y:end.y};
+    if(!best||best.d>2)return null;
     const path=[{x:best.x,y:best.y},...points.slice(best.i+1)];
-    let total=0;for(let i=1;i<path.length;i++)total+=Math.hypot(path[i].x-path[i-1].x,path[i].y-path[i-1].y);
-    let distance=total*Math.max(0,Math.min(1,t));
-    for(let i=1;i<path.length;i++){const a=path[i-1],b=path[i],length=Math.hypot(b.x-a.x,b.y-a.y);if(length&&distance<=length){const u=distance/length;return {x:a.x+(b.x-a.x)*u,y:a.y+(b.y-a.y)*u};}distance-=length;}
+    const lengths=[];
+    let total=0;
+    for(let i=1;i<path.length;i++){
+      const length=Math.hypot(path[i].x-path[i-1].x,path[i].y-path[i-1].y);
+      total+=length;lengths.push(length);
+    }
+    return {path,lengths,total};
+  }
+  function motionAlongRoad(start,end,t,cache){
+    let road;
+    if(cache?.has(end)&&cache.get(end).start===start)road=cache.get(end).road;
+    else {
+      road=prepareRoad(start,end);
+      cache?.set(end,{start,road});
+    }
+    if(road){
+      let distance=road.total*Math.max(0,Math.min(1,t));
+      for(let i=0;i<road.lengths.length;i++){
+        const length=road.lengths[i];
+        if(length&&distance<=length){
+          const a=road.path[i],b=road.path[i+1],u=distance/length;
+          return {x:a.x+(b.x-a.x)*u,y:a.y+(b.y-a.y)*u};
+        }
+        distance-=length;
+      }
+    }
     return {x:end.x,y:end.y};
   }
   // Render a short history, rather than restarting an ease-out on every packet.
   function createMotionBuffer(delay=150){
+    const roads=new WeakMap();
     let frames=[],offset=null,lastTarget=-Infinity;
     function push(enemies,stamp,now,reset=false){
       if(reset||frames.length&&stamp<frames.at(-1).at||frames.length&&now-frames.at(-1).arrival>1000){frames=[];offset=null;lastTarget=-Infinity;}
@@ -34,7 +58,7 @@ const HexDuoGame=(()=>{
       while(frames.length>2&&frames[1].at<=target)frames.shift();
       const a=frames[0],b=frames.find(f=>f.at>=target)||frames.at(-1),before=frames.filter(f=>f.at<=target).at(-1)||a;
       const t=b.at>before.at?Math.max(0,Math.min(1,(target-before.at)/(b.at-before.at))):1;
-      let changed=false;for(const e of enemies){const x=e.x,y=e.y,start=before.enemies.get(e.id),end=b.enemies.get(e.id);if(start&&end)Object.assign(e,t>=1?{x:end.x,y:end.y}:motionAlongRoad(start,end,t));else if(end)Object.assign(e,{x:end.x,y:end.y});changed ||= x!==e.x||y!==e.y;}
+      let changed=false;for(const e of enemies){const x=e.x,y=e.y,start=before.enemies.get(e.id),end=b.enemies.get(e.id);if(start&&end)Object.assign(e,t>=1?{x:end.x,y:end.y}:motionAlongRoad(start,end,t,roads));else if(end)Object.assign(e,{x:end.x,y:end.y});changed ||= x!==e.x||y!==e.y;}
       return changed;
     }
     return {push,draw};
@@ -80,6 +104,9 @@ const HexDuoGame=(()=>{
     if(b.phase==='duoWait')return say('wait','Deine Welle ist geschafft','Dein Partner kämpft noch. Danach geht es für euch beide weiter.',true);
     return say('wait','Einen Moment','Der nächste Schritt wird vorbereitet.',true);
   }
+  function canAutoReady(board){
+    return board?.phase==='build'&&!board.celebration&&!board.tunnelOffer&&!board.openingRemaining&&!board.rewardOffer;
+  }
   function mount(api){
     const $=id=>document.getElementById(id);let profileChanged=true,view=null,match=null,board=null,transferKey='',guardianKey='',leaving=false,client,picking=null;
     let guideKey='',guideUntil=0,guideTimer=null,giftKey='',giftPreview=null;
@@ -97,6 +124,8 @@ const HexDuoGame=(()=>{
       const next=match.boards[board].state;
       for(const key of ['selectedSlot','selectedTower','selectedBuilding','selectedCard','rotation','hoveredPlacement'])delete next[key];
       next.wavePlans??=[];next.rescueCard??=null;next.tunnelOffer??=null;next.drawPile??=[];next.discard??=[];next.runTowerStats??={};next.runTowerDetails??={};next.goldEarned??={kills:0,completion:0,income:0};next.waveKills??=0;next.pendingSpawns??=0;
+      // The HUD follows the player's payout on either board.
+      next.duoDiamondEstimate=view.result?0:view.boards[view.player].duoDiamondEstimate||0;
       next.duoReinforcement=view.reinforcements[board];next.duoMode=true;next.remoteMotionBuffered=true;next.showSlotHints=api.getState().showSlotHints;next.showHexGrid=api.getState().showHexGrid;next.consumablesLocked=!own()||view.ready[view.player]||view.connection.paused;next.challengeDay=null;next.biomeSeed=null;
       if(!switched)mergeBoard(api.getState(),next);
       track(next,switched);api.accept(next,switched,profileChanged);profileChanged=false;
@@ -139,7 +168,6 @@ const HexDuoGame=(()=>{
       if(!view)return;
       renderGifts();
       const state=api.getState(),player=view.player,partner=1-player,readonly=!own(),locked=readonly||view.ready[player]||view.connection.paused,help=guide(view,board);
-      $('runDiamonds').textContent=view.result?'(+0)':readonly?'':'(+'+(state.duoDiamondEstimate||0)+')';
       for(const id of ['duoHud','duoMapLabel','duoQuickMap','duoTurn'])$(id).classList.remove('hidden');
       $('duoQuickMap').textContent=readonly?'⇄ Zurück zu meiner Karte':'⇄ Partnerkarte ansehen';
       $('duoMapLabel').textContent=readonly?'Partnerkarte · Nur anschauen':'Deine Festung';
@@ -176,7 +204,7 @@ const HexDuoGame=(()=>{
       for(const button of document.querySelectorAll('#hand button'))button.disabled=locked;
       if(locked)for(const selector of ['#towerMenu button','#towerUpgrades button','#towerUpgrades select','#buildingOptions button','#quickLoadout button','#hand button'])for(const button of document.querySelectorAll(selector))button.disabled=true;
       for(const id of ['sellTowerBtn','sellBuildingBtn','baseWallsBtn','baseWeaponBtn'])if(locked)$(id).disabled=true;
-      $('autoStart').disabled=true;$('restartTutorialBtn').disabled=true;
+      $('restartTutorialBtn').disabled=true;
       const selected=state.selectedTower&&state.map.get(state.selectedTower.q+','+state.selectedTower.r)?.towers[state.selectedTower.index];if(selected?.guestOwner!==undefined)for(const button of document.querySelectorAll('#towerUpgrades button,#towerUpgrades select'))button.disabled=true;
       const gkey=JSON.stringify([view.boards.map(b=>b.landmarks),locked,view.phase]);if(gkey!==guardianKey){guardianKey=gkey;const box=$('duoGuardians');box.replaceChildren();if(view.phase==='prepare')view.boards.forEach((b,i)=>b.landmarks.forEach(l=>{if(l.type!=='boss'||!l.claimed||!Array.isArray(l.consent)||!['pending','ready'].includes(l.status))return;const button=document.createElement('button');button.textContent='Wächter · Karte '+(i+1)+' · '+l.consent.filter(Boolean).length+'/2 bereit';button.disabled=locked;button.addEventListener('click',()=>send('guardian',{board:i,id:l.q+','+l.r,value:!l.consent[player]}));box.appendChild(button);}));$('duoGuardianSection').classList.toggle('hidden',!box.children.length);}
       const transfer=JSON.stringify([view.wave,view.pendingHelp]);if(transfer!==transferKey){transferKey=transfer;const incoming=view.pendingHelp[partner],outgoing=view.pendingHelp[player];if(incoming||outgoing){const sender=incoming?partner:player,slot=view.reinforcements[sender],type=slot&&match.boards[sender].state.map.get(slot.q+','+slot.r)?.towers[slot.index]?.type;$('duoTransfer').textContent=incoming?'➶ Partnerverstärkung ist unterwegs!':'➶ Deine Verstärkung fliegt zum Partner!';if(type){const icon=document.createElement('span');icon.innerHTML=HexArsenal.icon(type,HexData.TOWERS[type].color);$('duoTransfer').appendChild(icon);}$('duoTransfer').classList.remove('hidden');$('duoTransfer').getAnimations?.().forEach(a=>a.cancel());if(!globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches)$('duoTransfer').animate?.([{opacity:0,transform:'translate(-65%,10px)'},{opacity:1,transform:'translate(-50%,0)'},{opacity:0,transform:'translate(-35%,-18px)'}],{duration:1800,fill:'forwards'});}else $('duoTransfer').classList.add('hidden');}
@@ -196,9 +224,18 @@ const HexDuoGame=(()=>{
     document.addEventListener('click',e=>{if(!e.target.closest('#duoHud,#duoSupportShortcut'))$('duoHud').open=false;});
     client=HexDuoClient.create({token:api.token,clientId,onStatus:(text,session)=>{if(session?.invalid){forget();location.replace('/duo-lobby.html#session='+api.token);return;}$('duoNetworkStatus').textContent=text;$('duoTakeover').classList.toggle('hidden',!session?.conflict);},onView:next=>{
       if(!next.lobbyState?.started){client.stop();location.replace('/duo-lobby.html#session='+api.token);return;}
-      const first=!view;view=next;match=HexDuoClient.presentation(next,match);board??=next.player;
-      const receipts=JSON.stringify((next.settlements||[]).map(r=>r.id));if(receipts!==settledKey)try{let profile=HexProfile.load(HexData.TOWERS);for(const receipt of next.settlements||[])profile=HexProfile.settleDuo(profile,receipt,HexData.TOWERS);settledKey=receipts;profileChanged=true;}catch{api.setMessage('Spielstand konnte noch nicht gespeichert werden.');}
+      const previous=view,first=!previous;view=next;match=HexDuoClient.presentation(next,match);board??=next.player;
+      const receipts=JSON.stringify((next.settlements||[]).map(r=>r.id));
+      if(receipts!==settledKey)try{
+        let profile=HexProfile.load(HexData.TOWERS);
+        for(const receipt of next.settlements||[])if(!profile.duoSettledRuns.includes(receipt.id)){
+          profile=HexProfile.settleDuo(profile,receipt,HexData.TOWERS);api.profileSettled?.(profile);
+        }
+        settledKey=receipts;profileChanged=true;
+      }catch{api.setMessage('Spielstand konnte noch nicht gespeichert werden.');}
       accept(first);
+      if(previous&&own()&&$('autoStart').checked&&!next.ready[next.player]&&!next.connection.paused&&
+         !canAutoReady(previous.boards[next.player])&&canAutoReady(next.boards[next.player]))send('ready',{value:true});
     }});
     globalThis.addEventListener('pagehide',()=>client.stop());client.start();return bridge;
   }

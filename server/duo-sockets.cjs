@@ -21,7 +21,7 @@ function attachSockets(server,room,{browser,publicOrigin,isClosing}){
    if(!message||typeof message!=='object'||!['/state','/command','/session'].includes(message.path))return fail(400,'invalid-request');
    const {token,clientId}=socket.data,{path,packet}=message;
    try{
-    if(!room.view(token))return fail(401,'unauthorized');
+    if(!(room.hasSeat?room.hasSeat(token):room.view(token)))return fail(401,'unauthorized');
     if(path==='/session'){
      if(!room.claim||!packet||Array.isArray(packet)||Object.keys(packet).length!==1||!['takeover','leave'].includes(packet.action))return fail(400,'invalid-session-action');
      const access=room.claim(token,clientId,packet.action==='takeover');if(!access.ok)return fail(409,access.reason);

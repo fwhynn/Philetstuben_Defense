@@ -153,7 +153,7 @@ const HexData=(()=>{
     const ultimate=tower.ultimate&&ultimateDefinition(tower);if(ultimate){def.name=ultimate.name;def.damage=(def.damage||0)*(ultimate.damageFactor||1);def.range=(def.range||0)*(ultimate.rangeFactor||1);def.cooldown=(def.cooldown||1)*(ultimate.cooldownFactor||1);if(def.slow)def.slow*=ultimate.slowFactor||1;if(def.splash)def.splash+=ultimate.splashBonus||0;if(def.chain)def.chain+=ultimate.chainBonus||0;if(def.jumpRange)def.jumpRange+=ultimate.jumpBonus||0;if(def.bossMultiplier)def.bossMultiplier*=ultimate.bossFactor||1;if(def.hitSlow)def.hitSlow*=ultimate.hitSlowFactor||1;for(const [field,bonus] of [['slowDuration','slowDurationBonus'],['pierceTargets','pierceBonus'],['soulLimit','soulLimitBonus'],['soulDuration','soulDurationBonus']])if(def[field])def[field]+=ultimate[bonus]||0;}
     // Small balance adjustment applies to both upgrade branches and ultimates.
     if(tower.type==='freeze')def.range*=.95;
-    if(tower.type==='flame'){def.damage*=.8;def.damageMultipliers={...def.damageMultipliers,armor:.4,magic:.5};}
+    if(tower.type==='flame'){def.damage*=.76;def.damageMultipliers={...def.damageMultipliers,armor:.4,magic:.5};}
     if(tower.type==='mine')def.damage*=.85;
     if(tower.type==='chain')def.damage*=1.3;
     if(tower.type==='necromancer'){def.damage*=1.5;def.soulDamage*=1.25;}

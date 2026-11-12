@@ -26,11 +26,24 @@ const HexDuoSession=(()=>{
   function cleanGuests(match){for(const run of match.boards){for(const tile of run.state.map.values())tile.towers=tile.towers.map(t=>t?.guestOwner!==undefined?null:t);run.state.mines=(run.state.mines||[]).filter(m=>m.source?.guestOwner===undefined);HexBuildings.refresh(run.state);}match.pendingHelp=[null,null];}
   function launchHelp(match){for(let sender=0;sender<2;sender++){const help=match.pendingHelp[sender],recipient=1-sender;if(!help||help.at>match.elapsedMs)continue;match.pendingHelp[sender]=null;if(match.finished[recipient])continue;const state=match.boards[recipient].state,slot=match.portals[recipient],tile=slotAt(state,slot);if(!tile||tile.towers[slot.index])continue;tile.towers[slot.index]={...help.tower,guestOwner:sender,statId:undefined,biome:HexBiomes.forTile(state,tile),tileType:tile.type,rangeFactor:1,paid:0,lastShot:state.elapsedMs};HexBuildings.refresh(state);}}
   function sync(match){for(const run of match.boards){run.state.hp=match.hp;run.state.maxHp=match.maxHp;}}
-  function create(seed,loadouts,augments=[]){
+  function boardOptions(state){
+    return {heroId:state.heroId,difficulty:state.difficulty,unlocks:[...state.ultimateUnlocks,...state.buildingUnlocks]};
+  }
+  function makeBoard(seed,runId,loadout,metaAugments,options){
+    const run=HexRunSession.create({...options,seed,runId,loadout,metaAugments});
+    run.state.duoMode=true;return run;
+  }
+  function configureBoard(match,player,options){
+    const old=match.boards[player].state;
+    match.boards[player]=makeBoard(old.seed,old.runId,options.loadout,options.metaAugments,options);
+    match.hp=match.maxHp=match.boards.reduce((sum,r)=>sum+HexHeroes.hero(r.state.heroId).hp,0);
+    sync(match);
+  }
+  function create(seed,loadouts,augments=[],options=[]){
     if(typeof seed!=='string'||!seed||!Array.isArray(loadouts)||loadouts.length!==2)throw new Error('Two loadouts and a seed required');
-    const boards=loadouts.map((loadout,i)=>HexRunSession.create({seed:seed+'|board|'+i,runId:seed+'|duo|'+i,loadout,heroId:'standard',difficulty:'normal',metaAugments:augments[i]}));
-    for(const board of boards)board.state.duoMode=true;
-    const match={version:VERSION,seed,boards,hp:40,maxHp:40,wave:0,phase:'prepare',ready:[false,false],finished:[false,false],elapsedMs:0,receipts:[[],[]],portals:[null,null],reinforcements:[null,null],waveHelp:[null,null],pendingHelp:[null,null],leaked:[false,false],support:[{},{}]};sync(match);return match;
+    const boards=loadouts.map((loadout,i)=>makeBoard(seed+'|board|'+i,seed+'|duo|'+i,loadout,augments[i],options[i]));
+    const hp=boards.reduce((sum,r)=>sum+r.state.maxHp,0);
+    const match={version:VERSION,seed,boards,hp,maxHp:hp,wave:0,phase:'prepare',ready:[false,false],finished:[false,false],elapsedMs:0,receipts:[[],[]],portals:[null,null],reinforcements:[null,null],waveHelp:[null,null],pendingHelp:[null,null],leaked:[false,false],support:[{},{}]};sync(match);return match;
   }
   function finishMatch(match,outcome){
     if(match.result)return;
@@ -59,7 +72,7 @@ const HexDuoSession=(()=>{
       }
       if(action!=='rematch'||typeof payload.value!=='boolean')return false;
       if(match.endlessVotes)match.endlessVotes[player]=false;match.rematch[player]=payload.value;match.receipts[player].push(id);
-      if(match.rematch.every(Boolean)){const receipts=match.receipts;const next=create(match.seed+'|rematch',match.boards.map(r=>r.state.towerLoadout),match.boards.map(r=>r.state.metaAugments));for(const key of Object.keys(match))delete match[key];Object.assign(match,next,{receipts});}
+      if(match.rematch.every(Boolean)){const receipts=match.receipts;const next=create(match.seed+'|rematch',match.boards.map(r=>r.state.towerLoadout),match.boards.map(r=>r.state.metaAugments),match.boards.map(r=>boardOptions(r.state)));for(const key of Object.keys(match))delete match[key];Object.assign(match,next,{receipts});}
       return true;
     }
     const run=match.boards[player],s=run.state,hp=s.hp,max=s.maxHp;let ok=false;
@@ -170,5 +183,5 @@ const HexDuoSession=(()=>{
     if(match.delivery&&(match.delivery.rulesVersion??1)===1){for(const o of match.delivery.offers){if(o.index===null)o.choices[0].amount=DELIVERY.gold;else o.legacyGold=true;}match.delivery.rulesVersion=3;}
     return match;
   }
-  return {create,command,tick,capture,restore,DELIVERY};
+  return {configureBoard,create,command,tick,capture,restore,DELIVERY};
 })();

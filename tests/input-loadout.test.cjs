@@ -22,7 +22,9 @@ test('grid setting persists and diamond HUD forecasts only unpaid run rewards', 
   assert.equal(a.state.showHexGrid, false); assert.equal(storage.get('hexGrid'), 'false');
   a.newRun(); assert.equal(a.state.showHexGrid, false);
   a.state.wave = 10; a.state.earnedMeta.periodicBosses = 1; a.state.earnedMeta.explorationBosses = 1;
-  a.renderAll(); assert.equal(elements.get('runDiamonds').textContent, '(+15)');
+  a.renderAll(); assert.equal(elements.get('runDiamonds').textContent, '(+15)');assert.equal(elements.get('diamondPayout').textContent,'+15');
+  a.state.challengeDay='2026-11-12';a.state.challengeWon=true;a.renderAll();
+  assert.equal(elements.get('diamondPayout').textContent,'+10');assert.equal(elements.get('diamondRates').hidden,true);assert.equal(elements.get('diamondDaily').hidden,false);
   a.state.metaSettled = true; a.renderAll(); assert.equal(elements.get('runDiamonds').textContent, '(+0)');
 });
 

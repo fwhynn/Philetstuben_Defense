@@ -10,61 +10,61 @@ const HexRunFlow=(()=>{
     if(state.challengeKind==='powerGrid')return HexPowerGrid.prepare(state);
     if(state.challengeKind==='expedition')return HexExpedition.prepare(state);
     if(state.challengeKind==='garrison'){state.hand=[];state.phase='build';return 'ready';}
-    const CARD_LIBRARY=HexData.CARD_LIBRARY;let result='ready';
-    const shuffle=arr=>HexRunFlow.shuffle(arr,random);
-    // A building plot or a closing road never satisfies the road-progress guarantee.
-    function hasAnyPlacement(card,rotation){
-      if((card?.roads?.length||0)<2)return false;
-      const checked=new Set();
-      for(const tile of state.map.values())for(let d=0;d<6;d++){
-        const n=HexMap.neighbor(tile.q,tile.r,d),id=key(n.q,n.r);if(checked.has(id))continue;checked.add(id);
-        if(!HexPlacementCommands.canPlace(state,n.q,n.r,card,rotation))continue;
-        const roads=HexMap.rotatedRoads(card,rotation),candidate=new Map(state.map);candidate.set(id,{...n,type:card.id,roads});
-        if(HexMap.hasExteriorFront(candidate,state.landmarks))return true;
+    const {CARD_LIBRARY}=HexData;
+    function ensurePlayableHand(){
+      const targets=new Map(),checked=new Map(),deck=new Set(state.deck);
+      for(const tile of state.map.values())for(const d of tile.roads||[]){
+        const n=HexMap.neighbor(tile.q,tile.r,d),id=key(n.q,n.r);
+        if(!state.map.has(id))targets.set(id,n);
+      }
+      function playable(id){
+        if(checked.has(id))return checked.get(id);
+        const card=CARD_LIBRARY[id];
+        // A building plot or a dead end cannot guarantee road progress.
+        let fits=false;
+        if(deck.has(id)&&card?.roads?.length>=2){
+          for(let rotation=0;rotation<6&&!fits;rotation++)for(const n of targets.values()){
+            if(!HexPlacementCommands.canPlace(state,n.q,n.r,card,rotation))continue;
+            if(state.openingRemaining){
+              // The two-front opening has its own placement rules, without landmarks.
+              const next=new Map(state.map);next.set(key(n.q,n.r),{...n,type:id,roads:HexMap.rotatedRoads(card,rotation)});
+              if(!HexMap.hasExteriorFront(next,state.landmarks))continue;
+            }
+            fits=true;break;
+          }
+        }
+        checked.set(id,fits);return fits;
+      }
+      if(state.hand.some(playable))return true;
+      for(const pile of [state.drawPile,state.discard]){
+        const index=pile.findIndex(playable);if(index<0)continue;
+        const [id]=pile.splice(index,1);
+        if(state.hand.length)state.discard.push(state.hand.pop());
+        state.hand.push(id);return true;
       }
       return false;
     }
-  function refillDraw(){
-    if(state.drawPile.length===0){state.drawPile=shuffle(state.discard);state.discard=[];}
-  }
-  function draw(){
+
     HexDeck.recoverMissing(state);
     state.discard.push(...state.hand.filter(id=>id!=='rescue'));
     state.hand=[];
-    let guard=0;
-    while(state.hand.length<(state.openingRemaining===2?5:state.augments?.includes('fourthCard')?4:3) && guard<30){
-      guard++;
-      refillDraw();
-      if(state.drawPile.length===0) break;
+    const handSize=state.openingRemaining===2?5:state.augments?.includes('fourthCard')?4:3;
+    while(state.hand.length<handSize){
+      if(!state.drawPile.length){state.drawPile=shuffle(state.discard,random);state.discard=[];}
+      if(!state.drawPile.length)break;
       state.hand.push(state.drawPile.pop());
     }
     state.tunnelOffer=null;state.tunnelConfirmed=false;
-    const playable=(state.map.size<=1||HexMap.hasExteriorFront(state.map,state.landmarks))&&ensurePlayableHand();
-    
-    if(!playable){
-      const rescue=HexMap.rescue(state.map,state.landmarks,state.difficulty==='dual'?2:1);
-      if(rescue){state.discard.push(...state.hand);state.rescueCard=rescue;state.hand=['rescue'];result='rescue';}
-      else {state.phase='build';state.tunnelOffer=HexMap.tunnelPlan(state.map,state.landmarks,true);result=state.tunnelOffer?'tunnel':'blocked';}
-    }
-    return result;
-  }
-  function ensurePlayableHand(){
-    const playableIds=new Set(state.deck.filter(id=>{
-      for(let rot=0;rot<6;rot++) if(hasAnyPlacement(CARD_LIBRARY[id],rot)) return true;
-      return false;
-    }));
-    if(!playableIds.size) return false;
-    if(state.hand.some(id=>playableIds.has(id)))return true;
-    // Replace only one card; preserve the other options, pile counts and opening hand size.
-    const pile=[state.drawPile,state.discard].find(p=>p.some(id=>playableIds.has(id)));
-    if(!pile)return false;
-    const [id]=pile.splice(pile.findIndex(id=>playableIds.has(id)),1);
-    if(state.hand.length)state.discard.push(state.hand.pop());
-    state.hand.push(id);
-    return true;
-  }
+    if((state.map.size<=1||HexMap.hasExteriorFront(state.map,state.landmarks))&&ensurePlayableHand())return 'ready';
 
-    return draw();
+    state.discard.push(...state.hand);
+    state.rescueCard=HexMap.rescue(state.map,state.landmarks,state.difficulty==='dual'?2:1);
+    state.hand=state.rescueCard?['rescue']:[];
+    if(state.rescueCard)return 'rescue';
+
+    state.phase='build';
+    state.tunnelOffer=HexMap.tunnelPlan(state.map,state.landmarks,true);
+    return state.tunnelOffer?'tunnel':'blocked';
   }
   function start(state,random){
     if(state.challengeKind==='greed'&&state.greedContract?.wave!==state.wave+1)return null;

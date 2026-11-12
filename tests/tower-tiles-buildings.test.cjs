@@ -2,16 +2,20 @@ const { test } = require('node:test'), assert = require('node:assert/strict');
 const fs = require('node:fs'), path = require('node:path'), vm = require('node:vm');
 const { load } = require('./helpers/game.cjs');
 function rules() { const c = {}; for (const f of ['data.js', 'deck.js', 'buildings.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../classes', f), 'utf8'), c); return vm.runInNewContext('({data:HexData,deck:HexDeck,buildings:HexBuildings})', c); }
-test('remote market allows an initial placement and one correction, preserved through checkpoint reload',()=>{
+test('remote market can move only when another market matches its coverage, including after reload',()=>{
  const c=require('../headless-core.cjs')(),run=c.runtime.create({seed:'market-limit',runId:'market-limit',loadout:['archer','catapult','chain','freeze','mine']}),s=run.state,slot={q:0,r:0,index:0};
  const building={type:'market',special:true,level:3};s.map.get('0,0').buildings=[building];
  for(const q of [4,5,6])s.map.set(q+',0',{q,r:0,type:'straight',roads:[0,3],slots:0,towers:[]});
- assert.equal(c.buildings.setTarget(s,slot,'missing'),false);assert.equal(c.buildings.targetRemaining(building),2);
- assert.ok(c.buildings.setTarget(s,slot,'4,0'));assert.equal(c.buildings.setTarget(s,slot,'4,0'),false);assert.equal(c.buildings.targetRemaining(building),1);
+ assert.equal(c.buildings.setTarget(s,slot,'missing'),false);assert.equal(c.buildings.targetRemaining(building,s),1);
+ assert.ok(c.buildings.setTarget(s,slot,'4,0'));assert.equal(c.buildings.setTarget(s,slot,'4,0'),false);assert.equal(c.buildings.targetRemaining(building,s),0);
  const restored=c.snapshot.restore(JSON.parse(JSON.stringify(c.snapshot.capture(s,run.random)))).state;
- assert.ok(c.buildings.setTarget(restored,slot,'5,0'));assert.equal(c.buildings.setTarget(restored,slot,'6,0'),false);assert.equal(c.buildings.cost(restored,{q:5,r:0},100),65);
- assert.equal(c.buildings.cost(restored,{q:4,r:0},100),100);
- delete building.targetUses;assert.equal(c.buildings.targetRemaining(building),1,'legacy targets count as the first placement');
+ assert.equal(c.buildings.setTarget(restored,slot,'5,0'),false);
+ const other={type:'market',level:2};restored.map.get('4,0').buildings=[other];
+ assert.equal(c.buildings.setTarget(restored,slot,'6,0'),false);
+ other.level=3;assert.ok(c.buildings.setTarget(restored,slot,'6,0'));
+ assert.equal(c.buildings.setTarget(restored,slot,'5,0'),false);
+ assert.equal(c.buildings.cost(restored,{q:6,r:0},100),65);
+ assert.equal(c.buildings.targetRemaining(building,s),0,'legacy target without a counter is locked');
 });
 test('every tower has exactly one exclusive tile; only validated run loadout tiles enter rewards', () => {
   const { data, deck } = rules(); for (const type of Object.keys(data.TOWERS)) {
@@ -25,7 +29,7 @@ test('every tower has exactly one exclusive tile; only validated run loadout til
 test('exclusive bonuses apply to their tower, upgraded branches and necromancer spirits only', () => {
   const { data } = rules(); for (const c of Object.values(data.CARD_LIBRARY).filter(c => c.towerBonus)) {
     const type = c.requiredTower, base = data.towerDefinition({ type }), buff = data.towerDefinition({ type, tileType: c.id });
-    if (c.towerBonus.range) assert.equal(buff.range, Math.round((type==='freeze'?data.TOWERS.freeze.range*.95:base.range) * 1.25)); else assert.equal(buff.damage, Number(((type==='flame'?data.TOWERS[type].damage*.8:base.damage) * 1.25).toFixed(2)));
+    if (c.towerBonus.range) assert.equal(buff.range, Math.round((type==='freeze'?data.TOWERS.freeze.range*.95:base.range) * 1.25)); else assert.equal(buff.damage, Number(((type==='flame'?data.TOWERS[type].damage*.76:base.damage) * 1.25).toFixed(2)));
     const other = data.towerDefinition({ type: 'archer', tileType: c.id }); assert.equal(other.damage, data.TOWERS.archer.damage); assert.equal(other.range, data.TOWERS.archer.range);
     for (const [branch] of data.availableUpgrades({ type })) { const plain = data.towerDefinition({ type, branch }), boost = data.towerDefinition({ type, branch, tileType: c.id }); if (c.towerBonus.damage) assert.ok(Math.abs(boost.damage-plain.damage*1.25)<.02); }
   }
@@ -55,6 +59,7 @@ test('meta building upgrades affect exactly one remote hex and retargeting remov
     s.buildingUnlocks = ['building:' + type]; assert.ok(buildings.upgrade(s, slot)); assert.equal(buildings.upgrade(s, slot), false); assert.equal(buildings.setTarget(s, slot, 'missing'), false);
     buildings.setTarget(s, slot, '4,0'); assert.ok(buildings.highlight({ ...s, selectedBuilding: slot }).tiles.includes(a));
     assert.equal(type === 'forge' ? a.towers[0].supportDamage : buildings.cost(s, a, 100), type === 'forge' ? 1.3 : 65);
+    if(type==='market'){assert.equal(buildings.setTarget(s,slot,'5,0'),false);buildings.sell(s,slot);continue;}
     buildings.setTarget(s, slot, '5,0'); assert.equal(type === 'forge' ? a.towers[0].supportDamage : buildings.cost(s, a, 100), type === 'forge' ? 1 : 100);
     buildings.sell(s, slot); assert.equal(type === 'forge' ? b.towers[0].supportDamage : buildings.cost(s, b, 100), type === 'forge' ? 1 : 100);
   }

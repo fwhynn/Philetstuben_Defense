@@ -27,7 +27,7 @@ test('leaks from either board drain one shared pool and defeat stops both boards
   assert.equal(send(0,'ready',{value:true}),false);
 });
 test('team healing and max HP blessings apply once and rejected commands do not mutate the partner',()=>{
-  const {c,m,send}=setup();const s=m.boards[0].state;s.phase='bossReward';s.bossRewards=['boss'];const offer=c.rewards.offer(s,'boss',m.boards[0].random),index=offer.choices.findIndex(c=>c.blessing==='bastion');
+  const {c,m,send}=setup();const s=m.boards[0].state;s.phase='bossReward';s.bossRewards=['boss'];s.rewardOffer={kind:'boss',context:'boss',wave:s.wave,phase:s.phase,id:'saved-boss',choices:[{kind:'blessing',blessing:'bastion'}]};const offer=c.rewards.offer(s,'boss',m.boards[0].random),index=offer.choices.findIndex(c=>c.blessing==='bastion');
   assert.ok(send(0,'reward',{offerId:offer.id,index}));assert.equal(m.hp,45);assert.equal(m.maxHp,45);assert.equal(m.boards[1].state.hp,45);
   assert.equal(send(0,'reward',{offerId:offer.id,index}),false);assert.equal(m.hp,45);
   const before=json(c.duo.capture(m));assert.equal(c.duo.command(m,2,{id:'x',wave:0,action:'ready',payload:{value:true}}),false);assert.equal(c.duo.command(m,0,{id:'x',wave:99,action:'ready',payload:{value:true}}),false);assert.deepEqual(json(c.duo.capture(m)),before);

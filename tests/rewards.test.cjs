@@ -23,7 +23,8 @@ test('workshop shrine upgrades a built loadout tower without increasing its sale
 });
 test('boss blessings replace the card choice, cannot be repeated, and reset next run',()=>{
   for(const [title,kind] of [['Bastionssegen','hp'],['Handelspakt','income']]){
-    const {a,elements}=load();a.state.wave=1;a.state.bossRewards=['wave:15'];a.showBossReward();
+    const {a,elements}=load();a.state.wave=1;a.state.bossRewards=['wave:15'];
+    a.state.rewardOffer={kind:'boss',context:'wave:15',wave:1,phase:'bossReward',id:'saved',choices:[{kind:'blessing',blessing:kind==='hp'?'bastion':'income'}]};a.showBossReward();
     const button=elements.get('rewardChoices').children.find(b=>b.innerHTML.includes(title)),deck=a.state.deck.length;
     button.listeners.click();assert.equal(a.state.deck.length,deck);assert.equal(a.state.bossRewards.length,0);
     assert.equal(kind==='hp'?a.state.maxHp:a.state.income,kind==='hp'?25:2);
@@ -49,4 +50,24 @@ test('shrine controls match direct blessings, card selection and card removal',(
     if(!direct&&effect!=='remove')assert.equal(elements.get('skipRemovalBtn').textContent,'Belohnung überspringen');
     if(direct){elements.get('rewardChoices').children[0].listeners.click();a.showRewards();assert.equal(elements.get('rewardInspectActions').classList.contains('hidden'),false);}
   }
+});
+
+test('guardian loot draws three distinct blessings, with all six reachable and applied once',()=>{
+  const core=require('../headless-core.cjs')(),seen=new Set();
+  for(let i=0;i<40;i++){
+    const run=core.runtime.create({seed:'guardian-'+i,runId:'reward-test',loadout:['archer','catapult','freeze','mine','chain']});
+    const state=run.state;state.phase='bossReward';state.bossRewards=['2,3'];state.hp=16;state.maxHp=20;
+    const offer=core.rewards.offer(state,'boss',run.random), options=offer.choices.filter(c=>c.kind==='blessing');
+    assert.equal(options.length,3);assert.equal(new Set(options.map(c=>c.blessing)).size,3);
+    assert.equal(core.rewards.offer(state,'boss',run.random),offer);
+    for(const option of options){
+      const stateCopy=JSON.parse(JSON.stringify(state)), gold=stateCopy.gold, income=stateCopy.income;
+      assert.ok(core.rewards.choose(stateCopy,offer.id,offer.choices.indexOf(option)));
+      assert.equal(core.rewards.choose(stateCopy,offer.id,offer.choices.indexOf(option)),false);
+      const result=[stateCopy.hp,stateCopy.maxHp,stateCopy.gold-gold,stateCopy.income-income,stateCopy.freeTowerBuilds||0];
+      const expected={bastion:[21,25,0,0,0],income:[16,20,0,2,0],treasury:[16,20,60,0,0],builder:[16,20,0,0,1],recovery:[20,20,18,0,0],convoy:[16,20,25,1,0]};
+      assert.deepEqual(result,expected[option.blessing]);seen.add(option.blessing);
+    }
+  }
+  assert.equal(seen.size,6);
 });

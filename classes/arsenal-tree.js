@@ -120,7 +120,7 @@ const HexArsenalTree=(()=>{
     const toView=event=>{const rect=svg.getBoundingClientRect(),s=Math.max(box.w/rect.width,box.h/rect.height);return {x:cx+(event.clientX-rect.left-rect.width/2)*s,y:cy+(event.clientY-rect.top-rect.height/2)*s,s};};
     apply();
     host.querySelector('[data-augments]')?.addEventListener('click',()=>{if(!augments.open)augments.select(true);});
-    for(const b of host.querySelectorAll('[data-group]'))b.addEventListener('click',()=>{if(augments?.open){state.group=b.dataset.group;state.selected='hub';augments.select(false);return;}if(state.group===b.dataset.group)return;state.group=b.dataset.group;state.selected='hub';view.x=0;view.y=0;view.scale=1;render(host,all,profile,onUnlock);host.querySelector('[data-group][aria-selected=true]')?.focus();});
+    for(const b of host.querySelectorAll('[data-group]'))b.addEventListener('click',()=>{if(augments?.open){state.group=b.dataset.group;state.selected='hub';augments.select(false);return;}if(state.group===b.dataset.group)return;state.group=b.dataset.group;state.selected='hub';view.x=0;view.y=0;view.scale=1;render(host,all,profile,onUnlock,augments);host.querySelector('[data-group][aria-selected=true]')?.focus();});
     const choose=id=>{state.selected=id;for(const g of host.querySelectorAll('.skillNode'))g.classList.toggle('selected',g.dataset.node===id);detail.innerHTML=details(byId.get(id),profile,list);bindButtons();};
     function bindButtons(){for(const b of detail.querySelectorAll('[data-unlock-kind]'))b.addEventListener('click',()=>onUnlock(b.dataset.unlockKind,b.dataset.unlockId));}
     bindButtons();

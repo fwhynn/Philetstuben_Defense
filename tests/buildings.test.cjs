@@ -35,3 +35,17 @@ test('a forge refreshes existing tower bonuses without adding passive income', (
   const tower = { type: 'archer' }, state = { hp: 20, phase: 'build', gold: 70, income: 2, map: new Map([['0,0', { q: 0, r: 0, buildingSlots: 1, buildings: [null], towers: [] }], ['1,0', { q: 1, r: 0, towers: [tower] }]]) };
   assert.ok(context.rules.buy(state, { q: 0, r: 0, index: 0 }, 'forge')); assert.equal(tower.supportDamage, 1.15); assert.equal(state.income, 2); assert.equal(state.gold, 30);
 });
+
+test('Far Sight changes frost aura and build preview only under forge coverage',()=>{
+  const c=require('../headless-core.cjs')(),tower={type:'freeze'},slot={q:0,r:0,index:0};
+  const tile={...slot,towers:[tower],buildings:[],siteEffect:'damage'};
+  const state={map:new Map([['0,0',tile]]),metaAugments:{version:1,cards:[{id:'forge',tier:4}]}};
+  const range=()=>c.data.towerDefinition(tower).range;
+  c.buildings.refresh(state);const base=range();
+  tile.buildings.push({type:'forge'});c.buildings.refresh(state);
+  assert.equal(tower.supportRange,1.12);
+  assert.equal(c.buildings.rangeBonus(state,slot),tower.supportRange);
+  assert.ok(range()>base);
+  assert.equal(c.augmentCards.definition(state,tower,c.data.towerDefinition(tower)).range,range());
+  tile.buildings=[];c.buildings.refresh(state);assert.equal(range(),base);
+});

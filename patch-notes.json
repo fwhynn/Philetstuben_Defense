@@ -1,5 +1,95 @@
 [
   {
+    "version": "next",
+    "title": "Zwei Festungen, zwei Arsenale",
+    "summary": "Nimm dein Arsenal mit ins Duo, schau vor einer Belohnung auf deine Karte und entdecke vier neue Wächtersegen.",
+    "overview": [
+      {
+        "kind": "new",
+        "title": "NEU",
+        "items": [
+          "Eigene Startfestung im Duo",
+          "Vier neue Wächtersegen"
+        ]
+      },
+      {
+        "kind": "fixed",
+        "title": "VERBESSERT",
+        "items": [
+          "Rettung bei blockierten Straßen",
+          "Weniger Rechenaufwand bei vielen Minen"
+        ]
+      }
+    ],
+    "sections": [
+      {
+        "title": "Duo mit deinem Arsenal",
+        "entries": [
+          {
+            "title": "Vor und während der Partie",
+            "bullets": [
+              "Jeder wählt seine freigeschaltete Startfestung, seine fünf Türme und optional den Zwei-Fronten-Start. Turmvorlagen lassen sich aus dem Solo übernehmen.",
+              "Die Startfestungen legen ihre Lebenspunkte zusammen. Gold, Einkommen, ausgerüstete Stufe-4-Pfade und Gebäudespezialisierungen gelten für den jeweiligen Spieler.",
+              "Die Lobby zeigt eure aktiven Augments schon vor dem Bereitmelden. Eure Festungs- und Arsenalauswahl gilt auch für die Revanche.",
+              "Bei Beute, Schreinen und Partnergeschenken kannst du dein Deck und deine Karte anschauen und zur offenen Auswahl zurückkehren.",
+              "Automatisches Bereitmelden lässt sich pro Spieler einschalten. Dein Profil zählt Duo-Siege und deine beste Duo-Welle.",
+              "Im Duo brauchen Baubefehle und die Wellenplanung auf großen Karten weniger Rechenzeit."
+            ],
+            "stats": []
+          }
+        ]
+      },
+      {
+        "title": "Hexe, Türme und Wächter",
+        "entries": [
+          {
+            "title": "Neue Beute und korrigierte Spielregeln",
+            "bullets": [
+              "Wächterschatz, Baumeisterbrief, Heilvorrat und Versorgungszug erweitern die Wächterbeute. Bis zu drei verschiedene Segen stehen zufällig zur Wahl.",
+              "Bei einer blockierten Straße macht die unspielbare Hand dem Rettungsangebot Platz. Das funktioniert auch beim Fortsetzen älterer Spielstände.",
+              "Ein Markt darf sein Zusatz-Hex neu wählen, sobald ein anderer Markt dort mindestens denselben Rabatt gewährt.",
+              "Weitsicht erweitert die Reichweite von Türmen unter Schmiedeeinfluss auch bei Frosttürmen. Voll ausgebaute Türme zeigen ihre Schadenswerte direkt.",
+              "Der Flammenwerferturm verursacht auf allen Ausbaustufen 5 % weniger Schaden. Minen und ihr Nachbeben brauchen bei vielen gleichzeitigen Explosionen weniger Rechenzeit."
+            ],
+            "stats": []
+          }
+        ]
+      },
+      {
+        "title": "Menüs und Kartenansicht",
+        "entries": [
+          {
+            "title": "Mehr Platz für die Auswahl",
+            "bullets": [
+              "Handkarten sind gleich hoch. Deckansicht und Kartenübersicht im Run sind größer. Segenkarten reagieren beim Überfahren wie Hexkarten.",
+              "Wellenplanung, Goldplanung, Diamantenübersicht und Spielregeln zeigen die wichtigsten Angaben kompakter. Beim Blick auf die Karte schweben die Auswahlknöpfe einzeln.",
+              "Baum und Werkstatt haben dieselbe Fenstergröße. Der Augment-Reiter bleibt beim Wechsel zu Gebäuden erreichbar. Hauptmenü-Hexe bieten mehr Platz für lange Beschriftungen.",
+              "Das Auge zum Einblenden des Passworts sitzt mittig im Eingabefeld."
+            ],
+            "stats": []
+          }
+        ]
+      }
+    ],
+    "changes": [
+      "Jeder wählt seine freigeschaltete Startfestung, seine fünf Türme und optional den Zwei-Fronten-Start. Turmvorlagen lassen sich aus dem Solo übernehmen.",
+      "Die Startfestungen legen ihre Lebenspunkte zusammen. Gold, Einkommen, ausgerüstete Stufe-4-Pfade und Gebäudespezialisierungen gelten für den jeweiligen Spieler.",
+      "Die Lobby zeigt eure aktiven Augments schon vor dem Bereitmelden. Eure Festungs- und Arsenalauswahl gilt auch für die Revanche.",
+      "Bei Beute, Schreinen und Partnergeschenken kannst du dein Deck und deine Karte anschauen und zur offenen Auswahl zurückkehren.",
+      "Automatisches Bereitmelden lässt sich pro Spieler einschalten. Dein Profil zählt Duo-Siege und deine beste Duo-Welle.",
+      "Im Duo brauchen Baubefehle und die Wellenplanung auf großen Karten weniger Rechenzeit.",
+      "Wächterschatz, Baumeisterbrief, Heilvorrat und Versorgungszug erweitern die Wächterbeute. Bis zu drei verschiedene Segen stehen zufällig zur Wahl.",
+      "Bei einer blockierten Straße macht die unspielbare Hand dem Rettungsangebot Platz. Das funktioniert auch beim Fortsetzen älterer Spielstände.",
+      "Ein Markt darf sein Zusatz-Hex neu wählen, sobald ein anderer Markt dort mindestens denselben Rabatt gewährt.",
+      "Weitsicht erweitert die Reichweite von Türmen unter Schmiedeeinfluss auch bei Frosttürmen. Voll ausgebaute Türme zeigen ihre Schadenswerte direkt.",
+      "Der Flammenwerferturm verursacht auf allen Ausbaustufen 5 % weniger Schaden. Minen und ihr Nachbeben brauchen bei vielen gleichzeitigen Explosionen weniger Rechenzeit.",
+      "Handkarten sind gleich hoch. Deckansicht und Kartenübersicht im Run sind größer. Segenkarten reagieren beim Überfahren wie Hexkarten.",
+      "Wellenplanung, Goldplanung, Diamantenübersicht und Spielregeln zeigen die wichtigsten Angaben kompakter. Beim Blick auf die Karte schweben die Auswahlknöpfe einzeln.",
+      "Baum und Werkstatt haben dieselbe Fenstergröße. Der Augment-Reiter bleibt beim Wechsel zu Gebäuden erreichbar. Hauptmenü-Hexe bieten mehr Platz für lange Beschriftungen.",
+      "Das Auge zum Einblenden des Passworts sitzt mittig im Eingabefeld."
+    ]
+  },
+  {
     "version": "1.2.8",
     "title": "Feinschliff der Oberfläche",
     "summary": "Deutlichere Seltenheiten, Bauplätze direkt auf den Hexkarten und aufgeräumte Fenster für Basis, Turmbau und Einstellungen.",

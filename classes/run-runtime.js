@@ -141,7 +141,7 @@ const HexRunRuntime=(()=>{
     const id=key(plan.q,plan.r),source=state.map.get(plan.source),number=state.nextTunnelId=(state.nextTunnelId||0)+1;
     source.tunnels??=[];source.tunnels.push(id);source.tunnelLabel='Tunnel '+number;
     state.map.set(id,{q:plan.q,r:plan.r,type:'rescueTunnel',roads:state.difficulty==='dual'?[plan.dir,(plan.dir+1)%6]:[plan.dir],rotation:plan.dir,slots:0,towers:[],buildingSlots:0,buildings:[],income:0,tunnels:[plan.source],tunnelLabel:'Tunnel '+number});
-    state.vision=HexExploration.expand(state.landmarks,state.map);state.tunnelOffer=null;state.tunnelConfirmed=false;return true;
+    state.vision=HexExploration.expand(state.landmarks,state.map);state.tunnelOffer=null;state.tunnelConfirmed=false;state.drawResult='ready';return true;
   }
   function advanceIntroduction(state){
     const intro=state.introduction;if(!intro||state.challengeDay||state.duoMode)return;

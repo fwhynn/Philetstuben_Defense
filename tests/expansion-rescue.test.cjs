@@ -20,7 +20,7 @@ test('free rescue tunnel preserves existing tiles and restores an expandable rou
   const n=c.map.neighbor(source.tile.q,source.tile.r,source.dir);assert.equal(c.map.canPlace(restored.state.map,n.q,n.r,c.data.CARD_LIBRARY.straight,source.dir%3,restored.state.landmarks),true);
 });
 test('existing blocked runs offer a confirmed tunnel and field clicks close the tower drawer',()=>{
-  const {a,elements}=load();trap(a.state);a.state.phase='place';a.drawHand();assert.equal(a.state.phase,'build');assert.ok(a.state.tunnelOffer);
+  const {a,elements}=load();trap(a.state);a.state.phase='place';a.drawHand();assert.equal(a.state.phase,'build');assert.ok(a.state.tunnelOffer);assert.equal(a.state.hand.length,0);
   const size=a.state.map.size,button=elements.get('tunnelRescueBtn');button.listeners.click();assert.equal(a.state.map.size,size);assert.equal(a.state.tunnelConfirmed,true);
   button.listeners.click();assert.equal(a.state.map.size,size+1);assert.equal(a.state.tunnelOffer,null);
   a.rendererCommands.fieldClick();elements.get('towerDrawer').classList.remove('hidden');a.rendererCommands.clearSelection();assert.equal(elements.get('towerDrawer').classList.contains('hidden'),true);
@@ -35,6 +35,7 @@ test('rescue action survives notification expiry, checkpoint restore and confirm
  const checkpoint=a.captureRunCheckpoint();a.restoreRunCheckpoint(checkpoint);assert.equal(panel.classList.contains('hidden'),false);
  button.listeners.click();assert.equal(panel.classList.contains('hidden'),false);assert.equal(button.textContent,'Tunnel kostenlos bauen');
  button.listeners.click();assert.equal(panel.classList.contains('hidden'),true);assert.equal(a.state.tunnelOffer,null);
+ a.restoreRunCheckpoint(a.captureRunCheckpoint());assert.equal(a.state.tunnelOffer,null);
 });
 
 test('legacy blocked checkpoint recovers its missing rescue offer without changing the deck',()=>{
@@ -43,9 +44,21 @@ test('legacy blocked checkpoint recovers its missing rescue offer without changi
  assert.ok(a.state.tunnelOffer);assert.equal(elements.get('tunnelRescuePanel').classList.contains('hidden'),false);assert.equal(JSON.stringify(a.state.deck),deck);
 });
 
-test('rescue button belongs to the persistent wave controls rather than the fading message',()=>{
- const html=require('node:fs').readFileSync('index.html','utf8'),dock=html.indexOf('<div class="dockBR">'),button=html.indexOf('id="tunnelRescueBtn"');
- assert.ok(button>dock&&button<html.indexOf('id="startWaveBtn"'));assert.equal(html.match(/id="tunnelRescueBtn"/g).length,1);
+test('a wave 28 legacy build hand is discarded once and a completed tunnel is not offered twice',()=>{
+ const {a}=load(),s=a.state;trap(s);s.wave=27;s.phase='build';s.openingRemaining=0;
+ s.deck=['tee','fanJunction','mirrorJunction'];s.hand=[...s.deck];s.drawPile=[];s.discard=[];s.tunnelOffer=null;delete s.drawResult;
+ a.restoreRunCheckpoint(a.captureRunCheckpoint());
+ assert.deepEqual(Array.from(a.state.hand),[]);assert.deepEqual(Array.from(a.state.discard),Array.from(s.deck));assert.ok(a.state.tunnelOffer);
+ const c=loadCore();assert.equal(c.runtime.rescueTunnel(a.state),true);
+ // Legacy saves also kept their old hand and draw marker after building the tunnel.
+ a.state.hand=[...s.deck];a.state.discard=[];a.state.drawResult='tunnel';
+ a.restoreRunCheckpoint(a.captureRunCheckpoint());assert.equal(a.state.tunnelOffer,null);assert.equal(a.state.hand.length,0);
+ a.restoreRunCheckpoint(a.captureRunCheckpoint());assert.deepEqual(Array.from(a.state.discard),Array.from(s.deck));
+});
+
+test('rescue action replaces the unplayable hand in the persistent card dock',()=>{
+ const html=require('node:fs').readFileSync('index.html','utf8'),dock=html.indexOf('<section class="handDock"'),button=html.indexOf('id="tunnelRescueBtn"');
+ assert.ok(button>dock&&button<html.indexOf('<div class="dockBR">'));assert.equal(html.match(/id="tunnelRescueBtn"/g).length,1);
 });
 test('headless placement applies a hand card once and rejects malformed or duplicate commands',()=>{
   const c=loadCore(),{state:s}=c.runtime.create({seed:'place',runId:'p',loadout:['archer','catapult','chain','freeze','mine']});s.hand=['straight'];

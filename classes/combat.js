@@ -109,7 +109,7 @@ const HexCombat=(()=>{
   function echoCandidates(enemies,due){
     const valid=e=>Number.isSafeInteger(Math.floor(e.x/128))&&Number.isSafeInteger(Math.floor(e.y/128));
     if(due.length<4||enemies.length<32||!enemies.every(valid))return ()=>enemies;
-    const cells=new Map();enemies.forEach((enemy,order)=>{
+    const cells=new Map(),regions=new Map();enemies.forEach((enemy,order)=>{
       const key=Math.floor(enemy.x/128)+','+Math.floor(enemy.y/128);
       if(!cells.has(key))cells.set(key,[]);cells.get(key).push({enemy,order});
     });
@@ -117,29 +117,37 @@ const HexCombat=(()=>{
       if(!valid(echo)||!Number.isFinite(echo.r)||echo.r<0||echo.r>512)return enemies;
       const x0=Math.floor((echo.x-echo.r)/128),x1=Math.floor((echo.x+echo.r)/128),y0=Math.floor((echo.y-echo.r)/128),y1=Math.floor((echo.y+echo.r)/128);
       if(![x0,x1,y0,y1].every(Number.isSafeInteger))return enemies;
+      const region=x0+','+x1+','+y0+','+y1;
+      if(regions.has(region))return regions.get(region);
       const near=[];for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++)for(const entry of cells.get(x+','+y)||[])near.push(entry);
-      near.sort((a,b)=>a.order-b.order);return near.map(entry=>entry.enemy);
+      near.sort((a,b)=>a.order-b.order);
+      const ordered=near.map(entry=>entry.enemy);regions.set(region,ordered);return ordered;
     };
   }
   function augmentTicks(state,refs,dt,time,emit){
-    const pulse=cardLevel(state,'freeze')===4&&Math.floor(time/5000)>(state.augmentPulseCycle||0);
-    if(cardLevel(state,'freeze')===4)state.augmentPulseCycle=Math.floor(time/5000);
-    const due=(state.augmentEchoes||[]).filter(e=>e.at<=time),candidates=echoCandidates(state.enemies,due);
-    for(const echo of due){
-      for(const enemy of candidates(echo))if(enemy.alive&&Math.hypot(enemy.x-echo.x,enemy.y-echo.y)<=echo.r)damageEnemy(enemy,echo.damage,{damageType:'physical',damageMultipliers:echo.multipliers,augmentSecondary:true},state,emit,echo.source);
-      state.projectiles.push({kind:'blast',x:echo.x,y:echo.y,r:echo.r,ttl:.3,max:.3,color:'#e8bc68'});
+    const freezeDuration=cardValue(state,'freeze'),legendary=cardLevel(state,'freeze')===4;
+    const pulse=legendary&&Math.floor(time/5000)>(state.augmentPulseCycle||0);
+    if(legendary)state.augmentPulseCycle=Math.floor(time/5000);
+    const echoes=state.augmentEchoes;
+    if(echoes?.some(e=>e.at<=time)){
+      const due=[],pending=[];
+      for(const echo of echoes)(echo.at<=time?due:pending).push(echo);
+      state.augmentEchoes=pending;
+      const candidates=echoCandidates(state.enemies,due);
+      for(const echo of due){
+        for(const enemy of candidates(echo))if(enemy.alive&&withinMineRadius(enemy,echo,echo.r))damageEnemy(enemy,echo.damage,{damageType:'physical',damageMultipliers:echo.multipliers,augmentSecondary:true},state,emit,echo.source);
+        state.projectiles.push({kind:'blast',x:echo.x,y:echo.y,r:echo.r,ttl:.3,max:.3,color:'#e8bc68'});
+      }
     }
-    if(state.augmentEchoes)state.augmentEchoes=state.augmentEchoes.filter(e=>e.at>time);
     for(const enemy of state.enemies){
       const burn=enemy.augmentBurn;
       if(burn){while(enemy.alive&&burn.next<=time&&burn.next<=burn.until){damageEnemy(enemy,burn.damage,{damageType:'fire',damageMultipliers:burn.multipliers,bossMultiplier:burn.bossMultiplier,augmentSecondary:true},state,emit,burn.source);burn.next+=1000;}if(time>=burn.until)delete enemy.augmentBurn;}
-      if(!enemy.alive||!cardValue(state,'freeze'))continue;
+      if(!enemy.alive||!freezeDuration)continue;
       const inRange=refs.some(r=>r.tw.type==='freeze'&&Math.hypot(enemy.x-r.pos.x,enemy.y-r.pos.y)<=r.definition.range);
       if(!inRange){enemy.augmentCold=0;continue;}
-      const legendary=cardLevel(state,'freeze')===4;
       enemy.augmentCold=(enemy.augmentCold||0)+dt;
       if(time>=(enemy.augmentFreezeReady||0)&&(legendary?pulse:enemy.augmentCold>=3)){
-        enemy.augmentFrozen=time+cardValue(state,'freeze')*1000*(enemy.type==='boss'?.5:1);
+        enemy.augmentFrozen=time+freezeDuration*1000*(enemy.type==='boss'?.5:1);
         enemy.augmentFreezeReady=time+5000;enemy.augmentCold=0;enemy.augmentPulse=Math.floor(time/5000);
         state.projectiles.push({kind:'blast',x:enemy.x,y:enemy.y,r:18,ttl:.25,max:.25,color:'#bceeff'});
       }
@@ -202,6 +210,10 @@ const HexCombat=(()=>{
     const p=randomMinePoint(state,ref,def.range,layout);if(!p)return;ref.tw.lastShot=time;state.mines.push({id:state.nextMineId=(state.nextMineId||0)+1,owner,source:{type:ref.tw.type,statId:ref.tw.statId,guestOwner:ref.tw.guestOwner},x:p.x,y:p.y,damage:def.damage,splash:def.splash,color:def.color,damageMultipliers:def.damageMultipliers});
   }
   const mineTriggerCache=new WeakMap();
+  function withinMineRadius(enemy,mine,radius){
+    const dx=enemy.x-mine.x,dy=enemy.y-mine.y;
+    return dx>=-radius&&dx<=radius&&dy>=-radius&&dy<=radius&&Math.hypot(dx,dy)<=radius;
+  }
   function triggerMines(state,emit){
     // Only enemies trigger mines. Explosions never trigger neighbouring mines.
     state.mines??=[];if(!state.mines.length||!state.enemies.length)return;
@@ -220,7 +232,7 @@ const HexCombat=(()=>{
         for(const e of state.enemies){
           if(!e.alive||durability(e)<=0||!Number.isSafeInteger(Math.floor(e.x/28))||!Number.isSafeInteger(Math.floor(e.y/28)))continue;
           for(let x=Math.floor((e.x-14)/28);x<=Math.floor((e.x+14)/28);x++)for(let y=Math.floor((e.y-14)/28);y<=Math.floor((e.y+14)/28);y++)
-            for(const record of index.grid.get(x+','+y)||[]){if(hits.has(record))continue;const m=record.mine;if(Math.hypot(e.x-m.x,e.y-m.y)<=14)hits.add(record);}
+            for(const record of index.grid.get(x+','+y)||[]){if(hits.has(record))continue;const m=record.mine;if(withinMineRadius(e,m,14))hits.add(record);}
         }
         if(!hits.size)return;
         // Broad phase for bursts: exact radius checks and original enemy order
@@ -240,7 +252,7 @@ const HexCombat=(()=>{
               candidates=nearby.sort((a,b)=>a.order-b.order).map(r=>r.enemy);blastCandidates.set(key,candidates);
             }
           }
-          for(const e of candidates)if(e.alive&&Math.hypot(e.x-mine.x,e.y-mine.y)<=mine.splash)damageEnemy(e,mine.damage,def,state,emit,mine.source||{type:'mine'});
+          for(const e of candidates)if(e.alive&&withinMineRadius(e,mine,mine.splash))damageEnemy(e,mine.damage,def,state,emit,mine.source||{type:'mine'});
           state.projectiles.push({kind:'blast',x:mine.x,y:mine.y,r:mine.splash,ttl:.22,color:mine.color});queueEcho(state,mine);emit('mine');removed.add(mine);dirtyCells.add(record.key);
         }
         for(const key of dirtyCells){const bucket=index.grid.get(key).filter(r=>!hits.has(r));if(bucket.length)index.grid.set(key,bucket);else index.grid.delete(key);}
@@ -266,7 +278,7 @@ const HexCombat=(()=>{
       if(largest>state.enemies.length/2)grid=null;
     }
     const triggeredByEnemy=mine=>{
-      const matches=e=>e.alive&&durability(e)>0&&Math.hypot(e.x-mine.x,e.y-mine.y)<=14;
+      const matches=e=>e.alive&&withinMineRadius(e,mine,14)&&durability(e)>0;
       if(!grid||!Number.isSafeInteger(Math.floor(mine.x/28))||!Number.isSafeInteger(Math.floor(mine.y/28)))return state.enemies.some(matches);
       for(let x=Math.floor((mine.x-14)/28);x<=Math.floor((mine.x+14)/28);x++)
         for(let y=Math.floor((mine.y-14)/28);y<=Math.floor((mine.y+14)/28);y++)
@@ -275,8 +287,11 @@ const HexCombat=(()=>{
     };
     // Capture every trigger before dealing damage: stacked mines all fire even
     // when the first one kills their shared triggering enemy.
-    const triggered=new Set(grid?state.mines.filter(triggeredByEnemy):state.mines.filter(mine=>state.enemies.some(e=>e.alive&&durability(e)>0&&Math.hypot(e.x-mine.x,e.y-mine.y)<=14))),remaining=[];
-    for(const mine of state.mines){const trigger=triggered.has(mine);if(!trigger){remaining.push(mine);continue;}const def={damageType:'physical',area:true,damageMultipliers:mine.damageMultipliers};state.enemies.filter(e=>e.alive&&Math.hypot(e.x-mine.x,e.y-mine.y)<=mine.splash).forEach(e=>damageEnemy(e,mine.damage,def,state,emit,mine.source||{type:'mine'}));state.projectiles.push({kind:'blast',x:mine.x,y:mine.y,r:mine.splash,ttl:.22,color:mine.color});queueEcho(state,mine);emit('mine');}state.mines=remaining;
+    let triggered;
+    for(const mine of state.mines)if(triggeredByEnemy(mine))(triggered??=new Set()).add(mine);
+    if(!triggered)return;
+    const remaining=[];
+    for(const mine of state.mines){const trigger=triggered.has(mine);if(!trigger){remaining.push(mine);continue;}const def={damageType:'physical',area:true,damageMultipliers:mine.damageMultipliers};state.enemies.filter(e=>e.alive&&withinMineRadius(e,mine,mine.splash)).forEach(e=>damageEnemy(e,mine.damage,def,state,emit,mine.source||{type:'mine'}));state.projectiles.push({kind:'blast',x:mine.x,y:mine.y,r:mine.splash,ttl:.22,color:mine.color});queueEcho(state,mine);emit('mine');}state.mines=remaining;
   }
   // Nur für die Darstellung: Kennung, Turmtyp, Trefferpositionen und Lebensdauer eines Geschosses. Der Schaden wird sofort beim Schuss verrechnet.
   const nextProjectileId=state=>state.nextProjectileId=(state.nextProjectileId||0)+1;

@@ -24,7 +24,7 @@
     let map=records.get(node);if(!map){map=new Map();records.set(node,map);}
     const value=read(),previous=map.get(key),source=previous&&value===previous.output?previous.source:value;
     const normalized=source.replace(/\s+/g,' ').trim();
-    const translated=text(normalized),output=source.replace(/\S[\s\S]*\S|\S/,()=>translated);
+    const translated=source.includes('\n')&&node.parentElement?.closest?.('.planDetail')?source.trim().split('\n').map(line=>text(line.trim())).join('\n'):text(normalized),output=source.replace(/\S[\s\S]*\S|\S/,()=>translated);
     map.set(key,{source,output});if(value!==output)write(output);
   }
   function apply(node){

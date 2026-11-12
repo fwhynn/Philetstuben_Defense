@@ -15,7 +15,7 @@ const HexAugmentCardsUI=(()=>{
   if(!host)return;
   const eligible=HexAugmentCards.unlocked(profile);
   root.classList.toggle('augmentsOpen',eligible&&!!root._augmentsOpen);
-  let toggle=root.querySelector?.('#augmentCollectionToggle');
+  let toggle=document.getElementById('augmentCollectionToggle');
   if(!toggle){toggle=document.createElement('button');toggle.id='augmentCollectionToggle';root.querySelector?.('.arsenalToolbar')?.appendChild(toggle);}
   const seen=HexAugmentCards.clean(profile.augmentCards).introSeen;
   toggle.hidden=!eligible;toggle.className='secondary';toggle.dataset.fresh=seen?'':'1';toggle.textContent=root._augmentsOpen?'Türme & Gebäude':seen?'Augment-Karten':'Neu · Augment-Karten';toggle.setAttribute('aria-pressed',String(!!root._augmentsOpen));

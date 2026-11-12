@@ -550,11 +550,11 @@ function create(host0,commands){
     if(!building){const pick=new THREE.Mesh(slotPick,invisible);pick.userData.pick={kind:'building',q:tile.q,r:tile.r,index};group.add(pick);picks.push(pick);}
     const hint=building?new THREE.Mesh(hintGeometry,mats.hint):null;
     if(hint){hint.position.y=50;hint.visible=false;group.add(hint);}
-    const retargetRing=building?.type==='forge'?new THREE.Mesh(circleRing,basic('#ffd16a',.8)):null;
+    const retargetRing=['forge','market'].includes(building?.type)?new THREE.Mesh(circleRing,basic('#ffd16a',.8)):null;
     if(retargetRing){retargetRing.scale.setScalar(24);retargetRing.position.y=2;retargetRing.visible=false;group.add(retargetRing);}
     return {group,picks,hint,retargetRing,tile,index};
   }
-  function objectSig(tile){return JSON.stringify([tile.type==='base'?baseUpgradeParts().key:'',tile.slots,tile.buildingSlots,tile.type,tile.rotation,(tile.towers||[]).map(t=>t&&[t.type,t.branch,t.finalUpgrade,t.ultimate,t.level,t.tileType]),(tile.buildings||[]).map(b=>b&&b.type)]);}
+  function objectSig(tile){return JSON.stringify([tile.type==='base'?baseUpgradeParts().key:'',tile.slots,tile.buildingSlots,tile.type,tile.rotation,(tile.towers||[]).map(t=>t&&[t.type,t.branch,t.finalUpgrade,t.ultimate,t.level,t.tileType,t.supportRange,t.rangeFactor,t.biome]),(tile.buildings||[]).map(b=>b&&b.type)]);}
   function syncObjects(){
     const seen=new Set();
     for(const tile of state.map.values()){
@@ -622,7 +622,7 @@ function create(host0,commands){
     const selected=state.dragTower?state.dragSlot:state.selectedTower||state.hoverTower||(state.previewTower?state.selectedSlot:null);
     const tile=selected&&state.map.get(key(selected.q,selected.r)),tower=tile?.towers[selected.index],type=state.dragTower||tower?.type||state.previewTower;
     if(tile&&type){
-      const p=slotPositions(tile)[selected.index],def=HexData.towerDefinition(tower||{type,biome:HexBiomes.forTile(state,tile),rangeFactor:state.challengeDay?.85:1,tileType:tile.type,supportRange:HexBuildings.rangeBonus(state.map,selected)});
+      const p=slotPositions(tile)[selected.index],def=HexData.towerDefinition(tower||{type,biome:HexBiomes.forTile(state,tile),rangeFactor:state.challengeDay?.85:1,tileType:tile.type,supportRange:HexBuildings.rangeBonus(state,selected)});
       for(const m of [rangeFill,rangeRing]){m.visible=true;m.position.set(p.x,.8,p.y);m.scale.setScalar(def.range);m.material.color.set(def.color);}
       if(tower&&state.previewUpgrade?.tower===tower){const next=state.previewUpgrade.definition;if(next.range!==def.range)for(const m of [previewRangeFill,previewRangeRing]){m.visible=true;m.position.set(p.x,.9,p.y);m.scale.setScalar(next.range);m.material.color.set(next.color);}}
     }else rangeFill.visible=rangeRing.visible=false;

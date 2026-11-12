@@ -50,6 +50,21 @@ const HexRunSnapshot=(()=>{
     if(snapshot?.format!=='autohex-run'||snapshot.version!==VERSION||snapshot.rules!==RULES)throw new Error('Incompatible run checkpoint');
     const state=decode(snapshot.state),random=HexRandom.restore(snapshot.random);
     if(!(state.map instanceof Map)||!(state.landmarks instanceof Map)||!supported(state)||!Array.isArray(state.spawnQueue)||state.pendingSpawns!==state.spawnQueue.length)throw new Error('Invalid run checkpoint');
+    // Older blocked draws kept the rejected cards in hand during the build phase.
+    const normalHand=!state.openingRemaining&&(!state.challengeKind||['caravan','greed'].includes(state.challengeKind));
+    const staleHand=normalHand&&state.hand?.length>0;
+    if(state.phase==='build'&&state.hp>0&&!state.waveRunning&&(staleHand||state.tunnelOffer||['tunnel','blocked'].includes(state.drawResult))){
+      if(staleHand){state.discard.push(...state.hand.filter(id=>id!=='rescue'));state.hand=[];state.rescueCard=null;}
+      if(!state.tunnelOffer){
+        const lastTile=Array.from(state.map.values()).at(-1);
+        if(lastTile?.type==='rescueTunnel'&&HexMap.hasExteriorFront(state.map,state.landmarks))state.drawResult='ready';
+        else {
+          const blockedDraw=['tunnel','blocked'].includes(state.drawResult);
+          const blockedRoad=blockedDraw||!HexMap.rescue(state.map,state.landmarks,state.difficulty==='dual'?2:1);
+          if(blockedRoad){state.tunnelOffer=HexMap.tunnelPlan(state.map,state.landmarks,true);state.tunnelConfirmed=false;}
+        }
+      }
+    }
     state.biomeLayoutVersion??=1;
     // Support multipliers are derived from buildings, not permanent purchases.
     // Reconcile older forge values without changing paid costs or owned levels.

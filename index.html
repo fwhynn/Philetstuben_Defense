@@ -204,10 +204,10 @@
             </summary>
             <div class="statPopup">
               <h2>Goldplanung</h2>
-              <p id="goldForecast" class="hint"></p>
-              <p id="towerBudget" class="hint"></p>
-              <h3>Goldquellen &amp; Run-Einnahmen</h3>
-              <p id="goldSources" class="hint"></p>
+              <p id="goldHeadline" class="planHeadline"></p>
+              <details class="planDetail"><summary>Wellen-Ertrag</summary><p id="goldForecast"></p></details>
+              <details class="planDetail"><summary>Turmpreise</summary><p id="towerBudget"></p></details>
+              <details class="planDetail"><summary>Einnahmen im Run</summary><p id="goldSources"></p></details>
             </div>
           </details>
           <details id="waveDropdown" class="statDetails">
@@ -218,7 +218,9 @@
             </summary>
             <div class="statPopup">
               <h2>Waveplanung</h2>
-              <p id="waveForecast" class="hint"></p>
+              <p id="waveHeadline" class="planHeadline"></p>
+              <ul id="waveRoster" class="waveRoster"></ul>
+              <details class="planDetail"><summary>Gegnerwerte und Fähigkeiten</summary><p id="waveForecast"></p></details>
               <div id="garrisonForecast" class="hidden"></div>
               <p id="liveWaveInfo" class="hint"></p>
             </div>
@@ -238,12 +240,17 @@
                 id="profileDiamonds">0</strong> <span
                 id="runDiamonds" title="Diamanten bei Ende des aktuellen Durchlaufs">(+0)</span> <span
                 class="dropdownArrow" aria-hidden="true">▾</span></summary>
-            <div class="statPopup">
-              <h2>Meta-Fortschritt</h2>
-              <p id="profileStats" class="hint"></p>
-              <p class="hint">Diamanten werden am Runende ausgezahlt. Freischaltungen findest du im Arsenal im
-                Hauptmenü.
-              </p>
+            <div class="statPopup diamondPanel">
+              <h2>Diamanten</h2>
+              <div class="diamondPayout"><span>Deine Ausbeute</span><strong><span class="hxi hxi-gem" aria-hidden="true"></span> <span id="diamondPayout">+0</span></strong></div>
+              <dl id="diamondRates">
+                <div><dt id="diamondWaves">Alle 2 erreichten Wellen</dt><dd>+1</dd></div>
+                <div><dt id="diamondBoss">Wellenboss besiegt</dt><dd>+5</dd></div>
+                <div><dt id="diamondGuardian">Erkundungswächter besiegt</dt><dd>+3</dd></div>
+                <div id="diamondMilestone"><dt>Welle 10, 20, 30 … erstmals erreicht</dt><dd>+2</dd></div>
+              </dl>
+              <p id="diamondDaily" hidden>Erster Sieg in der Tagesaufgabe: +10 Diamanten.</p>
+              <p class="hint">Am Ende gutgeschrieben. Im Arsenal einlösen.</p>
             </div>
           </details>
           <details id="baseDropdown" class="statDetails">
@@ -282,6 +289,10 @@
             wählen (1–3) · R dreht · Hex anklicken</span>
           <button id="rotateHexBtn" class="secondary" type="button" disabled aria-label="Ausgewählte Hexkarte drehen">Drehen (R)</button>
         </div>
+        <section id="tunnelRescuePanel" class="tunnelRescuePanel hidden" aria-label="Rettungstunnel">
+          <p id="tunnelRescueText" aria-live="polite">Keine passende Straße? Öffne kostenlos eine neue Front.</p>
+          <button id="tunnelRescueBtn" class="secondary" type="button">Rettungstunnel ansehen</button>
+        </section>
         <section id="detourControls" class="hidden" aria-label="Straßenplanung"><strong id="detourStatus" aria-live="polite"></strong><p id="detourStock"></p></section><div id="hand" class="hand"></div><section id="greedDock" class="hidden"><h2>35 Wellen · Verdiene so viel Gold wie möglich</h2><p id="greedDockStatus"></p><div id="greedDockChoices"></div></section>
         <section id="powerControls" class="hidden" aria-label="Stromnetz">
           <p id="powerStatus" aria-live="polite"></p><p id="powerHint" role="status"></p>
@@ -299,10 +310,6 @@
 
       <!-- Unten rechts: Wave starten -->
       <div class="dockBR">
-        <section id="tunnelRescuePanel" class="tunnelRescuePanel hidden" aria-label="Rettungstunnel">
-          <p id="tunnelRescueText" aria-live="polite">Keine passende Straße? Öffne kostenlos eine neue Front.</p>
-          <button id="tunnelRescueBtn" class="secondary" type="button">Rettungstunnel ansehen</button>
-        </section>
         <label class="speedControl" for="doubleSpeed">Tempo <output id="speedValue" for="doubleSpeed">1×</output>
           <small>F: nächstes Tempo</small><input id="doubleSpeed" type="range" min="1" max="8" step="1" value="1"
             aria-label="Spielgeschwindigkeit" /></label>
@@ -354,30 +361,32 @@
           <h2>Spielregeln</h2><button class="secondary drawerClose hxHex" aria-label="Schließen"
             title="Schließen (Escape)"><small>Esc</small> ×</button>
         </div>
-        <ul>
-          <li>Die Startfestung bestimmt HP und Gold; die Base lässt sich ausbauen.</li>
-          <li>Menüs und Informationen schließen durch einen Klick außerhalb oder mit Escape. Beim Verkauf bestätigt ein
-            zweiter Klick auf denselben Knopf. Belohnungen bleiben offen, bis du gewählt oder sie über „Karte anschauen“
-            ausgeblendet hast.</li>
-          <li>Jedes offene Straßenende ist ein Spawnpunkt. Die Welle hat eine feste Gegneranzahl, die auf die offenen
-            Enden aufgeteilt wird. Mehr Enden erzeugen keine zusätzlichen Gegner.</li>
-          <li>Die epische Bastionssackgasse hat einen eigenen Gegnerportal-Platz. Für 250 Gold entsteht dort zwischen
-            den Wellen ein zusätzlicher Eingang, der sich die feste Gegnerzahl mit den Straßenenden teilt. Normale
-            Gebäude sind auf diesem Platz nicht möglich.</li>
-          <li>Stufe 1 abschließen: Wave 35 überleben, dadurch Stufe 2 · Zwei Fronten freischalten. Nach Wave 35: Run
-            beenden oder mit gleicher Map im Endless-Modus weiterspielen.</li>
-          <li>Ab Wave 15 erscheint alle 10 Waves ein Boss an einem zufälligen Eingang. Bosswellen werden vor dem Start
-            angekündigt.</li>
-          <li>Jeder Gegner entscheidet an jeder Gabelung zufällig zwischen allen Wegen zur Base. Sackgassen und
-            Schleifen werden ausgeschlossen.</li>
-          <li>Alle 2 Waves: 1 von 3 neuen Hexkarten ins Deck.</li>
-          <li>Sicht ab jedem gesetzten Hex: Radius 2 klar, bis Radius 6 Nebel, danach unsichtbar. ? = unbekanntes
-            Sonderfeld. ◆ Schatz, ✦ Shrine, ☠ Boss. Schätze werden zu Handelsposten (+2 Gold je Welle, insgesamt
-            höchstens +20). Schreine gewähren dauerhaft +10 % Schaden oder +15 % Reichweite auf ihrem Hex und seinen
-            Nachbarn; gleiche Schreinboni stapeln nicht. Besiegte Erkundungswächter hinterlassen einen Turmplatz mit +20
-            % Reichweite. Feste Sonderfelder werden durch passende Nachbarstraßen
-            angeschlossen.</li>
-        </ul>
+        <div class="rulesScroll" tabindex="0" role="region" aria-label="Regeln für das Standardspiel">
+          <h3>Deine Runde im Standardspiel</h3>
+          <ol class="ruleSteps">
+            <li><strong>Hex legen</strong><span>Drehe die Karte, bis die Straßen anschließen.</span></li>
+            <li><strong>Türme bauen</strong><span>Setze Türme auf freie Plätze oder baue sie aus.</span></li>
+            <li><strong>Welle starten</strong><span>Verteidige die Festung. Überlebe Welle 35.</span></li>
+          </ol>
+          <details><summary>Belohnungen und Bosse</summary>
+            <p>Nach jeder zweiten Welle wählst du eine neue Hexkarte. In Welle 15, 25, 35 und danach alle zehn Wellen erscheint ein Boss.</p>
+            <p>Mit Welle 35 schaltest du Zwei Fronten frei. Deine aktuelle Karte kannst du endlos weiterspielen.</p>
+          </details>
+          <details><summary>Woher kommen die Gegner?</summary>
+            <p>Alle offenen Straßenenden teilen sich dieselbe Gegnerzahl. An Gabelungen wählen Gegner zufällig einen Weg zur Festung und meiden Sackgassen und Schleifen.</p>
+            <p>Auf einer epischen Bastionssackgasse kannst du zwischen Wellen für 250 Gold einen weiteren Eingang bauen.</p>
+          </details>
+          <details><summary>Was bringen Sonderfelder?</summary>
+            <p>Eine passende Straße verbindet das Sonderfeld. Bis zwei Hexe weit siehst du das Gelände, bis sechs Hexe weit seine Umrisse im Nebel.</p>
+            <dl><div><dt>Schatz</dt><dd>Wird zum Handelsposten. +2 Gold pro Welle, zusammen bis zu +20.</dd></div>
+              <div><dt>Schrein</dt><dd>+10 % Schaden oder +15 % Reichweite auf diesem Hex und seinen Nachbarn. Gleiche Boni gelten einmal.</dd></div>
+              <div><dt>Wächter</dt><dd>Hinterlässt nach dem Sieg einen Turmplatz mit +20 % Reichweite.</dd></div></dl>
+          </details>
+          <details><summary>Festung und Bedienung</summary>
+            <p>Deine Startfestung bestimmt Leben und Startgold. Klicke die Festung an, um sie auszubauen.</p>
+            <p>Escape oder ein Klick nach draußen schließt Menüs. Verkaufen bestätigst du mit einem zweiten Klick. Über „Karte anschauen“ kannst du eine Belohnung für später offenlassen.</p>
+          </details>
+        </div>
       </aside>
 
       <!-- Einstellungen als Fenster mit Bereichen (classes/settings-window.js schaltet die Bereiche um). Alle IDs bleiben,
@@ -409,7 +418,7 @@
               <section class="hxGroup">
                 <h3 class="hxGroupTitle">Spielablauf</h3>
                 <label class="hxSwitchRow"><span><strong>Einsteigerhinweise</strong><small>Mini-Tutorial, Tastenbelegungs-Hinweis und Hinweise zu neu entdeckten Biomen. Spielregeln und wichtige Spielmeldungen bleiben verfügbar.</small></span><input id="onboardingHints" type="checkbox" checked></label>
-                <label class="hxSwitchRow"><span><strong>Wellen automatisch starten</strong><small>Nach dem Platzieren eines Hexes starten.</small></span><input id="autoStart" type="checkbox" /></label>
+                <label class="hxSwitchRow"><span><strong id="autoWaveTitle">Wellen automatisch starten</strong><small id="autoWaveHint">Nach dem Platzieren eines Hexes starten.</small></span><input id="autoStart" type="checkbox" /></label>
                 <label class="hxSelectRow"><strong>Grafikstil</strong><select data-asset-edition aria-label="Grafikstil">
                     <option value="normal">Normal</option>
                     <option value="sakura">Sakura-Edition</option>
@@ -782,8 +791,16 @@
               </div>
               <div>
                 <span class="accountStatIcon" aria-hidden="true"><span class="hxi hxi-wave"></span></span>
-                <dt>Beste Welle</dt>
+                <dt>Solo-Bestwelle</dt>
                 <dd id="accountBestWave">0</dd>
+              </div>
+              <div>
+                <span class="accountStatIcon" aria-hidden="true"><span class="hxi hxi-duo"></span></span>
+                <dt>Duo-Bestwelle</dt><dd id="accountDuoBest">0</dd>
+              </div>
+              <div>
+                <span class="accountStatIcon" aria-hidden="true"><span class="hxi hxi-leaderboard"></span></span>
+                <dt>Duo-Siege</dt><dd id="accountDuoWins">0</dd>
               </div>
               <div>
                 <span class="accountStatIcon" aria-hidden="true"><span class="hxi hxi-cooldown"></span></span>
@@ -997,6 +1014,7 @@
           <div class="arsenalViewSwitch" role="group" aria-label="Ansicht"><button type="button" class="secondary" data-arsenal-view="tree"
               aria-pressed="true">Baum</button><button type="button" class="secondary" data-arsenal-view="workshop"
               aria-pressed="false">Werkstatt</button></div>
+          <button id="augmentCollectionToggle" class="secondary" type="button" hidden>Augment-Karten</button>
           <button id="resetDiamondsBtn" class="secondary">Reset</button><button id="closeArsenalBtn" class="secondary"
             aria-label="Arsenal schließen (Escape)" title="Zurück (Escape)">Zurück · Esc</button>
         </header>

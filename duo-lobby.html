@@ -21,7 +21,7 @@
  <details class="lobbyRules"><summary>So funktioniert Duo</summary><ol>
   <li><strong>Gleichzeitig bauen:</strong> Jeder legt Hexfelder und baut Türme auf seiner eigenen Karte.</li>
   <li><strong>Gemeinsam starten:</strong> Die Welle beginnt erst, wenn ihr beide »Bereit« gedrückt habt.</li>
-  <li><strong>Geteilte Leben:</strong> Beide Karten verlieren Leben aus demselben Vorrat von 40.</li>
+  <li><strong>Geteilte Leben:</strong> Eure Startfestungen legen ihre Lebenspunkte zusammen. Gold und Einkommen gehören jedem Spieler einzeln.</li>
   <li><strong>Helfen:</strong> Wer eine Welle ohne Lebensverlust schafft, schickt eine Turmkopie auf das Portal des Partners. Alle 5 Wellen beschenkt ihr euch.</li>
  </ol></details>
 </div>
@@ -35,16 +35,19 @@
   <div id="seatFriend" class="lobbySeat" data-state="open"><span class="lobbyAvatar">P</span><div><strong>Dein Partner</strong><p id="friendReady">Wartet auf Beitritt …</p></div></div>
  </div>
  <section class="lobbyLoadouts" aria-label="Turmauswahl">
-  <div><h2>Deine Turmauswahl <span id="lobbyLoadoutCount"></span></h2><p>Wähle fünf Türme für diese Duo-Partie. Änderungen heben deine Bereitschaft auf.</p><div id="lobbyLoadoutChoices" class="lobbyTowerChoices"></div><p id="lobbyAugments" role="status"></p><button id="lobbyApplyLoadout" type="button">Turmauswahl übernehmen</button></div>
-  <div><h2>Turmauswahl deines Partners</h2><div id="lobbyPartnerLoadout" class="lobbyTowerChoices"></div></div>
+  <div><h2>Deine Festung</h2>
+   <div class="lobbySetup"><label>Startfestung<select id="lobbyHero"></select></label><label>Straßenausgänge<select id="lobbyFronts"><option value="normal">Eine Front</option><option value="dual">Zwei Fronten</option></select></label></div>
+   <p id="lobbyHeroInfo"></p><p id="lobbyFrontHint" hidden>Zwei Fronten schaltest du mit Welle 35 im Standardspiel frei.</p>
+   <h2>Deine Turmauswahl <span id="lobbyLoadoutCount"></span></h2><p>Wähle fünf Türme für diese Duo-Partie. Änderungen heben deine Bereitschaft auf.</p><label id="lobbyPresetLabel" class="lobbyPreset" hidden>Turmvorlage<select id="lobbyPreset"></select></label><div id="lobbyLoadoutChoices" class="lobbyTowerChoices"></div><p id="lobbyAugments" role="status"></p><details id="lobbyArsenal" hidden><summary>Ausgerüstete Stufe-4-Pfade und Gebäudespezialisierungen</summary><ul id="lobbyArsenalList"></ul></details><button id="lobbyApplyLoadout" type="button">Auswahl übernehmen</button></div>
+  <div><h2>Festung deines Partners</h2><p id="lobbyPartnerFortress"></p><h2>Turmauswahl deines Partners</h2><div id="lobbyPartnerLoadout" class="lobbyTowerChoices"></div></div>
  </section>
  <button id="lobbyReady" class="lobbyPrimary" disabled>Bereit</button>
  <p id="lobbyHint" class="lobbyHint"></p>
  <div class="lobbySecondary"><button id="lobbyTakeover" hidden>Sitzung hier übernehmen</button><button id="lobbyLeave" class="lobbyGhost">Lobby verlassen</button></div>
 </section>
 <p id="status" role="status" class="lobbyStatus"></p>
-<p class="lobbyFoot">Freunde-Beta: Zwei getrennte Browser oder Geräte nutzen. Die Partie wird auf dem Server gespeichert. Diamanten werden nach dem gemeinsamen Abschluss deinem lokalen Spielstand gutgeschrieben.</p>
+<p class="lobbyFoot">Freunde-Beta: Zwei getrennte Browser oder Geräte nutzen. Die Partie wird auf dem Server gespeichert. Diamanten und Duo-Bestwelle werden nach dem gemeinsamen Abschluss deinem Profil gutgeschrieben.</p>
 </main>
-<script src="runtime-config.js?v=8387605f19c28ee8"></script><script src="classes/api.js?v=8387605f19c28ee8"></script><script src="classes/local-store.js?v=8387605f19c28ee8"></script><script src="classes/biomes.js?v=8387605f19c28ee8"></script><script src="classes/data.js?v=8387605f19c28ee8"></script><script src="classes/arsenal.js?v=8387605f19c28ee8"></script><script src="classes/augment-cards.js?v=8387605f19c28ee8"></script><script src="classes/profile.js?v=8387605f19c28ee8"></script><script src="/socket.io/socket.io.js"></script><script src="duo-client.js?v=8387605f19c28ee8"></script><script src="duo-lobby.js?v=8387605f19c28ee8"></script><script src="classes/site-visit.js?v=8387605f19c28ee8"></script>
+<script src="runtime-config.js?v=8387605f19c28ee8"></script><script src="classes/api.js?v=8387605f19c28ee8"></script><script src="classes/local-store.js?v=8387605f19c28ee8"></script><script src="classes/biomes.js?v=8387605f19c28ee8"></script><script src="classes/data.js?v=8387605f19c28ee8"></script><script src="classes/arsenal.js?v=8387605f19c28ee8"></script><script src="classes/augment-cards.js?v=8387605f19c28ee8"></script><script src="classes/buildings.js?v=8387605f19c28ee8"></script><script src="classes/heroes.js?v=8387605f19c28ee8"></script><script src="classes/profile.js?v=8387605f19c28ee8"></script><script src="/socket.io/socket.io.js"></script><script src="duo-client.js?v=8387605f19c28ee8"></script><script src="duo-lobby.js?v=8387605f19c28ee8"></script><script src="classes/site-visit.js?v=8387605f19c28ee8"></script>
 </body>
 </html>

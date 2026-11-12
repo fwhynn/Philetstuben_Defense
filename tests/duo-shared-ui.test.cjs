@@ -45,3 +45,19 @@ test('partner gifts are inspectable without acting for the partner and received 
  view.delivery.offers[1].index=1;view.revision++;duo.receive(view);assert.match(ui.elements.get('duoGiftReceived').textContent,/Kleine Kurve/);assert.equal(ui.elements.get('duoGiftReceived').classList.contains('hidden'),false);
  view.boards[0].phase='place';view.delivery.offers[0].index=0;view.revision++;duo.receive(view);assert.equal(preview.classList.contains('hidden'),true);assert.match(ui.elements.get('duoGiftHistory').children.at(-1).textContent,/50 Gold/);assert.equal(duo.calls.length,0);
 });
+
+test('automatic readiness follows the local build transition once and leaves manual withdrawal available',()=>{
+ const duo={real:true,calls:[]},ui=load({duo});
+ const room=createRoom({seed:'auto-ready',loadouts:Array(2).fill(['archer','catapult','chain','freeze','mine'])});
+ const a=room.connect(0);room.connect(1);
+ const view=room.view(a.token);duo.receive(view);
+ const autoStart=ui.elements.get('autoStart');assert.equal(!!autoStart.disabled,false);autoStart.checked=true;
+ function show(phase,options={}){
+   const next=structuredClone(view);next.revision++;
+   Object.assign(next.boards[0],{phase,openingRemaining:0},options);duo.receive(next);
+ }
+ show('build',{openingRemaining:1});assert.equal(duo.calls.length,0);
+ show('build');assert.equal(duo.calls.length,1);assert.equal(duo.calls[0].action,'ready');assert.equal(duo.calls[0].payload.value,true);
+ show('build');assert.equal(duo.calls.length,1);
+ autoStart.checked=false;show('place');show('build');assert.equal(duo.calls.length,1);
+});

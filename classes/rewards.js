@@ -66,13 +66,30 @@ const HexRewards=(()=>{
     const usage=state.runTowerStats[tower.type]||{builds:0,upgrades:0};usage.upgrades++;state.runTowerStats[tower.type]=usage;
     return true;
   }
+  const bossBlessings={
+    bastion:{label:'Bastionssegen',desc:'+5 maximale und aktuelle Basis-LP.',icon:'heart',maxHp:5},
+    income:{label:'Handelspakt',desc:'+2 Gold je überlebter Welle.',icon:'coin',income:2},
+    treasury:{label:'Wächterschatz',desc:'Sofort 60 Gold.',icon:'coin',gold:60},
+    builder:{label:'Baumeisterbrief',desc:'Dein nächster Turmbau ist kostenlos.',icon:'build',freeBuilds:1},
+    recovery:{label:'Heilvorrat',desc:'Heilt bis zu 10 Basis-LP. Jeder ungenutzte Heilpunkt bringt 3 Gold.',icon:'heart',healing:10},
+    convoy:{label:'Versorgungszug',desc:'Sofort 25 Gold und +1 Gold je überlebter Welle.',icon:'coin',gold:25,income:1}
+  };
+  function bossBlessing(state,kind){
+    const {maxHp=0,healing=0,freeBuilds=0,gold:coins=0,income=0}=bossBlessings[kind];
+    const heal=Math.min(healing,Math.max(0,state.maxHp-state.hp));
+    const gold=coins+(healing-heal)*3;
+    if(maxHp){state.maxHp+=maxHp;state.hp+=maxHp;}
+    if(freeBuilds)state.freeTowerBuilds=(state.freeTowerBuilds||0)+freeBuilds;
+    if(heal)state.hp+=heal;
+    if(gold){state.gold+=gold;state.goldEarned.boss=(state.goldEarned.boss||0)+gold;}
+    if(income){state.income+=income;state.rewardIncome=(state.rewardIncome||0)+income;}
+  }
   function blessing(state,kind){
     if(state.hp<=0)return false;
     if(kind==='repair'&&state.phase==='shrineReward'){
       if(state.hp<state.maxHp)state.hp=Math.min(state.maxHp,state.hp+5);else supplies(state);
     }else if(kind==='supplies'&&state.phase==='shrineReward')supplies(state);
-    else if(kind==='bastion'&&state.phase==='bossReward'){state.maxHp+=5;state.hp+=5;}
-    else if(kind==='income'&&state.phase==='bossReward'){state.income+=2;state.rewardIncome=(state.rewardIncome||0)+2;}
+    else if(state.phase==='bossReward'&&Object.hasOwn(bossBlessings,kind))bossBlessing(state,kind);
     else return false;
     return true;
   }
@@ -99,7 +116,10 @@ const HexRewards=(()=>{
         const library=rarity?Object.fromEntries(Object.entries(HexData.CARD_LIBRARY).filter(([,card])=>card.rarity===rarity)):HexData.CARD_LIBRARY;
         const rng=kind==='boss'?HexRandom.create(state.seed+'|bossloot|'+context):kind==='shrine'?HexRandom.create(state.seed+'|shrine|'+context):random;
         choices=HexDeck.rewards(HexDeck.forLoadout(library,state.towerLoadout),rng).map(cardId=>({kind:'card',cardId}));
-        if(kind==='boss')choices.push({kind:'blessing',blessing:'bastion'},{kind:'blessing',blessing:'income'});
+        if(kind==='boss'){
+          const blessings=HexRunFlow.shuffle(Object.keys(bossBlessings),rng).slice(0,3);
+          for(const blessing of blessings)choices.push({kind:'blessing',blessing});
+        }
       }
     }
     state.nextRewardOfferId=(state.nextRewardOfferId||0)+1;
@@ -124,5 +144,5 @@ const HexRewards=(()=>{
     }
     state.rewardOffer=null;return true;
   }
-  return {augments,augmentChoices,refinement,applyAugment,canRedraw,redraw,merchantOffers,merchantPrice,canTrade,trade,offer,choose,upgradeChoices,upgrade,blessing};
+  return {bossBlessings,augments,augmentChoices,refinement,applyAugment,canRedraw,redraw,merchantOffers,merchantPrice,canTrade,trade,offer,choose,upgradeChoices,upgrade,blessing};
 })();

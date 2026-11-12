@@ -345,9 +345,11 @@
  return parseJson(response);
  }
  globalThis.HexApi = {
- async applyDuoAugments(session,clientId){
+ async applyDuoAugments(session,clientId,profile){
    assertSession();const token=getToken();
-   const response=await fetch('/lobby/augments',{method:'POST',headers:{Authorization:'Bearer '+session,'X-Duo-Client':clientId,...(token?{'X-Account-Token':token}:{})},signal:AbortSignal.timeout(10000)});
+   const guest=!token&&profile?{hero:profile.activeHero,difficulty:profile.difficulty,towers:profile.unlockedTowers,loadout:profile.activeLoadout,
+     milestones:profile.milestones.filter(id=>id==='standard35'||id==='dual35'),unlocks:HexProfile.runUnlocks(profile).filter(id=>id.startsWith('ultimate:')||id.startsWith('building:'))}:null;
+   const response=await fetch('/lobby/augments',{method:'POST',...(guest?{body:JSON.stringify(guest)}:{}),headers:{...(guest?{'Content-Type':'application/json'}:{}),Authorization:'Bearer '+session,'X-Duo-Client':clientId,...(token?{'X-Account-Token':token}:{})},signal:AbortSignal.timeout(10000)});
    const payload=await parseJson(response);if(getToken()!==token)throw saveError('Account wurde inzwischen gewechselt.');return payload;
  },
  getGreedLeaderboard:(mode,day)=>runRankingRequest('?'+new URLSearchParams({mode,day}),undefined,true),
