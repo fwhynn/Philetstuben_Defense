@@ -1,5 +1,42 @@
 [
   {
+    "version": "next",
+    "title": "Flüssigeres Duo",
+    "changes": [
+      "Große Duo-Wellen mit vielen Gegnern, Türmen und Minen laufen flüssiger und benötigen weniger Rechenzeit.",
+      "Gleichzeitig laufende Duo-Partien bremsen sich bei der Simulation nicht mehr gegenseitig aus.",
+      "Kürzere Speicherspitzen und schnellere Zustandsaktualisierungen verbessern die Reaktionszeit im Duo.",
+      "Bestehende Duo-Partien können nach dem Update fortgesetzt werden. Spielregeln, Grafik und Fortschritt bleiben unverändert."
+    ],
+    "summary": "Mehr Reaktionsgeschwindigkeit in großen Duo-Partien, auch wenn mehrere Teams gleichzeitig spielen.",
+    "overview": [
+      {
+        "title": "Auf einen Blick",
+        "items": [
+          "Weniger Verzögerungen im Duo",
+          "Bestehende Partien bleiben erhalten"
+        ]
+      }
+    ],
+    "sections": [
+      {
+        "title": "Leistung und Wiederaufnahme",
+        "entries": [
+          {
+            "title": "Flüssigere Duo-Partien",
+            "bullets": [
+              "Große Duo-Wellen mit vielen Gegnern, Türmen und Minen laufen flüssiger und benötigen weniger Rechenzeit.",
+              "Gleichzeitig laufende Duo-Partien bremsen sich bei der Simulation nicht mehr gegenseitig aus.",
+              "Kürzere Speicherspitzen und schnellere Zustandsaktualisierungen verbessern die Reaktionszeit im Duo.",
+              "Bestehende Duo-Partien können nach dem Update fortgesetzt werden. Spielregeln, Grafik und Fortschritt bleiben unverändert."
+            ],
+            "stats": []
+          }
+        ]
+      }
+    ]
+  },
+  {
     "version": "1.3.0",
     "title": "Duo gemeinsam stärker",
     "summary": "Eine kompakte Teamleiste, Wunschgeschenke und eine übersichtlichere Lobby verbessern das Duo. Dazu kommen die Sperrbasis, mehr Diamanten für weite Runs und viele Verbesserungen bei Menüs und Bedienung.",

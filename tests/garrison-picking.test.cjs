@@ -28,10 +28,12 @@ test('revealed event hexes share terrain depth before connection while fog stays
  let visibility='fog';const ctx={THREE,scene,gl:{},state:{map:new Map(),landmarks:new Map([['2,0',landmark]])},landmarkRecords:new Map(),key:c.map.key,axialToWorld:c.map.axialToWorld,HexMap:c.map,HexExploration:{visibility:()=>visibility,treasureReward:()=>25},HexModelMap:{modelFor:()=>({name:'straight'}),propAngle:()=>0},buildTile:()=>new THREE.Group(),label(){},LANDMARK_LABEL:{}};
  const source=fs.readFileSync(require.resolve('../classes/three-renderer.js'),'utf8');vm.createContext(ctx);
  vm.runInContext(source.slice(source.indexOf('  const layer={'),source.indexOf('  let state,targetList=')),ctx);
+ const visibilityStart=source.indexOf('  let landmarkVisibilityCache='),visibilityEnd=source.indexOf('  function clearOverlays()',visibilityStart);
+ vm.runInContext(source.slice(visibilityStart,visibilityEnd),ctx);
  const start=source.indexOf('  function syncLandmarks(){'),end=source.indexOf('  function syncEmpty(){',start);
  vm.runInContext(source.slice(start,end)+'\nsyncLandmarks();',ctx);
  const fog=ctx.landmarkRecords.get('2,0').holder;assert.equal(fog.parent.parent,vm.runInContext('backgroundScene',ctx));
- visibility='clear';vm.runInContext('syncLandmarks();',ctx);const revealed=ctx.landmarkRecords.get('2,0').holder;
+ visibility='clear';vm.runInContext('landmarkVisibilityCache=new WeakMap();syncLandmarks();',ctx);const revealed=ctx.landmarkRecords.get('2,0').holder;
  assert.equal(fog.parent,null);assert.equal(revealed.parent.parent,scene);assert.equal(revealed.parent,vm.runInContext('layer.landmarks',ctx));
  landmark.claimed=true;vm.runInContext('syncLandmarks();',ctx);assert.equal(revealed.parent,null);assert.equal(ctx.landmarkRecords.size,0);
 });

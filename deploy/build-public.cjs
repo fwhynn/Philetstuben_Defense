@@ -12,7 +12,9 @@ function stampClientFiles(out,{sourceTree=false,onChanged=()=>{}}={}){
     const original=fs.readFileSync(file,'utf8'),source=normalize(original);
     // Only local files that actually exist in this artifact, including dynamic
     // script URLs and relative ES-module imports. API/socket URLs stay unchanged.
-    const stamped=source.replace(/(["'])([^"'`\s<>?]+\.(?:js|mjs|css))\1/g,(whole,quote,url)=>{
+    const stamped=source.replace(/(["'])([^"'`\s<>?]+\.(?:js|mjs|css))\1/g,(whole,quote,url,offset)=>{
+      // CommonJS loads filesystem paths, not browser URLs (including in dual-use adapters).
+      if(/\brequire(?:\.resolve)?\s*\(\s*$/.test(source.slice(0,offset)))return whole;
       if(/^(?:https?:|\/\/|data:)/.test(url))return whole;
       const target=path.resolve(url.startsWith('/')?out:path.dirname(file),url.replace(/^\//,''));
       if(!target.startsWith(out+path.sep)||!fs.existsSync(target))return whole;

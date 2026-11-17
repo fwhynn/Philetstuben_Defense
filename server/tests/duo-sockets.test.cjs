@@ -5,6 +5,38 @@ async function connect(url,auth,origin=url){const s=io(url,{auth,extraHeaders:{O
 async function listen(room){const s=createTransport(room,{browser:true});await new Promise(resolve=>s.listen(0,'127.0.0.1',resolve));return s;}
 async function stop(server,store){server.quiesce();store.backup();await new Promise(resolve=>server.close(resolve));}
 const request=(socket,path,packet)=>socket.timeout(2000).emitWithAck('request',{path,packet});
+
+test('enemy field patches require explicit client capability; older delta clients keep full enemies',async t=>{
+ const {createRoom}=require('../duo-room.cjs'),core=require('../../headless-core.cjs')();
+ const original=createRoom({seed:'enemy-capability',loadouts:Array(2).fill(core.profile.START_TOWERS)}),a=original.connect(0),b=original.connect(1),snapshot=original.checkpoint(),match=core.duo.restore(snapshot.match);
+ for(const board of match.boards)board.state.enemies=[{id:1,x:1,y:0,hp:100,alive:true,name:'Static name',description:'Long static description '.repeat(20)}];
+ snapshot.match=core.duo.capture(match);const room=createRoom({snapshot}),server=await listen(room),url=`http://127.0.0.1:${server.address().port}`;
+ const sockets=await Promise.all([a,b].map((seat,i)=>connect(url,{token:seat.token,clientId:crypto.randomUUID(),...(i===0?{wireEnemyFields:1}:{})})));
+ t.after(async()=>{sockets.forEach(s=>s.close());server.quiesce();await new Promise(r=>server.close(r));});
+ const packets=[[],[]];sockets.forEach((s,i)=>s.on('state',packet=>{packets[i].push(packet);if(packet.wireBase)s.emit('state-base',packet.wireBase);}));
+ const wait=async predicate=>{const end=Date.now()+3000;while(!predicate()){if(Date.now()>end)throw Error('Capability timeout');await new Promise(r=>setTimeout(r,15));}};
+ await wait(()=>packets.every(p=>p.some(x=>x.wireBase)));await new Promise(r=>setTimeout(r,30));
+ const v=room.view(a.token);room.receive(a.token,{epoch:v.epoch,sequence:v.next,wave:v.wave,phase:v.boards[0].phase,action:'speed',payload:{value:2}});
+ await wait(()=>packets.every(p=>p.some(x=>x.wireDelta)));
+ assert.ok(packets[0].at(-1).boards[0].wireEnemies);
+ assert.equal(packets[1].at(-1).boards[0].wireEnemies,undefined);assert.equal(packets[1].at(-1).boards[0].enemies.length,1);
+});
+
+test('opt-in command acknowledgements include current state only after durable storage',async t=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'duo-command-state-')),file=path.join(dir,'checkpoint.json');
+ const store=createStore(file),a=store.create({requestId:crypto.randomUUID()});
+ store.join({requestId:crypto.randomUUID(),code:a.code});
+ const server=await listen(store),url=`http://127.0.0.1:${server.address().port}`,socket=await connect(url,{token:a.token,clientId:crypto.randomUUID()});
+ t.after(async()=>{socket.close();await stop(server,store);fs.rmSync(dir,{recursive:true,force:true});});
+ const v=(await request(socket,'/state')).body,packet={epoch:v.epoch,sequence:v.next,wave:v.wave,phase:v.boards[0].phase,action:'lobbyLoadout',payload:{towers:['archer','catapult','chain','freeze','mine']}};
+ const response=await socket.timeout(2000).emitWithAck('request',{path:'/command',packet,withState:true});
+ assert.equal(response.status,200);assert.equal(response.body.ok,true);
+ const saved=JSON.parse(fs.readFileSync(file,'utf8')).rooms[0].room;
+ assert.equal(response.body.state.next,saved.seats[0].next);
+ assert.equal(response.body.state.revision,saved.revision);
+ const duplicate=await socket.timeout(2000).emitWithAck('request',{path:'/command',packet,withState:true});
+ assert.equal(duplicate.body.duplicate,true);assert.equal(duplicate.body.state.next,response.body.state.next);
+});
 test('Socket.IO authenticates, rejects foreign origins, preserves commands and resumes saved rooms after update',async t=>{
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'autohex-socket-')),file=path.join(dir,'checkpoint.json');t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
  let store=createStore(file),server=await listen(store);const url=()=>`http://127.0.0.1:${server.address().port}`;

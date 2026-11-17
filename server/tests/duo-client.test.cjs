@@ -2,6 +2,15 @@ const {test}=require('node:test'),assert=require('node:assert/strict');
 const {createRoom}=require('../duo-room.cjs'),{createTransport}=require('../duo-transport.cjs');
 const client=require('../../duo-client.js');
 const loadout=['archer','catapult','chain','freeze','mine'];
+test('socket command state avoids another request and still retries a lost acknowledgement',async t=>{
+ const room=createRoom({seed:'combined-ack',loadouts:[loadout,loadout]}),seat=room.connect(0);room.connect(1);
+ const calls=[];let lose=true,current,resolveReady;const ready=new Promise(r=>resolveReady=r);
+ const socket={connected:true,on(){},connect(){},disconnect(){},timeout(){return this;},async emitWithAck(event,message){calls.push(message.path);if(message.path==='/state')return {status:200,body:room.view(seat.token)};assert.equal(message.withState,true);const result=room.receive(seat.token,message.packet);if(lose){lose=false;throw Error('Lost acknowledgement');}return {status:200,body:{...result,state:room.view(seat.token)}};}};
+ const adapter=client.create({token:seat.token,ioFactory:()=>socket,onView:v=>{current=v;resolveReady();}});t.after(()=>adapter.stop());adapter.start();await ready;
+ const next=current.next;const result=await adapter.send('speed',{value:2});
+ assert.equal(result.ok,true);assert.equal(result.duplicate,true);assert.equal(current.next,next+1);assert.equal(current.speed,2);
+ assert.deepEqual(calls,['/state','/command','/command']);
+});
 test('browser adapter retries a lost acknowledgement with same sequence and uses only authoritative state',async t=>{
  const room=createRoom({seed:'network-adapter',loadouts:[loadout,loadout]}),seat=room.connect(0);room.connect(1);const server=createTransport(room,{browser:true,autoTick:true});await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));t.after(()=>new Promise(resolve=>{server.closeAllConnections();server.close(resolve);}));const origin='http://127.0.0.1:'+server.address().port;
  assert.equal((await fetch(origin+'/duo-prototype.html')).status,200);assert.equal((await fetch(origin+'/duo-client.js')).status,200);assert.equal((await fetch(origin+'/state',{headers:{Authorization:'Bearer '+seat.token,Origin:'http://foreign.test'}})).status,403);

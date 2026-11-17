@@ -119,6 +119,12 @@ const HexRunRuntime=(()=>{
     state.enemies.push({id:state.nextEnemyId++,...profile,...(villageId===undefined?{}:{villageId}),spawnedAt:state.elapsedMs,points,index:0,t:0,hp,maxHp:hp,maxArmorHp:profile.armorHp||0,maxMagicHp:profile.magicHp||0,alive:true,x:start.x,y:start.y});
   }
 
+  const combatSlots=new WeakMap();
+  function towerSlots(tile){
+    const old=combatSlots.get(tile),signature=[tile.q,tile.r,tile.type,tile.rotation,tile.slots];
+    if(old&&signature.every((v,i)=>v===old.signature[i]))return old.slots;
+    const slots=HexMap.slotPositions(tile);combatSlots.set(tile,{signature,slots});return slots;
+  }
   function advance(state,random,dt,emit=()=>{}){
     if(!Number.isFinite(dt)||dt<0)throw new Error('Invalid simulation delta');
     if(!state.waveRunning)return 'idle';
@@ -129,7 +135,7 @@ const HexRunRuntime=(()=>{
     const existingEnemyCount=state.enemies.length;
     for(let i=0;i<existingEnemyCount;i++){const boss=state.enemies[i];if(!boss.alive||!boss.summonInterval||(boss.summoned||0)>=boss.summonLimit)continue;boss.nextSummonAt??=time+boss.summonInterval;if(time<boss.nextSummonAt)continue;boss.nextSummonAt=time+boss.summonInterval;boss.summoned=(boss.summoned||0)+1;const hp=Math.round(boss.maxHp*.025);state.projectiles.push({kind:'blast',x:boss.x,y:boss.y,r:24,ttl:1,max:1,color:'#c598ff'});state.enemies.push({id:state.nextEnemyId++,type:'swarm',name:'Seelendiener',...(boss.villageId===undefined?{}:{villageId:boss.villageId}),summoned:true,hp,maxHp:hp,armorHp:0,magicHp:0,speed:boss.speed*.8,killGold:0,baseDamage:1,alive:true,points:boss.points.map(p=>({...p})),index:boss.index,t:boss.t,x:boss.x,y:boss.y});}
     const powered=state.challengeKind==='powerGrid'?HexPowerGrid.activeIds(state):null;
-    const refs=[];for(const tile of state.map.values()){if(!tile.towers?.some(Boolean))continue;const slots=HexMap.slotPositions(tile);(tile.towers||[]).forEach((tw,i)=>{if(tw&&(!powered||powered.has(tw.statId)))refs.push({tw,pos:slots[i],tile});});}
+    const refs=[];for(const tile of state.map.values()){if(!tile.towers?.some(Boolean))continue;const slots=towerSlots(tile);(tile.towers||[]).forEach((tw,i)=>{if(tw&&(!powered||powered.has(tw.statId)))refs.push({tw,pos:slots[i],tile});});}
     const base=HexHeroes.combatRef(state);if(base)refs.push(base);
     HexCombat.step(state,refs,HexData.TOWERS,dt,time,emit);
     return state.hp<=0?'defeat':state.pendingSpawns===0&&state.enemies.length===0?'complete':'running';

@@ -74,10 +74,10 @@ const HexExploration=(()=>{
     let nearest=Infinity;for(const tile of map.values()) nearest=Math.min(nearest,distance(tile,position));
     return nearest<=clearRadius+(map.revealBonus||0)?'clear':nearest<=fogRadius||position.relicId&&position.relicLocated?'fog':'hidden';
   }
-  function gridCells(map,landmarks){
+  function gridCells(map,landmarks,visible=position=>visibility(map,position)){
     const cells=new Map(map);
     for(const tile of map.values())for(let d=0;d<6;d++){const n=HexMap.neighbor(tile.q,tile.r,d);cells.set(n.q+','+n.r,n);}
-    for(const landmark of landmarks?.values()||[])if(visibility(map,landmark)!=='hidden')cells.set(landmark.q+','+landmark.r,landmark);
+    for(const landmark of landmarks?.values()||[])if(visible(landmark)!=='hidden')cells.set(landmark.q+','+landmark.r,landmark);
     return [...cells.values()];
   }
   function claim(state,q,r){

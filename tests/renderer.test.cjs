@@ -1,5 +1,21 @@
 const { test } = require('node:test'), assert = require('node:assert/strict');
 const fs = require('node:fs'), path = require('node:path'), vm = require('node:vm');
+
+test('enemy health bars retain their geometry and skip writes only while all six health values match',()=>{
+ const source=fs.readFileSync(path.join(__dirname,'../classes/three-renderer.js'),'utf8');
+ const fn=source.match(/  function syncEnemyBars\(obj,e\)\{[\s\S]*?\n  \}/)[0];
+ const context={clamp:(v,min,max)=>Math.max(min,Math.min(max,v))};vm.runInNewContext(fn+';globalThis.sync=syncEnemyBars;',context);
+ let writes=0;const track=o=>new Proxy(o,{set(target,key,value){writes++;target[key]=value;return true;}});
+ const mesh=()=>track({position:track({x:0,y:0}),scale:track({x:26})});
+ const obj={fgs:{hp:mesh(),armorHp:mesh(),magicHp:mesh()},barBgs:{hp:mesh(),armorHp:mesh(),magicHp:mesh()}};
+ const enemy={hp:50,maxHp:100,armorHp:0,maxArmorHp:100,magicHp:20,maxMagicHp:40};context.sync(obj,enemy);
+ assert.equal(obj.fgs.hp.scale.x,13);assert.equal(obj.fgs.hp.position.x,-6.5);assert.equal(obj.fgs.hp.position.y,0);
+ assert.equal(obj.fgs.armorHp.visible,false);assert.equal(obj.fgs.magicHp.visible,true);assert.equal(obj.fgs.magicHp.position.y,5);
+ writes=0;for(let i=0;i<60;i++)context.sync(obj,{...enemy,x:i,y:i});assert.equal(writes,0);
+ context.sync(obj,{...enemy,armorHp:10,maxArmorHp:20});assert.ok(writes>0);assert.equal(obj.fgs.armorHp.scale.x,13);assert.equal(obj.fgs.magicHp.position.y,10);
+ context.sync(obj,{...enemy,hp:0,maxMagicHp:0});assert.equal(obj.fgs.hp.scale.x,.001);assert.equal(obj.fgs.hp.visible,true);assert.equal(obj.fgs.magicHp.visible,false);
+ context.sync(obj,{...enemy,maxHp:200});assert.equal(obj.fgs.hp.scale.x,6.5);
+});
 test('placement hint follows camera movement and hides when its tile leaves the view',()=>{
  const source=fs.readFileSync(path.join(__dirname,'../classes/three-renderer.js'),'utf8');
  const cameraFn=source.match(/  function applyCamera\(\)\{[\s\S]*?\n  \}/)[0],hintFn=source.match(/  function positionRotateHint\(\)\{[\s\S]*?\n  \}/)[0];

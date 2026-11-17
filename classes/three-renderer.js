@@ -316,9 +316,16 @@ function create(host0,commands){
     return [id,{fill,border}];
   }));
   let overlaySig='';
+  // Scoped to one synchronous render: reveals, map edits and board switches
+  // cannot reuse a visibility result from a previous update.
+  let landmarkVisibilityCache=new WeakMap();
+  function landmarkVisibility(landmark){
+    if(!landmarkVisibilityCache.has(landmark))landmarkVisibilityCache.set(landmark,HexExploration.visibility(state.map,landmark));
+    return landmarkVisibilityCache.get(landmark);
+  }
   function clearOverlays(){for(const mesh of [...layer.overlays.children]){layer.overlays.remove(mesh);mesh.dispose();}overlaySig='';}
   function syncTileOverlays(){
-    const highlight=HexBiomes.highlight(state)||HexBuildings.highlight(state),cells=state.showHexGrid?HexExploration.gridCells(state.map,state.landmarks):[];
+    const highlight=HexBiomes.highlight(state)||HexBuildings.highlight(state),cells=state.showHexGrid?HexExploration.gridCells(state.map,state.landmarks,landmarkVisibility):[];
     const sig=JSON.stringify([cells.map(t=>key(t.q,t.r)),highlight.color,highlight.tileColors,highlight.tiles.map(t=>key(t.q,t.r)),highlight.otherColor,(highlight.otherTiles||[]).map(t=>key(t.q,t.r)),highlight.currentColor,(highlight.currentTiles||[]).map(t=>key(t.q,t.r))]);if(sig===overlaySig)return;
     clearOverlays();overlaySig=sig;
     const add=(tiles,geometry,material,order,colors)=>{if(!tiles.length)return;const mesh=new THREE.InstancedMesh(geometry,material,tiles.length),matrix=new THREE.Matrix4();tiles.forEach((tile,i)=>{const p=axialToWorld(tile.q,tile.r);matrix.makeTranslation(p.x,3,p.y);mesh.setMatrixAt(i,matrix);if(colors)mesh.setColorAt(i,new THREE.Color(colors[key(tile.q,tile.r)]));});mesh.instanceMatrix.needsUpdate=true;if(mesh.instanceColor)mesh.instanceColor.needsUpdate=true;mesh.renderOrder=order;layer.overlays.add(mesh);};
@@ -468,7 +475,7 @@ function create(host0,commands){
     const seen=new Set();
     for(const landmark of state.landmarks?.values()||[]){
       if(landmark.claimed) continue;
-      const visibility=HexExploration.visibility(state.map,landmark);if(visibility==='hidden') continue;
+      const visibility=landmarkVisibility(landmark);if(visibility==='hidden') continue;
       const id=key(landmark.q,landmark.r),c=axialToWorld(landmark.q,landmark.r),p=landmark.prefab,clear=visibility==='clear'&&p;
       const sig=[visibility,landmark.type,p?.type,p?.rotation].join('|');seen.add(id);
       let record=landmarkRecords.get(id);
@@ -486,7 +493,7 @@ function create(host0,commands){
     for(const [id,record] of [...landmarkRecords]) if(!seen.has(id)){record.holder.removeFromParent();landmarkRecords.delete(id);}
   }
   function syncEmpty(){
-    const landmarkVisible=[...state.landmarks?.values()||[]].filter(l=>!l.claimed&&HexExploration.visibility(state.map,l)!=='hidden').map(l=>key(l.q,l.r));
+    const landmarkVisible=[...state.landmarks?.values()||[]].filter(l=>!l.claimed&&landmarkVisibility(l)!=='hidden').map(l=>key(l.q,l.r));
     const sig=state.map.size+'|'+isSakura()+'|'+landmarkVisible.join(';');if(sig===emptySig) return;emptySig=sig;clearGroup(layer.empty);
     const adjacent=new Map();
     for(const tile of state.map.values()) for(let d=0;d<6;d++){const n=neighbor(tile.q,tile.r,d),id=key(n.q,n.r);if(!state.map.has(id)&&!landmarkVisible.includes(id)) adjacent.set(id,n);}
@@ -561,7 +568,13 @@ function create(host0,commands){
     if(retargetRing){retargetRing.scale.setScalar(24);retargetRing.position.y=2;retargetRing.visible=false;group.add(retargetRing);}
     return {group,picks,hint,retargetRing,tile,index};
   }
-  function objectSig(tile){return JSON.stringify([tile.type==='base'?baseUpgradeParts().key:'',tile.slots,tile.buildingSlots,tile.type,tile.rotation,(tile.towers||[]).map(t=>t&&[t.type,t.branch,t.finalUpgrade,t.ultimate,t.level,t.tileType,t.supportRange,t.rangeFactor,t.biome]),(tile.buildings||[]).map(b=>b&&b.type)]);}
+  const objectSignatures=new WeakMap();
+  function sameSignatureValues(a,b){return a===b||Array.isArray(a)&&Array.isArray(b)&&a.length===b.length&&a.every((value,i)=>sameSignatureValues(value,b[i]));}
+  function objectSig(tile){
+    const values=[tile.type==='base'?baseUpgradeParts().key:'',tile.slots,tile.buildingSlots,tile.type,tile.rotation,(tile.towers||[]).map(t=>t&&[t.type,t.branch,t.finalUpgrade,t.ultimate,t.level,t.tileType,t.supportRange,t.rangeFactor,t.biome]),(tile.buildings||[]).map(b=>b&&b.type)],old=objectSignatures.get(tile);
+    if(old&&sameSignatureValues(values,old.values))return old.sig;
+    const sig=JSON.stringify(values);objectSignatures.set(tile,{values,sig});return sig;
+  }
   function syncObjects(){
     const seen=new Set();
     for(const tile of state.map.values()){
@@ -677,6 +690,12 @@ function create(host0,commands){
     obj.fgs={};obj.barBgs={};[['hp',mats.hp,0],['armorHp',mats.armor,5],['magicHp',mats.magic,10]].forEach(([field,material,offset])=>{const bg=new THREE.Mesh(barGeometry,mats.bar),fg=new THREE.Mesh(barGeometry,material);bg.scale.set(26,3,1);fg.scale.set(26,3,1);fg.position.z=.1;bg.position.y=fg.position.y=offset;bar.add(bg,fg);obj.fgs[field]=fg;obj.barBgs[field]=bg;});bar.position.y=obj.barY;group.add(bar);
     layer.dynamic.add(group);return obj;
   }
+  function syncEnemyBars(obj,e){
+    const values=[e.hp,e.maxHp,e.armorHp,e.maxArmorHp,e.magicHp,e.maxMagicHp];
+    if(obj.barValues&&values.every((v,i)=>Object.is(v,obj.barValues[i])))return;
+    obj.barValues=values;
+    let barRow=0;for(const [field,max] of [['hp','maxHp'],['armorHp','maxArmorHp'],['magicHp','maxMagicHp']]){const fg=obj.fgs[field],visible=e[max]>0&&(field==='hp'||e[field]>0),ratio=visible?clamp((e[field]||0)/e[max],0,1):0;fg.visible=obj.barBgs[field].visible=visible;if(visible){fg.position.y=obj.barBgs[field].position.y=barRow++*5;}fg.scale.x=Math.max(.001,26*ratio);fg.position.x=-13*(1-ratio);}
+  }
   function syncEnemies(){
     const alive=new Set();
     for(const e of state.enemies){
@@ -692,7 +711,7 @@ function create(host0,commands){
         obj.remoteMotion=obj.last?{x:obj.group.position.x,y:obj.group.position.z,toX:e.x,toY:e.y,start:performance.now()}:null;
       }
       obj.last={x:e.x,y:e.y};
-      if(!state.remoteView||!obj.remoteMotion)obj.group.position.set(e.x,obj.baseY,e.y);let barRow=0;for(const [field,max] of [['hp','maxHp'],['armorHp','maxArmorHp'],['magicHp','maxMagicHp']]){const fg=obj.fgs[field],visible=e[max]>0&&(field==='hp'||e[field]>0),ratio=visible?clamp((e[field]||0)/e[max],0,1):0;fg.visible=obj.barBgs[field].visible=visible;if(visible){fg.position.y=obj.barBgs[field].position.y=barRow++*5;}fg.scale.x=Math.max(.001,26*ratio);fg.position.x=-13*(1-ratio);}
+      if(!state.remoteView||!obj.remoteMotion)obj.group.position.set(e.x,obj.baseY,e.y);syncEnemyBars(obj,e);
     }
     for(const [id,obj] of [...enemyObjects]) if(!alive.has(id)){layer.dynamic.remove(obj.group);obj.body?.material.dispose();obj.sprite?.material.dispose();obj.healGlow?.dispose();enemyObjects.delete(id);}
   }
@@ -958,6 +977,7 @@ function create(host0,commands){
   function render(nextState,placementTargets=[]){
     if(state!==nextState){if(state) rebuildAll();state=nextState;}
     targetList=placementTargets;if(!ready) return;
+    landmarkVisibilityCache=new WeakMap();
     syncTileOverlays();syncTiles();syncLandmarks();syncEmpty();syncObjects();syncTargets();syncGhost();syncSelection();syncMines();syncConsumables();syncEnemies();syncProjectiles();syncPowerVisuals();syncLabels();
     if(pickDirty){pickables=[...objectRecords.values()].flatMap(r=>r.picks).concat(layer.targets.children.map(g=>g.children[1]));layer.objects.updateMatrixWorld(true);layer.targets.updateMatrixWorld(true);pickDirty=false;}
     refreshPointerCursor();
@@ -995,7 +1015,8 @@ function create(host0,commands){
     }else slowFrames=0;
     const dt=Math.min((now-last)/1000,.1);last=now;
     if(state&&ready){
-      const enemies=state.enemies||[],aimDistances=new Map();
+      const enemies=state.enemies||[],aimDistances=new Map();let rangeQuery;
+      const nearby=(pos,range)=>(rangeQuery??=HexCombat.presentationRange(enemies))(pos,range);
       const aimDistance=e=>{if(!aimDistances.has(e))aimDistances.set(e,HexCombat.remainingDistance(e));return aimDistances.get(e);};
       for(const ring of overloadRings)ring.rotation.y=now*.004;
       for(const record of objectRecords.values())for(const obj of record.buildings)if(obj.hint.visible)obj.hint.position.y=50+Math.sin(now/220)*3;
@@ -1005,13 +1026,13 @@ function create(host0,commands){
         if(!obj.turret||obj.def.aura) continue;
         const tower=state.map.get(key(obj.tile.q,obj.tile.r))?.towers[obj.index]||obj.tower,definition=HexData.towerDefinition(tower);
         const shot=tower.aim,shooting=shot&&state.elapsedMs-shot.time<350;
-        const best=shooting?shot:HexCombat.targetByPriority(enemies.filter(e=>e.alive&&!e.sporeHidden&&(!e.immunity||e.immunity!==definition.damageType)&&Math.hypot(e.x-obj.pos.x,e.y-obj.pos.y)<=definition.range),tower,obj.pos,aimDistance);
+        const best=shooting?shot:HexCombat.targetByPriority(nearby(obj.pos,definition.range).filter(e=>e.alive&&!e.sporeHidden&&(!e.immunity||e.immunity!==definition.damageType)),tower,obj.pos,aimDistance);
         if(best){const wanted=Math.atan2(-(best.y-obj.pos.y),best.x-obj.pos.x),diff=Math.atan2(Math.sin(wanted-obj.angle),Math.cos(wanted-obj.angle));obj.angle+=diff*(shooting?1:Math.min(1,dt*10));obj.turret.rotation.y=obj.angle;}
         if(obj.kick>0){obj.kick=Math.max(0,obj.kick-dt*9);const k=obj.kick*obj.kick*.045;obj.turret.position.set(obj.turretBase.x-Math.cos(obj.angle)*k,obj.turretBase.y,obj.turretBase.z+Math.sin(obj.angle)*k);}   // Rückstoß entgegen der Schussrichtung
       }
       const baseRange=(typeof HexHeroes!=='undefined'&&HexHeroes.weapon(state)?.range)||0;
       for(const record of tileRecords.values()){const obj=record.weapon;if(!obj?.turret) continue;
-        let best=null,bestDistance=baseRange;for(const e of enemies){if(e.sporeHidden)continue;const d=Math.hypot(e.x-obj.pos.x,e.y-obj.pos.y);if(d<=bestDistance){best=e;bestDistance=d;}}
+        let best=null,bestDistance=baseRange;for(const e of nearby(obj.pos,baseRange)){if(e.sporeHidden)continue;const d=Math.hypot(e.x-obj.pos.x,e.y-obj.pos.y);if(d<=bestDistance){best=e;bestDistance=d;}}
         if(best){const wanted=Math.atan2(-(best.y-obj.pos.y),best.x-obj.pos.x),diff=Math.atan2(Math.sin(wanted-obj.angle),Math.cos(wanted-obj.angle));obj.angle+=diff*Math.min(1,dt*10);obj.turret.rotation.y=obj.angle;}
         if(obj.kick>0){obj.kick=Math.max(0,obj.kick-dt*9);const k=obj.kick*obj.kick*.045;obj.turret.position.set(obj.turretBase.x-Math.cos(obj.angle)*k,obj.turretBase.y,obj.turretBase.z+Math.sin(obj.angle)*k);}
       }

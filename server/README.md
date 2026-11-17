@@ -45,6 +45,71 @@ Dies ersetzt die ältere Aussage „keine Trennungspause“. Browser im Hintergr
 
 ## Dauerhafte Wiederaufnahme (aktueller Stand)
 
+### Worker und aufgeteilter Speicher (17.11.2026)
+
+Der Launcher verwendet acht getrennte Node-Worker mit jeweils höchstens einem
+Raum für Simulation, Autorisierung und Speicherung. Ein Raum bleibt während
+seiner gesamten Lebensdauer in seinem Worker. HTTP, Socket.IO, globale
+Lobby-Zuordnung und Assets bleiben im Hauptthread. Neue Lobbys/Beitritte werden
+global geordnet, damit Wiederholungen, Einladungscodes und die Acht-Raum-Grenze
+auch über Worker-Grenzen erhalten bleiben. Laufende Spielbefehle gehen direkt
+an den zuständigen Worker, ohne auf andere Partien zu warten.
+Ein zusätzlicher, bei Bedarf gestarteter Worker berechnet die Netzwerk-Deltas und hält
+die bestätigten Baselines getrennt pro Socket. Öffentliche Ansichten werden als
+JSON-Text zwischen Simulations- und Netzwerk-Worker weitergereicht; private
+Checkpoints gelangen nicht in diesen Datenweg. Pro Socket bleibt höchstens ein
+Snapshot unterwegs, insgesamt sind maximal 128 Encoder-Aufträge offen.
+Ein Encoder-Ausfall verwirft nur die Netzwerk-Baselines: Der nächste Auftrag
+startet einen neuen Encoder und liefert zunächst einen vollständigen Zustand.
+Er startet keine neue Partie. Beim Schließen des Servers wird auch der Encoder
+beendet. Socket.IO-JSON-Encoding und Kompression bleiben im Hauptthread bzw.
+in dessen bestehender zlib-Verarbeitung.
+Innerhalb des Workers bleibt die Reihenfolge synchron: Eigentümerprüfung,
+Spielaktion, dauerhafte Speicherung, Antwort. Der Simulationstakt (50-ms-Schritte
+und bisherige Geschwindigkeitsfaktoren) bleibt gleich. Es gibt kein paralleles
+Simulieren desselben Matches und keine Bestätigung vor erfolgreichem Schreiben.
+Weiterhin darf nur ein Server dieselben Speicherpfade verwenden.
+
+`DUO_SAVE_FILE` bleibt der Einstiegspunkt und enthält einen festen Pool-Verweis
+(`autohex-worker-pool`, Version 1) auf acht Dateien in `<DUO_SAVE_FILE>.pool/`.
+Jeder Worker verwaltet ausschließlich seinen `slot-N.json`-Index und dessen
+`slot-N.json.rooms/`-Verzeichnis. Die Raumversionen bleiben SHA-256-geprüft und
+unveränderlich; neue Raumdaten werden vor dem jeweiligen Index dauerhaft
+geschrieben. Aktuelle und vorherige Generation bleiben erhalten. Kein Worker
+schreibt den Index eines anderen Workers. Ergebnisbelege und Retry-Kennungen
+bleiben im zuständigen Slot erhalten, auch wenn dessen vorheriger Raum endet.
+Fehlende oder beschädigte Dateien führen zum Startfehler, nie zu Ersatzpartien.
+
+Bestehende Einzeldateien und Lobby-Indizes werden automatisch gelesen. Vor der
+Umstellung entstehen `.before-pool` (unveränderte ursprüngliche Datei) und
+`.before-pool-export` (vollständige selbstständige Sicherung). Der Pool-Verweis
+wird erst nach allen acht dauerhaften Slot-Dateien veröffentlicht. Ursprüngliche
+Raumdateien bleiben für Rollback erhalten. Regeln, Matchformat, RNG-Zustände,
+Spielerlinks, Befehlsfolgen und Ergebnisbelege werden nicht zurückgesetzt.
+`.previous` ist der vorherige **Index** und benötigt die Dateien aus dem
+ursprünglichen `.rooms`-Verzeichnis. Es erfolgt kein automatischer Rückfall auf
+einen älteren Stand, der bereits bestätigte Aktionen verlieren könnte.
+
+Backups: bei angehaltenem Server `node server/backup.cjs SOURCE NEW_DESTINATION`
+verwenden. Das Werkzeug liest alle drei Speicherlayouts und erstellt eine validierte,
+selbstständige Einzeldatei im bisherigen Format. Auch `.before-update` ist nach
+sauberem Shutdown eine solche vollständige Einzeldatei. Nur den neuen Index zu
+kopieren reicht **nicht** als Backup. Alternativ müssen Index und gesamtes
+`.pool`-Verzeichnis einschließlich aller Unterverzeichnisse bei gestopptem Server
+gemeinsam gesichert werden (beim alten Lobby-Index stattdessen `.rooms`).
+Für die Rückkehr zu älterem Servercode dessen passenden, selbstständigen Export
+verwenden, nicht den neuen Index. Der Export überschreibt keine bestehende Zieldatei.
+
+Shutdown stoppt zuerst neue Zugriffe und den Worker-Takt, wartet laufende
+Operationen ab, schreibt Backup/letzten Stand und beendet danach den Worker.
+Ein ausgefallener Simulations-Worker stoppt die übrigen Takte, sperrt neue
+Aktionen und setzt den Healthcheck auf 503;
+er startet nicht heimlich ein neues Match. Bei hartem Abbruch gilt weiterhin
+das bisherige Checkpoint-Intervall für unbestätigten Kampffortschritt.
+
+Die folgenden Absätze beschreiben die vorherige Einzeldatei-Version; für
+Dateiaufteilung, Backups und Worker-Betrieb gilt die Ergänzung oben.
+
 Der Launcher speichert standardmäßig unter `~/.autohex-duo/checkpoint.json`, außerhalb der öffentlich ausgelieferten Dateien. `DUO_SAVE_FILE` kann auf einen privaten absoluten Pfad umgestellt werden. Die Datei enthält private Sitzungstokens: nicht teilen oder ins Webverzeichnis legen. Betriebssystemrechte zusätzlich passend zum Dienstkonto setzen; Modus 0600 ist auf Windows kein Ersatz für ACLs.
 
 Erstellen, Beitreten und Commands werden vor der Antwort atomar gespeichert (temporäre Datei, fsync, Umbenennen). Die Kampfsimulation sichert zusätzlich jede Sekunde. Nach hartem Prozessverlust können bis zu etwa einer Sekunde Kampfzeit zurückgerollt werden; bestätigte Käufe sind bereits gespeichert. SIGINT/SIGTERM sichern abschließend. Die Wiederherstellung prüft Format, Snapshotversion und Spielversion; unbekannte/defekte Dateien führen zum Startfehler und werden nicht überschrieben. Schreibfehler stoppen Simulation und neue Aktionen (HTTP 503).

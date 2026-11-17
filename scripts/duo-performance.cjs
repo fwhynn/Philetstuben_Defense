@@ -20,8 +20,8 @@ function sample(){const {room,a,b}=fixture(),client=require('../duo-client.js');
   t=performance.now();const text=JSON.stringify([first,second]);wire.push(performance.now()-t);checksum=createHash('sha256').update(text.replace(/"serverId":"[^"]+"/g,'').replace(/"epoch":"[^"]+"/g,'')).digest('hex');
  }
  const median=a=>a.sort((a,b)=>a-b)[Math.floor(a.length/2)];return {viewPairMs:median(times),presentationWithJsonMs:median(present),encodePairMs:median(wire),checksum};}
-function bandwidth(){
- const codec=require('../classes/duo-wire.js'),zlib=require('node:zlib'),{room,a}=fixture(),initial=room.view(a.token),base=codec.baseline(initial,'benchmark'),decoder=codec.decoder();decoder.accept({...initial,wireBase:'benchmark'});
+function bandwidth(codec=require('../classes/duo-wire.js'),options={}){
+ const zlib=require('node:zlib'),{room,a}=fixture(),initial=room.view(a.token),base=codec.baseline(initial,'benchmark',options),decoder=codec.decoder();decoder.accept({...initial,wireBase:'benchmark'});
  let fullBytes=0,deltaBytes=0,fullCompressed=0,deltaCompressed=0,encodeMs=0,decodeMs=0;
  for(let tick=1;tick<=20;tick++){
   const next=JSON.parse(JSON.stringify(initial));next.revision+=tick;
@@ -34,4 +34,4 @@ function bandwidth(){
  return {scenario:'Moving enemies, every tower aiming, 200 mine removals + 100 placements per board in two seconds, including full baseline refresh',fullBytes,deltaBytes,fullCompressed,deltaCompressed,encodeMsPerPacket:encodeMs/20,decodeMsPerPacket:decodeMs/20};
 }
 if(require.main===module){const result={scope:'Two boards, each 81 tiles / 160 towers / 300 enemies / 3000 mines; 35 changed revisions',...sample(),bandwidth:bandwidth()};if(process.argv[2])fs.writeFileSync(process.argv[2],JSON.stringify(result,null,2));console.log(result);}
-module.exports={fixture,sample};
+module.exports={fixture,sample,bandwidth};

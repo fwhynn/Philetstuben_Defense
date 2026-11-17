@@ -158,10 +158,11 @@ const HexDuoSession=(()=>{
       sync(match);
     }
   }
-  function capture(match){
+  function capture(match,omitBoards=false){
 
-    return {duo:JSON.parse(JSON.stringify({...(match.hexGifts?{hexGifts:match.hexGifts}:{}),...(match.endless?{endless:true,victoryPaid:match.victoryPaid}:{}),...(match.endlessVotes?{endlessVotes:match.endlessVotes}:{}),speed:match.speed||1,paused:!!match.paused,portals:match.portals,reinforcements:match.reinforcements,waveHelp:match.waveHelp,pendingHelp:match.pendingHelp,leaked:match.leaked,support:match.support,delivery:match.delivery||null,result:match.result||null,rematch:match.rematch||[false,false]})),format:'autohex-duo',version:VERSION,seed:match.seed,hp:match.hp,maxHp:match.maxHp,wave:match.wave,phase:match.phase,ready:[...match.ready],finished:[...match.finished],elapsedMs:match.elapsedMs,receipts:match.receipts.map(r=>[...r]),boards:match.boards.map(run=>HexRunSnapshot.capture(run.state,run.random))};
+    return {duo:JSON.parse(JSON.stringify({...(match.hexGifts?{hexGifts:match.hexGifts}:{}),...(match.endless?{endless:true,victoryPaid:match.victoryPaid}:{}),...(match.endlessVotes?{endlessVotes:match.endlessVotes}:{}),speed:match.speed||1,paused:!!match.paused,portals:match.portals,reinforcements:match.reinforcements,waveHelp:match.waveHelp,pendingHelp:match.pendingHelp,leaked:match.leaked,support:match.support,delivery:match.delivery||null,result:match.result||null,rematch:match.rematch||[false,false]})),format:'autohex-duo',version:VERSION,seed:match.seed,hp:match.hp,maxHp:match.maxHp,wave:match.wave,phase:match.phase,ready:[...match.ready],finished:[...match.finished],elapsedMs:match.elapsedMs,receipts:match.receipts.map(r=>[...r]),...(!omitBoards?{boards:match.boards.map(run=>HexRunSnapshot.capture(run.state,run.random))}:{})};
   }
+  function stringify(match){return JSON.stringify(capture(match,true)).slice(0,-1)+',"boards":['+match.boards.map(run=>HexRunSnapshot.stringify(run.state,run.random)).join(',')+']}';}
   function restore(snapshot){
     if(snapshot?.format!=='autohex-duo'||![2,VERSION].includes(snapshot.version)||!Array.isArray(snapshot.boards)||snapshot.boards.length!==2||!['prepare','combat','gameover','victory'].includes(snapshot.phase))throw new Error('Invalid Duo checkpoint');
     for(const key of ['ready','finished','receipts'])if(!Array.isArray(snapshot[key])||snapshot[key].length!==2)throw new Error('Invalid Duo checkpoint');
@@ -201,5 +202,5 @@ const HexDuoSession=(()=>{
     if(match.delivery&&(match.delivery.rulesVersion??1)===1){for(const o of match.delivery.offers){if(o.index===null)o.choices[0].amount=DELIVERY.gold;else o.legacyGold=true;}match.delivery.rulesVersion=3;}
     return match;
   }
-  return {configureBoard,create,command,tick,capture,restore,DELIVERY,HEX_GIFT};
+  return {configureBoard,create,command,tick,capture,stringify,restore,DELIVERY,HEX_GIFT};
 })();

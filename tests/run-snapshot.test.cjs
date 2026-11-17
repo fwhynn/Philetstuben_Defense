@@ -42,9 +42,34 @@ test('checkpoint rejects unsupported phases and versions without changing the ru
   assert.throws(()=>core.snapshot.restore({...checkpoint,version:99}),/Incompatible/);
   for(const phase of ['reward','removal','bossReward']){run.state.phase=phase;assert.throws(()=>core.snapshot.capture(run.state,run.random),/Checkpoint/);}
 });
+
+test('direct serialization is byte-identical for routes, sentinels, maps, sets and RNG streams',()=>{
+ const core=loadCore(),run=combatRun(core),s=run.state;
+ for(let i=0;i<80;i++)core.runtime.advance(s,run.random,.05);
+ s.serializerFixture={missing:undefined,numbers:[NaN,Infinity,-Infinity,-0],set:new Set([1,'x']),map:new Map([[undefined,{x:2}]])};
+ for(const enemy of s.enemies)enemy.points=enemy.points.map(p=>({...p}));
+ assert.equal(core.snapshot.stringify(s,run.random),JSON.stringify(core.snapshot.capture(s,run.random)));
+ const restored=core.snapshot.restore(JSON.parse(core.snapshot.stringify(s,run.random)));
+ for(let i=0;i<100;i++){
+  assert.equal(core.runtime.advance(s,run.random,.05),core.runtime.advance(restored.state,restored.random,.05));
+  assert.equal(core.snapshot.stringify(s,run.random),JSON.stringify(core.snapshot.capture(restored.state,restored.random)));
+ }
+ s.cycle=s;assert.throws(()=>core.snapshot.stringify(s,run.random),/Cyclic/);
+});
 test('solo controller uses the same simulation and restores a JSON checkpoint',()=>{
   const {a}=load();a.state.map.set('1,0',{q:1,r:0,type:'straight',roads:[0,3],slots:0,towers:[]});a.state.phase='build';a.startWave();a.update(.2,200,false);
   const checkpoint=json(a.captureRunCheckpoint());a.update(.5,700,false);const future=json(a.captureRunCheckpoint());
   a.restoreRunCheckpoint(checkpoint);a.update(.5,700,false);
   assert.deepEqual(json(a.captureRunCheckpoint()),future);
+});
+
+test('route serialization caches expire between checkpoints and retain unusual point values',()=>{
+ const core=loadCore(),initial=combatRun(core),raw=[{x:1,y:2},{x:3,y:4}];
+ initial.state.routeFixture=[{points:raw},{points:raw},{points:raw.map(p=>({...p}))}];
+ const run=core.snapshot.restore(core.snapshot.capture(initial.state,initial.random)),s=run.state,points=s.routeFixture[0].points;
+ s.routeFixture[1].points=points;
+ const check=()=>assert.equal(core.snapshot.stringify(s,run.random),JSON.stringify(core.snapshot.capture(s,run.random)));
+ check();points[0].x=99;points.push({x:NaN,y:Infinity,tunnel:undefined});check();
+ points[1].label='雪"\\';points[1].nested={value:4};check();
+ s.routeFixture.push({points:[,undefined,null,{x:-0,y:-Infinity}]});check();
 });

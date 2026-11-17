@@ -5,6 +5,7 @@ const loadCore = require('../headless-core.cjs');
 const RULESET = require('../package.json').version;
 // Reviewed checkpoint compatibility, including legacy 20-gold gift migration.
 function compatibleRuleset(source,target=RULESET){
+  if(target==='1.3.1'&&['1.2.8','1.2.9','1.3.0'].includes(source))return true;
   if(target==='1.3.0'&&['1.2.8','1.2.9'].includes(source))return true;
   if(target==='1.2.9'&&source==='1.2.8')return true;
   return source===target || target==='1.2.1'&&source==='1.2.0' || target==='1.2.2'&&['1.1.9','1.2.0','1.2.1'].includes(source) || target==='1.2.3'&&['1.1.9','1.2.0','1.2.1','1.2.2'].includes(source) || target==='1.2.4'&&['1.1.9','1.2.0','1.2.1','1.2.2','1.2.3'].includes(source) || target==='1.2.5'&&['1.1.9','1.2.0','1.2.1','1.2.2','1.2.3','1.2.4'].includes(source);
@@ -85,6 +86,7 @@ function createRoom({ seed = crypto.randomUUID(), loadouts, now = () => Date.now
       seat.loadoutChosen = lobby.ready[player] || loadout.join('|') !== core.profile.START_TOWERS.join('|');
     }
   });
+  let matchGeneration=0;
   const serverId = crypto.randomUUID(); let frameTime=now(); let connectionKey = '', expired = false, ended = null, maintenanceAt = null;
   const presenceNow = () => maintenanceAt ?? now();
   function setMaintenance(enabled) { if (typeof enabled !== 'boolean') throw Error('Invalid maintenance state'); if (enabled && maintenanceAt === null) maintenanceAt = now(); else if (!enabled && maintenanceAt !== null) { const elapsed = now() - maintenanceAt; for (const s of seats) if (s) s.seen += Math.max(0, elapsed); maintenanceAt = null; } connection(); }
@@ -123,6 +125,7 @@ function createRoom({ seed = crypto.randomUUID(), loadouts, now = () => Date.now
     const fingerprint = JSON.stringify(packet);
     if (packet.sequence === session.next - 1 && session.last?.fingerprint === fingerprint) return { ...session.last.result, duplicate: true };
     if (packet.sequence !== session.next) return { ok: false, reason: 'sequence', next: session.next };
+    matchGeneration++; // A validated command may mutate state even when rejected.
     let result;
     const presence = connection();
     if (presence.paused) result = { ok: false, reason: ended ? 'match-ended' : presence.maintenance ? 'maintenance' : presence.expired ? 'reconnect-expired' : 'disconnected' };
@@ -160,6 +163,7 @@ function createRoom({ seed = crypto.randomUUID(), loadouts, now = () => Date.now
   function applyAugments(token,profile,guest) {
     const player=seat(token);if(player<0)return {ok:false,reason:'unauthorized'};
     if(lobby.started||ended||maintenanceAt!==null)return {ok:false,reason:'illegal'};
+    matchGeneration++;
     const s=match.boards[player].state;
     const session=seats[player],progress=core.profile.normalize(profile||guest||null,core.data.TOWERS);
     const heroes=Object.keys(core.heroes.definitions).filter(id=>core.profile.heroUnlocked(progress,id));
@@ -207,7 +211,15 @@ function createRoom({ seed = crypto.randomUUID(), loadouts, now = () => Date.now
     return value;
   }
   function publicResult() { return match.result ? { ...copy(match.result), id: offerId(match.result.id) } : null; }
+  // Cache only serialized match data; always refresh seats, rate limits and receipts.
+  let savedGeneration=-1,savedMatch;
+  function serializeCheckpoint() {
+    if(ended||expired)return null;
+    if(savedGeneration!==matchGeneration){savedMatch=core.duo.stringify(match);savedGeneration=matchGeneration;}
+    const header={format:'autohex-room',version:1,ruleset:RULESET,lobby:copy(lobby),epoch,revision,seats:copy(seats)};
+    return JSON.stringify(header).slice(0,-1)+',"match":'+savedMatch+'}';
+  }
   function checkpoint() { if (ended || expired) return null; return { format: 'autohex-room', version: 1, ruleset: RULESET, lobby: copy(lobby), epoch, revision, seats: copy(seats), match: core.duo.capture(match) }; }
-  return { applyAugments, hasSeat:token=>seat(token)>=0, pushKey(token){const i=seat(token);if(i<0)return null;connection();return serverId+epoch+':'+revision+':'+seats[i].next;}, get result() { return publicResult(); }, setMaintenance, connect, touch, claim, leave, receive, view, presence() { return connection(); }, checkpoint, tick() { if (!lobby.started || connection().paused || match.paused || match.phase!=='combat') return; frameTime=now(); for (let i = 0; i < (match.speed || 1) * core.runtime.PLAYBACK_RATE; i++)core.duo.tick(match); revision++; } };
+  return { applyAugments, hasSeat:token=>seat(token)>=0, pushKey(token){const i=seat(token);if(i<0)return null;connection();return serverId+epoch+':'+revision+':'+seats[i].next;}, get result() { return publicResult(); }, setMaintenance, connect, touch, claim, leave, receive, view, presence() { return connection(); }, checkpoint, serializeCheckpoint, tick() { if (!lobby.started || connection().paused || match.paused || match.phase!=='combat') return; matchGeneration++;frameTime=now(); for (let i = 0; i < (match.speed || 1) * core.runtime.PLAYBACK_RATE; i++)core.duo.tick(match); revision++; } };
 }
 module.exports = { createRoom, payloadValid, RULESET, motionPath, compatibleRuleset };

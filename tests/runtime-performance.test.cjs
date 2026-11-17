@@ -10,6 +10,7 @@ test('combat computes slot geometry only for occupied tiles and follows sales an
   calls=0;core.runtime.advance(state,random,2);assert.equal(calls,0);
   state.map.get('1,0').towers[0]={type:'mine',lastShot:0};
   core.runtime.advance(state,random,2);assert.equal(calls,1);
+  core.runtime.advance(state,random,2);assert.equal(calls,1,'unchanged occupied tile reuses its geometry');
 });
 function fixture(core){
   const run=core.runtime.create({seed:'route-cache',runId:'test',loadout});

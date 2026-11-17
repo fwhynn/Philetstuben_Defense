@@ -91,7 +91,18 @@ Schlägt Pull/npm fehl, bricht der Webhook vor dem Neustart ab; der Dienst läuf
 
 ## Spielstände und Grenzen
 
-`/var/lib/autohextd/checkpoint.json` enthält Lobbys, private Sitzungen, Karten, Gegner/Kampfzustand, Befehlssequenzen, Belohnungen und Ergebnisbelege. Speicherung nach mutierenden Befehlen sowie ungefähr jede Sekunde. Atomarer Dateitausch und fsync einschließlich Verzeichnis unter Linux; sauberes SIGTERM schreibt den letzten Stand. Socket-Verbindungen selbst werden neu aufgebaut, statt Betriebssystem-Sockets zu speichern.
+`/var/lib/autohextd/checkpoint.json` verweist auf acht private Worker-Slots unter
+`checkpoint.json.pool/`. Jeder Slot hat einen eigenen Index und eigene
+Raumdateien. Pro Worker läuft höchstens eine Partie. Alte Einzeldateien oder
+Lobby-Indizes werden nach Sicherung als `.before-pool` und als selbstständiger
+`.before-pool-export` automatisch übernommen. Speicherung nach mutierenden
+Befehlen sowie ungefähr jede Sekunde bleibt unverändert: erst Raumdaten mit
+fsync, dann der jeweilige Index mit fsync einschließlich Verzeichnis unter Linux.
+Sauberes SIGTERM stoppt alle Takte, wartet auf den letzten Stand und erstellt
+eine selbstständige `.before-update`-Datei im bisherigen Format. Socket-
+Verbindungen werden neu aufgebaut. `/healthz` meldet `simulationWorkers: 8`.
+
+Für ein vollständiges Backup den Server anhalten und `node server/backup.cjs SOURCE NEW_DESTINATION` verwenden, oder Pool-Verweis **und** komplettes `.pool`-Verzeichnis gemeinsam sichern (beim alten Lobby-Index das `.rooms`-Verzeichnis). Der Verweis allein ist kein Backup. Alte Serverversionen benötigen einen passenden selbstständigen Export. Weiterhin nur ein Serverprozess je Speicherpfad; Details in [server/README.md](../../server/README.md#worker-und-aufgeteilter-speicher-17112026).
 
 Bei hartem Prozessabbruch/Stromausfall kann der Fortschritt seit dem letzten Checkpoint fehlen. Inkompatible zukünftige Regel-/Speicherformatänderungen benötigen Migration; der Server darf solche Dateien nicht stillschweigend löschen. Vor jedem Release Kompatibilität prüfen. `.before-update` wird beim nächsten sauberen Stop ersetzt und ist kein Ersatz für regelmäßige versionierte Backups.
 

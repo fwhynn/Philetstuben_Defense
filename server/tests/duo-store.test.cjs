@@ -3,6 +3,14 @@ const {createStore}=require('../duo-store.cjs'),{createTransport}=require('../du
 function file(t){const dir=fs.mkdtempSync(path.join(os.tmpdir(),'autohex-duo-store-'));t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));return path.join(dir,'checkpoint.json');}
 function packet(store,seat,action,payload){const v=store.view(seat.token);return {epoch:v.epoch,sequence:v.next,wave:v.wave,phase:v.boards[seat.player].phase,action,payload};}
 function place(store,seat){const b=store.view(seat.token).boards[seat.player];for(let index=0;index<b.placements.length;index++)for(let rotation=0;rotation<6;rotation++){const p=b.placements[index][rotation].find(p=>p.legal);if(p)return {q:p.q,r:p.r,index,rotation};}throw Error('Missing opening');}
+test('unchanged flushes skip disk I/O but rejected-command rate limits are still persisted',t=>{
+ let time=0;const writes=[],store=createStore(file(t),{now:()=>time,write:(file,text)=>writes.push(text)});
+ const a=store.create({requestId:randomUUID()});store.join({requestId:randomUUID(),code:a.code});
+ const count=writes.length;store.flush();store.flush();assert.equal(writes.length,count);
+ store.receive(a.token,{});assert.equal(writes.length,count+1);
+ const next=JSON.parse(writes.at(-1)).rooms[0].room;assert.equal(next.seats[0].tokens,39);
+ time=50;store.touch(a.token);store.flush();assert.equal(JSON.parse(writes.at(-1)).rooms[0].room.seats[0].seen,50);
+});
 test('disk restart retains lobby, seats, gold and lost acknowledgement; both players must return',t=>{
  const target=file(t);let time=0,store=createStore(target,{now:()=>time});const request={requestId:randomUUID()},a=store.create(request),b=store.join({requestId:randomUUID(),code:a.code});
  require('./start-lobby.cjs')(store,[a,b]);const positions=[a,b].map(seat=>{const p=place(store,seat);assert.ok(store.receive(seat.token,packet(store,seat,'place',p)).ok);return p;});

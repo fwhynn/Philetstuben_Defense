@@ -27,9 +27,15 @@ test('release stamps static scripts, dynamic game loader and relative module imp
  fs.writeFileSync(path.join(dir,'classes/api.js'),'');
  fs.writeFileSync(path.join(dir,'classes/game.js'),'// first');
  fs.writeFileSync(path.join(dir,'classes/renderer.js'),'import {value} from "./detail.mjs";');
+ fs.writeFileSync(path.join(dir,'adapter.js'),'const wire=require("./classes/api.js?v=deadbeef");const path=require.resolve("./classes/api.js");import("./classes/api.js");');
  fs.writeFileSync(path.join(dir,'classes/detail.mjs'),'export const value=1;');
  const token=stampClientFiles(dir),html=fs.readFileSync(path.join(dir,'index.html'),'utf8');
  for(const file of ['api.js','game.js','renderer.js'])assert.ok(html.includes(file+'?v='+token));
  assert.ok(html.includes('"/socket.io/socket.io.js"'));
  assert.ok(fs.readFileSync(path.join(dir,'classes/renderer.js'),'utf8').includes('detail.mjs?v='+token));
+ const adapter=fs.readFileSync(path.join(dir,'adapter.js'),'utf8');
+ assert.ok(adapter.includes('require("./classes/api.js")'));
+ assert.ok(adapter.includes('require.resolve("./classes/api.js")'));
+ assert.ok(adapter.includes('import("./classes/api.js?v='+token+'")'));
+ assert.equal(stampClientFiles(dir),token);
 });

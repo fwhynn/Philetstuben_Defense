@@ -73,7 +73,10 @@ const HexCombat=(()=>{
     if(route){e.points=[{x:e.x,y:e.y},...route.map(p=>({...p}))];e.index=0;e.t=0;e.shortcutJump=true;e.shortcutFlight={start:state.elapsedMs,from:{x:e.x,y:e.y},to:{...route[0]}};}
   }
   const hiddenBySpores=(state,e)=> (state.enemyZones||[]).some(z=>z.kind==='spores'&&z.until>(state.elapsedMs||0)&&Math.hypot(e.x-z.x,e.y-z.y)<=z.r);
-  const pool=(e,name)=>Math.max(0,Number(e[name])||0);
+  // The headless VM otherwise resolves these globals for every pool of every
+  // candidate. Capture the unchanged built-ins once, keeping coercion exact.
+  const poolMax=Math.max,poolNumber=Number;
+  const pool=(e,name)=>poolMax(0,poolNumber(e[name])||0);
   const durability=e=>pool(e,'hp')+pool(e,'armorHp')+pool(e,'magicHp');
   function remainingDistance(e){let value=0;if(!e.points?.length)return Infinity;if(e.index<e.points.length-1){const a=e.points[e.index],b=e.points[e.index+1];value+=(b.tunnel?0:Math.hypot(b.x-a.x,b.y-a.y))*(1-(e.t||0));}for(let i=e.index+1;i<e.points.length-1;i++)value+=e.points[i+1].tunnel?0:Math.hypot(e.points[i+1].x-e.points[i].x,e.points[i+1].y-e.points[i].y);return value;}
   function targetByPriority(candidates,tower,pos,distance=remainingDistance){
@@ -87,6 +90,21 @@ const HexCombat=(()=>{
       if(ties.length===1)return best;candidates=ties;
     }
     return candidates[0];
+  }
+  // Frame-local broad phase for presentation. Exact distance and original array
+  // order are retained, including target-priority ties and base-weapon ties.
+  function presentationRange(enemies){
+    const cells=new Map(),size=128;
+    enemies.forEach((e,i)=>{if(!Number.isFinite(e.x)||!Number.isFinite(e.y))return;const key=Math.floor(e.x/size)+','+Math.floor(e.y/size);let cell=cells.get(key);if(!cell)cells.set(key,cell=[]);cell.push(i);});
+    return (pos,range)=>{
+      const exact=e=>Math.hypot(e.x-pos.x,e.y-pos.y)<=range;
+      if(!Number.isFinite(range)||!Number.isFinite(pos.x)||!Number.isFinite(pos.y))return enemies.filter(exact);
+      if(range<0)return [];
+      const x0=Math.floor((pos.x-range)/size),x1=Math.floor((pos.x+range)/size),y0=Math.floor((pos.y-range)/size),y1=Math.floor((pos.y+range)/size);
+      if((x1-x0+1)*(y1-y0+1)>enemies.length)return enemies.filter(exact);
+      const indices=[];for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++){const cell=cells.get(x+','+y);if(cell)for(const i of cell)indices.push(i);}
+      indices.sort((a,b)=>a-b);return indices.map(i=>enemies[i]).filter(exact);
+    };
   }
   function nextChainTarget(enemies,hit,last,range,damageType,state){
     let best=null,bestDistance=Infinity;
@@ -340,7 +358,9 @@ const HexCombat=(()=>{
     }
     triggerMines(state,emit);state.enemies=state.enemies.filter(e=>e.alive&&durability(e)>0);
     const mineLayout={}; // Shared lazily by all mine layers in this simulation step.
-    for(const ref of towerRefs){const def=ref.definition||HexData.towerDefinition(ref.tw,TOWERS);if(def.aura)continue;if(def.mine){layMine(state,ref,def,time,mineLayout);continue;}if(time-ref.tw.lastShot<def.cooldown*1000)continue;const inRange=state.enemies.filter(e=>e.alive&&durability(e)>0&&!hiddenBySpores(state,e)&&(!e.immunity||e.immunity!==def.damageType)&&Math.hypot(e.x-ref.pos.x,e.y-ref.pos.y)<=def.range);if(!inRange.length)continue;const primary=targetByPriority(inRange,ref.tw,ref.pos,targetDistance);if(ref.tw.type==='archer'&&cardValue(state,'archer')){
+    // Reject distant enemies before inspecting their pools/zones. The same exact
+    // hypot radius and array order still decide targeting; health stays live.
+    for(const ref of towerRefs){const def=ref.definition||HexData.towerDefinition(ref.tw,TOWERS);if(def.aura)continue;if(def.mine){layMine(state,ref,def,time,mineLayout);continue;}if(time-ref.tw.lastShot<def.cooldown*1000)continue;const inRange=state.enemies.filter(e=>e.alive&&withinMineRadius(e,ref.pos,def.range)&&durability(e)>0&&!hiddenBySpores(state,e)&&(!e.immunity||e.immunity!==def.damageType));if(!inRange.length)continue;const primary=targetByPriority(inRange,ref.tw,ref.pos,targetDistance);if(ref.tw.type==='archer'&&cardValue(state,'archer')){
         const max=cardLevel(state,'archer')===4?8:5,streak=Math.min(max,ref.tw.augmentStreak||0);
         if(ref.tw.augmentTarget!==primary.id){
           // The previous target's haste must not accelerate the first shot at a new target.
@@ -361,7 +381,7 @@ const HexCombat=(()=>{
         const angle=time*.001+index*Math.PI*2/ref.tw.souls.length,pos={x:ref.pos.x+Math.cos(angle)*22,y:ref.pos.y+Math.sin(angle)*22};
         state.projectiles.push({kind:'spirit',x:pos.x,y:pos.y,r:5,ttl:dt+.01,color:ref.def.color});
         if(time-soul.lastShot<1000)continue;
-        const targets=state.enemies.filter(e=>e.alive&&durability(e)>0&&!hiddenBySpores(state,e)&&(!e.immunity||e.immunity!==ref.def.damageType)&&Math.hypot(e.x-ref.pos.x,e.y-ref.pos.y)<=ref.def.range);
+        const targets=state.enemies.filter(e=>e.alive&&withinMineRadius(e,ref.pos,ref.def.range)&&durability(e)>0&&!hiddenBySpores(state,e)&&(!e.immunity||e.immunity!==ref.def.damageType));
         if(!targets.length)continue;const target=targetByPriority(targets,ref.tw,ref.pos,targetDistance);soul.lastShot=time;
         damageEnemy(target,ref.def.soulDamage,ref.def,state,emit,ref.tw);
         state.projectiles.push({kind:'line',x1:pos.x,y1:pos.y,x2:target.x,y2:target.y,ttl:.2,max:.2,color:ref.def.color,tower:'necromancer',id:nextProjectileId(state),hits:[target.id],hitAt:[{x:target.x,y:target.y}]});
@@ -377,5 +397,5 @@ const HexCombat=(()=>{
     if(state.splitChildren?.length){state.enemies.push(...state.splitChildren);state.splitChildren=[];}
     state.projectiles.forEach(p=>p.ttl-=dt);state.projectiles=state.projectiles.filter(p=>p.ttl>0);state.enemies=state.enemies.filter(e=>e.alive&&durability(e)>0);
   }
-  return {step,durability,remainingDistance,targetByPriority,consumables,lanePoint,buyConsumable,clearConsumables,applyConsumables,consumableStats,consumableRemaining};
+  return {step,durability,remainingDistance,targetByPriority,presentationRange,consumables,lanePoint,buyConsumable,clearConsumables,applyConsumables,consumableStats,consumableRemaining};
 })();
