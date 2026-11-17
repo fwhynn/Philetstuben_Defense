@@ -15,7 +15,7 @@ const HexDuoClient=(()=>{
  function inviteCode(value){const text=String(value||'').trim(),match=text.match(/[#&?]join=([a-f0-9]{10})(?![a-z0-9])/i)||text.replace(/[\s-]/g,'').match(/^([a-f0-9]{10})$/i);return match?match[1].toUpperCase():'';}
  function create({token,fetchImpl=fetch,onView=()=>{},onStatus=()=>{},clientId=crypto.randomUUID(),ioFactory=globalThis.io}){
   const socket=typeof ioFactory==='function'?ioFactory({autoConnect:false,auth:{token,clientId},reconnection:true}):null;
-  const wire=(typeof HexDuoWire!=='undefined'?HexDuoWire:typeof require==='function'?require('./classes/duo-wire.js'):null)?.decoder();
+  const wire=(typeof HexDuoWire!=='undefined'?HexDuoWire:typeof require==='function'?require('./classes/duo-wire.js?v=ca3d2cbabf271a05'):null)?.decoder();
   let view=null,busy=false,stopped=false,offline=false,conflict=false,invalid=false,timer;
   // Middleware rejections are not retried by Socket.IO itself: an unknown token is final, anything else retries.
   socket?.on('connect_error',error=>{if(stopped||socket.active)return;if(error?.message==='unauthorized'){invalid=true;return;}setTimeout(()=>{if(!stopped&&!socket.connected)socket.connect();},1000);});

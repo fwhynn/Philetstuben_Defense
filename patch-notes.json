@@ -1,6 +1,6 @@
 [
   {
-    "version": "next",
+    "version": "1.3.0",
     "title": "Duo gemeinsam stärker",
     "summary": "Eine kompakte Teamleiste, Wunschgeschenke und eine übersichtlichere Lobby verbessern das Duo. Dazu kommen die Sperrbasis, mehr Diamanten für weite Runs und viele Verbesserungen bei Menüs und Bedienung.",
     "sections": [
@@ -182,7 +182,8 @@
       "Erhaltene Geschenke werden mit Kartenbild oder Goldsymbol und dem Namen des Partners deutlich eingeblendet. Die Geschenkübersicht hält fest, was du bekommen hast.",
       "Beim Auswählen eines Zusatz-Hexes für Schmiede, Markt oder Sperrbasis hebt sich das Feld unter dem Mauszeiger hervor: Gold zeigt ein gültiges Ziel, Rot eine ungültige Auswahl. Ein ungültiger Klick beendet die Auswahl nicht.",
       "Die Duo-Infoleiste sitzt als schmale Teamleiste direkt am oberen Bildschirmrand. Sie vereint Wellenplanung, gemeinsame Leben, beide Spielerstatus und Kartenwechsel. Partnerhilfe und Geschenkverlauf bleiben über das Teamsymbol erreichbar."
-    ]
+    ],
+    "date": "2026-11-17"
   },
   {
     "version": "1.2.9",
