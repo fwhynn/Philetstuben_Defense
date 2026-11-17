@@ -25,3 +25,10 @@ test('buffer follows steady server time despite packet jitter, duplicate snapsho
  buffer.draw(rendered,1550);assert.equal(rendered[0].x,40);assert.equal(buffer.draw(rendered,1600),false);
  buffer.push([enemy(500)],3000,3000,true);buffer.draw(rendered,3000);assert.equal(rendered[0].x,500,'board changes reset old interpolation');
 });
+
+test('late packets resume at bounded pace instead of a forward jump',()=>{
+ const {createMotionBuffer}=require('../classes/duo-game.js'),b=createMotionBuffer(),enemy=x=>({id:1,x,y:0,motionPath:[{x:0,y:0},{x,y:0}]}),shown=[enemy(0)];
+ for(let t=0;t<=400;t+=100)b.push([enemy(t)],t,t);
+ for(let t=400;t<=700;t+=10)b.draw(shown,t);
+ assert.equal(shown[0].x,400);b.push([enemy(700)],700,710);const before=shown[0].x;b.draw(shown,710);assert.ok(shown[0].x-before<=11.001);assert.ok(shown[0].x>before);
+});

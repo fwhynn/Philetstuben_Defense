@@ -1,9 +1,9 @@
 /* DOM-only Arsenal workshop: one tree at a time, chosen from a side rail. Profile mutations remain in the controller. */
 const HexArsenal=(()=>{
-  const icons={archer:'➶',catapult:'◈',chain:'ϟ',freeze:'❄',mine:'✹',ballista:'➳',flame:'♨',element:'✦',necromancer:'☽',house:'⌂',forge:'⚒',market:'◆'};
+  const icons={archer:'➶',catapult:'◈',chain:'ϟ',freeze:'❄',mine:'✹',ballista:'➳',flame:'♨',element:'✦',necromancer:'☽',house:'⌂',forge:'⚒',market:'◆',bastion:'♜'};
   const BUILDING_COLOR='#d3b566';
   // Designer-Icons (assets/uidesign/towers) in Turmfarbe auf kleinem Hex; Typen ohne Datei behalten das Zeichen-Icon.
-  const ARTWORK={archer:'tower_archer',catapult:'tower_catapult',chain:'tower_chain',freeze:'tower_freeze',mine:'tower_mine',ballista:'tower_ballista',flame:'tower_flame',element:'tower_element',necromancer:'tower_necromancer',house:'building_house',forge:'building_forge',market:'building_market'};
+  const ARTWORK={archer:'tower_archer',catapult:'tower_catapult',chain:'tower_chain',freeze:'tower_freeze',mine:'tower_mine',ballista:'tower_ballista',flame:'tower_flame',element:'tower_element',necromancer:'tower_necromancer',house:'building_house',forge:'building_forge',market:'building_market',bastion:'building_bastion'};
   // Ausbaupfade: Designer-Symbole towers/icon_path_<id>.svg (alle 38 Pfade); „Scharfschütze“ heißt dort sniper.
   const PATH_ICONS=new Set(['absoluteZero','arrowRain','barrage','boltStorm','carpet','deepFrost','demolition','dragonSlayer','eagleEye','earthquake','elementFire','elementTempest','elementTide','elementVolcano','elementWater','elementWind','firestorm','fortressBreaker','frostField','harpoon','inferno','minefield','overload','repeater','rockStorm','siege','sniper','soulChoir','soulKeeper','soulLegion','soulLord','storm','sunfire','tempest','thunder','volley','wildfire','winter']);
   const artwork=(name,color)=>`<span class="researchIcon hxTowerIcon" aria-hidden="true" style="color:${color||'#a7bda4'}"><span class="hxi hxi-${name}"></span></span>`;
@@ -33,7 +33,7 @@ const HexArsenal=(()=>{
     for(const [type,def] of Object.entries(HexBuildings.definitions)){
       if(!HexBuildings.upgrades[type])continue;
       const special=HexBuildings.specials[type],owned=profile.unlocks.includes('building:'+type);
-      const buildingChanges=(a,b)=>{const before=HexBuildings.definition(a),after=HexBuildings.definition(b),f=n=>Number(n.toFixed(2)).toLocaleString('de-DE');return type==='house'?['Gold je Welle: '+before.income+' → '+after.income]:type==='forge'?['Turmschaden-Bonus: '+f((before.damage-1)*100)+' % → '+f((after.damage-1)*100)+' %']:['Turm-Rabatt: '+f((1-before.discount)*100)+' % → '+f((1-after.discount)*100)+' %'];};
+      const buildingChanges=(a,b)=>{const before=HexBuildings.definition(a),after=HexBuildings.definition(b),f=n=>Number(n.toFixed(2)).toLocaleString('de-DE');return type==='bastion'?['Turmreichweite-Bonus: '+f((before.range-1)*100)+' % → '+f((after.range-1)*100)+' %']:type==='house'?['Gold je Welle: '+before.income+' → '+after.income]:type==='forge'?['Turmschaden-Bonus: '+f((before.damage-1)*100)+' % → '+f((after.damage-1)*100)+' %']:['Turm-Rabatt: '+f((1-before.discount)*100)+' % → '+f((1-after.discount)*100)+' %'];};
       const steps=[0,1].map(i=>({changes:buildingChanges({type,level:i+1},{type,level:i+2}),tier:'Stufe '+(i+2),name:def.name+' · Stufe '+(i+2),desc:HexBuildings.definition({type,level:i+2}).desc,cost:HexBuildings.upgrades[type][i].cost}));
       list.push({type,kind:'building',name:def.name,desc:def.desc,color:BUILDING_COLOR,cost:def.cost,owned:true,
         paths:[{steps,meta:{tier:'Spezial',name:special.name,desc:special.desc,changes:type==='house'?buildingChanges({type,level:3},{type,level:3,special:true}):['Zusätzlich versorgbare Wunschhexe: 0 → 1'],cost:special.cost,state:owned?'active':'locked',status:owned?'✓ Dauerhaft freigeschaltet':'Meta-Freischaltung',action:owned?null:{kind:'building',cost:HexProfile.BUILDING_UNLOCKS[type].cost}}}],

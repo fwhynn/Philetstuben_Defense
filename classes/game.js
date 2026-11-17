@@ -59,7 +59,7 @@
   let gameSpeed = 1; try { gameSpeed = Math.max(1, Math.min(8, Math.round(Number(gameStorage.getItem('gameSpeed')) || 1))); } catch { }
   const syncSpeedFill = () => speedToggle.style.setProperty?.('--fill', ((Number(speedToggle.value) - 1) / 7 * 100) + '%');
   speedToggle.value = String(gameSpeed); document.getElementById('speedValue').textContent = gameSpeed + '×'; syncSpeedFill(); speedToggle.addEventListener('input', syncSpeedFill);
-  function changeSpeed(value) { if (duoToken) { duoAction('speed', { value: Number(value) }); return; } advanceClock(performance.now()); gameSpeed = Math.max(1, Math.min(8, Math.round(Number(value) || 1))); speedToggle.value = String(gameSpeed); syncSpeedFill(); document.getElementById('speedValue').textContent = gameSpeed + '×'; try { gameStorage.setItem('gameSpeed', String(gameSpeed)); } catch { } saveGameSettings(); }
+  function changeSpeed(value) { if (duoToken) { duoBridge?.setSpeed(Number(value)); return; } advanceClock(performance.now()); gameSpeed = Math.max(1, Math.min(8, Math.round(Number(value) || 1))); speedToggle.value = String(gameSpeed); syncSpeedFill(); document.getElementById('speedValue').textContent = gameSpeed + '×'; try { gameStorage.setItem('gameSpeed', String(gameSpeed)); } catch { } saveGameSettings(); }
   speedToggle.addEventListener('input', () => changeSpeed(speedToggle.value));
   const towerMenu = document.getElementById('towerMenu');
   let towerMenuNeedsFreshTouch = false;
@@ -228,7 +228,13 @@
 
   const slotPositions = HexMap.slotPositions;
 
-  function applyBuildingTarget(q, r) { if (!state.buildingTarget) return false; if (duoToken) { duoAction('buildingTarget', { slot: state.buildingTarget, target: key(q, r) }); state.buildingTarget = null; return true; } const ok = HexBuildings.setTarget(state, state.buildingTarget, key(q, r)); if (ok) { state.buildingTarget = null; setMessage('Zusätzliches Hex versorgt.'); renderAll(); } else { setMessage('Dieses Hex ist bereits versorgt. Wähle ein unversorgtes Hex.'); renderAll(); } return true; }
+  function applyBuildingTarget(q, r) {
+    if (!state.buildingTarget) return false;
+    if (!HexBuildings.canTarget(state,state.buildingTarget,key(q,r))) { setMessage('Hier ist kein Zusatz-Hex möglich. Wähle ein hervorgehobenes Hex.'); renderAll(); return true; }
+    if (duoToken) { duoAction('buildingTarget', { slot: state.buildingTarget, target: key(q, r) }); state.buildingTarget = state.hoveredPlacement = null; renderAll(); return true; }
+    if (HexBuildings.setTarget(state,state.buildingTarget,key(q,r))) { state.buildingTarget = state.hoveredPlacement = null; setMessage('Zusätzliches Hex versorgt.'); renderAll(); }
+    return true;
+  }
   function placeTile(q, r) {
     if (consumeAt(q, r)) return;
     if (state.dragTower) { cancelQuickTower(); renderAll(); return; }
@@ -628,7 +634,7 @@ R dreht die Karte, dann Feld anklicken.`;
     }
     lastHp = state.hp; lastGold = state.gold;
     const bar = document.getElementById('waveBar');
-    if (bar) { const total = state.waveRunning ? uiWavePlan(state.wave).count : 0, left = state.pendingSpawns + state.enemies.filter(e => e.alive).length; bar.style.width = total ? Math.max(0, Math.min(100, 100 - left / total * 100)) + '%' : '0%'; }
+    if (bar) { const total = state.waveRunning || state.phase==='duoWait' ? uiWavePlan(state.wave).count : 0, left = state.pendingSpawns + state.enemies.filter(e => e.alive).length; bar.style.width = total ? Math.max(0, Math.min(100, 100 - left / total * 100)) + '%' : '0%'; }
     if (state.selectedTower || state.selectedBuilding) document.getElementById('towerDrawer')?.classList.add('hidden');
     app.classList.toggle('canStart', state.phase === 'build' && !state.waveRunning && state.hp > 0);
   }
@@ -691,19 +697,20 @@ R dreht die Karte, dann Feld anklicken.`;
     renderQuickControls(); renderIntroductionNotice();
     uxFeedback();
     renderBasePanel(); renderTutorial();
-    const bossWave = !!HexWaves.bossProfile(state.waveRunning ? state.wave : state.wave + 1), phaseKind = state.waveRunning ? (bossWave ? 'boss' : 'wave') : 'build';
+    const sharedWaveRunning=state.waveRunning||state.phase==='duoWait';
+    const bossWave = !!HexWaves.bossProfile(sharedWaveRunning ? state.wave : state.wave + 1), phaseKind = sharedWaveRunning ? (bossWave ? 'boss' : 'wave') : 'build';
     document.getElementById('waveDropdown').dataset.phase = phaseKind; document.getElementById('phaseName').textContent = state.phase === 'gameover' ? 'Niederlage' : state.phase === 'victory' ? 'Sieg' : phaseKind === 'boss' ? 'Bosswelle' : phaseKind === 'wave' ? 'Welle läuft' : 'Bauphase';
-    hpEl.textContent = `${state.hp}/${state.maxHp}`; goldEl.textContent = state.gold; waveEl.textContent = state.waveRunning || ['victory', 'gameover'].includes(state.phase) ? state.wave : state.wave + 1; deckCountEl.textContent = state.deck.length;
+    hpEl.textContent = `${state.hp}/${state.maxHp}`; goldEl.textContent = state.gold; waveEl.textContent = sharedWaveRunning || ['victory', 'gameover'].includes(state.phase) ? state.wave : state.wave + 1; deckCountEl.textContent = state.deck.length;
     updateArsenalHint();
     document.getElementById('upgradeStatus').checked = !!state.showUpgradeStatus;
     document.getElementById('profileDiamonds').textContent = profile.diamonds;
-    const payout = state.metaSettled ? 0 : duoToken ? (state.duoDiamondEstimate || 0) : state.challengeDay ? (state.challengeWon && !profile.dailyResults?.[state.challengeDay]?.won ? 10 : 0) : HexProfile.runReward(profile, { wave: state.wave, ...state.earnedMeta }).total;
+    const payout = state.metaSettled ? 0 : duoToken ? (state.duoDiamondEstimate || 0) : state.challengeDay ? (state.challengeWon && !profile.dailyResults?.[state.challengeDay]?.won ? 10 : 0) : HexProfile.runReward(profile, { wave: state.wave, completedWave: state.lastCompletedWave || 0, ...state.earnedMeta }).total;
     document.getElementById('runDiamonds').textContent = '(+' + payout + ')';
     document.getElementById('diamondPayout').textContent = '+' + payout;
     document.getElementById('diamondRates').hidden = !!state.challengeDay;
     document.getElementById('diamondDaily').hidden = !state.challengeDay;
     document.getElementById('diamondMilestone').hidden = !!duoToken;
-    document.getElementById('diamondWaves').textContent = duoToken ? 'Alle 2 gemeinsam überlebten Wellen' : 'Alle 2 erreichten Wellen';
+    document.getElementById('diamondWaves').textContent = duoToken ? 'Bis Welle 35: je 2 gemeinsam überlebte Wellen' : 'Bis Welle 35: je 2 überlebte Wellen';
     document.getElementById('diamondBoss').textContent = duoToken ? 'Wellenboss auf deiner Karte' : 'Wellenboss besiegt';
     document.getElementById('diamondGuardian').textContent = duoToken ? 'Erkundungswächter im Team besiegt' : 'Erkundungswächter besiegt';
     document.getElementById('bonusIncome').textContent = `(+${state.income})`;
@@ -770,11 +777,11 @@ R dreht die Karte, dann Feld anklicken.`;
     button.addEventListener('pointerenter', show); button.addEventListener('pointerleave', clear); button.addEventListener('focus', show); button.addEventListener('blur', clear);
   }
   function renderDeckOverview(target = 'deckOverview') {
-    const deckKey = JSON.stringify([state.deck, state.drawPile, state.discard, uiLanguageRevision]);
+    const deckKey = JSON.stringify([state.deck, state.drawPile, state.discard, state.duoPartnerView, state.duoPartnerView?state.hand:null, uiLanguageRevision]);
     if (deckRenderKeys.get(target) === deckKey) return;
     deckRenderKeys.set(target, deckKey);
     const content = document.getElementById(target); content.innerHTML = '';
-    for (const [name, ids] of [['Gesamtes Deck', state.deck], ['Nachziehstapel', state.drawPile], ['Ablagestapel', state.discard]]) {
+    for (const [name, ids] of state.duoPartnerView?[['Deck deines Partners',state.deck],['Hand deines Partners',state.hand]]:[['Gesamtes Deck', state.deck], ['Nachziehstapel', state.drawPile], ['Ablagestapel', state.discard]]) {
       const section = document.createElement('section'), heading = document.createElement('h3');
       heading.textContent = `${name} (${ids.length})`; section.appendChild(heading);
       const counts = new Map(); ids.forEach(id => counts.set(id, (counts.get(id) || 0) + 1));
@@ -797,12 +804,13 @@ R dreht die Karte, dann Feld anklicken.`;
     const alive = state.enemies.filter(e => e.alive && HexCombat.durability(e) > 0);
     const aliveGold = alive.reduce((sum, e) => sum + (e.killGold ?? HexWaves.economy.kill), 0);
     const readyBossCount = [...state.landmarks.values()].filter(item => item.status === 'ready').length;
-    const forecastKey = JSON.stringify([state.wave, state.income, !!state.challengeDay, state.heroId, state.gold, state.goldEarned, state.waveRunning, state.pendingSpawns, state.waveKills, alive.length, aliveGold, alive.filter(e => e.type === 'boss').length, readyBossCount, state.selectedSlot || state.selectedTower || state.selectedBuilding, state.towerLoadout, state.buildingVersion, uiLanguageRevision]);
+    const sharedWaveRunning=state.waveRunning||state.phase==='duoWait';
+    const forecastKey = JSON.stringify([state.wave, state.income, !!state.challengeDay, state.heroId, state.gold, state.goldEarned, sharedWaveRunning, state.pendingSpawns, state.waveKills, alive.length, aliveGold, alive.filter(e => e.type === 'boss').length, readyBossCount, state.selectedSlot || state.selectedTower || state.selectedBuilding, state.towerLoadout, state.buildingVersion, uiLanguageRevision]);
     if (forecastKey === forecastRenderKey) return;
     forecastRenderKey = forecastKey;
     const fullPlan = document.getElementById('garrisonForecast'); fullPlan.classList.toggle('hidden', state.challengeKind !== 'garrison');
     if (state.challengeKind === 'garrison') fullPlan.innerHTML = [1, 2, 3].map(w => { const p = uiWavePlan(w), groups = new Map(); for (const e of p.enemies) { const entry = groups.get(e.type) || { e, n: 0 }; entry.n++; groups.set(e.type, entry); } return '<details><summary>Angriff ' + w + ' · ' + p.count + ' Gegner</summary><ul>' + [...groups.values()].map(({ e, n }) => '<li>' + n + ' × ' + e.name + ' · ' + e.hp + ' LP' + (e.armorHp ? ' + ' + e.armorHp + ' Rüstung' : '') + (e.magicHp ? ' + ' + e.magicHp + ' Magieresistenz' : '') + '</li>').join('') + '</ul></details>'; }).join('');
-    const plan = uiWavePlan(state.waveRunning ? state.wave : state.wave + 1);
+    const plan = uiWavePlan(sharedWaveRunning ? state.wave : state.wave + 1);
     const boss = HexExploration.bossProfile(plan.wave), bossGold = readyBossCount * boss.killGold;
     const groups = new Map();
     plan.enemies.forEach(enemy => { const entry = groups.get(enemy.type) || { count: 0, profile: enemy }; entry.count++; groups.set(enemy.type, entry); });
@@ -958,7 +966,7 @@ R dreht die Karte, dann Feld anklicken.`;
         const obstacles=[...document.querySelectorAll('.compactToolbar,.dockTL,.hud,.dockBR,.dockBL,.mapControls,.handDock,.duoQuickMap')].map(el=>el.getBoundingClientRect()).filter(r=>r.right>left&&r.left<right);
         bounds=HexUiLayout.columnArea(document.documentElement.clientWidth,height,obstacles,left,right-left);
         if(tutorial.active)bounds.top=Math.max(bounds.top,area.top);
-        panel.style.height=Math.max(0,bounds.bottom-bounds.top)/zoom+'px';
+        panel.style.height=panel.id==='buildingPanel'?'auto':Math.max(0,bounds.bottom-bounds.top)/zoom+'px';
       }else panel.style.height='';
       fitMenu(panel,bounds);
     }
@@ -972,11 +980,11 @@ R dreht die Karte, dann Feld anklicken.`;
     if (!state.selectedTower && !state.selectedBuilding && !baseAsPanel) return;
     const panel = state.selectedTower ? document.getElementById('towerPanel') : state.selectedBuilding ? document.getElementById('buildingPanel') : document.getElementById('baseDropdown').querySelector?.('.basePanel'), area = menuArea();
     if (!panel) return;
-    if (area && document.documentElement.clientWidth>700) { const zoom=cssZoom(panel),left=document.documentElement.clientWidth>1100?area.left:12,right=Math.min(document.documentElement.clientWidth-12,left+440*zoom),height=document.documentElement.clientHeight;const obstacles=[...document.querySelectorAll('.compactToolbar,.dockTL,.hud,.dockBL,.mapControls,.handDock,.duoQuickMap,#quickLoadout,#biomeRail')].map(el=>el.getBoundingClientRect()).filter(r=>r.right>left&&r.left<right);const bounds=HexUiLayout.columnArea(document.documentElement.clientWidth,height,obstacles,left,right-left);if(tutorial.active)bounds.top=Math.max(bounds.top,area.top);panel.style.height=Math.max(0,bounds.bottom-bounds.top)/zoom+'px';fitMenu(panel,bounds,bounds.left,bounds.top);return;}
+    if (area && document.documentElement.clientWidth>700) { const zoom=cssZoom(panel),left=document.documentElement.clientWidth>1100?area.left:12,right=Math.min(document.documentElement.clientWidth-12,left+440*zoom),height=document.documentElement.clientHeight;const obstacles=[...document.querySelectorAll('.compactToolbar,.dockTL,.hud,.dockBL,.mapControls,.handDock,.duoQuickMap,#quickLoadout,#biomeRail')].map(el=>el.getBoundingClientRect()).filter(r=>r.right>left&&r.left<right);const bounds=HexUiLayout.columnArea(document.documentElement.clientWidth,height,obstacles,left,right-left);if(tutorial.active)bounds.top=Math.max(bounds.top,area.top);panel.style.height=panel.id==='buildingPanel'?'auto':Math.max(0,bounds.bottom-bounds.top)/zoom+'px';fitMenu(panel,bounds,bounds.left,bounds.top);return;}
     if (area) { const narrow = document.documentElement.clientWidth <= 700; fitMenu(panel, area, area.left, narrow ? area.bottom - panel.getBoundingClientRect().height : area.top); }
   }
   // Gebäudefenster wie das Turmfenster: Symbol-Hex, Text, rechts der Goldpreis als Knopf.
-  function buildingIcon(type) { return ({ house: 'building_house', forge: 'building_forge', market: 'building_market', portal: 'portal' })[type] || 'buildingSlot'; }
+  function buildingIcon(type) { return ({ house: 'building_house', forge: 'building_forge', market: 'building_market', bastion: 'building_bastion', portal: 'portal' })[type] || 'buildingSlot'; }
   function buildingOfferMarkup(type, title, desc, cost, blocked = '') {
     return '<span class="buildingOfferIcon" aria-hidden="true"><span class="hxi hxi-' + buildingIcon(type) + '"></span></span><span class="buildingOfferText"><strong>' + title + '</strong><small>' + desc + '</small>' + (blocked ? '<small class="buildBlockedReason">' + blocked + '</small>' : '') + '</span><span class="buildingOfferPrice">' + cost + '<span class="hxi hxi-coin" aria-hidden="true"></span><span class="sr-only"> Gold</span></span>';
   }
@@ -986,15 +994,15 @@ R dreht die Karte, dann Feld anklicken.`;
     panel.classList.remove('hidden'); const building = tile.buildings?.[selected.index];
     document.getElementById('buildingPanelTitle').textContent = building ? HexBuildings.definitions[building.type].name + ' · Stufe ' + (building.special ? 4 : building.level || 1) : (tile.type === 'deadEnd' ? 'Gegnerportal-Platz' : 'Gebäudeslot');
     document.getElementById('buildingPanelIcon').className = 'hxi hxi-' + buildingIcon(building?.type || (tile.type === 'deadEnd' ? 'portal' : 'slot'));
-    document.getElementById('buildingPanelInfo').textContent = `${CARD_LIBRARY[tile.type]?.name || 'Hex'}: automatisch +${tile.income || 0} Gold je überlebter Wave. ${building ? HexBuildings.definition(building, state).desc : tile.type === 'deadEnd' ? HexBuildings.definitions.portal.desc : 'Optional einen Gebäudetyp bauen. Haus: zusätzliches Einkommen, Schmiede: Tower-Schaden, Markt: Tower-Rabatte. Ein Gebäude pro Slot.'}`;
+    document.getElementById('buildingPanelInfo').textContent = `${CARD_LIBRARY[tile.type]?.name || 'Hex'}: automatisch +${tile.income || 0} Gold je überlebter Wave. ${building ? HexBuildings.definition(building, state).desc : tile.type === 'deadEnd' ? HexBuildings.definitions.portal.desc : 'Optional einen Gebäudetyp bauen. Haus: zusätzliches Einkommen, Schmiede: Tower-Schaden, Markt: Tower-Rabatte, Sperrbasis: Reichweite. Ein Gebäude pro Slot.'}`;
     if(building){const effect=HexAugmentCards.activeDescription(state,building.type);if(effect)document.getElementById('buildingPanelInfo').textContent+=' '+effect;}
-    if(building?.type==='market') document.getElementById('buildingPanelInfo').textContent += ' Bereits gewährte Rabatte werden vom Verkaufserlös abgezogen.';
+    if(building?.type==='market') document.getElementById('buildingPanelInfo').textContent += ' Beim Verkauf eines Markts erhältst du kein Gold zurück.';
     const panelKey = JSON.stringify([selected, building, state.map.size, state.buildingVersion]);
     const buildingChanged = buildingPanelKey !== panelKey;
     if (buildingChanged) {
       buildingPanelKey = panelKey; panel._targetButton = null; buildingButtons.clear(); const content = document.getElementById('buildingOptions'); content.innerHTML = '';
       if (!building) for (const [type, definition] of Object.entries(HexBuildings.definitions).filter(([type]) => HexBuildings.allowedTypes(tile).includes(type))) {
-        const button = document.createElement('button'); button.className = 'upgradeOption buildingOffer'; const blocked = HexBuildings.buildBlockReason(tile, type); button.title = blocked || 'Kräftig: aktueller Wirkbereich. Blass: Versorgung durch andere Gebäude desselben Typs.'; button.innerHTML = buildingOfferMarkup(type, definition.name + ' bauen', definition.desc, definition.cost, blocked);
+        const button = document.createElement('button'); button.className = 'upgradeOption buildingOffer'; const blocked = HexBuildings.buildBlockReason(tile, type); button.title = blocked || 'Kräftig: aktueller Wirkbereich. Blass: Versorgung durch andere Gebäude desselben Typs.'; button.innerHTML = '<kbd class="buildingHotkey">'+(buildingButtons.size+1)+'</kbd>'+buildingOfferMarkup(type, definition.name + ' bauen', definition.desc, definition.cost, blocked);
         const preview = () => { if (HexBuildings.buildBlockReason(tile, type)) return; state.previewBuilding = { ...selected, type }; renderBoard(); }, clear = () => { state.previewBuilding = null; renderBoard(); };
         button.addEventListener('pointerenter', preview); button.addEventListener('pointerleave', clear); button.addEventListener('focus', preview); button.addEventListener('blur', clear);
         button.addEventListener('click', () => { state.previewBuilding = null; if (duoToken) { duoAction('building', { slot: state.selectedBuilding, type }); return; } if (HexBuildings.buy(state, state.selectedBuilding, type)) { sound.play('build'); renderAll(); } }); content.appendChild(button); buildingButtons.set(type, button);
@@ -1099,7 +1107,7 @@ R dreht die Karte, dann Feld anklicken.`;
     if (!tower) { panel.classList.add('hidden'); towerPanelKey = ''; towerSelectionKey = ''; towerComparison = null; state.previewUpgrade = null; return; }
     const fullyUpgraded = !!(tower.ultimate || tower.finalUpgrade && (state.challengeKind === 'towerDraft' || !HexData.ultimateAvailable(state,tower)));
     const selectionKey = JSON.stringify([selections('Tower'),fullyUpgraded]);
-    if (towerSelectionKey !== selectionKey) { towerSelectionKey = selectionKey; towerComparison = null; towerFocusOpen = false; document.getElementById('towerExtraDetails').open = fullyUpgraded; }
+    if (towerSelectionKey !== selectionKey) { towerSelectionKey = selectionKey; towerComparison = null; towerFocusOpen = false; document.getElementById('towerExtraDetails').open = false; }
     panel.classList.remove('hidden'); document.getElementById('towerPanelTitle').textContent = HexData.towerDefinition(tower).name;
     document.getElementById('towerPanelStage').textContent = tower.ultimate ? 'Ultimate' : tower.finalUpgrade ? 'Stufe 3 · Zweigfinale' : tower.branch ? 'Stufe 2 · Spezialisierung' : 'Basisstufe';
     document.getElementById('towerSubNote').textContent = HexData.towerDefinition(tower).name + ' · ' + document.getElementById('towerPanelStage').textContent;
@@ -1122,11 +1130,11 @@ R dreht die Karte, dann Feld anklicken.`;
       const biome = HexBiomes.definitions[tower.biome || 'grass'], terrain = CARD_LIBRARY[tower.tileType], influences = [biome.name + ': ' + biome.description], influenceIcons = ['<span class="hxi hxi-biome_' + (tower.biome || 'grass') + '"></span>'];
       const bonus = HexData.tileBonusLabel(terrain); if (bonus) { influences.push(terrain.name + ': ' + bonus); influenceIcons[1] = miniPathSvg(terrain, state.map.get(key(selected.q, selected.r))?.rotation || 0); }
       const selectedTile = state.map.get(key(selected.q, selected.r));
-      if (selectedTile?.site === 'guardian' && selected.index === selectedTile.siteSlot) influences.push('Wächter-Bauplatz: +20 % Reichweite.');
+      if (selectedTile?.site === 'guardian' && selected.index === selectedTile.siteSlot) influences.push('Wächter-Bauplatz: +30 % Reichweite.');
       for (const tile of state.map.values()) {
         const distance = Math.max(Math.abs(tile.q - selected.q), Math.abs(tile.r - selected.r), Math.abs(tile.q + tile.r - selected.q - selected.r));
         if (distance <= 1 && tile.siteEffect) influences.push('Schrein (' + tile.q + ', ' + tile.r + '): ' + (tile.siteEffect === 'damage' ? '+10 % Schaden' : '+15 % Reichweite'));
-        for (const building of tile.buildings || []) if (building && ['forge', 'market'].includes(building.type)) {
+        for (const building of tile.buildings || []) if (building && ['forge', 'market', 'bastion'].includes(building.type)) {
           const effect = HexBuildings.definition(building);
           if (distance <= effect.radius || building.special && building.target === key(selected.q, selected.r)) { influenceIcons[influences.length] = '<span class="hxi hxi-building_' + building.type + '"></span>'; influences.push(effect.name + ' (' + tile.q + ', ' + tile.r + '): ' + effect.desc); }
         }
@@ -1149,14 +1157,28 @@ R dreht die Karte, dann Feld anklicken.`;
         const tower = targetable[0];
         const labels = { closestBase: 'Nächste an der Base', furthestBase: 'Weiteste von der Base', mostHealth: 'Meistes Leben', leastHealth: 'Wenigstes Leben', mostArmor: 'Meiste Rüstung', mostMagic: 'Meiste Magieresistenz', boss: 'Bosse', healer: 'Heiler', closestTower: 'Nächste am Turm', furthestTower: 'Weiteste vom Turm' }, defaults = HexData.defaultTargetPriority(tower);
         tower.targetPriority = [...new Set(tower.targetPriority || defaults)]; for (const value of defaults) if (tower.targetPriority.length < 3 && !tower.targetPriority.includes(value)) tower.targetPriority.push(value); tower.targetPriority = tower.targetPriority.slice(0, 3);
-        const targeting = document.createElement('details'); targeting.className = 'targetPriorities towerDisclosure'; targeting.setAttribute('aria-label', 'Angriffsfokus'); targeting.open = group || towerFocusOpen;
+        const targeting = document.createElement('details'); targeting.className = 'targetPriorities towerDisclosure'; targeting.id = 'towerAttackFocus'; targeting.setAttribute('data-keep-open', ''); targeting.setAttribute('aria-label', 'Angriffsfokus'); targeting.open = group || towerFocusOpen;
         const summary = document.createElement('summary'); summary.innerHTML = '<span class="focusLabel">Angriffsfokus</span><span class="focusValue">' + HexTowerView.escape(targetable.some(t => (t.targetPriority || defaults)[0] !== tower.targetPriority[0]) ? 'Unterschiedliche Einstellungen' : labels[tower.targetPriority[0]]) + '</span>'; targeting.appendChild(summary);
         targeting.addEventListener('toggle', () => { towerFocusOpen = targeting.open; }); focusSection = targeting;
         const copy = document.createElement('button'), paste = document.createElement('button');
         copy.className = paste.className = 'towerFocusCopy'; copy.textContent = 'Fokus kopieren'; paste.textContent = 'Fokus einfügen'; paste.disabled = !copiedTowerPriorities;
         copy.addEventListener('click', () => { copiedTowerPriorities = [...tower.targetPriority]; towerPanelKey = ''; renderAll(); });
         paste.addEventListener('click', () => { if (!copiedTowerPriorities) return; if (duoToken) duoBridge?.priorities(selections('Tower').filter(slot => { const t=state.map.get(key(slot.q,slot.r))?.towers[slot.index]; return targetable.includes(t); }).map(slot => ({slot,priorities:[...copiedTowerPriorities]}))); else for (const target of targetable) target.targetPriority = [...copiedTowerPriorities]; towerPanelKey = ''; renderAll(); });
-        focusActions = [copy, paste];
+        const applyType = document.createElement('button');
+        applyType.className = 'towerFocusCopy towerFocusType'; applyType.textContent = 'Fokus für alle Türme dieses Typs übernehmen'; applyType.disabled = group;
+        applyType.addEventListener('click', () => {
+          const priorities = [...tower.targetPriority], packets = [];
+          for (const tile of state.map.values()) (tile.towers || []).forEach((target, index) => {
+            if (!target || target.type !== tower.type || target.guestOwner !== undefined) return;
+            packets.push({slot:{q:tile.q,r:tile.r,index},priorities:[...priorities]});
+            if (!duoToken) target.targetPriority = [...priorities];
+          });
+          if (duoToken) duoBridge?.priorities(packets);
+          towerPanelKey = ''; renderAll();
+        });
+        focusActions = [copy, paste, applyType];
+        // Keep the disclosure in place until these buttons receive their click.
+        for (const button of focusActions) button.setAttribute('aria-controls', targeting.id);
         tower.targetPriority.forEach((value, index) => { const row = document.createElement('label'); row.textContent = `${index + 1}.`; const select = document.createElement('select'); select.setAttribute('aria-label', 'Angriffsfokus Priorität ' + (index + 1)); const mixed = targetable.some(t => (t.targetPriority || defaults)[index] !== value); if (mixed) { const option = document.createElement('option'); option.value = ''; option.textContent = 'Unterschiedliche Einstellungen'; option.disabled = true; option.selected = true; select.appendChild(option); } for (const [id, label] of Object.entries(labels)) { const option = document.createElement('option'); option.value = id; option.textContent = label; option.selected = !mixed && id === value; select.appendChild(option); } select.addEventListener('change', () => { if (duoToken) { const packets = selections('Tower').map(slot => { const target = state.map.get(key(slot.q, slot.r))?.towers[slot.index], priorities = [...(target.targetPriority || defaults)], old = priorities[index], other = priorities.indexOf(select.value); priorities[index] = select.value; if (other >= 0 && other !== index) priorities[other] = old; return { slot, priorities }; }); duoBridge?.priorities(packets); return; } for (const target of targetable) { target.targetPriority = [...(target.targetPriority || defaults)]; const old = target.targetPriority[index], other = target.targetPriority.indexOf(select.value); target.targetPriority[index] = select.value; if (other >= 0 && other !== index) target.targetPriority[other] = old; } towerPanelKey = ''; renderAll(); }); row.appendChild(select); targeting.appendChild(row); });
       }
       if (group) { const hint = document.createElement('p'); hint.className = 'hint'; hint.textContent = 'Änderungen gelten für ' + targetable.length + ' Türme mit Angriffsfokus. Unterschiedliche bisherige Einstellungen werden durch die Auswahl je Zeile angepasst. Support und Minenleger bleiben unverändert. Upgrades und Verkauf: einzelnen Turm auswählen.'; content.appendChild(hint); }
@@ -1486,23 +1508,41 @@ R dreht die Karte, dann Feld anklicken.`;
     document.getElementById('cancelLoadoutBtn').textContent = 'Zurück'; document.getElementById('cancelLoadoutBtn').title = hasActiveRun && !loadoutEdit ? 'Zurück zum Run' : 'Zurück zum Hauptmenü';
   }
   let loadoutEdit = false;   // true: vom Hauptmenü geöffnet, Bestätigen speichert nur und startet keinen Run
-  function confirmRunRestart() {
+  let pendingRunRestart = null;
+  function closeRunRestart() {
+    pendingRunRestart=null; document.getElementById('restartRunOverlay').classList.add('hidden');
+    clockDebt=0;last=performance.now();
+  }
+  document.getElementById('cancelRestartRunBtn').addEventListener('click',closeRunRestart);
+  document.getElementById('closeRestartRunBtn').addEventListener('click',closeRunRestart);
+  document.getElementById('confirmRestartRunBtn').addEventListener('click',()=>{
+    const pending=pendingRunRestart;if(!pending)return;
+    closeRunRestart();if(confirmRunRestart(pending.proceed,true,pending.runId))pending.proceed();
+  });
+  function confirmRunRestart(proceed, approved=false, expectedRunId=null) {
     if (duoToken) return true;
     const saved = !hasActiveRun && readRunAutosave(), old = hasActiveRun ? state : saved ? HexRunSnapshot.restore(saved.checkpoint).state : null;
     if (!old || old.phase === 'gameover' || old.hp <= 0) return true;
     const settlementProfile = pendingServerProfile ? HexProfile.readFile(JSON.stringify(pendingServerProfile), TOWERS) : profile;
-    const summary = { runId: old.runId, wave: old.wave, ...old.earnedMeta, towers: old.runTowerStats }, dailyWave = old.lastCompletedWave || 0;
+    const summary = { runId: old.runId, wave: old.wave, completedWave: old.lastCompletedWave || 0, ...old.earnedMeta, towers: old.runTowerStats }, dailyWave = old.lastCompletedWave || 0;
     const reward = challengeLab || old.metaSettled || settlementProfile.settledRuns.includes(old.runId) ? 0 : old.challengeDay ? (dailyWave >= (old.challengeTarget || 20) && (old.challengeKind!=='expedition'||old.challengeWon===true) && !settlementProfile.dailyResults?.[old.challengeDay]?.won ? 10 : 0) : HexProfile.runReward(settlementProfile, summary).total;
-    if (!globalThis.confirm?.('Dein Durchlauf (Welle ' + old.wave + ') wird beendet. Du erhältst ' + reward + ' Diamanten. Wirklich neu starten?')) return false;
+    if(approved&&old.runId!==expectedRunId)return false;
+    if(!approved){
+      pendingRunRestart={proceed,runId:old.runId};clockDebt=0;last=performance.now();
+      document.getElementById('restartRunWave').textContent='Welle '+old.wave;
+      document.getElementById('restartRunDiamonds').textContent='+'+reward+' ◆';
+      document.getElementById('restartRunOverlay').classList.remove('hidden');
+      document.getElementById('cancelRestartRunBtn').focus?.();return false;
+    }
     applyPendingServerProfile();
     if (!old.metaSettled) profile = old.challengeDay ? HexProfile.settleDaily(profile, old.challengeDay, dailyWave, TOWERS, old.challengeTarget || 20, 0, old.challengeKind!=='expedition'||old.challengeWon===true).profile : HexProfile.settleRun(profile, summary, TOWERS).profile;
     old.metaSettled = true; old.phase = 'gameover'; old.waveRunning = false;
     hasActiveRun = false; clearRunTimers(); stopSoloPresence(); clearRunAutosave(); scheduleCloudSave(); return true;
   }
   let pendingChallengeDay=null;
-  function openLoadout(edit = false) { pendingChallengeDay=null; if (edit !== true && !confirmRunRestart()) return; if (HexProfile.learning(profile) && !duoToken && !challengeLab) { mainMenu.classList.add('hidden'); newRun(); return; } if (duoToken) { location.assign('/duo-lobby.html'); return; } loadoutEdit = edit === true; pendingDifficulty = profile.difficulty || 'normal'; pendingHero = profile.activeHero; pendingLoadout = [...profile.activeLoadout]; renderLoadout(); loadoutOverlay.classList.remove('hidden'); }
+  function openLoadout(edit = false) { pendingChallengeDay=null; if (edit !== true && !confirmRunRestart(()=>openLoadout(edit))) return; document.getElementById('playModeOverlay').classList.add('hidden'); if (HexProfile.learning(profile) && !duoToken && !challengeLab) { mainMenu.classList.add('hidden'); newRun(); return; } if (duoToken) { location.assign('/duo-lobby.html'); return; } loadoutEdit = edit === true; pendingDifficulty = profile.difficulty || 'normal'; pendingHero = profile.activeHero; pendingLoadout = [...profile.activeLoadout]; renderLoadout(); loadoutOverlay.classList.remove('hidden'); }
   function confirmLoadout() {
-    if (!loadoutEdit && !confirmRunRestart()) return;
+    if (!loadoutEdit && !confirmRunRestart(confirmLoadout)) return;
     const saved = HexProfile.setLoadout({ ...profile, activeHero: pendingHero, difficulty: pendingDifficulty }, pendingLoadout, TOWERS); if (!saved) return;
     profile = saved; loadoutOverlay.classList.add('hidden');
     if (loadoutEdit) { loadoutEdit = false; openMainMenu(); return; }
@@ -1589,7 +1629,7 @@ R dreht die Karte, dann Feld anklicken.`;
     if (state.challengeDay) { const result = HexProfile.settleDaily(profile, state.challengeDay, Math.max(state.challengeWon ? (state.challengeTarget || 20) : 0, state.lastCompletedWave || Math.max(0, state.wave - 1)), TOWERS, state.challengeTarget || 20, 0, state.challengeKind!=='expedition'||state.challengeWon===true); profile = result.profile; state.metaSettled = true; document.getElementById('gameOverTitle').textContent = state.challengeKind === 'movingFortress' ? (state.challengeWon?'Festung sicher angekommen!':'Die Festung ist gefallen') : state.challengeKind === 'towerDraft' ? (state.challengeWon?'Draft gemeistert!':'Draft gescheitert') : state.challengeKind === 'expedition' ? (state.challengeWon?'Expedition erfolgreich!':state.expedition.failed?'Expedition gescheitert · Relikte fehlen':'Expedition gescheitert') : state.challengeKind === 'powerGrid' ? (state.challengeWon?'Das Netz hält!':'Stromnetz überrannt') : state.challengeKind === 'villages' ? (state.challengeWon?'Alle drei Dörfer gerettet!':'Ein Dorf ist gefallen') : state.challengeKind === 'detour' ? (state.challengeWon ? 'DER UMWEG HAT SICH GELOHNT!' : 'Die Straße hielt nicht stand') : state.challengeKind === 'greed' ? (state.challengeWon ? 'DEM FLUCH WIDERSTANDEN!' : 'Der Gier erlegen') : state.challengeKind === 'garrison' ? (state.challengeWon ? 'DIE GARNISON HÄLT STAND!' : 'Die Garnison ist gefallen') : (state.challengeWon ? 'DIE KARAWANE IST GERETTET!' : 'Die Karawane ist gefallen'); document.getElementById('gameOverResult').textContent = (state.challengeKind === 'movingFortress' ? 'Wandernde Festung' : state.challengeKind === 'towerDraft' ? 'Turm-Draft' : state.challengeKind === 'expedition' ? 'Expedition ins Unbekannte · '+state.expedition.collected.length+'/3 Relikte' : state.challengeKind === 'powerGrid' ? 'Stromnetz' : state.challengeKind === 'villages' ? 'Drei Dörfer' : state.challengeKind === 'detour' ? 'Die Kunst des Umwegs' : state.challengeKind === 'greed' ? 'Der Fluch der Gier · Verdientes Gold: ' + HexWaves.greedGold(state) : state.challengeKind === 'garrison' ? 'Die letzte Garnison' : 'Die letzte Karawane') + ' · ' + state.challengeDay + ' · ' + (state.challengeWon ? (state.endless ? 'Endlosmodus · Wave ' + state.wave + ' erreicht' : 'Welle ' + (state.challengeTarget || 20) + ' überlebt!') : 'Wave ' + state.wave + ' erreicht'); document.getElementById('diamondBreakdown').textContent = challengeLab ? 'Testlauf – keine Tagesbelohnung oder Bestenliste.' : result.reward ? 'Tagessieg: +10 Diamanten' : state.challengeWon ? 'Tagesbelohnung bereits erhalten.' : 'Keine Tagesbelohnung – versuche es erneut!'; document.getElementById('gameOverDiamonds').textContent = profile.diamonds; document.getElementById('gameOverBest').textContent = profile.dailyResults[state.challengeDay].best; gameOverOverlay.classList.remove('hidden'); return; }
     document.getElementById('gameOverTitle').textContent = 'Durchlauf beendet';
     let reward = { wave: 0, bosses: 0, milestones: 0, total: 0, duplicate: true };
-    if (!state.metaSettled) { const settled = HexProfile.settleRun(profile, { runId: state.runId, wave: state.wave, ...state.earnedMeta, towers: state.runTowerStats }, TOWERS); profile = settled.profile; reward = settled.reward; state.metaSettled = true; }
+    if (!state.metaSettled) { const settled = HexProfile.settleRun(profile, { runId: state.runId, wave: state.wave, completedWave: state.lastCompletedWave || 0, ...state.earnedMeta, towers: state.runTowerStats }, TOWERS); profile = settled.profile; reward = settled.reward; state.metaSettled = true; }
     document.getElementById('gameOverResult').textContent = `Wave ${state.wave} erreicht · ${state.earnedMeta.normalKills} normale Gegner · ${state.earnedMeta.periodicBosses + state.earnedMeta.explorationBosses} Bosse besiegt`;
     document.getElementById('diamondBreakdown').innerHTML = `<div><strong>+${reward.wave}</strong>Wave-Fortschritt</div><div><strong>+${reward.bosses}</strong>Boss-Siege</div><div><strong>+${reward.milestones}</strong>Neue Bestmarken</div>`;
     document.getElementById('gameOverDiamonds').textContent = profile.diamonds; document.getElementById('gameOverBest').textContent = profile.records.highestWave;
@@ -1612,7 +1652,7 @@ R dreht die Karte, dann Feld anklicken.`;
   document.getElementById('resetDiamondsBtn').addEventListener('click', () => { if (!resetArsenalPending) { resetArsenalPending = true; renderArsenal('Alle Turm- und Meta-Freischaltungen werden entfernt; Loadouts werden auf die fünf Starttürme zurückgesetzt. Ein bereits laufender Run behält seine Startauswahl. Erneut klicken zum Bestätigen.'); return; } const result = HexProfile.resetUnlocks(profile, TOWERS); profile = result.profile; scheduleCloudSave(); pendingLoadout = [...profile.activeLoadout]; resetArsenalPending = false; renderLoadout(); renderArsenal(result.refund + ' Diamanten erstattet. Du kannst dich neu entscheiden.'); renderUI(); });
   function openArsenal() { resetArsenalPending = false; renderArsenal(); arsenalOverlay.classList.remove('hidden'); }
   // Ansicht im Arsenal: Baum oder Werkstatt; gilt für diese Sitzung.
-  for (const button of document.querySelectorAll?.('[data-arsenal-view]') || []) button.addEventListener('click', () => { arsenalOverlay.dataset.view = button.dataset.arsenalView; for (const other of document.querySelectorAll('[data-arsenal-view]')) other.setAttribute('aria-pressed', String(other === button)); });
+  for (const button of document.querySelectorAll?.('[data-arsenal-view]') || []) button.addEventListener('click', () => { arsenalOverlay.dataset.view = button.dataset.arsenalView; arsenalOverlay._augmentsOpen = false; renderArsenal(); for (const other of document.querySelectorAll('[data-arsenal-view]')) other.setAttribute('aria-pressed', String(other === button)); });
 
   function toggleUpgradeStatus(value = !state.showUpgradeStatus) { state.showUpgradeStatus = value; document.getElementById('upgradeStatus').checked = value; saveGameSettings(); renderBoard(); }
   document.getElementById('upgradeStatus').addEventListener('change', e => toggleUpgradeStatus(e.target.checked));
@@ -1634,7 +1674,7 @@ R dreht die Karte, dann Feld anklicken.`;
   document.getElementById('hotkeyHelp').addEventListener('toggle', renderHotkeyTip);
   document.addEventListener('click', () => renderHotkeyTip());
   document.getElementById('rotateHexBtn').addEventListener('click', () => rotateSelected());
-  document.getElementById('redrawHandBtn').addEventListener('click',()=>{if(duoToken){duoAction('redraw');return;}if(HexRewards.redraw(state,random)){renderSessionPhase();saveRunAutosave();}});
+  document.getElementById('redrawHandBtn').addEventListener('click',()=>{if(duoToken){duoAction('redraw');return;}if(HexRewards.redraw(state,random)){renderSessionPhase();saveRunAutosave();}else if(HexRewards.canRedraw(state)){setMessage('Keine andere Kartenhand möglich. Dein kostenloser Reroll bleibt verfügbar.');}});
   let selectedMerchantSite=null;
   function merchantSite(){if(state.map.get(selectedMerchantSite)?.site==='merchant')return selectedMerchantSite;const tile=[...state.map.values()].find(t=>t.site==='merchant');return tile?key(tile.q,tile.r):null;}
 
@@ -1944,7 +1984,15 @@ R dreht die Karte, dann Feld anklicken.`;
     const user=accountApi().storedUserId(),payload=JSON.parse(HexProfile.exportFile(profile,TOWERS));
     payload._augmentAction={...operation,requestId:crypto.randomUUID()};
     try {
-      const result=await accountApi().putSave(payload);
+      let result;
+      try { result=await accountApi().putSave(payload); }
+      catch(error) {
+        // Retry the identical operation only for an ambiguous transport/server failure.
+        // The API checks its receipt before applying the request again.
+        if(error.status && error.status<500)throw error;
+        if(accountApi().storedUserId()!==user || globalThis.HexLocalStore?.blocked)throw error;
+        result=await accountApi().putSave(payload);
+      }
       if(globalThis.HexLocalStore?.blocked)throw Error('Speicherzugriff wurde geändert. Bitte den Account-Spielstand neu laden.');
       if(accountApi().storedUserId()!==user)throw Error('Account wurde gewechselt. Bitte neu laden.');
       if(!result.data?.profile?.augmentCards)throw Error('Die Antwort ist unvollständig. Bitte den Account-Spielstand neu laden.');
@@ -2112,8 +2160,8 @@ R dreht die Karte, dann Feld anklicken.`;
     mainMenu.classList.toggle('canContinue', !!resume); document.getElementById('menuPlayLabel').textContent = 'Spielen'; document.getElementById('menuPlayDetail').textContent = resume ? 'Fortsetzen · Welle ' + resumeWave : ''; mainMenu.classList.remove('hidden'); }
   let menuResume = false;
   function openPlayChoices() { mainMenu.classList.add('hidden'); document.getElementById('playModeChoices').classList.remove('hidden'); document.getElementById('dailyModeDetails').classList.add('hidden'); document.getElementById('playModeOverlay').classList.remove('hidden'); }
-  document.getElementById('dailyStartBtn').addEventListener('click', () => { if (!HexProfile.modesUnlocked(profile) || !confirmRunRestart()) return; mainMenu.classList.add('hidden'); document.getElementById('playModeOverlay').classList.add('hidden'); const day=new Date().toISOString().slice(0,10);if(['greed','villages'].includes(HexWaves.daily(day).id)){openLoadout();pendingChallengeDay=day;renderLoadout();}else newRun(undefined,'standard','dual',day); });
-  document.getElementById('menuPlayBtn').addEventListener('click', () => { if (menuResume) { openPlayChoices(); return; } if (!HexProfile.modesUnlocked(profile) && !confirmRunRestart()) return; mainMenu.classList.add('hidden'); if (!HexProfile.modesUnlocked(profile)) { if (HexProfile.learning(profile)) newRun(); else openLoadout(); return; } document.getElementById('playModeChoices').classList.remove('hidden'); document.getElementById('dailyModeDetails').classList.add('hidden'); document.getElementById('playModeOverlay').classList.remove('hidden'); });
+  document.getElementById('dailyStartBtn').addEventListener('click', function startDailyMission() { if (!HexProfile.modesUnlocked(profile) || !confirmRunRestart(startDailyMission)) return; mainMenu.classList.add('hidden'); document.getElementById('playModeOverlay').classList.add('hidden'); const day=new Date().toISOString().slice(0,10);if(['greed','villages'].includes(HexWaves.daily(day).id)){openLoadout();pendingChallengeDay=day;renderLoadout();}else newRun(undefined,'standard','dual',day); });
+  document.getElementById('menuPlayBtn').addEventListener('click', function playFromMenu() { if (menuResume) { openPlayChoices(); return; } if (!HexProfile.modesUnlocked(profile) && !confirmRunRestart(playFromMenu)) return; mainMenu.classList.add('hidden'); if (!HexProfile.modesUnlocked(profile)) { if (HexProfile.learning(profile)) newRun(); else openLoadout(); return; } document.getElementById('playModeChoices').classList.remove('hidden'); document.getElementById('dailyModeDetails').classList.add('hidden'); document.getElementById('playModeOverlay').classList.remove('hidden'); });
   async function openDuoLobby() {
     if (!HexProfile.modesUnlocked(profile) || !suspendSoloRun()) return;
     if (accountApi()?.isLoggedIn() && cloudStore.get(CLOUD_DIRTY) === '1') {
@@ -2124,10 +2172,10 @@ R dreht die Karte, dann Feld anklicken.`;
   }
   for (const id of ['duoModeBtn', 'menuDuoBtn']) document.getElementById(id).addEventListener('click', openDuoLobby);
   document.getElementById('menuDailyBtn').addEventListener('click', () => { if (!HexProfile.modesUnlocked(profile)) return; mainMenu.classList.add('hidden'); renderDailyMission(); document.getElementById('playModeChoices').classList.add('hidden'); document.getElementById('dailyModeDetails').classList.remove('hidden'); document.getElementById('playModeOverlay').classList.remove('hidden'); });
-  document.getElementById('standardModeBtn').addEventListener('click', () => {
+  document.getElementById('standardModeBtn').addEventListener('click', function startStandardMode() {
     // Vor der Freischaltung der Modi: neuer Run wie bisher direkt (Einführung) bzw. über die Run-Vorbereitung.
-    if (!HexProfile.modesUnlocked(profile)) { if (!confirmRunRestart()) return; document.getElementById('playModeOverlay').classList.add('hidden'); if (HexProfile.learning(profile)) newRun(); else openLoadout(); return; }
-    document.getElementById('playModeOverlay').classList.add('hidden'); openLoadout();
+    if (!HexProfile.modesUnlocked(profile)) { if (!confirmRunRestart(startStandardMode)) return; document.getElementById('playModeOverlay').classList.add('hidden'); if (HexProfile.learning(profile)) newRun(); else openLoadout(); return; }
+    openLoadout();
   });
   document.getElementById('dailyModeBtn').addEventListener('click', () => { if (!HexProfile.modesUnlocked(profile)) return; renderDailyMission(); document.getElementById('playModeChoices').classList.add('hidden'); document.getElementById('dailyModeDetails').classList.remove('hidden'); });
   document.getElementById('playModeBackBtn').addEventListener('click', () => { document.getElementById('playModeOverlay').classList.add('hidden'); openMainMenu(); });
@@ -2151,7 +2199,7 @@ R dreht die Karte, dann Feld anklicken.`;
   newRunBtn.addEventListener('click', openLoadout);
   document.getElementById('confirmLoadoutBtn').addEventListener('click', confirmLoadout);
   document.getElementById('cancelLoadoutBtn').addEventListener('click', () => { loadoutOverlay.classList.add('hidden'); if (!hasActiveRun || loadoutEdit) openMainMenu(); loadoutEdit = false; });
-  document.getElementById('retryLoadoutBtn').addEventListener('click', () => { if(confirmRunRestart()) newRun(state.towerLoadout, state.heroId, state.difficulty, state.challengeDay); });
+  document.getElementById('retryLoadoutBtn').addEventListener('click', function retryLoadout() { if(confirmRunRestart(retryLoadout)) newRun(state.towerLoadout, state.heroId, state.difficulty, state.challengeDay); });
   document.getElementById('gameOverMapBtn').addEventListener('click', () => inspectEndMap(true));
   document.getElementById('backToRunResultBtn').addEventListener('click', () => inspectEndMap(false));
   document.getElementById('gameOverMenuBtn').addEventListener('click', () => { gameOverOverlay.classList.add('hidden'); openMainMenu(); });
@@ -2213,6 +2261,7 @@ R dreht die Karte, dann Feld anklicken.`;
   for (const [id, close] of [['rewardOverlay', () => inspectReward('map')], ['gameOverOverlay', () => inspectEndMap(true)], ['campaignVictory', () => inspectCampaign(true)], ['celebration', closeCelebration]]) { const overlay = document.getElementById(id); overlay.addEventListener('click', e => { if (e.target === overlay) close(); }); }
   document.getElementById('deckDropdown').addEventListener('toggle', () => { if (document.getElementById('deckDropdown').open) renderDeckOverview(); });
   document.addEventListener('keydown', e => {
+    if(pendingRunRestart){if(e.key==='Escape'){e.preventDefault?.();closeRunRestart();}return;}
     if (e.ctrlKey && !e.altKey && !e.metaKey && e.key.toLowerCase() === 'f') { e.preventDefault(); if (!e.repeat) toggleFps(); return; }
     if (document.getElementById('patchNotesOverlay')?.classList.contains('hidden') === false) return;
     if (document.getElementById('leaderboardOverlay')?.classList.contains('hidden') === false) return;
@@ -2244,7 +2293,7 @@ R dreht die Karte, dann Feld anklicken.`;
       if (!hadPanel && hasActiveRun && mainMenu.classList.contains('hidden')) document.getElementById('settingsDrawer').classList.remove('hidden');
       renderHotkeyTip(); renderAll(); return;
     }
-    if (e.key.toLowerCase() === 'f' && !e.repeat && e.target?.id === 'doubleSpeed') { e.preventDefault(); changeSpeed(gameSpeed % 8 + 1); return; }
+    if (e.key.toLowerCase() === 'f' && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey && !e.target?.isContentEditable && (!['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target?.tagName) || e.target?.id === 'doubleSpeed')) { e.preventDefault?.(); duoToken ? duoBridge?.cycleSpeed() : changeSpeed(gameSpeed % 8 + 1); return; }
     if (e.key.toLowerCase() === 'r' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.target?.isContentEditable && !['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target?.tagName) && state.phase === 'place') { e.preventDefault?.(); rotateSelected(); return; }
     if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'SUMMARY'].includes(e.target?.tagName) || e.target?.isContentEditable) return;
     if (e.ctrlKey || e.metaKey || e.altKey) return;
@@ -2254,12 +2303,12 @@ R dreht die Karte, dann Feld anklicken.`;
     if (e.code === 'Space' && !e.repeat) { e.preventDefault(); startWave(); }
     if (/^[1-9]$/.test(e.key)) {
       const n = Number(e.key) - 1;
-      if (state.selectedSlot) { const b = [...towerButtons.values()][n]; if (b && !b.disabled) b.click(); }
+      if(state.selectedBuilding){const b=[...buildingButtons.values()][n];if(b&&!b.disabled)b.click();}
+      else if (state.selectedSlot) { const b = [...towerButtons.values()][n]; if (b && !b.disabled) b.click(); }
       else if (state.phase === 'place' && state.hand[n]) { state.selectedCard = n; state.rotation = 0; renderAll(); }
     }
     if (e.key.toLowerCase() === 'p') togglePause();
     if (e.key.toLowerCase() === 'r') rotateSelected();
-    if (e.key.toLowerCase() === 'f' && !e.repeat) { changeSpeed(gameSpeed % 8 + 1); }
   });
 
   const cameraKeys = new Set(); let cameraLast = performance.now(), cameraVelocity = { x: 0, y: 0, turn: 0 };
@@ -2281,7 +2330,7 @@ R dreht die Karte, dann Feld anklicken.`;
   function advanceClock(now) {
     if (duoToken) { last = now; clockDebt = 0; if (state.waveRunning && !document.hidden && duoBridge?.animate?.(now)) { if(renderer.renderMotion) renderer.renderMotion(); else renderBoard(); } return; }
     const elapsed = Math.max(0, (now - last) / 1000); last = now;
-    if (paused || !hasActiveRun || !state.waveRunning) { clockDebt = 0; return; }
+    if (document.hidden || pendingRunRestart || paused || !hasActiveRun || !state.waveRunning) { clockDebt = 0; return; }
     clockDebt += elapsed * HexRunRuntime.PLAYBACK_RATE; const step = .05 / gameSpeed; let count = 0;
     while (clockDebt >= step && state.waveRunning && count++ < 200) { clockDebt -= step; update(step, now, false); }
     if (!state.waveRunning) clockDebt = 0;
@@ -2299,8 +2348,7 @@ R dreht die Karte, dann Feld anklicken.`;
     if (elapsed >= 500) { fpsEl.textContent = 'FPS: ' + Math.round((count - fpsFrames) * 1000 / elapsed); fpsStart = now; fpsFrames = count; }
   }
   function frame(now) { animationFrames++; positionRelicEffects(); advanceCamera(now); advanceClock(now); updateFps(now); requestAnimationFrame(frame); }
-  globalThis.setInterval?.(() => { if (document.hidden) advanceClock(performance.now()); }, 250);
-  document.addEventListener('visibilitychange', () => { fpsStart = null; if (fpsVisible) fpsEl.textContent = 'FPS: —'; cancelQuickTower(); resetCameraKeys(); advanceClock(performance.now()); });
+  document.addEventListener('visibilitychange', () => { fpsStart = null; if (fpsVisible) fpsEl.textContent = 'FPS: —'; cancelQuickTower(); resetCameraKeys(); last=performance.now();clockDebt=0; });
   if (duoToken) {
     document.getElementById('openMainMenuBtn').textContent='Duo-Lobby';
     document.getElementById('autoWaveTitle').textContent='Automatisch bereitmelden';
@@ -2330,8 +2378,8 @@ R dreht die Karte, dann Feld anklicken.`;
           if(offer.kind==='removal')return showRemoval(state.removalSource,offer);
         }
         inspectReward('selection');
-        document.getElementById('rewardTitle').textContent = kind === 'delivery' ? 'Geschenk für deinen Partner' : 'Gemeinsamer Durchlauf beendet';
-        document.getElementById('rewardDescription').textContent = kind === 'delivery' ? 'Wähle eine Karte oder Gold für deinen Partner.' : offer.description;
+        document.getElementById('rewardTitle').textContent = kind === 'delivery' ? offer.sent?'Geschenk verschickt':'Geschenk für deinen Partner' : 'Gemeinsamer Durchlauf beendet';
+        document.getElementById('rewardDescription').textContent = kind === 'delivery' ? offer.sent?'Dein Geschenk ist angekommen. Unten kannst du dir weiterhin etwas wünschen.':'Wähle eine Karte oder Gold für deinen Partner. Sein Wunsch ist mit einem Stern markiert.' : offer.description;
         document.getElementById('skipRemovalBtn').classList.add('hidden');
         for (const [index, choice] of offer.choices.entries()) {
           const button = choice.cardId ? cardElement(choice.cardId, false) : document.createElement('button');
@@ -2342,7 +2390,12 @@ R dreht die Karte, dann Feld anklicken.`;
             const title=document.createElement('strong'),hint=document.createElement('span');
             title.textContent='+'+choice.amount+' Gold';hint.textContent='Für deinen Partner · sofort verfügbar';button.appendChild(icon);button.appendChild(title);button.appendChild(hint);
           }else if(!choice.cardId){button.className='upgradeOption';button.textContent=choice.label;}
-          button.addEventListener('click',()=>duoBridge.choose(kind,offer,index));rewardChoices.appendChild(button);
+          if(kind==='delivery'){
+            button.disabled=!!offer.sent;
+            button.classList.toggle('duoGiftWished',offer.wish===index);button.classList.toggle('duoGiftSent',offer.sent&&offer.index===index);
+            if(offer.wish===index||offer.sent&&offer.index===index){const badge=document.createElement('span');badge.className='duoGiftBadge';badge.textContent=offer.sent&&offer.index===index?'✓ Verschickt':'★ Wunsch deines Partners';button.appendChild(badge);}
+          }
+          button.addEventListener('click',()=>{if(!button.disabled)duoBridge.choose(kind,offer,index);});rewardChoices.appendChild(button);
         }
         if (kind === 'result') { renderRunStatistics(); const stats = document.createElement('section'); stats.className = 'duoResultStats'; stats.innerHTML = document.getElementById('runStatistics').innerHTML; rewardChoices.appendChild(stats); const ranking=document.createElement('section');rewardChoices.appendChild(ranking);showRunRanking(ranking,offer.ranking); } state.rewardOffer = kind === 'result' ? null : offer; openRewardSelection();
       }
@@ -2357,7 +2410,7 @@ R dreht die Karte, dann Feld anklicken.`;
     const saved=readRunAutosave();
     if(saved)restoreRunCheckpoint(saved.checkpoint);
     if(!saved&&['greed','villages'].includes(challengeLab.mission.id))openLoadout();
-    const restart=document.createElement('button');restart.className='secondary';restart.textContent='Neu starten';restart.addEventListener('click',()=>{if(['greed','villages'].includes(challengeLab.mission.id)){openLoadout();return;}if(confirmRunRestart()){newRun();mainMenu.classList.add('hidden');saveRunAutosave(true);}});bar.appendChild(restart);
+    const restart=document.createElement('button');restart.className='secondary';restart.textContent='Neu starten';restart.addEventListener('click',function restartLab(){if(['greed','villages'].includes(challengeLab.mission.id)){openLoadout();return;}if(confirmRunRestart(restartLab)){newRun();mainMenu.classList.add('hidden');saveRunAutosave(true);}});bar.appendChild(restart);
     back.addEventListener('click',()=>saveRunAutosave(true));
     globalThis.addEventListener('pagehide',()=>saveRunAutosave(true));
     const report=document.createElement('button');report.className='secondary';report.textContent='Testbericht';report.addEventListener('click',()=>{

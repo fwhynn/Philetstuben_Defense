@@ -5,10 +5,27 @@ test('placement hint follows camera movement and hides when its tile leaves the 
  const cameraFn=source.match(/  function applyCamera\(\)\{[\s\S]*?\n  \}/)[0],hintFn=source.match(/  function positionRotateHint\(\)\{[\s\S]*?\n  \}/)[0];
  const box={left:0,top:0,width:800,height:600},context={rotateAnchor:{x:200,y:200},HEX:30,rotateHint:{style:{}},HexCompact:{touch:()=>true},cam:{x:0,z:0,dist:100,yaw:0,pitch:.5},camera:{position:{set(){}},lookAt(){},updateMatrixWorld(){}},sun:{target:{position:{set(){}}},position:{set(){}}},host:{getBoundingClientRect:()=>box},wrap:{getBoundingClientRect:()=>box}};
  context.project=p=>({x:p.x-context.cam.x,y:p.y-context.cam.z});
+ context.state={};context.targetList=[];context.key=(q,r)=>q+','+r;
  vm.runInNewContext(hintFn+cameraFn+';globalThis.move=applyCamera;',context);
  context.move();const before=parseFloat(context.rotateHint.style.top);assert.equal(context.rotateHint.style.left,'200px');assert.doesNotMatch(context.rotateHint.textContent,/Mausrad/);
  context.cam.x=50;context.cam.z=40;context.move();assert.equal(context.rotateHint.style.left,'150px');assert.equal(parseFloat(context.rotateHint.style.top),before-40);
  context.cam.x=1000;context.move();assert.equal(context.rotateHint.style.display,'none');
+ context.cam.x=0;context.state={buildingTarget:{q:0,r:0,index:0},hoveredPlacement:'4,0'};context.targetList=[{q:4,r:0,legal:true}];context.move();assert.equal(context.rotateHint.textContent,'✓ Zusatz-Hex wählen');
+ context.targetList[0].legal=false;context.move();assert.equal(context.rotateHint.textContent,'✕ Hier nicht möglich');
+});
+
+test('3D extra-hex preview highlights the hovered target even during combat with no hand cards',()=>{
+ const source=fs.readFileSync(path.join(__dirname,'../classes/three-renderer.js'),'utf8'),fn=source.match(/  function syncGhost\(\)\{[\s\S]*?\n  \}/)[0];
+ class Mesh{constructor(geometry,material){this.geometry=geometry;this.material=material;this.position={set:(...values)=>{this.xyz=values;}};}}
+ const context={THREE:{Mesh},state:{phase:'wave',waveRunning:true,buildingTarget:{q:0,r:0,index:0},hoveredPlacement:'4,0',hand:[],selectedCard:0},targetList:[{q:4,r:0,legal:true}],CARD_LIBRARY:{},key:(q,r)=>q+','+r,ghostSig:'',rotateAnchor:null,flatHex:'fill',outline:'outline',mats:{targetHover:{name:'gold'},targetBlocked:{name:'red'},targetOutline:{},blockedOutline:{}},layer:{ghost:{children:[],add(m){this.children.push(m);}},targets:{children:[]}},clearGroup:g=>{g.children=[];},axialToWorld:(q,r)=>({x:q*100,y:r*100}),positionRotateHint(){}};
+ vm.runInNewContext(fn+';globalThis.draw=syncGhost;',context);context.draw();assert.equal(context.layer.ghost.children.length,2);assert.equal(context.layer.ghost.children[0].material.name,'gold');assert.equal(context.layer.ghost.children[0].material.depthTest,false);
+ context.targetList[0].legal=false;context.draw();assert.equal(context.layer.ghost.children[0].material.name,'red');context.state.hoveredPlacement=null;context.draw();assert.equal(context.layer.ghost.children.length,0);assert.equal(context.rotateAnchor,null);
+});
+
+test('3D extra-hex hit testing keeps a tower above the tile from swallowing the selection',()=>{
+ const source=fs.readFileSync(path.join(__dirname,'../classes/three-renderer.js'),'utf8'),fn=source.match(/  function pick\(event\)\{[^\n]+/)[0];
+ const tower={kind:'tower',q:4,r:0,index:0},target={kind:'target',q:4,r:0,legal:true},context={state:{buildingTarget:{}},setRay(){},pickables:[],ray:{intersectObjects:()=>[tower,target].map(pick=>({object:{userData:{pick}}}))}};
+ vm.runInNewContext(fn+';globalThis.hit=pick;',context);assert.equal(context.hit({}),target);context.state.buildingTarget=null;assert.equal(context.hit({}),tower);
 });
 test('free slot hints disappear when disabled or occupied', () => {
   const { renderer, svg, state } = setup(); state.phase = 'build'; state.hand = [];

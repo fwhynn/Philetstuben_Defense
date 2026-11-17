@@ -76,6 +76,8 @@ button,input,select,textarea,option{font-family:inherit}
 .hxi-building_forge{--i:url("assets/uidesign/towers/icon_building_forge.svg")}
 .hxi-building_house{--i:url("assets/uidesign/towers/icon_building_house.svg")}
 .hxi-building_market{--i:url("assets/uidesign/towers/icon_building_market.svg")}
+.hxi-building_bastion{--i:url("assets/uidesign/towers/icon_building_bastion.svg")}
+.buildingOffer{position:relative}.buildingHotkey{position:absolute;left:3px;top:3px;font-size:12px;opacity:.8}
 .hxi-path_sniper{--i:url("assets/uidesign/towers/icon_path_sniper.svg")}
 .hxi-path_volley{--i:url("assets/uidesign/towers/icon_path_volley.svg")}
 .hxi-tower_archer{--i:url("assets/uidesign/towers/icon_tower_archer.svg")}
@@ -614,7 +616,7 @@ h1,h2,.loadoutBox h2,.gameOverBox h2,.arsenalToolbar h2,.accountHeader h2,.celeb
 #arsenalOverlay[data-view=tree] .arsenalBody{display:none}
 #arsenalOverlay:not([data-view=tree]) .skillTreeView{display:none}
 /* Augment-Sammlung ersetzt beide Arsenal-Ansichten, solange sie offen ist. */
-#arsenalOverlay.augmentsOpen .skillTreeView,#arsenalOverlay.augmentsOpen .arsenalViewSwitch{display:none}
+#arsenalOverlay.augmentsOpen .skillTreeView{display:none}
 /* Baum-Ansicht: Fenster fast bildschirmfüllend */
 #arsenalOverlay[data-view] .loadoutBox{width:min(1760px,100%);height:calc(100dvh - 32px)}
 .arsenalViewSwitch{display:inline-flex;gap:4px;padding:3px;border:1.5px solid var(--hx-capsule-line);border-radius:999px;background:#0e1d16}
@@ -2255,3 +2257,144 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 #rewardDeckOverview .deckHexCard{width:100%!important;min-height:160px}
 #rewardDeckOverview .deckHexCard svg.hxCardArt{width:min(100%,100px)!important}
 #rewardDeckOverview .deckHexCard small{font-size:16px!important}
+
+/* Unavailable wave actions share the same disabled appearance in every phase. */
+#app #startWaveBtn[data-state]:disabled{background:#56625b!important;color:#c9d2cc;cursor:not-allowed;animation:none!important;filter:none;transform:none}
+#app #startWaveBtn[data-state]:disabled::after{background:linear-gradient(180deg,#3a4440,#2c3430)}
+#buildingPanel:not(.hidden){height:auto;min-height:0;bottom:auto}
+#buildingPanel>*{flex-shrink:0}
+#towerPanel .towerDevelopment>.towerUpgrades>.towerFocusType{flex-basis:100%;padding:10px;line-height:1.25}
+
+/* Keep Arsenal navigation and scroll gutters stable across collection/view changes. */
+#arsenalOverlay .arsenalViewSwitch{flex:none}
+#arsenalOverlay .arsenalViewSwitch button{display:flex;align-items:center;justify-content:center;min-width:94px;line-height:1;padding:0 14px;text-align:center}
+#arsenalOverlay .augmentCollection,#arsenalOverlay .arsenalRail,#arsenalOverlay .arsenalDetail{scrollbar-gutter:stable}
+#arsenalOverlay .augmentStatus{margin:0 0 12px;padding:10px 14px;border:1px solid #c9a24a;border-radius:8px;white-space:normal;overflow-wrap:anywhere}
+#arsenalOverlay .augmentStatus:empty{display:none}
+@media(min-width:761px){
+ #arsenalOverlay[data-view=workshop] .arsenalBody{grid-template-columns:320px minmax(0,1fr)}
+ #arsenalOverlay[data-view=workshop] .arsenalTab{padding:12px;gap:12px;min-height:74px}
+ #arsenalOverlay[data-view=workshop] .arsenalTab .researchIcon{flex-basis:48px;width:48px;height:48px}
+ #arsenalOverlay[data-view=workshop] .arsenalTabText strong{font-size:17px}
+ #arsenalOverlay[data-view=workshop] .arsenalTabText small{font-size:13px;white-space:normal}
+}
+
+/* Shared large-menu frame: viewport margins and dimensions respect desktop UI zoom. */
+:root{--hx-dialog-width:1440px;--hx-dialog-height:880px;--hx-dialog-gap:24px}
+#loadoutOverlay>.loadoutBox,#arsenalOverlay[data-view]>.loadoutBox,#leaderboardOverlay>.leaderboardBox,#playModeOverlay>.modeBox,#menuSettingsOverlay>.settingsWindow,#accountOverlay>.accountBox,#saveOverlay>.modeBox{
+ box-sizing:border-box;width:min(var(--hx-dialog-width),calc((100vw - var(--hx-dialog-gap)) / var(--hx-k,1)))!important;
+ height:min(var(--hx-dialog-height),calc((100dvh - var(--hx-dialog-gap)) / var(--hx-k,1)))!important;
+ max-height:calc((100dvh - var(--hx-dialog-gap)) / var(--hx-k,1))!important;overflow-y:auto;scrollbar-gutter:stable;
+}
+#loadoutOverlay>.loadoutBox{align-content:start;padding:28px;gap:18px}
+#accountOverlay .accountBox>div,#accountOverlay .accountBox>p{max-width:900px;margin-left:auto;margin-right:auto;width:100%}
+#leaderboardOverlay .lbHead{grid-template-columns:1fr auto}
+#leaderboardOverlay .lbHead h2{padding-left:60px}
+#restartRunOverlay{z-index:1000;background:#06110cbb;backdrop-filter:blur(5px)}
+.restartRunBox{position:relative;box-sizing:border-box;width:min(660px,calc((100vw - 24px) / var(--hx-k,1)));padding:32px;border:2px solid #d6ad53;border-radius:18px;background:radial-gradient(ellipse at top,#244832,#10261a);box-shadow:0 22px 70px #000b;color:#f4ecd6;font-family:var(--hx-font-ui)}
+.restartRunBox .hxWinClose{position:absolute;right:16px;top:16px}
+.restartRunBox .eyebrow{color:#e3bd67;text-transform:uppercase;letter-spacing:.1em}
+.restartRunBox h2{padding-right:48px;font:900 32px/1.15 var(--hx-font-title);color:#fff3cf}
+.restartRunBox p{line-height:1.6}
+.restartRunSummary{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:24px 0;padding:20px;border:1px solid #506748;border-radius:12px;background:#0a1d14}
+.restartRunSummary span{display:grid;gap:8px}.restartRunSummary strong{color:#ffe193;font-size:26px}
+.restartRunBox footer{display:flex;gap:12px;flex-wrap:wrap}.restartRunBox footer button{flex:1;min-height:52px;padding:12px;font-size:17px}
+@media(max-width:700px){:root{--hx-dialog-gap:16px}#loadoutOverlay>.loadoutBox{padding:16px;gap:10px}.restartRunBox{padding:22px}.restartRunBox footer{flex-direction:column}}
+/* Stable viewport anchoring: no measured HUD/hand height moves the Duo rails. */
+@media(min-width:1101px) and (min-height:601px){
+ .duoGame #quickLoadout,.duoGame #biomeRail{top:calc(50dvh / var(--hx-k,1));bottom:auto;height:auto;max-height:calc((100dvh - 180px) / var(--hx-k,1));transform:translateY(-50%);justify-content:center;overflow:visible;transition:none;gap:22px}
+ .duoGame .mapRail button{flex-shrink:0}
+}
+.duoGame .duoTurn .duoMapLabel,.duoGame .duoTurn.duoTurnCompact .duoMapLabel{display:inline-block!important;font-size:13px;margin:2px 4px}
+.duoPartnerView .boardWrap{box-shadow:inset 0 0 0 5px #eac264}
+.duoGame .duoTurnPartnerView .duoMapLabel{background:#604c16;color:#fff0bd}
+#app.duoDisconnected::before{content:attr(data-pause-message);width:min(660px,calc(100vw - 48px));padding:28px;border-radius:16px;background:#242a2ceb;text-align:center;font:700 26px/1.5 var(--hx-font-ui);z-index:80}
+.duoGame #app.paused .boardWrap{filter:grayscale(.85) brightness(.5)}
+.duoGiftPreview{margin:20px 0 0!important;padding:20px 24px!important;border:1px solid #a28a4c;border-radius:12px;background:#132b1f}
+.duoPartnerOffers{gap:16px!important}.duoPartnerGift{padding:16px!important;min-width:0;overflow-wrap:anywhere}.duoPartnerGift small{font-size:15px!important}
+.duoHexGiftChoices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.duoHexGiftChoices .card{width:auto;min-width:0;height:auto;min-height:150px;padding:10px}.duoHexGiftChoices .card .slots{display:none}
+@media(max-width:700px){.duoGiftPreview{padding:12px!important}.duoPartnerOffers{gap:8px!important}}
+.duoPartnerGift{position:relative;white-space:normal;text-align:center}
+.duoPartnerGift:not(:disabled){cursor:pointer!important}
+.duoPartnerGift:not(:disabled):hover,.duoPartnerGift:focus-visible{background:#294e35!important;outline:2px solid #ffe198;outline-offset:2px}
+.duoPartnerGift.wished,#rewardChoices .duoGiftWished{border:2px solid #ffd66c!important;box-shadow:0 0 0 2px #c9a24a44,0 0 20px #f2c35a33!important}
+.duoPartnerGift:disabled{opacity:1!important;cursor:default!important}
+.duoWishLabel{color:#ffe198!important;font-weight:700!important}
+.duoGiftBadge{margin-top:8px;padding:5px 8px;border-radius:5px;background:#3c4b21;color:#fff4ce;font:700 14px/1.3 var(--hx-font-ui)}
+#rewardChoices .duoGiftSent{opacity:1!important;border-color:#8ed6a1!important}
+.duoPartnerGiftIcon svg,.duoGiftNoticeIcon svg{width:100%;height:100%}
+.duoGiftNotice{position:fixed;z-index:950;right:18px;bottom:190px;width:min(340px,calc(100vw - 36px));padding:18px 40px 18px 18px;border:2px solid #e5be62;border-radius:12px;background:linear-gradient(135deg,#213f2a,#11271c);box-shadow:0 6px 25px #0008,0 0 24px #f4ce7133;color:#fff0ce;font-family:var(--hx-font-ui);animation:duoGiftAppear .3s ease-out}
+.duoGiftNotice.hidden{display:none}
+#duoGiftNoticeClose{position:absolute;right:6px;top:6px;width:30px;height:30px;min-height:0;padding:0;background:transparent;color:#fff0ce;border:0;font-size:24px}
+#duoGiftNoticeTitle{font-size:14px;color:#e6d69e}
+.duoGiftNoticeItem{display:flex;gap:12px;align-items:center;margin-top:9px}
+.duoGiftNoticeItem strong{display:block;font:900 23px/1.2 var(--hx-font-title);color:#ffe198}
+.duoGiftNoticeItem div>span{display:block;font-size:13px;margin-top:4px;color:#cbdccd}
+.duoGiftNoticeIcon{display:grid;place-items:center;width:52px;height:60px;flex:none;background:url('assets/uidesign/hex/hex_gold.svg') center/contain no-repeat}
+.duoGiftNoticeIcon .hxi{width:28px;height:28px;color:#5b4316}
+@keyframes duoGiftAppear{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.duoGiftNotice{animation:none}}
+@media(max-width:700px){.duoGiftNotice{bottom:155px;right:12px;width:min(300px,calc(100vw - 24px));padding:12px 36px 12px 12px}}
+
+/* Selected Duo layout: one shallow team strip flush with the viewport edge. */
+.duoGame{--duo-bar-h:64px}
+.duoGame .duoEdgeBar{
+ position:fixed;top:env(safe-area-inset-top,0px);left:50%;right:auto;transform:translateX(-50%);z-index:25;
+ display:grid;grid-template-areas:"map phase hp self partner swap help";grid-template-columns:max-content minmax(190px,1.5fr) max-content minmax(90px,1fr) minmax(100px,1fr) max-content 40px;
+ align-items:center;gap:12px;box-sizing:border-box;width:min(1040px,calc(100vw / var(--hx-k,1) - 24px));max-width:none;min-height:var(--duo-bar-h);padding:9px 16px;
+ border:0!important;border-radius:0;background:none!important;box-shadow:none;overflow:visible;isolation:isolate;pointer-events:auto;font-size:17px;
+}
+.duoGame .duoEdgeBar.hidden{display:none}
+.duoEdgeBar::before,.duoEdgeBar::after{content:'';position:absolute;pointer-events:none}
+.duoEdgeBar::before{inset:0;z-index:-2;background:var(--hx-panel-edge);clip-path:var(--hx-chamfer-10)}
+.duoEdgeBar::after{inset:0 2px 2px;z-index:-1;background:var(--hx-panel-fill);clip-path:var(--hx-chamfer-9)}
+.duoGame .duoEdgeBar #duoMapLabel{grid-area:map;max-width:110px;margin:0;padding:0 12px 0 0;border-right:1px solid #b5954b80;border-radius:0;background:none;color:#f5e9c8;font-size:16px;letter-spacing:0;text-transform:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.duoGame .duoEdgeBar.duoTurnPartnerView #duoMapLabel{color:#ffe198}
+.duoEdgeBar .duoPhaseSlot{grid-area:phase;position:relative;inset:auto;z-index:auto;display:block;min-width:0;margin:0;padding:0}
+.duoEdgeBar #waveDropdown{position:relative;inset:auto;margin:0;width:100%;z-index:auto}
+.duoEdgeBar #waveDropdown>summary{display:flex;align-items:center;justify-content:center;white-space:nowrap;height:42px;min-height:42px;padding:0 12px;gap:7px;font-size:18px}
+.duoEdgeBar #waveDropdown .statPopup{z-index:40;max-width:calc(100vw / var(--hx-k,1) - 24px)}
+.duoEdgeBar #waveDropdown .waveBarWrap{left:12px;right:12px;bottom:3px;height:3px}
+.duoEdgeBar .duoTeamInfo{grid-area:hp;display:flex;flex-direction:row;gap:6px;padding:0 12px 0 0;border:0;border-right:1px solid #b5954b80;white-space:nowrap;font-variant-numeric:tabular-nums}
+.duoEdgeBar .duoTeamInfo .hxi-heart,.duoEdgeBar #duoTeamHp{color:#f76d74;font-size:18px}
+.duoEdgeBar #duoSeatSelf{grid-area:self}.duoEdgeBar #duoSeatPartner{grid-area:partner}
+.duoEdgeBar .duoSeat{justify-content:center;text-align:left;gap:7px;min-width:0;padding:8px;border:1px solid #586955;border-radius:6px;background:#182c20}
+.duoEdgeBar .duoSeatText{flex-direction:row;align-items:center;gap:5px;overflow:hidden}
+.duoEdgeBar .duoSeatText strong{font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100px}
+.duoEdgeBar .duoSeatText small{font-size:16px;min-width:0}
+.duoEdgeBar .duoSeatText small::before{content:'· ';color:#e6d7b4}
+.duoEdgeBar .duoSeatDot{width:10px;height:10px;box-shadow:none;animation:none!important}
+.duoEdgeBar .duoSeat[data-state=ready]{border-color:#6cb87a;background:#163f25}
+.duoEdgeBar .duoSeat[data-state=todo]{border-color:#b48b37;background:#393018}
+.duoEdgeBar .duoSeat[data-state=offline]{border-color:#bd655b;background:#3b211d}
+.duoGame .duoEdgeBar .duoQuickMap{grid-area:swap;display:inline-flex;align-items:center;justify-content:center;gap:8px;margin:0;min-height:42px;padding:6px 12px;font-size:17px;border-radius:6px;white-space:nowrap}
+.duoEdgeBar .duoQuickMap::before{content:'';width:18px;height:18px;background:currentColor;mask:url('assets/uidesign/icons/icon_duoSwap.svg') center/contain no-repeat}
+.duoEdgeBar #duoSupportMenu{grid-area:help;min-width:0}
+.duoGame .duoEdgeBar .duoSupportShortcut{display:grid;place-items:center;width:40px;min-height:42px;margin:0;padding:8px;border-radius:6px}
+.duoEdgeBar #duoHud{display:none;position:absolute;top:calc(100% + 8px);right:0;left:auto;width:min(400px,calc(100vw / var(--hx-k,1) - 24px));max-width:none;margin:0;pointer-events:auto;box-shadow:0 8px 24px #0008}
+.duoEdgeBar #duoHud[open]{display:block}.duoEdgeBar #duoHud>summary{display:none}
+.duoEdgeBar #duoHud .duoHudBody{position:static;width:auto;max-height:calc(100dvh / var(--hx-k,1) - var(--duo-bar-h) - 32px);overflow:auto;padding:14px 18px}
+.duoGame #duoHud #duoTurnTitle,.duoGame #duoHud #duoTurnText{display:block}
+.duoGame #healthStat{display:none!important}
+.duoEdgeBar button:focus-visible,.duoEdgeBar summary:focus-visible{outline:2px solid #ffe198;outline-offset:3px}
+/* On narrower desktops the ordinary menu/resources get their own row below the strip. */
+@media(min-width:1101px) and (min-height:601px){.duoGame .gameHeader{top:var(--hx-top)}}
+@media(min-width:1101px) and (max-width:1600px) and (min-height:601px){.duoGame .gameHeader{top:calc(var(--duo-bar-h) + 12px)}}
+@media(max-width:1000px){
+ .duoGame{--duo-bar-h:102px}
+ .duoGame .duoEdgeBar{grid-template-areas:"map map phase phase hp help" "self self partner partner swap swap";grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;padding:7px 10px;font-size:15px}
+ .duoGame .duoEdgeBar #duoMapLabel{max-width:none;font-size:14px;padding-right:6px}
+ .duoEdgeBar .duoTeamInfo{padding:0;border:0;gap:4px;justify-content:center}.duoEdgeBar #duoTeamHp,.duoEdgeBar .duoTeamInfo .hxi-heart{font-size:14px}
+ .duoEdgeBar #waveDropdown>summary{height:38px;min-height:38px;padding:0 7px;gap:4px;font-size:15px}
+ .duoEdgeBar #waveDropdown .phaseName,.duoEdgeBar #waveDropdown .phaseDot{display:none}
+ .duoEdgeBar .duoSeat{padding:7px 5px;gap:5px}.duoEdgeBar .duoSeatText{gap:3px}
+ .duoEdgeBar .duoSeatText strong,.duoEdgeBar .duoSeatText small{font-size:14px}
+ .duoGame .duoEdgeBar .duoQuickMap{font-size:14px;min-height:38px;padding:5px;gap:5px}
+ .duoGame .duoEdgeBar .duoSupportShortcut{min-height:38px;width:100%;padding:7px}
+}
+@media(max-width:1100px),(max-height:600px){
+ .duoGame .compactToolbar{top:calc(env(safe-area-inset-top,0px) + var(--duo-bar-h) + 8px)}
+ .duoGame .gameHeader{top:calc(env(safe-area-inset-top,0px) + var(--duo-bar-h) + 62px)}
+ html[data-compact=towers] .duoGame #quickLoadout,html[data-compact=biomes] .duoGame #biomeRail{top:calc(env(safe-area-inset-top,0px) + var(--duo-bar-h) + 62px)}
+}
+@media(max-width:480px){.duoEdgeBar .duoTeamInfo{flex-direction:column;gap:0}.duoEdgeBar .duoTeamInfo .hxi-heart{width:12px;height:12px}}

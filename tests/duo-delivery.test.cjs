@@ -22,6 +22,7 @@ test('personal wave rewards finish first; deferred draw survives restore',()=>{
  const {c,m,send}=finished(10);assert.ok(m.boards.every(r=>r.state.phase==='reward'));
  assert.equal(send(0,'delivery',{offerId:m.delivery.offers[0].id,index:0}),false);
  const a=m.boards[0].state,b=m.boards[1].state;assert.ok(send(0,'reward',{offerId:a.rewardOffer.id,index:0}));assert.equal(a.phase,'duoDelivery');assert.equal(send(0,'delivery',{offerId:m.delivery.offers[0].id,index:0}),false);
+ assert.ok(send(0,'deliveryWish',{offerId:m.delivery.offers[1].id,index:1}),'recipient can mark a wish while the sender finishes their personal reward');
  assert.doesNotThrow(()=>c.duo.restore(json(c.duo.capture(m))));assert.ok(send(1,'reward',{offerId:b.rewardOffer.id,index:0}));
  for(let p=0;p<2;p++)assert.ok(send(p,'delivery',{offerId:m.delivery.offers[p].id,index:0}));
  assert.ok(m.boards.every(r=>!r.state.duoDeliveryPending&&r.state.celebrationActive));
@@ -48,4 +49,19 @@ test('legacy gifts already delivered are not paid or relabeled again during migr
  const {c,m}=finished(),snap=json(c.duo.capture(m));delete snap.duo.delivery.rulesVersion;for(const o of snap.duo.delivery.offers)o.choices[0].amount=20;snap.duo.delivery.offers[0].index=0;
  const restored=c.duo.restore(snap);assert.equal(restored.delivery.offers[0].choices[0].amount,20);assert.equal(restored.delivery.offers[1].choices[0].amount,50);
  const gold=restored.boards[1].state.gold;assert.equal(c.duo.command(restored,0,{id:'duplicate',wave:5,action:'delivery',payload:{offerId:restored.delivery.offers[0].id,index:0}}),false);assert.equal(restored.boards[1].state.gold,gold);assert.doesNotThrow(()=>c.duo.restore(json(c.duo.capture(restored))));
+});
+
+test('gift wishes belong to the recipient, persist, cancel and never transfer a reward',()=>{
+ const {c,m,send}=finished(),own=m.delivery.offers[0],partner=m.delivery.offers[1],before=m.boards.map(b=>({gold:b.state.gold,deck:b.state.deck.length}));
+ assert.equal(send(0,'deliveryWish',{offerId:own.id,index:1}),false);
+ for(const index of [-1,3,1.2,'1',undefined])assert.equal(send(0,'deliveryWish',{offerId:partner.id,index}),false);
+ assert.equal(send(0,'deliveryWish',{offerId:'old-offer',index:1}),false);
+ assert.ok(send(0,'deliveryWish',{offerId:partner.id,index:1}));assert.equal(partner.wish,1);assert.equal(partner.index,null);
+ assert.deepEqual(m.boards.map(b=>({gold:b.state.gold,deck:b.state.deck.length})),before);
+ const restored=c.duo.restore(json(c.duo.capture(m)));assert.equal(restored.delivery.offers[1].wish,1);
+ const corrupt=json(c.duo.capture(m));corrupt.duo.delivery.offers[1].wish=5;assert.throws(()=>c.duo.restore(corrupt),/gift wish/);
+ assert.ok(send(0,'deliveryWish',{offerId:partner.id,index:null}));assert.equal(partner.wish,null);
+ assert.ok(send(0,'delivery',{offerId:own.id,index:0}));assert.ok(send(0,'deliveryWish',{offerId:partner.id,index:2}),'wish stays available after own delivery');
+ assert.ok(send(1,'delivery',{offerId:partner.id,index:0}),'sender can choose differently');assert.equal(partner.index,0);
+ assert.equal(send(0,'deliveryWish',{offerId:partner.id,index:1}),false);assert.equal(m.boards[0].state.gold,before[0].gold+50);
 });

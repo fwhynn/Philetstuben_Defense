@@ -5,6 +5,7 @@ const loadCore = require('../headless-core.cjs');
 const RULESET = require('../package.json').version;
 // Reviewed checkpoint compatibility, including legacy 20-gold gift migration.
 function compatibleRuleset(source,target=RULESET){
+  if(target==='1.3.0'&&['1.2.8','1.2.9'].includes(source))return true;
   if(target==='1.2.9'&&source==='1.2.8')return true;
   return source===target || target==='1.2.1'&&source==='1.2.0' || target==='1.2.2'&&['1.1.9','1.2.0','1.2.1'].includes(source) || target==='1.2.3'&&['1.1.9','1.2.0','1.2.1','1.2.2'].includes(source) || target==='1.2.4'&&['1.1.9','1.2.0','1.2.1','1.2.2','1.2.3'].includes(source) || target==='1.2.5'&&['1.1.9','1.2.0','1.2.1','1.2.2','1.2.3','1.2.4'].includes(source);
 }
@@ -17,6 +18,7 @@ function payloadValid(action, p) {
   switch (action) {
     case 'guardian': return exact(p, ['board', 'id', 'value']) && integer(p.board, 0, 1) && typeof p.id === 'string' && /^-?\d{1,4},-?\d{1,4}$/.test(p.id) && typeof p.value === 'boolean';
     case 'lobbyLoadout': return (exact(p,['towers']) || exact(p,['towers','heroId','difficulty']) && word(p.heroId) && ['normal','dual'].includes(p.difficulty)) && Array.isArray(p.towers) && p.towers.length===5 && new Set(p.towers).size===5 && p.towers.every(word);
+    case 'lobbyStart': return exact(p, []);
     case 'lobbyReady':
     case 'pause':
     case 'rematch':
@@ -25,7 +27,7 @@ function payloadValid(action, p) {
     case 'place': return exact(p, ['q', 'r', 'index', 'rotation']) && integer(p.q, -1000, 1000) && integer(p.r, -1000, 1000) && integer(p.index, 0, 4) && integer(p.rotation, 0, 5);
     case 'tower': return exact(p, ['type', 'slots']) && word(p.type) && Array.isArray(p.slots) && p.slots.length > 0 && p.slots.length <= 32 && p.slots.every(slot);
     case 'upgrade': return exact(p, ['slot', 'upgrade']) && slot(p.slot) && word(p.upgrade);
-    case 'building': return exact(p, ['slot', 'type']) && slot(p.slot) && ['house', 'forge', 'market', 'portal'].includes(p.type);
+    case 'building': return exact(p, ['slot', 'type']) && slot(p.slot) && ['house', 'forge', 'market', 'bastion', 'portal'].includes(p.type);
     case 'speed': return exact(p, ['value']) && integer(p.value, 1, 8);
     case 'consumable': return exact(p, ['kind', 'slot']) && ['spikes', 'resin', 'overload'].includes(p.kind) && (slot(p.slot) || p.kind!=='overload' && exact(p.slot,['q','r','index','x','y']) && slot({q:p.slot.q,r:p.slot.r,index:p.slot.index}) && Number.isFinite(p.slot.x) && Number.isFinite(p.slot.y));
     case 'baseUpgrade': return exact(p, ['kind']) && ['walls', 'weapon'].includes(p.kind);
@@ -34,7 +36,9 @@ function payloadValid(action, p) {
     case 'sellTower': case 'sellBuilding':
     case 'buildingUpgrade': return exact(p, ['slot']) && slot(p.slot);
     case 'portal': case 'reinforcement': return exact(p, ['slot']) && (p.slot === null || slot(p.slot));
+    case 'giftHex': return exact(p,['cardId'])&&['straight','smallCurve','bigCurve'].includes(p.cardId);
     case 'delivery': return exact(p, ['offerId', 'index']) && typeof p.offerId === 'string' && p.offerId.length <= 200 && integer(p.index, 0, 2);
+    case 'deliveryWish': return exact(p, ['offerId', 'index']) && typeof p.offerId === 'string' && p.offerId.length <= 200 && (p.index === null || integer(p.index, 0, 2));
     case 'reward': return exact(p, ['offerId', 'index']) && typeof p.offerId === 'string' && p.offerId.length <= 200 && (p.index === null || integer(p.index, 0, 1000));
     case 'merchant': return exact(p,['site','item']) && typeof p.site==='string' && /^-?\d{1,4},-?\d{1,4}$/.test(p.site) && ['repair','protection'].includes(p.item);
     case 'redraw': case 'extraHex': case 'acknowledge': case 'tunnel': return exact(p, []);
@@ -42,7 +46,13 @@ function payloadValid(action, p) {
   }
 }
 const offerId = id => crypto.createHash('sha256').update(id).digest('hex');
-const copy = v => v !== null && typeof v === 'object' ? JSON.parse(JSON.stringify(v)) : v;
+// Views contain plain JSON values. Copy them directly instead of encoding and parsing
+// every nested field for every enemy, tower and mine on both clients' snapshots.
+function copy(v){
+  if(v===null||typeof v!=='object')return typeof v==='number'&&!Number.isFinite(v)?null:v;
+  if(Array.isArray(v))return Array.from(v,item=>item===undefined?null:copy(item));
+  const result={};for(const key of Object.keys(v))if(v[key]!==undefined)result[key]=copy(v[key]);return result;
+}
 function pick(value, fields) {
   const result = {};
   for (const key of fields) if (value[key] !== undefined) result[key] = copy(value[key]);
@@ -119,17 +129,21 @@ function createRoom({ seed = crypto.randomUUID(), loadouts, now = () => Date.now
     else if (packet.action === 'lobbyLoadout') {
       const s=match.boards[player].state,{towers,heroId=s.heroId,difficulty=s.difficulty}=packet.payload;
       const access=session.setupOptions||{heroes:['standard'],twoFronts:false};
-      const ok=!lobby.started&&towers.every(id=>Object.hasOwn(core.data.TOWERS,id)&&(!access.towers||access.towers.includes(id)))&&access.heroes.includes(heroId)&&(difficulty==='normal'||access.twoFronts);
+      const ok=!lobby.started&&towers.every(id=>Object.hasOwn(core.data.TOWERS,id)&&(!access.towers||access.towers.includes(id)))&&access.heroes.includes(heroId)&&(player===0?(difficulty==='normal'||access.twoFronts):difficulty===match.boards[0].state.difficulty);
       if(ok){
         core.duo.configureBoard(match,player,{loadout:towers,heroId,difficulty,unlocks:[...s.ultimateUnlocks,...s.buildingUnlocks],metaAugments:s.metaAugments});
+        if(player===0&&match.boards[1].state.difficulty!==difficulty){
+          const other=match.boards[1].state;core.duo.configureBoard(match,1,{loadout:other.towerLoadout,heroId:other.heroId,difficulty,unlocks:[...other.ultimateUnlocks,...other.buildingUnlocks],metaAugments:other.metaAugments});lobby.ready[1]=false;
+        }
         session.loadoutChosen=true;lobby.ready[player]=false;revision++;
       }
       result={ok,reason:ok?null:'illegal'};
     }
+    else if(packet.action==='lobbyStart'){const ok=player===0&&!lobby.started&&seats.every(Boolean)&&lobby.ready[1];if(ok){lobby.ready=[true,true];lobby.started=true;revision++;}result={ok,reason:ok?null:'partner-not-ready'};}
     else if (packet.action === 'lobbyReady') { const ok = !lobby.started && seats.every(Boolean); if (ok) { lobby.ready[player] = packet.payload.value; if (lobby.ready.every(Boolean)) lobby.started = true; revision++; } result = { ok, reason: ok ? null : 'illegal' }; }
     else if (!lobby.started) result = { ok: false, reason: 'lobby-not-ready' };
     else if (packet.wave !== match.wave || packet.phase !== match.boards[player].state.phase) result = { ok: false, reason: 'stale' };
-    else { let payload = packet.payload; if (packet.action === 'reward' || packet.action === 'delivery') { const offer = packet.action === 'delivery' ? match.delivery?.offers[player] : match.boards[player].state.rewardOffer; payload = { ...payload, offerId: offer && offerId(offer.id) === payload.offerId ? offer.id : '' }; } const ok = core.duo.command(match, player, { id: epoch + ':' + player + ':' + packet.sequence, wave: packet.wave, action: packet.action, payload }); if (ok) revision++; result = { ok, reason: ok ? null : 'illegal' }; }
+    else { let payload = packet.payload; if (packet.action === 'reward' || packet.action === 'delivery' || packet.action === 'deliveryWish') { const offer = packet.action === 'deliveryWish' ? match.delivery?.offers[1-player] : packet.action === 'delivery' ? match.delivery?.offers[player] : match.boards[player].state.rewardOffer; payload = { ...payload, offerId: offer && offerId(offer.id) === payload.offerId ? offer.id : '' }; } const ok = core.duo.command(match, player, { id: epoch + ':' + player + ':' + packet.sequence, wave: packet.wave, action: packet.action, payload }); if (ok) revision++; result = { ok, reason: ok ? null : 'illegal' }; }
     result = { ...result, sequence: packet.sequence, next: ++session.next, revision }; session.last = { fingerprint, result }; return { ...result };
   }
   const placementCache = new WeakMap();
@@ -152,7 +166,7 @@ function createRoom({ seed = crypto.randomUUID(), loadouts, now = () => Date.now
     const twoFronts=progress.milestones.includes('standard35');
     const first=!session.setupOptions&&!session.loadoutChosen;
     const hero=first?progress.activeHero:s.heroId,heroId=heroes.includes(hero)?hero:'standard';
-    const difficulty=twoFronts&&(first?progress.difficulty:s.difficulty)==='dual'?'dual':'normal';
+    const difficulty=player===1?match.boards[0].state.difficulty:twoFronts&&(first?progress.difficulty:s.difficulty)==='dual'?'dual':'normal';
     const towers=[...new Set([...core.profile.START_TOWERS,...progress.unlockedTowers.filter(id=>Object.hasOwn(core.data.TOWERS,id))])];
     const preferred=first&&(profile||guest)?.activeLoadout?.length===5?progress.activeLoadout:s.towerLoadout;
     const loadout=[...new Set([...preferred.filter(id=>towers.includes(id)),...towers])].slice(0,5);
@@ -163,22 +177,33 @@ function createRoom({ seed = crypto.randomUUID(), loadouts, now = () => Date.now
     }else{
       s.metaAugments=copy(selected);s.ultimateUnlocks=unlocks.filter(id=>id.startsWith('ultimate:'));s.buildingUnlocks=unlocks.filter(id=>id.startsWith('building:'));
     }
+    if(player===0&&match.boards[1].state.difficulty!==difficulty){const other=match.boards[1].state;core.duo.configureBoard(match,1,{loadout:other.towerLoadout,heroId:other.heroId,difficulty,unlocks:[...other.ultimateUnlocks,...other.buildingUnlocks],metaAugments:other.metaAugments});lobby.ready[1]=false;}
+    const identity=profile?._duoIdentity;if(identity&&typeof identity.username==='string'&&identity.username.length<=80)session.identity={id:String(identity.id),username:identity.username};else if(!profile)delete session.identity;
     session.setupOptions={heroes,twoFronts,towers};lobby.ready[player]=false;revision++;
     const equipped=match.boards[player].state;
     return {ok:true,cards:copy(selected.cards),setupOptions:copy(session.setupOptions),heroId,difficulty,loadout:[...loadout],ultimateUnlocks:[...equipped.ultimateUnlocks],buildingUnlocks:[...equipped.buildingUnlocks]};
   }
+  // Geometry changes rarely during combat; do not walk every road for each landmark at 10 Hz per viewer.
+  const terrainCache=new WeakMap();
+  function terrain(s){
+    const key=JSON.stringify([[...s.map.keys()],s.map.revealBonus,s.biomeSeed,s.biomeLayoutVersion,s.challengeDay,[...s.landmarks.values()].map(l=>[l.q,l.r,l.claimed,!!l.prefab,l.relicLocated])]);
+    let cached=terrainCache.get(s);
+    if(cached?.key!==key){cached={key,biomes:Object.fromEntries(core.biomes.visibleTiles(s).map(t=>[t.q+','+t.r,core.biomes.forTile(s,t)])),visibility:new Map([...s.landmarks.values()].map(l=>[l.q+','+l.r,core.exploration.visibility(s.map,l)]))};terrainCache.set(s,cached);}
+    return cached;
+  }
   function view(token) {
     const player = seat(token); if (player < 0) return null; const presence = connection();
-    const boards = match.boards.map(({ state: s }, index) => ({
-      visibleBiomes: Object.fromEntries(core.biomes.visibleTiles(s).map(t => [t.q + ',' + t.r, core.biomes.forTile(s, t)])), player: index, phase: s.phase, gold: s.gold, income: s.income, wave: s.wave, elapsedMs: s.elapsedMs, ...pick(s, ['heroId', 'baseUpgrades', 'earnedMeta', 'difficulty', 'openingRemaining', 'baseExits', 'lastCompletedWave', 'pendingSpawns', 'waveKills', 'buildingVersion', 'goldEarned', 'consumables', 'consumableUsage', 'extraHexPurchases', 'extraHexWave', 'augments', 'freeTowerBuilds', 'freeExtraHexes', 'redrawWave', 'merchantPurchases', 'merchantProtectionWave', 'merchantProtection']),
+    const boards = match.boards.map(({ state: s }, index) => {const ground=terrain(s);return ({
+      visibleBiomes: copy(ground.biomes), player: index, phase: s.phase, gold: s.gold, income: s.income, wave: s.wave, elapsedMs: s.elapsedMs, ...pick(s, ['heroId', 'baseUpgrades', 'earnedMeta', 'difficulty', 'openingRemaining', 'baseExits', 'lastCompletedWave', 'pendingSpawns', 'waveKills', 'buildingVersion', 'goldEarned', 'consumables', 'consumableUsage', 'extraHexPurchases', 'extraHexWave', 'augments', 'freeTowerBuilds', 'freeExtraHexes', 'redrawWave', 'merchantPurchases', 'merchantProtectionWave', 'merchantProtection']),
       map: [...s.map.values()].map(t => ({ ...pick(t, ['q', 'r', 'type', 'rotation', 'roads', 'slots', 'buildingSlots', 'buildings', 'income', 'tunnels', 'tunnelLabel', 'site', 'siteEffect', 'siteSlot', 'siteIncome']), biome: core.biomes.forTile(s, t), towers: (t.towers || []).map(tower => tower ? pick(tower, ['type', 'level', 'branch', 'finalUpgrade', 'ultimate', 'guestOwner', 'targetPriority', 'biome', 'tileType', 'rangeFactor', 'supportDamage', 'supportRange', 'forgeSupported', 'paid', 'upgradeSpent', 'builtOnWave', 'statId', 'souls', 'aim', 'overloadUntil', 'overloadPending']) : null) })),
-      landmarks: [...s.landmarks.values()].flatMap(l => { const visibility = core.exploration.visibility(s.map, l); return visibility === 'clear' ? [pick(l, ['q', 'r', 'type', 'claimed', 'status', 'consent', 'prefab', 'augment', 'merchant'])] : visibility === 'fog' ? [pick(l, ['q', 'r'])] : []; }),
+      landmarks: [...s.landmarks.values()].flatMap(l => { const visibility = ground.visibility.get(l.q+','+l.r); return visibility === 'clear' ? [pick(l, ['q', 'r', 'type', 'claimed', 'status', 'consent', 'prefab', 'augment', 'merchant'])] : visibility === 'fog' ? [pick(l, ['q', 'r'])] : []; }),
       enemies: s.enemies.map(e => ({motionPath:motionPath(e),...pick(e, ['id', 'type', 'name', 'originBiome', 'bossKind', 'immunity', 'abilityIcon', 'description', 'color', 'caravan', 'splitOnDeath', 'killGold', 'x', 'y', 'hp', 'maxHp', 'armorHp', 'maxArmorHp', 'magicHp', 'maxMagicHp', 'alive', 'slowFactor', 'shieldHits', 'molted', 'sprinting', 'leaping', 'leapProgress', 'crouching', 'sporeHidden', 'charge'])})),
       projectiles: (s.projectiles || []).map(p => pick(p, ['kind', 'x', 'y', 'x1', 'y1', 'x2', 'y2', 'r', 'ttl', 'max', 'fade', 'color', 'tower', 'variant', 'splash', 'id', 'hits', 'hitAt', 'pts'])),
       mines: (s.mines || []).map(m => pick(m, ['id', 'x', 'y', 'color'])),
-      ...(index === player ? { ...pick(s, ['removalSource', 'metaAugments', 'augmentMarketWave', 'runTowerStats', 'runTowerDetails', 'baseKills', 'consumableKills', 'baseDamage', 'patricianBonusIncome']), duoDiamondEstimate: Math.max(0, Math.floor(Math.min(...match.boards.map(r => r.state.lastCompletedWave || 0)) / 2) + (s.earnedMeta?.periodicBosses || 0) * 5 + match.boards.reduce((n, r) => n + (r.state.earnedMeta?.explorationBosses || 0), 0) * 3 - (match.victoryPaid?.[index] || 0)), hand: [...s.hand], placements: copy(placements(s)), rescueCard: s.rescueCard ? copy(s.rescueCard) : null, tunnelOffer: s.tunnelOffer ? copy(s.tunnelOffer) : null, ultimateUnlocks: [...s.ultimateUnlocks], buildingUnlocks: [...s.buildingUnlocks], wavePlans: wavePlans(s), drawPile: [...s.drawPile], discard: [...s.discard], deckCounts: s.deck.reduce((a, id) => (a[id] = (a[id] || 0) + 1, a), {}), loadout: [...s.towerLoadout], rewardOffer: s.rewardOffer ? { ...pick(s.rewardOffer, ['kind', 'choices', 'skippable']), ...(s.rewardOffer.kind==='shrine'?{shrineEffect:core.exploration.shrineEffect(s.landmarks,s.pendingShrine)}:s.rewardOffer.kind==='boss'?{rarity:core.exploration.bossRewardRarity(s.seed,s.bossRewards[0])}:{}), id: offerId(s.rewardOffer.id) } : null, celebration: s.activeCelebration ? copy(s.activeCelebration) : null } : {}),
-    }));
-    const value={ lobbyState: {...copy(lobby),...(!lobby.started?{setupOptions:copy(seats[player].setupOptions||{heroes:['standard'],twoFronts:false})}:{}),augments:match.boards.map(r=>copy(r.state.metaAugments?.cards||[])),loadouts:match.boards.map(r=>[...r.state.towerLoadout])}, speed: match.speed || 1, paused: !!match.paused, protocol: 1, frameTime, serverId, epoch, revision, player, connection: presence, next: seats[player].next, hp: match.hp, maxHp: match.maxHp, wave: match.wave, phase: match.phase, ready: [...match.ready], finished: [...match.finished], portals: copy(match.portals), reinforcements: copy(match.reinforcements), pendingHelp: match.pendingHelp.map(h => h ? { at: h.at } : null), result: publicResult(), endless:!!match.endless, endlessVotes:copy(match.endlessVotes||[false,false]), rematch: copy(match.rematch || [false, false]), support: copy(match.support), delivery: match.delivery ? { wave: match.delivery.wave, offers: match.delivery.offers.map((o, i) => i === player ? { ...copy(o), id: offerId(o.id) } : { index:o.index, choices:copy(o.choices) }) } : null, boards };
+      hand:[...s.hand],loadout:[...s.towerLoadout],deckCounts:s.deck.reduce((a,id)=>(a[id]=(a[id]||0)+1,a),{}),
+      ...(index === player ? { ...pick(s, ['removalSource', 'metaAugments', 'augmentMarketWave', 'runTowerStats', 'runTowerDetails', 'baseKills', 'consumableKills', 'baseDamage', 'patricianBonusIncome']), duoDiamondEstimate: Math.max(0, core.profile.waveDiamonds(Math.min(...match.boards.map(r => r.state.lastCompletedWave || 0))) + (s.earnedMeta?.periodicBosses || 0) * 5 + match.boards.reduce((n, r) => n + (r.state.earnedMeta?.explorationBosses || 0), 0) * 3 - (match.victoryPaid?.[index] || 0)), hand: [...s.hand], placements: copy(placements(s)), rescueCard: s.rescueCard ? copy(s.rescueCard) : null, tunnelOffer: s.tunnelOffer ? copy(s.tunnelOffer) : null, ultimateUnlocks: [...s.ultimateUnlocks], buildingUnlocks: [...s.buildingUnlocks], wavePlans: wavePlans(s), drawPile: [...s.drawPile], discard: [...s.discard], deckCounts: s.deck.reduce((a, id) => (a[id] = (a[id] || 0) + 1, a), {}), loadout: [...s.towerLoadout], rewardOffer: s.rewardOffer ? { ...pick(s.rewardOffer, ['kind', 'choices', 'skippable']), ...(s.rewardOffer.kind==='shrine'?{shrineEffect:core.exploration.shrineEffect(s.landmarks,s.pendingShrine)}:s.rewardOffer.kind==='boss'?{rarity:core.exploration.bossRewardRarity(s.seed,s.bossRewards[0])}:{}), id: offerId(s.rewardOffer.id) } : null, celebration: s.activeCelebration ? copy(s.activeCelebration) : null } : {}),
+    });});
+    const value={ lobbyState: {...copy(lobby),names:seats.map((seat,i)=>seat?.identity?.username||('Gast '+(i+1))),host:0,...(!lobby.started?{setupOptions:copy(seats[player].setupOptions||{heroes:['standard'],twoFronts:false})}:{}),augments:match.boards.map(r=>copy(r.state.metaAugments?.cards||[])),loadouts:match.boards.map(r=>[...r.state.towerLoadout])}, speed: match.speed || 1, paused: !!match.paused, protocol: 1, frameTime, serverId, epoch, revision, player, connection: presence, next: seats[player].next, hp: match.hp, maxHp: match.maxHp, wave: match.wave, phase: match.phase, ready: [...match.ready], finished: [...match.finished], portals: copy(match.portals), reinforcements: copy(match.reinforcements), pendingHelp: match.pendingHelp.map(h => h ? { at: h.at } : null), result: publicResult(), endless:!!match.endless, endlessVotes:copy(match.endlessVotes||[false,false]), rematch: copy(match.rematch || [false, false]), support: copy(match.support), hexGifts:copy(match.hexGifts||[null,null]), delivery: match.delivery ? { wave: match.delivery.wave, offers: match.delivery.offers.map((o, i) => i === player ? { ...copy(o), id: offerId(o.id) } : { id:offerId(o.id), index:o.index, wish:o.wish??null, choices:copy(o.choices) }) } : null, boards };
     return value;
   }
   function publicResult() { return match.result ? { ...copy(match.result), id: offerId(match.result.id) } : null; }

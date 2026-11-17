@@ -229,6 +229,7 @@ function create(host0,commands){
     tar:makePool(new THREE.CircleGeometry(1,14).rotateX(-Math.PI/2),400,new THREE.MeshStandardMaterial({color:'#ffffff',roughness:.22,polygonOffset:true,polygonOffsetFactor:-2})),
     smoke:makePool(new THREE.SphereGeometry(1,8,6),180,new THREE.MeshStandardMaterial({color:'#ffffff',transparent:true,opacity:.18,depthWrite:false,roughness:1}))};
   const mats={empty:std('#ffffff',{transparent:true,opacity:.6}),legal:basic('#7fcf6a',.25),illegal:basic('#c0594c',.16),outlineLegal:basic('#a9dc93'),outlineIllegal:basic('#ba6b60'),
+    targetHover:basic('#ffdc78',.45),targetBlocked:basic('#f05b56',.4),targetOutline:basic('#ffe59b'),blockedOutline:basic('#ff7d70'),
     portalSlot:basic('#c991ff'),hint:basic('#ffffff'),buildingSlot:basic('#59e0d2',.9),slot:basic('#ffffff',1),select:basic('#f4d36d',.9),bar:basic('#321a18'),hp:basic('#78b95f'),armor:basic('#df8b3a'),magic:basic('#69aee8')};
   const enemyGeometry={small:new THREE.SphereGeometry(9,14,10),boss:new THREE.SphereGeometry(15,16,12)},barGeometry=new THREE.PlaneGeometry(1,1);
   const ghostMaterials=new Map(),biomeMaterials=new Map();
@@ -540,6 +541,12 @@ function create(host0,commands){
       const arch=new THREE.Mesh(new THREE.TorusGeometry(12,3,6,16),std('#8254b5',{emissive:'#a16bdb',emissiveIntensity:.5}));arch.position.y=14;gate.add(arch);
       const core=new THREE.Mesh(new THREE.CircleGeometry(10,16),new THREE.MeshBasicMaterial({color:'#c991ff',transparent:true,opacity:.65,side:THREE.DoubleSide}));core.position.y=14;gate.add(core);
       group.add(gate);
+     }else if(type==='bastion'){
+      const stone=std('#8b9ca6'),flag=std('#5ba5d1');
+      const tower=new THREE.Mesh(new THREE.CylinderGeometry(12,16,32,6),stone);tower.position.y=16;tower.castShadow=true;group.add(tower);
+      for(let i=0;i<6;i++){const angle=i*Math.PI/3,battlement=new THREE.Mesh(new THREE.BoxGeometry(6,7,6),stone);battlement.position.set(Math.cos(angle)*10,34,Math.sin(angle)*10);battlement.castShadow=true;group.add(battlement);}
+      const pole=new THREE.Mesh(new THREE.CylinderGeometry(1,1,20,4),stone);pole.position.y=41;group.add(pole);
+      const banner=new THREE.Mesh(new THREE.BoxGeometry(12,8,1),flag);banner.position.set(6,46,0);group.add(banner);
     }else if(building){
       const palette={house:['#c9a066','#a94a3a'],forge:['#6b6e75','#3d3f45'],market:['#d8c48a','#b8443a']}[type]||['#bc914d','#7a5a2c'];
       const body=new THREE.Mesh(new THREE.BoxGeometry(26,18,22).translate(0,9,0),std(palette[0])),roof=new THREE.Mesh(new THREE.ConeGeometry(21,13,4).rotateY(Math.PI/4).translate(0,24.5,0),std(palette[1]));
@@ -550,7 +557,7 @@ function create(host0,commands){
     if(!building){const pick=new THREE.Mesh(slotPick,invisible);pick.userData.pick={kind:'building',q:tile.q,r:tile.r,index};group.add(pick);picks.push(pick);}
     const hint=building?new THREE.Mesh(hintGeometry,mats.hint):null;
     if(hint){hint.position.y=50;hint.visible=false;group.add(hint);}
-    const retargetRing=['forge','market'].includes(building?.type)?new THREE.Mesh(circleRing,basic('#ffd16a',.8)):null;
+    const retargetRing=['forge','market','bastion'].includes(building?.type)?new THREE.Mesh(circleRing,basic('#ffd16a',.8)):null;
     if(retargetRing){retargetRing.scale.setScalar(24);retargetRing.position.y=2;retargetRing.visible=false;group.add(retargetRing);}
     return {group,picks,hint,retargetRing,tile,index};
   }
@@ -585,11 +592,14 @@ function create(host0,commands){
   }
   function syncGhost(){
     const hovered=state.hoveredPlacement,target=targetList.find(t=>key(t.q,t.r)===hovered),card=state.hand?.[state.selectedCard]==='rescue'?state.rescueCard:CARD_LIBRARY[state.hand?.[state.selectedCard]];
-    const show=target&&card&&state.phase==='place'&&!state.waveRunning;
-    const sig=show?[target.q,target.r,card.id,state.rotation,target.legal].join('|'):'';
+    const building=!!state.buildingTarget,show=target&&(building||card&&state.phase==='place'&&!state.waveRunning);
+    const sig=show?[target.q,target.r,building?'building':card.id,state.rotation,target.legal].join('|'):'';
     if(sig!==ghostSig){
       ghostSig=sig;clearGroup(layer.ghost);
-      if(show){
+      if(show&&building){
+        const c=axialToWorld(target.q,target.r),fill=new THREE.Mesh(flatHex,target.legal?mats.targetHover:mats.targetBlocked),ring=new THREE.Mesh(outline,target.legal?mats.targetOutline:mats.blockedOutline);
+        for(const mesh of [fill,ring]){mesh.position.set(c.x,3,c.y);mesh.renderOrder=58;mesh.material.depthTest=false;mesh.material.depthWrite=false;layer.ghost.add(mesh);}
+      }else if(show){
         const tile={q:target.q,r:target.r,type:card.id,rotation:state.rotation,roads:HexMap.rotatedRoads(card,state.rotation),slots:card.slots||0,buildingSlots:card.buildingSlots||0},spec={kind:'tile',...HexModelMap.modelFor(tile)};
         layer.ghost.add(buildTile(spec,tile,{ghost:true,legal:target.legal}));
         const c=axialToWorld(target.q,target.r),ring=new THREE.Mesh(outline,target.legal?mats.outlineLegal:mats.outlineIllegal);ring.position.set(c.x,0,c.y);layer.ghost.add(ring);
@@ -606,7 +616,8 @@ function create(host0,commands){
     if(!center||corners.some(p=>!p))return;
     const bounds=host.getBoundingClientRect(),outer=wrap.getBoundingClientRect(),left=center.x-(bounds.left-outer.left),top=Math.max(...corners.map(p=>p.y))-(bounds.top-outer.top)+6;
     if(left<0||left>bounds.width||top<0||top>bounds.height)return;
-    rotateHint.textContent=globalThis.HexCompact?.touch?.()?'Vorschau antippen: setzen · Knopf zum Drehen':'R / Mausrad-Klick · Drehen';
+    const target=state.buildingTarget&&targetList.find(t=>key(t.q,t.r)===state.hoveredPlacement);
+    rotateHint.textContent=target?(target.legal?'✓ Zusatz-Hex wählen':'✕ Hier nicht möglich'):globalThis.HexCompact?.touch?.()?'Vorschau antippen: setzen · Knopf zum Drehen':'R / Mausrad-Klick · Drehen';
     rotateHint.style.display='block';rotateHint.style.left=left+'px';rotateHint.style.top=top+'px';
   }
 
@@ -993,9 +1004,8 @@ function create(host0,commands){
         if(obj.hint.visible) obj.hint.position.y=66+Math.sin(now/220)*3;
         if(!obj.turret||obj.def.aura) continue;
         const tower=state.map.get(key(obj.tile.q,obj.tile.r))?.towers[obj.index]||obj.tower,definition=HexData.towerDefinition(tower);
-        const candidates=enemies.filter(e=>e.alive&&!e.sporeHidden&&(!e.immunity||e.immunity!==definition.damageType)&&Math.hypot(e.x-obj.pos.x,e.y-obj.pos.y)<=definition.range);
         const shot=tower.aim,shooting=shot&&state.elapsedMs-shot.time<350;
-        const best=shooting?shot:HexCombat.targetByPriority(candidates,tower,obj.pos,aimDistance);
+        const best=shooting?shot:HexCombat.targetByPriority(enemies.filter(e=>e.alive&&!e.sporeHidden&&(!e.immunity||e.immunity!==definition.damageType)&&Math.hypot(e.x-obj.pos.x,e.y-obj.pos.y)<=definition.range),tower,obj.pos,aimDistance);
         if(best){const wanted=Math.atan2(-(best.y-obj.pos.y),best.x-obj.pos.x),diff=Math.atan2(Math.sin(wanted-obj.angle),Math.cos(wanted-obj.angle));obj.angle+=diff*(shooting?1:Math.min(1,dt*10));obj.turret.rotation.y=obj.angle;}
         if(obj.kick>0){obj.kick=Math.max(0,obj.kick-dt*9);const k=obj.kick*obj.kick*.045;obj.turret.position.set(obj.turretBase.x-Math.cos(obj.angle)*k,obj.turretBase.y,obj.turretBase.z+Math.sin(obj.angle)*k);}   // Rückstoß entgegen der Schussrichtung
       }
@@ -1031,7 +1041,7 @@ function create(host0,commands){
   let drag=null,press=null,hoverTowerKey=null,hoverBuildingKey=null,pointerPosition=null;
   const pinch=HexCamera.pinch((factor,anchor)=>zoom(factor,anchor));
   dom.style.touchAction='none';
-  function pick(event){setRay(event);const hit=ray.intersectObjects(pickables,false)[0];return hit?.object.userData.pick||null;}
+  function pick(event){setRay(event);const hits=ray.intersectObjects(pickables,false),hit=(state?.buildingTarget&&hits.find(h=>h.object.userData.pick?.kind==='target'))||hits[0];return hit?.object.userData.pick||null;}
   function refreshPointerCursor(){
     if(!pointerPosition||drag)return;
     const found=pick(pointerPosition);
@@ -1039,10 +1049,10 @@ function create(host0,commands){
   }
   function updateHover(event){
     const found=pick(event),id=found?.kind==='target'?key(found.q,found.r):null;
-    if(id!==hoverPick){if(hoverPick) commands.leavePlacement(hoverPick);if(id) commands.hoverPlacement(id);hoverPick=id;render(state,targetList);}
-    const tw=found?.kind==='tower'?{q:found.q,r:found.r,index:found.index}:null,twKey=tw?tw.q+','+tw.r+','+tw.index:null;   // Reichweite beim Überfahren eines Turms
+    if(id!==hoverPick||id&&state.hoveredPlacement!==id){if(hoverPick) commands.leavePlacement(hoverPick);if(id) commands.hoverPlacement(id);hoverPick=id;render(state,targetList);}
+    const tw=!state.buildingTarget&&found?.kind==='tower'?{q:found.q,r:found.r,index:found.index}:null,twKey=tw?tw.q+','+tw.r+','+tw.index:null;   // Reichweite beim Überfahren eines Turms
     if(twKey!==hoverTowerKey){hoverTowerKey=twKey;state.hoverTower=tw;render(state,targetList);}
-    const building=found?.kind==='building'?{q:found.q,r:found.r,index:found.index}:null,buildingKey=building?`${building.q},${building.r},${building.index}`:null;
+    const building=!state.buildingTarget&&found?.kind==='building'?{q:found.q,r:found.r,index:found.index}:null,buildingKey=building?`${building.q},${building.r},${building.index}`:null;
     if(buildingKey!==hoverBuildingKey){hoverBuildingKey=buildingKey;commands.hoverBuilding?.(building);}
     refreshPointerCursor();
   }

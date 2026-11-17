@@ -24,7 +24,7 @@ test('shrine choices persist and equal auras do not stack; guardian grants preci
  assert.equal(s.map.get('1,0').towers[0].supportRange,1.15);
  assert.equal(c.exploration.activateShrine(s,'0,0','damage'),false);
  s.landmarks.set('2,0',{q:2,r:0,type:'boss',status:'defeated'});c.exploration.defeatGuardian(s,'2,0');c.exploration.defeatGuardian(s,'2,0');assert.equal(s.map.get('2,0').slots,2);
- s.map.get('2,0').towers[1]={type:'archer'};c.buildings.refresh(s);assert.equal(s.map.get('2,0').towers[0].supportRange,1.15);assert.equal(s.map.get('2,0').towers[1].supportRange,1.15*1.2);
+ s.map.get('2,0').towers[1]={type:'archer'};c.buildings.refresh(s);assert.equal(s.map.get('2,0').towers[0].supportRange,1.15);assert.equal(s.map.get('2,0').towers[1].supportRange,1.15*1.3);
  const restored=c.snapshot.restore(c.snapshot.capture(s,run.random)).state;assert.equal(restored.map.get('0,0').siteEffect,'range');assert.equal(restored.map.get('2,0').siteSlot,1);
  s.pendingShrine='0,0';s.phase='shrineReward';assert.equal(c.rewards.offer(s,'shrine',run.random).choices[0].kind,'site');
 });

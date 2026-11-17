@@ -89,3 +89,23 @@ test('all seven augments can be collected, then exhausted pools give supplies wi
  const {c,run,s}=setup();s.deck=['sentryBend','straight','straight','smallCurve','bigCurve'];s.hand=[];s.discard=[];s.drawPile=[...s.deck];for(const id of Object.keys(c.rewards.augments))take(c,s,id);assert.equal(s.augments.length,7);assert.equal(c.rewards.augmentChoices(s,run.random).length,0);
  s.landmarks.set('1,0',{q:1,r:0,type:'shrine',augment:true,claimed:true});s.pendingShrine='1,0';c.session.shrine(s,run.random);assert.equal(s.rewardOffer.choices[0].blessing,'supplies');const gold=s.gold;assert.ok(c.session.choose(s,run.random,s.rewardOffer.id,0));assert.equal(s.gold,gold+30);assert.equal(s.phase,'build');
 });
+
+
+test('Wegweiser changes identical redraws across seeded starts without losing deck copies',()=>{
+ for(let seed=0;seed<100;seed++){
+  const {c,s}=setup();take(c,s,'wayfinder');s.phase='place';s.landmarks=new Map();
+  s.deck=['straight','straight','straight','smallCurve','bigCurve'];s.hand=['straight','straight','straight'];s.drawPile=[];s.discard=['smallCurve','bigCurve'];
+  const old=[...s.hand].sort().join('|');assert.ok(c.rewards.redraw(s,c.random.create('reroll-'+seed)));
+  assert.notEqual([...s.hand].sort().join('|'),old);
+  assert.deepEqual([...s.hand,...s.drawPile,...s.discard].sort(),s.deck.slice().sort());
+  assert.equal(c.rewards.redraw(s,c.random.create('again')),false);
+ }
+});
+
+test('Wegweiser does not consume its use when the deck cannot produce a different hand',()=>{
+ const {c,s}=setup();take(c,s,'wayfinder');s.phase='place';s.landmarks=new Map();
+ s.deck=Array(5).fill('straight');s.hand=Array(3).fill('straight');s.drawPile=['straight'];s.discard=['straight'];
+ const before=JSON.stringify([s.hand,s.drawPile,s.discard]);
+ assert.equal(c.rewards.redraw(s,()=>.5),false);assert.equal(c.rewards.canRedraw(s),true);
+ assert.equal(JSON.stringify([s.hand,s.drawPile,s.discard]),before);
+});

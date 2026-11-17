@@ -9,7 +9,11 @@ function createAccountAugments(apiBase, request = fetch) {
     if (!response.ok) throw Error('Account API unavailable');
     const data = await response.json();
     if (data.augmentProtocol !== 1) throw Error('Account API needs augment update');
-    return data.data?.profile || null;
+    const profile=data.data?.profile || {};
+    const identityResponse=await request(new URL('/me',apiBase),{headers:{Authorization:'Bearer '+token,Accept:'application/json'},redirect:'error',cache:'no-store',signal:AbortSignal.timeout(5000)});
+    if(!identityResponse.ok)throw Error('Account identity unavailable');
+    const identity=await identityResponse.json();
+    return {...profile,_duoIdentity:identity.user};
   };
 }
 module.exports={createAccountAugments};

@@ -27,7 +27,7 @@ test('the shared screen shows the team bar and a card click plus field click sen
  duo.receive(room.view(a.token));
  const el=id=>ui.elements.get(id);
  assert.equal(el('duoTurn').classList.contains('hidden'),false);assert.equal(el('duoTurnTitle').textContent,'Du bist dran: Hex legen');
- assert.equal(el('duoSeatSelf').dataset.state,'todo');assert.equal(el('duoSeatPartnerText').textContent,'legt ein Hex');assert.equal(el('duoTeamHp').textContent,'♥ 40/40 gemeinsam');
+ assert.equal(el('duoSeatSelf').dataset.state,'todo');assert.equal(el('duoSeatPartnerText').textContent,'legt ein Hex');assert.equal(el('duoTeamHp').textContent,'40/40');
  const s=duo.api.getState();el('hand').children[0].listeners.click();assert.equal(s.selectedCard,0);
  const cell=s.placements[0][0].find(c=>c.legal)||s.placements[0].flat().find(c=>c.legal);if(!s.placements[0][0].includes(cell))s.rotation=s.placements[0].findIndex(cells=>cells.includes(cell));
  ui.rendererCommands.placeTile(cell.q,cell.r);assert.equal(JSON.stringify(duo.calls.at(-1)),JSON.stringify({action:'place',payload:{q:cell.q,r:cell.r,index:0,rotation:s.rotation}}));
@@ -46,14 +46,12 @@ test('enemies glide between server snapshots instead of jumping',()=>{
  const far=JSON.parse(JSON.stringify(next));far.revision++;far.frameTime=clock;far.boards[0].enemies=[{...enemy(900),motionPath:[{x:900,y:10}]}];duo.receive(far);clock+=200;duo.bridge.animate(clock);assert.equal(e().x,900,'teleports are not smeared across the map');
 });
 
-test('Duo instructions collapse after six seconds without snapshots restarting the timer',()=>{
- let clock=1000;const duo={real:true,calls:[]},ui=load({duo,now:()=>clock}),{room,seats:[a]}=setup('collapse-guide');
- const compact=()=>ui.elements.get('duoTurn').classList.contains('duoTurnCompact');
- duo.receive(room.view(a.token));assert.equal(compact(),false);
- clock+=5000;duo.receive(room.view(a.token));assert.equal(compact(),false);
- clock+=1100;duo.receive(room.view(a.token));assert.equal(compact(),true);
- assert.ok(send(room,a,'place',opening(room,a)).ok);duo.receive(room.view(a.token));assert.equal(compact(),false,'new instruction expands');
- clock+=6100;duo.receive(room.view(a.token));assert.equal(compact(),true);
- const paused=room.view(a.token);paused.connection={...paused.connection,paused:true,remainingSeconds:60};duo.receive(paused);
- clock+=7000;duo.receive(paused);assert.equal(compact(),false,'connection warnings remain visible');
+test('Duo guidance remains in the team menu instead of changing the bar after a timeout',()=>{
+ let clock=1000;const duo={real:true,calls:[]},ui=load({duo,now:()=>clock}),{room,seats:[a]}=setup('edge-guide');
+ duo.receive(room.view(a.token));const title=ui.elements.get('duoTurnTitle').textContent;
+ clock+=12000;duo.receive(room.view(a.token));assert.equal(ui.elements.get('duoTurnTitle').textContent,title);
+ assert.ok(send(room,a,'place',opening(room,a)).ok);duo.receive(room.view(a.token));assert.equal(ui.elements.get('duoTurnTitle').textContent,'Bauphase: Türme bauen');
+ ui.elements.get('duoSupportShortcut').listeners.click();assert.equal(ui.elements.get('duoHud').open,true);ui.elements.get('duoHud').listeners.toggle();assert.equal(ui.elements.get('duoSupportShortcut').attributes['aria-expanded'],'true');
+ ui.documentListeners.keydown({key:'Escape',preventDefault(){}});assert.equal(ui.elements.get('duoHud').open,false);
+ const paused=room.view(a.token);paused.connection={...paused.connection,paused:true,remainingSeconds:60};duo.receive(paused);assert.equal(ui.elements.get('duoTurn').dataset.tone,'alert');assert.ok(ui.elements.get('app').classList.contains('duoDisconnected'));
 });

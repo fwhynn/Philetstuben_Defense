@@ -81,7 +81,7 @@ test('game over cancels pending spawns and disables the run', () => {
 });
 
 test('game over pays accumulated run progress once', () => {
-  const { a, elements } = load(); a.state.phase = 'wave'; a.state.waveRunning = true; a.state.wave = 23; a.state.hp = 0; a.state.earnedMeta = { normalKills: 99, periodicBosses: 2, explorationBosses: 1 };
+  const { a, elements } = load(); a.state.phase = 'wave'; a.state.waveRunning = true; a.state.wave = 23; a.state.lastCompletedWave = 22; a.state.hp = 0; a.state.earnedMeta = { normalKills: 99, periodicBosses: 2, explorationBosses: 1 };
   a.update(0, 0); assert.match(elements.get('diamondBreakdown').innerHTML, /\+11/); assert.match(elements.get('diamondBreakdown').innerHTML, /\+13/); assert.match(elements.get('diamondBreakdown').innerHTML, /\+4/); assert.equal(elements.get('gameOverDiamonds').textContent, 28);
   a.update(0, 0); assert.equal(elements.get('gameOverDiamonds').textContent, 28);
 });

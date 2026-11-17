@@ -1,5 +1,5 @@
 'use strict';
-const {Server}=require('socket.io');
+const {Server}=require('socket.io'),wire=require('../classes/duo-wire.js');
 function attachSockets(server,room,{browser,publicOrigin,isClosing}){
  // Compressed frames shrink the 10 Hz board snapshots to a fraction; short pings detect lost players within ~10 s.
  const io=new Server(server,{maxHttpBufferSize:8192,serveClient:true,perMessageDeflate:{threshold:1024},pingInterval:5000,pingTimeout:5000,allowRequest(req,done){const origin=req.headers.origin;done(null,!isClosing()&&(!origin||browser&&origin===(publicOrigin||'http://'+req.headers.host)));}});
@@ -8,10 +8,15 @@ function attachSockets(server,room,{browser,publicOrigin,isClosing}){
  const present=new Set(),touch=socket=>{if(isClosing()||room.healthy===false)return;try{room.touch?.(socket.data.token);}catch{}};
  const heartbeat=setInterval(()=>{for(const socket of present)touch(socket);},1000);heartbeat.unref?.();
  // Push changed snapshots at a steady 10 Hz instead of waiting for request/response round trips.
- const sent=new WeakMap(),push=setInterval(()=>{if(isClosing()||room.healthy===false)return;for(const socket of present){try{if(socket.conn?.transport?.writable===false)continue;const {token,clientId}=socket.data;if(room.claim&&!room.claim(token,clientId).ok)continue;const currentKey=room.pushKey?.(token);if(currentKey&&sent.get(socket)===currentKey)continue;const view=room.view(token);if(!view)continue;const key=view.serverId+view.epoch+':'+view.revision+':'+view.next;if(sent.get(socket)===key)continue;sent.set(socket,key);socket.volatile.emit('state',view);}catch{}}},100);push.unref?.();
+ const sent=new WeakMap(),push=setInterval(()=>{if(isClosing()||room.healthy===false)return;for(const socket of present){try{if(socket.conn?.transport?.writable===false)continue;const {token,clientId}=socket.data;if(room.claim&&!room.claim(token,clientId).ok)continue;const currentKey=room.pushKey?.(token);if(currentKey&&sent.get(socket)===currentKey)continue;const view=room.view(token);if(!view)continue;const key=view.serverId+view.epoch+':'+view.revision+':'+view.next;if(sent.get(socket)===key)continue;sent.set(socket,key);
+        const state=socket.data.wire||(socket.data.wire={base:null,pending:null,at:0});
+        if(!state.base&&!state.pending||Date.now()-state.at>=2000){
+          const id=view.serverId+':'+view.epoch+':'+view.revision+':'+view.next;
+          state.pending=wire.baseline(view,id);state.at=Date.now();socket.emit('state',{...view,wireBase:id});
+        }else socket.volatile.emit('state',wire.delta(view,state.base));}catch{}}},100);push.unref?.();
  server.on('close',()=>{clearInterval(heartbeat);clearInterval(push);});
  io.on('connection',socket=>{
-  present.add(socket);touch(socket);socket.on('disconnect',()=>present.delete(socket));
+  present.add(socket);touch(socket);socket.on('state-base',id=>{const state=socket.data.wire;if(state?.pending?.id===id){state.base=state.pending;state.pending=null;}});socket.on('disconnect',()=>present.delete(socket));
   let count=0,window=Date.now();
   socket.on('request',(message,ack)=>{
    if(typeof ack!=='function')return;

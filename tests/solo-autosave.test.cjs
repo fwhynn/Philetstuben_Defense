@@ -63,5 +63,5 @@ test('mode selection does not end the saved solo run before choosing Duo',()=>{
  let prompts=0;const view=load({initialProfile:{introduction:{version:1,bestWave:35}},confirm:()=>{prompts++;return true;}});
  view.elements.get('openMainMenuBtn').listeners.click();const saved=view.storage.get(key);
  assert.ok(saved);view.elements.get('menuPlayBtn').listeners.click();assert.equal(prompts,0);assert.equal(view.storage.get(key),saved);
- view.elements.get('standardModeBtn').listeners.click();assert.equal(prompts,1);assert.equal(view.storage.get(key),'');
+ view.elements.get('standardModeBtn').listeners.click();assert.equal(prompts,0);assert.equal(view.elements.get('restartRunOverlay').classList.contains('hidden'),false);assert.equal(view.storage.get(key),saved);view.elements.get('confirmRestartRunBtn').listeners.click();assert.equal(view.storage.get(key),'');
 });

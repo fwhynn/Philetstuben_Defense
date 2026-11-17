@@ -81,3 +81,8 @@ test('tied ranks still fill the podium and leave nobody hidden',async()=>{
  assert.deepEqual(podium.map(c=>c.children[0].children.at(-1).textContent),['2','1','2'],'Rangabzeichen zeigt den echten Rang');
  assert.deepEqual(view.rows().filter(r=>!r.className.includes('onPodium')).map(r=>r.children[1].textContent),['Tomate']);
 });
+
+test('Duo team rows retain both names and highlight either team member as own rank',async()=>{
+ const players=[{rank:1,username:'Mate + Ich',members:['Mate','Ich'],highestWave:70,runsPlayed:2000}],view=setup({players:async()=>({players}),loggedIn:true,username:'Ich'});
+ view.open();await tick();view.sorts[3].events.click();await tick();assert.equal(headers(view)[1].children[0].textContent,'Team');assert.equal(view.rows()[0].children[1].textContent,'Mate + Ich');assert.ok(view.rows()[0].classList.contains('own'));assert.equal(view.nodes.get('leaderboardOwn').textContent,'Deine Platzierung: 1');
+});

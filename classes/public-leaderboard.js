@@ -21,7 +21,7 @@
   content.replaceChildren();if(!players)return;
   const number=new Intl.NumberFormat(globalThis.HexI18n?.getLanguage?.()==='en'?'en-US':'de-DE'),table=node('table'),head=node('tr'),body=node('tbody'),thead=node('thead');
   for(const [,key,title]of fields){
-   const active=key===orderBy,th=node('th',undefined,(key==='rank'||key==='name'?key+' ':'')+(active?'sorted':'')),button=node('button',title);
+   const active=key===orderBy,th=node('th',undefined,(key==='rank'||key==='name'?key+' ':'')+(active?'sorted':'')),button=node('button',key==='name'&&mode==='duo'?'Team':title);
    th.scope='col';th.setAttribute('aria-sort',active?direction:'none');button.type='button';button.className='leaderboardColumnSort';
    if(active){const arrow=node('span',direction==='ascending'?' ↑':' ↓');arrow.setAttribute('aria-hidden','true');button.appendChild(arrow);}
    button.addEventListener('click',()=>chooseOrder(key));th.appendChild(button);head.appendChild(th);
@@ -36,7 +36,7 @@
   });
   for(const player of ordered){
    const row=node('tr',undefined,(player.rank<=3?'top'+player.rank:'')+(podiumPlayers().includes(player)?' onPodium':'')),name=node('td',player.username,'name');name.setAttribute('data-no-translate','');
-   if(ownName&&player.username===ownName){row.classList.add('own');const badge=node('span','Du','lbYou');name.appendChild(badge);}
+   if(ownName&&(player.username===ownName||player.members?.includes(ownName))){row.classList.add('own');const badge=node('span','Du','lbYou');name.appendChild(badge);}
    row.appendChild(node('td',String(player.rank),'rank'));row.appendChild(name);
    for(const [field,key]of columns)row.appendChild(node('td',number.format(Number(player[field])||0),key===orderBy?'sorted':''));
    if(canDelete){
@@ -79,7 +79,7 @@
    host.appendChild(column);
   }
   if(top.length&&orderBy===columns[0][1]&&direction==='descending'&&!canDelete)content.classList.add('withPodium');else content.classList.remove('withPodium');
-  const mine=ownName&&players.find(p=>p.username===ownName);own.textContent=mine?'Deine Platzierung: '+mine.rank:'';
+  const mine=ownName&&players.find(p=>(p.username===ownName||p.members?.includes(ownName)));own.textContent=mine?'Deine Platzierung: '+mine.rank:'';
  }
  async function load(){
   const current=++generation;loading=false;
@@ -88,7 +88,7 @@
   if(mode==='daily'){columns=[['gold','gold','Verdientes Gold'],['highestWave','highest_wave','Beste Welle']];fields=[['rank','rank','Rang'],['username','name','Name'],...columns];if(!fields.some(([,key])=>key===orderBy)||orderBy==='highest_wave'){sort=orderBy='gold';direction='descending';}for(const b of document.querySelectorAll('[data-greed-board]'))b.setAttribute('aria-pressed',String(b.dataset.greedBoard===greedMode));}
   loading=true;if(!players)status.textContent='Bestenliste wird geladen …';
   const requestedSort=sort;
-  try{const data=mode==='daily'?await HexApi.getGreedLeaderboard(greedMode,greedDay.value):mode==='legacy'?await HexApi.getPublicLeaderboard(requestedSort):await HexApi.getRunLeaderboard(mode);if(mode!=='legacy'){if(data.mode!==(mode==='daily'?greedMode:mode)||!Array.isArray(data.entries))throw Error();data.players=data.entries.map(r=>({...r,highestWave:r.wave,normalKills:r.kills}));}if(current!==generation)return;if(!Array.isArray(data?.players))throw Error();players=data.players;loadedSort=requestedSort;loading=false;render();status.textContent=fallbackNotice+(players.length?(mode==='legacy'?'Ungeprüfte Account-Gesamtwerte, keine getrennte Run-Wertung.':mode==='daily'?'Freigegebene Bestwerte des gewählten Tages · Verdientes Gold.':'Freigegebene Bestwerte pro Account · Welle, danach Kills.'):'Noch keine Einträge in dieser Kategorie.');}
+  try{const data=mode==='daily'?await HexApi.getGreedLeaderboard(greedMode,greedDay.value):mode==='legacy'?await HexApi.getPublicLeaderboard(requestedSort):await HexApi.getRunLeaderboard(mode);if(mode!=='legacy'){if(data.mode!==(mode==='daily'?greedMode:mode)||!Array.isArray(data.entries))throw Error();data.players=data.entries.map(r=>({...r,highestWave:r.wave,normalKills:r.kills}));}if(current!==generation)return;if(!Array.isArray(data?.players))throw Error();players=data.players;loadedSort=requestedSort;loading=false;render();status.textContent=fallbackNotice+(players.length?(mode==='legacy'?'Ungeprüfte Account-Gesamtwerte, keine getrennte Run-Wertung.':mode==='duo'?'Bestwerte pro Team · Welle, danach Kills. Ältere Einzelmeldungen bleiben erhalten.':mode==='daily'?'Freigegebene Bestwerte des gewählten Tages · Verdientes Gold.':'Freigegebene Bestwerte pro Account · Welle, danach Kills.'):'Noch keine Einträge in dieser Kategorie.');}
   catch{if(current===generation){loading=false;if(mode==='single'){mode='legacy';columns=legacyColumns;fields=[['rank','rank','Rang'],['username','name','Name'],...columns];fallbackNotice='Getrennte Run-Bestenlisten sind noch nicht verfügbar. Angezeigt werden die bisherigen Gesamtwerte. ';return load();}status.textContent='Bestenliste konnte nicht geladen werden. Bitte später erneut öffnen.';}}
  }
  for(const button of modeButtons)button.addEventListener('click',()=>{
@@ -103,6 +103,6 @@
  }
  // Bossporträts laden als Modul nach; sobald sie da sind, das Podest neu zeichnen.
  globalThis.addEventListener?.('hexbossportraitsready',()=>{if(!overlay.classList.contains('hidden')&&players)render();});
- $('menuLeaderboardBtn').addEventListener('click',open);$('closeLeaderboardBtn').addEventListener('click',close);$('leaderboardBackBtn').addEventListener('click',close);
+ $('menuLeaderboardBtn').addEventListener('click',open);$('closeLeaderboardBtn').addEventListener('click',close);
  document.addEventListener('keydown',event=>{if(!overlay.classList.contains('hidden')&&event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();close();}},true);
 })();

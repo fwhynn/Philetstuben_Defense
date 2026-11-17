@@ -87,11 +87,12 @@ test('build menu rows match the tower window: type tag, short stats, strength li
  assert.doesNotMatch(offer,/statChip/,'keine Wertechips mehr in der Zeile');
  });
 
-test('reaching the final available upgrade opens details once and respects closing them',()=>{
+test('fully upgraded towers keep details closed and allow explicitly opening values',()=>{
  const e=fixture(),details=e.elements.get('towerExtraDetails');
  assert.equal(details.open,false);
  Object.assign(e.tower,{branch:'marksman',finalUpgrade:'eagleEye',level:3});
  e.a.state.ultimateUnlocks=['ultimate:archer:marksman'];e.a.renderAll();assert.equal(details.open,false);
- e.tower.ultimate='archer';e.a.renderAll();assert.equal(details.open,true);
+ e.tower.ultimate='archer';e.a.renderAll();assert.equal(details.open,false);
+ e.elements.get('towerValuesBtn').listeners.click();assert.equal(details.open,true);e.a.renderAll();assert.equal(details.open,true);
  details.open=false;e.a.renderAll();assert.equal(details.open,false);
 });

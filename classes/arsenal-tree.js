@@ -8,11 +8,11 @@ const HexArsenalTree=(()=>{
   const GROUPS=[{id:'tower',label:'Türme',icon:'tower_archer'},{id:'building',label:'Gebäude',icon:'building_house'}];
   // Radien in Baum-Einheiten; ex streckt waagerecht, turn dreht den Start (in Sektoren). Werte so gewählt, dass sich
   // weder Knoten noch Beschriftungen überlappen (siehe tests/arsenal-tree.test.cjs).
-  const RADII={tower:{root:290,step:[430,530],meta:660,ex:1.25,turn:0},building:{root:170,step:[310,410],meta:510,ex:1.2,turn:.5}};
+  const RADII={tower:{root:290,step:[430,530],meta:660,ex:1.25,turn:0},building:{root:170,step:[350,450],meta:560,ex:1.2,turn:.5}};
   const SIZE={hub:80,root:58,meta:46,step:26},FONT={root:34,meta:27},LINE=1.15,PAD=70;
   const HEX=a=>[0,1,2,3,4,5].map(i=>{const t=Math.PI/180*(60*i-90);return (Math.cos(t)*a).toFixed(1)+','+(Math.sin(t)*a).toFixed(1);}).join(' ');
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const ICON={archer:'tower_archer',catapult:'tower_catapult',chain:'tower_chain',freeze:'tower_freeze',mine:'tower_mine',ballista:'tower_ballista',flame:'tower_flame',element:'tower_element',necromancer:'tower_necromancer',house:'building_house',forge:'building_forge',market:'building_market'};
+  const ICON={archer:'tower_archer',catapult:'tower_catapult',chain:'tower_chain',freeze:'tower_freeze',mine:'tower_mine',ballista:'tower_ballista',flame:'tower_flame',element:'tower_element',necromancer:'tower_necromancer',house:'building_house',forge:'building_forge',market:'building_market',bastion:'building_bastion'};
   const view={x:0,y:0,scale:1},state={selected:'hub',group:'tower'};
 
   // Lange Namen an einem Leerzeichen in zwei Zeilen teilen.

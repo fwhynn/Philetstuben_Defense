@@ -13,6 +13,7 @@ const HexAugmentCardsUI=(()=>{
   if(!host){host=document.getElementById('augmentCardCollection');if(!host?.parentNode){host=document.createElement('section');host.id='augmentCardCollection';root.querySelector?.('.loadoutBox')?.appendChild(host);}}
 
   if(!host)return;
+  root._augmentRefresh=()=>render(root,profile,save,transact);
   const eligible=HexAugmentCards.unlocked(profile);
   root.classList.toggle('augmentsOpen',eligible&&!!root._augmentsOpen);
   let toggle=document.getElementById('augmentCollectionToggle');
@@ -22,9 +23,16 @@ const HexAugmentCardsUI=(()=>{
   toggle.onclick=()=>{root._augmentsOpen=!root._augmentsOpen;render(root,profile,save,transact);};
   host.replaceChildren();host.className='augmentCollection';host.hidden=!eligible||!root._augmentsOpen;if(host.hidden)return;
   const a=HexAugmentCards.clean(profile.augmentCards),slots=HexAugmentCards.slots(profile);
-  const status=el('p','augmentStatus');status.setAttribute('role','status');
-  let busy=false;
-  const commit=async(fn,operation)=>{if(busy)return;busy=true;if(operation.kind==='buy')root._augmentRevealPacks=a.packs+1;const buttons=[...host.querySelectorAll('button')],disabled=buttons.map(b=>b.disabled);buttons.forEach(b=>b.disabled=true);status.textContent='Wird gespeichert …';try{if(transact)await transact(operation,fn);else save(fn());}catch(e){delete root._augmentRevealPacks;status.textContent=e.message;}finally{busy=false;buttons.forEach((b,i)=>b.disabled=disabled[i]);}};
+  const status=el('p','augmentStatus',root._augmentPending?'Wird gespeichert …':root._augmentError||'');status.setAttribute('role','status');host.appendChild(status);
+  const commit=async(fn,operation)=>{
+    if(root._augmentPending)return;
+    root._augmentPending=true;root._augmentError='';
+    if(operation.kind==='buy')root._augmentRevealPacks=a.packs+1;
+    root._augmentRefresh();
+    try{if(transact)await transact(operation,fn);else await save(fn());}
+    catch(e){delete root._augmentRevealPacks;root._augmentError=e.message||'Kauf konnte nicht abgeschlossen werden.';}
+    finally{root._augmentPending=false;root._augmentRefresh();if(root._augmentError)host.querySelector('.augmentStatus')?.scrollIntoView?.({block:'nearest'});}
+  };
 
   // Kopf: Titel, belegte Plätze als Hex-Reihe, Booster als Hauptaktion
   const head=el('header','augmentHead'),intro=el('div','augmentHeadText');intro.appendChild(el('p','augmentKicker','Standard / zwei Fronten / Duo'));intro.appendChild(el('h2','','Augment-Karten'));
@@ -33,7 +41,7 @@ const HexAugmentCardsUI=(()=>{
   const nextWave=SLOT_WAVES[slots-1];
   slotRow.appendChild(el('span','augmentSlotText','Ausgerüstet: '+a.equipped.length+'/'+slots+' · '+(nextWave?'Nächster Platz nach Welle '+nextWave:'Alle Plätze freigeschaltet')));intro.appendChild(slotRow);head.appendChild(intro);
   const shop=el('div','augmentShop'),buy=el('button','primary augmentBuy','Booster öffnen · 50 ◆ · 2 Karten');buy.disabled=profile.diamonds<50;
-  buy.addEventListener('click',()=>{commit(()=>HexAugmentCards.buy(profile,()=>{const buffer=new Uint32Array(1);crypto.getRandomValues(buffer);return buffer[0]/4294967296;}),{kind:'buy'});});shop.appendChild(buy);
+  buy.addEventListener('click',()=>commit(()=>HexAugmentCards.buy(profile,()=>{const buffer=new Uint32Array(1);crypto.getRandomValues(buffer);return buffer[0]/4294967296;}),{kind:'buy'}));shop.appendChild(buy);
   shop.appendChild(el('small','','Spätestens jedes 10. Paket enthält Selten oder besser.'));head.appendChild(shop);host.appendChild(head);
   const odds=el('ul','augmentOdds');odds.setAttribute('aria-label','Ziehchancen');
   for(const [tier,chance] of [60,25,10,4,1].entries()){const item=el('li','',HexAugmentCards.rarities[tier]+' '+chance+' %');item.dataset.tier=String(tier);odds.appendChild(item);}
@@ -42,9 +50,9 @@ const HexAugmentCardsUI=(()=>{
   if(!a.introSeen){const welcome=el('aside','augmentWelcome');
    welcome.appendChild(el('h3','','Neu: Deine Augment-Sammlung'));
    welcome.appendChild(el('p','','Öffne ein Paket mit zwei Karten, rüste eine Karte aus und starte deinen nächsten Run. Drei gleiche Karten kannst du zu einer stärkeren verschmelzen. Die Karten bleiben dauerhaft in deiner Sammlung.'));
-   const ok=el('button','primary','Verstanden');ok.addEventListener('click',()=>{if(busy)return;try{save({...profile,augmentCards:{...a,introSeen:true}});}catch(e){status.textContent=e.message;}});welcome.appendChild(ok);host.appendChild(welcome);
+   const ok=el('button','primary','Verstanden');ok.addEventListener('click',()=>{if(root._augmentPending)return;try{save({...profile,augmentCards:{...a,introSeen:true}});}catch(e){status.textContent=e.message;}});welcome.appendChild(ok);host.appendChild(welcome);
   }
-  if(a.lastPack.length){const result=el('div'),fresh=root._augmentRevealPacks===a.packs;result.className='augmentPackResult'+(fresh?' augmentReveal':'');if(fresh)delete root._augmentRevealPacks;
+  if(a.lastPack.length){const result=el('div'),fresh=!root._augmentPending&&root._augmentRevealPacks===a.packs;result.className='augmentPackResult'+(fresh?' augmentReveal':'');if(fresh)delete root._augmentRevealPacks;
    result.setAttribute('aria-live','polite');result.appendChild(el('h3','augmentPackCaption',fresh?'Deine neuen Karten':'Zuletzt erhalten'));
    const cards=el('div','augmentPackCards');
    for(const [i,c] of a.lastPack.entries()){const def=HexAugmentCards.catalog[c.id],tile=el('article','augmentCard augmentPackCard');tile.dataset.tier=String(c.tier);tile.dataset.order=String(i);
@@ -70,7 +78,8 @@ const HexAugmentCardsUI=(()=>{
     const use=el('button',equipped?'secondary augmentEquip':'primary augmentEquip',equipped?'Ablegen':'Ausrüsten');use.setAttribute('aria-pressed',String(equipped));use.disabled=!equipped&&a.equipped.length>=slots;use.addEventListener('click',()=>commit(()=>HexAugmentCards.equip(profile,id),{kind:'equip',card:id}));card.appendChild(use);
    }grid.appendChild(card);
   }
-  host.appendChild(grid);host.appendChild(status);
+  host.appendChild(grid);
+  if(root._augmentPending)for(const button of host.querySelectorAll('button'))button.disabled=true;
  }
  return {render};
 })();

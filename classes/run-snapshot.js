@@ -68,7 +68,7 @@ const HexRunSnapshot=(()=>{
     state.biomeLayoutVersion??=1;
     // Support multipliers are derived from buildings, not permanent purchases.
     // Reconcile older forge values without changing paid costs or owned levels.
-    if([...state.map.values()].some(tile=>tile.buildings?.some(b=>b?.type==='forge')))HexBuildings.refresh(state);
+    if([...state.map.values()].some(tile=>tile.site==='guardian'||tile.buildings?.some(b=>['forge','bastion'].includes(b?.type))))HexBuildings.refresh(state);
     return {state,random};
   }
   return {capture,restore,VERSION,RULES};

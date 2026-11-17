@@ -1,20 +1,24 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const {load}=require('./helpers/game.cjs');
-test('introduction restart confirms exact reward, cancels without mutation and pays once on acceptance',()=>{
- let accept=false;const prompts=[],view=load({initialStorage:{'tutorial-v1':''},confirm:text=>{prompts.push(text);return accept;}});
- const {a,elements,storage}=view;Object.assign(a.state,{wave:25,earnedMeta:{normalKills:10,periodicBosses:1,explorationBosses:0}});
- const id=a.state.runId;elements.get('newRunBtn').listeners.click();assert.equal(a.state.runId,id);assert.match(prompts[0],/Welle 25.*21 Diamanten/);
- assert.equal(JSON.parse(storage.get('hex-bastion-profile-v1')).diamonds,0);
- accept=true;elements.get('newRunBtn').listeners.click();assert.notEqual(a.state.runId,id);
- const profile=JSON.parse(storage.get('hex-bastion-profile-v1'));assert.equal(profile.diamonds,21);assert.equal(profile.settledRuns.filter(run=>run===id).length,1);
+test('custom restart dialog cancels without mutation and pays once on acceptance',()=>{
+ const {a,elements,storage,documentListeners}=load({initialStorage:{'tutorial-v1':''},confirm:()=>{throw Error('native confirmation forbidden');}});
+ Object.assign(a.state,{wave:25,lastCompletedWave:24,earnedMeta:{normalKills:10,periodicBosses:1,explorationBosses:0}});
+ const id=a.state.runId;elements.get('newRunBtn').listeners.click();assert.equal(a.state.runId,id);
+ assert.equal(elements.get('restartRunWave').textContent,'Welle 25');assert.equal(elements.get('restartRunDiamonds').textContent,'+21 ◆');
+ documentListeners.keydown({key:'Escape',preventDefault(){}});assert.equal(elements.get('restartRunOverlay').classList.contains('hidden'),true);
+ assert.equal(a.state.runId,id);assert.equal(JSON.parse(storage.get('hex-bastion-profile-v1')).diamonds,0);
+ elements.get('newRunBtn').listeners.click();elements.get('confirmRestartRunBtn').listeners.click();assert.notEqual(a.state.runId,id);
+ elements.get('confirmRestartRunBtn').listeners.click();const profile=JSON.parse(storage.get('hex-bastion-profile-v1'));assert.equal(profile.diamonds,21);assert.equal(profile.settledRuns.filter(run=>run===id).length,1);
 });
-test('saved run is also confirmed and paid before starting again after reload',()=>{
+test('saved run remains intact until the in-game restart confirmation is accepted',()=>{
  const original=load();Object.assign(original.a.state,{wave:25,phase:'wave',waveRunning:true,enemies:[],pendingSpawns:0,spawnQueue:[]});original.a.endWave();
- const prompts=[],view=load({bootToMenu:true,initialStorage:Object.fromEntries(original.storage),confirm:text=>{prompts.push(text);return true;}});
- view.elements.get('menuPlayBtn').listeners.click();assert.equal(prompts.length,0);view.elements.get('standardModeBtn').listeners.click();assert.match(prompts[0],/Welle 25/);
- assert.ok(JSON.parse(view.storage.get('hex-bastion-profile-v1')).settledRuns.includes(original.a.state.runId));
- assert.equal(view.storage.get('autohex-solo-autosave-v1'),'');
+ const view=load({bootToMenu:true,initialStorage:Object.fromEntries(original.storage)});
+ view.elements.get('menuPlayBtn').listeners.click();view.elements.get('standardModeBtn').listeners.click();assert.equal(view.elements.get('restartRunWave').textContent,'Welle 25');
+ assert.ok(view.storage.get('autohex-solo-autosave-v1'));view.elements.get('cancelRestartRunBtn').listeners.click();assert.ok(view.storage.get('autohex-solo-autosave-v1'));
+ view.elements.get('standardModeBtn').listeners.click();view.elements.get('confirmRestartRunBtn').listeners.click();
+ assert.ok(JSON.parse(view.storage.get('hex-bastion-profile-v1')).settledRuns.includes(original.a.state.runId));assert.equal(view.storage.get('autohex-solo-autosave-v1'),'');
 });
+
 test('audio persists volume, stores mute as 0 % and accepts bounded account settings',()=>{
  const storage=new Map();function boot(){const nodes=new Map();const document={getElementById(id){if(!nodes.has(id))nodes.set(id,{checked:true,value:'35',listeners:{},addEventListener(name,fn){this.listeners[name]=fn;}});return nodes.get(id);},addEventListener(){}};
  const context={document,localStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v)}};vm.runInNewContext(fs.readFileSync(require.resolve('../classes/sound.js'),'utf8')+'\nglobalThis.audio=HexAudio;',context);return {nodes,audio:context.audio};}
@@ -39,4 +43,11 @@ test('background music loops after the first input, pauses in a hidden tab and p
  first.nodes.get('musicEnabled').checked=false;first.nodes.get('musicEnabled').listeners.change();assert.equal(track.paused,true);
  const next=boot();assert.equal(next.nodes.get('musicEnabled').checked,true);assert.equal(next.nodes.get('musicVolume').value,'0');
  next.audio.applySettings({musicEnabled:true,musicVolume:500});assert.deepEqual({...next.audio.settings()},{enabled:true,volume:35,musicEnabled:true,musicVolume:100});
+});
+
+
+test('restart confirmation pauses the current wave and cancellation resumes without catching up',()=>{
+ let now=0;const {a,elements}=load({now:()=>now});a.state.waveRunning=true;a.state.pendingSpawns=1;now=100;a.advanceClock(now);
+ const before=a.state.elapsedMs;elements.get('newRunBtn').listeners.click();now=60000;a.advanceClock(now);assert.equal(a.state.elapsedMs,before);
+ elements.get('cancelRestartRunBtn').listeners.click();a.advanceClock(now);assert.equal(a.state.elapsedMs,before);now+=100;a.advanceClock(now);assert.ok(a.state.elapsedMs>before&&a.state.elapsedMs<before+251);
 });

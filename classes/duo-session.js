@@ -21,6 +21,20 @@ const HexDuoSession=(()=>{
     if(delivery.offers.every(o=>o.index!==null))for(const run of match.boards){run.state.duoDeliveryPending=false;if(match.endless&&match.wave===35)HexRunSession.waveRewards(run.state,run.random);else HexRunSession.preparation(run.state,run.random);}
     return true;
   }
+  function wishDelivery(match,player,payload){
+    // Wishes belong to the sender's offer, but only its recipient may change them.
+    const delivery=match.delivery,offer=delivery?.offers[1-player];
+    if(match.phase!=='prepare'||delivery?.wave!==match.wave||match.boards[player].state.phase!=='duoDelivery'||!offer||offer.index!==null||offer.id!==payload.offerId)return false;
+    if(payload.index!==null&&(!Number.isInteger(payload.index)||payload.index<0||payload.index>=offer.choices.length))return false;
+    offer.wish=payload.index;return true;
+  }
+  const HEX_GIFT=Object.freeze({cards:Object.freeze(['straight','smallCurve','bigCurve']),baseCost:75,costStep:25});
+  function giftHex(match,player,cardId){
+    const s=match.boards[player].state,count=match.hexGifts?.[player]?.count||0,cost=HEX_GIFT.baseCost+count*HEX_GIFT.costStep;
+    if(match.phase!=='prepare'||!['place','build'].includes(s.phase)||!HEX_GIFT.cards.includes(cardId)||s.gold<cost||match.hexGifts?.[player]?.wave===match.wave)return false;
+    s.gold-=cost;HexDeck.addReward(match.boards[1-player].state,cardId);
+    match.hexGifts??=[null,null];match.hexGifts[player]={count:count+1,wave:match.wave,cardId};return true;
+  }
   const same=(a,b)=>a&&b&&a.q===b.q&&a.r===b.r&&a.index===b.index;
   function slotAt(state,slot){if(!slot||![slot.q,slot.r,slot.index].every(Number.isInteger)||slot.index<0)return null;const tile=state.map.get(HexMap.key(slot.q,slot.r));return tile&&slot.index<tile.slots?tile:null;}
   function cleanGuests(match){for(const run of match.boards){for(const tile of run.state.map.values())tile.towers=tile.towers.map(t=>t?.guestOwner!==undefined?null:t);run.state.mines=(run.state.mines||[]).filter(m=>m.source?.guestOwner===undefined);HexBuildings.refresh(run.state);}match.pendingHelp=[null,null];}
@@ -45,11 +59,11 @@ const HexDuoSession=(()=>{
     const hp=boards.reduce((sum,r)=>sum+r.state.maxHp,0);
     const match={version:VERSION,seed,boards,hp,maxHp:hp,wave:0,phase:'prepare',ready:[false,false],finished:[false,false],elapsedMs:0,receipts:[[],[]],portals:[null,null],reinforcements:[null,null],waveHelp:[null,null],pendingHelp:[null,null],leaked:[false,false],support:[{},{}]};sync(match);return match;
   }
-  function finishMatch(match,outcome){
+  function finishMatch(match,outcome,rewardVersion=2){
     if(match.result)return;
     const wave=outcome==='victory'?match.wave:Math.min(...match.boards.map(r=>r.state.lastCompletedWave||0));
     const exploration=match.boards.reduce((sum,r)=>sum+(r.state.earnedMeta?.explorationBosses||0),0);
-    match.result={id:match.seed+(match.endless?'|endless-result':'|result'),outcome,wave,players:match.boards.map((r,i)=>({wave,diamonds:Math.max(0,Math.floor(wave/2)+(r.state.earnedMeta?.periodicBosses||0)*5+exploration*3-(match.victoryPaid?.[i]||0)),towers:JSON.parse(JSON.stringify(r.state.runTowerStats)),support:JSON.parse(JSON.stringify(match.support[i])),gold:r.state.gold}))};
+    match.result={...(rewardVersion===2?{rewardVersion:2}:{}),id:match.seed+(match.endless?'|endless-result':'|result'),outcome,wave,players:match.boards.map((r,i)=>({wave,diamonds:Math.max(0,(rewardVersion===2?HexProfile.waveDiamonds(wave):Math.floor(wave/2))+(r.state.earnedMeta?.periodicBosses||0)*5+exploration*3-(match.victoryPaid?.[i]||0)),towers:JSON.parse(JSON.stringify(r.state.runTowerStats)),support:JSON.parse(JSON.stringify(match.support[i])),gold:r.state.gold}))};
     match.rematch=[false,false];
   }
   function lose(match){cleanGuests(match);match.hp=0;match.phase='gameover';match.ready=[false,false];for(const {state:s} of match.boards){HexCombat.clearConsumables(s);s.hp=0;s.phase='gameover';s.waveRunning=false;s.spawnQueue=[];s.pendingSpawns=0;s.enemies=[];s.projectiles=[];}finishMatch(match,'defeat');}
@@ -92,7 +106,9 @@ const HexDuoSession=(()=>{
       }
       else if(action==='portal'&&match.phase==='prepare'){const tile=slotAt(s,payload.slot);if(payload.slot===null){match.portals[player]=null;ok=true;}else if(tile&&!tile.towers[payload.slot.index]){match.portals[player]={...payload.slot};ok=true;}}
       else if(action==='reinforcement'&&match.phase==='prepare'){const tile=slotAt(s,payload.slot),tower=tile?.towers[payload.slot.index];if(payload.slot===null){match.reinforcements[player]=null;ok=true;}else if(tower&&tower.guestOwner===undefined){match.reinforcements[player]={...payload.slot};ok=true;}}
+      else if(action==='giftHex')ok=giftHex(match,player,payload.cardId);
       else if(action==='delivery')ok=deliver(match,player,payload);
+      else if(action==='deliveryWish')ok=wishDelivery(match,player,payload);
       else if(action==='place'&&match.phase==='prepare')ok=!!HexRunSession.place(s,run.random,payload);
       else if(action==='reward'&&match.phase==='prepare')ok=HexRunSession.choose(s,run.random,payload.offerId,payload.index);
       else if(action==='acknowledge'&&match.phase==='prepare')ok=HexRunSession.acknowledge(s);
@@ -144,7 +160,7 @@ const HexDuoSession=(()=>{
   }
   function capture(match){
 
-    return {duo:JSON.parse(JSON.stringify({...(match.endless?{endless:true,victoryPaid:match.victoryPaid}:{}),...(match.endlessVotes?{endlessVotes:match.endlessVotes}:{}),speed:match.speed||1,paused:!!match.paused,portals:match.portals,reinforcements:match.reinforcements,waveHelp:match.waveHelp,pendingHelp:match.pendingHelp,leaked:match.leaked,support:match.support,delivery:match.delivery||null,result:match.result||null,rematch:match.rematch||[false,false]})),format:'autohex-duo',version:VERSION,seed:match.seed,hp:match.hp,maxHp:match.maxHp,wave:match.wave,phase:match.phase,ready:[...match.ready],finished:[...match.finished],elapsedMs:match.elapsedMs,receipts:match.receipts.map(r=>[...r]),boards:match.boards.map(run=>HexRunSnapshot.capture(run.state,run.random))};
+    return {duo:JSON.parse(JSON.stringify({...(match.hexGifts?{hexGifts:match.hexGifts}:{}),...(match.endless?{endless:true,victoryPaid:match.victoryPaid}:{}),...(match.endlessVotes?{endlessVotes:match.endlessVotes}:{}),speed:match.speed||1,paused:!!match.paused,portals:match.portals,reinforcements:match.reinforcements,waveHelp:match.waveHelp,pendingHelp:match.pendingHelp,leaked:match.leaked,support:match.support,delivery:match.delivery||null,result:match.result||null,rematch:match.rematch||[false,false]})),format:'autohex-duo',version:VERSION,seed:match.seed,hp:match.hp,maxHp:match.maxHp,wave:match.wave,phase:match.phase,ready:[...match.ready],finished:[...match.finished],elapsedMs:match.elapsedMs,receipts:match.receipts.map(r=>[...r]),boards:match.boards.map(run=>HexRunSnapshot.capture(run.state,run.random))};
   }
   function restore(snapshot){
     if(snapshot?.format!=='autohex-duo'||![2,VERSION].includes(snapshot.version)||!Array.isArray(snapshot.boards)||snapshot.boards.length!==2||!['prepare','combat','gameover','victory'].includes(snapshot.phase))throw new Error('Invalid Duo checkpoint');
@@ -153,6 +169,7 @@ const HexDuoSession=(()=>{
     const match={version:VERSION,seed:snapshot.seed,hp:snapshot.hp,maxHp:snapshot.maxHp,wave:snapshot.wave,phase:snapshot.phase,ready:[...snapshot.ready],finished:[...snapshot.finished],elapsedMs:snapshot.elapsedMs,receipts:snapshot.receipts.map(r=>[...r]),boards:snapshot.boards.map(HexRunSnapshot.restore)};
     if(match.boards.some(r=>r.state.wave!==match.wave||r.state.hp!==match.hp||r.state.maxHp!==match.maxHp))throw new Error('Inconsistent Duo checkpoint');
     if(snapshot.duo?.speed!==undefined&&(!Number.isInteger(snapshot.duo.speed)||snapshot.duo.speed<1||snapshot.duo.speed>8)||snapshot.duo?.paused!==undefined&&typeof snapshot.duo.paused!=='boolean')throw Error('Invalid Duo clock');
+    if(snapshot.duo?.hexGifts!==undefined){const gifts=snapshot.duo.hexGifts;if(!Array.isArray(gifts)||gifts.length!==2||gifts.some(g=>g&&(!Number.isSafeInteger(g.count)||g.count<1||!Number.isInteger(g.wave)||g.wave<0||g.wave>match.wave||!HEX_GIFT.cards.includes(g.cardId))))throw Error('Invalid hex gifts');match.hexGifts=JSON.parse(JSON.stringify(gifts));}
     match.speed=snapshot.duo?.speed||1;match.paused=!!snapshot.duo?.paused;
     for(const field of ['portals','reinforcements','waveHelp','pendingHelp','leaked','support']){if(!Array.isArray(snapshot.duo?.[field])||snapshot.duo[field].length!==2)throw new Error('Invalid Duo checkpoint');match[field]=JSON.parse(JSON.stringify(snapshot.duo[field]));}
     match.delivery=snapshot.version===2?null:JSON.parse(JSON.stringify(snapshot.duo.delivery??null));
@@ -167,7 +184,7 @@ const HexDuoSession=(()=>{
     const terminal=['gameover','victory'].includes(match.phase);
     if(terminal!==!!match.result||match.phase==='gameover'&&match.hp!==0||!terminal&&match.hp<=0||match.phase==='victory'&&(match.hp<=0||match.wave!==35))throw new Error('Invalid Duo result phase');
     if(!Array.isArray(match.rematch)||match.rematch.length!==2||match.rematch.some(v=>typeof v!=='boolean'))throw new Error('Invalid rematch votes');
-    if(terminal){const expected={...match,result:null};finishMatch(expected,match.phase==='victory'?'victory':'defeat');if(JSON.stringify(expected.result)!==JSON.stringify(match.result))throw new Error('Invalid Duo result');}
+    if(terminal){const rewardVersion=match.result.rewardVersion??1;if(![1,2].includes(rewardVersion))throw new Error('Invalid Duo reward version');const expected={...match,result:null};finishMatch(expected,match.phase==='victory'?'victory':'defeat',rewardVersion);if(JSON.stringify(expected.result)!==JSON.stringify(match.result))throw new Error('Invalid Duo result');}
     const pending=match.boards.some(run=>run.state.duoDeliveryPending);
     if(match.delivery){
       const d=match.delivery;
@@ -176,6 +193,7 @@ const HexDuoSession=(()=>{
       const expected=deliveryOffers({...match,wave:d.wave},d.rulesVersion??1);
       if(d.rulesVersion===3)for(let i=0;i<d.offers.length;i++){const o=d.offers[i];if(o?.legacyGold===true&&o.index!==null)expected[i].choices[0].amount=20;else if(o?.legacyGold!==undefined)throw new Error('Invalid legacy gift');}
       if(d.offers.some((o,i)=>!o||o.id!==expected[i].id||JSON.stringify(o.choices)!==JSON.stringify(expected[i].choices)||o.index!==null&&(!Number.isInteger(o.index)||o.index<0||o.index>=o.choices.length)))throw new Error('Invalid Duo delivery');
+      if(d.offers.some(o=>o.wish!=null&&(!Number.isInteger(o.wish)||o.wish<0||o.wish>=o.choices.length)))throw new Error('Invalid Duo gift wish');
       const unfinished=d.offers.some(o=>o.index===null);
       if(unfinished&&(match.phase!=='prepare'||d.wave!==match.wave||!match.boards.every(run=>run.state.duoDeliveryPending))||pending!==unfinished)throw new Error('Inconsistent Duo delivery');
     }else if(pending)throw new Error('Missing Duo delivery');
@@ -183,5 +201,5 @@ const HexDuoSession=(()=>{
     if(match.delivery&&(match.delivery.rulesVersion??1)===1){for(const o of match.delivery.offers){if(o.index===null)o.choices[0].amount=DELIVERY.gold;else o.legacyGold=true;}match.delivery.rulesVersion=3;}
     return match;
   }
-  return {configureBoard,create,command,tick,capture,restore,DELIVERY};
+  return {configureBoard,create,command,tick,capture,restore,DELIVERY,HEX_GIFT};
 })();

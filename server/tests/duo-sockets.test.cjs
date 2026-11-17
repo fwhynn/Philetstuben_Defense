@@ -35,3 +35,14 @@ test('Socket.IO authenticates, rejects foreign origins, preserves commands and r
  const wait=async predicate=>{const end=Date.now()+5000;while(!predicate()){if(Date.now()>end)throw Error('Reconnect timeout');await new Promise(r=>setTimeout(r,25));}};
  await wait(()=>current);const epoch=current.epoch;await stop(server,store);current=null;store=createStore(file);server=createTransport(store,{browser:true});await new Promise(resolve=>server.listen(port,'127.0.0.1',resolve));await wait(()=>current);assert.equal(current.epoch,epoch);adapter.stop();assert.equal(rawSocket.connected,false);
  });
+
+test('socket baselines tolerate delayed acknowledgements, while old clients continue receiving full views',async t=>{
+ const room=require('../duo-room.cjs').createRoom({seed:'wire-sockets',loadouts:Array(2).fill(['archer','catapult','chain','freeze','mine'])}),a=room.connect(0),b=room.connect(1),server=await listen(room),url='http://127.0.0.1:'+server.address().port;
+ const sockets=await Promise.all([a,b].map(seat=>connect(url,{token:seat.token,clientId:crypto.randomUUID()})));t.after(async()=>{sockets.forEach(s=>s.close());server.quiesce();await new Promise(r=>server.close(r));});
+ const codec=require('../../classes/duo-wire.js'),decoder=codec.decoder(),modern=[],legacy=[];let base;
+ sockets[0].on('state',packet=>{modern.push(packet);if(packet.wireBase)base=packet.wireBase;const decoded=decoder.accept(packet);assert.ok(decoded);assert.ok(Array.isArray(decoded.boards[0].map));});sockets[1].on('state',packet=>legacy.push(packet));
+ const wait=async predicate=>{const end=Date.now()+3000;while(!predicate()){if(Date.now()>end)throw Error('Wire test timeout');await new Promise(r=>setTimeout(r,15));}};
+ const change=value=>{const v=room.view(a.token);room.receive(a.token,{epoch:v.epoch,sequence:v.next,wave:v.wave,phase:v.boards[0].phase,action:'speed',payload:{value}});};
+ await wait(()=>base&&legacy.length);const firstBase=base;change(2);await wait(()=>modern.length>=2);assert.equal(base,firstBase);assert.equal(modern.at(-1).wireDelta,undefined,'no delta before acknowledgement');
+ sockets[0].emit('state-base',firstBase);await new Promise(r=>setTimeout(r,30));change(3);await wait(()=>modern.some(p=>p.wireDelta));assert.equal(modern.at(-1).wireDelta,firstBase);assert.equal(modern.at(-1).speed,3);assert.ok(legacy.every(p=>!p.wireDelta&&Array.isArray(p.boards[0].map)));
+});

@@ -1,5 +1,190 @@
 [
   {
+    "version": "next",
+    "title": "Duo gemeinsam stärker",
+    "summary": "Eine kompakte Teamleiste, Wunschgeschenke und eine übersichtlichere Lobby verbessern das Duo. Dazu kommen die Sperrbasis, mehr Diamanten für weite Runs und viele Verbesserungen bei Menüs und Bedienung.",
+    "sections": [
+      {
+        "title": "Belohnungen und Bedienung",
+        "entries": [
+          {
+            "title": "Diamanten für überlebte Wellen",
+            "bullets": [
+              "Bis Welle 35 bleibt es bei einem Diamanten je zwei überlebten Wellen. Welle 36–50 gibt je 3, Welle 51–60 je 6 und ab Welle 61 jede weitere überlebte Welle 12 Diamanten. Gilt für Solo und Duo; Bossboni und Tagesbelohnungen bleiben unverändert."
+            ],
+            "stats": [
+              {
+                "label": "Diamanten · Welle 36–50",
+                "before": "1 je 2 Wellen",
+                "after": "3 je Welle"
+              },
+              {
+                "label": "Diamanten · Welle 51–60",
+                "before": "1 je 2 Wellen",
+                "after": "6 je Welle"
+              },
+              {
+                "label": "Diamanten · ab Welle 61",
+                "before": "1 je 2 Wellen",
+                "after": "12 je Welle"
+              }
+            ]
+          },
+          {
+            "title": "Turmwerte und Wegweiser",
+            "bullets": [
+              "Voll ausgebaute Türme öffnen ihre Werte nicht mehr automatisch.",
+              "Der Wegweiser versucht bei einem identischen Neuziehen eine andere Kartenkombination anzubieten. Bleibt die Hand unverändert, wird der kostenlose Reroll nicht verbraucht."
+            ],
+            "stats": []
+          },
+          {
+            "title": "Klarere Bedienung",
+            "bullets": [
+              "Nicht verfügbare Wellenstart-Knöpfe sind auch während des Kampfes grau. Gebäudemenüs richten ihre Höhe nach dem Inhalt.",
+              "Der Angriffsfokus lässt sich mit einem Knopf auf alle eigenen Türme desselben Typs übertragen. Fokus kopieren reagiert auch bei geöffnetem Fokusbereich auf den ersten Klick."
+            ],
+            "stats": []
+          },
+          {
+            "title": "Arsenal und Augment-Käufe",
+            "bullets": [
+              "Der Angriffsfokus bleibt geöffnet, bis du ihn selbst zuklappst oder den Turm wechselst. Auch Upgrade-Käufe reagieren direkt auf den ersten Klick.",
+              "Die Basis zeigt keinen zusätzlichen Erklärungstext mehr unter den Ausbauoptionen.",
+              "Baum und Werkstatt bleiben beim Wechsel zu Augment-Karten erreichbar. Die Schalter sind zentriert, die Turmliste der Werkstatt ist breiter.",
+              "Augment-Käufe zeigen den Speicherstatus und Fehler direkt oben. Laufende Käufe bleiben beim Reiterwechsel gesperrt; bei einer unterbrochenen Serverantwort wird derselbe Vorgang einmal sicher erneut abgefragt."
+            ],
+            "stats": []
+          },
+          {
+            "title": "Menüs und Spielpausen",
+            "bullets": [
+              "Die Bestenliste hat nur noch einen Schließen-Knopf. Beim Laden der Spielseite verdeckt eine Ladeansicht das noch nicht fertige Spiel.",
+              "Ein neuer Bestätigungsdialog zeigt vor dem Beenden eines laufenden Durchlaufs die Welle und die verdienten Diamanten. Abbrechen behält den Durchlauf.",
+              "Solo-Durchläufe pausieren in unsichtbaren Tabs. Beim Zurückkehren wird keine Hintergrundzeit nachgeholt.",
+              "Die großen Menüfenster folgen gemeinsamen Größenregeln. Die Durchlauf-Vorbereitung bietet mehr Platz."
+            ],
+            "stats": []
+          }
+        ]
+      },
+      {
+        "title": "Gebäude und Duo",
+        "entries": [
+          {
+            "title": "Gebäude und Wächter",
+            "bullets": [
+              "Märkte geben beim Verkauf immer 0 Gold zurück, auch direkt nach dem Bau. Andere Gebäude behalten ihre Rückerstattung.",
+              "Neu: Die Sperrbasis erhöht die Reichweite benachbarter Türme um 10 / 15 / 20 %. Fernwacht versorgt auf Stufe 4 ein zusätzliches gewähltes Hex. Gleiche Reichweitenboni stapeln sich nicht.",
+              "Im geöffneten Gebäudebaumenü wählen die Tasten 1–4 Haus, Schmiede, Markt und Sperrbasis.",
+              "Wächter-Bauplätze erhöhen die Turmreichweite um 30 % statt 20 %."
+            ],
+            "stats": [
+              {
+                "label": "Wächter-Bauplatz · Reichweite",
+                "before": "+20 %",
+                "after": "+30 %"
+              },
+              {
+                "label": "Markt · Verkaufserlös",
+                "before": "Rabattbereinigte Rückerstattung",
+                "after": "0 Gold"
+              }
+            ]
+          },
+          {
+            "title": "Duo: Gemeinsam vorbereiten und helfen",
+            "bullets": [
+              "Die breitere Lobby zeigt beide Namen, Turmauswahlen und Augments vor dem Start. Vollständige Auswahlen werden automatisch übernommen. Der Host startet, sobald der Partner bereit ist.",
+              "Der Host legt die Frontenzahl für beide fest. Eine Änderung dieser gemeinsamen Einstellung setzt die Bereitschaft des Partners zurück.",
+              "Duo-Ergebnisse derselben Partie erscheinen gemeinsam als Team. Bestehende Einträge bleiben erhalten.",
+              "Die Partnerkarte ist deutlicher markiert. Partnerhand und Deck sind einsehbar; Geschenk-Vorschauen haben mehr Platz.",
+              "Zwischen Wellen kannst du eine Gerade oder Kurve für das Partnerdeck kaufen: ein Hex pro Welle, zunächst 75 Gold, danach je Kauf 25 Gold mehr.",
+              "F schaltet das gemeinsame Tempo auch nach einem Knopfklick korrekt weiter. Bei Verbindungsunterbrechungen zeigt eine graue Pauseansicht den Wartezustand.",
+              "Die Turmauswahl sitzt mittig am linken Rand. Große Duo-Karten und Minenfelder werden effizienter übertragen; verspätete Bewegungsdaten werden ohne sprunghaftes Nachholen geglättet."
+            ],
+            "stats": []
+          },
+          {
+            "title": "Geschenke wünschen und klarer erkennen",
+            "bullets": [
+              "In der Duo-Geschenkphase kannst du dein Wunschgeschenk beim Partner markieren. Er sieht den Wunsch direkt an seiner Auswahl und entscheidet weiterhin selbst. Auch nach dem eigenen Versenden bleibt die Wunsch-Auswahl verfügbar.",
+              "Erhaltene Geschenke werden mit Kartenbild oder Goldsymbol und dem Namen des Partners deutlich eingeblendet. Die Geschenkübersicht hält fest, was du bekommen hast.",
+              "Beim Auswählen eines Zusatz-Hexes für Schmiede, Markt oder Sperrbasis hebt sich das Feld unter dem Mauszeiger hervor: Gold zeigt ein gültiges Ziel, Rot eine ungültige Auswahl. Ein ungültiger Klick beendet die Auswahl nicht.",
+              "Die Duo-Infoleiste sitzt als schmale Teamleiste direkt am oberen Bildschirmrand. Sie vereint Wellenplanung, gemeinsame Leben, beide Spielerstatus und Kartenwechsel. Partnerhilfe und Geschenkverlauf bleiben über das Teamsymbol erreichbar."
+            ],
+            "stats": []
+          }
+        ]
+      }
+    ],
+    "overview": [
+      {
+        "kind": "new",
+        "title": "NEU",
+        "items": [
+          "Sperrbasis für mehr Reichweite",
+          "Duo-Wunschgeschenke und Teamleiste",
+          "Duo-Bestenliste als Team"
+        ]
+      },
+      {
+        "kind": "buff",
+        "title": "VERSTÄRKT",
+        "items": [
+          "Mehr Diamanten ab Welle 36",
+          "Wächter-Reichweite: 20 % → 30 %"
+        ]
+      },
+      {
+        "kind": "nerf",
+        "title": "ABGESCHWÄCHT",
+        "items": [
+          "Markt-Verkauf: immer 0 Gold"
+        ]
+      },
+      {
+        "kind": "new",
+        "title": "VERBESSERT",
+        "items": [
+          "Flüssigeres Duo bei großen Karten",
+          "Fokusaktionen mit einem Klick",
+          "Einheitlichere, geräumigere Menüs"
+        ]
+      }
+    ],
+    "changes": [
+      "Bis Welle 35 bleibt es bei einem Diamanten je zwei überlebten Wellen. Welle 36–50 gibt je 3, Welle 51–60 je 6 und ab Welle 61 jede weitere überlebte Welle 12 Diamanten. Gilt für Solo und Duo; Bossboni und Tagesbelohnungen bleiben unverändert.",
+      "Voll ausgebaute Türme öffnen ihre Werte nicht mehr automatisch.",
+      "Der Wegweiser versucht bei einem identischen Neuziehen eine andere Kartenkombination anzubieten. Bleibt die Hand unverändert, wird der kostenlose Reroll nicht verbraucht.",
+      "Nicht verfügbare Wellenstart-Knöpfe sind auch während des Kampfes grau. Gebäudemenüs richten ihre Höhe nach dem Inhalt.",
+      "Der Angriffsfokus lässt sich mit einem Knopf auf alle eigenen Türme desselben Typs übertragen. Fokus kopieren reagiert auch bei geöffnetem Fokusbereich auf den ersten Klick.",
+      "Der Angriffsfokus bleibt geöffnet, bis du ihn selbst zuklappst oder den Turm wechselst. Auch Upgrade-Käufe reagieren direkt auf den ersten Klick.",
+      "Die Basis zeigt keinen zusätzlichen Erklärungstext mehr unter den Ausbauoptionen.",
+      "Baum und Werkstatt bleiben beim Wechsel zu Augment-Karten erreichbar. Die Schalter sind zentriert, die Turmliste der Werkstatt ist breiter.",
+      "Augment-Käufe zeigen den Speicherstatus und Fehler direkt oben. Laufende Käufe bleiben beim Reiterwechsel gesperrt; bei einer unterbrochenen Serverantwort wird derselbe Vorgang einmal sicher erneut abgefragt.",
+      "Die Bestenliste hat nur noch einen Schließen-Knopf. Beim Laden der Spielseite verdeckt eine Ladeansicht das noch nicht fertige Spiel.",
+      "Ein neuer Bestätigungsdialog zeigt vor dem Beenden eines laufenden Durchlaufs die Welle und die verdienten Diamanten. Abbrechen behält den Durchlauf.",
+      "Solo-Durchläufe pausieren in unsichtbaren Tabs. Beim Zurückkehren wird keine Hintergrundzeit nachgeholt.",
+      "Die großen Menüfenster folgen gemeinsamen Größenregeln. Die Durchlauf-Vorbereitung bietet mehr Platz.",
+      "Märkte geben beim Verkauf immer 0 Gold zurück, auch direkt nach dem Bau. Andere Gebäude behalten ihre Rückerstattung.",
+      "Neu: Die Sperrbasis erhöht die Reichweite benachbarter Türme um 10 / 15 / 20 %. Fernwacht versorgt auf Stufe 4 ein zusätzliches gewähltes Hex. Gleiche Reichweitenboni stapeln sich nicht.",
+      "Im geöffneten Gebäudebaumenü wählen die Tasten 1–4 Haus, Schmiede, Markt und Sperrbasis.",
+      "Wächter-Bauplätze erhöhen die Turmreichweite um 30 % statt 20 %.",
+      "Die breitere Lobby zeigt beide Namen, Turmauswahlen und Augments vor dem Start. Vollständige Auswahlen werden automatisch übernommen. Der Host startet, sobald der Partner bereit ist.",
+      "Der Host legt die Frontenzahl für beide fest. Eine Änderung dieser gemeinsamen Einstellung setzt die Bereitschaft des Partners zurück.",
+      "Duo-Ergebnisse derselben Partie erscheinen gemeinsam als Team. Bestehende Einträge bleiben erhalten.",
+      "Die Partnerkarte ist deutlicher markiert. Partnerhand und Deck sind einsehbar; Geschenk-Vorschauen haben mehr Platz.",
+      "Zwischen Wellen kannst du eine Gerade oder Kurve für das Partnerdeck kaufen: ein Hex pro Welle, zunächst 75 Gold, danach je Kauf 25 Gold mehr.",
+      "F schaltet das gemeinsame Tempo auch nach einem Knopfklick korrekt weiter. Bei Verbindungsunterbrechungen zeigt eine graue Pauseansicht den Wartezustand.",
+      "Die Turmauswahl sitzt mittig am linken Rand. Große Duo-Karten und Minenfelder werden effizienter übertragen; verspätete Bewegungsdaten werden ohne sprunghaftes Nachholen geglättet.",
+      "In der Duo-Geschenkphase kannst du dein Wunschgeschenk beim Partner markieren. Er sieht den Wunsch direkt an seiner Auswahl und entscheidet weiterhin selbst. Auch nach dem eigenen Versenden bleibt die Wunsch-Auswahl verfügbar.",
+      "Erhaltene Geschenke werden mit Kartenbild oder Goldsymbol und dem Namen des Partners deutlich eingeblendet. Die Geschenkübersicht hält fest, was du bekommen hast.",
+      "Beim Auswählen eines Zusatz-Hexes für Schmiede, Markt oder Sperrbasis hebt sich das Feld unter dem Mauszeiger hervor: Gold zeigt ein gültiges Ziel, Rot eine ungültige Auswahl. Ein ungültiger Klick beendet die Auswahl nicht.",
+      "Die Duo-Infoleiste sitzt als schmale Teamleiste direkt am oberen Bildschirmrand. Sie vereint Wellenplanung, gemeinsame Leben, beide Spielerstatus und Kartenwechsel. Partnerhilfe und Geschenkverlauf bleiben über das Teamsymbol erreichbar."
+    ]
+  },
+  {
     "version": "1.2.9",
     "title": "Zwei Festungen, zwei Arsenale",
     "summary": "Nimm dein Arsenal mit ins Duo, schau vor einer Belohnung auf deine Karte und entdecke vier neue Wächtersegen.",

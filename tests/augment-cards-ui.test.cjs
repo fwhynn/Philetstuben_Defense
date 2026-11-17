@@ -19,13 +19,13 @@ test('collection opens from Arsenal; account purchase waits for server and suppr
  ui.render(root,p,()=>{throw Error('local mutation forbidden');},(op)=>{assert.equal(op.kind,'buy');calls++;return new Promise(resolve=>release=resolve);});
  assert.equal(root.querySelector('#augmentCardCollection').hidden,true);root.querySelector('#augmentCollectionToggle').onclick();
  const host=root.querySelector('#augmentCardCollection'),buy=host.querySelector('button');assert.equal(host.hidden,false);
- buy.listeners.click();buy.listeners.click();assert.equal(calls,1);assert.equal(buy.disabled,true);assert.equal(p.diamonds,100);
- release();await new Promise(resolve=>setImmediate(resolve));assert.equal(buy.disabled,false);
+ buy.listeners.click();buy.listeners.click();assert.equal(calls,1);assert.equal(host.querySelector('button').disabled,true);assert.equal(p.diamonds,100);
+ release();await new Promise(resolve=>setImmediate(resolve));assert.equal(host.querySelector('button').disabled,false);
 });
 test('failed server mutation leaves collection untouched and reports the error',async()=>{
  const {root,ui,p}=setup();root._augmentsOpen=true;ui.render(root,p,()=>{},async()=>{throw Error('Keine Verbindung');});
  const host=root.querySelector('#augmentCardCollection'),buy=host.querySelector('button');buy.listeners.click();await new Promise(resolve=>setImmediate(resolve));
- assert.equal(host.children.at(-1).textContent,'Keine Verbindung');assert.equal(p.diamonds,100);assert.equal(buy.disabled,false);
+ assert.equal(host.children[0].textContent,'Keine Verbindung');assert.equal(p.diamonds,100);assert.equal(buy.disabled,false);
 });
 
 test('pack reveal shows exactly the two saved cards and only animates the new purchase once',()=>{
@@ -51,4 +51,24 @@ test('unlocked collection remains accessible after selecting a building in the A
  const toggle=elements.get('augmentCollectionToggle');
  assert.equal(toggle.hidden,false);toggle.onclick();
  assert.equal(elements.get('arsenalOverlay').classList.contains('augmentsOpen'),true);
+});
+
+
+test('pending purchase stays locked across tab rerenders and errors remain visible at the top',async()=>{
+ const {root,ui,p}=setup();root._augmentsOpen=true;let release,calls=0;
+ const transact=()=>{calls++;return new Promise((resolve,reject)=>release=reject);};
+ ui.render(root,p,()=>{},transact);root.querySelector('#augmentCardCollection').querySelector('button').listeners.click();
+ root._augmentsOpen=false;ui.render(root,p,()=>{},transact);root._augmentsOpen=true;ui.render(root,p,()=>{},transact);
+ const host=root.querySelector('#augmentCardCollection');assert.equal(host.querySelector('button').disabled,true);
+ host.querySelector('button').listeners.click();assert.equal(calls,1);
+ release(Error('Server vorübergehend nicht erreichbar'));await new Promise(resolve=>setImmediate(resolve));
+ assert.equal(host.children[0].textContent,'Server vorübergehend nicht erreichbar');assert.equal(host.querySelector('button').disabled,false);
+});
+
+test('confirmed purchase refreshes balance-dependent availability and preserves the pack reveal',async()=>{
+ const {root,ui,p}=setup();root._augmentsOpen=true;p.diamonds=50;
+ const save=()=>{};const transact=async()=>{const next={...p,diamonds:0,augmentCards:{...p.augmentCards,packs:1,lastPack:[{id:'house',tier:0},{id:'base',tier:1}]}};ui.render(root,next,save,transact);};
+ ui.render(root,p,save,transact);await root.querySelector('#augmentCardCollection').querySelector('button').listeners.click();
+ const host=root.querySelector('#augmentCardCollection');assert.equal(host.querySelector('button').disabled,true);
+ assert.ok(host.children.some(n=>n.className==='augmentPackResult augmentReveal'));
 });

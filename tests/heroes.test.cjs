@@ -51,11 +51,11 @@ test('base weapon attacks only within range, respects cooldown and pays kills th
   const merchant = {}; heroes.initialize(merchant, 'merchant'); assert.equal(heroes.weapon(merchant, 1).damage, 9);
 });
 test('hero selection persists only on confirmation, retry retains hero, upgrades reset', () => {
-  const { a, elements, storage } = load({initialProfile:{milestones:['standard35']}}); elements.get('newRunBtn').listeners.click(); elements.get('heroChoices').children[1].listeners.click();
+  const { a, elements, storage } = load({initialProfile:{milestones:['standard35']}}); elements.get('newRunBtn').listeners.click();elements.get('confirmRestartRunBtn').listeners.click(); elements.get('heroChoices').children[1].listeners.click();
   assert.equal(a.state.heroId, 'standard'); elements.get('confirmLoadoutBtn').listeners.click(); assert.equal(a.state.heroId, 'builder'); assert.equal(a.state.gold, 55);
   assert.equal(JSON.parse(storage.get('hex-bastion-profile-v1')).activeHero, 'builder');
   a.state.phase = 'build'; elements.get('baseWallsBtn').listeners.click(); assert.equal(a.state.maxHp, 25);
-  elements.get('retryLoadoutBtn').listeners.click(); assert.equal(a.state.heroId, 'builder'); assert.equal(a.state.maxHp, 20); assert.equal(a.state.baseUpgrades.walls, 0);
+  elements.get('retryLoadoutBtn').listeners.click();elements.get('confirmRestartRunBtn').listeners.click(); assert.equal(a.state.heroId, 'builder'); assert.equal(a.state.maxHp, 20); assert.equal(a.state.baseUpgrades.walls, 0);
   const fresh = load({ initialProfile: JSON.parse(storage.get('hex-bastion-profile-v1')) }); assert.equal(fresh.a.state.heroId, 'builder');
 });
 test('merchant wave income is awarded and forecast without adding it twice', () => {

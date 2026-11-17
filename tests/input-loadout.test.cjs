@@ -21,7 +21,7 @@ test('grid setting persists and diamond HUD forecasts only unpaid run rewards', 
   elements.get('hexGrid').checked = false; elements.get('hexGrid').listeners.change();
   assert.equal(a.state.showHexGrid, false); assert.equal(storage.get('hexGrid'), 'false');
   a.newRun(); assert.equal(a.state.showHexGrid, false);
-  a.state.wave = 10; a.state.earnedMeta.periodicBosses = 1; a.state.earnedMeta.explorationBosses = 1;
+  a.state.wave = 10; a.state.lastCompletedWave = 10; a.state.earnedMeta.periodicBosses = 1; a.state.earnedMeta.explorationBosses = 1;
   a.renderAll(); assert.equal(elements.get('runDiamonds').textContent, '(+15)');assert.equal(elements.get('diamondPayout').textContent,'+15');
   a.state.challengeDay='2026-11-12';a.state.challengeWon=true;a.renderAll();
   assert.equal(elements.get('diamondPayout').textContent,'+10');assert.equal(elements.get('diamondRates').hidden,true);assert.equal(elements.get('diamondDaily').hidden,false);
@@ -39,7 +39,7 @@ test('middle click rotates clockwise, R remains available, and building phase do
 
 test('arsenal unlocks refresh an open loadout and both new towers can be taken into a run', () => {
   const { a, elements, storage, selectSlot, buyTower } = load({ initialProfile: { diamonds: 100 } });
-  elements.get('newRunBtn').listeners.click();
+  elements.get('newRunBtn').listeners.click();elements.get('confirmRestartRunBtn').listeners.click();
   elements.get('menuArsenalBtn').listeners.click();
   for (const id of ['ballista', 'flame']) unlock(elements, 'tower:' + id);
   assert.equal(elements.get('loadoutChoices').children.length, 7);
@@ -63,7 +63,7 @@ test('arsenal unlocks refresh an open loadout and both new towers can be taken i
 
 test('element and necromancer unlock, enter a five-slot loadout and build with upgrade choices', () => {
   const { a, elements, storage, selectSlot, buyTower, data } = load({ initialProfile: { diamonds: 100 } });
-  elements.get('newRunBtn').listeners.click(); elements.get('menuArsenalBtn').listeners.click();
+  elements.get('newRunBtn').listeners.click();elements.get('confirmRestartRunBtn').listeners.click(); elements.get('menuArsenalBtn').listeners.click();
   for (const id of ['element', 'necromancer']) unlock(elements, 'tower:' + id);
   elements.get('closeArsenalBtn').listeners.click(); const choices = () => elements.get('loadoutChoices').children;
   choices()[0].listeners.click(); choices()[5].listeners.click(); choices()[1].listeners.click(); choices()[6].listeners.click();
@@ -121,7 +121,7 @@ test('defeat leads to main menu and loadout cancellation no longer offers a dead
 });
 
 test('research map exposes all towers and buildings and reset needs confirmation before refund', () => {
-  const { elements, storage } = load({ initialProfile: { diamonds: 100 } }); elements.get('menuArsenalBtn').listeners.click(); assert.equal(elements.get('arsenalChoices').children.length, 12); unlock(elements, 'tower:ballista'); assert.equal(JSON.parse(storage.get('hex-bastion-profile-v1')).diamonds, 80);
+  const { elements, storage } = load({ initialProfile: { diamonds: 100 } }); elements.get('menuArsenalBtn').listeners.click(); assert.equal(elements.get('arsenalChoices').children.length, 13); unlock(elements, 'tower:ballista'); assert.equal(JSON.parse(storage.get('hex-bastion-profile-v1')).diamonds, 80);
   elements.get('resetDiamondsBtn').listeners.click(); assert.equal(JSON.parse(storage.get('hex-bastion-profile-v1')).diamonds, 80); elements.get('resetDiamondsBtn').listeners.click(); const p = JSON.parse(storage.get('hex-bastion-profile-v1')); assert.equal(p.diamonds, 100); assert.equal(p.unlockedTowers.includes('ballista'), false); assert.equal(elements.get('resetDiamondsBtn').disabled, true);
 });
 
@@ -129,7 +129,7 @@ test('arsenal shows one tree at a time, picked from a rail that marks affordable
   const fs = require('node:fs'), path = require('node:path'), html = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8'); const arsenal=html.search(/src\s*=\s*["']classes\/arsenal\.js(?:\?v=[a-f0-9]+)?["']/),game=html.search(/s\.src\s*=\s*["']classes\/game\.js(?:\?v=[a-f0-9]+)?["']/); assert.ok(arsenal>=0&&game>arsenal,'Arsenal must load before the game controller');
   const { elements } = load({ initialProfile: { diamonds: 20 } }); elements.get('menuArsenalBtn').listeners.click();
   const trees = elements.get('arsenalChoices').children, tabs = elements.get('arsenalTabs').children.filter(e => e.attributes.role === 'tab');
-  assert.equal(tabs.length, 12); assert.equal(trees.filter(t => !t.hidden).length, 1);
+  assert.equal(tabs.length, 13); assert.equal(trees.filter(t => !t.hidden).length, 1);
   assert.ok(tabs.some(t => t.className.includes('affordable'))); assert.equal(tabs.find(t => t.attributes['aria-controls'] === 'research-ballista').className.includes('locked'), true);
   const target = tabs.find(t => t.attributes['aria-controls'] === 'research-market'); target.listeners.click();
   assert.equal(target.attributes['aria-selected'], 'true'); assert.deepEqual(trees.filter(t => !t.hidden).map(t => t.id), ['research-market']);
@@ -258,4 +258,15 @@ test('hovering another biome replaces the pinned tooltip and leaving restores it
  const buttons=elements.get('biomeRail').children,[grass,desert]=buttons,visible=()=>buttons.filter(b=>b.classList.contains('showTooltip'));
  grass.listeners.click();assert.deepEqual(visible(),[grass]);desert.listeners.pointerenter();assert.deepEqual(visible(),[desert]);desert.listeners.pointerleave();assert.deepEqual(visible(),[grass]);
  documentListeners.pointerdown({button:0,target:{closest:()=>null}});assert.equal(visible().length,0);
+});
+
+
+test('building panel uses content height while the tower panel retains the full available column',()=>{
+ const {a,elements,document}=load();document.documentElement={clientWidth:1920,clientHeight:1080};
+ const rect=(width,height)=>({left:80,top:100,width,height,right:80+width,bottom:100+height});
+ for(const id of ['quickLoadout','biomeRail'])elements.get(id).getBoundingClientRect=()=>rect(0,0);
+ const building=elements.get('buildingPanel'),tower=elements.get('towerPanel');building.id='buildingPanel';tower.id='towerPanel';
+ building.getBoundingClientRect=()=>rect(400,240);tower.getBoundingClientRect=()=>rect(400,700);
+ document.querySelectorAll=s=>s.startsWith('.towerPanel:not')?[building,tower]:[];
+ a.layoutMenus();assert.equal(building.style.height,'auto');assert.ok(parseFloat(building.style.maxHeight)>240);assert.ok(parseFloat(tower.style.height)>240);
 });

@@ -25,7 +25,7 @@
    const ready=!!next.lobbyState?.ready?.[next.player],available=new Set(access.towers||['archer','catapult','chain','freeze','mine',...lobbyProfile.unlockedTowers||[],...own]);
    const presets=(lobbyProfile.loadoutPresets||[]).filter(p=>p.towers.length===5&&p.towers.every(id=>available.has(id)));
    const dirty=draftKey()!==key,renderKey=JSON.stringify([draftKey(),otherBoard?.heroId,otherBoard?.difficulty,ownBoard.ultimateUnlocks,ownBoard.buildingUnlocks,access,presets,partner,savingLoadout,next.lobby.players,dirty,ready,!!augmentSession?.loading,next.lobbyState?.augments,[...available]]);
-   $('lobbyApplyLoadout').disabled=savingLoadout||ready||draftLoadout.length!==5||!dirty;
+
    if(renderKey===loadoutRenderKey)return;loadoutRenderKey=renderKey;
    const locked=savingLoadout||ready,heroSelect=$('lobbyHero'),fronts=$('lobbyFronts');
    heroSelect.replaceChildren();
@@ -34,7 +34,7 @@
    }
    heroSelect.value=draftHero;heroSelect.disabled=locked;
    $('lobbyHeroInfo').textContent=HexHeroes.hero(draftHero).desc;
-   fronts.value=draftFronts;fronts.disabled=locked||!access.twoFronts;$('lobbyFrontHint').hidden=access.twoFronts;
+   fronts.value=draftFronts;fronts.disabled=locked||next.player!==0||!access.twoFronts;$('lobbyFrontHint').hidden=next.player===0&&access.twoFronts;$('lobbyFrontHint').textContent=next.player===0?'Zwei Fronten schaltest du mit Welle 35 im Standardspiel frei.':'Die Frontenzahl legt der Host für euch beide fest.';
    const partnerFortress=otherBoard?.heroId||'standard';
    $('lobbyPartnerFortress').textContent=next.lobby.players<2?'Wartet auf Beitritt …':HexHeroes.hero(partnerFortress).name+' · '+(otherBoard.difficulty==='dual'?'Zwei Fronten':'Eine Front');
    const preset=$('lobbyPreset');preset.replaceChildren();$('lobbyPresetLabel').hidden=!presets.length;
@@ -57,20 +57,21 @@
     augmentBox.appendChild(row);}
    const augmentNote=document.createElement('small');augmentNote.textContent='Aktive Augments für eure Turmauswahl. Gäste spielen ohne Account-Augments.';augmentBox.appendChild(augmentNote);
    $('lobbyLoadoutCount').textContent=draftLoadout.length+'/5';$('lobbyLoadoutChoices').replaceChildren();$('lobbyPartnerLoadout').replaceChildren();
-   function tower(id,selected,interactive){const def=HexData.TOWERS[id],button=document.createElement(interactive?'button':'div');button.className='lobbyTowerChoice';button.innerHTML=HexArsenal.icon(id,def.color);const name=document.createElement('span');name.textContent=def.name+(interactive&&!available.has(id)?' · Gesperrt':'');button.appendChild(name);if(interactive){button.type='button';button.setAttribute('aria-pressed',String(selected));button.disabled=savingLoadout||ready||!available.has(id)||(!selected&&draftLoadout.length>=5);button.addEventListener('click',()=>{draftLoadout=selected?draftLoadout.filter(t=>t!==id):[...draftLoadout,id];show(view);});}return button;}
+   function tower(id,selected,interactive){const def=HexData.TOWERS[id],button=document.createElement(interactive?'button':'div');button.className='lobbyTowerChoice';button.innerHTML=HexArsenal.icon(id,def.color);const name=document.createElement('span');name.textContent=def.name+(interactive&&!available.has(id)?' · Gesperrt':'');button.appendChild(name);if(interactive){button.type='button';button.setAttribute('aria-pressed',String(selected));button.disabled=savingLoadout||ready||!available.has(id)||(!selected&&draftLoadout.length>=5);button.addEventListener('click',()=>{draftLoadout=selected?draftLoadout.filter(t=>t!==id):[...draftLoadout,id];show(view);saveSelection();});}return button;}
    for(const id of Object.keys(HexData.TOWERS))$('lobbyLoadoutChoices').appendChild(tower(id,draftLoadout.includes(id),true));
    if(next.lobby.players<2)$('lobbyPartnerLoadout').textContent='Wartet auf deinen Partner …';else for(const id of partner)$('lobbyPartnerLoadout').appendChild(tower(id,true,false));
  }
  function show(next){
    const own=next.player,other=1-own,ready=next.lobbyState?.ready||[false,false],joined=next.lobby.players>=2,online=next.connection.players[other]==='connected';
+   $('ownName').textContent=(next.lobbyState.names?.[own]||'Du')+(own===0?' · Host':'');$('friendName').textContent=joined?(next.lobbyState.names?.[other]||'Dein Partner')+(other===0?' · Host':''):'Dein Partner';
    $('invite').value=location.origin+'/duo-lobby.html#join='+next.lobby.code;
    $('roomCode').replaceChildren('Code: ',Object.assign(document.createElement('strong'),{textContent:next.lobby.code}),' · '+next.lobby.players+'/2');
    $('seatOwn').dataset.state=ready[own]?'ready':'notready';$('ownReady').textContent=ready[own]?'Bereit ✓':'Noch nicht bereit';
    $('seatFriend').dataset.state=!joined?'open':!online?'offline':ready[other]?'ready':'notready';
    $('friendReady').textContent=!joined?'Wartet auf Beitritt …':!online?'Verbindung unterbrochen':ready[other]?'Bereit ✓':'Noch nicht bereit';
    step('stepInvite',joined?'done':'current');step('stepJoin',joined?'done':'');step('stepReady',ready.every(Boolean)?'done':joined?'current':'');
-   $('lobbyReady').textContent=ready[own]?'Bereitschaft zurücknehmen':'Ich bin bereit';renderLoadouts(next);$('lobbyReady').disabled=!joined||next.connection.paused||savingLoadout||draftKey()!==loadoutKey;
-   $('lobbyHint').textContent=!joined?'Schicke deinem Partner den Link. Sobald er beitritt, könnt ihr euch bereit melden.':!online?'Dein Partner ist gerade nicht verbunden. Warte kurz, bis er zurück ist.':ready[own]&&!ready[other]?'Du bist bereit. Das Spiel startet, sobald dein Partner auch bereit ist.':!ready[own]&&ready[other]?'Dein Partner ist bereit und wartet auf dich.':'Das Spiel startet, sobald ihr beide bereit seid.';
+   $('lobbyReady').textContent=own===0?(ready[other]?'Spiel starten':'Warte auf Partner · noch nicht bereit'):ready[own]?'Bereitschaft zurücknehmen':'Ich bin bereit';renderLoadouts(next);$('lobbyReady').disabled=!joined||next.connection.paused||savingLoadout||draftKey()!==loadoutKey||draftLoadout.length!==5||own===0&&!ready[other];
+   $('lobbyHint').textContent=!joined?'Schicke deinem Partner den Link. Sobald er beitritt, könnt ihr euch bereit melden.':!online?'Dein Partner ist gerade nicht verbunden. Warte kurz, bis er zurück ist.':ready[own]&&!ready[other]?'Du bist bereit. Das Spiel startet, sobald dein Partner auch bereit ist.':!ready[own]&&ready[other]?'Dein Partner ist bereit. Du kannst das Spiel starten.':'Wählt eure Türme. Der Partner bestätigt mit Bereit, der Host startet.';
  }
  async function syncAugments(){
    const session=augmentSession;session.loading=true;show(view);
@@ -106,13 +107,13 @@
  }
  // Expired or removed rooms answer 401 forever; drop the stale link instead of retrying.
  function closed(token){client?.stop();client=null;view=null;augmentSession=null;savingLoadout=false;draftLoadout=null;loadoutRenderKey='';if(localStorage.getItem('autohex-duo-session')===token)localStorage.removeItem('autohex-duo-session');$('resumeDuo')?.remove();history.replaceState(null,'',location.pathname);$('waitingLobby').hidden=true;$('lobbyEntry').hidden=false;notice('Diese Duo-Lobby existiert nicht mehr oder ist abgelaufen.');}
- $('lobbyHero').addEventListener('change',()=>{draftHero=$('lobbyHero').value;show(view);});
- $('lobbyFronts').addEventListener('change',()=>{draftFronts=$('lobbyFronts').value;show(view);});
- $('lobbyPreset').addEventListener('change',()=>{const preset=$('lobbyPreset').value;if(preset){draftLoadout=preset.split('|');show(view);}});
- $('lobbyApplyLoadout').addEventListener('click',async()=>{if(!client||!view||savingLoadout||draftLoadout?.length!==5)return;savingLoadout=true;renderLoadouts(view);try{await client.send('lobbyLoadout',{towers:[...draftLoadout],heroId:draftHero,difficulty:draftFronts});await syncAugments();notice('Auswahl übernommen.');}catch(e){notice(e.message);}finally{savingLoadout=false;if(view)show(view);}});
+ $('lobbyHero').addEventListener('change',()=>{draftHero=$('lobbyHero').value;show(view);saveSelection();});
+ $('lobbyFronts').addEventListener('change',()=>{draftFronts=$('lobbyFronts').value;show(view);saveSelection();});
+ $('lobbyPreset').addEventListener('change',()=>{const preset=$('lobbyPreset').value;if(preset){draftLoadout=preset.split('|');show(view);saveSelection();}});
+ async function saveSelection(){if(!client||!view||savingLoadout||draftLoadout?.length!==5||draftKey()===loadoutKey)return;savingLoadout=true;show(view);try{await client.send('lobbyLoadout',{towers:[...draftLoadout],heroId:draftHero,difficulty:draftFronts});await syncAugments();}catch(e){notice(e.message);}finally{savingLoadout=false;if(view)show(view);}}
  $('lobbyReady').addEventListener('click',async()=>{
    if(!view||savingLoadout)return;const ready=!view.lobbyState.ready[view.player];savingLoadout=true;show(view);
-   try{if(ready)await syncAugments();await client.send('lobbyReady',{value:ready});}
+   try{if(view.player===0){await client.send('lobbyStart',{});}else{if(ready)await syncAugments();await client.send('lobbyReady',{value:ready});}}
    catch(error){notice(error.message);}finally{savingLoadout=false;if(view)show(view);}
  });
  $('lobbyTakeover').addEventListener('click',()=>client.takeover().catch(e=>notice(e.message)));

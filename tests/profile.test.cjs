@@ -99,3 +99,18 @@ test('preset names persist through saving loadouts and export/import without cha
  const saved=p.savePreset(named,1,[...named.activeLoadout].reverse(),d),imported=p.readFile(p.exportFile(saved,d),d);assert.equal(imported.loadoutPresets[1].name,'Meine Bossjäger');
  assert.equal(p.renamePreset(named,1,'   ',d),null);assert.equal(p.renamePreset(named,-1,'Name',d),null);assert.equal(p.renamePreset(named,3,'Name',d),null);assert.equal(p.renamePreset(named,0,'x'.repeat(50),d).loadoutPresets[0].name.length,30);
 });
+
+
+test('late wave diamonds use cumulative tiers with unchanged early rewards and boss bonuses',()=>{
+ const {profile:p}=setup(),data=p.defaults();data.records.highestWave=100;
+ for(const [wave,expected]of [[0,0],[1,0],[2,1],[34,17],[35,17],[36,20],[50,62],[51,68],[60,122],[61,134],[70,242],[100,602]])assert.equal(p.waveDiamonds(wave),expected,'wave '+wave);
+ for(const [wave,bosses,total]of [[35,3,32],[50,4,82],[70,6,272]])assert.equal(p.runReward(data,{wave,periodicBosses:bosses}).total,total);
+ assert.equal(p.runReward(data,{wave:61,completedWave:60}).wave,122,'unfinished wave is not rewarded');
+});
+
+test('late reward settlement preserves old balances and does not pay a run twice',()=>{
+ const {profile:p,definitions}=setup(),data=p.defaults();data.diamonds=123;data.records.highestWave=100;data.settledRuns=['old'];
+ const result=p.settleRun(data,{runId:'late',wave:70,completedWave:70,periodicBosses:6},definitions);
+ assert.equal(result.profile.diamonds,395);assert.ok(result.profile.settledRuns.includes('old'));
+ assert.equal(p.settleRun(result.profile,{runId:'late',wave:70,periodicBosses:6},definitions).profile.diamonds,395);
+});

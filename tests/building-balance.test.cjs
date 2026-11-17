@@ -4,18 +4,18 @@ test('market grants discounts only on successful purchases, avoids free rental, 
  const {c,s,run,base,slot,tower}=setup();assert.ok(c.buildings.buy(s,slot,'market'));const market=base.buildings[0];
  for(let i=0;i<5;i++)c.buildings.cost(s,tower,25);assert.equal(market.discountGranted,undefined);
  const gold=s.gold;s.gold=0;assert.equal(c.towers.buy(s,'archer',[tower]).ok,false);assert.equal(market.discountGranted,undefined);s.gold=gold;
- assert.ok(c.towers.buy(s,'archer',[tower]).ok);assert.equal(market.discountGranted,3);assert.equal(c.buildings.refund(s,market).amount,32);
+ assert.ok(c.towers.buy(s,'archer',[tower]).ok);assert.equal(market.discountGranted,3);assert.equal(c.buildings.refund(s,market).amount,0);
  assert.ok(c.towers.upgrade(s,tower,'volley'));assert.equal(market.discountGranted,8);
  assert.equal(c.towers.upgrade(s,tower,'volley'),false);assert.equal(market.discountGranted,8);
  const restored=c.snapshot.restore(JSON.parse(JSON.stringify(c.snapshot.capture(s,run.random)))).state;
- assert.equal(restored.map.get('0,0').buildings[0].discountGranted,8);assert.equal(c.buildings.refund(restored,restored.map.get('0,0').buildings[0]).amount,27);
- const before=restored.gold;assert.ok(c.buildings.sell(restored,slot));assert.equal(restored.gold,before+27);assert.equal(c.buildings.sell(restored,slot),false);
+ assert.equal(restored.map.get('0,0').buildings[0].discountGranted,8);assert.equal(c.buildings.refund(restored,restored.map.get('0,0').buildings[0]).amount,0);
+ const before=restored.gold;assert.ok(c.buildings.sell(restored,slot));assert.equal(restored.gold,before);assert.equal(c.buildings.sell(restored,slot),false);
 });
 test('overlapping markets attribute savings once to the strongest; sale never pays negative gold',()=>{
  const {c,s,base,slot,tower}=setup();c.buildings.buy(s,slot,'market');s.map.set('1,-1',{q:1,r:-1,buildingSlots:1,buildings:[null],towers:[]});const other={q:1,r:-1,index:0};c.buildings.buy(s,other,'market');c.buildings.upgrade(s,other);c.buildings.upgrade(s,other);
  const strong=s.map.get('1,-1').buildings[0];assert.ok(c.towers.buy(s,'mine',[tower]).ok);assert.equal(base.buildings[0].discountGranted,undefined);assert.equal(strong.discountGranted,12);
  for(let i=0;i<10;i++)c.buildings.recordDiscount(s,tower,100,65);
- assert.equal(c.buildings.refund(s,strong).amount,0);assert.equal(c.buildings.refund(s,base.buildings[0]).amount,35);
+ assert.equal(c.buildings.refund(s,strong).amount,0);assert.equal(c.buildings.refund(s,base.buildings[0]).amount,0);
 });
 test('patrician network is capped, selling and repeated refresh reconcile income',()=>{
  const {c,s,base}=setup();for(let i=0;i<4;i++){const slot={q:0,r:0,index:i};c.buildings.buy(s,slot,'house');for(let j=0;j<3;j++)c.buildings.upgrade(s,slot);}

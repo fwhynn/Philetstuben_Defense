@@ -11,8 +11,8 @@ test('Duo freezes own account selection, retains partner readiness and persists 
  command(room,a,'lobbyReady',{value:true});assert.equal(room.applyAugments(a.token,profile()).ok,false);
 });
 test('Duo authenticated profile lookup is fixed-origin and refuses legacy APIs or forged tokens',async()=>{
- let called;const load=createAccountAugments('https://api.example.test',async(url,options)=>{called={url:String(url),options};return {ok:true,json:async()=>({augmentProtocol:1,data:{profile:profile()}})};});
- assert.equal((await load('a'.repeat(64))).diamonds,100);assert.equal(called.url,'https://api.example.test/saves');assert.equal(called.options.redirect,'error');
+ const called=[];const load=createAccountAugments('https://api.example.test',async(url,options)=>{called.push({url:String(url),options});return {ok:true,json:async()=>String(url).endsWith('/me')?{user:{id:17,username:'Partner'}}:{augmentProtocol:1,data:{profile:profile()}}};});
+ assert.equal((await load('a'.repeat(64))).diamonds,100);assert.deepEqual(called.map(c=>c.url),['https://api.example.test/saves','https://api.example.test/me']);assert.ok(called.every(c=>c.options.redirect==='error'));
  await assert.rejects(load('bad'));assert.throws(()=>createAccountAugments('http://untrusted.test'));
  await assert.rejects(createAccountAugments('https://api.example.test',async()=>({ok:true,json:async()=>({data:{profile:profile()}})}))('a'.repeat(64)));
 });
@@ -68,7 +68,7 @@ test('guest Arsenal brings catalog unlocks and fortresses while account augments
  async function sync(seat,headers={}){const r=await fetch(url,{method:'POST',headers:{Authorization:'Bearer '+seat.token,'X-Duo-Client':randomUUID(),...headers},body:JSON.stringify(guest)});assert.equal(r.status,200);return r.json();}
  const local=await sync(a);assert.deepEqual(local.cards,[]);assert.equal(local.heroId,'merchant');assert.equal(local.difficulty,'dual');
  assert.deepEqual(local.buildingUnlocks,['building:market']);assert.deepEqual(local.ultimateUnlocks,['ultimate:archer:marksman']);
- const account=await sync(b,{'X-Account-Token':'a'.repeat(64)});assert.equal(account.heroId,'standard');assert.equal(account.difficulty,'normal');
+ const account=await sync(b,{'X-Account-Token':'a'.repeat(64)});assert.equal(account.heroId,'standard');assert.equal(account.difficulty,'dual');
  assert.deepEqual(account.buildingUnlocks,[]);assert.deepEqual(account.ultimateUnlocks,[]);assert.deepEqual(account.cards,[{id:'archer',tier:0},{id:'chain',tier:1}]);
  assert.equal(room.view(b.token).hp,35);
 });

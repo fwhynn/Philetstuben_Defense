@@ -29,11 +29,11 @@ test('all random exit pairs allow two mandatory opening placements without losin
 });
 
 test('difficulty persists from preparation, retry retains it, and a seed repeats exits',()=>{
-  const {a,elements,storage}=load({initialProfile:{milestones:['standard35']}});elements.get('newRunBtn').listeners.click();
+  const {a,elements,storage}=load({initialProfile:{milestones:['standard35']}});elements.get('newRunBtn').listeners.click();elements.get('confirmRestartRunBtn').listeners.click();
   elements.get('difficultyChoices').children[1].listeners.click();elements.get('runSeed').value='same';
   elements.get('confirmLoadoutBtn').listeners.click();
   assert.equal(a.state.difficulty,'dual');assert.equal(JSON.parse(storage.get('hex-bastion-profile-v1')).difficulty,'dual');
-  const exits=Array.from(a.state.baseExits);elements.get('retryLoadoutBtn').listeners.click();assert.deepEqual(Array.from(a.state.baseExits),exits);
-  elements.get('newRunBtn').listeners.click();elements.get('difficultyChoices').children[0].listeners.click();elements.get('confirmLoadoutBtn').listeners.click();
+  const exits=Array.from(a.state.baseExits);elements.get('retryLoadoutBtn').listeners.click();elements.get('confirmRestartRunBtn').listeners.click();assert.deepEqual(Array.from(a.state.baseExits),exits);
+  elements.get('newRunBtn').listeners.click();elements.get('confirmRestartRunBtn').listeners.click();elements.get('difficultyChoices').children[0].listeners.click();elements.get('confirmLoadoutBtn').listeners.click();
   assert.equal(a.state.difficulty,'normal');assert.equal(a.state.hand.length,3);assert.equal(a.state.baseExits.length,1);
 });

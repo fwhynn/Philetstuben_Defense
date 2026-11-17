@@ -10,7 +10,7 @@ const HexProfile=(()=>{
   function activeUltimate(profile,type){const owned=(ULTIMATE_BRANCHES[type]||[]).filter(branch=>ownsUltimate(profile,type,branch));return owned.includes(profile.activeUltimates?.[type])?profile.activeUltimates[type]:owned[0];}
   function runUnlocks(profile){return [...profile.unlocks.filter(id=>!id.startsWith('ultimate:')),...Object.keys(ULTIMATE_BRANCHES).flatMap(type=>{const branch=activeUltimate(profile,type);return branch?['ultimate:'+type+':'+branch]:[];})];}
   function activateUltimate(profile,id,definitions){const [type,branch]=id.split(':');if(!ULTIMATE_BRANCHES[type]?.includes(branch)||!ownsUltimate(profile,type,branch))return null;return save({...profile,activeUltimates:{...profile.activeUltimates,[type]:branch}},definitions);}
-  const BUILDING_UNLOCKS={house:{cost:40},forge:{cost:40},market:{cost:40}};
+  const BUILDING_UNLOCKS={house:{cost:40},forge:{cost:40},market:{cost:40},bastion:{cost:40}};
   function unlockBuilding(profile,id,definitions){const clean=normalize(profile,definitions),offer=BUILDING_UNLOCKS[id],key='building:'+id;if(!offer||clean.unlocks.includes(key)||clean.diamonds<offer.cost)return null;return save({...clean,diamonds:clean.diamonds-offer.cost,unlockCosts:{...clean.unlockCosts,[key]:offer.cost},unlocks:[...clean.unlocks,key]},definitions);}
   function affordableUnlocks(profile){return Object.entries(TOWER_UNLOCKS).filter(([id,o])=>!profile.unlockedTowers.includes(id)&&profile.diamonds>=o.cost).length+Object.entries(ULTIMATE_UNLOCKS).reduce((sum,[id,o])=>sum+(profile.unlockedTowers.includes(id)&&profile.diamonds>=o.cost?ULTIMATE_BRANCHES[id].filter(branch=>!ownsUltimate(profile,id,branch)).length:0),0)+Object.entries(BUILDING_UNLOCKS).filter(([id,o])=>!profile.unlocks.includes('building:'+id)&&profile.diamonds>=o.cost).length;}
   function resetValue(profile){let amount=0;for(const [kind,offers] of [['tower',TOWER_UNLOCKS],['ultimate',ULTIMATE_UNLOCKS],['building',BUILDING_UNLOCKS]])for(const [id,offer] of Object.entries(offers)){const key=kind+':'+id,owned=kind==='tower'?profile.unlockedTowers.includes(id):profile.unlocks.includes(key);if(owned){const paid=profile.unlockCosts?.[key];amount+=Number.isFinite(paid)&&paid>=0?paid:offer.cost;}}for(const key of profile.unlocks){const [kind,type,branch]=key.split(':');if(kind==='ultimate'&&ULTIMATE_BRANCHES[type]?.includes(branch))amount+=profile.unlockCosts?.[key]??ULTIMATE_UNLOCKS[type].cost;}return amount;}
@@ -55,9 +55,13 @@ const HexProfile=(()=>{
     const clean=normalize(profile,definitions),selected=validIds(ids,definitions);if(index<0||index>2||selected.length!==5||selected.some(id=>!clean.unlockedTowers.includes(id)))return null;
     const presets=clean.loadoutPresets.map((preset,i)=>i===index?{...preset,towers:selected}:preset);return save({...clean,loadoutPresets:presets},definitions);
   }
+  function waveDiamonds(completedWave){
+    const wave=Number.isFinite(Number(completedWave))?Math.max(0,Math.floor(Number(completedWave))):0;
+    return Math.floor(Math.min(wave,35)/2)+Math.max(0,Math.min(wave,50)-35)*3+Math.max(0,Math.min(wave,60)-50)*6+Math.max(0,wave-60)*12;
+  }
   function runReward(clean,summary){
     const wave=Math.max(0,Math.floor(Number(summary.wave)||0)),periodic=Math.max(0,Math.floor(Number(summary.periodicBosses)||0)),exploration=Math.max(0,Math.floor(Number(summary.explorationBosses)||0));
-    const waveDiamonds=wave>=2?Math.floor(wave/2):0,bossDiamonds=periodic*5+exploration*3,oldBest=Math.max(0,Number(clean.records.highestWave)||0);
+    const waveDiamonds=HexProfile.waveDiamonds(summary.completedWave??wave),bossDiamonds=periodic*5+exploration*3,oldBest=Math.max(0,Number(clean.records.highestWave)||0);
     let milestoneDiamonds=0;for(let mark=10;mark<=wave;mark+=10)if(mark>oldBest)milestoneDiamonds+=2;
     const total=waveDiamonds+bossDiamonds+milestoneDiamonds;
     return {wave:waveDiamonds,bosses:bossDiamonds,milestones:milestoneDiamonds,total};
@@ -125,5 +129,5 @@ const HexProfile=(()=>{
   function modesUnlocked(profile){return !!profile.introduction?.legacy||profile.milestones?.includes('standard35')||profile.introduction?.bestWave>=35;}
   function recordIntroduction(profile,wave,definitions){const clean=normalize(profile,definitions);if(!Number.isInteger(wave)||wave<0)return clean;return save({...clean,...(typeof HexAugmentCards!=='undefined'?{augmentCards:{...HexAugmentCards.clean(clean.augmentCards),bestWave:Math.max(clean.augmentCards?.bestWave||0,wave)}}:{}),introduction:{...clean.introduction,bestWave:Math.max(clean.introduction.bestWave,Math.min(35,wave))}},definitions);}
   function skipIntroduction(profile,definitions){const clean=normalize(profile,definitions);return save({...clean,introduction:{...clean.introduction,skipped:true}},definitions);}
-  return {get storageProblem(){return storageProblem;},learning,modesUnlocked,recordIntroduction,skipIntroduction,ULTIMATE_BRANCHES,ownsUltimate,activeUltimate,runUnlocks,activateUltimate,settleDuo,heroUnlocked,exportFile,readFile,importFile,resetValue,resetUnlocks,affordableUnlocks,BUILDING_UNLOCKS,unlockBuilding,STORAGE_KEY,START_TOWERS,TOWER_UNLOCKS,ULTIMATE_UNLOCKS,defaults,normalize,load,save,setLoadout,renamePreset,savePreset,runReward,settleRun,settleDaily,unlockTower,unlockUltimate};
+  return {get storageProblem(){return storageProblem;},learning,modesUnlocked,recordIntroduction,skipIntroduction,ULTIMATE_BRANCHES,ownsUltimate,activeUltimate,runUnlocks,activateUltimate,settleDuo,heroUnlocked,exportFile,readFile,importFile,resetValue,resetUnlocks,affordableUnlocks,BUILDING_UNLOCKS,unlockBuilding,STORAGE_KEY,START_TOWERS,TOWER_UNLOCKS,ULTIMATE_UNLOCKS,defaults,normalize,load,save,setLoadout,renamePreset,savePreset,waveDiamonds,runReward,settleRun,settleDaily,unlockTower,unlockUltimate};
 })();

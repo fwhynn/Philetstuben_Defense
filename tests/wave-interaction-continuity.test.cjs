@@ -14,7 +14,7 @@ test('reward interactions cancel building targeting but retain quick build and c
  elements.get('rewardChoices').children[0].listeners.click();assert.equal(a.state.phase,'place');assert.equal(a.state.selectedSlot,slot);assert.equal(a.state.buildingTarget,null);assert.equal(a.state.dragTower,'archer');
 });
 test('preparation shows explicit lock reasons for difficulty and both locked fortresses',()=>{
- const {elements}=load();elements.get('standardModeBtn').listeners.click();
+ const {elements}=load();elements.get('standardModeBtn').listeners.click();elements.get('confirmRestartRunBtn').listeners.click();
  const difficulty=elements.get('difficultyChoices').children.find(b=>b.disabled);assert.match(difficulty.innerHTML,/unlockRequirement.*Stufe 1: Welle 35/);
  const heroes=elements.get('heroChoices').children.filter(b=>b.disabled);assert.equal(heroes.length,2);assert.match(heroes[0].innerHTML,/unlockRequirement.*Stufe 1: Welle 35/);assert.match(heroes[1].innerHTML,/unlockRequirement.*Stufe 2 · Zwei Fronten: Welle 35/);
 });

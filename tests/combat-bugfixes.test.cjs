@@ -61,3 +61,17 @@ test('first wave is clearable without consumables, meta or flame by several dama
  for(let i=0;i<7200;i++){result=c.runtime.advance(s,random,1/60);if(result!=='running')break;}
  assert.equal(result,'complete',type);assert.equal(s.hp,20,type);assert.equal(s.waveKills,5,type);}
 });
+
+
+test('apply focus to a type updates all owned matching towers without changing other types or guests',()=>{
+ const {a,elements,selectSlot,buyTower}=load();a.state.gold=1000;a.state.phase='build';
+ for(const [q,type]of [[1,'archer'],[2,'archer'],[3,'catapult'],[4,'archer']]){a.state.map.set(q+',0',{q,r:0,type:'straight',roads:[0,3],slots:1,towers:[null]});selectSlot(q,0,0);buyTower(type);}
+ const tower=q=>a.state.map.get(q+',0').towers[0];tower(4).guestOwner=1;
+ const other=JSON.stringify(tower(3)),guest=JSON.stringify(tower(4));tower(1).targetPriority=['healer','boss','closestBase'];
+ a.state.selectedTower={q:1,r:0,index:0};a.state.selectedTowers=[a.state.selectedTower];a.renderAll();
+ const content=elements.get('towerUpgrades');assert.equal(content.children.find(n=>n.id==='towerAttackFocus').attributes['data-keep-open'],'');const button=content.children.find(n=>n.textContent==='Fokus für alle Türme dieses Typs übernehmen');
+ assert.equal(button.attributes['aria-controls'],'towerAttackFocus');button.listeners.click();
+ assert.deepEqual([...tower(2).targetPriority],[...tower(1).targetPriority]);assert.notEqual(tower(2).targetPriority,tower(1).targetPriority);
+ assert.equal(JSON.stringify(tower(3)),other);assert.equal(JSON.stringify(tower(4)),guest);
+ const copy=elements.get('towerUpgrades').children.find(n=>n.textContent==='Fokus kopieren');assert.equal(copy.attributes['aria-controls'],'towerAttackFocus');
+});

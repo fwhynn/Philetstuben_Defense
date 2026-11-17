@@ -84,3 +84,19 @@ test('late identity response cannot relabel or log out an account from another t
   await assert.rejects(a.logout(),e=>e.status===409);assert.equal(storage.get('hex-bastion-auth-token'),'OTHER');
  }
 });
+
+
+test('a lost augment PUT response is recovered from its receipt without a second charge',async()=>{
+ let puts=0,revision='a'.repeat(64),data={profile:{diamonds:100,augmentCards:{packs:0}}};
+ const api=client(async(url,options)=>{
+  if(options.method==='PUT'){
+   puts++;const body=JSON.parse(options.body);assert.equal(body._baseRevision,revision);
+   revision='b'.repeat(64);data={_augmentReceipt:{id:body._augmentAction.requestId},profile:{diamonds:50,augmentCards:{packs:1}}};
+   throw new TypeError('response lost after commit');
+  }
+  return {ok:true,status:200,json:async()=>({augmentProtocol:1,revision,data})};
+ });
+ await api.getSave();const payload={_augmentAction:{kind:'buy',requestId:'11111111-1111-4111-8111-111111111111'}};
+ await assert.rejects(api.putSave(payload));const result=await api.putSave(payload);
+ assert.equal(puts,1);assert.equal(result.data.profile.diamonds,50);assert.equal(result.data.profile.augmentCards.packs,1);
+});

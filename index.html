@@ -16,6 +16,7 @@
   </head>
 
   <body>
+    <div id="bootScreen" role="status" aria-live="polite" style="position:fixed;inset:0;z-index:9999;display:grid;place-content:center;text-align:center;gap:16px;background:#0d2117;color:#f4d382;font:24px/1.5 system-ui"><strong>AutoHex TD</strong><span>Wird geladen …</span></div>
     <!-- Gemeinsame Verläufe und Maske der Kartenbilder (miniPathSvg in game.js); nie ausblenden, sonst greifen die Verweise nicht. -->
     <svg id="hxCardDefs" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute;overflow:hidden"><defs>
       <clipPath id="hxCardClip"><polygon points="433,60 814,280 814,720 433,940 52,720 52,280"/></clipPath>
@@ -109,6 +110,7 @@
       <details id="duoHud" class="duoHud hidden">
         <summary id="duoSummary">Duo · Team</summary>
         <div class="duoHudBody">
+          <section class="duoHudSection"><h3 id="duoTurnTitle"></h3><p id="duoTurnText"></p></section>
           <section class="duoHudSection">
             <h3>Karte wechseln</h3>
             <div class="duoMapSwitch"><button id="duoOwnMap">Meine Karte</button><button
@@ -128,7 +130,8 @@
                 id="duoSendTower">Turm wählen</button><button id="duoClearTower" class="secondary">Abwählen</button>
             </div>
           </section>
-          <section id="duoGifts" class="duoHudSection hidden"><h3>Partnergeschenke</h3><div id="duoGiftHistory"></div></section>
+          <section class="duoHudSection"><h3>Hex für den Partner kaufen</h3><p id="duoHexGiftInfo"></p><div id="duoHexGiftChoices" class="duoHexGiftChoices"></div><p id="duoHexGiftReceipt" role="status"></p></section>
+          <section id="duoGifts" class="duoHudSection hidden"><h3>Partnergeschenke</h3><p id="duoGiftReceived" class="duoGiftReceived hidden" role="status"></p><div id="duoGiftHistory"></div></section>
           <section id="duoGuardianSection" class="duoHudSection hidden">
             <h3>Wächter</h3>
             <p class="duoHelpText">Wächter starten erst, wenn ihr beide zustimmt.</p>
@@ -141,24 +144,19 @@
           </section>
         </div>
       </details>
-      <section id="duoTurn" class="duoTurn hidden" data-tone="act" aria-live="polite">
-        <div class="duoSeats">
-          <div id="duoSeatSelf" class="duoSeat" data-state="todo"><span class="duoSeatDot"
-              aria-hidden="true"></span><span class="duoSeatText"><strong>Du</strong><small
-                id="duoSeatSelfText"></small></span></div>
-          <div class="duoTeamInfo"><strong id="duoTeamWave">Vorbereitung</strong><small id="duoTeamHp"></small></div>
-          <div id="duoSeatPartner" class="duoSeat duoSeatPartner" data-state="waiting"><span
-              class="duoSeatText"><strong>Partner</strong><small id="duoSeatPartnerText"></small></span><span
-              class="duoSeatDot" aria-hidden="true"></span></div>
-        </div>
-        <div class="duoTurnBody"><span id="duoMapLabel" class="duoMapLabel hidden"></span><strong
-            id="duoTurnTitle"></strong>
-          <p id="duoTurnText"></p><button id="duoQuickMap" class="duoQuickMap hidden" type="button">⇄ Partnerkarte
-            ansehen</button>
-        </div>
-      <p id="duoGiftReceived" class="duoGiftReceived hidden" role="status"></p>
-      <button id="duoSupportShortcut" class="duoSupportShortcut" type="button">⇄ Partnerhilfe &amp; Geschenke</button>
+      <section id="duoTurn" class="duoTurn duoEdgeBar hidden" data-tone="act" aria-label="Duo-Spielstatus">
+        <span id="duoMapLabel" class="duoMapLabel hidden"></span>
+        <div id="duoPhaseSlot" class="duoPhaseSlot hud"></div>
+        <div class="duoTeamInfo" aria-live="polite"><span class="hxi hxi-heart" aria-hidden="true"></span><strong id="duoTeamHp"></strong></div>
+        <div id="duoSeatSelf" class="duoSeat" data-state="todo"><span class="duoSeatDot" aria-hidden="true"></span><span class="duoSeatText"><strong>Du</strong><small id="duoSeatSelfText"></small></span></div>
+        <div id="duoSeatPartner" class="duoSeat duoSeatPartner" data-state="waiting"><span class="duoSeatDot" aria-hidden="true"></span><span class="duoSeatText"><strong id="duoPartnerName" data-no-translate>Partner</strong><small id="duoSeatPartnerText"></small></span></div>
+        <button id="duoQuickMap" class="duoQuickMap hidden" type="button">Partnerkarte</button>
+        <div id="duoSupportMenu"><button id="duoSupportShortcut" class="duoSupportShortcut" type="button" aria-label="Partnerhilfe und Geschenke" title="Partnerhilfe und Geschenke" aria-controls="duoHud" aria-expanded="false"><span class="hxi hxi-partner" aria-hidden="true"></span></button></div>
       </section>
+      <aside id="duoGiftNotice" class="duoGiftNotice hidden" aria-label="Geschenk erhalten">
+        <button id="duoGiftNoticeClose" type="button" aria-label="Geschenkmeldung schließen">×</button>
+        <div role="status" aria-live="polite" aria-atomic="true"><span id="duoGiftNoticeTitle"></span><div id="duoGiftNoticeContent"></div></div>
+      </aside>
       <div id="duoTransfer" class="duoTransfer hidden" role="status"></div>
       <nav id="quickLoadout" class="mapRail loadoutRail" aria-label="Loadout: Turm auf einen freien Platz ziehen"></nav>
       <aside id="biomeIntro" class="biomeIntro hidden" role="status"><strong id="biomeIntroTitle">Neues Biom
@@ -244,7 +242,10 @@
               <h2>Diamanten</h2>
               <div class="diamondPayout"><span>Deine Ausbeute</span><strong><span class="hxi hxi-gem" aria-hidden="true"></span> <span id="diamondPayout">+0</span></strong></div>
               <dl id="diamondRates">
-                <div><dt id="diamondWaves">Alle 2 erreichten Wellen</dt><dd>+1</dd></div>
+                <div><dt id="diamondWaves">Bis Welle 35: je 2 überlebte Wellen</dt><dd>+1</dd></div>
+                <div><dt>Welle 36–50: je überlebte Welle</dt><dd>+3</dd></div>
+                <div><dt>Welle 51–60: je überlebte Welle</dt><dd>+6</dd></div>
+                <div><dt>Ab Welle 61: je überlebte Welle</dt><dd>+12</dd></div>
                 <div><dt id="diamondBoss">Wellenboss besiegt</dt><dd>+5</dd></div>
                 <div><dt id="diamondGuardian">Erkundungswächter besiegt</dt><dd>+3</dd></div>
                 <div id="diamondMilestone"><dt>Welle 10, 20, 30 … erstmals erreicht</dt><dd>+2</dd></div>
@@ -268,8 +269,6 @@
               <p class="towerSectionLabel">Ausbauten</p>
               <button id="baseWallsBtn" class="secondary baseUpgrade" data-kind="walls"></button><button
                 id="baseWeaponBtn" class="secondary baseUpgrade" data-kind="weapon"></button>
-              <p class="hint baseNote">Mit Run-Gold ausbauen. Käufe sind beim Hex-Platzieren, in der Bauphase und während einer
-                Wave möglich. Ausbau gilt nur für diesen Run.</p>
             </div>
           </details>
         </header>
@@ -380,7 +379,7 @@
             <p>Eine passende Straße verbindet das Sonderfeld. Bis zwei Hexe weit siehst du das Gelände, bis sechs Hexe weit seine Umrisse im Nebel.</p>
             <dl><div><dt>Schatz</dt><dd>Wird zum Handelsposten. +2 Gold pro Welle, zusammen bis zu +20.</dd></div>
               <div><dt>Schrein</dt><dd>+10 % Schaden oder +15 % Reichweite auf diesem Hex und seinen Nachbarn. Gleiche Boni gelten einmal.</dd></div>
-              <div><dt>Wächter</dt><dd>Hinterlässt nach dem Sieg einen Turmplatz mit +20 % Reichweite.</dd></div></dl>
+              <div><dt>Wächter</dt><dd>Hinterlässt nach dem Sieg einen Turmplatz mit +30 % Reichweite.</dd></div></dl>
           </details>
           <details><summary>Festung und Bedienung</summary>
             <p>Deine Startfestung bestimmt Leben und Startgold. Klicke die Festung an, um sie auszubauen.</p>
@@ -697,7 +696,6 @@
       aria-labelledby="leaderboardTitle">
       <section class="leaderboardBox hxWindow">
         <header class="lbHead">
-          <button id="leaderboardBackBtn" type="button" class="lbBack hxWinClose" aria-label="Zurück" title="Zurück (Escape)"><span class="hxCloseHex"><span class="hxi hxi-back"></span></span></button>
           <h2 id="leaderboardTitle">Bestenliste</h2>
           <button id="closeLeaderboardBtn" class="secondary hxWinClose" aria-label="Schließen" title="Schließen (Escape)"><span class="hxCloseHex" aria-hidden="true"><span class="hxi hxi-close"></span></span></button>
         </header>
@@ -933,6 +931,15 @@
       </div>
     </div>
 
+    <div id="restartRunOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="restartRunTitle" aria-describedby="restartRunDescription">
+      <section class="restartRunBox hxWindow">
+        <button id="closeRestartRunBtn" class="secondary hxWinClose" aria-label="Schließen"><span class="hxCloseHex"><span class="hxi hxi-close"></span></span></button>
+        <p class="eyebrow">Neuer Durchlauf</p><h2 id="restartRunTitle">Bereit für einen neuen Anfang?</h2>
+        <p id="restartRunDescription">Dein aktueller Durchlauf wird beendet. Du kannst ihn danach nicht fortsetzen. Deine verdienten Diamanten werden gutgeschrieben.</p>
+        <div class="restartRunSummary"><span><small>Aktueller Durchlauf</small><strong id="restartRunWave"></strong></span><span><small>Deine Belohnung</small><strong id="restartRunDiamonds"></strong></span></div>
+        <footer><button id="cancelRestartRunBtn" class="secondary" data-dialog-initial-focus>Durchlauf behalten</button><button id="confirmRestartRunBtn" class="primary">Beenden &amp; neu vorbereiten</button></footer>
+      </section>
+    </div>
     <div id="loadoutOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="loadoutTitle">
       <div class="loadoutBox">
         <p class="eyebrow">RUNVORBEREITUNG</p>
@@ -1114,7 +1121,7 @@
     <script src="classes/arsenal-tree.js?v=860b5f1582436fc0"></script>
     <script src="classes/exploration.js?v=860b5f1582436fc0"></script>
     <script src="classes/duo-server-status.js?v=860b5f1582436fc0"></script>
-    <script src="duo-client.js?v=860b5f1582436fc0"></script>
+    <script src="classes/duo-wire.js"></script><script src="duo-client.js?v=860b5f1582436fc0"></script>
     <script src="classes/duo-game.js?v=860b5f1582436fc0"></script>
     <script src="classes/placement-commands.js?v=860b5f1582436fc0"></script>
     <script src="classes/run-flow.js?v=860b5f1582436fc0"></script>

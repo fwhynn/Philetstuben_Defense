@@ -2,7 +2,7 @@
 const HexRunFlow=(()=>{
   const {key}=HexMap;
   function shuffle(arr,random){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-  function drawHand(state,random){
+  function drawHand(state,random,redrawPrevious){
     if(state.challengeKind==='movingFortress')return HexMovingFortress.prepare(state);
     if(state.challengeKind==='towerDraft')return HexTowerDraft.prepare(state);
     if(state.challengeKind==='detour')return HexDetour.prepare(state);
@@ -53,6 +53,14 @@ const HexRunFlow=(()=>{
       if(!state.drawPile.length){state.drawPile=shuffle(state.discard,random);state.discard=[];}
       if(!state.drawPile.length)break;
       state.hand.push(state.drawPile.pop());
+    }
+    // A reroll should change the offered cards, not just their ordering.
+    if(redrawPrevious&&[...state.hand].sort().join('|')===[...redrawPrevious].sort().join('|')){
+      outer:for(const pile of [state.drawPile,state.discard])for(let i=0;i<pile.length;i++){
+        const index=state.hand.findIndex(id=>id!==pile[i]);
+        if(index<0)continue;
+        [state.hand[index],pile[i]]=[pile[i],state.hand[index]];break outer;
+      }
     }
     state.tunnelOffer=null;state.tunnelConfirmed=false;
     if((state.map.size<=1||HexMap.hasExteriorFront(state.map,state.landmarks))&&ensurePlayableHand())return 'ready';

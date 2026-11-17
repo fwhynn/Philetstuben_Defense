@@ -44,9 +44,9 @@ const HexDuoGame=(()=>{
   // Render a short history, rather than restarting an ease-out on every packet.
   function createMotionBuffer(delay=150){
     const roads=new WeakMap();
-    let frames=[],offset=null,lastTarget=-Infinity;
+    let frames=[],offset=null,lastTarget=-Infinity,lastDraw=null;
     function push(enemies,stamp,now,reset=false){
-      if(reset||frames.length&&stamp<frames.at(-1).at||frames.length&&now-frames.at(-1).arrival>1000){frames=[];offset=null;lastTarget=-Infinity;}
+      if(reset||frames.length&&stamp<frames.at(-1).at||frames.length&&now-frames.at(-1).arrival>1000){frames=[];offset=null;lastTarget=-Infinity;lastDraw=null;}
       offset=offset===null?now-stamp:Math.min(offset,now-stamp);
       const frame={at:stamp,arrival:now,enemies:new Map(enemies.map(e=>[e.id,{x:e.x,y:e.y,motionPath:e.motionPath,leaping:e.leaping}]))};
       if(frames.at(-1)?.at===stamp)frames[frames.length-1]=frame;else frames.push(frame);
@@ -54,7 +54,10 @@ const HexDuoGame=(()=>{
     }
     function draw(enemies,now){
       if(!frames.length)return false;
-      const target=Math.max(lastTarget,now-offset-delay);lastTarget=target;
+      // Never let the playhead run past received data. Recover late packets at at most
+      // 110% visual pace instead of jumping to the newest position in one frame.
+      const desired=Math.min(frames.at(-1).at,now-offset-delay),elapsed=lastDraw===null?Infinity:Math.max(0,now-lastDraw);
+      const target=lastTarget===-Infinity?desired:Math.max(lastTarget,Math.min(desired,lastTarget+elapsed*1.1));lastTarget=target;lastDraw=now;
       while(frames.length>2&&frames[1].at<=target)frames.shift();
       const a=frames[0],b=frames.find(f=>f.at>=target)||frames.at(-1),before=frames.filter(f=>f.at<=target).at(-1)||a;
       const t=b.at>before.at?Math.max(0,Math.min(1,(target-before.at)/(b.at-before.at))):1;
@@ -66,7 +69,7 @@ const HexDuoGame=(()=>{
   function mergeBoard(previous,next){
     // Preserve identity of unchanged selections/previews across 10 Hz snapshots.
     for(const [key,tile] of next.map){const old=previous.map?.get(key);if(!old)continue;
-      tile.towers=tile.towers.map((tower,i)=>{const before=old.towers?.[i];if(tower&&before&&tower.statId===before.statId&&tower.type===before.type){delete before.overloadUntil;delete before.overloadPending;Object.assign(before,tower);return before;}return tower;});
+      tile.towers=tile.towers.map((tower,i)=>{const before=old.towers?.[i];if(tower===before)return tower;if(tower&&before&&tower.statId===before.statId&&tower.type===before.type){delete before.overloadUntil;delete before.overloadPending;Object.assign(before,tower);return before;}return tower;});
       tile.buildings=(tile.buildings||[]).map((building,i)=>{const before=old.buildings?.[i];if(building&&before&&building.type===before.type){Object.assign(before,building);return before;}return building;});
     }
     return next;
@@ -108,8 +111,9 @@ const HexDuoGame=(()=>{
     return board?.phase==='build'&&!board.celebration&&!board.tunnelOffer&&!board.openingRemaining&&!board.rewardOffer;
   }
   function mount(api){
-    const $=id=>document.getElementById(id);let profileChanged=true,view=null,match=null,board=null,transferKey='',guardianKey='',leaving=false,client,picking=null;
-    let guideKey='',guideUntil=0,guideTimer=null,giftKey='',giftPreview=null;
+    const $=id=>document.getElementById(id);let profileChanged=true,view=null,match=null,board=null,transferKey='',guardianKey='',leaving=false,client,picking=null,pendingSpeed=null,speedRequest=0,networkOffline=false;
+    let giftKey='',giftPreview=null,giftNoticeTimer=null;
+    const giftReceipts=new Set();
     const storageKey='autohex-duo-client:'+api.token;let clientId=sessionStorage.getItem(storageKey);if(!clientId){clientId=crypto.randomUUID();sessionStorage.setItem(storageKey,clientId);}
     const own=()=>view&&board===view.player;
     // Enemies arrive ~10 times per second; glide between snapshots so combat does not stutter.
@@ -126,68 +130,90 @@ const HexDuoGame=(()=>{
       next.wavePlans??=[];next.rescueCard??=null;next.tunnelOffer??=null;next.drawPile??=[];next.discard??=[];next.runTowerStats??={};next.runTowerDetails??={};next.goldEarned??={kills:0,completion:0,income:0};next.waveKills??=0;next.pendingSpawns??=0;
       // The HUD follows the player's payout on either board.
       next.duoDiamondEstimate=view.result?0:view.boards[view.player].duoDiamondEstimate||0;
-      next.duoReinforcement=view.reinforcements[board];next.duoMode=true;next.remoteMotionBuffered=true;next.showSlotHints=api.getState().showSlotHints;next.showHexGrid=api.getState().showHexGrid;next.consumablesLocked=!own()||view.ready[view.player]||view.connection.paused;next.challengeDay=null;next.biomeSeed=null;
+      next.duoPartnerView=!own();next.duoReinforcement=view.reinforcements[board];next.duoMode=true;next.remoteMotionBuffered=true;next.showSlotHints=api.getState().showSlotHints;next.showHexGrid=api.getState().showHexGrid;next.consumablesLocked=!own()||view.ready[view.player]||view.connection.paused;next.challengeDay=null;next.biomeSeed=null;
       if(!switched)mergeBoard(api.getState(),next);
       track(next,switched);api.accept(next,switched,profileChanged);profileChanged=false;
       if(!own()){api.reward(null);$('celebration').classList.add('hidden');return;}
       if(view.result){const result=view.result;api.reward({ranking:{runId:result.id,mode:'duo',wave:result.wave,kills:match.boards.reduce((total,b)=>{const e=b.state.earnedMeta||{};return total+(e.normalKills||0)+(e.periodicBosses||0)+(e.explorationBosses||0);},0),ruleset:globalThis.AUTOHEX_VERSION||'unknown'},description:(result.outcome==='victory'?'Gemeinsam geschafft!':'Gemeinsam gekämpft.')+' Welle '+result.wave+' · '+result.players[view.player].diamonds+' Diamanten'+(result.outcome==='victory'?' · Endlos startet erst, wenn ihr beide zustimmt. · '+(view.endlessVotes||[]).filter(Boolean).length+'/2 bereit':''),choices:[...(result.outcome==='victory'?[{label:view.endlessVotes?.[view.player]?'Endlos-Zustimmung zurücknehmen':view.endlessVotes?.[1-view.player]?'Endlos weiterspielen · Partner wartet':'Gemeinsam endlos weiterspielen'}]:[]),{label:view.rematch?.[view.player]?'Neustart-Zustimmung zurücknehmen':'Noch eine gemeinsame Partie'},{label:'Zur Lobby'}]},'result');}
-      else if(next.phase==='duoDelivery'){const offer=view.delivery?.offers[view.player];api.reward(offer?.index===null?{...offer,skippable:false}:null,'delivery');}
+      else if(next.phase==='duoDelivery'){const offer=view.delivery?.offers[view.player];api.reward(offer?{...offer,skippable:false,sent:offer.index!==null}:null,'delivery');}
       else api.reward(next.rewardOffer,'reward');
       renderGifts();
       $('celebration').classList.toggle('hidden',!next.celebrationActive);
       if(next.celebrationActive){$('celebrationTitle').textContent=next.activeCelebration.bosses?'Die Wächter sind gefallen!':'Gemeinsam geschafft!';$('celebrationWave').textContent='Welle '+next.activeCelebration.wave+' überlebt';$('celebrationText').textContent=next.activeCelebration.messages.join(' · ');}
     }
     function switchBoard(index){if(!match||index===board)return;board=index;picking=null;guardianKey='';accept(true);}
+    const describeGift=choice=>choice?.kind==='gold'?'+'+choice.amount+' Gold':HexData.CARD_LIBRARY[choice?.cardId]?.name||'Karte';
+    function giftIcon(choice,className){
+      const icon=document.createElement('span');icon.className=className;icon.setAttribute('aria-hidden','true');
+      const card=HexData.CARD_LIBRARY[choice?.cardId];
+      if(card){const art=api.cardElement(card.id,false).querySelector?.('svg');if(art){icon.appendChild(art.cloneNode(true));return icon;}}
+      const glyph=document.createElement('span');glyph.className='hxi hxi-'+(choice.kind==='gold'?'coin':'deck');icon.appendChild(glyph);return icon;
+    }
+    function notifyGifts(previous){
+      const partner=1-view.player,offer=view.delivery?.offers?.[partner],paid=view.hexGifts?.[partner],events=[];
+      if(offer?.index!=null)events.push({id:view.epoch+':delivery:'+offer.id+':'+view.delivery.wave,choice:offer.choices[offer.index],recent:view.boards[view.player].phase==='duoDelivery'});
+      if(paid)events.push({id:view.epoch+':hex:'+paid.count,choice:{kind:'card',cardId:paid.cardId},recent:false});
+      const fresh=events.filter(e=>!giftReceipts.has(e.id));for(const e of events)giftReceipts.add(e.id);
+      const shown=fresh.filter(e=>previous||e.recent);if(!shown.length)return;
+      const notice=$('duoGiftNotice'),content=$('duoGiftNoticeContent');content.replaceChildren();
+      for(const e of shown){const item=document.createElement('div');item.className='duoGiftNoticeItem';item.appendChild(giftIcon(e.choice,'duoGiftNoticeIcon'));
+        const text=document.createElement('div'),title=document.createElement('strong'),detail=document.createElement('span');title.textContent=describeGift(e.choice);
+        detail.textContent=e.choice.kind==='gold'?'Deinem Gold gutgeschrieben':'Deinem Deck hinzugefügt';text.appendChild(title);text.appendChild(detail);item.appendChild(text);content.appendChild(item);}
+      $('duoGiftNoticeTitle').textContent='Geschenk von '+(view.lobbyState?.names?.[partner]||'deinem Partner');notice.classList.remove('hidden');
+      clearTimeout(giftNoticeTimer);giftNoticeTimer=setTimeout(()=>notice.classList.add('hidden'),8000);
+    }
     function renderGifts(){
       const delivery=view.delivery,partnerOffer=delivery?.offers?.[1-view.player],ownOffer=delivery?.offers?.[view.player];
-      const key=JSON.stringify([delivery,api.getState().phase,board]);if(key===giftKey)return;giftKey=key;
+      const key=JSON.stringify([delivery,api.getState().phase,board,view.connection.paused]);if(key===giftKey)return;giftKey=key;
       giftPreview=$('duoGiftPreview');giftPreview.replaceChildren();giftPreview.classList.add('hidden');$('duoGiftHistory').replaceChildren();
       $('duoGifts').classList.toggle('hidden',!delivery);$('duoGiftReceived').classList.toggle('hidden',!partnerOffer||partnerOffer.index===null);
       if(!delivery)return;
-      const describe=choice=>choice?.kind==='gold'?'+'+choice.amount+' Gold':HexData.CARD_LIBRARY[choice?.cardId]?.name||'Karte';
+      const describe=describeGift;
       const received=partnerOffer?.index!==null&&partnerOffer?.index!==undefined?partnerOffer.choices?.[partnerOffer.index]:null;
       const receipt=received?'Vom Partner erhalten: '+describe(received)+' · Welle '+delivery.wave:'Dein Partner hat noch kein Geschenk gewählt.';
       $('duoGiftReceived').textContent=receipt;
       function fill(box){
         const status=document.createElement('p');status.className='duoGiftReceipt';status.textContent=receipt;box.appendChild(status);
-        const title=document.createElement('strong');title.textContent='Diese Geschenke kann dein Partner dir schicken:';box.appendChild(title);
+        const title=document.createElement('strong');title.textContent=received?'Dein Partner hat dir geschenkt:':'Was möchtest du erhalten? Klicke deinen Wunsch an.';box.appendChild(title);
         const choices=document.createElement('div');choices.className='duoPartnerOffers';
         for(const [index,choice] of (partnerOffer?.choices||[]).entries()){
-          const item=document.createElement('div');item.className='duoPartnerGift';item.classList.toggle('chosen',partnerOffer.index===index);
-          const icon=document.createElement('span');icon.className='duoPartnerGiftIcon';icon.setAttribute('aria-hidden','true');const glyph=document.createElement('span');glyph.className='hxi hxi-'+(choice.kind==='gold'?'coin':'deck');icon.appendChild(glyph);item.appendChild(icon);
+          const item=document.createElement('button');item.type='button';item.className='duoPartnerGift';item.classList.toggle('chosen',partnerOffer.index===index);item.classList.toggle('wished',partnerOffer.wish===index);
+          item.disabled=!own()||api.getState().phase!=='duoDelivery'||partnerOffer.index!==null||!partnerOffer.id||view.connection.paused;
+          item.setAttribute('aria-pressed',String(partnerOffer.wish===index));item.setAttribute('aria-label',describe(choice)+(partnerOffer.wish===index?' · Wunsch zurücknehmen':' · Als Wunsch markieren'));
+          item.addEventListener('click',()=>{if(!item.disabled)send('deliveryWish',{offerId:partnerOffer.id,index:partnerOffer.wish===index?null:index});});
+          item.appendChild(giftIcon(choice,'duoPartnerGiftIcon'));
           const name=document.createElement('strong');name.textContent=describe(choice);item.appendChild(name);
           const detail=document.createElement('small');detail.textContent=choice.cardId?HexData.CARD_LIBRARY[choice.cardId].desc:'Sofort verfügbares Gold';item.appendChild(detail);
-          if(partnerOffer.index===index){const selected=document.createElement('small');selected.textContent='✓ Erhalten';item.appendChild(selected);}choices.appendChild(item);
+          const selected=document.createElement('small');selected.className='duoWishLabel';selected.textContent=partnerOffer.index===index?'✓ Erhalten':partnerOffer.wish===index?'★ Dein Wunsch':partnerOffer.index===null?'Als Wunsch markieren':'';item.appendChild(selected);choices.appendChild(item);
         }
         box.appendChild(choices);const hint=document.createElement('p');hint.textContent=ownOffer&&ownOffer.index!==null?'Du hast verschenkt: '+describe(ownOffer.choices?.[ownOffer.index]):'Stimmt euch ab. Jeder wählt das Geschenk für den anderen.';box.appendChild(hint);
       }
       fill($('duoGiftHistory'));
-      if(own()&&api.getState().phase==='duoDelivery'&&ownOffer?.index===null){giftPreview.classList.remove('hidden');fill(giftPreview);}
+      if(own()&&api.getState().phase==='duoDelivery'){giftPreview.classList.remove('hidden');fill(giftPreview);}
     }
     function render(){
       if(!view)return;
       renderGifts();
       const state=api.getState(),player=view.player,partner=1-player,readonly=!own(),locked=readonly||view.ready[player]||view.connection.paused,help=guide(view,board);
       for(const id of ['duoHud','duoMapLabel','duoQuickMap','duoTurn'])$(id).classList.remove('hidden');
-      $('duoQuickMap').textContent=readonly?'⇄ Zurück zu meiner Karte':'⇄ Partnerkarte ansehen';
-      $('duoMapLabel').textContent=readonly?'Partnerkarte · Nur anschauen':'Deine Festung';
+      const partnerName=view.lobbyState?.names?.[partner]||'Partner';
+      $('duoQuickMap').textContent=readonly?'Meine Karte':'Partnerkarte';$('duoQuickMap').setAttribute('aria-label',readonly?'Zurück zu meiner Karte':'Partnerkarte ansehen');
+      $('duoMapLabel').textContent=readonly?'Partnerkarte':'Deine Karte';$('duoMapLabel').title=readonly?partnerName+' · Nur anschauen':'Deine Festung';document.body.classList.toggle('duoPartnerView',readonly);syncPause();
       $('duoOwnMap').setAttribute('aria-pressed',String(!readonly));$('duoPartnerMap').setAttribute('aria-pressed',String(readonly));
       // Team bar: both seats, shared wave/lives and the one thing to do next.
       $('duoTurn').dataset.tone=help.tone;$('duoTurn').classList.toggle('duoTurnPartnerView',readonly);
       $('duoSeatSelf').dataset.state=help.self.state;$('duoSeatSelfText').textContent=help.self.text;
       $('duoSeatPartner').dataset.state=help.partner.state;$('duoSeatPartnerText').textContent=help.partner.text;
-      $('duoTeamWave').textContent=view.phase==='combat'?'Welle '+view.wave:view.wave?'Vor Welle '+(view.wave+1):'Vorbereitung';$('duoTeamHp').textContent='♥ '+view.hp+'/'+view.maxHp+' gemeinsam';
+      $('duoPartnerName').textContent=partnerName;$('duoSeatPartner').title=partnerName+' · '+help.partner.text;$('duoSeatSelf').title='Du · '+help.self.text;
+      $('duoTeamHp').textContent=view.hp+'/'+view.maxHp;$('duoTeamHp').setAttribute('aria-label','Gemeinsame Leben: '+view.hp+'/'+view.maxHp);
       $('duoTurnTitle').textContent=help.title;$('duoTurnText').textContent=help.text;
-      // Repeated network snapshots must not restart the instruction's lifetime.
-      const nextGuideKey=JSON.stringify([board,view.wave,help.title]);
-      if(nextGuideKey!==guideKey){
-        guideKey=nextGuideKey;guideUntil=performance.now()+6000;clearTimeout(guideTimer);
-        guideTimer=setTimeout(()=>{if(help.tone!=='alert')$('duoTurn').classList.add('duoTurnCompact');},6000);
-      }
-      $('duoTurn').classList.toggle('duoTurnCompact',help.tone!=='alert'&&performance.now()>=guideUntil);
       document.body.classList.toggle('duoLocked',locked);
       const status='Partner '+help.partner.text;$('duoSummary').textContent='Duo · '+status;$('duoPartnerStatus').textContent=status;
       const portal=view.portals[player],tower=view.reinforcements[player];
+      const gifts=view.hexGifts||[null,null],giftCost=75+(gifts[player]?.count||0)*25,canGift=!locked&&view.phase==='prepare'&&['place','build'].includes(state.phase)&&gifts[player]?.wave!==view.wave;
+      $('duoHexGiftInfo').textContent=giftCost+' Gold · Ein Hex pro Welle · Für das Deck deines Partners';
+      for(const b of $('duoHexGiftChoices').children)b.disabled=!canGift||state.gold<giftCost;
+      const incomingGift=gifts[partner];$('duoHexGiftReceipt').textContent=incomingGift?'Vom Partner erhalten: '+HexData.CARD_LIBRARY[incomingGift.cardId].name+' · Vor Welle '+(incomingGift.wave+1):'';
       $('duoSupportInfo').textContent='Schaffst du eine Welle ohne Lebensverlust, fliegt eine Kopie deiner Verstärkung auf das Portal deines Partners und hilft ihm bis zum Wellenende. Umgekehrt landet seine Hilfe auf deinem Portal. Alle 5 Wellen schenkt ihr euch zusätzlich etwas.';
       $('duoPortalState').textContent=portal?'Hex '+portal.q+','+portal.r+' · Platz '+(portal.index+1):'Noch nicht gesetzt – ein freier Turmplatz auf deiner Karte';
       const towerType=tower&&match.boards[player].state.map.get(tower.q+','+tower.r)?.towers[tower.index]?.type;
@@ -199,7 +225,7 @@ const HexDuoGame=(()=>{
       $('startWaveBtn').disabled=readonly||view.connection.paused||state.phase!=='build'||state.celebrationActive;
       $('startWaveBtn').classList.toggle('duoReadyOn',!readonly&&!!view.ready[player]);
       $('startWaveBtn').textContent=readonly?'Partnerkarte · Nur anschauen':view.connection.paused?'Pausiert · Partner fehlt':state.phase==='place'?'Zuerst Hex legen':state.phase==='duoDelivery'?'Geschenk für den Partner wählen':state.phase==='duoWait'?'Warte auf deinen Partner':state.phase==='wave'?'Gemeinsame Welle läuft':view.ready[player]?'Bereit ✓ · zurücknehmen':view.ready[partner]?'Bereit – Partner wartet (Leertaste)':'Bereit für die Welle (Leertaste)';if(globalThis.HexCompact?.touch?.())$('startWaveBtn').textContent=$('startWaveBtn').textContent.replace(' (Leertaste)','');
-      $('doubleSpeed').value=String(view.speed||1);$('doubleSpeed').style.setProperty?.('--fill',((view.speed||1)-1)/7*100+'%');$('speedValue').textContent=(view.speed||1)+'×';$('pauseBtn').textContent=view.paused?'▶ Gemeinsam fortsetzen (P)':'⏸ Pause (P)';
+      const speed=pendingSpeed??view.speed??1;$('doubleSpeed').value=String(speed);$('doubleSpeed').style.setProperty?.('--fill',(speed-1)/7*100+'%');$('speedValue').textContent=speed+'×';$('doubleSpeed').title='Gemeinsames Tempo für beide Karten';$('pauseBtn').textContent=view.paused?'▶ Gemeinsam fortsetzen (P)':'⏸ Pause (P)';
       for(const id of ['doubleSpeed','pauseBtn'])$(id).disabled=readonly||view.connection.paused;
       for(const button of document.querySelectorAll('#hand button'))button.disabled=locked;
       if(locked)for(const selector of ['#towerMenu button','#towerUpgrades button','#towerUpgrades select','#buildingOptions button','#quickLoadout button','#hand button'])for(const button of document.querySelectorAll(selector))button.disabled=true;
@@ -209,12 +235,19 @@ const HexDuoGame=(()=>{
       const gkey=JSON.stringify([view.boards.map(b=>b.landmarks),locked,view.phase]);if(gkey!==guardianKey){guardianKey=gkey;const box=$('duoGuardians');box.replaceChildren();if(view.phase==='prepare')view.boards.forEach((b,i)=>b.landmarks.forEach(l=>{if(l.type!=='boss'||!l.claimed||!Array.isArray(l.consent)||!['pending','ready'].includes(l.status))return;const button=document.createElement('button');button.textContent='Wächter · Karte '+(i+1)+' · '+l.consent.filter(Boolean).length+'/2 bereit';button.disabled=locked;button.addEventListener('click',()=>send('guardian',{board:i,id:l.q+','+l.r,value:!l.consent[player]}));box.appendChild(button);}));$('duoGuardianSection').classList.toggle('hidden',!box.children.length);}
       const transfer=JSON.stringify([view.wave,view.pendingHelp]);if(transfer!==transferKey){transferKey=transfer;const incoming=view.pendingHelp[partner],outgoing=view.pendingHelp[player];if(incoming||outgoing){const sender=incoming?partner:player,slot=view.reinforcements[sender],type=slot&&match.boards[sender].state.map.get(slot.q+','+slot.r)?.towers[slot.index]?.type;$('duoTransfer').textContent=incoming?'➶ Partnerverstärkung ist unterwegs!':'➶ Deine Verstärkung fliegt zum Partner!';if(type){const icon=document.createElement('span');icon.innerHTML=HexArsenal.icon(type,HexData.TOWERS[type].color);$('duoTransfer').appendChild(icon);}$('duoTransfer').classList.remove('hidden');$('duoTransfer').getAnimations?.().forEach(a=>a.cancel());if(!globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches)$('duoTransfer').animate?.([{opacity:0,transform:'translate(-65%,10px)'},{opacity:1,transform:'translate(-50%,0)'},{opacity:0,transform:'translate(-35%,-18px)'}],{duration:1800,fill:'forwards'});}else $('duoTransfer').classList.add('hidden');}
     }
-    document.querySelector('.dockTL')?.appendChild($('duoHud'));
+    for(const cardId of ['straight','smallCurve','bigCurve']){const b=api.cardElement(cardId,false);b.addEventListener('click',()=>send('giftHex',{cardId}));$('duoHexGiftChoices').appendChild(b);}
+    // Move the real controls, retaining disclosure handlers and live wave progress.
+    $('duoPhaseSlot').appendChild($('waveDropdown'));
+    $('duoSupportMenu').appendChild($('duoHud'));
     function pickSupport(kind,slot){if(!picking||picking!==kind)return false;const tile=api.getState().map.get(slot.q+','+slot.r);if(kind==='tower'&&tile?.towers?.[slot.index]?.guestOwner!==undefined){api.setMessage('Wähle einen eigenen Turm, keine Partnerverstärkung.');return true;}picking=null;send(kind==='tower'?'reinforcement':'portal',{slot});return true;}
     function beginSupport(kind){const state=api.getState(),slot=kind==='tower'?state.selectedTower:state.selectedSlot;if(slot){send(kind==='tower'?'reinforcement':'portal',{slot});return;}picking=picking===kind?null:kind;$('duoHud').open=false;globalThis.HexCompact?.open('');api.setMessage(picking?(kind==='tower'?'Verstärkung: Klicke jetzt einen eigenen Turm an. Escape bricht ab.':'Partnerportal: Klicke jetzt einen freien Turmplatz an. Escape bricht ab.'):'Auswahl abgebrochen.');}
-    document.addEventListener('keydown',e=>{if(e.key==='Escape')picking=null;});
-    const bridge={animate,pickSupport,render,send,offerKey:null,ready:()=>send('ready',{value:!view?.ready[view.player]}),pause:()=>send('pause',{value:!view?.paused}),async priorities(packets){for(const packet of packets)if(!await send('targetPriority',packet))break;},choose(kind,offer,index){if(kind==='result'){if(view.result?.outcome==='victory'&&index===0)send('endless',{value:!view.endlessVotes?.[view.player]});else if(index===(view.result?.outcome==='victory'?2:1))location.assign('/duo-lobby.html');else send('rematch',{value:!view.rematch?.[view.player]});}else send(kind==='delivery'?'delivery':'reward',{offerId:offer.id,index});}};
-    $('duoSupportShortcut').addEventListener('click',()=>{ $('duoHud').open=true; $('duoSendTower').focus?.(); });
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'){picking=null;if($('duoHud').open){$('duoHud').open=false;$('duoSupportShortcut').focus?.();}}});
+    function syncPause(){const blocked=networkOffline||view?.connection?.paused,app=$('app');app.classList.toggle('paused',blocked||!!view?.paused);app.classList.toggle('duoDisconnected',!!blocked);app.dataset.pauseMessage=networkOffline?'Verbindung unterbrochen · Wiederverbinden …':view?.connection?.maintenance?'Serverwartung · Eure Partie ist pausiert.':view?.connection?.expired?'Partner nicht zurückgekehrt · Partie pausiert.':blocked?'Warte auf Partner · Verbindung unterbrochen. Warte, bis er wieder beitritt …':'Pause';}
+    async function setSpeed(value){const serial=++speedRequest;pendingSpeed=value;render();try{return await send('speed',{value});}finally{if(serial===speedRequest){pendingSpeed=null;render();}}}
+    const bridge={cycleSpeed:()=>setSpeed((pendingSpeed??view?.speed??1)%8+1),setSpeed,animate,pickSupport,render,send,offerKey:null,ready:()=>send('ready',{value:!view?.ready[view.player]}),pause:()=>send('pause',{value:!view?.paused}),async priorities(packets){for(const packet of packets)if(!await send('targetPriority',packet))break;},choose(kind,offer,index){if(kind==='result'){if(view.result?.outcome==='victory'&&index===0)send('endless',{value:!view.endlessVotes?.[view.player]});else if(index===(view.result?.outcome==='victory'?2:1))location.assign('/duo-lobby.html');else send('rematch',{value:!view.rematch?.[view.player]});}else send(kind==='delivery'?'delivery':'reward',{offerId:offer.id,index});}};
+    $('duoSupportShortcut').addEventListener('click',()=>{ $('duoHud').open=!$('duoHud').open; });
+    $('duoHud').addEventListener('toggle',()=>{$('duoSupportShortcut').setAttribute('aria-expanded',String($('duoHud').open));});
+    $('duoGiftNoticeClose').addEventListener('click',()=>{clearTimeout(giftNoticeTimer);$('duoGiftNotice').classList.add('hidden');});
     $('duoQuickMap').addEventListener('click',()=>switchBoard(own()?1-view.player:view.player));
     $('duoOwnMap').addEventListener('click',()=>switchBoard(view.player));$('duoPartnerMap').addEventListener('click',()=>switchBoard(1-view.player));
     $('duoReservePortal').addEventListener('click',()=>beginSupport('slot'));$('duoSendTower').addEventListener('click',()=>beginSupport('tower'));$('duoClearPortal').addEventListener('click',()=>send('portal',{slot:null}));$('duoClearTower').addEventListener('click',()=>send('reinforcement',{slot:null}));
@@ -222,7 +255,7 @@ const HexDuoGame=(()=>{
     function forget(){try{if(localStorage.getItem('autohex-duo-session')===api.token)localStorage.removeItem('autohex-duo-session');}catch{}}
     $('duoTakeover').addEventListener('click',()=>client.takeover().catch(e=>api.setMessage(e.message)));
     document.addEventListener('click',e=>{if(!e.target.closest('#duoHud,#duoSupportShortcut'))$('duoHud').open=false;});
-    client=HexDuoClient.create({token:api.token,clientId,onStatus:(text,session)=>{if(session?.invalid){forget();location.replace('/duo-lobby.html#session='+api.token);return;}$('duoNetworkStatus').textContent=text;$('duoTakeover').classList.toggle('hidden',!session?.conflict);},onView:next=>{
+    client=HexDuoClient.create({token:api.token,clientId,onStatus:(text,session)=>{if(session?.invalid){forget();location.replace('/duo-lobby.html#session='+api.token);return;}networkOffline=!!session?.offline;$('duoNetworkStatus').textContent=text;syncPause();$('duoTakeover').classList.toggle('hidden',!session?.conflict);},onView:next=>{
       if(!next.lobbyState?.started){client.stop();location.replace('/duo-lobby.html#session='+api.token);return;}
       const previous=view,first=!previous;view=next;match=HexDuoClient.presentation(next,match);board??=next.player;
       const receipts=JSON.stringify((next.settlements||[]).map(r=>r.id));
@@ -233,7 +266,7 @@ const HexDuoGame=(()=>{
         }
         settledKey=receipts;profileChanged=true;
       }catch{api.setMessage('Spielstand konnte noch nicht gespeichert werden.');}
-      accept(first);
+      accept(first);notifyGifts(previous);
       if(previous&&own()&&$('autoStart').checked&&!next.ready[next.player]&&!next.connection.paused&&
          !canAutoReady(previous.boards[next.player])&&canAutoReady(next.boards[next.player]))send('ready',{value:true});
     }});

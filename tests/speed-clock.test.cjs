@@ -26,3 +26,14 @@ test('displayed 1× through 8× scale from two simulation seconds per real secon
     assert.equal(elements.get('speedValue').textContent,speed+'×');
   }
 });
+
+
+test('hidden Solo tabs pause and resume without accumulating catch-up time at every speed',()=>{
+ for(const speed of [1,4,8]){
+  let now=0;const {a,elements,document,documentListeners}=load({now:()=>now});elements.get('doubleSpeed').value=String(speed);elements.get('doubleSpeed').listeners.input();a.state.waveRunning=true;a.state.pendingSpawns=1;
+  now=100;a.advanceClock(now);const before=a.state.elapsedMs;
+  document.hidden=true;documentListeners.visibilitychange();now=60000;a.advanceClock(now);assert.equal(a.state.elapsedMs,before);
+  document.hidden=false;documentListeners.visibilitychange();a.advanceClock(now);assert.equal(a.state.elapsedMs,before);
+  now+=100;a.advanceClock(now);assert.ok(Math.abs(a.state.elapsedMs-before-200*speed)<51);
+ }
+});

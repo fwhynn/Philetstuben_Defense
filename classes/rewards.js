@@ -37,7 +37,15 @@ const HexRewards=(()=>{
     return true;
   }
   function canRedraw(state){return state.augments?.includes('wayfinder')&&state.phase==='place'&&!state.waveRunning&&!state.openingRemaining&&!state.celebrationActive&&state.hp>0&&state.redrawWave!==state.wave&&!state.hand.includes('rescue');}
-  function redraw(state,random){if(!canRedraw(state))return false;state.redrawWave=state.wave;state.drawResult=HexRunFlow.drawHand(state,random);return true;}
+  function redraw(state,random){
+    if(!canRedraw(state))return false;
+    const previous=[...state.hand],piles={hand:previous,drawPile:[...state.drawPile],discard:[...state.discard]};
+    state.drawResult=HexRunFlow.drawHand(state,random,previous);
+    if(state.drawResult==='ready'&&[...state.hand].sort().join('|')===[...previous].sort().join('|')){
+      Object.assign(state,piles);return false;
+    }
+    state.redrawWave=state.wave;return true;
+  }
   const merchantOffers=Object.freeze({repair:{label:'Feldversorgung',desc:'Sofort bis zu 2 Basisleben wiederherstellen.',base:60},protection:{label:'Schutzvorrat',desc:'In der nächsten Welle insgesamt 2 Basisschaden verhindern.',base:80}});
   function merchantCounts(state,site){const purchases=state.merchantPurchases||{};const first=[...state.map.values()].find(t=>t.site==='merchant');return purchases[site]||(first&&site===first.q+','+first.r?purchases:{});}
   function merchantPrice(state,id,site){return merchantOffers[id]?merchantOffers[id].base*2**(merchantCounts(state,site)[id]||0):Infinity;}

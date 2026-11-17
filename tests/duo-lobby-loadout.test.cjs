@@ -12,10 +12,16 @@ test('lobby UI selects five towers, applies on server, reflects partner and prev
  assert.equal(nodes.get('lobbyAugments').children[0].children[1].dataset.augment,'archer');
  assert.deepEqual(lobby.view(b.token).lobbyState.ready,[false,false]);
  const choices=()=>nodes.get('lobbyLoadoutChoices').children,choose=id=>choices()[Object.keys(core.data.TOWERS).indexOf(id)];assert.equal(nodes.get('lobbyLoadoutCount').textContent,'5/5');assert.equal(nodes.get('lobbyPartnerLoadout').children.length,5);
- choose('archer').listeners.click();assert.equal(nodes.get('lobbyLoadoutCount').textContent,'4/5');assert.equal(nodes.get('lobbyApplyLoadout').disabled,true);choose('flame').listeners.click();assert.equal(nodes.get('lobbyApplyLoadout').disabled,false);
- const hero=nodes.get('lobbyHero');hero.value='builder';hero.listeners.change();
- const fronts=nodes.get('lobbyFronts');fronts.value='dual';fronts.listeners.change();
- await nodes.get('lobbyApplyLoadout').listeners.click();assert.equal(lobby.view(b.token).boards[0].heroId,'builder');assert.equal(lobby.view(b.token).boards[0].openingRemaining,2);assert.equal(calls.at(-2).action,'lobbyLoadout');assert.deepEqual(lobby.view(b.token).lobbyState.augments[0],[]);assert.ok(lobby.view(b.token).lobbyState.loadouts[0].includes('flame'));
+
+ const settle=async()=>{for(let i=0;i<4;i++)await new Promise(resolve=>setImmediate(resolve));};
+ choose('archer').listeners.click();assert.equal(nodes.get('lobbyLoadoutCount').textContent,'4/5');assert.equal(nodes.get('lobbyReady').disabled,true);choose('flame').listeners.click();await settle();
+ assert.ok(lobby.view(b.token).lobbyState.loadouts[0].includes('flame'));assert.deepEqual(lobby.view(b.token).lobbyState.augments[0],[]);
+ const hero=nodes.get('lobbyHero');hero.value='builder';hero.listeners.change();await settle();
+ const fronts=nodes.get('lobbyFronts');fronts.value='dual';fronts.listeners.change();await settle();
+ assert.equal(lobby.view(b.token).boards[0].heroId,'builder');assert.equal(lobby.view(b.token).boards[0].openingRemaining,2);assert.equal(lobby.view(b.token).boards[1].difficulty,'dual');
  const selected=choices()[0];callbacks.onView(lobby.view(a.token));assert.equal(choices()[0],selected,'network refresh preserves unchanged button nodes');
- await nodes.get('lobbyReady').listeners.click();assert.equal(calls.at(-2).action,'accountAugments');assert.ok(choices().every(n=>n.disabled));assert.equal(nodes.get('lobbyReady').disabled,false,'readiness can be withdrawn');
+ assert.equal(nodes.get('lobbyReady').disabled,true,'host waits until partner is ready');
+ const v=lobby.view(b.token);assert.ok(lobby.receive(b.token,{epoch:v.epoch,sequence:v.next,wave:v.wave,phase:v.boards[1].phase,action:'lobbyReady',payload:{value:true}}).ok);
+ callbacks.onView(lobby.view(a.token));assert.equal(nodes.get('lobbyReady').textContent,'Spiel starten');assert.equal(nodes.get('lobbyReady').disabled,false);
+ await nodes.get('lobbyReady').listeners.click();assert.equal(calls.at(-1).action,'lobbyStart');assert.ok(lobby.view(a.token).lobbyState.started);assert.equal(nodes.has('lobbyApplyLoadout'),false);
 });

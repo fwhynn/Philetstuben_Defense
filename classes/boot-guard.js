@@ -16,5 +16,5 @@
   }
   window.addEventListener('error',event=>{if(event.target?.tagName==='SCRIPT'||event.error)show();},true);
   window.addEventListener('unhandledrejection',show);
-  window.addEventListener('autohex-ready',()=>{if(!failed)ready=true;});
+  window.addEventListener('autohex-ready',()=>{if(!failed){ready=true;document.getElementById?.('bootScreen')?.remove();}});
 })();

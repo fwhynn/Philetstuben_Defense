@@ -19,6 +19,19 @@ function create(svg,commands){
   svg.appendChild(worldLayer);svg.appendChild(objectLayer);
   const hintLayer=document.createElementNS('http://www.w3.org/2000/svg','g');hintLayer.style.pointerEvents='none';svg.appendChild(hintLayer);
   let scene=worldLayer,objectKey='';
+  function drawBuildingTargets(){
+    if(!state.buildingTarget)return;
+    for(const tile of state.map.values()){
+      const id=key(tile.q,tile.r),legal=HexBuildings.canTarget(state,state.buildingTarget,id),c=axialToWorld(tile.q,tile.r);
+      const hit=drawPoly(c.x,c.y,HEX-3,'transparent','transparent',1);hit.dataset.buildingTarget=id;hit.style.pointerEvents='all';hit.style.cursor=legal?'pointer':'not-allowed';
+      const label=text(c.x,c.y+HEX-12,legal?'✓ Zusatz-Hex wählen':'✕ Hier nicht möglich',10,legal?'#ffedaa':'#ffbab0','700');label.style.pointerEvents='none';scene.appendChild(label);
+      function paint(hover){hit.setAttribute('fill',hover?(legal?'rgba(255,220,120,.45)':'rgba(240,91,86,.4)'):legal?'rgba(110,220,200,.25)':'transparent');hit.setAttribute('stroke',hover?(legal?'#ffe59b':'#ff7d70'):legal?'#8ff3df':'transparent');hit.setAttribute('stroke-width',hover?4:1);label.style.display=hover?'':'none';}
+      paint(state.hoveredPlacement===id);
+      hit.addEventListener('pointerenter',e=>{if(e?.pointerType==='touch')return;commands.hoverPlacement(id);paint(true);});
+      hit.addEventListener('pointerleave',e=>{if(e?.pointerType==='touch')return;commands.leavePlacement(id);paint(false);});
+      hit.addEventListener('click',e=>{e.stopPropagation();commands.placeTile(tile.q,tile.r);});
+    }
+  }
   function render(nextState,placementTargets=[]){
     state=nextState;
     scene=worldLayer;worldLayer.innerHTML='';
@@ -56,7 +69,7 @@ function create(svg,commands){
     for(const tile of state.map.values()) drawTile(tile,'roads');
     for(const landmark of state.landmarks.values()) if(landmark.status){const c=axialToWorld(landmark.q,landmark.r),label=text(c.x,c.y+35,{ready:'☠ bereit',fighting:'☠ Kampf',defeated:'☠ besiegt',escaped:'☠ entkommen'}[landmark.status],9,'#e8b7b0','700');label.style.pointerEvents='none';scene.appendChild(label);}
 
-    if(state.phase==='place'&&!state.waveRunning&&state.hand[state.selectedCard]){
+    if(state.phase==='place'&&!state.waveRunning&&!state.buildingTarget&&state.hand[state.selectedCard]){
       const id=state.hand[state.selectedCard],card=id==='rescue'?state.rescueCard:CARD_LIBRARY[id];
       for(const s of placementTargets){
         const legal=s.legal; const c=axialToWorld(s.q,s.r);
@@ -103,7 +116,7 @@ function create(svg,commands){
         for(const [dx,dy] of [[5,5],[5,-5],[0,6]]){const spike=line(p.x+x-dx,p.y+y-dy,p.x+x+dx,p.y+y+dy,'#ded9c6',2);spike.style.pointerEvents='none';scene.appendChild(spike);}
       }
     }
-    if(state.buildingTarget)for(const tile of state.map.values()){if(!HexBuildings.canTarget(state,state.buildingTarget,key(tile.q,tile.r)))continue;const c=axialToWorld(tile.q,tile.r),hit=drawPoly(c.x,c.y,HEX-3,'rgba(110,220,200,.25)','#8ff3df',1);hit.style.pointerEvents='all';hit.style.cursor='pointer';hit.addEventListener('click',e=>{e.stopPropagation();commands.placeTile(tile.q,tile.r);});}drawUpgradeHints();drawBuildingUpgradeHints();drawTileOverlays();drawSelectionRings();if(state.duoPortal){const slot=state.duoPortal,tile=state.map.get(key(slot.q,slot.r)),p=tile&&slotPositions(tile)[slot.index];if(p){const ring=document.createElementNS(NS,'circle');for(const [name,value] of Object.entries({cx:p.x,cy:p.y,r:21,fill:'none',stroke:'#7b36fa','stroke-width':4}))ring.setAttribute(name,value);scene.appendChild(ring);scene.appendChild(text(p.x,p.y-27,'Partner-Portal',10,'#30125e','700'));}}scene=worldLayer;
+    drawUpgradeHints();drawBuildingUpgradeHints();drawTileOverlays();drawSelectionRings();drawBuildingTargets();if(state.duoPortal){const slot=state.duoPortal,tile=state.map.get(key(slot.q,slot.r)),p=tile&&slotPositions(tile)[slot.index];if(p){const ring=document.createElementNS(NS,'circle');for(const [name,value] of Object.entries({cx:p.x,cy:p.y,r:21,fill:'none',stroke:'#7b36fa','stroke-width':4}))ring.setAttribute(name,value);scene.appendChild(ring);scene.appendChild(text(p.x,p.y-27,'Partner-Portal',10,'#30125e','700'));}}scene=worldLayer;
     for(const mine of state.mines||[]) drawMine(mine);
     for(const e of state.enemies) drawEnemy(e);
     for(const p of state.projectiles) drawProjectile(p);

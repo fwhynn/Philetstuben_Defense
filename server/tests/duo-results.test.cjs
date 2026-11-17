@@ -33,6 +33,21 @@ test('endless requires both votes, survives restart and pays only additional dia
  m.wave=37;m.phase='combat';m.hp=1;m.finished=[false,false];m.delivery=null;
  for(const {state:s} of m.boards){s.duoDeliveryPending=false;s.wave=37;s.lastCompletedWave=36;s.hp=1;s.phase='wave';s.waveRunning=true;s.pendingSpawns=0;s.spawnQueue=[];s.enemies=[{alive:true,hp:1,baseDamage:2,index:1,points:[{x:0,y:0},{x:0,y:0}],x:0,y:0}];}
  snapshot.rooms[0].room.match=core.duo.capture(m);fs.writeFileSync(file,JSON.stringify(snapshot));store=createStore(file,{now:()=>3});store.touch(a.token);store.touch(b.token);store.tick();
- view=store.view(a.token);assert.equal(view.result.wave,36);assert.equal(view.result.players[0].diamonds,1);assert.notEqual(view.result.id,victory.result.id);assert.equal(view.settlements.length,2);assert.equal(view.settlements.reduce((n,r)=>n+r.diamonds,0),18);
+ view=store.view(a.token);assert.equal(view.result.wave,36);assert.equal(view.result.players[0].diamonds,3);assert.notEqual(view.result.id,victory.result.id);assert.equal(view.settlements.length,2);assert.equal(view.settlements.reduce((n,r)=>n+r.diamonds,0),20);
  store=createStore(file,{now:()=>4});assert.equal(store.receipts(a.token).length,2);
+});
+
+
+test('late Duo payouts preserve legacy terminal checkpoints and reject changed receipts',()=>{
+ const c=loadCore(),loadout=['archer','catapult','chain','freeze','mine'],m=c.duo.create('late-reward',[loadout,loadout]);
+ m.phase='combat';m.wave=71;m.hp=1;m.endless=true;m.victoryPaid=[32,32];
+ for(const {state:s}of m.boards){s.endless=true;s.wave=71;s.lastCompletedWave=70;s.earnedMeta.periodicBosses=6;s.hp=1;s.phase='wave';s.waveRunning=true;s.spawnQueue=[];s.pendingSpawns=0;s.enemies=[{alive:true,hp:1,baseDamage:2,index:1,points:[{x:0,y:0},{x:0,y:0}],x:0,y:0}];}
+ c.duo.tick(m);assert.equal(m.result.players[0].diamonds,240);
+ const snapshot=JSON.parse(JSON.stringify(c.duo.capture(m)));
+ assert.equal(c.duo.restore(snapshot).result.players[0].diamonds,240);
+ delete snapshot.duo.result.rewardVersion;
+ for(const p of snapshot.duo.result.players)p.diamonds=33;
+ assert.equal(c.duo.restore(snapshot).result.players[0].diamonds,33,'old settled amount remains unchanged');
+ snapshot.duo.result.players[0].diamonds++;
+ assert.throws(()=>c.duo.restore(snapshot),/result/);
 });

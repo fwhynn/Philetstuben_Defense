@@ -85,3 +85,22 @@ test('leaderboard modes and every published patch note have full English transla
   assert.equal(i.text(i.text(source,'de'),'en'),catalog.en[source],'German terminology normalization preserves the translation');
  }
 });
+
+
+test('focus action pointerdown preserves disclosure geometry so the first click reaches the button',()=>{
+ const handlers={},panel={id:'towerAttackFocus',open:true,contains:()=>false,matches:()=>false};
+ const button={getAttribute:name=>name==='aria-controls'?'towerAttackFocus':null};
+ vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../classes/menu-controls.js'),'utf8'),{document:{querySelectorAll:s=>s==='details[open]'?[panel]:[],addEventListener:(type,fn)=>handlers[type]=fn}});
+ const target={closest:s=>s==='[aria-controls]'?button:null};
+ handlers.pointerdown({button:0,target});assert.equal(panel.open,true);
+ handlers.click({button:0,detail:1,target});assert.equal(panel.open,true);
+ handlers.pointerdown({button:0,target:{closest:()=>null}});assert.equal(panel.open,false);
+});
+
+
+test('persistent tower focus disclosure does not collapse before unrelated actions or outside clicks',()=>{
+ const handlers={},panel={open:true,matches:s=>s==='[data-keep-open]',contains:()=>false};
+ vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../classes/menu-controls.js'),'utf8'),{document:{querySelectorAll:s=>s==='details[open]'?[panel]:[],addEventListener:(type,fn)=>handlers[type]=fn}});
+ for(const type of ['pointerdown','click'])handlers[type]({button:0,detail:1,target:{closest:()=>null}});
+ assert.equal(panel.open,true);
+});

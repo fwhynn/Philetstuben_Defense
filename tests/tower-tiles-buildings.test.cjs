@@ -37,7 +37,7 @@ test('exclusive bonuses apply to their tower, upgraded branches and necromancer 
 });
 test('building sale refunds only once and removes income, damage and discounts immediately', () => {
   const { buildings } = rules(), slot = { q: 0, r: 0, index: 0 };
-  for (const type of ['house', 'forge', 'market']) {
+  for (const type of ['house', 'forge', 'bastion']) {
     const tile = { q: 0, r: 0, buildingSlots: 1, buildings: [null], towers: [{ type: 'archer' }] }, s = { map: new Map([['0,0', tile]]), hp: 20, gold: 100, income: 2, wave: 0, phase: 'build', waveRunning: false };
     assert.ok(buildings.buy(s, slot, type)); assert.equal(buildings.refund(s, tile.buildings[0]).percent, 100); assert.ok(buildings.sell(s, slot)); assert.equal(s.gold, 100); assert.equal(s.income, 2); assert.equal(tile.towers[0].supportDamage, 1); assert.equal(buildings.cost(s, slot, 100), 100); assert.equal(buildings.sell(s, slot), false);
     buildings.buy(s, slot, type); s.wave = 1; s.phase = 'wave'; s.waveRunning = true; assert.equal(buildings.refund(s, tile.buildings[0]).percent, 50); buildings.sell(s, slot); assert.equal(s.gold, 100 - Math.ceil(buildings.definitions[type].cost / 2));
@@ -83,5 +83,5 @@ test('one forge and one market per hex; houses remain repeatable and sale reopen
 
 test('building menu explains duplicate locks and keeps them disabled after gold refresh',()=>{
  const {a,elements}=load();a.state.phase='build';a.state.gold=1000;a.state.map.set('2,0',{q:2,r:0,type:'empty',roads:[],slots:0,towers:[],buildingSlots:3,buildings:[{type:'forge',level:1,paid:40},{type:'market',level:1,paid:35},null]});a.state.selectedBuilding={q:2,r:0,index:2};
- for(let i=0;i<2;i++){a.renderAll();const buttons=elements.get('buildingOptions').children;assert.equal(buttons.length,3);assert.equal(buttons[0].disabled,false);for(const button of buttons.slice(1)){assert.equal(button.disabled,true);assert.match(button.innerHTML,/bereits/);}a.state.gold+=100;}
+ for(let i=0;i<2;i++){a.renderAll();const buttons=elements.get('buildingOptions').children;assert.equal(buttons.length,4);assert.equal(buttons[3].disabled,false);assert.equal(buttons[0].disabled,false);for(const button of buttons.slice(1,3)){assert.equal(button.disabled,true);assert.match(button.innerHTML,/bereits/);}a.state.gold+=100;}
 });
