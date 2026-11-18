@@ -1,6 +1,6 @@
 [
   {
-    "version": "next",
+    "version": "1.3.3",
     "title": "Duo: im gleichen Takt",
     "summary": "Passende Treffer, freie Upgrades und mehr Übersicht – vom Turmbau bis zum gemeinsamen Endlosspiel.",
     "overview": [
@@ -97,7 +97,8 @@
       "Nach Welle 35 steht Endlos weiterspielen als gelber Hauptbutton im Ergebnisfenster. Beide Spieler müssen weiterhin zustimmen. Welle, Diamanten und Team-Kills sind direkt sichtbar; Details lassen sich aufklappen.",
       "Das gesamte Deck nutzt oben die volle Dialogbreite. Darunter stehen Ablagestapel und Nachziehstapel nebeneinander; auf schmalen Bildschirmen untereinander.",
       "Nach einem Turmbau öffnet sich direkt das Menü des neuen Turms, damit du sofort Upgrades kaufen kannst. Die zusätzliche Turmpreisliste in der Goldplanung entfällt."
-    ]
+    ],
+    "date": "2026-11-18"
   },
   {
     "version": "1.3.2",
