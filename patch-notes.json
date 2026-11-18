@@ -1,6 +1,6 @@
 [
   {
-    "version": "next",
+    "version": "1.3.4",
     "title": "Sieben neue Türme, vierzehn Ultimates",
     "summary": "Gravitation, Wind, Gift, Meteore, Laser, Glücksspiel und Portale erweitern dein Arsenal – im Solo und Duo.",
     "overview": [
@@ -85,7 +85,8 @@
       "Neue Turmmodelle für alle Ausbaustufen und Editionen, passende Symbole und sieben Bonushexe machen die neuen Rollen sichtbar. Die Turmübersicht zeigt auch Gift, Laseraufladung, Bindung und Portalwirkung.",
       "Die neuen Türme sind an vergleichbare Goldbudgets angepasst. Giftstapel, Rückwürfe und Bindungen sind begrenzt; Bosse widerstehen Versetzungen und werden von Portalen nur kurz verlangsamt.",
       "Freischaltungen und gewählte Ultimates der neuen Türme werden mit deinem Account gespeichert."
-    ]
+    ],
+    "date": "2026-11-18"
   },
   {
     "version": "1.3.3",
