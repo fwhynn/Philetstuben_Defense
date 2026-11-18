@@ -807,7 +807,28 @@ function create(host0,commands){
     const high=quality==='high',now=performance.now();
     for(const pool of Object.values(fx)) pool.begin();
     const live=new Set();
+    for(const e of state.enemies){
+      const doses=e.poisonStacks??e.poisons?.length??0;
+      for(let i=0;i<Math.min(3,doses);i++){const a=now*.0015+i*2.094;fx.orbs.ball(e.x+Math.cos(a)*8,16+i*3,e.y+Math.sin(a)*8,1.4,'#98c857');}
+      if(e.burning||e.augmentBurn?.until>state.elapsedMs)fx.flash.ball(e.x,10,e.y,4+Math.sin(now*.02+e.id),'#ef9c4b',.4);
+    }
     for(const p of state.projectiles){
+      if(p.kind==='laserBeam'){
+        fx.glow.segment(p.x1,35,p.y1,p.x2,12,p.y2,p.r+1,p.color,.45);
+        fx.solid.segment(p.x1,35,p.y1,p.x2,12,p.y2,p.r*.5,'#fff3ba',.9);
+        fx.flash.ball(p.x2,12,p.y2,2+p.r,p.color,.8);continue;
+      }
+      if(['gravityWell','portalGate','crater','meteorFall','tornado'].includes(p.kind)){
+        const t=(state.elapsedMs||0)*.001,ring=(radius,y,color,width=1)=>{
+          for(let i=0;i<16;i++){const a=i*Math.PI/8,b=(i+1)*Math.PI/8;fx.glow.segment(p.x+Math.cos(a)*radius,y,p.y+Math.sin(a)*radius,p.x+Math.cos(b)*radius,y,p.y+Math.sin(b)*radius,width,color,.7);}
+        };
+        if(p.kind==='gravityWell'){fx.solid.ball(p.x,17,p.y,7,'#171427');ring(13,17,'#bd9ae7',2);ring(p.r,3,p.color,.65);if(high)for(let i=0;i<5;i++){const a=t*5+i*1.256,r=10+(1-(t+i*.2)%1)*p.r*.6;fx.orbs.ball(p.x+Math.cos(a)*r,8,p.y+Math.sin(a)*r,1.3,p.color);}}
+        if(p.kind==='portalGate'){for(let i=0;i<16;i++){const a=i*Math.PI/8,b=(i+1)*Math.PI/8;fx.glow.segment(p.x+Math.cos(a)*17,20+Math.sin(a)*20,p.y,p.x+Math.cos(b)*17,20+Math.sin(b)*20,p.y,2.1,p.color,.85);}fx.flash.ball(p.x,20,p.y,10,p.color,.3);ring(p.r,3,p.color,.7);}
+        if(p.kind==='crater'){fx.tar.ball(p.x,2,p.y,p.r*.7,'#493727');ring(p.r*.78,3,'#bf642d',1);for(let i=0;i<(high?7:4);i++){const a=i*2.4+t*.2,r=p.r*(.2+(i%3)*.2);fx.flash.ball(p.x+Math.cos(a)*r,4+Math.abs(Math.sin(t*3+i))*5,p.y+Math.sin(a)*r,3,'#e9a34d',.65);}}
+        if(p.kind==='meteorFall'){ring(p.r,3,p.color,.8);const y=12+120*(1-(p.fade||0));fx.solid.ball(p.x,y,p.y,7,'#8c5942');fx.flash.ball(p.x,y+5,p.y,9,'#f6b75f',.7);fx.glow.segment(p.x,y,p.y,p.x-7,y+32,p.y-4,3,'#f29c4b',.6);}
+        if(p.kind==='tornado')for(let j=0;j<3;j++){const y=4+j*9,r=4+j*4;for(let i=0;i<10;i++){const a=i*Math.PI/5+t*7+j,b=a+.5;fx.glow.segment(p.x+Math.cos(a)*r,y,p.y+Math.sin(a)*r,p.x+Math.cos(b)*r,y+3,p.y+Math.sin(b)*r,1.2,p.color,.75);}}
+        continue;
+      }
       if(p.kind==='enemyTar'){
         let tile=null,best=Infinity;for(const t of state.map.values()){const c=axialToWorld(t.q,t.r),d=Math.hypot(c.x-p.x,c.y-p.y);if(d<best){best=d;tile=t;}}
         const h=tile?roadSpot(tile.q,tile.r).y+.18:.3;

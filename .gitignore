@@ -13,4 +13,5 @@ assets/index.json
 # generated previews, exports and archives
 /artifacts/enemies/
 /artifacts/*.zip
+/artifacts/new-towers-*.txt
 /output/

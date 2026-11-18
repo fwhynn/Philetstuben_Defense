@@ -11,7 +11,7 @@ async function loadScene(file){
 
 test('ultimate towers and boss identities are registered and ship in every edition',()=>{
   const {ULTIMATE_MODELS,ALL_MODELS}=vm.runInContext('HexModelMap',context(['model-map.js']));
-  assert.equal(ULTIMATE_MODELS.length,19);
+  assert.equal(ULTIMATE_MODELS.length,33);
   assert.ok(ULTIMATE_MODELS.includes('flame_sunfire_ultimate')&&ULTIMATE_MODELS.includes('element_elementTempest_ultimate'));
   for(const id of ULTIMATE_MODELS)assert.ok(ALL_MODELS.towers.includes(id),id);
   for(const kind of ['iron','hunter','summoner'])assert.ok(ALL_MODELS.enemies.includes('boss_'+kind));

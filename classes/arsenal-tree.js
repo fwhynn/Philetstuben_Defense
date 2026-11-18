@@ -13,6 +13,7 @@ const HexArsenalTree=(()=>{
   const HEX=a=>[0,1,2,3,4,5].map(i=>{const t=Math.PI/180*(60*i-90);return (Math.cos(t)*a).toFixed(1)+','+(Math.sin(t)*a).toFixed(1);}).join(' ');
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const ICON={archer:'tower_archer',catapult:'tower_catapult',chain:'tower_chain',freeze:'tower_freeze',mine:'tower_mine',ballista:'tower_ballista',flame:'tower_flame',element:'tower_element',necromancer:'tower_necromancer',house:'building_house',forge:'building_forge',market:'building_market',bastion:'building_bastion'};
+  for(const type of ['gravity','wind','poison','meteor','laser','gamble','portal'])ICON[type]='tower_'+type;
   const view={x:0,y:0,scale:1},state={selected:'hub',group:'tower'};
 
   // Lange Namen an einem Leerzeichen in zwei Zeilen teilen.
@@ -32,6 +33,7 @@ const HexArsenalTree=(()=>{
 
   // Knoten und Kanten aus den Baumdaten: Polarkoordinaten auf einer Ellipse, je Baum ein Sektor, je Zweig ein Strahl.
   function layout(list,profile,radii=RADII.tower){
+    const scale=Math.max(1,list.length/9);radii={...radii,root:radii.root*scale,step:radii.step.map(r=>r*scale),meta:radii.meta*scale};
     const nodes=[{id:'hub',kind:'hub',x:0,y:0,lit:true,name:'Arsenal'}],edges=[];
     const sector=Math.PI*2/Math.max(1,list.length),at=(r,a)=>({x:Math.cos(a)*r*radii.ex,y:Math.sin(a)*r});
     list.forEach((tree,i)=>{

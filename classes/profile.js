@@ -7,6 +7,10 @@ const HexProfile=(()=>{
   const ULTIMATE_UNLOCKS={element:{cost:35},necromancer:{cost:40},archer:{cost:20},catapult:{cost:20},chain:{cost:20},freeze:{cost:20},mine:{cost:20},ballista:{cost:30},flame:{cost:30}};
   const ULTIMATE_BRANCHES={"archer":["volley","marksman"],"catapult":["siege","barrage"],"chain":["storm","overload"],"freeze":["deepFrost","frostField"],"mine":["demolition","minefield"],"ballista":["harpoon","repeater"],"flame":["inferno","wildfire"],"element":["elementFire","elementWater","elementWind"],"necromancer":["soulChoir","soulKeeper"]};
   function ownsUltimate(profile,type,branch){return profile.unlocks.includes('ultimate:'+type)||profile.unlocks.includes('ultimate:'+type+':'+branch);}
+  for(const [type,cost] of Object.entries({gravity:45,wind:30,poison:30,meteor:55,laser:50,gamble:40,portal:60})){
+    TOWER_UNLOCKS[type]={cost};ULTIMATE_UNLOCKS[type]={cost:cost>=50?40:30};
+    ULTIMATE_BRANCHES[type]=({gravity:['gravityWell','gravityResonator'],wind:['windCannon','windGuide'],poison:['poisonThorn','poisonSpore'],meteor:['meteorCaller','meteorEmber'],laser:['laserFocus','laserSplitter'],gamble:['gambleLoaded','gambleHigh'],portal:['portalReturn','portalTime']})[type];
+  }
   function activeUltimate(profile,type){const owned=(ULTIMATE_BRANCHES[type]||[]).filter(branch=>ownsUltimate(profile,type,branch));return owned.includes(profile.activeUltimates?.[type])?profile.activeUltimates[type]:owned[0];}
   function runUnlocks(profile){return [...profile.unlocks.filter(id=>!id.startsWith('ultimate:')),...Object.keys(ULTIMATE_BRANCHES).flatMap(type=>{const branch=activeUltimate(profile,type);return branch?['ultimate:'+type+':'+branch]:[];})];}
   function activateUltimate(profile,id,definitions){const [type,branch]=id.split(':');if(!ULTIMATE_BRANCHES[type]?.includes(branch)||!ownsUltimate(profile,type,branch))return null;return save({...profile,activeUltimates:{...profile.activeUltimates,[type]:branch}},definitions);}

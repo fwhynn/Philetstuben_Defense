@@ -1,11 +1,14 @@
 /* DOM-only Arsenal workshop: one tree at a time, chosen from a side rail. Profile mutations remain in the controller. */
 const HexArsenal=(()=>{
   const icons={archer:'➶',catapult:'◈',chain:'ϟ',freeze:'❄',mine:'✹',ballista:'➳',flame:'♨',element:'✦',necromancer:'☽',house:'⌂',forge:'⚒',market:'◆',bastion:'♜'};
+  Object.assign(icons,{gravity:'◉',wind:'≋',poison:'♧',meteor:'☄',laser:'✦',gamble:'⚄',portal:'◎'});
   const BUILDING_COLOR='#d3b566';
   // Designer-Icons (assets/uidesign/towers) in Turmfarbe auf kleinem Hex; Typen ohne Datei behalten das Zeichen-Icon.
   const ARTWORK={archer:'tower_archer',catapult:'tower_catapult',chain:'tower_chain',freeze:'tower_freeze',mine:'tower_mine',ballista:'tower_ballista',flame:'tower_flame',element:'tower_element',necromancer:'tower_necromancer',house:'building_house',forge:'building_forge',market:'building_market',bastion:'building_bastion'};
+  for(const type of ['gravity','wind','poison','meteor','laser','gamble','portal'])ARTWORK[type]='tower_'+type;
   // Ausbaupfade: Designer-Symbole towers/icon_path_<id>.svg (alle 38 Pfade); „Scharfschütze“ heißt dort sniper.
   const PATH_ICONS=new Set(['absoluteZero','arrowRain','barrage','boltStorm','carpet','deepFrost','demolition','dragonSlayer','eagleEye','earthquake','elementFire','elementTempest','elementTide','elementVolcano','elementWater','elementWind','firestorm','fortressBreaker','frostField','harpoon','inferno','minefield','overload','repeater','rockStorm','siege','sniper','soulChoir','soulKeeper','soulLegion','soulLord','storm','sunfire','tempest','thunder','volley','wildfire','winter']);
+  for(const [id,up] of Object.entries(HexData.UPGRADES))if(HexData.TOWERS[up.tower]?.weapon)PATH_ICONS.add(id);
   const artwork=(name,color)=>`<span class="researchIcon hxTowerIcon" aria-hidden="true" style="color:${color||'#a7bda4'}"><span class="hxi hxi-${name}"></span></span>`;
   function pathIcon(branch,color){const name=branch==='marksman'?'sniper':branch;if(!PATH_ICONS.has(name))return '';
     return `<span class="researchIcon hxTowerIcon hxPathIcon" aria-hidden="true" style="--tree-color:${color||'#a7bda4'}"><span class="hxi" style="--i:url(&quot;assets/uidesign/towers/icon_path_${name}.svg&quot;)"></span></span>`;}

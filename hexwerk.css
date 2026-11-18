@@ -2403,6 +2403,15 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 }
 @media(max-width:480px){.duoEdgeBar .duoTeamInfo{flex-direction:column;gap:0}.duoEdgeBar .duoTeamInfo .hxi-heart{width:12px;height:12px}}
 
+/* Additional tower silhouettes, shared by build menu, Arsenal and run statistics. */
+.hxi-tower_gravity{--i:url("assets/uidesign/towers/icon_tower_gravity.svg")}
+.hxi-tower_wind{--i:url("assets/uidesign/towers/icon_tower_wind.svg")}
+.hxi-tower_poison{--i:url("assets/uidesign/towers/icon_tower_poison.svg")}
+.hxi-tower_meteor{--i:url("assets/uidesign/towers/icon_tower_meteor.svg")}
+.hxi-tower_laser{--i:url("assets/uidesign/towers/icon_tower_laser.svg")}
+.hxi-tower_gamble{--i:url("assets/uidesign/towers/icon_tower_gamble.svg")}
+.hxi-tower_portal{--i:url("assets/uidesign/towers/icon_tower_portal.svg")}
+
 /* Deck overview: full collection first, two clearly separated piles below. */
 .deckOverview{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
 .deckOverview>section{min-width:0;padding:0 0 16px}

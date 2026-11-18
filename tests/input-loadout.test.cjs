@@ -121,7 +121,7 @@ test('defeat leads to main menu and loadout cancellation no longer offers a dead
 });
 
 test('research map exposes all towers and buildings and reset needs confirmation before refund', () => {
-  const { elements, storage } = load({ initialProfile: { diamonds: 100 } }); elements.get('menuArsenalBtn').listeners.click(); assert.equal(elements.get('arsenalChoices').children.length, 13); unlock(elements, 'tower:ballista'); assert.equal(JSON.parse(storage.get('hex-bastion-profile-v1')).diamonds, 80);
+  const { elements, storage } = load({ initialProfile: { diamonds: 100 } }); elements.get('menuArsenalBtn').listeners.click(); assert.equal(elements.get('arsenalChoices').children.length, 20); unlock(elements, 'tower:ballista'); assert.equal(JSON.parse(storage.get('hex-bastion-profile-v1')).diamonds, 80);
   elements.get('resetDiamondsBtn').listeners.click(); assert.equal(JSON.parse(storage.get('hex-bastion-profile-v1')).diamonds, 80); elements.get('resetDiamondsBtn').listeners.click(); const p = JSON.parse(storage.get('hex-bastion-profile-v1')); assert.equal(p.diamonds, 100); assert.equal(p.unlockedTowers.includes('ballista'), false); assert.equal(elements.get('resetDiamondsBtn').disabled, true);
 });
 
@@ -129,7 +129,7 @@ test('arsenal shows one tree at a time, picked from a rail that marks affordable
   const fs = require('node:fs'), path = require('node:path'), html = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8'); const arsenal=html.search(/src\s*=\s*["']classes\/arsenal\.js(?:\?v=[a-f0-9]+)?["']/),game=html.search(/s\.src\s*=\s*["']classes\/game\.js(?:\?v=[a-f0-9]+)?["']/); assert.ok(arsenal>=0&&game>arsenal,'Arsenal must load before the game controller');
   const { elements } = load({ initialProfile: { diamonds: 20 } }); elements.get('menuArsenalBtn').listeners.click();
   const trees = elements.get('arsenalChoices').children, tabs = elements.get('arsenalTabs').children.filter(e => e.attributes.role === 'tab');
-  assert.equal(tabs.length, 13); assert.equal(trees.filter(t => !t.hidden).length, 1);
+  assert.equal(tabs.length, 20); assert.equal(trees.filter(t => !t.hidden).length, 1);
   assert.ok(tabs.some(t => t.className.includes('affordable'))); assert.equal(tabs.find(t => t.attributes['aria-controls'] === 'research-ballista').className.includes('locked'), true);
   const target = tabs.find(t => t.attributes['aria-controls'] === 'research-market'); target.listeners.click();
   assert.equal(target.attributes['aria-selected'], 'true'); assert.deepEqual(trees.filter(t => !t.hidden).map(t => t.id), ['research-market']);

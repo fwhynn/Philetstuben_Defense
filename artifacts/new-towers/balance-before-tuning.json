@@ -1,0 +1,5573 @@
+{
+  "description": "Actual shared Solo/Duo combat, 50 ms steps, neutral terrain, no augments. Moving 880-unit road, 24 enemies or one boss. Tier 1: 250 gold/W10; tier 4: 1000 gold/W18. Support armies spend up to 42% on control, remainder on archers. Other armies fill discrete leftover gold with archers. Gamble uses eight seeds. Stationary values are a separate 20-second role check, not balance proof.",
+  "cases": [
+    {
+      "type": "archer",
+      "branch": null,
+      "level": 1,
+      "name": "Archer",
+      "budget": 250,
+      "support": false,
+      "composition": [
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 13,
+          "leaks": 11,
+          "survivors": 0,
+          "damage": 4790,
+          "damageShare": 0.801,
+          "enemySeconds": 476,
+          "spent": 250,
+          "towerCount": 10,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 12,
+          "leaks": 12,
+          "survivors": 0,
+          "damage": 2490,
+          "damageShare": 0.695,
+          "enemySeconds": 372,
+          "spent": 250,
+          "towerCount": 10,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 6,
+          "leaks": 18,
+          "survivors": 0,
+          "damage": 4615,
+          "damageShare": 0.441,
+          "enemySeconds": 712,
+          "spent": 250,
+          "towerCount": 10,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 4,
+          "leaks": 20,
+          "survivors": 0,
+          "damage": 3147,
+          "damageShare": 0.301,
+          "enemySeconds": 664,
+          "spent": 250,
+          "towerCount": 10,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 10,
+          "leaks": 14,
+          "survivors": 0,
+          "damage": 4031,
+          "damageShare": 0.675,
+          "enemySeconds": 514,
+          "spent": 250,
+          "towerCount": 10,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 3038,
+          "damageShare": 0.871,
+          "enemySeconds": 45,
+          "spent": 250,
+          "towerCount": 10,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "catapult",
+      "branch": null,
+      "level": 1,
+      "name": "Katapult",
+      "budget": 250,
+      "support": false,
+      "composition": [
+        {
+          "type": "catapult",
+          "level": 1,
+          "cost": 40
+        },
+        {
+          "type": "catapult",
+          "level": 1,
+          "cost": 40
+        },
+        {
+          "type": "catapult",
+          "level": 1,
+          "cost": 40
+        },
+        {
+          "type": "catapult",
+          "level": 1,
+          "cost": 40
+        },
+        {
+          "type": "catapult",
+          "level": 1,
+          "cost": 40
+        },
+        {
+          "type": "catapult",
+          "level": 1,
+          "cost": 40
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 13,
+          "leaks": 11,
+          "survivors": 0,
+          "damage": 5289,
+          "damageShare": 0.885,
+          "enemySeconds": 476,
+          "spent": 240,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 14,
+          "leaks": 10,
+          "survivors": 0,
+          "damage": 3046,
+          "damageShare": 0.849,
+          "enemySeconds": 356,
+          "spent": 240,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 9,
+          "leaks": 15,
+          "survivors": 0,
+          "damage": 7970,
+          "damageShare": 0.762,
+          "enemySeconds": 683,
+          "spent": 240,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 3,
+          "leaks": 21,
+          "survivors": 0,
+          "damage": 3807,
+          "damageShare": 0.364,
+          "enemySeconds": 676,
+          "spent": 240,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 8,
+          "leaks": 16,
+          "survivors": 0,
+          "damage": 4098,
+          "damageShare": 0.686,
+          "enemySeconds": 542,
+          "spent": 240,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 1566,
+          "damageShare": 0.449,
+          "enemySeconds": 45,
+          "spent": 240,
+          "towerCount": 6,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "chain",
+      "branch": null,
+      "level": 1,
+      "name": "Kettenblitz",
+      "budget": 250,
+      "support": false,
+      "composition": [
+        {
+          "type": "chain",
+          "level": 1,
+          "cost": 45
+        },
+        {
+          "type": "chain",
+          "level": 1,
+          "cost": 45
+        },
+        {
+          "type": "chain",
+          "level": 1,
+          "cost": 45
+        },
+        {
+          "type": "chain",
+          "level": 1,
+          "cost": 45
+        },
+        {
+          "type": "chain",
+          "level": 1,
+          "cost": 45
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 7,
+          "leaks": 17,
+          "survivors": 0,
+          "damage": 3780,
+          "damageShare": 0.633,
+          "enemySeconds": 558,
+          "spent": 250,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 8,
+          "leaks": 16,
+          "survivors": 0,
+          "damage": 2016,
+          "damageShare": 0.562,
+          "enemySeconds": 418,
+          "spent": 250,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 3,
+          "leaks": 21,
+          "survivors": 0,
+          "damage": 3002,
+          "damageShare": 0.287,
+          "enemySeconds": 767,
+          "spent": 250,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 5152,
+          "damageShare": 0.493,
+          "enemySeconds": 718,
+          "spent": 250,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 7,
+          "leaks": 17,
+          "survivors": 0,
+          "damage": 3180,
+          "damageShare": 0.532,
+          "enemySeconds": 564,
+          "spent": 250,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 1084,
+          "damageShare": 0.311,
+          "enemySeconds": 45,
+          "spent": 250,
+          "towerCount": 6,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "freeze",
+      "branch": null,
+      "level": 1,
+      "name": "Freeze",
+      "budget": 250,
+      "support": true,
+      "composition": [
+        {
+          "type": "freeze",
+          "level": 1,
+          "cost": 30
+        },
+        {
+          "type": "freeze",
+          "level": 1,
+          "cost": 30
+        },
+        {
+          "type": "freeze",
+          "level": 1,
+          "cost": 30
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 11,
+          "leaks": 13,
+          "survivors": 0,
+          "damage": 3830,
+          "damageShare": 0.641,
+          "enemySeconds": 680,
+          "spent": 240,
+          "towerCount": 9,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 12,
+          "leaks": 12,
+          "survivors": 0,
+          "damage": 2232,
+          "damageShare": 0.622,
+          "enemySeconds": 506,
+          "spent": 240,
+          "towerCount": 9,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 6,
+          "leaks": 18,
+          "survivors": 0,
+          "damage": 3884,
+          "damageShare": 0.371,
+          "enemySeconds": 958,
+          "spent": 240,
+          "towerCount": 9,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 4,
+          "leaks": 20,
+          "survivors": 0,
+          "damage": 2638,
+          "damageShare": 0.252,
+          "enemySeconds": 892,
+          "spent": 240,
+          "towerCount": 9,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 9,
+          "leaks": 15,
+          "survivors": 0,
+          "damage": 3051,
+          "damageShare": 0.511,
+          "enemySeconds": 712,
+          "spent": 240,
+          "towerCount": 9,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 0,
+          "survivors": 0,
+          "damage": 3486,
+          "damageShare": 1,
+          "enemySeconds": 46,
+          "spent": 240,
+          "towerCount": 9,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "mine",
+      "branch": null,
+      "level": 1,
+      "name": "Minenleger",
+      "budget": 250,
+      "support": false,
+      "composition": [
+        {
+          "type": "mine",
+          "level": 1,
+          "cost": 35
+        },
+        {
+          "type": "mine",
+          "level": 1,
+          "cost": 35
+        },
+        {
+          "type": "mine",
+          "level": 1,
+          "cost": 35
+        },
+        {
+          "type": "mine",
+          "level": 1,
+          "cost": 35
+        },
+        {
+          "type": "mine",
+          "level": 1,
+          "cost": 35
+        },
+        {
+          "type": "mine",
+          "level": 1,
+          "cost": 35
+        },
+        {
+          "type": "mine",
+          "level": 1,
+          "cost": 35
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 24,
+          "leaks": 0,
+          "survivors": 0,
+          "damage": 5976,
+          "damageShare": 1,
+          "enemySeconds": 330,
+          "spent": 245,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 24,
+          "leaks": 0,
+          "survivors": 0,
+          "damage": 3586,
+          "damageShare": 1,
+          "enemySeconds": 219,
+          "spent": 245,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 23,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 10309,
+          "damageShare": 0.986,
+          "enemySeconds": 457,
+          "spent": 245,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 10,
+          "leaks": 14,
+          "survivors": 0,
+          "damage": 7614,
+          "damageShare": 0.728,
+          "enemySeconds": 584,
+          "spent": 245,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 19,
+          "leaks": 5,
+          "survivors": 0,
+          "damage": 5831,
+          "damageShare": 0.976,
+          "enemySeconds": 405,
+          "spent": 245,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 2603,
+          "damageShare": 0.747,
+          "enemySeconds": 45,
+          "spent": 245,
+          "towerCount": 7,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "ballista",
+      "branch": null,
+      "level": 1,
+      "name": "Balliste",
+      "budget": 250,
+      "support": false,
+      "composition": [
+        {
+          "type": "ballista",
+          "level": 1,
+          "cost": 55
+        },
+        {
+          "type": "ballista",
+          "level": 1,
+          "cost": 55
+        },
+        {
+          "type": "ballista",
+          "level": 1,
+          "cost": 55
+        },
+        {
+          "type": "ballista",
+          "level": 1,
+          "cost": 55
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 6,
+          "leaks": 18,
+          "survivors": 0,
+          "damage": 4399,
+          "damageShare": 0.736,
+          "enemySeconds": 584,
+          "spent": 245,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 2,
+          "leaks": 22,
+          "survivors": 0,
+          "damage": 2602,
+          "damageShare": 0.726,
+          "enemySeconds": 472,
+          "spent": 245,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 1,
+          "leaks": 23,
+          "survivors": 0,
+          "damage": 4449,
+          "damageShare": 0.425,
+          "enemySeconds": 794,
+          "spent": 245,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 2643,
+          "damageShare": 0.253,
+          "enemySeconds": 718,
+          "spent": 245,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 1,
+          "leaks": 23,
+          "survivors": 0,
+          "damage": 1495,
+          "damageShare": 0.25,
+          "enemySeconds": 638,
+          "spent": 245,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 0,
+          "survivors": 0,
+          "damage": 3486,
+          "damageShare": 1,
+          "enemySeconds": 27,
+          "spent": 245,
+          "towerCount": 5,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "flame",
+      "branch": null,
+      "level": 1,
+      "name": "Flammenturm",
+      "budget": 250,
+      "support": false,
+      "composition": [
+        {
+          "type": "flame",
+          "level": 1,
+          "cost": 50
+        },
+        {
+          "type": "flame",
+          "level": 1,
+          "cost": 50
+        },
+        {
+          "type": "flame",
+          "level": 1,
+          "cost": 50
+        },
+        {
+          "type": "flame",
+          "level": 1,
+          "cost": 50
+        },
+        {
+          "type": "flame",
+          "level": 1,
+          "cost": 50
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 18,
+          "leaks": 6,
+          "survivors": 0,
+          "damage": 5724,
+          "damageShare": 0.958,
+          "enemySeconds": 383,
+          "spent": 250,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 22,
+          "leaks": 2,
+          "survivors": 0,
+          "damage": 3560,
+          "damageShare": 0.993,
+          "enemySeconds": 239,
+          "spent": 250,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 2,
+          "leaks": 22,
+          "survivors": 0,
+          "damage": 3267,
+          "damageShare": 0.312,
+          "enemySeconds": 781,
+          "spent": 250,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 2,
+          "leaks": 22,
+          "survivors": 0,
+          "damage": 3944,
+          "damageShare": 0.377,
+          "enemySeconds": 694,
+          "spent": 250,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 18,
+          "leaks": 6,
+          "survivors": 0,
+          "damage": 5478,
+          "damageShare": 0.917,
+          "enemySeconds": 393,
+          "spent": 250,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 1092,
+          "damageShare": 0.313,
+          "enemySeconds": 45,
+          "spent": 250,
+          "towerCount": 5,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "element",
+      "branch": null,
+      "level": 1,
+      "name": "Elementturm",
+      "budget": 250,
+      "support": false,
+      "composition": [
+        {
+          "type": "element",
+          "level": 1,
+          "cost": 50
+        },
+        {
+          "type": "element",
+          "level": 1,
+          "cost": 50
+        },
+        {
+          "type": "element",
+          "level": 1,
+          "cost": 50
+        },
+        {
+          "type": "element",
+          "level": 1,
+          "cost": 50
+        },
+        {
+          "type": "element",
+          "level": 1,
+          "cost": 50
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 3,
+          "leaks": 21,
+          "survivors": 0,
+          "damage": 1857,
+          "damageShare": 0.311,
+          "enemySeconds": 608,
+          "spent": 250,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 4,
+          "leaks": 20,
+          "survivors": 0,
+          "damage": 973,
+          "damageShare": 0.271,
+          "enemySeconds": 458,
+          "spent": 250,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 1,
+          "leaks": 23,
+          "survivors": 0,
+          "damage": 1709,
+          "damageShare": 0.163,
+          "enemySeconds": 791,
+          "spent": 250,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 2522,
+          "damageShare": 0.241,
+          "enemySeconds": 718,
+          "spent": 250,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 2,
+          "leaks": 22,
+          "survivors": 0,
+          "damage": 1098,
+          "damageShare": 0.184,
+          "enemySeconds": 620,
+          "spent": 250,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 1200,
+          "damageShare": 0.344,
+          "enemySeconds": 45,
+          "spent": 250,
+          "towerCount": 5,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "necromancer",
+      "branch": null,
+      "level": 1,
+      "name": "Nekromantenturm",
+      "budget": 250,
+      "support": false,
+      "composition": [
+        {
+          "type": "necromancer",
+          "level": 1,
+          "cost": 60
+        },
+        {
+          "type": "necromancer",
+          "level": 1,
+          "cost": 60
+        },
+        {
+          "type": "necromancer",
+          "level": 1,
+          "cost": 60
+        },
+        {
+          "type": "necromancer",
+          "level": 1,
+          "cost": 60
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 2,
+          "leaks": 22,
+          "survivors": 0,
+          "damage": 1293,
+          "damageShare": 0.216,
+          "enemySeconds": 622,
+          "spent": 240,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 3,
+          "leaks": 21,
+          "survivors": 0,
+          "damage": 793,
+          "damageShare": 0.221,
+          "enemySeconds": 469,
+          "spent": 240,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 1,
+          "leaks": 23,
+          "survivors": 0,
+          "damage": 1027,
+          "damageShare": 0.098,
+          "enemySeconds": 795,
+          "spent": 240,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 1764,
+          "damageShare": 0.169,
+          "enemySeconds": 718,
+          "spent": 240,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 1,
+          "leaks": 23,
+          "survivors": 0,
+          "damage": 619,
+          "damageShare": 0.104,
+          "enemySeconds": 633,
+          "spent": 240,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 780,
+          "damageShare": 0.224,
+          "enemySeconds": 45,
+          "spent": 240,
+          "towerCount": 4,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "gravity",
+      "branch": null,
+      "level": 1,
+      "name": "Gravitationsturm",
+      "budget": 250,
+      "support": true,
+      "composition": [
+        {
+          "type": "gravity",
+          "level": 1,
+          "cost": 55
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 9,
+          "leaks": 15,
+          "survivors": 0,
+          "damage": 3419,
+          "damageShare": 0.572,
+          "enemySeconds": 552,
+          "spent": 230,
+          "towerCount": 8,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 8,
+          "leaks": 16,
+          "survivors": 0,
+          "damage": 1814,
+          "damageShare": 0.506,
+          "enemySeconds": 433,
+          "spent": 230,
+          "towerCount": 8,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 3,
+          "leaks": 21,
+          "survivors": 0,
+          "damage": 3214,
+          "damageShare": 0.307,
+          "enemySeconds": 784,
+          "spent": 230,
+          "towerCount": 8,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 3,
+          "leaks": 21,
+          "survivors": 0,
+          "damage": 2469,
+          "damageShare": 0.236,
+          "enemySeconds": 704,
+          "spent": 230,
+          "towerCount": 8,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 8,
+          "leaks": 16,
+          "survivors": 0,
+          "damage": 2691,
+          "damageShare": 0.45,
+          "enemySeconds": 569,
+          "spent": 230,
+          "towerCount": 8,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 2237,
+          "damageShare": 0.642,
+          "enemySeconds": 46,
+          "spent": 230,
+          "towerCount": 8,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "wind",
+      "branch": null,
+      "level": 1,
+      "name": "Windturm",
+      "budget": 250,
+      "support": false,
+      "composition": [
+        {
+          "type": "wind",
+          "level": 1,
+          "cost": 45
+        },
+        {
+          "type": "wind",
+          "level": 1,
+          "cost": 45
+        },
+        {
+          "type": "wind",
+          "level": 1,
+          "cost": 45
+        },
+        {
+          "type": "wind",
+          "level": 1,
+          "cost": 45
+        },
+        {
+          "type": "wind",
+          "level": 1,
+          "cost": 45
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 6,
+          "leaks": 18,
+          "survivors": 0,
+          "damage": 3710,
+          "damageShare": 0.621,
+          "enemySeconds": 578,
+          "spent": 250,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 6,
+          "leaks": 18,
+          "survivors": 0,
+          "damage": 2029,
+          "damageShare": 0.566,
+          "enemySeconds": 438,
+          "spent": 250,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 2,
+          "leaks": 22,
+          "survivors": 0,
+          "damage": 3193,
+          "damageShare": 0.305,
+          "enemySeconds": 795,
+          "spent": 250,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 2,
+          "leaks": 22,
+          "survivors": 0,
+          "damage": 3771,
+          "damageShare": 0.361,
+          "enemySeconds": 707,
+          "spent": 250,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 4,
+          "leaks": 20,
+          "survivors": 0,
+          "damage": 2891,
+          "damageShare": 0.484,
+          "enemySeconds": 605,
+          "spent": 250,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 1319,
+          "damageShare": 0.378,
+          "enemySeconds": 49,
+          "spent": 250,
+          "towerCount": 6,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "poison",
+      "branch": null,
+      "level": 1,
+      "name": "Giftturm",
+      "budget": 250,
+      "support": false,
+      "composition": [
+        {
+          "type": "poison",
+          "level": 1,
+          "cost": 40
+        },
+        {
+          "type": "poison",
+          "level": 1,
+          "cost": 40
+        },
+        {
+          "type": "poison",
+          "level": 1,
+          "cost": 40
+        },
+        {
+          "type": "poison",
+          "level": 1,
+          "cost": 40
+        },
+        {
+          "type": "poison",
+          "level": 1,
+          "cost": 40
+        },
+        {
+          "type": "poison",
+          "level": 1,
+          "cost": 40
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 2,
+          "leaks": 22,
+          "survivors": 0,
+          "damage": 4269,
+          "damageShare": 0.714,
+          "enemySeconds": 636,
+          "spent": 240,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 3,
+          "leaks": 21,
+          "survivors": 0,
+          "damage": 2346,
+          "damageShare": 0.654,
+          "enemySeconds": 486,
+          "spent": 240,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 3374,
+          "damageShare": 0.323,
+          "enemySeconds": 808,
+          "spent": 240,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 2743,
+          "damageShare": 0.262,
+          "enemySeconds": 718,
+          "spent": 240,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 1884,
+          "damageShare": 0.315,
+          "enemySeconds": 646,
+          "spent": 240,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 718,
+          "damageShare": 0.206,
+          "enemySeconds": 45,
+          "spent": 240,
+          "towerCount": 6,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "meteor",
+      "branch": null,
+      "level": 1,
+      "name": "Meteorturm",
+      "budget": 250,
+      "support": false,
+      "composition": [
+        {
+          "type": "meteor",
+          "level": 1,
+          "cost": 80
+        },
+        {
+          "type": "meteor",
+          "level": 1,
+          "cost": 80
+        },
+        {
+          "type": "meteor",
+          "level": 1,
+          "cost": 80
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 12,
+          "leaks": 12,
+          "survivors": 0,
+          "damage": 4398,
+          "damageShare": 0.736,
+          "enemySeconds": 511,
+          "spent": 240,
+          "towerCount": 3,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 24,
+          "leaks": 0,
+          "survivors": 0,
+          "damage": 3586,
+          "damageShare": 1,
+          "enemySeconds": 171,
+          "spent": 240,
+          "towerCount": 3,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 9,
+          "leaks": 15,
+          "survivors": 0,
+          "damage": 6283,
+          "damageShare": 0.601,
+          "enemySeconds": 681,
+          "spent": 240,
+          "towerCount": 3,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 4,
+          "leaks": 20,
+          "survivors": 0,
+          "damage": 3761,
+          "damageShare": 0.36,
+          "enemySeconds": 674,
+          "spent": 240,
+          "towerCount": 3,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 10,
+          "leaks": 14,
+          "survivors": 0,
+          "damage": 3726,
+          "damageShare": 0.623,
+          "enemySeconds": 549,
+          "spent": 240,
+          "towerCount": 3,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 1098,
+          "damageShare": 0.315,
+          "enemySeconds": 45,
+          "spent": 240,
+          "towerCount": 3,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "laser",
+      "branch": null,
+      "level": 1,
+      "name": "Laserturm",
+      "budget": 250,
+      "support": false,
+      "composition": [
+        {
+          "type": "laser",
+          "level": 1,
+          "cost": 65
+        },
+        {
+          "type": "laser",
+          "level": 1,
+          "cost": 65
+        },
+        {
+          "type": "laser",
+          "level": 1,
+          "cost": 65
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 5,
+          "leaks": 19,
+          "survivors": 0,
+          "damage": 2736,
+          "damageShare": 0.458,
+          "enemySeconds": 583,
+          "spent": 245,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 5,
+          "leaks": 19,
+          "survivors": 0,
+          "damage": 1276,
+          "damageShare": 0.356,
+          "enemySeconds": 448,
+          "spent": 245,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 3,
+          "leaks": 21,
+          "survivors": 0,
+          "damage": 2008,
+          "damageShare": 0.192,
+          "enemySeconds": 759,
+          "spent": 245,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 3,
+          "leaks": 21,
+          "survivors": 0,
+          "damage": 1852,
+          "damageShare": 0.177,
+          "enemySeconds": 675,
+          "spent": 245,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 4,
+          "leaks": 20,
+          "survivors": 0,
+          "damage": 1668,
+          "damageShare": 0.279,
+          "enemySeconds": 592,
+          "spent": 245,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 2947,
+          "damageShare": 0.845,
+          "enemySeconds": 45,
+          "spent": 245,
+          "towerCount": 5,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "gamble",
+      "branch": null,
+      "level": 1,
+      "name": "Glücksspielturm",
+      "budget": 250,
+      "support": false,
+      "composition": [
+        {
+          "type": "gamble",
+          "level": 1,
+          "cost": 55
+        },
+        {
+          "type": "gamble",
+          "level": 1,
+          "cost": 55
+        },
+        {
+          "type": "gamble",
+          "level": 1,
+          "cost": 55
+        },
+        {
+          "type": "gamble",
+          "level": 1,
+          "cost": 55
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 10,
+          "leaks": 14,
+          "survivors": 0,
+          "damage": 3964,
+          "damageShare": 0.543,
+          "enemySeconds": 564,
+          "spent": 245,
+          "towerCount": 5,
+          "samples": 8
+        },
+        "swarm": {
+          "kills": 10.25,
+          "leaks": 13.75,
+          "survivors": 0,
+          "damage": 2006,
+          "damageShare": 0.481,
+          "enemySeconds": 414,
+          "spent": 245,
+          "towerCount": 5,
+          "samples": 8
+        },
+        "armored": {
+          "kills": 4.88,
+          "leaks": 19.13,
+          "survivors": 0,
+          "damage": 4183,
+          "damageShare": 0.328,
+          "enemySeconds": 745,
+          "spent": 245,
+          "towerCount": 5,
+          "samples": 8
+        },
+        "magic": {
+          "kills": 4,
+          "leaks": 20,
+          "survivors": 0,
+          "damage": 3938,
+          "damageShare": 0.3,
+          "enemySeconds": 675,
+          "spent": 245,
+          "towerCount": 5,
+          "samples": 8
+        },
+        "shield": {
+          "kills": 5.63,
+          "leaks": 18.38,
+          "survivors": 0,
+          "damage": 1943,
+          "damageShare": 0.244,
+          "enemySeconds": 593,
+          "spent": 245,
+          "towerCount": 5,
+          "samples": 8
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 2498,
+          "damageShare": 0.575,
+          "enemySeconds": 45,
+          "spent": 245,
+          "towerCount": 5,
+          "samples": 8
+        }
+      }
+    },
+    {
+      "type": "portal",
+      "branch": null,
+      "level": 1,
+      "name": "Portalturm",
+      "budget": 250,
+      "support": true,
+      "composition": [
+        {
+          "type": "portal",
+          "level": 1,
+          "cost": 100
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 7,
+          "leaks": 17,
+          "survivors": 0,
+          "damage": 3183,
+          "damageShare": 0.533,
+          "enemySeconds": 599,
+          "spent": 250,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 6,
+          "leaks": 18,
+          "survivors": 0,
+          "damage": 1515,
+          "damageShare": 0.423,
+          "enemySeconds": 447,
+          "spent": 250,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 5,
+          "leaks": 19,
+          "survivors": 0,
+          "damage": 3448,
+          "damageShare": 0.33,
+          "enemySeconds": 792,
+          "spent": 250,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 3,
+          "leaks": 21,
+          "survivors": 0,
+          "damage": 2608,
+          "damageShare": 0.249,
+          "enemySeconds": 736,
+          "spent": 250,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 5,
+          "leaks": 19,
+          "survivors": 0,
+          "damage": 2336,
+          "damageShare": 0.391,
+          "enemySeconds": 602,
+          "spent": 250,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 1856,
+          "damageShare": 0.532,
+          "enemySeconds": 45,
+          "spent": 250,
+          "towerCount": 7,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "archer",
+      "branch": "volley",
+      "level": 4,
+      "name": "Pfeilhagel",
+      "budget": 1000,
+      "support": false,
+      "composition": [
+        {
+          "type": "archer",
+          "level": 4,
+          "cost": 220
+        },
+        {
+          "type": "archer",
+          "level": 4,
+          "cost": 220
+        },
+        {
+          "type": "archer",
+          "level": 4,
+          "cost": 220
+        },
+        {
+          "type": "archer",
+          "level": 4,
+          "cost": 220
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 17,
+          "leaks": 7,
+          "survivors": 0,
+          "damage": 22229,
+          "damageShare": 0.943,
+          "enemySeconds": 465,
+          "spent": 1000,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 24,
+          "leaks": 0,
+          "survivors": 0,
+          "damage": 14141,
+          "damageShare": 1,
+          "enemySeconds": 244,
+          "spent": 1000,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 6,
+          "leaks": 18,
+          "survivors": 0,
+          "damage": 26925,
+          "damageShare": 0.653,
+          "enemySeconds": 720,
+          "spent": 1000,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 2,
+          "leaks": 22,
+          "survivors": 0,
+          "damage": 19476,
+          "damageShare": 0.472,
+          "enemySeconds": 690,
+          "spent": 1000,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 13,
+          "leaks": 11,
+          "survivors": 0,
+          "damage": 21719,
+          "damageShare": 0.922,
+          "enemySeconds": 500,
+          "spent": 1000,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 3598,
+          "damageShare": 0.262,
+          "enemySeconds": 44,
+          "spent": 1000,
+          "towerCount": 5,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "archer",
+      "branch": "marksman",
+      "level": 4,
+      "name": "Meisterschütze",
+      "budget": 1000,
+      "support": false,
+      "composition": [
+        {
+          "type": "archer",
+          "level": 4,
+          "cost": 220
+        },
+        {
+          "type": "archer",
+          "level": 4,
+          "cost": 220
+        },
+        {
+          "type": "archer",
+          "level": 4,
+          "cost": 220
+        },
+        {
+          "type": "archer",
+          "level": 4,
+          "cost": 220
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 8,
+          "leaks": 16,
+          "survivors": 0,
+          "damage": 12915,
+          "damageShare": 0.548,
+          "enemySeconds": 530,
+          "spent": 1000,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 10,
+          "leaks": 14,
+          "survivors": 0,
+          "damage": 7364,
+          "damageShare": 0.521,
+          "enemySeconds": 390,
+          "spent": 1000,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 4,
+          "leaks": 20,
+          "survivors": 0,
+          "damage": 12680,
+          "damageShare": 0.307,
+          "enemySeconds": 728,
+          "spent": 1000,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 3,
+          "leaks": 21,
+          "survivors": 0,
+          "damage": 8576,
+          "damageShare": 0.208,
+          "enemySeconds": 667,
+          "spent": 1000,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 7,
+          "leaks": 17,
+          "survivors": 0,
+          "damage": 8418,
+          "damageShare": 0.357,
+          "enemySeconds": 552,
+          "spent": 1000,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 11353,
+          "damageShare": 0.826,
+          "enemySeconds": 44,
+          "spent": 1000,
+          "towerCount": 5,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "catapult",
+      "branch": "barrage",
+      "level": 4,
+      "name": "Steinlawine",
+      "budget": 1000,
+      "support": false,
+      "composition": [
+        {
+          "type": "catapult",
+          "level": 4,
+          "cost": 265
+        },
+        {
+          "type": "catapult",
+          "level": 4,
+          "cost": 265
+        },
+        {
+          "type": "catapult",
+          "level": 4,
+          "cost": 265
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 6,
+          "leaks": 18,
+          "survivors": 0,
+          "damage": 15134,
+          "damageShare": 0.642,
+          "enemySeconds": 557,
+          "spent": 990,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 7,
+          "leaks": 17,
+          "survivors": 0,
+          "damage": 8993,
+          "damageShare": 0.636,
+          "enemySeconds": 413,
+          "spent": 990,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 2,
+          "leaks": 22,
+          "survivors": 0,
+          "damage": 22908,
+          "damageShare": 0.555,
+          "enemySeconds": 763,
+          "spent": 990,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 2,
+          "leaks": 22,
+          "survivors": 0,
+          "damage": 10616,
+          "damageShare": 0.257,
+          "enemySeconds": 682,
+          "spent": 990,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 5,
+          "leaks": 19,
+          "survivors": 0,
+          "damage": 13609,
+          "damageShare": 0.577,
+          "enemySeconds": 569,
+          "spent": 990,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 5691,
+          "damageShare": 0.414,
+          "enemySeconds": 44,
+          "spent": 990,
+          "towerCount": 7,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "catapult",
+      "branch": "siege",
+      "level": 4,
+      "name": "Belagerungstitan",
+      "budget": 1000,
+      "support": false,
+      "composition": [
+        {
+          "type": "catapult",
+          "level": 4,
+          "cost": 265
+        },
+        {
+          "type": "catapult",
+          "level": 4,
+          "cost": 265
+        },
+        {
+          "type": "catapult",
+          "level": 4,
+          "cost": 265
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 9,
+          "leaks": 15,
+          "survivors": 0,
+          "damage": 17743,
+          "damageShare": 0.753,
+          "enemySeconds": 508,
+          "spent": 990,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 11,
+          "leaks": 13,
+          "survivors": 0,
+          "damage": 10606,
+          "damageShare": 0.75,
+          "enemySeconds": 377,
+          "spent": 990,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 6,
+          "leaks": 18,
+          "survivors": 0,
+          "damage": 26039,
+          "damageShare": 0.631,
+          "enemySeconds": 700,
+          "spent": 990,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 3,
+          "leaks": 21,
+          "survivors": 0,
+          "damage": 12703,
+          "damageShare": 0.308,
+          "enemySeconds": 664,
+          "spent": 990,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 6,
+          "leaks": 18,
+          "survivors": 0,
+          "damage": 13636,
+          "damageShare": 0.579,
+          "enemySeconds": 554,
+          "spent": 990,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 7473,
+          "damageShare": 0.544,
+          "enemySeconds": 44,
+          "spent": 990,
+          "towerCount": 7,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "chain",
+      "branch": "storm",
+      "level": 4,
+      "name": "Gewitterfront",
+      "budget": 1000,
+      "support": false,
+      "composition": [
+        {
+          "type": "chain",
+          "level": 4,
+          "cost": 270
+        },
+        {
+          "type": "chain",
+          "level": 4,
+          "cost": 270
+        },
+        {
+          "type": "chain",
+          "level": 4,
+          "cost": 270
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 6,
+          "leaks": 18,
+          "survivors": 0,
+          "damage": 15822,
+          "damageShare": 0.671,
+          "enemySeconds": 576,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 7,
+          "leaks": 17,
+          "survivors": 0,
+          "damage": 8229,
+          "damageShare": 0.582,
+          "enemySeconds": 430,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 1,
+          "leaks": 23,
+          "survivors": 0,
+          "damage": 12218,
+          "damageShare": 0.296,
+          "enemySeconds": 780,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 21418,
+          "damageShare": 0.519,
+          "enemySeconds": 707,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 5,
+          "leaks": 19,
+          "survivors": 0,
+          "damage": 14979,
+          "damageShare": 0.636,
+          "enemySeconds": 585,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 3623,
+          "damageShare": 0.264,
+          "enemySeconds": 44,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "chain",
+      "branch": "overload",
+      "level": 4,
+      "name": "Donnerschlag",
+      "budget": 1000,
+      "support": false,
+      "composition": [
+        {
+          "type": "chain",
+          "level": 4,
+          "cost": 270
+        },
+        {
+          "type": "chain",
+          "level": 4,
+          "cost": 270
+        },
+        {
+          "type": "chain",
+          "level": 4,
+          "cost": 270
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 9,
+          "leaks": 15,
+          "survivors": 0,
+          "damage": 14506,
+          "damageShare": 0.616,
+          "enemySeconds": 527,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 9,
+          "leaks": 15,
+          "survivors": 0,
+          "damage": 8060,
+          "damageShare": 0.57,
+          "enemySeconds": 400,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 3,
+          "leaks": 21,
+          "survivors": 0,
+          "damage": 12177,
+          "damageShare": 0.295,
+          "enemySeconds": 751,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 19590,
+          "damageShare": 0.475,
+          "enemySeconds": 707,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 7,
+          "leaks": 17,
+          "survivors": 0,
+          "damage": 11485,
+          "damageShare": 0.487,
+          "enemySeconds": 555,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 5380,
+          "damageShare": 0.391,
+          "enemySeconds": 44,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "freeze",
+      "branch": "frostField",
+      "level": 4,
+      "name": "Polarweite",
+      "budget": 1000,
+      "support": true,
+      "composition": [
+        {
+          "type": "freeze",
+          "level": 4,
+          "cost": 220
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 13,
+          "leaks": 11,
+          "survivors": 0,
+          "damage": 16051,
+          "damageShare": 0.681,
+          "enemySeconds": 817,
+          "spent": 990,
+          "towerCount": 9,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 15,
+          "leaks": 9,
+          "survivors": 0,
+          "damage": 10211,
+          "damageShare": 0.722,
+          "enemySeconds": 592,
+          "spent": 990,
+          "towerCount": 9,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 7,
+          "leaks": 17,
+          "survivors": 0,
+          "damage": 16694,
+          "damageShare": 0.405,
+          "enemySeconds": 1182,
+          "spent": 990,
+          "towerCount": 9,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 5,
+          "leaks": 19,
+          "survivors": 0,
+          "damage": 11455,
+          "damageShare": 0.278,
+          "enemySeconds": 1106,
+          "spent": 990,
+          "towerCount": 9,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 12,
+          "leaks": 12,
+          "survivors": 0,
+          "damage": 14313,
+          "damageShare": 0.607,
+          "enemySeconds": 849,
+          "spent": 990,
+          "towerCount": 9,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 0,
+          "survivors": 0,
+          "damage": 13748,
+          "damageShare": 1,
+          "enemySeconds": 52,
+          "spent": 990,
+          "towerCount": 9,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "freeze",
+      "branch": "deepFrost",
+      "level": 4,
+      "name": "Ewiges Eis",
+      "budget": 1000,
+      "support": true,
+      "composition": [
+        {
+          "type": "freeze",
+          "level": 4,
+          "cost": 220
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 17,
+          "leaks": 7,
+          "survivors": 0,
+          "damage": 18917,
+          "damageShare": 0.803,
+          "enemySeconds": 738,
+          "spent": 990,
+          "towerCount": 9,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 20,
+          "leaks": 4,
+          "survivors": 0,
+          "damage": 12209,
+          "damageShare": 0.863,
+          "enemySeconds": 514,
+          "spent": 990,
+          "towerCount": 9,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 9,
+          "leaks": 15,
+          "survivors": 0,
+          "damage": 19722,
+          "damageShare": 0.478,
+          "enemySeconds": 1148,
+          "spent": 990,
+          "towerCount": 9,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 6,
+          "leaks": 18,
+          "survivors": 0,
+          "damage": 13869,
+          "damageShare": 0.336,
+          "enemySeconds": 1099,
+          "spent": 990,
+          "towerCount": 9,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 15,
+          "leaks": 9,
+          "survivors": 0,
+          "damage": 16915,
+          "damageShare": 0.718,
+          "enemySeconds": 789,
+          "spent": 990,
+          "towerCount": 9,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 0,
+          "survivors": 0,
+          "damage": 13748,
+          "damageShare": 1,
+          "enemySeconds": 46,
+          "spent": 990,
+          "towerCount": 9,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "mine",
+      "branch": "minefield",
+      "level": 4,
+      "name": "Minenmeer",
+      "budget": 1000,
+      "support": false,
+      "composition": [
+        {
+          "type": "mine",
+          "level": 4,
+          "cost": 245
+        },
+        {
+          "type": "mine",
+          "level": 4,
+          "cost": 245
+        },
+        {
+          "type": "mine",
+          "level": 4,
+          "cost": 245
+        },
+        {
+          "type": "mine",
+          "level": 4,
+          "cost": 245
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 22,
+          "leaks": 2,
+          "survivors": 0,
+          "damage": 23130,
+          "damageShare": 0.981,
+          "enemySeconds": 375,
+          "spent": 980,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 24,
+          "leaks": 0,
+          "survivors": 0,
+          "damage": 14141,
+          "damageShare": 1,
+          "enemySeconds": 232,
+          "spent": 980,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 15,
+          "leaks": 9,
+          "survivors": 0,
+          "damage": 37902,
+          "damageShare": 0.919,
+          "enemySeconds": 562,
+          "spent": 980,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 6,
+          "leaks": 18,
+          "survivors": 0,
+          "damage": 23819,
+          "damageShare": 0.578,
+          "enemySeconds": 620,
+          "spent": 980,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 20,
+          "leaks": 4,
+          "survivors": 0,
+          "damage": 22961,
+          "damageShare": 0.974,
+          "enemySeconds": 397,
+          "spent": 980,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 6687,
+          "damageShare": 0.486,
+          "enemySeconds": 44,
+          "spent": 980,
+          "towerCount": 4,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "mine",
+      "branch": "demolition",
+      "level": 4,
+      "name": "Weltenbrecher",
+      "budget": 1000,
+      "support": false,
+      "composition": [
+        {
+          "type": "mine",
+          "level": 4,
+          "cost": 245
+        },
+        {
+          "type": "mine",
+          "level": 4,
+          "cost": 245
+        },
+        {
+          "type": "mine",
+          "level": 4,
+          "cost": 245
+        },
+        {
+          "type": "mine",
+          "level": 4,
+          "cost": 245
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 24,
+          "leaks": 0,
+          "survivors": 0,
+          "damage": 23568,
+          "damageShare": 1,
+          "enemySeconds": 293,
+          "spent": 980,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 24,
+          "leaks": 0,
+          "survivors": 0,
+          "damage": 14141,
+          "damageShare": 1,
+          "enemySeconds": 182,
+          "spent": 980,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 24,
+          "leaks": 0,
+          "survivors": 0,
+          "damage": 41244,
+          "damageShare": 1,
+          "enemySeconds": 385,
+          "spent": 980,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 12,
+          "leaks": 12,
+          "survivors": 0,
+          "damage": 29989,
+          "damageShare": 0.727,
+          "enemySeconds": 544,
+          "spent": 980,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 24,
+          "leaks": 0,
+          "survivors": 0,
+          "damage": 23568,
+          "damageShare": 1,
+          "enemySeconds": 325,
+          "spent": 980,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 5575,
+          "damageShare": 0.406,
+          "enemySeconds": 44,
+          "spent": 980,
+          "towerCount": 4,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "ballista",
+      "branch": "harpoon",
+      "level": 4,
+      "name": "Drachentod",
+      "budget": 1000,
+      "support": false,
+      "composition": [
+        {
+          "type": "ballista",
+          "level": 4,
+          "cost": 315
+        },
+        {
+          "type": "ballista",
+          "level": 4,
+          "cost": 315
+        },
+        {
+          "type": "ballista",
+          "level": 4,
+          "cost": 315
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 2,
+          "leaks": 22,
+          "survivors": 0,
+          "damage": 11346,
+          "damageShare": 0.481,
+          "enemySeconds": 620,
+          "spent": 995,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 1,
+          "leaks": 23,
+          "survivors": 0,
+          "damage": 6762,
+          "damageShare": 0.478,
+          "enemySeconds": 473,
+          "spent": 995,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 10547,
+          "damageShare": 0.256,
+          "enemySeconds": 794,
+          "spent": 995,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 6484,
+          "damageShare": 0.157,
+          "enemySeconds": 707,
+          "spent": 995,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 4546,
+          "damageShare": 0.193,
+          "enemySeconds": 636,
+          "spent": 995,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 0,
+          "survivors": 0,
+          "damage": 13748,
+          "damageShare": 1,
+          "enemySeconds": 22,
+          "spent": 995,
+          "towerCount": 5,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "ballista",
+      "branch": "repeater",
+      "level": 4,
+      "name": "Bolzenorkan",
+      "budget": 1000,
+      "support": false,
+      "composition": [
+        {
+          "type": "ballista",
+          "level": 4,
+          "cost": 315
+        },
+        {
+          "type": "ballista",
+          "level": 4,
+          "cost": 315
+        },
+        {
+          "type": "ballista",
+          "level": 4,
+          "cost": 315
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 3,
+          "leaks": 21,
+          "survivors": 0,
+          "damage": 12964,
+          "damageShare": 0.55,
+          "enemySeconds": 616,
+          "spent": 995,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 7408,
+          "damageShare": 0.524,
+          "enemySeconds": 490,
+          "spent": 995,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 11853,
+          "damageShare": 0.287,
+          "enemySeconds": 794,
+          "spent": 995,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 6940,
+          "damageShare": 0.168,
+          "enemySeconds": 707,
+          "spent": 995,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 8089,
+          "damageShare": 0.343,
+          "enemySeconds": 636,
+          "spent": 995,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 13365,
+          "damageShare": 0.972,
+          "enemySeconds": 44,
+          "spent": 995,
+          "towerCount": 5,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "flame",
+      "branch": "inferno",
+      "level": 4,
+      "name": "Sonnenkern",
+      "budget": 1000,
+      "support": false,
+      "composition": [
+        {
+          "type": "flame",
+          "level": 4,
+          "cost": 295
+        },
+        {
+          "type": "flame",
+          "level": 4,
+          "cost": 295
+        },
+        {
+          "type": "flame",
+          "level": 4,
+          "cost": 295
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 24,
+          "leaks": 0,
+          "survivors": 0,
+          "damage": 23568,
+          "damageShare": 1,
+          "enemySeconds": 257,
+          "spent": 985,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 24,
+          "leaks": 0,
+          "survivors": 0,
+          "damage": 14141,
+          "damageShare": 1,
+          "enemySeconds": 182,
+          "spent": 985,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 7,
+          "leaks": 17,
+          "survivors": 0,
+          "damage": 24803,
+          "damageShare": 0.601,
+          "enemySeconds": 716,
+          "spent": 985,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 6,
+          "leaks": 18,
+          "survivors": 0,
+          "damage": 24345,
+          "damageShare": 0.59,
+          "enemySeconds": 649,
+          "spent": 985,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 24,
+          "leaks": 0,
+          "survivors": 0,
+          "damage": 23568,
+          "damageShare": 1,
+          "enemySeconds": 297,
+          "spent": 985,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 4421,
+          "damageShare": 0.322,
+          "enemySeconds": 44,
+          "spent": 985,
+          "towerCount": 7,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "flame",
+      "branch": "wildfire",
+      "level": 4,
+      "name": "Feuerwalze",
+      "budget": 1000,
+      "support": false,
+      "composition": [
+        {
+          "type": "flame",
+          "level": 4,
+          "cost": 295
+        },
+        {
+          "type": "flame",
+          "level": 4,
+          "cost": 295
+        },
+        {
+          "type": "flame",
+          "level": 4,
+          "cost": 295
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 20,
+          "leaks": 4,
+          "survivors": 0,
+          "damage": 23319,
+          "damageShare": 0.989,
+          "enemySeconds": 371,
+          "spent": 985,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 24,
+          "leaks": 0,
+          "survivors": 0,
+          "damage": 14141,
+          "damageShare": 1,
+          "enemySeconds": 202,
+          "spent": 985,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 3,
+          "leaks": 21,
+          "survivors": 0,
+          "damage": 15928,
+          "damageShare": 0.386,
+          "enemySeconds": 758,
+          "spent": 985,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 4,
+          "leaks": 20,
+          "survivors": 0,
+          "damage": 17969,
+          "damageShare": 0.436,
+          "enemySeconds": 667,
+          "spent": 985,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 19,
+          "leaks": 5,
+          "survivors": 0,
+          "damage": 22712,
+          "damageShare": 0.964,
+          "enemySeconds": 399,
+          "spent": 985,
+          "towerCount": 7,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 4412,
+          "damageShare": 0.321,
+          "enemySeconds": 44,
+          "spent": 985,
+          "towerCount": 7,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "element",
+      "branch": "elementFire",
+      "level": 4,
+      "name": "Weltenbrand",
+      "budget": 1000,
+      "support": false,
+      "composition": [
+        {
+          "type": "element",
+          "level": 4,
+          "cost": 280
+        },
+        {
+          "type": "element",
+          "level": 4,
+          "cost": 280
+        },
+        {
+          "type": "element",
+          "level": 4,
+          "cost": 280
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 12,
+          "leaks": 12,
+          "survivors": 0,
+          "damage": 20914,
+          "damageShare": 0.887,
+          "enemySeconds": 502,
+          "spent": 985,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 23,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 14085,
+          "damageShare": 0.996,
+          "enemySeconds": 268,
+          "spent": 985,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 6,
+          "leaks": 18,
+          "survivors": 0,
+          "damage": 24768,
+          "damageShare": 0.601,
+          "enemySeconds": 722,
+          "spent": 985,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 4,
+          "leaks": 20,
+          "survivors": 0,
+          "damage": 32116,
+          "damageShare": 0.779,
+          "enemySeconds": 669,
+          "spent": 985,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 11,
+          "leaks": 13,
+          "survivors": 0,
+          "damage": 18883,
+          "damageShare": 0.801,
+          "enemySeconds": 523,
+          "spent": 985,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 3803,
+          "damageShare": 0.277,
+          "enemySeconds": 44,
+          "spent": 985,
+          "towerCount": 5,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "element",
+      "branch": "elementWind",
+      "level": 4,
+      "name": "Himmelssturm",
+      "budget": 1000,
+      "support": false,
+      "composition": [
+        {
+          "type": "element",
+          "level": 4,
+          "cost": 280
+        },
+        {
+          "type": "element",
+          "level": 4,
+          "cost": 280
+        },
+        {
+          "type": "element",
+          "level": 4,
+          "cost": 280
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 8,
+          "leaks": 16,
+          "survivors": 0,
+          "damage": 18114,
+          "damageShare": 0.769,
+          "enemySeconds": 546,
+          "spent": 985,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 18,
+          "leaks": 6,
+          "survivors": 0,
+          "damage": 13579,
+          "damageShare": 0.96,
+          "enemySeconds": 328,
+          "spent": 985,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 4,
+          "leaks": 20,
+          "survivors": 0,
+          "damage": 20430,
+          "damageShare": 0.495,
+          "enemySeconds": 742,
+          "spent": 985,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 2,
+          "leaks": 22,
+          "survivors": 0,
+          "damage": 33780,
+          "damageShare": 0.819,
+          "enemySeconds": 691,
+          "spent": 985,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 6,
+          "leaks": 18,
+          "survivors": 0,
+          "damage": 15752,
+          "damageShare": 0.668,
+          "enemySeconds": 563,
+          "spent": 985,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 5191,
+          "damageShare": 0.378,
+          "enemySeconds": 44,
+          "spent": 985,
+          "towerCount": 5,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "element",
+      "branch": "elementWater",
+      "level": 4,
+      "name": "Ozeanherz",
+      "budget": 1000,
+      "support": false,
+      "composition": [
+        {
+          "type": "element",
+          "level": 4,
+          "cost": 280
+        },
+        {
+          "type": "element",
+          "level": 4,
+          "cost": 280
+        },
+        {
+          "type": "element",
+          "level": 4,
+          "cost": 280
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 5036,
+          "damageShare": 0.214,
+          "enemySeconds": 761,
+          "spent": 985,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 3040,
+          "damageShare": 0.215,
+          "enemySeconds": 588,
+          "spent": 985,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 4426,
+          "damageShare": 0.107,
+          "enemySeconds": 945,
+          "spent": 985,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 7069,
+          "damageShare": 0.171,
+          "enemySeconds": 1003,
+          "spent": 985,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 3042,
+          "damageShare": 0.129,
+          "enemySeconds": 761,
+          "spent": 985,
+          "towerCount": 5,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 8576,
+          "damageShare": 0.624,
+          "enemySeconds": 78,
+          "spent": 985,
+          "towerCount": 5,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "necromancer",
+      "branch": "soulChoir",
+      "level": 4,
+      "name": "Seelenheer",
+      "budget": 1000,
+      "support": false,
+      "composition": [
+        {
+          "type": "necromancer",
+          "level": 4,
+          "cost": 320
+        },
+        {
+          "type": "necromancer",
+          "level": 4,
+          "cost": 320
+        },
+        {
+          "type": "necromancer",
+          "level": 4,
+          "cost": 320
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 1395,
+          "damageShare": 0.059,
+          "enemySeconds": 636,
+          "spent": 985,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 754,
+          "damageShare": 0.053,
+          "enemySeconds": 490,
+          "spent": 985,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 1125,
+          "damageShare": 0.027,
+          "enemySeconds": 794,
+          "spent": 985,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 1586,
+          "damageShare": 0.038,
+          "enemySeconds": 707,
+          "spent": 985,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 641,
+          "damageShare": 0.027,
+          "enemySeconds": 636,
+          "spent": 985,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 889,
+          "damageShare": 0.065,
+          "enemySeconds": 44,
+          "spent": 985,
+          "towerCount": 4,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "necromancer",
+      "branch": "soulKeeper",
+      "level": 4,
+      "name": "Seelenherrscher",
+      "budget": 1000,
+      "support": false,
+      "composition": [
+        {
+          "type": "necromancer",
+          "level": 4,
+          "cost": 320
+        },
+        {
+          "type": "necromancer",
+          "level": 4,
+          "cost": 320
+        },
+        {
+          "type": "necromancer",
+          "level": 4,
+          "cost": 320
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 1,
+          "leaks": 23,
+          "survivors": 0,
+          "damage": 3952,
+          "damageShare": 0.168,
+          "enemySeconds": 625,
+          "spent": 985,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 1,
+          "leaks": 23,
+          "survivors": 0,
+          "damage": 2085,
+          "damageShare": 0.147,
+          "enemySeconds": 480,
+          "spent": 985,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 2664,
+          "damageShare": 0.065,
+          "enemySeconds": 794,
+          "spent": 985,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 4232,
+          "damageShare": 0.103,
+          "enemySeconds": 707,
+          "spent": 985,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 1,
+          "leaks": 23,
+          "survivors": 0,
+          "damage": 1646,
+          "damageShare": 0.07,
+          "enemySeconds": 626,
+          "spent": 985,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 2059,
+          "damageShare": 0.15,
+          "enemySeconds": 44,
+          "spent": 985,
+          "towerCount": 4,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "gravity",
+      "branch": "gravityWell",
+      "level": 4,
+      "name": "Ereignishorizont",
+      "budget": 1000,
+      "support": true,
+      "composition": [
+        {
+          "type": "gravity",
+          "level": 4,
+          "cost": 300
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 8,
+          "leaks": 16,
+          "survivors": 0,
+          "damage": 10826,
+          "damageShare": 0.459,
+          "enemySeconds": 582,
+          "spent": 1000,
+          "towerCount": 10,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 7,
+          "leaks": 17,
+          "survivors": 0,
+          "damage": 6059,
+          "damageShare": 0.429,
+          "enemySeconds": 448,
+          "spent": 1000,
+          "towerCount": 10,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 1,
+          "leaks": 23,
+          "survivors": 0,
+          "damage": 10482,
+          "damageShare": 0.254,
+          "enemySeconds": 824,
+          "spent": 1000,
+          "towerCount": 10,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 7595,
+          "damageShare": 0.184,
+          "enemySeconds": 743,
+          "spent": 1000,
+          "towerCount": 10,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 7,
+          "leaks": 17,
+          "survivors": 0,
+          "damage": 9553,
+          "damageShare": 0.405,
+          "enemySeconds": 595,
+          "spent": 1000,
+          "towerCount": 10,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 8359,
+          "damageShare": 0.608,
+          "enemySeconds": 45,
+          "spent": 1000,
+          "towerCount": 10,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "gravity",
+      "branch": "gravityResonator",
+      "level": 4,
+      "name": "Pulsar",
+      "budget": 1000,
+      "support": true,
+      "composition": [
+        {
+          "type": "gravity",
+          "level": 4,
+          "cost": 300
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 7,
+          "leaks": 17,
+          "survivors": 0,
+          "damage": 12514,
+          "damageShare": 0.531,
+          "enemySeconds": 567,
+          "spent": 1000,
+          "towerCount": 10,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 9,
+          "leaks": 15,
+          "survivors": 0,
+          "damage": 7718,
+          "damageShare": 0.546,
+          "enemySeconds": 413,
+          "spent": 1000,
+          "towerCount": 10,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 4,
+          "leaks": 20,
+          "survivors": 0,
+          "damage": 12201,
+          "damageShare": 0.296,
+          "enemySeconds": 759,
+          "spent": 1000,
+          "towerCount": 10,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 2,
+          "leaks": 22,
+          "survivors": 0,
+          "damage": 10156,
+          "damageShare": 0.246,
+          "enemySeconds": 694,
+          "spent": 1000,
+          "towerCount": 10,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 5,
+          "leaks": 19,
+          "survivors": 0,
+          "damage": 10738,
+          "damageShare": 0.456,
+          "enemySeconds": 586,
+          "spent": 1000,
+          "towerCount": 10,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 8719,
+          "damageShare": 0.634,
+          "enemySeconds": 45,
+          "spent": 1000,
+          "towerCount": 10,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "wind",
+      "branch": "windCannon",
+      "level": 4,
+      "name": "Sturmfront",
+      "budget": 1000,
+      "support": false,
+      "composition": [
+        {
+          "type": "wind",
+          "level": 4,
+          "cost": 270
+        },
+        {
+          "type": "wind",
+          "level": 4,
+          "cost": 270
+        },
+        {
+          "type": "wind",
+          "level": 4,
+          "cost": 270
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 7,
+          "leaks": 17,
+          "survivors": 0,
+          "damage": 15766,
+          "damageShare": 0.669,
+          "enemySeconds": 572,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 11,
+          "leaks": 13,
+          "survivors": 0,
+          "damage": 11260,
+          "damageShare": 0.796,
+          "enemySeconds": 390,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 2,
+          "leaks": 22,
+          "survivors": 0,
+          "damage": 15185,
+          "damageShare": 0.368,
+          "enemySeconds": 793,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 3,
+          "leaks": 21,
+          "survivors": 0,
+          "damage": 17253,
+          "damageShare": 0.418,
+          "enemySeconds": 697,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 5,
+          "leaks": 19,
+          "survivors": 0,
+          "damage": 13217,
+          "damageShare": 0.561,
+          "enemySeconds": 594,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 4834,
+          "damageShare": 0.352,
+          "enemySeconds": 48,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "wind",
+      "branch": "windGuide",
+      "level": 4,
+      "name": "Umleitung",
+      "budget": 1000,
+      "support": false,
+      "composition": [
+        {
+          "type": "wind",
+          "level": 4,
+          "cost": 270
+        },
+        {
+          "type": "wind",
+          "level": 4,
+          "cost": 270
+        },
+        {
+          "type": "wind",
+          "level": 4,
+          "cost": 270
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 3,
+          "leaks": 21,
+          "survivors": 0,
+          "damage": 8486,
+          "damageShare": 0.36,
+          "enemySeconds": 640,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 4,
+          "leaks": 20,
+          "survivors": 0,
+          "damage": 5004,
+          "damageShare": 0.354,
+          "enemySeconds": 480,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 1,
+          "leaks": 23,
+          "survivors": 0,
+          "damage": 7520,
+          "damageShare": 0.182,
+          "enemySeconds": 831,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 1,
+          "leaks": 23,
+          "survivors": 0,
+          "damage": 8143,
+          "damageShare": 0.197,
+          "enemySeconds": 739,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 2,
+          "leaks": 22,
+          "survivors": 0,
+          "damage": 6490,
+          "damageShare": 0.275,
+          "enemySeconds": 650,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 3786,
+          "damageShare": 0.275,
+          "enemySeconds": 48,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "poison",
+      "branch": "poisonThorn",
+      "level": 4,
+      "name": "Königsvenom",
+      "budget": 1000,
+      "support": false,
+      "composition": [
+        {
+          "type": "poison",
+          "level": 4,
+          "cost": 270
+        },
+        {
+          "type": "poison",
+          "level": 4,
+          "cost": 270
+        },
+        {
+          "type": "poison",
+          "level": 4,
+          "cost": 270
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 2,
+          "leaks": 22,
+          "survivors": 0,
+          "damage": 12301,
+          "damageShare": 0.522,
+          "enemySeconds": 612,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 2,
+          "leaks": 22,
+          "survivors": 0,
+          "damage": 6690,
+          "damageShare": 0.473,
+          "enemySeconds": 471,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 1,
+          "leaks": 23,
+          "survivors": 0,
+          "damage": 10151,
+          "damageShare": 0.246,
+          "enemySeconds": 783,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 8204,
+          "damageShare": 0.199,
+          "enemySeconds": 707,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 1,
+          "leaks": 23,
+          "survivors": 0,
+          "damage": 5739,
+          "damageShare": 0.244,
+          "enemySeconds": 625,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 4906,
+          "damageShare": 0.357,
+          "enemySeconds": 44,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "poison",
+      "branch": "poisonSpore",
+      "level": 4,
+      "name": "Seuchenherd",
+      "budget": 1000,
+      "support": false,
+      "composition": [
+        {
+          "type": "poison",
+          "level": 4,
+          "cost": 270
+        },
+        {
+          "type": "poison",
+          "level": 4,
+          "cost": 270
+        },
+        {
+          "type": "poison",
+          "level": 4,
+          "cost": 270
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 3,
+          "leaks": 21,
+          "survivors": 0,
+          "damage": 11681,
+          "damageShare": 0.496,
+          "enemySeconds": 608,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 6,
+          "leaks": 18,
+          "survivors": 0,
+          "damage": 7399,
+          "damageShare": 0.523,
+          "enemySeconds": 445,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 1,
+          "leaks": 23,
+          "survivors": 0,
+          "damage": 10262,
+          "damageShare": 0.249,
+          "enemySeconds": 784,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 0,
+          "leaks": 24,
+          "survivors": 0,
+          "damage": 7664,
+          "damageShare": 0.186,
+          "enemySeconds": 707,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 2,
+          "leaks": 22,
+          "survivors": 0,
+          "damage": 9964,
+          "damageShare": 0.423,
+          "enemySeconds": 617,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 3050,
+          "damageShare": 0.222,
+          "enemySeconds": 44,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "meteor",
+      "branch": "meteorCaller",
+      "level": 4,
+      "name": "Sternenfall",
+      "budget": 1000,
+      "support": false,
+      "composition": [
+        {
+          "type": "meteor",
+          "level": 4,
+          "cost": 380
+        },
+        {
+          "type": "meteor",
+          "level": 4,
+          "cost": 380
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 14,
+          "leaks": 10,
+          "survivors": 0,
+          "damage": 20665,
+          "damageShare": 0.877,
+          "enemySeconds": 525,
+          "spent": 1000,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 24,
+          "leaks": 0,
+          "survivors": 0,
+          "damage": 14141,
+          "damageShare": 1,
+          "enemySeconds": 291,
+          "spent": 1000,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 3,
+          "leaks": 21,
+          "survivors": 0,
+          "damage": 25741,
+          "damageShare": 0.624,
+          "enemySeconds": 761,
+          "spent": 1000,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 1,
+          "leaks": 23,
+          "survivors": 0,
+          "damage": 14556,
+          "damageShare": 0.353,
+          "enemySeconds": 697,
+          "spent": 1000,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 12,
+          "leaks": 12,
+          "survivors": 0,
+          "damage": 17681,
+          "damageShare": 0.75,
+          "enemySeconds": 568,
+          "spent": 1000,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 4584,
+          "damageShare": 0.333,
+          "enemySeconds": 44,
+          "spent": 1000,
+          "towerCount": 4,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "meteor",
+      "branch": "meteorEmber",
+      "level": 4,
+      "name": "Caldera",
+      "budget": 1000,
+      "support": false,
+      "composition": [
+        {
+          "type": "meteor",
+          "level": 4,
+          "cost": 380
+        },
+        {
+          "type": "meteor",
+          "level": 4,
+          "cost": 380
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 17,
+          "leaks": 7,
+          "survivors": 0,
+          "damage": 20918,
+          "damageShare": 0.888,
+          "enemySeconds": 492,
+          "spent": 1000,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 24,
+          "leaks": 0,
+          "survivors": 0,
+          "damage": 14141,
+          "damageShare": 1,
+          "enemySeconds": 258,
+          "spent": 1000,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 6,
+          "leaks": 18,
+          "survivors": 0,
+          "damage": 20816,
+          "damageShare": 0.505,
+          "enemySeconds": 746,
+          "spent": 1000,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 1,
+          "leaks": 23,
+          "survivors": 0,
+          "damage": 15269,
+          "damageShare": 0.37,
+          "enemySeconds": 696,
+          "spent": 1000,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 15,
+          "leaks": 9,
+          "survivors": 0,
+          "damage": 19516,
+          "damageShare": 0.828,
+          "enemySeconds": 537,
+          "spent": 1000,
+          "towerCount": 4,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 4987,
+          "damageShare": 0.363,
+          "enemySeconds": 44,
+          "spent": 1000,
+          "towerCount": 4,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "laser",
+      "branch": "laserFocus",
+      "level": 4,
+      "name": "Sonnenlanze",
+      "budget": 1000,
+      "support": false,
+      "composition": [
+        {
+          "type": "laser",
+          "level": 4,
+          "cost": 355
+        },
+        {
+          "type": "laser",
+          "level": 4,
+          "cost": 355
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 7,
+          "leaks": 17,
+          "survivors": 0,
+          "damage": 11414,
+          "damageShare": 0.484,
+          "enemySeconds": 549,
+          "spent": 1000,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 7,
+          "leaks": 17,
+          "survivors": 0,
+          "damage": 5400,
+          "damageShare": 0.382,
+          "enemySeconds": 424,
+          "spent": 1000,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 4,
+          "leaks": 20,
+          "survivors": 0,
+          "damage": 8983,
+          "damageShare": 0.218,
+          "enemySeconds": 732,
+          "spent": 1000,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 3,
+          "leaks": 21,
+          "survivors": 0,
+          "damage": 7750,
+          "damageShare": 0.188,
+          "enemySeconds": 662,
+          "spent": 1000,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 6,
+          "leaks": 18,
+          "survivors": 0,
+          "damage": 8119,
+          "damageShare": 0.345,
+          "enemySeconds": 560,
+          "spent": 1000,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 0,
+          "survivors": 0,
+          "damage": 13748,
+          "damageShare": 1,
+          "enemySeconds": 27,
+          "spent": 1000,
+          "towerCount": 6,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "laser",
+      "branch": "laserSplitter",
+      "level": 4,
+      "name": "Prismennetz",
+      "budget": 1000,
+      "support": false,
+      "composition": [
+        {
+          "type": "laser",
+          "level": 4,
+          "cost": 355
+        },
+        {
+          "type": "laser",
+          "level": 4,
+          "cost": 355
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 9,
+          "leaks": 15,
+          "survivors": 0,
+          "damage": 14488,
+          "damageShare": 0.615,
+          "enemySeconds": 533,
+          "spent": 1000,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 9,
+          "leaks": 15,
+          "survivors": 0,
+          "damage": 7091,
+          "damageShare": 0.501,
+          "enemySeconds": 408,
+          "spent": 1000,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 3,
+          "leaks": 21,
+          "survivors": 0,
+          "damage": 9739,
+          "damageShare": 0.236,
+          "enemySeconds": 747,
+          "spent": 1000,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 4,
+          "leaks": 20,
+          "survivors": 0,
+          "damage": 10882,
+          "damageShare": 0.264,
+          "enemySeconds": 653,
+          "spent": 1000,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 8,
+          "leaks": 16,
+          "survivors": 0,
+          "damage": 11561,
+          "damageShare": 0.491,
+          "enemySeconds": 537,
+          "spent": 1000,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 7059,
+          "damageShare": 0.513,
+          "enemySeconds": 44,
+          "spent": 1000,
+          "towerCount": 6,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "gamble",
+      "branch": "gambleLoaded",
+      "level": 4,
+      "name": "Gesicherte Bank",
+      "budget": 1000,
+      "support": false,
+      "composition": [
+        {
+          "type": "gamble",
+          "level": 4,
+          "cost": 300
+        },
+        {
+          "type": "gamble",
+          "level": 4,
+          "cost": 300
+        },
+        {
+          "type": "gamble",
+          "level": 4,
+          "cost": 300
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 4.38,
+          "leaks": 19.63,
+          "survivors": 0,
+          "damage": 9575,
+          "damageShare": 0.425,
+          "enemySeconds": 580,
+          "spent": 1000,
+          "towerCount": 7,
+          "samples": 8
+        },
+        "swarm": {
+          "kills": 5.63,
+          "leaks": 18.38,
+          "survivors": 0,
+          "damage": 5250,
+          "damageShare": 0.399,
+          "enemySeconds": 428,
+          "spent": 1000,
+          "towerCount": 7,
+          "samples": 8
+        },
+        "armored": {
+          "kills": 2.5,
+          "leaks": 21.5,
+          "survivors": 0,
+          "damage": 9906,
+          "damageShare": 0.249,
+          "enemySeconds": 748,
+          "spent": 1000,
+          "towerCount": 7,
+          "samples": 8
+        },
+        "magic": {
+          "kills": 2.13,
+          "leaks": 21.88,
+          "survivors": 0,
+          "damage": 9105,
+          "damageShare": 0.234,
+          "enemySeconds": 677,
+          "spent": 1000,
+          "towerCount": 7,
+          "samples": 8
+        },
+        "shield": {
+          "kills": 3.5,
+          "leaks": 20.5,
+          "survivors": 0,
+          "damage": 7468,
+          "damageShare": 0.328,
+          "enemySeconds": 585,
+          "spent": 1000,
+          "towerCount": 7,
+          "samples": 8
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 6801,
+          "damageShare": 0.56,
+          "enemySeconds": 44,
+          "spent": 1000,
+          "towerCount": 7,
+          "samples": 8
+        }
+      }
+    },
+    {
+      "type": "gamble",
+      "branch": "gambleHigh",
+      "level": 4,
+      "name": "Alles oder nichts",
+      "budget": 1000,
+      "support": false,
+      "composition": [
+        {
+          "type": "gamble",
+          "level": 4,
+          "cost": 300
+        },
+        {
+          "type": "gamble",
+          "level": 4,
+          "cost": 300
+        },
+        {
+          "type": "gamble",
+          "level": 4,
+          "cost": 300
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        },
+        {
+          "type": "archer",
+          "level": 1,
+          "cost": 25
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 5.38,
+          "leaks": 18.63,
+          "survivors": 0,
+          "damage": 10717,
+          "damageShare": 0.377,
+          "enemySeconds": 592,
+          "spent": 1000,
+          "towerCount": 7,
+          "samples": 8
+        },
+        "swarm": {
+          "kills": 6.25,
+          "leaks": 17.75,
+          "survivors": 0,
+          "damage": 5663,
+          "damageShare": 0.272,
+          "enemySeconds": 441,
+          "spent": 1000,
+          "towerCount": 7,
+          "samples": 8
+        },
+        "armored": {
+          "kills": 2.88,
+          "leaks": 21.13,
+          "survivors": 0,
+          "damage": 11177,
+          "damageShare": 0.216,
+          "enemySeconds": 763,
+          "spent": 1000,
+          "towerCount": 7,
+          "samples": 8
+        },
+        "magic": {
+          "kills": 2.25,
+          "leaks": 21.75,
+          "survivors": 0,
+          "damage": 10035,
+          "damageShare": 0.195,
+          "enemySeconds": 689,
+          "spent": 1000,
+          "towerCount": 7,
+          "samples": 8
+        },
+        "shield": {
+          "kills": 3.75,
+          "leaks": 20.25,
+          "survivors": 0,
+          "damage": 7601,
+          "damageShare": 0.285,
+          "enemySeconds": 606,
+          "spent": 1000,
+          "towerCount": 7,
+          "samples": 8
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 7232,
+          "damageShare": 0.382,
+          "enemySeconds": 43,
+          "spent": 1000,
+          "towerCount": 7,
+          "samples": 8
+        }
+      }
+    },
+    {
+      "type": "portal",
+      "branch": "portalReturn",
+      "level": 4,
+      "name": "Rückstrom",
+      "budget": 1000,
+      "support": true,
+      "composition": [
+        {
+          "type": "portal",
+          "level": 4,
+          "cost": 380
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 7,
+          "leaks": 17,
+          "survivors": 0,
+          "damage": 11292,
+          "damageShare": 0.479,
+          "enemySeconds": 659,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 5,
+          "leaks": 19,
+          "survivors": 0,
+          "damage": 4751,
+          "damageShare": 0.336,
+          "enemySeconds": 460,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 2,
+          "leaks": 22,
+          "survivors": 0,
+          "damage": 10867,
+          "damageShare": 0.263,
+          "enemySeconds": 878,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 1,
+          "leaks": 23,
+          "survivors": 0,
+          "damage": 7108,
+          "damageShare": 0.172,
+          "enemySeconds": 796,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 6,
+          "leaks": 18,
+          "survivors": 0,
+          "damage": 7365,
+          "damageShare": 0.312,
+          "enemySeconds": 620,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 6888,
+          "damageShare": 0.501,
+          "enemySeconds": 44,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        }
+      }
+    },
+    {
+      "type": "portal",
+      "branch": "portalTime",
+      "level": 4,
+      "name": "Zeitschleuse",
+      "budget": 1000,
+      "support": true,
+      "composition": [
+        {
+          "type": "portal",
+          "level": 4,
+          "cost": 380
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        },
+        {
+          "type": "archer",
+          "level": 3,
+          "cost": 120
+        }
+      ],
+      "results": {
+        "normal": {
+          "kills": 6,
+          "leaks": 18,
+          "survivors": 0,
+          "damage": 11592,
+          "damageShare": 0.492,
+          "enemySeconds": 640,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "swarm": {
+          "kills": 7,
+          "leaks": 17,
+          "survivors": 0,
+          "damage": 5977,
+          "damageShare": 0.423,
+          "enemySeconds": 456,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "armored": {
+          "kills": 2,
+          "leaks": 22,
+          "survivors": 0,
+          "damage": 12742,
+          "damageShare": 0.309,
+          "enemySeconds": 863,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "magic": {
+          "kills": 1,
+          "leaks": 23,
+          "survivors": 0,
+          "damage": 8193,
+          "damageShare": 0.199,
+          "enemySeconds": 781,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "shield": {
+          "kills": 6,
+          "leaks": 18,
+          "survivors": 0,
+          "damage": 7317,
+          "damageShare": 0.31,
+          "enemySeconds": 609,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        },
+        "boss": {
+          "kills": 0,
+          "leaks": 1,
+          "survivors": 0,
+          "damage": 7078,
+          "damageShare": 0.515,
+          "enemySeconds": 45,
+          "spent": 980,
+          "towerCount": 6,
+          "samples": 1
+        }
+      }
+    }
+  ],
+  "dps": [
+    {
+      "type": "archer",
+      "branch": "volley",
+      "cost": 220,
+      "normal1": 37.5,
+      "boss1": 37.5,
+      "normal6": 225
+    },
+    {
+      "type": "archer",
+      "branch": "marksman",
+      "cost": 220,
+      "normal1": 89,
+      "boss1": 89,
+      "normal6": 89
+    },
+    {
+      "type": "catapult",
+      "branch": "barrage",
+      "cost": 265,
+      "normal1": 60.9,
+      "boss1": 60.9,
+      "normal6": 182.7
+    },
+    {
+      "type": "catapult",
+      "branch": "siege",
+      "cost": 265,
+      "normal1": 57.6,
+      "boss1": 57.6,
+      "normal6": 172.8
+    },
+    {
+      "type": "chain",
+      "branch": "storm",
+      "cost": 270,
+      "normal1": 41.9,
+      "boss1": 41.9,
+      "normal6": 144.4
+    },
+    {
+      "type": "chain",
+      "branch": "overload",
+      "cost": 270,
+      "normal1": 67.2,
+      "boss1": 67.2,
+      "normal6": 165.3
+    },
+    {
+      "type": "freeze",
+      "branch": "frostField",
+      "cost": 220,
+      "normal1": 0,
+      "boss1": 0,
+      "normal6": 0
+    },
+    {
+      "type": "freeze",
+      "branch": "deepFrost",
+      "cost": 220,
+      "normal1": 0,
+      "boss1": 0,
+      "normal6": 0
+    },
+    {
+      "type": "mine",
+      "branch": "minefield",
+      "cost": 245,
+      "normal1": 3.4,
+      "boss1": 3.4,
+      "normal6": 20.2
+    },
+    {
+      "type": "mine",
+      "branch": "demolition",
+      "cost": 245,
+      "normal1": 0,
+      "boss1": 0,
+      "normal6": 0
+    },
+    {
+      "type": "ballista",
+      "branch": "harpoon",
+      "cost": 315,
+      "normal1": 106,
+      "boss1": 286.3,
+      "normal6": 106
+    },
+    {
+      "type": "ballista",
+      "branch": "repeater",
+      "cost": 315,
+      "normal1": 139.2,
+      "boss1": 180.9,
+      "normal6": 139.2
+    },
+    {
+      "type": "flame",
+      "branch": "inferno",
+      "cost": 295,
+      "normal1": 78.6,
+      "boss1": 78.6,
+      "normal6": 471.5
+    },
+    {
+      "type": "flame",
+      "branch": "wildfire",
+      "cost": 295,
+      "normal1": 97.5,
+      "boss1": 97.5,
+      "normal6": 584.8
+    },
+    {
+      "type": "element",
+      "branch": "elementFire",
+      "cost": 280,
+      "normal1": 44.2,
+      "boss1": 44.2,
+      "normal6": 265.2
+    },
+    {
+      "type": "element",
+      "branch": "elementWind",
+      "cost": 280,
+      "normal1": 39,
+      "boss1": 39,
+      "normal6": 234
+    },
+    {
+      "type": "element",
+      "branch": "elementWater",
+      "cost": 280,
+      "normal1": 33.8,
+      "boss1": 33.8,
+      "normal6": 33.8
+    },
+    {
+      "type": "necromancer",
+      "branch": "soulChoir",
+      "cost": 320,
+      "normal1": 12.8,
+      "boss1": 12.8,
+      "normal6": 12.8
+    },
+    {
+      "type": "necromancer",
+      "branch": "soulKeeper",
+      "cost": 320,
+      "normal1": 38.3,
+      "boss1": 38.3,
+      "normal6": 38.3
+    },
+    {
+      "type": "gravity",
+      "branch": "gravityWell",
+      "cost": 300,
+      "normal1": 4,
+      "boss1": 4,
+      "normal6": 24
+    },
+    {
+      "type": "gravity",
+      "branch": "gravityResonator",
+      "cost": 300,
+      "normal1": 22,
+      "boss1": 22,
+      "normal6": 132
+    },
+    {
+      "type": "wind",
+      "branch": "windCannon",
+      "cost": 270,
+      "normal1": 38,
+      "boss1": 38,
+      "normal6": 228
+    },
+    {
+      "type": "wind",
+      "branch": "windGuide",
+      "cost": 270,
+      "normal1": 20.8,
+      "boss1": 20.8,
+      "normal6": 73.6
+    },
+    {
+      "type": "poison",
+      "branch": "poisonThorn",
+      "cost": 270,
+      "normal1": 85.5,
+      "boss1": 104.8,
+      "normal6": 112.8
+    },
+    {
+      "type": "poison",
+      "branch": "poisonSpore",
+      "cost": 270,
+      "normal1": 34.8,
+      "boss1": 34.8,
+      "normal6": 208.7
+    },
+    {
+      "type": "meteor",
+      "branch": "meteorCaller",
+      "cost": 380,
+      "normal1": 30.2,
+      "boss1": 30.2,
+      "normal6": 181.3
+    },
+    {
+      "type": "meteor",
+      "branch": "meteorEmber",
+      "cost": 380,
+      "normal1": 49.2,
+      "boss1": 49.2,
+      "normal6": 295.2
+    },
+    {
+      "type": "laser",
+      "branch": "laserFocus",
+      "cost": 355,
+      "normal1": 337.5,
+      "boss1": 337.5,
+      "normal6": 337.5
+    },
+    {
+      "type": "laser",
+      "branch": "laserSplitter",
+      "cost": 355,
+      "normal1": 94.5,
+      "boss1": 94.5,
+      "normal6": 283.4
+    },
+    {
+      "type": "gamble",
+      "branch": "gambleLoaded",
+      "cost": 300,
+      "normal1": 94.9,
+      "boss1": 94.9,
+      "normal6": 94.9
+    },
+    {
+      "type": "gamble",
+      "branch": "gambleHigh",
+      "cost": 300,
+      "normal1": 146.4,
+      "boss1": 134.4,
+      "normal6": 146.4
+    },
+    {
+      "type": "portal",
+      "branch": "portalReturn",
+      "cost": 380,
+      "normal1": 0,
+      "boss1": 0,
+      "normal6": 0
+    },
+    {
+      "type": "portal",
+      "branch": "portalTime",
+      "cost": 380,
+      "normal1": 0,
+      "boss1": 0,
+      "normal6": 0
+    }
+  ]
+}

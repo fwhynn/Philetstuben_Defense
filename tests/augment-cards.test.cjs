@@ -50,7 +50,7 @@ test('burn respects shields and immunity, refreshes without stacking and expires
 });
 test('frost pulse is periodic, boss duration halved and does not permanently stun',()=>{
  const r=combat('freeze',4),s=r.state,e=enemy({type:'boss'});s.enemies=[e];const ref={tw:{type:'freeze'},pos:{x:0,y:0},definition:{aura:true,slow:.8,range:100}};
- step(r,5,[ref]);assert.equal(e.augmentFrozen,5300);step(r,1,[ref]);assert.equal(e.augmentFrozen,5300);step(r,4,[ref]);assert.equal(e.augmentFrozen,10300);
+ step(r,5,[ref]);assert.equal(e.augmentFrozen,5300);step(r,1,[ref]);assert.equal(e.augmentFrozen,5300);step(r,4,[ref]);assert.equal(e.augmentFrozen,10200) // shared boss control budget: 0.5 s per 8 s;
 });
 test('house pays once per completed wave regardless of building count',()=>{
  const r=combat('house',4),s=r.state;s.map.get('0,0').buildings=[{type:'house'},{type:'house'}];const gold=s.gold;c.flow.finish(s);assert.equal(s.gold,gold+c.waves.economy.completion+6);const paid=s.gold;c.flow.finish(s);assert.equal(s.gold,paid);

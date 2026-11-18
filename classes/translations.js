@@ -4,6 +4,7 @@ Archer:'Bogenschütze',Freeze:'Frostturm',Waveplanung:'Wellenplanung',Waves:'Wel
 },en:{}};
 // One source phrase and its English equivalent per line; dynamic fragments may compose.
 globalThis.HexTranslations.add=function(rows){for(const line of rows.trim().split('\n')){const at=line.indexOf('|');if(at>0)this.en[line.slice(0,at)]=line.slice(at+1);}};
+Object.assign(HexTranslations.en,{"Sieben neue Türme, vierzehn Ultimates":"Seven new towers, fourteen ultimates","Gravitation, Wind, Gift, Meteore, Laser, Glücksspiel und Portale erweitern dein Arsenal – im Solo und Duo.":"Gravity, wind, poison, meteors, lasers, gambling and portals expand your arsenal in solo and co-op.","Sieben Türme für Solo und Duo":"Seven towers for solo and co-op","Zwei Ausbaupfade pro Turm":"Two upgrade paths per tower","Modelle für alle Editionen":"Models for every edition","Mehr taktische Rollen im Arsenal":"More tactical roles in the arsenal","Begrenzte Kontrolle statt endloser Blockaden":"Limited control instead of endless lockdowns","Neue Möglichkeiten":"New possibilities","Zwei Wege bis Stufe 4":"Two paths to level 4","Kontrolle und Umwege":"Control and detours","Schaden mit eigener Stärke":"Damage with a distinct role","Ins Arsenal integriert":"Integrated into the arsenal","Aussehen und Übersicht":"Appearance and clarity","Balance und Fortschritt":"Balance and progression","Sieben neue Türme sind im Arsenal freischaltbar und im Solo und Duo spielbar. Jeder hat zwei Ausbaupfade bis Stufe 4 mit eigenem Ultimate.":"Seven new towers can be unlocked in the arsenal and played in solo and co-op. Each has two upgrade paths to level 4 with its own ultimate.","Der Gravitationsturm zieht Gegner zusammen und bindet sie kurz. Wähle zwischen einem stärkeren Schwarzen Loch und zusätzlichen Schadenspulsen.":"The Gravity Tower pulls enemies together and briefly holds them. Choose between a stronger black hole and additional damage pulses.","Der Windturm schickt Tornados über die Wege. Seine Ultimates verbreitern den Angriff oder lenken Gegner auf längere verbundene Wege um.":"The Wind Tower sends tornadoes along the roads. Its ultimates widen the attack or redirect enemies onto longer connected routes.","Der Giftturm verteilt anhaltenden Giftschaden. Ein Pfad konzentriert sich auf starke Einzelziele, der andere verbreitet Gift über Gruppen.":"The Poison Tower deals damage over time. One path focuses on powerful single targets, while the other spreads poison among groups.","Der Meteorturm trifft aus großer Entfernung und hinterlässt brennende Krater. Wähle zwischen mehreren Einschlägen und länger brennenden Flächen.":"The Meteor Tower strikes from long range and leaves burning craters. Choose between multiple impacts and longer-lasting burning areas.","Der Laserturm steigert seinen Schaden, solange er dasselbe Ziel angreift. Sein zweiter Pfad teilt die Leistung auf mehrere schwächere Strahlen auf.":"The Laser Tower increases its damage while attacking the same target. Its second path splits its power into several weaker beams.","Der Glücksspielturm würfelt bei jedem Schuss zwischen Schaden, kritischen Treffern und Risiken. Ein Pfad sichert negative Ergebnisse ab, der andere erhöht Einsatz und Gewinnchance.":"The Gambling Tower rolls for damage, critical hits and risks with every shot. One path protects against negative results, while the other raises the stakes and chance of a big win.","Der Portalturm schickt eine begrenzte Zahl von Gegnern einmalig zum Weganfang zurück. Seine Ultimates bieten mehr Portalplätze oder kürzere Abklingzeiten.":"The Portal Tower sends a limited number of enemies back to the entrance once. Its ultimates offer more portal charges or shorter cooldowns.","Neue Turmmodelle für alle Ausbaustufen und Editionen, passende Symbole und sieben Bonushexe machen die neuen Rollen sichtbar. Die Turmübersicht zeigt auch Gift, Laseraufladung, Bindung und Portalwirkung.":"New tower models for every upgrade stage and edition, matching icons and seven bonus hexes make the new roles visible. Tower details also show poison, laser charging, binding and portal effects.","Die neuen Türme sind an vergleichbare Goldbudgets angepasst. Giftstapel, Rückwürfe und Bindungen sind begrenzt; Bosse widerstehen Versetzungen und werden von Portalen nur kurz verlangsamt.":"The new towers are tuned to comparable gold budgets. Poison stacks, knockbacks and binding are limited; bosses resist displacement and portals only briefly slow them.","Freischaltungen und gewählte Ultimates der neuen Türme werden mit deinem Account gespeichert.":"Unlocks and selected ultimates for the new towers are saved with your account."});
 HexTranslations.add(`
 Bist du dir sicher?|Are you sure?
 Erneut antippen, um 1 Kopie zu entfernen.|Tap again to remove 1 copy.
@@ -3013,6 +3014,130 @@ Partnerkarte ansehen (M)|View partner map (M)
 Duo: Eigene / Partnerkarte|Co-op: Your / partner map
 Team und Geschenke|Team and gifts
 Du kannst Türme weiter verbessern und ihren Fokus ändern und bleibst dabei bereit. Die Welle startet, sobald dein Partner bereit ist.|You can keep upgrading towers and changing their targeting while staying ready. The wave starts when your partner is ready.`);
+HexTranslations.add(`
+Gravitationsturm|Gravity Tower
+Windturm|Wind Tower
+Giftturm|Poison Tower
+Meteorturm|Meteor Tower
+Laserturm|Laser Tower
+Glücksspielturm|Gambler Tower
+Portalturm|Portal Tower
+Verdichter|Compressor
+Singularitätskern|Singularity Core
+Ereignishorizont|Event Horizon
+Resonator|Resonator
+Gezeitenlinse|Tidal Lens
+Pulsar|Pulsar
+Windkanone|Wind Cannon
+Sturmrotor|Storm Rotor
+Sturmfront|Storm Front
+Leitwind|Guiding Wind
+Wirbelweiche|Vortex Junction
+Umleitung|Diversion
+Giftdorn|Venom Thorn
+Toxindrüse|Toxin Gland
+Königsvenom|Royal Venom
+Sporenwerfer|Spore Launcher
+Pestkessel|Plague Cauldron
+Seuchenherd|Plague Source
+Himmelsrufer|Sky Caller
+Sternenschmiede|Star Forge
+Sternenfall|Starfall
+Glutanker|Ember Anchor
+Magmakessel|Magma Cauldron
+Caldera|Caldera
+Fokuslinse|Focus Lens
+Glutprisma|Ember Prism
+Sonnenlanze|Sun Lance
+Strahlteiler|Beam Splitter
+Doppelprisma|Twin Prism
+Prismennetz|Prism Network
+Gezinktes Rad|Loaded Wheel
+Bankhalter|Banker
+Gesicherte Bank|Secure Bank
+Hochroller|High Roller
+Schicksalswurf|Fate's Dice
+Alles oder nichts|All or Nothing
+Rückwegtor|Return Gate
+Heimkehrbogen|Homecoming Arch
+Rückstrom|Backflow
+Zeitpforte|Time Gate
+Schleusenwerk|Sluiceworks
+Zeitschleuse|Time Sluice
+Gravitationskurve|Gravity Bend
+Windgasse|Wind Lane
+Giftpfad|Poison Path
+Meteorstraße|Meteor Road
+Prismenweg|Prism Path
+Glücksstraße|Lucky Road
+Rückweg|Return Road
+Zieht bis zu 5 Gegner auf der Straße zusammen und bindet sie kurz. Bosse widerstehen dem Zug.|Pulls up to 5 enemies together along the road and briefly binds them. Bosses resist the pull.
+Ein fliegender Tornado trifft bis zu 3 Gegner und bremst sie kurz.|A travelling tornado hits up to 3 enemies and briefly slows them.
+Vergiftet sein Ziel. Bis zu 3 Giftdosen pro Gegner; jede hält 5 Sekunden.|Poisons its target. Up to 3 doses per enemy, each lasting 5 seconds.
+Meteor nach 0,75 Sekunden. Hinterlässt einen brennenden Krater; schnelle Gegner können entkommen.|Meteor strikes after 0.75 seconds, leaving a burning crater. Fast enemies can escape.
+Der Strahl wird am selben Ziel stärker. Zielwechsel setzt ihn zurück und kostet 0,65 Sekunden.|The beam grows stronger on the same target. Switching targets resets it and takes 0.65 seconds.
+Zufallstreffer: Krit, Mega-Krit oder Jackpot. Kann Gegner auch heilen oder beschleunigen.|Random shots: critical, mega critical or jackpot. May also heal or speed up enemies.
+Öffnet kurz ein Rückportal. Jeder Gegner kann einmal zum eigenen Weganfang zurückkehren. Bosse werden nur gebremst.|Briefly opens a return portal. Each enemy can return to its own path entrance once. Bosses are only slowed.
+Bündelt größere Gruppen und hält sie länger fest.|Gathers larger groups and holds them for longer.
+Stärkere Impulse. Pulsar trifft die erfasste Gruppe nach 0,8 Sekunden ein zweites Mal.|Stronger pulses. Pulsar hits the captured group a second time after 0.8 seconds.
+Mehr Durchschläge. Sturmfront schießt jeden vierten Angriff als Tornadofächer (maximal 8 Ziele).|More targets per tornado. Every fourth Storm Front attack fires a tornado fan (up to 8 targets).
+Wirft Gegner auf ihrem Weg zurück. Umleitung versetzt jeden fünften Angriff bis zu 3 Gegner auf einen längeren Nachbarweg.|Pushes enemies back along their path. Every fifth Diversion attack throws up to 3 enemies onto a longer neighbouring road.
+Starkes Einzelgift. Königsvenom verursacht mit Gift 25 % mehr Bossschaden.|Strong single-target poison. Royal Venom deals 25% more poison damage to bosses.
+Eine Flächengiftdosis je Gegner. Seuchenherd überträgt Restgift beim Tod einmalig auf bis zu 2 Nachbarn.|One area-poison dose per enemy. Plague Source spreads remaining poison on death to up to 2 neighbours, without further spread.
+Schwere Einschläge. Sternenfall trifft 3 Stellen; jeder Gegner erleidet nur einen Einschlag je Salve.|Heavy impacts. Starfall strikes 3 locations; each enemy takes at most one impact per volley.
+Langlebige Krater entzünden durchlaufende Gegner. Feuer stapelt nicht; der stärkste Brand zählt.|Long-lasting craters ignite passing enemies. Fire does not stack; the strongest burn applies.
+Ein zunehmend starker Strahl. Ideal gegen einzelne, langlebige Ziele.|An increasingly powerful beam. Ideal against single, durable targets.
+Getrennte Strahlen mit eigener Aufladung. Prismennetz trifft 3 verschiedene Ziele; insgesamt weniger Spitzenschaden als Sonnenlanze.|Separate beams with independent charge. Prism Network hits 3 different targets, with less total peak damage than Sun Lance.
+Ersetzt schädliche Ergebnisse zunächst durch Nieten, später durch normale Treffer.|Replaces harmful outcomes with blanks, then with normal hits.
+Mehr Mega-Krits, aber auch mehr Heilung und Tempo für Gegner. Jackpot-Schaden bleibt begrenzt.|More mega critical hits, but also more healing and speed for enemies. Jackpot damage is capped.
+Mehr Ladungen pro Öffnung. Spezialeinheiten verbrauchen 2; Bosse 1 für eine kurze Verlangsamung.|More charges per opening. Special units consume 2; bosses consume 1 for a brief slow.
+Kleine Rückportale mit kürzerer Abklingzeit. Ein Gegner kann unabhängig von der Zahl der Türme nur einmal zurück.|Small return portals with a shorter cooldown. Each enemy can return only once, regardless of the number of towers.
++25 % Reichweite für Gravitationsturm auf diesem Hex.|+25% Gravity Tower range on this hex.
++25 % Schaden für Windturm auf diesem Hex.|+25% Wind Tower damage on this hex.
++25 % Schaden für Giftturm auf diesem Hex.|+25% Poison Tower damage on this hex.
++25 % Schaden für Meteorturm auf diesem Hex.|+25% Meteor Tower damage on this hex.
++25 % Schaden für Laserturm auf diesem Hex.|+25% Laser Tower damage on this hex.
++25 % Schaden für Glücksspielturm auf diesem Hex.|+25% Gambler Tower damage on this hex.
++25 % Reichweite für Portalturm auf diesem Hex.|+25% Portal Tower range on this hex.
+Gruppen bündeln|Gather groups
+Linienkontrolle|Lane control
+Anhaltender Schaden|Damage over time
+Fernbeschuss|Long-range bombardment
+Dauerfeuer auf Eliten|Sustained elite damage
+Riskanter Schaden|Risky damage
+Zeit gewinnen|Buy time
+Effektradius|Effect radius
+Maximale Ziele|Maximum targets
+Bindedauer|Bind duration
+Maximaler Zug|Maximum pull
+Zugweite|Pull distance
+Rückwurf|Knockback
+Gift je Dosis|Poison per dose
+Giftdauer|Poison duration
+Gift gegen Bosse|Poison against bosses
+Gift pro Sekunde|Poison per second
+Gift-Bossfaktor|Poison boss multiplier
+Brandschaden|Burn damage
+Brand pro Sekunde|Burn per second
+Branddauer|Burn duration
+Kraterdauer|Crater duration
+Meteorstellen|Meteor locations
+Strahl anfangs|Starting beam damage
+Strahl voll geladen|Fully charged beam damage
+Aufladezeit|Charge time
+Getrennte Strahlen|Separate beams
+Zielwechselpause|Target switch delay
+Portalladungen|Portal charges
+Portalöffnung|Portal opening
+Wirkung|Effect
+Grundschaden|Base damage
+Ladungen|Charges
+Gravitation|Gravity
+Rückportal|Return portal
+Zweiter Impuls|Second pulse
+Tornadofächer|Tornado fan
+Giftübertragung|Poison spread
+`);
 
 HexTranslations.add(`
 Team-Aktionen|Team actions
@@ -3033,15 +3158,13 @@ Anmelden, um euren Durchlauf in die Bestenliste einzutragen.|Sign in to add your
 `);
 
 Object.assign(HexTranslations.en,{
+  "Neu": "New",
   "Duo: im gleichen Takt": "Co-op: in sync",
   "Passende Treffer, freie Upgrades und mehr Übersicht – vom Turmbau bis zum gemeinsamen Endlosspiel.": "Synchronized hits, available upgrades and clearer menus, from building towers to continuing together in endless mode.",
-  "Verbessert": "Improved",
   "Treffer und Gegner im gleichen Takt": "Hits and enemies in sync",
   "Klarere Deck- und Ergebnisansicht": "Clearer deck and result views",
-  "Behoben": "Fixed",
   "Keine eingefrorenen Effekte beim Warten": "No frozen effects while waiting",
   "Upgrades nach der eigenen Welle": "Upgrades after your own wave",
-  "Neu": "New",
   "Kartenwechsel mit M": "Switch maps with M",
   "Entfernt": "Removed",
   "Portalhilfe mit versendeten Türmen": "Portal support with transferred towers",

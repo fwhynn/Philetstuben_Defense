@@ -113,6 +113,8 @@ const HexData=(()=>{
   const BRANCH_VISUALS={marksman:{icon:'◎',color:'#f5d06e'},volley:{icon:'≋',color:'#96d47c'},siege:{icon:'◆',color:'#e99a5c'},barrage:{icon:'⋮',color:'#ffdca1'},storm:{icon:'ϟ',color:'#93a5ff'},overload:{icon:'✦',color:'#e2a1ff'},deepFrost:{icon:'❄',color:'#70d5ff'},frostField:{icon:'❆',color:'#c0f6ea'},demolition:{icon:'✹',color:'#ff9b55'},minefield:{icon:'••',color:'#d9bc72'},harpoon:{icon:'➶',color:'#e7d39e'},repeater:{icon:'»',color:'#d4b979'},inferno:{icon:'☀',color:'#ff7448'},wildfire:{icon:'≋',color:'#ff9b55'}};
   Object.assign(BRANCH_VISUALS,{elementFire:{icon:'♨',color:'#ff8654'},elementWater:{icon:'≈',color:'#69d8ff'},elementWind:{icon:'≋',color:'#dbefae'},soulChoir:{icon:'☽',color:'#a6edb4'},soulKeeper:{icon:'☠',color:'#c8a3ee'}});
   function defaultTargetPriority(tower){
+    if(tower.type==='laser')return ['boss','mostHealth','closestBase'];
+    if(['gravity','portal','wind','poison','meteor','gamble'].includes(tower.type))return ['closestBase','mostHealth','boss'];
     if(tower.type==='archer')return ['closestBase','mostHealth','boss'];
     const def=towerDefinition(tower),m=def.damageMultipliers||{},kinds=[['hp','mostHealth'],['armor','mostArmor'],['magic','mostMagic']];
     const ranked=kinds.map(([kind,priority])=>({priority,damage:(def.damage||0)*(m[kind]??1)})).sort((a,b)=>b.damage-a.damage);
@@ -128,6 +130,8 @@ const HexData=(()=>{
     for(const [field,label,fallback,unit] of [['splash','Explosionsradius',0,''],['chain','Blitzziele',1,''],['jumpRange','Blitz-Sprungweite',0,''],['pierceTargets','Durchschlagsziele',0,''],['slowDuration','Verlangsamungsdauer',0,' s'],['soulLimit','Maximale Geister',0,''],['soulDamage','Geisterschaden pro Sekunde',0,''],['soulDuration','Geisterlebensdauer',0,' s'],['bossMultiplier','Bossschaden-Multiplikator',1,'×']]){
       const value=d=>field==='pierceTargets'?(d.pierce?(d.pierceTargets||3):0):(d[field]??fallback);add(label,value(before),value(after),unit);
     }
+    for(const [field,label] of [['effectRadius','Effektradius'],['targetCap','Maximale Ziele'],['bind','Bindedauer'],['pull','Zugweite'],['push','Rückwurf'],['poisonDps','Gift pro Sekunde'],['poisonDuration','Giftdauer'],['poisonBoss','Gift-Bossfaktor'],['burnDps','Brand pro Sekunde'],['craterDuration','Kraterdauer'],['burnDuration','Branddauer'],['beamMin','Strahl anfangs'],['beamMax','Strahl voll geladen'],['beamRamp','Aufladezeit'],['beams','Getrennte Strahlen'],['swapDelay','Zielwechselpause'],['portalCharges','Portalladungen'],['portalDuration','Portalöffnung'],['meteorCount','Meteorstellen']])add(label,before[field]||0,after[field]||0);
+    for(const [field,label] of [['gravityEcho','Zweiter Impuls'],['windFan','Tornadofächer'],['windReroute','Umleitung'],['poisonSpread','Giftübertragung']])if(after[field]&&!before[field])lines.push(label+': neu');
     add('Aura-Verlangsamung',(1-(before.slow??1))*100,(1-(after.slow??1))*100,' %');
     add('Treffer-Verlangsamung',(1-(before.hitSlow??1))*100,(1-(after.hitSlow??1))*100,' %');
     return lines;
@@ -157,13 +161,17 @@ const HexData=(()=>{
     if(tower.type==='mine')def.damage*=.85;
     if(tower.type==='chain')def.damage*=1.3;
     if(tower.type==='necromancer'){def.damage*=1.5;def.soulDamage*=1.25;}
+    if(ultimate?.stats)Object.assign(def,ultimate.stats);
+    const unmodifiedDamage=def.damage;
     if(typeof HexBiomes!=='undefined')HexBiomes.apply(def,tower);
     const bonus=terrain?.towerBonus?.type===tower.type?terrain.towerBonus:{};
     def.range=Math.round(def.range*(bonus.range||1)*(terrain?.towerRange||1)*(tower.rangeFactor||1)*(tower.supportRange||1));
     def.damage=def.damage*(bonus.damage||1)*(tower.type==='archer'?(terrain?.archerDamage||1):1)*(terrain?.towerDamage||1)*(tower.supportDamage||1);
     def.damage=Number(def.damage.toFixed(2));
+    const effectFactor=unmodifiedDamage?def.damage/unmodifiedDamage:(terrain?.towerDamage||1)*(tower.supportDamage||1);
+    for(const field of ['poisonDps','burnDps','beamMin','beamMax'])if(def[field])def[field]=Number((def[field]*effectFactor).toFixed(2));
     if(def.soulDamage)def.soulDamage*= (bonus.damage||1)* (terrain?.towerDamage||1)*(tower.supportDamage||1)*(ultimate?.damageFactor||1);
-    def.damageType=({elementFire:'fire',elementWater:'water',elementWind:'wind'})[tower.branch]||({flame:'fire',chain:'lightning',necromancer:'spirit',element:'arcane'})[tower.type]||'physical';
+    def.damageType=({elementFire:'fire',elementWater:'water',elementWind:'wind'})[tower.branch]||({flame:'fire',chain:'lightning',necromancer:'spirit',element:'arcane',gravity:'arcane',wind:'wind',poison:'poison',laser:'arcane'})[tower.type]||'physical';
     return def;
   }
   // Broad/group effects first, focused damage/control below. Pure single-target
@@ -186,6 +194,94 @@ const HexData=(()=>{
     if(terrain.towerRange)parts.push('+'+Math.round((terrain.towerRange-1)*100)+' % Reichweite');
     if(terrain.archerDamage)parts.push('+25 % Archer');
     return parts.join(' · ')||null;
+  }
+  // Each new weapon has one base and two complete, mutually exclusive paths.
+  Object.assign(TOWERS,{
+    gravity:{name:'Gravitationsturm',cost:40,range:155,damage:8,cooldown:5,color:'#a48bdb',damageMultipliers:{hp:1,armor:.75,magic:1.2},weapon:'gravity',effectRadius:55,targetCap:5,pull:35,bind:1,role:'Gruppen bündeln',desc:'Zieht bis zu 5 Gegner auf der Straße zusammen und bindet sie kurz. Bosse widerstehen dem Zug.'},
+    wind:{name:'Windturm',cost:45,range:165,damage:14,cooldown:1.3,color:'#c7e5c0',damageMultipliers:{hp:1,armor:.7,magic:1},weapon:'wind',targetCap:3,role:'Linienkontrolle',desc:'Ein fliegender Tornado trifft bis zu 3 Gegner und bremst sie kurz.'},
+    poison:{name:'Giftturm',cost:40,range:155,damage:3,cooldown:1.2,color:'#9ac85f',damageMultipliers:{hp:1.15,armor:.8,magic:.7},weapon:'poison',poisonDps:8,poisonDuration:5,targetCap:1,role:'Anhaltender Schaden',desc:'Vergiftet sein Ziel. Bis zu 3 Giftdosen pro Gegner; jede hält 5 Sekunden.'},
+    meteor:{name:'Meteorturm',cost:80,range:310,damage:42,cooldown:5,color:'#e79658',damageMultipliers:{hp:1,armor:1.3,magic:.65},weapon:'meteor',effectRadius:50,craterDuration:3,burnDps:5,burnDuration:3,role:'Fernbeschuss',desc:'Meteor nach 0,75 Sekunden. Hinterlässt einen brennenden Krater; schnelle Gegner können entkommen.'},
+    laser:{name:'Laserturm',cost:65,range:175,damage:8,cooldown:.2,color:'#f2c66d',damageMultipliers:{hp:1.15,armor:.75,magic:1.15},weapon:'laser',beamMin:8,beamMax:42,beamRamp:3,beams:1,swapDelay:.65,role:'Dauerfeuer auf Eliten',desc:'Der Strahl wird am selben Ziel stärker. Zielwechsel setzt ihn zurück und kostet 0,65 Sekunden.'},
+    gamble:{name:'Glücksspielturm',cost:55,range:155,damage:20,cooldown:.95,color:'#e0b45d',damageMultipliers:{hp:1,armor:.9,magic:.9},weapon:'gamble',luck:'base',role:'Riskanter Schaden',desc:'Zufallstreffer: Krit, Mega-Krit oder Jackpot. Kann Gegner auch heilen oder beschleunigen.'},
+    portal:{name:'Portalturm',cost:75,range:145,damage:0,cooldown:20,color:'#75d4d2',damageMultipliers:{hp:1,armor:1,magic:1},weapon:'portal',portalDuration:1.2,portalCharges:2,effectRadius:24,role:'Zeit gewinnen',desc:'Öffnet kurz ein Rückportal. Jeder Gegner kann einmal zum eigenen Weganfang zurückkehren. Bosse werden nur gebremst.'}
+  });
+  const newPaths={
+    gravity:[
+      ['gravityWell','gravityCore',['Verdichter','Singularitätskern','Ereignishorizont'],[35,55,90],
+        {range:165,damage:12,cooldown:5.2,effectRadius:65,targetCap:6,bind:1.1},
+        {range:170,damage:20,effectRadius:70,targetCap:7,pull:40,bind:1.2},
+        {range:180,damage:30,cooldown:6,effectRadius:80,targetCap:8,pull:45,bind:1.6},'Bündelt größere Gruppen und hält sie länger fest.'],
+      ['gravityResonator','gravityTide',['Resonator','Gezeitenlinse','Pulsar'],[35,55,90],
+        {range:165,damage:22},{range:180,damage:42,effectRadius:60,bind:.8},
+        {range:190,damage:55,cooldown:5.8,effectRadius:65,targetCap:6,bind:.8,gravityEcho:true},'Stärkere Impulse. Pulsar trifft die erfasste Gruppe nach 0,8 Sekunden ein zweites Mal.']
+    ],
+    wind:[
+      ['windCannon','windRotor',['Windkanone','Sturmrotor','Sturmfront'],[45,70,110],
+        {range:175,damage:19,cooldown:1.15,targetCap:4},{range:185,damage:28,cooldown:1,targetCap:5},
+        {range:195,damage:38,targetCap:6,windFan:true},'Mehr Durchschläge. Sturmfront schießt jeden vierten Angriff als Tornadofächer (maximal 8 Ziele).'],
+      ['windGuide','windSwitch',['Leitwind','Wirbelweiche','Umleitung'],[45,70,110],
+        {range:175,damage:17,cooldown:1.5,push:18},{range:185,damage:25,cooldown:1.6,targetCap:4,push:30},
+        {range:195,damage:32,windReroute:true},'Wirft Gegner auf ihrem Weg zurück. Umleitung versetzt jeden fünften Angriff bis zu 3 Gegner auf einen längeren Nachbarweg.']
+    ],
+    poison:[
+      ['poisonThorn','poisonGland',['Giftdorn','Toxindrüse','Königsvenom'],[45,70,115],
+        {range:165,damage:5,poisonDps:13,poisonDuration:4},{range:175,damage:7,poisonDps:20,poisonDuration:5},
+        {range:185,damage:8,poisonDps:30,poisonBoss:1.25},'Starkes Einzelgift. Königsvenom verursacht mit Gift 25 % mehr Bossschaden.'],
+      ['poisonSpore','poisonCauldron',['Sporenwerfer','Pestkessel','Seuchenherd'],[45,70,115],
+        {range:145,damage:6,cooldown:1.8,effectRadius:45,targetCap:4,poisonDps:10,poisonDuration:4,poisonArea:true},
+        {range:150,damage:10,effectRadius:60,targetCap:5,poisonDps:18,poisonDuration:5},
+        {range:160,damage:14,cooldown:1.7,effectRadius:70,targetCap:6,poisonDps:27,poisonSpread:true},'Eine Flächengiftdosis je Gegner. Seuchenherd überträgt Restgift beim Tod einmalig auf bis zu 2 Nachbarn.']
+    ],
+    meteor:[
+      ['meteorCaller','meteorForge',['Himmelsrufer','Sternenschmiede','Sternenfall'],[65,95,140],
+        {range:330,damage:75,cooldown:5.5,effectRadius:60,burnDps:7},
+        {range:360,damage:140,cooldown:6,effectRadius:75,burnDps:10},
+        {range:380,damage:95,cooldown:6.8,effectRadius:65,meteorCount:3,craterDuration:4,burnDps:14,burnDuration:4},'Schwere Einschläge. Sternenfall trifft 3 Stellen; jeder Gegner erleidet nur einen Einschlag je Salve.'],
+      ['meteorEmber','meteorMagma',['Glutanker','Magmakessel','Caldera'],[65,95,140],
+        {damage:40,effectRadius:60,craterDuration:5,burnDps:11},
+        {range:330,damage:60,cooldown:5.5,effectRadius:65,craterDuration:6,burnDps:20},
+        {range:350,damage:75,cooldown:6,effectRadius:75,craterDuration:8,burnDps:30,burnDuration:4},'Langlebige Krater entzünden durchlaufende Gegner. Feuer stapelt nicht; der stärkste Brand zählt.']
+    ],
+    laser:[
+      ['laserFocus','laserPrism',['Fokuslinse','Glutprisma','Sonnenlanze'],[60,85,145],
+        {range:185,damage:12,beamMin:12,beamMax:80,beamRamp:3.5},
+        {range:195,damage:18,beamMin:18,beamMax:165,beamRamp:4},
+        {range:205,damage:24,beamMin:24,beamMax:340,beamRamp:4.5},'Ein zunehmend starker Strahl. Ideal gegen einzelne, langlebige Ziele.'],
+      ['laserSplitter','laserDouble',['Strahlteiler','Doppelprisma','Prismennetz'],[60,85,145],
+        {damage:6,beamMin:6,beamMax:28,beamRamp:2.5,beams:2,swapDelay:.5},
+        {range:185,damage:10,beamMin:10,beamMax:62},
+        {range:195,damage:12,beamMin:12,beamMax:90,beamRamp:3,beams:3},'Getrennte Strahlen mit eigener Aufladung. Prismennetz trifft 3 verschiedene Ziele; insgesamt weniger Spitzenschaden als Sonnenlanze.']
+    ],
+    gamble:[
+      ['gambleLoaded','gambleBank',['Gezinktes Rad','Bankhalter','Gesicherte Bank'],[50,75,120],
+        {range:165,damage:25,cooldown:1.1,luck:'safe2'},
+        {range:175,damage:38,cooldown:1.05,luck:'safe3'},
+        {range:185,damage:55,cooldown:1,luck:'safe4'},'Ersetzt schädliche Ergebnisse zunächst durch Nieten, später durch normale Treffer.'],
+      ['gambleHigh','gambleFate',['Hochroller','Schicksalswurf','Alles oder nichts'],[50,75,120],
+        {damage:24,cooldown:1.2,luck:'risk'},
+        {range:165,damage:34,luck:'risk'},
+        {range:175,damage:48,cooldown:1.1,luck:'risk4'},'Mehr Mega-Krits, aber auch mehr Heilung und Tempo für Gegner. Jackpot-Schaden bleibt begrenzt.']
+    ],
+    portal:[
+      ['portalReturn','portalArch',['Rückwegtor','Heimkehrbogen','Rückstrom'],[45,65,95],
+        {range:155,portalDuration:1.5,portalCharges:3},
+        {range:165,cooldown:18,portalDuration:1.8},
+        {range:175,portalDuration:2,portalCharges:4},'Mehr Ladungen pro Öffnung. Spezialeinheiten verbrauchen 2; Bosse 1 für eine kurze Verlangsamung.'],
+      ['portalTime','portalSluice',['Zeitpforte','Schleusenwerk','Zeitschleuse'],[45,65,95],
+        {range:155,cooldown:17,portalDuration:1},
+        {range:165,cooldown:14},
+        {range:175,cooldown:12},'Kleine Rückportale mit kürzerer Abklingzeit. Ein Gegner kann unabhängig von der Zahl der Türme nur einmal zurück.']
+    ]
+  };
+  for(const [type,paths] of Object.entries(newPaths))for(const [branch,final,names,costs,second,third,fourth,desc] of paths){
+    UPGRADES[branch]={tower:type,name:names[0],cost:costs[0],...second,desc};
+    UPGRADES[final]={tower:type,requires:branch,name:names[1],cost:costs[1],...third,desc};
+    ULTIMATES[type]={name:names[2],cost:costs[2],desc};
+    SPECIALIZATIONS[branch]={name:names[2],stats:fourth,desc};
+    BRANCH_VISUALS[branch]={icon:({gravity:'◉',wind:'≋',poison:'♧',meteor:'☄',laser:'✦',gamble:'⚄',portal:'◎'})[type],color:TOWERS[type].color};
+  }
+  for(const [type,name] of Object.entries({gravity:'Gravitationskurve',wind:'Windgasse',poison:'Giftpfad',meteor:'Meteorstraße',laser:'Prismenweg',gamble:'Glücksstraße',portal:'Rückweg'})){
+    const id=type+'Road',range=['gravity','portal'].includes(type);CARD_LIBRARY[id]={...CARD_LIBRARY.straight,id,name,rarity:'Rare',model:'straight',requiredTower:type,towerBonus:{type,[range?'range':'damage']:1.25},desc:'+25 % '+(range?'Reichweite':'Schaden')+' für '+TOWERS[type].name+' auf diesem Hex.'};
   }
   const INTRO_TOWERS=[{wave:0,id:"archer"},{wave:0,id:"catapult"},{wave:5,id:"freeze"},{wave:10,id:"chain"},{wave:15,id:"mine"}];
   for(const {id,wave} of INTRO_TOWERS)TOWERS[id].introWave=wave;

@@ -245,7 +245,7 @@ function create(svg,commands){
       commands.selectTower(tile.q,tile.r,index,e.ctrlKey||e.metaKey);
     });
     const base=document.createElementNS(NS,'circle');base.setAttribute('cx',p.x);base.setAttribute('cy',p.y);base.setAttribute('r',14);base.setAttribute('fill','#202821');base.setAttribute('stroke',def.color);base.setAttribute('stroke-width',3);g.appendChild(base);
-    const visual=HexData.BRANCH_VISUALS[tw.branch],icon=visual?.icon||(tw.type==='element'?'◆':tw.type==='necromancer'?'☠':tw.type==='archer'?'A':tw.type==='catapult'?'K':tw.type==='freeze'?'❄':tw.type==='mine'?'✹':tw.type==='ballista'?'➶':tw.type==='flame'?'♨':'⚡');
+    const visual=HexData.BRANCH_VISUALS[tw.branch],icon=visual?.icon||({gravity:'◉',wind:'≋',poison:'♧',meteor:'☄',laser:'✦',gamble:'⚄',portal:'◎'})[tw.type]||(tw.type==='element'?'◆':tw.type==='necromancer'?'☠':tw.type==='archer'?'A':tw.type==='catapult'?'K':tw.type==='freeze'?'❄':tw.type==='mine'?'✹':tw.type==='ballista'?'➶':tw.type==='flame'?'♨':'⚡');
     if(visual)base.setAttribute('stroke',visual.color);
     const tx=text(p.x,p.y+5,icon,14,visual?.color||def.color,'800');g.appendChild(tx);
     if(tw.branch){const badge=document.createElementNS(NS,'circle');badge.setAttribute('cx',p.x+11);badge.setAttribute('cy',p.y+12);badge.setAttribute('r',6);badge.setAttribute('fill','#172019');badge.setAttribute('stroke',visual.color);g.appendChild(badge);g.appendChild(text(p.x+11,p.y+15,String(tw.level),8,'#fff','700'));}
@@ -270,7 +270,7 @@ function create(svg,commands){
     if(p.kind==='spirit'){const c=document.createElementNS(NS,'circle');c.setAttribute('cx',p.x);c.setAttribute('cy',p.y);c.setAttribute('r',p.r);c.setAttribute('fill',p.color);c.setAttribute('fill-opacity','.75');scene.appendChild(c);
     }else if(p.kind==='enemyTar'||p.kind==='enemySpores'){
       const c=document.createElementNS(NS,'circle');c.setAttribute('cx',p.x);c.setAttribute('cy',p.y);c.setAttribute('r',p.r);c.setAttribute('fill',p.kind==='enemyTar'?p.color:'#b6b884');c.setAttribute('fill-opacity',p.kind==='enemyTar'?'.8':'.25');scene.appendChild(c);
-    }else if(p.kind==='blast'){
+    }else if(['blast','gravityWell','portalGate','crater','meteorFall','tornado'].includes(p.kind)){
       const c=document.createElementNS(NS,'circle');c.setAttribute('cx',p.x);c.setAttribute('cy',p.y);c.setAttribute('r',p.r);c.setAttribute('fill',p.color);c.setAttribute('fill-opacity','.18');c.setAttribute('stroke',p.color);c.setAttribute('stroke-width','3');scene.appendChild(c);
     }else if(p.kind==='chain'){
       for(let i=0;i<p.pts.length-1;i++){const l=line(p.pts[i].x,p.pts[i].y,p.pts[i+1].x,p.pts[i+1].y,p.color,3);scene.appendChild(l);}
