@@ -1,5 +1,21 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
 const {createLobbies}=require('../server/duo-lobbies.cjs'),{randomUUID}=require('node:crypto'),core=require('../headless-core.cjs')();
+
+for(const player of [0,1])test('seat '+player+' recovers failed account loading, shows both names and selects its own augments',async()=>{
+ const lobby=createLobbies(),a=lobby.create({requestId:randomUUID()}),b=lobby.join({requestId:randomUUID(),code:a.code}),seat=[a,b][player],other=[b,a][player],nodes=new Map(),timers=[];
+ const p=i=>({_duoIdentity:{id:i+1,username:['Phil','Mate'][i]},records:{highestWave:36},unlocks:['tower:flame'],augmentCards:{...core.augmentCards.clean(null),cards:{archer:[1,0,0,0,0],chain:[0,1,0,0,0]},equipped:['archer']}});
+ lobby.applyAugments(other.token,p(1-player));let requests=0;
+ const element=()=>({children:[],listeners:{},attributes:{},dataset:{},appendChild(n){this.children.push(n);return n;},replaceChildren(...n){this.children=n;},setAttribute(k,v){this.attributes[k]=v;},addEventListener(k,f){this.listeners[k]=f;}});
+ const doc={getElementById(id){if(!nodes.has(id))nodes.set(id,element());return nodes.get(id);},createElement:element},storage=new Map();
+ const context={document:doc,URLSearchParams,location:{hash:'#session='+seat.token,origin:'http://localhost',assign(){}},crypto:{randomUUID},Date,setTimeout:fn=>timers.push(fn),sessionStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v)},localStorage:{getItem:()=>null},addEventListener(){},HexBuildings:core.buildings,HexHeroes:core.heroes,HexAugmentCards:core.augmentCards,HexData:core.data,HexArsenal:{icon:()=>''},HexProfile:{load:()=>({unlockedTowers:[]}),modesUnlocked:()=>true},HexApi:{async applyDuoAugments(token){if(++requests===1)throw Error('Vorübergehend nicht erreichbar');return lobby.applyAugments(token,p(player));}},HexDuoClient:{inviteCode:()=>'',create(o){return {start(){o.onView(lobby.view(seat.token));},stop(){},async send(action,payload){const v=lobby.view(seat.token);assert.ok(lobby.receive(seat.token,{epoch:v.epoch,sequence:v.next,wave:v.wave,phase:v.boards[player].phase,action,payload}).ok);o.onView(lobby.view(seat.token));}};}}};
+ const settle=()=>new Promise(r=>setImmediate(r));await vm.runInNewContext(fs.readFileSync('duo-lobby.js','utf8'),context);await settle();
+ assert.equal(nodes.get('lobbyReady').disabled,true);assert.ok(nodes.get('lobbyAugments').children.some(n=>n.textContent==='Account erneut laden'));
+ timers.shift()();await settle();if(timers.length){timers.shift()();await settle();}
+ assert.equal(requests,2);assert.match(nodes.get('friendName').textContent,new RegExp(player?'Phil':'Mate'));assert.match(nodes.get('ownName').textContent,new RegExp(player?'Mate':'Phil'));
+ const row=()=>nodes.get('lobbyAugments').children[0],chain=row().children.find(n=>n.dataset.augment==='chain');assert.equal(chain.disabled,false);await chain.listeners.click();
+ assert.deepEqual(lobby.view(other.token).lobbyState.augments[player],[{id:'archer',tier:0},{id:'chain',tier:1}]);assert.deepEqual(lobby.view(seat.token).lobbyState.augments[1-player],[{id:'archer',tier:0}]);
+ assert.equal(row().children.find(n=>n.dataset.augment==='chain').attributes['aria-pressed'],'true');
+});
 test('lobby UI selects five towers, applies on server, reflects partner and prevents edits when ready',async()=>{
  const lobby=createLobbies(),a=lobby.create({requestId:randomUUID()}),b=lobby.join({requestId:randomUUID(),code:a.code});const nodes=new Map(),calls=[];let callbacks;
  function node(tag='div'){return {tag,children:[],listeners:{},attributes:{},dataset:{},value:'',hidden:false,disabled:false,textContent:'',appendChild(n){this.children.push(n);return n;},replaceChildren(...n){this.children=n;},setAttribute(k,v){this.attributes[k]=v;},addEventListener(k,f){this.listeners[k]=f;},querySelector(){return node('button');},focus(){},remove(){}};}

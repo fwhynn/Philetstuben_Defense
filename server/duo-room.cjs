@@ -5,6 +5,7 @@ const loadCore = require('../headless-core.cjs');
 const RULESET = require('../package.json').version;
 // Reviewed checkpoint compatibility, including legacy 20-gold gift migration.
 function compatibleRuleset(source,target=RULESET){
+  if(target==='1.3.2'&&['1.2.8','1.2.9','1.3.0','1.3.1'].includes(source))return true;
   if(target==='1.3.1'&&['1.2.8','1.2.9','1.3.0'].includes(source))return true;
   if(target==='1.3.0'&&['1.2.8','1.2.9'].includes(source))return true;
   if(target==='1.2.9'&&source==='1.2.8')return true;
@@ -17,6 +18,7 @@ const word = v => typeof v === 'string' && /^[a-zA-Z0-9:_-]{1,120}$/.test(v);
 const slot = v => exact(v, ['q', 'r', 'index']) && integer(v.q, -1000, 1000) && integer(v.r, -1000, 1000) && integer(v.index, 0, 31);
 function payloadValid(action, p) {
   switch (action) {
+    case 'lobbyAugments': return exact(p,['cards']) && Array.isArray(p.cards) && p.cards.length<=5 && new Set(p.cards).size===p.cards.length && p.cards.every(word);
     case 'guardian': return exact(p, ['board', 'id', 'value']) && integer(p.board, 0, 1) && typeof p.id === 'string' && /^-?\d{1,4},-?\d{1,4}$/.test(p.id) && typeof p.value === 'boolean';
     case 'lobbyLoadout': return (exact(p,['towers']) || exact(p,['towers','heroId','difficulty']) && word(p.heroId) && ['normal','dual'].includes(p.difficulty)) && Array.isArray(p.towers) && p.towers.length===5 && new Set(p.towers).size===5 && p.towers.every(word);
     case 'lobbyStart': return exact(p, []);
@@ -67,7 +69,10 @@ function motionPath(e) {
     const p=e.points[i],last=result[0];
     if(e.points[i+1]?.tunnel)break;
     distance+=Math.hypot(last.x-p.x,last.y-p.y);
-    result.unshift({x:p.x,y:p.y});if(distance>=160)break;
+    // Keep corners, but collapse collinear samples. A longer trail also covers
+    // fast units at 8× during a late packet without inflating straight roads.
+    if(result.length>1){const b=result[0],c=result[1],ab={x:b.x-p.x,y:b.y-p.y},bc={x:c.x-b.x,y:c.y-b.y};if(Math.abs(ab.x*bc.y-ab.y*bc.x)<1e-7&&ab.x*bc.x+ab.y*bc.y>=0)result.shift();}
+    result.unshift({x:p.x,y:p.y});if(distance>=512)break;
   }
   return result;
 }
@@ -142,6 +147,12 @@ function createRoom({ seed = crypto.randomUUID(), loadouts, now = () => Date.now
       }
       result={ok,reason:ok?null:'illegal'};
     }
+    else if(packet.action==='lobbyAugments'){
+      const access=session.setupOptions?.augments,cards=packet.payload.cards,s=match.boards[player].state;
+      const ok=!lobby.started&&!!access&&cards.length<=access.slots&&cards.every(id=>access.choices.some(c=>c.id===id)&&(!Object.hasOwn(core.data.TOWERS,id)||s.towerLoadout.includes(id)));
+      if(ok){session.augmentSelection=[...cards];s.metaAugments={version:1,cards:cards.map(id=>({...access.choices.find(c=>c.id===id)}))};lobby.ready[player]=false;revision++;}
+      result={ok,reason:ok?null:'illegal'};
+    }
     else if(packet.action==='lobbyStart'){const ok=player===0&&!lobby.started&&seats.every(Boolean)&&lobby.ready[1];if(ok){lobby.ready=[true,true];lobby.started=true;revision++;}result={ok,reason:ok?null:'partner-not-ready'};}
     else if (packet.action === 'lobbyReady') { const ok = !lobby.started && seats.every(Boolean); if (ok) { lobby.ready[player] = packet.payload.value; if (lobby.ready.every(Boolean)) lobby.started = true; revision++; } result = { ok, reason: ok ? null : 'illegal' }; }
     else if (!lobby.started) result = { ok: false, reason: 'lobby-not-ready' };
@@ -175,7 +186,11 @@ function createRoom({ seed = crypto.randomUUID(), loadouts, now = () => Date.now
     const preferred=first&&(profile||guest)?.activeLoadout?.length===5?progress.activeLoadout:s.towerLoadout;
     const loadout=[...new Set([...preferred.filter(id=>towers.includes(id)),...towers])].slice(0,5);
     const unlocks=core.profile.runUnlocks(progress).filter(id=>id.startsWith('ultimate:')||id.startsWith('building:')&&Object.hasOwn(core.profile.BUILDING_UNLOCKS,id.slice(9)));
-    const selected=profile?core.augmentCards.run(progress,loadout):{version:1,cards:[]};
+    const accountAugments=core.augmentCards.clean(progress.augmentCards),slots=profile&&core.augmentCards.unlocked(progress)?core.augmentCards.slots(progress):0;
+    const choices=slots?Object.keys(core.augmentCards.catalog).map(id=>({id,tier:core.augmentCards.tier(accountAugments.cards,id)})).filter(c=>c.tier>=0):[];
+    // The lobby loadout belongs to this party; never rewrite the account save to change it.
+    const selection=session.augmentSelection||accountAugments.equipped;
+    const selected={version:1,cards:selection.filter(id=>choices.some(c=>c.id===id)).slice(0,slots).filter(id=>!Object.hasOwn(core.data.TOWERS,id)||loadout.includes(id)).map(id=>({...choices.find(c=>c.id===id)}))};
     if(heroId!==s.heroId||difficulty!==s.difficulty||loadout.join('|')!==s.towerLoadout.join('|')){
       core.duo.configureBoard(match,player,{loadout,heroId,difficulty,unlocks,metaAugments:selected});
     }else{
@@ -183,9 +198,9 @@ function createRoom({ seed = crypto.randomUUID(), loadouts, now = () => Date.now
     }
     if(player===0&&match.boards[1].state.difficulty!==difficulty){const other=match.boards[1].state;core.duo.configureBoard(match,1,{loadout:other.towerLoadout,heroId:other.heroId,difficulty,unlocks:[...other.ultimateUnlocks,...other.buildingUnlocks],metaAugments:other.metaAugments});lobby.ready[1]=false;}
     const identity=profile?._duoIdentity;if(identity&&typeof identity.username==='string'&&identity.username.length<=80)session.identity={id:String(identity.id),username:identity.username};else if(!profile)delete session.identity;
-    session.setupOptions={heroes,twoFronts,towers};lobby.ready[player]=false;revision++;
+    session.setupOptions={heroes,twoFronts,towers,augments:{slots,choices}};lobby.ready[player]=false;revision++;
     const equipped=match.boards[player].state;
-    return {ok:true,cards:copy(selected.cards),setupOptions:copy(session.setupOptions),heroId,difficulty,loadout:[...loadout],ultimateUnlocks:[...equipped.ultimateUnlocks],buildingUnlocks:[...equipped.buildingUnlocks]};
+    return {ok:true,name:session.identity?.username||('Gast '+(player+1)),cards:copy(selected.cards),setupOptions:copy(session.setupOptions),heroId,difficulty,loadout:[...loadout],ultimateUnlocks:[...equipped.ultimateUnlocks],buildingUnlocks:[...equipped.buildingUnlocks]};
   }
   // Geometry changes rarely during combat; do not walk every road for each landmark at 10 Hz per viewer.
   const terrainCache=new WeakMap();

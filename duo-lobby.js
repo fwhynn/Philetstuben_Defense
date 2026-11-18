@@ -24,7 +24,7 @@
    if(key!==loadoutKey||!draftLoadout){loadoutKey=key;draftLoadout=[...own];draftHero=ownBoard.heroId||'standard';draftFronts=ownBoard.difficulty||'normal';}
    const ready=!!next.lobbyState?.ready?.[next.player],available=new Set(access.towers||['archer','catapult','chain','freeze','mine',...lobbyProfile.unlockedTowers||[],...own]);
    const presets=(lobbyProfile.loadoutPresets||[]).filter(p=>p.towers.length===5&&p.towers.every(id=>available.has(id)));
-   const dirty=draftKey()!==key,renderKey=JSON.stringify([draftKey(),otherBoard?.heroId,otherBoard?.difficulty,ownBoard.ultimateUnlocks,ownBoard.buildingUnlocks,access,presets,partner,savingLoadout,next.lobby.players,dirty,ready,!!augmentSession?.loading,next.lobbyState?.augments,[...available]]);
+   const dirty=draftKey()!==key,renderKey=JSON.stringify([draftKey(),otherBoard?.heroId,otherBoard?.difficulty,ownBoard.ultimateUnlocks,ownBoard.buildingUnlocks,access,presets,partner,savingLoadout,next.lobby.players,dirty,ready,!!augmentSession?.loading,augmentSession?.error,!!augmentSession?.loaded,next.lobbyState?.augments,[...available]]);
 
    if(renderKey===loadoutRenderKey)return;loadoutRenderKey=renderKey;
    const locked=savingLoadout||ready,heroSelect=$('lobbyHero'),fronts=$('lobbyFronts');
@@ -49,13 +49,22 @@
      if(name){const item=document.createElement('li');item.textContent=(kind==='ultimate'?HexData.TOWERS[type].name:HexBuildings.definitions[type].name)+' · '+name;arsenal.appendChild(item);}
    }
    $('lobbyArsenal').hidden=!arsenal.children.length;
-   // Hexwerk: je Spieler eine Zeile mit Karten-Chips (Symbol und Seltenheit per CSS aus data-augment/data-tier).
-   const augments=next.lobbyState?.augments||[[],[]],augmentBox=$('lobbyAugments');augmentBox.replaceChildren();
-   for(const [label,cards] of [['Deine Augments:',augments[next.player]||[]],['Partner:',augments[1-next.player]||[]]]){const row=document.createElement('span');row.className='lobbyAugmentRow';const head=document.createElement('strong');head.textContent=label;row.appendChild(head);
-    if(!cards.length){const none=document.createElement('span');none.className='lobbyAugmentNone';none.textContent=label==='Deine Augments:'&&augmentSession?.loading?'Wird geladen …':label==='Partner:'&&next.lobby.players<2?'Wartet auf Beitritt …':'Keine Augments';row.appendChild(none);}
-    for(const c of cards){const chip=document.createElement('span');chip.className='augmentLoadoutChip';chip.dataset.augment=c.id;chip.dataset.tier=String(c.tier);chip.textContent=HexAugmentCards.catalog[c.id].name+' · '+HexAugmentCards.rarities[c.tier];row.appendChild(chip);}
-    augmentBox.appendChild(row);}
-   const augmentNote=document.createElement('small');augmentNote.textContent='Aktive Augments für eure Turmauswahl. Gäste spielen ohne Account-Augments.';augmentBox.appendChild(augmentNote);
+   const augments=next.lobbyState?.augments||[[],[]],augmentBox=$('lobbyAugments'),selection=augments[next.player]||[],options=access.augments;
+   augmentBox.replaceChildren();
+   for(const [local,cards] of [[true,options?.choices||selection],[false,augments[1-next.player]||[]]]){
+     const row=document.createElement('div');row.className='lobbyAugmentRow';
+     const head=document.createElement('strong');head.textContent=local?'Deine Augments · '+selection.length+'/'+(options?.slots??selection.length):'Augments deines Partners';row.appendChild(head);
+     if(!cards.length){const none=document.createElement('span');none.className='lobbyAugmentNone';none.textContent=local&&augmentSession?.loading?'Wird geladen …':!local&&next.lobby.players<2?'Wartet auf Beitritt …':local?'Keine Augment-Karten verfügbar':'Keine Augments';row.appendChild(none);}
+     for(const c of cards){
+       const chosen=selection.some(card=>card.id===c.id),usable=!HexData.TOWERS[c.id]||draftLoadout.includes(c.id),chip=document.createElement(local?'button':'span');
+       chip.className='augmentLoadoutChip';chip.dataset.augment=c.id;chip.dataset.tier=String(c.tier);chip.textContent=HexAugmentCards.catalog[c.id].name+' · '+HexAugmentCards.rarities[c.tier];
+       if(local){chip.type='button';chip.setAttribute('aria-pressed',String(chosen));chip.disabled=locked||!!augmentSession?.loading||!augmentSession?.loaded||!usable||!chosen&&selection.length>=(options?.slots||0);chip.title=usable?HexAugmentCards.describe(c.id,c.tier):'Wähle diesen Turm zuerst in deiner Turmauswahl.';chip.addEventListener('click',()=>selectAugment(c.id));}
+       row.appendChild(chip);
+     }
+     augmentBox.appendChild(row);
+   }
+   const augmentNote=document.createElement('small');augmentNote.textContent='Wähle deine Augments für diese Duo-Partie. Deine Auswahl im Arsenal bleibt erhalten. Gäste spielen ohne Account-Augments.';augmentBox.appendChild(augmentNote);
+   if(augmentSession?.error){const retry=document.createElement('button');retry.type='button';retry.textContent='Account erneut laden';retry.disabled=savingLoadout;retry.addEventListener('click',()=>refreshAccount());augmentBox.appendChild(retry);}
    $('lobbyLoadoutCount').textContent=draftLoadout.length+'/5';$('lobbyLoadoutChoices').replaceChildren();$('lobbyPartnerLoadout').replaceChildren();
    function tower(id,selected,interactive){const def=HexData.TOWERS[id],button=document.createElement(interactive?'button':'div');button.className='lobbyTowerChoice';button.innerHTML=HexArsenal.icon(id,def.color);const name=document.createElement('span');name.textContent=def.name+(interactive&&!available.has(id)?' · Gesperrt':'');button.appendChild(name);if(interactive){button.type='button';button.setAttribute('aria-pressed',String(selected));button.disabled=savingLoadout||ready||!available.has(id)||(!selected&&draftLoadout.length>=5);button.addEventListener('click',()=>{draftLoadout=selected?draftLoadout.filter(t=>t!==id):[...draftLoadout,id];show(view);saveSelection();});}return button;}
    for(const id of Object.keys(HexData.TOWERS))$('lobbyLoadoutChoices').appendChild(tower(id,draftLoadout.includes(id),true));
@@ -70,23 +79,40 @@
    $('seatFriend').dataset.state=!joined?'open':!online?'offline':ready[other]?'ready':'notready';
    $('friendReady').textContent=!joined?'Wartet auf Beitritt …':!online?'Verbindung unterbrochen':ready[other]?'Bereit ✓':'Noch nicht bereit';
    step('stepInvite',joined?'done':'current');step('stepJoin',joined?'done':'');step('stepReady',ready.every(Boolean)?'done':joined?'current':'');
-   $('lobbyReady').textContent=own===0?(ready[other]?'Spiel starten':'Warte auf Partner · noch nicht bereit'):ready[own]?'Bereitschaft zurücknehmen':'Ich bin bereit';renderLoadouts(next);$('lobbyReady').disabled=!joined||next.connection.paused||savingLoadout||draftKey()!==loadoutKey||draftLoadout.length!==5||own===0&&!ready[other];
+   $('lobbyReady').textContent=own===0?(ready[other]?'Spiel starten':'Warte auf Partner · noch nicht bereit'):ready[own]?'Bereitschaft zurücknehmen':'Ich bin bereit';renderLoadouts(next);$('lobbyReady').disabled=!joined||next.connection.paused||savingLoadout||!augmentSession?.loaded||draftKey()!==loadoutKey||draftLoadout.length!==5||own===0&&!ready[other];
    $('lobbyHint').textContent=!joined?'Schicke deinem Partner den Link. Sobald er beitritt, könnt ihr euch bereit melden.':!online?'Dein Partner ist gerade nicht verbunden. Warte kurz, bis er zurück ist.':ready[own]&&!ready[other]?'Du bist bereit. Das Spiel startet, sobald dein Partner auch bereit ist.':!ready[own]&&ready[other]?'Dein Partner ist bereit. Du kannst das Spiel starten.':'Wählt eure Türme. Der Partner bestätigt mit Bereit, der Host startet.';
  }
  async function syncAugments(){
-   const session=augmentSession;session.loading=true;show(view);
+   const session=augmentSession;session.loading=true;session.error=null;show(view);
    // The account endpoint accepts one lookup per seat per second.
    const delay=session.nextLookup-Date.now();
    if(delay>0)await new Promise(resolve=>setTimeout(resolve,delay));
    if(session!==augmentSession)return;
    let result;
    try{lobbyProfile=HexProfile.load(HexData.TOWERS);result=await HexApi.applyDuoAugments(session.token,session.clientId,lobbyProfile);}
+   catch(error){session.loaded=false;session.error=error.message;throw error;}
    finally{session.loading=false;session.nextLookup=Date.now()+1000;}
    if(session!==augmentSession||!view||view.lobbyState.started)return;
+   session.loaded=true;
+   const names=[...(view.lobbyState.names||[])];if(result.name)names[view.player]=result.name;
    const augments=[...(view.lobbyState.augments||[[],[]])];augments[view.player]=result.cards;
    const player=view.player,boards=[...view.boards],loadouts=[...view.lobbyState.loadouts];
    if(result.loadout){loadouts[player]=result.loadout;boards[player]={...boards[player],heroId:result.heroId,difficulty:result.difficulty,loadout:result.loadout,ultimateUnlocks:result.ultimateUnlocks,buildingUnlocks:result.buildingUnlocks};}
-   view={...view,boards,lobbyState:{...view.lobbyState,augments,loadouts,setupOptions:result.setupOptions||view.lobbyState.setupOptions}};show(view);
+   view={...view,boards,lobbyState:{...view.lobbyState,names,augments,loadouts,setupOptions:result.setupOptions||view.lobbyState.setupOptions}};show(view);
+ }
+ async function refreshAccount(attempt=0){
+   const current=augmentSession;if(!current||savingLoadout||!view||view.lobbyState.started)return;
+   savingLoadout=true;show(view);
+   try{await syncAugments();}
+   catch(error){if(current===augmentSession){current.error=error.message;current.loaded=false;notice(error.message);if(attempt<2)setTimeout(()=>{if(current===augmentSession&&!current.loaded)refreshAccount(attempt+1);},1500*(attempt+1));}}
+   finally{if(current===augmentSession){savingLoadout=false;if(view)show(view);}}
+ }
+ async function selectAugment(id){
+   if(!client||!view||savingLoadout||!augmentSession?.loaded)return;
+   const cards=(view.lobbyState.augments?.[view.player]||[]).map(c=>c.id);
+   savingLoadout=true;show(view);
+   try{await client.send('lobbyAugments',{cards:cards.includes(id)?cards.filter(c=>c!==id):[...cards,id]});}
+   catch(error){notice(error.message);}finally{savingLoadout=false;if(view)show(view);}
  }
  function wait(token){
    $('lobbyEntry').hidden=true;$('waitingLobby').hidden=false;
@@ -96,10 +122,7 @@
      view=next;
      if(initialView){
        initialView=false;
-       if(!next.lobbyState.started&&!next.lobbyState.ready[next.player]){
-         savingLoadout=true;const current=augmentSession;
-         syncAugments().catch(error=>{if(current===augmentSession)notice(error.message);}).finally(()=>{if(current===augmentSession){savingLoadout=false;if(view)show(view);}});
-       }
+       if(!next.lobbyState.started)refreshAccount();
      }
      show(next);
      if(next.lobbyState?.started&&!navigating){navigating=true;client.stop();status.textContent='Beide bereit – das Spiel startet …';location.assign('/index.html#duo='+token);}

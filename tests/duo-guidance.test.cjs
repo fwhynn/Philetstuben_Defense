@@ -12,7 +12,7 @@ test('team guidance tells each player what to do and why controls are locked',()
  assert.ok(send(room,a,'place',opening(room,a)).ok);
  g=guide(room.view(a.token));assert.equal(g.title,'Bauphase: Türme bauen');assert.equal(guide(room.view(b.token)).partner.text,'baut');
  assert.ok(send(room,a,'ready',{value:true}).ok);
- g=guide(room.view(a.token));assert.equal(g.tone,'wait');assert.equal(g.title,'Du bist bereit');assert.equal(g.locked,true);assert.equal(g.self.state,'ready');
+ g=guide(room.view(a.token));assert.equal(g.tone,'wait');assert.equal(g.title,'Du bist bereit');assert.equal(g.locked,false);assert.match(g.text,/automatisch zurück/);assert.equal(g.self.state,'ready');
  assert.ok(send(room,b,'place',opening(room,b)).ok);
  g=guide(room.view(b.token));assert.equal(g.partner.state,'ready');assert.match(g.text,/wartet auf dich/);
  assert.ok(send(room,b,'ready',{value:true}).ok);

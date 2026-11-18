@@ -3,6 +3,28 @@ const core=require('../../headless-core.cjs')(),{createLobbies}=require('../duo-
 const profile=()=>({diamonds:100,unlocks:['tower:flame'],records:{highestWave:36},unlockedTowers:['archer','chain'],augmentCards:{...core.augmentCards.clean(null),cards:{archer:[1,0,0,0,0],chain:[0,1,0,0,0]},equipped:['archer','chain']}});
 function command(r,s,action,payload){const v=r.view(s.token);return r.receive(s.token,{epoch:v.epoch,sequence:v.next,wave:v.wave,phase:v.boards[s.player].phase,action,payload});}
 function setup(){const room=createLobbies({now:()=>0}),a=room.create({requestId:randomUUID()}),b=room.join({requestId:randomUUID(),code:a.code});return {room,a,b};}
+
+test('both seats see verified names and can independently choose owned augments before ready',()=>{
+ let {room,a,b}=setup();const host={...profile(),_duoIdentity:{id:1,username:'Phil'}},mate={...profile(),_duoIdentity:{id:2,username:'Partner'}};
+ const original=JSON.stringify([host,mate]);room.applyAugments(a.token,host);room.applyAugments(b.token,mate);
+ for(const seat of [a,b])assert.deepEqual(room.view(seat.token).lobbyState.names,['Phil','Partner']);
+ assert.ok(command(room,b,'lobbyReady',{value:true}).ok);
+ assert.ok(command(room,a,'lobbyAugments',{cards:['chain']}).ok);assert.deepEqual(room.view(b.token).lobbyState.augments[0],[{id:'chain',tier:1}]);assert.deepEqual(room.view(a.token).lobbyState.ready,[false,true]);
+ assert.equal(command(room,a,'lobbyAugments',{cards:['mine']}).ok,false);assert.equal(command(room,a,'lobbyAugments',{cards:['chain','chain']}).ok,false);
+ room.applyAugments(a.token,host);assert.deepEqual(room.view(a.token).lobbyState.augments[0],[{id:'chain',tier:1}],'account refresh retains party selection');
+ room=createLobbies({now:()=>0,snapshot:JSON.parse(JSON.stringify(room.checkpoint()))});room.touch(a.token);room.touch(b.token);
+ assert.deepEqual(room.view(b.token).lobbyState.names,['Phil','Partner']);assert.deepEqual(room.view(b.token).lobbyState.augments[0],[{id:'chain',tier:1}]);
+ assert.ok(command(room,b,'lobbyAugments',{cards:['archer']}).ok);assert.deepEqual(room.view(a.token).lobbyState.ready,[false,false]);
+ assert.equal(JSON.stringify([host,mate]),original,'selection never mutates an account profile');
+ command(room,b,'lobbyReady',{value:true});command(room,a,'lobbyStart',{});assert.equal(command(room,a,'lobbyAugments',{cards:[]}).ok,false);
+});
+
+test('lobby choices enforce earned slots, compatible towers and guest isolation',()=>{
+ const {room,a,b}=setup(),p=profile();p.records.highestWave=16;p.unlockedTowers.push('flame');room.applyAugments(a.token,p);room.applyAugments(b.token,null);
+ assert.equal(room.view(a.token).lobbyState.setupOptions.augments.slots,1);
+ assert.equal(command(room,a,'lobbyAugments',{cards:['archer','chain']}).ok,false);assert.equal(command(room,b,'lobbyAugments',{cards:['archer']}).ok,false);
+ assert.ok(command(room,a,'lobbyLoadout',{towers:['flame','catapult','chain','freeze','mine']}).ok);assert.equal(command(room,a,'lobbyAugments',{cards:['archer']}).ok,false);
+});
 test('Duo freezes own account selection, retains partner readiness and persists across restore',()=>{
  let {room,a,b}=setup();command(room,b,'lobbyReady',{value:true});const p=profile();assert.equal(room.applyAugments(a.token,p).ok,true);p.augmentCards.cards.archer[4]=1;
  const before=room.view(a.token);assert.deepEqual(before.lobbyState.ready,[false,true]);assert.deepEqual(before.lobbyState.augments[0],[{id:'archer',tier:0},{id:'chain',tier:1}]);assert.deepEqual(before.lobbyState.augments[1],[]);

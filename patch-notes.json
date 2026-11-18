@@ -1,5 +1,84 @@
 [
   {
+    "version": "next",
+    "title": "Duo: klarer und flüssiger",
+    "summary": "Eigene Augments in der Lobby, lesbare Wunschgeschenke, Upgrades trotz Bereitschaft und gleichmäßigere Gegnerbewegungen.",
+    "overview": [
+      {
+        "title": "Neu",
+        "items": [
+          "Augments direkt in der Duo-Lobby wählen"
+        ]
+      },
+      {
+        "title": "Verbessert",
+        "items": [
+          "Stabile Geschenk-Auswahl",
+          "Flüssigere Gegnerbewegung"
+        ]
+      },
+      {
+        "title": "Behoben",
+        "items": [
+          "Accountnamen in der Lobby",
+          "Upgrades trotz Bereitschaft",
+          "Zurück zum Hauptmenü"
+        ]
+      }
+    ],
+    "sections": [
+      {
+        "title": "Gemeinsam spielen",
+        "entries": [
+          {
+            "title": "Deine Duo-Lobby",
+            "bullets": [
+              "Beide Spieler sehen den Accountnamen des anderen. Vorübergehend fehlgeschlagene Account-Abfragen werden erneut versucht.",
+              "Host und Partner können ihre eigenen verfügbaren Augment-Karten direkt in der Lobby auswählen. Die Auswahl des Partners bleibt sichtbar. Die Auswahl gilt für diese Duo-Partie; deine Sammlung und Arsenal-Auswahl bleiben erhalten."
+            ],
+            "stats": []
+          },
+          {
+            "title": "Geschenke ohne Verrutschen",
+            "bullets": [
+              "Die Markierung des Partnerwunsches hat von Anfang an ihren festen Platz. Geschenkkarten springen beim Markieren oder Versenden nicht mehr.",
+              "Dunkle Beschriftungen auf hellen Karten machen Wünsche und erhaltene Geschenke besser lesbar, auch beim Darüberfahren mit der Maus."
+            ],
+            "stats": []
+          },
+          {
+            "title": "Weiterbauen trotz Bereitschaft",
+            "bullets": [
+              "Auch nach „Bereit“ kannst du in der Bauphase weiterbauen und Türme verbessern. Eine erfolgreiche Änderung nimmt nur deine eigene Bereitschaft zurück. Fehlgeschlagene Käufe verändern sie nicht.",
+              "Damit lässt sich auch das Frostturm-Upgrade kaufen, wenn genug Gold vorhanden ist und du dich bereits bereitgemeldet hast.",
+              "Der Button in den Duo-Einstellungen heißt „Zurück zum Hauptmenü“ und führt direkt dorthin."
+            ],
+            "stats": []
+          },
+          {
+            "title": "Flüssigere Gegnerbewegung",
+            "bullets": [
+              "Gegner bewegen sich im Duo gleichmäßiger, auch bei hohem Tempo und schwankender Verbindung. Übergänge an Kurven, bei neu erscheinenden Gegnern und nach Pausen wurden verbessert.",
+              "Bestehende Duo-Partien bleiben beim Update erhalten. Spielstände, Diamanten, Augment-Sammlungen und Bestenlisten werden nicht zurückgesetzt."
+            ],
+            "stats": []
+          }
+        ]
+      }
+    ],
+    "changes": [
+      "Beide Spieler sehen den Accountnamen des anderen. Vorübergehend fehlgeschlagene Account-Abfragen werden erneut versucht.",
+      "Host und Partner können ihre eigenen verfügbaren Augment-Karten direkt in der Lobby auswählen. Die Auswahl des Partners bleibt sichtbar. Die Auswahl gilt für diese Duo-Partie; deine Sammlung und Arsenal-Auswahl bleiben erhalten.",
+      "Die Markierung des Partnerwunsches hat von Anfang an ihren festen Platz. Geschenkkarten springen beim Markieren oder Versenden nicht mehr.",
+      "Dunkle Beschriftungen auf hellen Karten machen Wünsche und erhaltene Geschenke besser lesbar, auch beim Darüberfahren mit der Maus.",
+      "Auch nach „Bereit“ kannst du in der Bauphase weiterbauen und Türme verbessern. Eine erfolgreiche Änderung nimmt nur deine eigene Bereitschaft zurück. Fehlgeschlagene Käufe verändern sie nicht.",
+      "Damit lässt sich auch das Frostturm-Upgrade kaufen, wenn genug Gold vorhanden ist und du dich bereits bereitgemeldet hast.",
+      "Der Button in den Duo-Einstellungen heißt „Zurück zum Hauptmenü“ und führt direkt dorthin.",
+      "Gegner bewegen sich im Duo gleichmäßiger, auch bei hohem Tempo und schwankender Verbindung. Übergänge an Kurven, bei neu erscheinenden Gegnern und nach Pausen wurden verbessert.",
+      "Bestehende Duo-Partien bleiben beim Update erhalten. Spielstände, Diamanten, Augment-Sammlungen und Bestenlisten werden nicht zurückgesetzt."
+    ]
+  },
+  {
     "version": "1.3.1",
     "title": "Flüssigeres Duo",
     "changes": [

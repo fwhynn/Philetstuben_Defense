@@ -2,6 +2,15 @@ const {test}=require('node:test'),assert=require('node:assert/strict'),loadCore=
 const loadout=['archer','catapult','chain','freeze','mine'],json=v=>JSON.parse(JSON.stringify(v));
 function setup(){const c=loadCore(),m=c.duo.create('duo-test',[loadout,loadout]);let seq=0;const send=(p,action,payload={})=>c.duo.command(m,p,{id:'test-'+seq++,wave:m.wave,action,payload});for(const run of m.boards){run.state.hand=['straight'];run.state.drawPile=run.state.deck.slice(1);run.state.discard=[];}return {c,m,send};}
 function buildBoth(h){for(let i=0;i<2;i++)assert.ok(h.send(i,'place',{q:1,r:0,index:0,rotation:0}));}
+test('a ready player can buy the affordable Frost ultimate; success alone withdraws their readiness',()=>{
+ const h=setup(),{m,send}=h;buildBoth(h);const s=m.boards[0].state,slot={q:1,r:0,index:0};
+ s.gold=122;s.ultimateUnlocks=['ultimate:freeze:deepFrost'];s.map.get('1,0').towers[0]={type:'freeze',level:3,branch:'deepFrost',finalUpgrade:'absoluteZero',paid:125};
+ assert.ok(send(0,'ready',{value:true}));assert.equal(send(0,'upgrade',{slot,upgrade:'not-an-upgrade'}),false);assert.equal(m.ready[0],true);
+ assert.ok(send(0,'speed',{value:8}));assert.equal(m.ready[0],true);
+ assert.ok(send(0,'upgrade',{slot,upgrade:'ultimate:freeze'}));assert.equal(s.map.get('1,0').towers[0].level,4);assert.equal(s.gold,27);assert.deepEqual(Array.from(m.ready),[false,false]);assert.equal(m.phase,'prepare');
+ // A purchase by the other player cannot revoke this player's readiness.
+ assert.ok(send(0,'ready',{value:true}));assert.ok(send(1,'tower',{type:'archer',slots:[slot]}));assert.deepEqual(Array.from(m.ready),[true,false]);
+});
 test('two boards remain independent and only both ready can start the same wave',()=>{
   const h=setup(),{m,send}=h;assert.notEqual(m.boards[0].state.seed,m.boards[1].state.seed);assert.equal(m.hp,40);
   assert.equal(send(0,'ready',{value:true}),false);buildBoth(h);

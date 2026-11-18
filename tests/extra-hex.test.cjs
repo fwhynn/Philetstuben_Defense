@@ -12,10 +12,10 @@ test('unavailable extra hex leaves gold, deck, RNG and snapshot unchanged',()=>{
  const {c,run,s}=setup();mutate(s);const before=JSON.stringify(s),rng=JSON.stringify(run.random.snapshot()),piles=JSON.stringify([s.hand,s.drawPile,s.discard]);assert.equal(c.session.buyExtraHex(s,run.random),false);assert.equal(JSON.stringify(s),before);assert.equal(JSON.stringify(run.random.snapshot()),rng);assert.equal(JSON.stringify([s.hand,s.drawPile,s.discard]),piles);
  }
 });
-test('Duo extra hex is authoritative, cannot be bought while ready, and only charges its owner',()=>{
+test('Duo extra hex withdraws own readiness and only charges its owner',()=>{
  const c=load(),match=c.duo.create('extra-duo',[loadout,loadout]),s=match.boards[0].state;s.wave=34;s.phase='build';s.openingRemaining=0;s.gold=1000;s.landmarks=new Map();s.map.get('0,0').roads=[0];const other=match.boards[1].state.gold;
- match.ready[0]=true;assert.equal(c.duo.command(match,0,{id:'extra-1',wave:match.wave,action:'extraHex',payload:{}}),false);match.ready[0]=false;
- assert.equal(c.duo.command(match,0,{id:'extra-2',wave:match.wave,action:'extraHex',payload:{}}),true);assert.equal(s.gold,800);assert.equal(match.boards[1].state.gold,other);
+ match.ready[0]=true;
+ assert.equal(c.duo.command(match,0,{id:'extra-2',wave:match.wave,action:'extraHex',payload:{}}),true);assert.equal(match.ready[0],false);assert.equal(s.gold,800);assert.equal(match.boards[1].state.gold,other);
  const {payloadValid}=require('../server/duo-room.cjs');assert.ok(payloadValid('extraHex',{}));assert.equal(payloadValid('extraHex',{price:0}),false);
 });
 test('every entrance receives floor or ceil of its share and remainders rotate evenly',()=>{

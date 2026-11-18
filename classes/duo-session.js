@@ -97,7 +97,7 @@ const HexDuoSession=(()=>{
       if(match.phase!=='prepare'||typeof payload.value!=='boolean'||payload.value&&!canReady(run))return false;
       match.ready[player]=payload.value;ok=true;
     }else{
-      if(match.ready[player])return false;
+      if(match.ready[player]&&s.phase!=='build')return false;
       if(action==='guardian'&&match.phase==='prepare'){
         if(!Number.isInteger(payload.board)||payload.board<0||payload.board>1||typeof payload.id!=='string'||typeof payload.value!=='boolean')return false;
         const landmark=match.boards[payload.board].state.landmarks.get(payload.id);
@@ -128,6 +128,9 @@ const HexDuoSession=(()=>{
       else if(action==='tunnel'&&match.phase==='prepare')ok=HexRunRuntime.rescueTunnel(s);
     }
     if(!ok)return false;
+    // A successful edit cancels only this player's readiness. Failed purchases and
+    // clock controls leave readiness intact. Ordinary edits do not unready the partner.
+    if(match.phase==='prepare'&&!['ready','pause','speed'].includes(action))match.ready[player]=false;
     match.receipts[player].push(id);match.receipts[player]=match.receipts[player].slice(-256);collectHealth(match,s,hp,max);
     if(match.phase==='prepare'&&match.ready.every(Boolean)){
       if(!match.boards.every(canReady)){match.ready=[false,false];return true;}

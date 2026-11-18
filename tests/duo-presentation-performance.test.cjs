@@ -3,6 +3,12 @@ const {presentation}=require('../duo-client.js');
 const clone=v=>JSON.parse(JSON.stringify(v));
 function snapshot(tick=0){return {player:0,wave:1,hp:40,maxHp:40,portals:[null,null],boards:[0,1].map(player=>({player,phase:'wave',gold:tick,hand:[],deckCounts:{straight:3},loadout:['archer'],enemies:[{id:tick,x:tick,y:0}],landmarks:[],map:[{q:0,r:0,type:'base',roads:[0,3],slots:1,towers:[{type:'archer',statId:player,level:tick,aim:{x:tick,y:0}}]}]}))};}
 const plain=value=>JSON.parse(JSON.stringify(value,(_,v)=>v instanceof Map?[...v]:v));
+
+test('interpolating a visible enemy never changes the authoritative network snapshot',()=>{
+ const raw=snapshot(1),shown=presentation(raw,null,{lazy:true}).boards[0].state;
+ shown.enemies[0].x=-123;shown.enemies[0].y=45;
+ assert.equal(raw.boards[0].enemies[0].x,1);assert.equal(raw.boards[0].enemies[0].y,0);
+});
 test('unseen boards are not prepared; switching uses the newest snapshot and retains tower identity',()=>{
  let lazy,eager,hiddenReads=0,oldTower;
  for(let tick=0;tick<40;tick++){

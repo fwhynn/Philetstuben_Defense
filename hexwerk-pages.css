@@ -122,6 +122,13 @@ body.hxPage{margin:0;min-height:100vh;color:#f4ecd6;font:600 17px/1.6 var(--hx-f
 /* Duo-Lobby: Augments beider Spieler als Karten-Chips (wie in der Run-Vorbereitung) */
 .duoLobbyPage #lobbyAugments{display:flex;flex-direction:column;gap:8px;padding:12px 14px;border:1.5px solid var(--hx-line);border-radius:12px;background:#0f2419}
 .duoLobbyPage .lobbyAugmentRow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}
+.duoLobbyPage .lobbyAugmentRow>strong{flex-basis:100%}
+.duoLobbyPage .lobbyAugmentRow button.augmentLoadoutChip{cursor:pointer;min-height:44px;max-width:100%;padding-block:6px;text-align:left;border:2px solid var(--rar);opacity:1}
+.duoLobbyPage .lobbyAugmentRow button.augmentLoadoutChip::after{content:'✓';width:1em;flex:none;color:#245c32;visibility:hidden}
+.duoLobbyPage .lobbyAugmentRow button.augmentLoadoutChip[aria-pressed="true"]{border-color:#ffcf65;background:linear-gradient(180deg,#fff6d7,#efd087);box-shadow:inset 0 0 0 1px #ffcf65}
+.duoLobbyPage .lobbyAugmentRow button.augmentLoadoutChip[aria-pressed="true"]::after{visibility:visible}
+.duoLobbyPage .lobbyAugmentRow button.augmentLoadoutChip:disabled{opacity:.55;cursor:default}
+.duoLobbyPage .lobbyAugmentRow button.augmentLoadoutChip:focus-visible{outline:3px solid #fff1b7;outline-offset:3px}
 .duoLobbyPage .lobbyAugmentRow>strong{min-width:120px;color:var(--hx-gold-text);font:700 15px var(--hx-font-ui)}
 .duoLobbyPage .lobbyAugmentNone{color:#b9c6bc;font-size:15px}
 .duoLobbyPage #lobbyAugments small{font-size:14px;line-height:1.45;color:#cfd9cf}

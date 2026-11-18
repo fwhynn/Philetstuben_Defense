@@ -9,7 +9,7 @@ const HexDuoGame=(()=>{
       const a=points[i],b=points[i+1],dx=b.x-a.x,dy=b.y-a.y,l2=dx*dx+dy*dy;
       const u=l2?Math.max(0,Math.min(1,((start.x-a.x)*dx+(start.y-a.y)*dy)/l2)):0;
       const x=a.x+u*dx,y=a.y+u*dy,d=Math.hypot(start.x-x,start.y-y);
-      if(!best||d<best.d)best={i,x,y,d};
+      if(!best||d<=best.d+1e-7)best={i,x,y,d};
     }
     if(!best||best.d>2)return null;
     const path=[{x:best.x,y:best.y},...points.slice(best.i+1)];
@@ -42,26 +42,34 @@ const HexDuoGame=(()=>{
     return {x:end.x,y:end.y};
   }
   // Render a short history, rather than restarting an ease-out on every packet.
-  function createMotionBuffer(delay=150){
+  function createMotionBuffer(delay=150,{adaptive=false}={}){
     const roads=new WeakMap();
-    let frames=[],offset=null,lastTarget=-Infinity,lastDraw=null;
+    let frames=[],offset=null,lastTarget=-Infinity,lastDraw=null,bufferDelay=delay;
     function push(enemies,stamp,now,reset=false){
-      if(reset||frames.length&&stamp<frames.at(-1).at||frames.length&&now-frames.at(-1).arrival>1000){frames=[];offset=null;lastTarget=-Infinity;lastDraw=null;}
+      if(reset||frames.length&&stamp<frames.at(-1).at||frames.length&&now-frames.at(-1).arrival>1000){frames=[];offset=null;lastTarget=-Infinity;lastDraw=null;bufferDelay=delay;}
+      // Commands and heartbeats can repeat a simulation frame. They must not
+      // overwrite its history with a rendered position or re-estimate network jitter.
+      if(frames.at(-1)?.at===stamp)return;
       offset=offset===null?now-stamp:Math.min(offset,now-stamp);
+      const interval=frames.length?stamp-frames.at(-1).at:100;
+      const required=Math.max(delay,Math.min(400,interval+50+Math.max(0,now-stamp-offset)));
+      if(adaptive)bufferDelay=required>bufferDelay?required:Math.max(required,bufferDelay-1);
       const frame={at:stamp,arrival:now,enemies:new Map(enemies.map(e=>[e.id,{x:e.x,y:e.y,motionPath:e.motionPath,leaping:e.leaping}]))};
-      if(frames.at(-1)?.at===stamp)frames[frames.length-1]=frame;else frames.push(frame);
+      frames.push(frame);
       if(frames.length>16)frames.shift();
     }
     function draw(enemies,now){
       if(!frames.length)return false;
       // Never let the playhead run past received data. Recover late packets at at most
       // 110% visual pace instead of jumping to the newest position in one frame.
-      const desired=Math.min(frames.at(-1).at,now-offset-delay),elapsed=lastDraw===null?Infinity:Math.max(0,now-lastDraw);
-      const target=lastTarget===-Infinity?desired:Math.max(lastTarget,Math.min(desired,lastTarget+elapsed*1.1));lastTarget=target;lastDraw=now;
+      const desired=Math.min(frames.at(-1).at,now-offset-bufferDelay),elapsed=lastDraw===null?0:Math.max(0,now-lastDraw);
+      // Absorb jitter by gently changing playback pace (90–110%), never by
+      // reversing a unit or stopping it just to enlarge the presentation buffer.
+      const target=lastTarget===-Infinity?desired:Math.min(frames.at(-1).at,lastTarget+Math.max(elapsed*.9,Math.min(elapsed*1.1,desired-lastTarget)));lastTarget=target;lastDraw=now;
       while(frames.length>2&&frames[1].at<=target)frames.shift();
       const a=frames[0],b=frames.find(f=>f.at>=target)||frames.at(-1),before=frames.filter(f=>f.at<=target).at(-1)||a;
       const t=b.at>before.at?Math.max(0,Math.min(1,(target-before.at)/(b.at-before.at))):1;
-      let changed=false;for(const e of enemies){const x=e.x,y=e.y,start=before.enemies.get(e.id),end=b.enemies.get(e.id);if(start&&end)Object.assign(e,t>=1?{x:end.x,y:end.y}:motionAlongRoad(start,end,t,roads));else if(end)Object.assign(e,{x:end.x,y:end.y});changed ||= x!==e.x||y!==e.y;}
+      let changed=false;for(const e of enemies){const x=e.x,y=e.y,start=before.enemies.get(e.id),end=b.enemies.get(e.id);if(start&&end)Object.assign(e,t>=1?{x:end.x,y:end.y}:motionAlongRoad(start,end,t,roads));else {const first=end||frames.find(f=>f.enemies.has(e.id))?.enemies.get(e.id);if(first)Object.assign(e,{x:first.x,y:first.y});}changed ||= x!==e.x||y!==e.y;}
       return changed;
     }
     return {push,draw};
@@ -101,7 +109,7 @@ const HexDuoGame=(()=>{
     if(b.phase==='duoDelivery'){const offer=view.delivery?.offers?.[own];return offer&&offer.index===null?say('act','Geschenk für deinen Partner','Wähle Gold oder eine Karte – sie landet direkt bei deinem Partner.'):say('wait','Geschenk verschickt','Sobald dein Partner auch gewählt hat, geht es weiter.',true);}
     if(b.rewardOffer||['reward','removal','bossReward','shrineReward'].includes(b.phase))return say('act','Wähle deine Belohnung','Dein Partner wählt gleichzeitig seine eigene.');
     if(b.phase==='place')return say('act','Du bist dran: Hex legen','Wähle unten eine Karte und klicke auf ein grünes Feld. R oder Rechtsklick dreht die Karte.');
-    if(b.phase==='build'&&view.ready[own])return say('wait','Du bist bereit','Die Welle startet, sobald dein Partner auch bereit ist. Zum Weiterbauen nimm die Bereitschaft zurück.',true);
+    if(b.phase==='build'&&view.ready[own])return say('wait','Du bist bereit','Die Welle startet, sobald dein Partner bereit ist. Weiterbauen nimmt deine Bereitschaft automatisch zurück.');
     if(b.phase==='build')return say('act','Bauphase: Türme bauen',view.ready[partner]?'Dein Partner ist schon bereit und wartet auf dich. Wenn du fertig bist: »Bereit für die Welle« (Leertaste).':'Baue Türme auf freie Plätze. Wenn du fertig bist: »Bereit für die Welle« (Leertaste). Die Welle startet, sobald ihr beide bereit seid.');
     if(b.phase==='wave')return say('combat','Gemeinsame Welle läuft','Eure Türme kämpfen automatisch auf beiden Karten. Du kannst nebenbei weiter bauen.');
     if(b.phase==='duoWait')return say('wait','Deine Welle ist geschafft','Dein Partner kämpft noch. Danach geht es für euch beide weiter.',true);
@@ -117,8 +125,8 @@ const HexDuoGame=(()=>{
     const storageKey='autohex-duo-client:'+api.token;let clientId=sessionStorage.getItem(storageKey);if(!clientId){clientId=crypto.randomUUID();sessionStorage.setItem(storageKey,clientId);}
     const own=()=>view&&board===view.player;
     // Enemies arrive ~10 times per second; glide between snapshots so combat does not stutter.
-    const motion=createMotionBuffer();let settledKey='';
-    function track(next,switched){const now=performance.now();motion.push(next.enemies||[],Number.isFinite(view.frameTime)?view.frameTime:now,now,switched);motion.draw(next.enemies||[],now);}
+    const motion=createMotionBuffer(150,{adaptive:true});let settledKey='',motionKey='';
+    function track(next,switched){const now=performance.now(),key=[view.serverId,view.wave,board,view.paused,view.connection.paused,next.waveRunning].join(':');motion.push(next.enemies||[],Number.isFinite(view.frameTime)?view.frameTime:now,now,switched||key!==motionKey);motionKey=key;motion.draw(next.enemies||[],now);}
     function animate(now){return motion.draw(api.getState().enemies||[],now);}
     async function send(action,payload={}){
       if(!view||!own()){api.setMessage('Partnerkarte · Nur anschauen.');return false;}
@@ -130,7 +138,7 @@ const HexDuoGame=(()=>{
       next.wavePlans??=[];next.rescueCard??=null;next.tunnelOffer??=null;next.drawPile??=[];next.discard??=[];next.runTowerStats??={};next.runTowerDetails??={};next.goldEarned??={kills:0,completion:0,income:0};next.waveKills??=0;next.pendingSpawns??=0;
       // The HUD follows the player's payout on either board.
       next.duoDiamondEstimate=view.result?0:view.boards[view.player].duoDiamondEstimate||0;
-      next.duoPartnerView=!own();next.duoReinforcement=view.reinforcements[board];next.duoMode=true;next.remoteMotionBuffered=true;next.showSlotHints=api.getState().showSlotHints;next.showHexGrid=api.getState().showHexGrid;next.consumablesLocked=!own()||view.ready[view.player]||view.connection.paused;next.challengeDay=null;next.biomeSeed=null;
+      next.duoPartnerView=!own();next.duoReinforcement=view.reinforcements[board];next.duoMode=true;next.remoteMotionBuffered=true;next.showSlotHints=api.getState().showSlotHints;next.showHexGrid=api.getState().showHexGrid;next.consumablesLocked=!own()||view.connection.paused;next.challengeDay=null;next.biomeSeed=null;
       if(!switched)mergeBoard(api.getState(),next);
       track(next,switched);api.accept(next,switched,profileChanged);profileChanged=false;
       if(!own()){api.reward(null);$('celebration').classList.add('hidden');return;}
@@ -196,7 +204,7 @@ const HexDuoGame=(()=>{
     function render(){
       if(!view)return;
       renderGifts();
-      const state=api.getState(),player=view.player,partner=1-player,readonly=!own(),locked=readonly||view.ready[player]||view.connection.paused,help=guide(view,board);
+      const state=api.getState(),player=view.player,partner=1-player,readonly=!own(),locked=readonly||view.connection.paused,help=guide(view,board);
       for(const id of ['duoHud','duoMapLabel','duoQuickMap','duoTurn'])$(id).classList.remove('hidden');
       const partnerName=view.lobbyState?.names?.[partner]||'Partner';
       setText($('duoQuickMap'),readonly?'Meine Karte':'Partnerkarte');$('duoQuickMap').setAttribute('aria-label',readonly?'Zurück zu meiner Karte':'Partnerkarte ansehen');

@@ -1,5 +1,26 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const {load}=require('./helpers/game.cjs'),{createRoom}=require('../server/duo-room.cjs'),{presentation}=require('../duo-client.js');
+
+test('gift cards reserve their badge slot before and after a partner wish',()=>{
+ const duo={real:true,calls:[]},ui=load({duo}),room=createRoom({seed:'fixed-gift',loadouts:Array(2).fill(['archer','catapult','chain','freeze','mine'])}),seat=room.connect(0);room.connect(1);
+ const v=room.view(seat.token);v.boards[0].phase='duoDelivery';v.delivery={wave:5,offers:[{id:'gift',index:null,choices:[{kind:'gold',amount:50},{kind:'card',cardId:'straight'},{kind:'card',cardId:'smallCurve'}]},{id:'other',index:null,choices:[]}]};duo.receive(v);
+ const badges=()=>ui.elements.get('rewardChoices').children.map(card=>card.children.at(-1));
+ assert.ok(badges().every(b=>b.className==='duoGiftBadge'&&b.dataset.active==='false'&&b.children[0].textContent===''));
+ v.delivery.offers[0].wish=1;v.revision++;duo.receive(v);
+ assert.ok(badges().every(b=>b.className==='duoGiftBadge'));assert.equal(badges()[1].children[0].textContent,'★ Wunsch deines Partners');assert.equal(badges()[1].dataset.active,'true');
+});
+
+test('ready status leaves the Frost upgrade menu usable, but disconnected or partner view remains locked',()=>{
+ const duo={real:true,calls:[]},ui=load({duo}),room=createRoom({seed:'ready-frost',loadouts:Array(2).fill(['archer','catapult','chain','freeze','mine'])}),seat=room.connect(0);room.connect(1);const v=room.view(seat.token);
+ v.ready[0]=true;v.boards[0].phase='build';v.boards[0].gold=122;v.boards[0].ultimateUnlocks=['ultimate:freeze:deepFrost'];const tile={q:1,r:0,type:'straight',rotation:0,roads:[0,3],slots:1,towers:[null],buildingSlots:0,buildings:[]};v.boards[0].map.push(tile);
+ tile.towers[0]={type:'freeze',level:3,branch:'deepFrost',finalUpgrade:'absoluteZero',paid:125,statId:'frost'};duo.receive(v);
+ ui.rendererCommands.selectTower(tile.q,tile.r,0);
+ assert.equal(ui.document.body.classList.contains('duoLocked'),false);assert.equal(duo.api.getState().consumablesLocked,false);
+ const descendants=n=>[n,...(n.children||[]).flatMap(descendants)],buy=descendants(ui.elements.get('towerUpgrades')).find(n=>n._upgradeName==='Ewiges Eis');assert.ok(buy);assert.equal(buy.disabled,false);buy.listeners.click();assert.equal(duo.calls.at(-1).action,'upgrade');
+ ui.elements.get('duoPartnerMap').listeners.click();assert.equal(ui.document.body.classList.contains('duoLocked'),true);
+ ui.elements.get('duoOwnMap').listeners.click();v.connection.paused=true;v.revision++;duo.receive(v);assert.equal(ui.document.body.classList.contains('duoLocked'),true);
+ assert.equal(ui.elements.get('openMainMenuBtn').textContent,'Zurück zum Hauptmenü');
+});
 test('Duo boots the real singleplayer interface and forwards actions without running the local simulation',()=>{
  const calls=[],bridge={render(){},send(action,payload){calls.push({action,payload});},ready(){calls.push({action:'ready'});},pause(){},priorities(){},offerKey:null};
  const ui=load({duo:bridge}),room=createRoom({seed:'shared-screen',loadouts:Array(2).fill(['archer','catapult','chain','freeze','mine'])}),seat=room.connect(0);room.connect(1);
