@@ -235,10 +235,10 @@ test('branch choice charges once and same-phase undo includes the upgrade purcha
   sellSelectedTower(); assert.equal(a.state.gold, 70); assert.equal(tile.towers[0], null);
 });
 
-test('buying a tower leaves its menu closed; clicking the placed tower selects it', () => {
+test('buying a tower opens its upgrade menu and the placed tower remains selectable', () => {
   const { a, buyTower, selectSlot, elements } = load();
   a.state.map.set('1,0', { q: 1, r: 0, type: 'straight', roads: [0, 3], slots: 1, towers: [null] }); a.state.phase = 'build';
-  selectSlot(1, 0, 0); buyTower('archer'); assert.equal(a.state.selectedTower, null);
+  selectSlot(1, 0, 0); buyTower('archer'); assert.equal(a.state.selectedTower.q, 1);assert.equal(elements.get('towerDrawer').classList.contains('hidden'),true);assert.equal(elements.get('towerPanel').classList.contains('hidden'),false);
   const objects = elements.get('board').children[2], tower = objects.children.findLast(e => e.listeners.click && e.children.some(c => String(c.textContent).includes('Archer')));
   assert.ok(tower); tower.listeners.click({ stopPropagation() { } }); assert.equal(a.state.selectedTower.q, 1); assert.equal(a.state.selectedTower.index, 0);
 });

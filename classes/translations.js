@@ -3005,3 +3005,63 @@ HexTranslations.add("Deine Augments ·|Your augments ·\nAugments deines Partner
 HexTranslations.add("Duo: klarer und flüssiger|Co-op: clearer and smoother\nEigene Augments in der Lobby, lesbare Wunschgeschenke, Upgrades trotz Bereitschaft und gleichmäßigere Gegnerbewegungen.|Choose augments in the lobby, read gift wishes clearly, upgrade while ready and enjoy smoother enemy movement.\nBeide Spieler sehen den Accountnamen des anderen. Vorübergehend fehlgeschlagene Account-Abfragen werden erneut versucht.|Both players see each other’s account name. Temporary account lookup failures are retried.\nHost und Partner können ihre eigenen verfügbaren Augment-Karten direkt in der Lobby auswählen. Die Auswahl des Partners bleibt sichtbar. Die Auswahl gilt für diese Duo-Partie; deine Sammlung und Arsenal-Auswahl bleiben erhalten.|Host and partner can choose their own available augment cards directly in the lobby. Your partner’s selection stays visible. This selection applies to the current co-op match; your collection and Arsenal selection are preserved.\nDie Markierung des Partnerwunsches hat von Anfang an ihren festen Platz. Geschenkkarten springen beim Markieren oder Versenden nicht mehr.|Partner wish markers reserve their space from the start. Gift cards no longer shift when marked or sent.\nDunkle Beschriftungen auf hellen Karten machen Wünsche und erhaltene Geschenke besser lesbar, auch beim Darüberfahren mit der Maus.|Dark labels on light cards make wishes and received gifts easier to read, including on hover.\nAuch nach „Bereit“ kannst du in der Bauphase weiterbauen und Türme verbessern. Eine erfolgreiche Änderung nimmt nur deine eigene Bereitschaft zurück. Fehlgeschlagene Käufe verändern sie nicht.|After marking yourself ready, you can still build and upgrade towers during preparation. A successful change withdraws only your own readiness. Failed purchases leave it unchanged.\nDamit lässt sich auch das Frostturm-Upgrade kaufen, wenn genug Gold vorhanden ist und du dich bereits bereitgemeldet hast.|This also lets you purchase a Frost Tower upgrade when you have enough gold and have already marked yourself ready.\nDer Button in den Duo-Einstellungen heißt „Zurück zum Hauptmenü“ und führt direkt dorthin.|The button in co-op settings now says “Back to main menu” and takes you directly there.\nGegner bewegen sich im Duo gleichmäßiger, auch bei hohem Tempo und schwankender Verbindung. Übergänge an Kurven, bei neu erscheinenden Gegnern und nach Pausen wurden verbessert.|Enemies move more smoothly in co-op, including at high speed and with a fluctuating connection. Transitions around bends, newly appearing enemies and resuming after pauses have been improved.\nBestehende Duo-Partien bleiben beim Update erhalten. Spielstände, Diamanten, Augment-Sammlungen und Bestenlisten werden nicht zurückgesetzt.|Existing co-op matches survive the update. Saves, diamonds, augment collections and leaderboards are not reset.\nDeine Duo-Lobby|Your co-op lobby\nGeschenke ohne Verrutschen|Gifts without shifting\nWeiterbauen trotz Bereitschaft|Keep building while ready\nFlüssigere Gegnerbewegung|Smoother enemy movement\nGemeinsam spielen|Playing together\nAugments direkt in der Duo-Lobby wählen|Choose augments directly in the co-op lobby\nStabile Geschenk-Auswahl|Stable gift selection\nAccountnamen in der Lobby|Account names in the lobby\nUpgrades trotz Bereitschaft|Upgrades while ready");
 
 HexTranslations.add("Verbessert|Improved\nBehoben|Fixed");
+
+HexTranslations.add(`Partnerkarte (M)|Partner map (M)
+Meine Karte (M)|My map (M)
+Zurück zu meiner Karte (M)|Return to my map (M)
+Partnerkarte ansehen (M)|View partner map (M)
+Duo: Eigene / Partnerkarte|Co-op: Your / partner map
+Team und Geschenke|Team and gifts
+Du kannst Türme weiter verbessern und ihren Fokus ändern und bleibst dabei bereit. Die Welle startet, sobald dein Partner bereit ist.|You can keep upgrading towers and changing their targeting while staying ready. The wave starts when your partner is ready.`);
+
+HexTranslations.add(`
+Team-Aktionen|Team actions
+Ein Hex verschenken|Gift a hex
+Duo-Partie verlassen|Leave co-op match
+Dein Partner kämpft noch. Du kannst bereits Türme bauen und verbessern.|Your partner is still fighting. You can already build and upgrade towers.
+Endlos bereit ✓ · zurücknehmen|Ready for endless ✓ · withdraw
+Neue Duo-Partie|New co-op match
+Neustart bereit ✓ · zurücknehmen|Ready to restart ✓ · withdraw
+Du bist bereit für Endlos. Warte auf deinen Partner.|You are ready for endless. Waiting for your partner.
+Dein Partner möchte endlos weiterspielen.|Your partner wants to continue in endless mode.
+Welle 35 geschafft! Wie weit kommt ihr gemeinsam?|Wave 35 complete! How far can you go together?
+Eure gemeinsame Verteidigung ist gefallen.|Your shared defence has fallen.
+Deine Diamanten|Your diamonds
+Team-Kills|Team kills
+Durchlauf im Detail|Run details
+Anmelden, um euren Durchlauf in die Bestenliste einzutragen.|Sign in to add your run to the leaderboard.
+`);
+
+Object.assign(HexTranslations.en,{
+  "Duo: im gleichen Takt": "Co-op: in sync",
+  "Passende Treffer, freie Upgrades und mehr Übersicht – vom Turmbau bis zum gemeinsamen Endlosspiel.": "Synchronized hits, available upgrades and clearer menus, from building towers to continuing together in endless mode.",
+  "Verbessert": "Improved",
+  "Treffer und Gegner im gleichen Takt": "Hits and enemies in sync",
+  "Klarere Deck- und Ergebnisansicht": "Clearer deck and result views",
+  "Behoben": "Fixed",
+  "Keine eingefrorenen Effekte beim Warten": "No frozen effects while waiting",
+  "Upgrades nach der eigenen Welle": "Upgrades after your own wave",
+  "Neu": "New",
+  "Kartenwechsel mit M": "Switch maps with M",
+  "Entfernt": "Removed",
+  "Portalhilfe mit versendeten Türmen": "Portal support with transferred towers",
+  "Doppelte Team-Menü-Aktionen": "Duplicate team menu actions",
+  "Gemeinsam verteidigen": "Defending together",
+  "Gegner und Treffer": "Enemies and hits",
+  "Gegnerbewegungen, Minen, Schaden und Geschosse werden im Duo gemeinsam dargestellt. Treffer erscheinen nicht mehr vor dem sichtbaren Kontakt.": "Enemy movement, mines, damage and projectiles now share the same co-op presentation timeline. Hits no longer appear before visible contact.",
+  "Nach längeren Bauphasen starten Gegner ohne erneuten Kartenwechsel flüssig. Neu erscheinende Gegner warten nicht mehr sichtbar am Weganfang auf ihre Bewegung.": "Enemies move smoothly after longer planning phases without switching maps. Newly appearing enemies no longer visibly wait at the entrance before moving.",
+  "Wenn deine Welle zuerst endet, verschwinden verbleibende Geschosse und Effekte, während dein Partner weiterkämpft.": "When your wave ends first, remaining projectiles and effects expire while your partner keeps fighting.",
+  "Verbessern, während du wartest": "Upgrade while waiting",
+  "Türme lassen sich auch nach dem eigenen Wellenende weiterbauen und verbessern. Gebäude- und Basis-Upgrades bleiben ebenfalls verfügbar.": "You can keep building and upgrading towers after your own wave ends. Building and base upgrades remain available too.",
+  "Turm- und Gebäude-Upgrades sowie Änderungen am Angriffsfokus nehmen deine Bereitschaft nicht mehr zurück.": "Tower and building upgrades and targeting changes no longer withdraw your readiness.",
+  "Schlankere Team-Aktionen": "Simpler team actions",
+  "M wechselt zwischen deiner Karte und der Partnerkarte. Der Hotkey steht auch am Kartenwechsel-Button und in den Einstellungen.": "M switches between your map and your partner’s map. The shortcut is shown on the map button and in settings.",
+  "Das Team-Pop-up konzentriert sich auf Hex-Geschenke und die gemeinsame Wächterfreigabe. Doppelte Statusanzeigen, Kartenwechsel und Geschenkverlauf entfallen. Partie verlassen findest du in den Einstellungen.": "The team pop-up focuses on hex gifts and shared guardian consent. Duplicate status text, map switching and gift history have been removed. Leave the match from settings.",
+  "Die Portalhilfe zum Versenden eines Turms wurde entfernt. Normale Partnergeschenke und gekaufte Hex-Geschenke bleiben erhalten.": "Portal support for transferring a tower has been removed. Regular partner gifts and purchased hex gifts remain available.",
+  "Gemeinsam weiter": "Keep going together",
+  "Nach Welle 35 steht Endlos weiterspielen als gelber Hauptbutton im Ergebnisfenster. Beide Spieler müssen weiterhin zustimmen. Welle, Diamanten und Team-Kills sind direkt sichtbar; Details lassen sich aufklappen.": "After wave 35, Continue endless is the yellow primary button in the results. Both players still need to agree. Wave, diamonds and team kills are shown immediately; details can be expanded.",
+  "Mehr Übersicht beim Bauen": "Clearer building menus",
+  "Deck und Turmbau": "Deck and tower building",
+  "Das gesamte Deck nutzt oben die volle Dialogbreite. Darunter stehen Ablagestapel und Nachziehstapel nebeneinander; auf schmalen Bildschirmen untereinander.": "The complete deck uses the full dialog width at the top. Discard and draw piles sit side by side below, or stack on narrow screens.",
+  "Nach einem Turmbau öffnet sich direkt das Menü des neuen Turms, damit du sofort Upgrades kaufen kannst. Die zusätzliche Turmpreisliste in der Goldplanung entfällt.": "Building a tower opens its menu immediately so you can buy upgrades right away. The extra tower price list has been removed from gold planning."
+});

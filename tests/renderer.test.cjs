@@ -171,9 +171,9 @@ test('power pylons mark all nodes including base and relays, cache geometry and 
  ctx.power.clear();assert.equal(ctx.power.group.children.length,0);
 });
 
-test('buffered Duo motion updates enemies without repeating static map and mine synchronization',()=>{
+test('buffered Duo motion advances enemies and effects but synchronizes mines only when their frame changes',()=>{
  const source=fs.readFileSync(path.join(__dirname,'../classes/three-renderer.js'),'utf8');
- const fn=source.match(/  function renderMotion\(\)\{[^\n]+\}/)[0];let updates=0;const context={state:{remoteView:true},ready:true,syncEnemies(){updates++;}};
- vm.runInNewContext(fn+';globalThis.move=renderMotion;',context);for(let i=0;i<60;i++)context.move();assert.equal(updates,60);context.ready=false;context.move();assert.equal(updates,60);
+ const fn=source.match(/  function renderMotion\(\)\{[^\n]+\}/)[0];let updates=0,mines=0,effects=0;const context={state:{remoteView:true,mines:[],consumables:[]},motionMines:null,motionConsumables:null,ready:true,syncEnemies(){updates++;},syncMines(){mines++;},syncConsumables(){},syncProjectiles(){effects++;}};
+ vm.runInNewContext(fn+';globalThis.move=renderMotion;',context);for(let i=0;i<60;i++)context.move();assert.equal(updates,60);assert.equal(effects,60);assert.equal(mines,1);context.state.mines=[];context.move();assert.equal(mines,2);context.ready=false;context.move();assert.equal(updates,61);
  const sync=source.match(/  function syncEnemies\(\)\{[\s\S]*?\n  function syncMines/)[0];assert.match(sync,/if\(state.remoteMotionBuffered\)obj.remoteMotion=null/);assert.match(sync,/state.remoteView&&!state.remoteMotionBuffered/);
 });

@@ -59,7 +59,7 @@ test('language changes, new runs and restored checkpoints invalidate UI caches',
   card=hand.children[0];a.newRun();assert.notEqual(hand.children[0],card);
 });
 
-test('forecast updates for guardian discovery, income, live enemy rewards and discounts',()=>{
+test('forecast updates for guardian discovery, income and live enemy rewards without a redundant tower price list',()=>{
   const {a,elements}=load(),s=a.state;
   s.landmarks.set('test',{q:50,r:50,status:'ready',kind:'boss'});a.renderAll();
   assert.match(elements.get('waveForecast').textContent,/Zusätzlich 1 Wächter/);
@@ -68,7 +68,5 @@ test('forecast updates for guardian discovery, income, live enemy rewards and di
   assert.match(elements.get('liveWaveInfo').textContent,/1 sind auf der Map/);
   const info=elements.get('liveWaveInfo').textContent;s.enemies[0].killGold=18;a.renderAll();assert.notEqual(elements.get('liveWaveInfo').textContent,info);
   s.enemies[0].alive=false;a.renderAll();assert.match(elements.get('liveWaveInfo').textContent,/0 sind auf der Map/);
-  s.selectedSlot={q:0,r:0,index:0};a.renderAll();const budget=elements.get('towerBudget').textContent;
-  s.map.get('0,0').buildings=[{type:'market',level:1}];s.buildingVersion=(s.buildingVersion||0)+1;a.renderAll();
-  assert.notEqual(elements.get('towerBudget').textContent,budget);
+  assert.equal(elements.has('towerBudget'),false);
 });

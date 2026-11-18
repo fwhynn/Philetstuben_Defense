@@ -17,8 +17,8 @@ test('ready status leaves the Frost upgrade menu usable, but disconnected or par
  ui.rendererCommands.selectTower(tile.q,tile.r,0);
  assert.equal(ui.document.body.classList.contains('duoLocked'),false);assert.equal(duo.api.getState().consumablesLocked,false);
  const descendants=n=>[n,...(n.children||[]).flatMap(descendants)],buy=descendants(ui.elements.get('towerUpgrades')).find(n=>n._upgradeName==='Ewiges Eis');assert.ok(buy);assert.equal(buy.disabled,false);buy.listeners.click();assert.equal(duo.calls.at(-1).action,'upgrade');
- ui.elements.get('duoPartnerMap').listeners.click();assert.equal(ui.document.body.classList.contains('duoLocked'),true);
- ui.elements.get('duoOwnMap').listeners.click();v.connection.paused=true;v.revision++;duo.receive(v);assert.equal(ui.document.body.classList.contains('duoLocked'),true);
+ ui.elements.get('duoQuickMap').listeners.click();assert.equal(ui.document.body.classList.contains('duoLocked'),true);
+ ui.elements.get('duoQuickMap').listeners.click();v.connection.paused=true;v.revision++;duo.receive(v);assert.equal(ui.document.body.classList.contains('duoLocked'),true);
  assert.equal(ui.elements.get('openMainMenuBtn').textContent,'Zurück zum Hauptmenü');
 });
 test('Duo boots the real singleplayer interface and forwards actions without running the local simulation',()=>{
@@ -42,20 +42,22 @@ test('real Duo adapter keeps selections across snapshots and makes the partner m
  assert.ok(Object.keys(duo.api.getState().visibleBiomes).length>duo.api.getState().map.size,'visible neighbouring terrain is included without exposing the map seed');
  const state=duo.api.getState(),tile=[...state.map.values()].find(t=>t.slots>0),slot={q:tile.q,r:tile.r,index:0};state.selectedSlot=slot;state.selectedSlots=[slot];state.selectedCard=1;state.rotation=2;
  refresh();assert.equal(state.selectedSlot,slot);assert.equal(state.selectedCard,1);assert.equal(state.rotation,2);
- ui.elements.get('duoReservePortal').listeners.click();assert.equal(duo.calls.at(-1).action,'portal');
- state.buildingTarget=slot;ui.elements.get('duoPartnerMap').listeners.click();assert.equal(state.buildingTarget,null);assert.equal(state.selectedSlot,null);assert.equal(ui.elements.get('startWaveBtn').disabled,true);
+ state.buildingTarget=slot;ui.elements.get('duoQuickMap').listeners.click();assert.equal(state.buildingTarget,null);assert.equal(state.selectedSlot,null);assert.equal(ui.elements.get('startWaveBtn').disabled,true);
  const count=duo.calls.length;await duo.bridge.send('baseUpgrade',{kind:'walls'});assert.equal(duo.calls.length,count);
- ui.elements.get('duoOwnMap').listeners.click();assert.equal(state.map.has(tile.q+','+tile.r),true);assert.equal(ui.elements.get('duoMapLabel').textContent,'Deine Karte');
+ ui.elements.get('duoQuickMap').listeners.click();assert.equal(state.map.has(tile.q+','+tile.r),true);assert.equal(ui.elements.get('duoMapLabel').textContent,'Deine Karte');
  const gift=room.view(seat.token);gift.boards[0].phase='duoDelivery';gift.delivery={offers:[{id:'gift',index:null,choices:[{kind:'gold',amount:20}]},{index:null}]};duo.receive(gift);
  assert.equal(ui.elements.get('rewardTitle').textContent,'Geschenk für deinen Partner');ui.elements.get('rewardChoices').children[0].listeners.click();assert.equal(duo.calls.at(-1).action,'delivery');assert.equal(duo.calls.at(-1).payload.offerId,'gift');
 });
 
-test('Duo support can be selected button-first and quick map switch stays available',()=>{
- const duo={real:true,calls:[]},ui=load({duo}),room=createRoom({seed:'pick-support',loadouts:Array(2).fill(['archer','catapult','chain','freeze','mine'])}),seat=room.connect(0);room.connect(1);duo.receive(room.view(seat.token));
- const s=duo.api.getState();s.phase='build';s.map.set('1,0',{q:1,r:0,type:'straight',slots:2,towers:[{type:'archer',level:1,statId:1},null]});s.selectedSlot=s.selectedTower=null;
- ui.elements.get('duoReservePortal').listeners.click();ui.rendererCommands.selectSlot(1,0,1);assert.equal(duo.calls.at(-1).action,'portal');assert.equal(duo.calls.at(-1).payload.slot.index,1);
- ui.elements.get('duoSendTower').listeners.click();ui.rendererCommands.selectTower(1,0,0);assert.equal(duo.calls.at(-1).action,'reinforcement');
- assert.equal(ui.elements.get('duoQuickMap').classList.contains('hidden'),false);ui.elements.get('duoQuickMap').listeners.click();assert.equal(ui.elements.get('duoMapLabel').textContent,'Partnerkarte');
+test('M switches both directions like the button, ignores text input and does not send a game command',()=>{
+ const duo={real:true,calls:[]},ui=load({duo}),room=createRoom({seed:'map-hotkey',loadouts:Array(2).fill(['archer','catapult','chain','freeze','mine'])}),a=room.connect(0);room.connect(1);duo.receive(room.view(a.token));
+ const press=(extra={})=>ui.documentListeners.keydown({key:'m',preventDefault(){},...extra});
+ assert.equal(ui.elements.get('duoQuickMap').textContent,'Partnerkarte (M)');
+ press();assert.equal(ui.elements.get('duoMapLabel').textContent,'Partnerkarte');assert.equal(ui.elements.get('duoQuickMap').textContent,'Meine Karte (M)');
+ for(const extra of [{repeat:true},{ctrlKey:true},{altKey:true},{metaKey:true},{target:{tagName:'INPUT'}},{target:{tagName:'TEXTAREA'}},{target:{tagName:'SELECT'}},{target:{isContentEditable:true}}]){press(extra);assert.equal(ui.elements.get('duoMapLabel').textContent,'Partnerkarte');}
+ press({key:'M',target:{tagName:'BUTTON'}});assert.equal(ui.elements.get('duoMapLabel').textContent,'Deine Karte');
+ ui.elements.get('duoQuickMap').listeners.click();assert.equal(ui.elements.get('duoMapLabel').textContent,'Partnerkarte');
+ assert.equal(duo.calls.length,0);assert.equal(ui.elements.has('duoReservePortal'),false);assert.equal(ui.elements.has('duoSendTower'),false);
 });
 
 test('partner gifts are inspectable without acting for the partner and received gifts remain visible',()=>{
@@ -63,8 +65,8 @@ test('partner gifts are inspectable without acting for the partner and received 
  const view=room.view(seat.token);view.boards[0].phase='duoDelivery';view.delivery={wave:5,offers:[{id:'own',index:null,choices:[{kind:'gold',amount:50}]},{index:null,choices:[{kind:'gold',amount:50},{kind:'card',cardId:'smallCurve'},{kind:'card',cardId:'bigCurve'}]}]};duo.receive(view);
  const preview=ui.elements.get('duoGiftPreview');assert.equal(preview.classList.contains('hidden'),false);assert.equal(preview.children[2].children.length,3);assert.equal(preview.children[2].children[1].children[1].textContent,'Kleine Kurve');
  const first=preview.children[2];view.revision++;duo.receive(JSON.parse(JSON.stringify(view)));assert.equal(preview.children[2],first,'unchanged snapshots do not replace gift cards');
- view.delivery.offers[1].index=1;view.revision++;duo.receive(view);assert.match(ui.elements.get('duoGiftReceived').textContent,/Kleine Kurve/);assert.equal(ui.elements.get('duoGiftReceived').classList.contains('hidden'),false);
- view.boards[0].phase='place';view.delivery.offers[0].index=0;view.revision++;duo.receive(view);assert.equal(preview.classList.contains('hidden'),true);assert.match(ui.elements.get('duoGiftHistory').children.at(-1).textContent,/50 Gold/);assert.equal(duo.calls.length,0);
+ view.delivery.offers[1].index=1;view.revision++;duo.receive(view);assert.match(preview.children[0].textContent,/Kleine Kurve/);assert.equal(ui.elements.get('duoGiftNotice').classList.contains('hidden'),false);
+ view.boards[0].phase='place';view.delivery.offers[0].index=0;view.revision++;duo.receive(view);assert.equal(preview.classList.contains('hidden'),true);assert.match(ui.elements.get('duoGiftNoticeContent').children[0].children[1].children[0].textContent,/Kleine Kurve/);assert.equal(duo.calls.length,0);
 });
 
 test('automatic readiness follows the local build transition once and leaves manual withdrawal available',()=>{
@@ -91,7 +93,7 @@ test('Duo speed hotkey uses shared speed, queues rapid presses and disconnect di
 });
 
 test('partner deck and hand are visible and a changed hand refreshes without revealing draw order',()=>{
- const duo={real:true,calls:[]},ui=load({duo}),room=createRoom({seed:'partner-hand',loadouts:Array(2).fill(['archer','catapult','chain','freeze','mine'])}),seat=room.connect(0);room.connect(1);const v=room.view(seat.token);duo.receive(v);ui.elements.get('duoPartnerMap').listeners.click();
+ const duo={real:true,calls:[]},ui=load({duo}),room=createRoom({seed:'partner-hand',loadouts:Array(2).fill(['archer','catapult','chain','freeze','mine'])}),seat=room.connect(0);room.connect(1);const v=room.view(seat.token);duo.receive(v);ui.elements.get('duoQuickMap').listeners.click();
  ui.elements.get('deckDropdown').open=true;ui.elements.get('deckDropdown').listeners.toggle();const sections=()=>ui.elements.get('deckOverview').children;assert.equal(sections().length,2);assert.match(sections()[0].children[0].textContent,/Deck deines Partners/);assert.match(sections()[1].children[0].textContent,/Hand deines Partners/);
  v.revision++;v.boards[1].hand=['straight'];duo.receive(v);assert.equal(sections()[1].children[0].textContent,'Hand deines Partners (1)');assert.equal(v.boards[1].drawPile,undefined);
 });
@@ -110,7 +112,7 @@ test('gift wishes are clickable, visible to the sender and remain available afte
 test('gift notifications show new paid gifts on either map without replaying old receipts on reconnect',()=>{
  const duo={real:true,calls:[]},ui=load({duo}),room=createRoom({seed:'receipt-ui',loadouts:Array(2).fill(['archer','catapult','chain','freeze','mine'])}),seat=room.connect(0);room.connect(1);
  const v=room.view(seat.token);v.hexGifts=[null,{count:1,wave:0,cardId:'straight'}];duo.receive(v);assert.equal(ui.document.getElementById('duoGiftNoticeContent').children.length,0,'initial snapshot is history');
- ui.elements.get('duoPartnerMap').listeners.click();v.hexGifts[1]={count:2,wave:1,cardId:'bigCurve'};v.revision++;duo.receive(v);assert.equal(ui.elements.get('duoGiftNotice').classList.contains('hidden'),false);
+ ui.elements.get('duoQuickMap').listeners.click();v.hexGifts[1]={count:2,wave:1,cardId:'bigCurve'};v.revision++;duo.receive(v);assert.equal(ui.elements.get('duoGiftNotice').classList.contains('hidden'),false);
  const content=ui.elements.get('duoGiftNoticeContent').children[0];duo.receive(v);assert.equal(ui.elements.get('duoGiftNoticeContent').children[0],content);
  const timer=[...ui.timers.entries()].find(([,f])=>String(f).includes("notice.classList.add('hidden')"));assert.ok(timer);timer[1]();assert.equal(ui.elements.get('duoGiftNotice').classList.contains('hidden'),true);
 });
@@ -122,6 +124,23 @@ test('the edge bar reuses wave planning, shows the actual partner name and keeps
  for(const [i,b] of v.boards.entries()){b.wave=24;b.phase=i?'wave':'duoWait';b.waveRunning=!!i;if(b.wavePlans)b.wavePlans=b.wavePlans.map((p,n)=>({...p,wave:24+n}));}
  duo.receive(v);assert.equal(wave.open,true,'moving the control retains its state');assert.equal(ui.elements.get('duoPartnerName').textContent,'Ein sehr langer Partnername');assert.match(ui.elements.get('duoSeatPartner').title,/Ein sehr langer Partnername/);assert.equal(ui.elements.get('duoTeamHp').textContent,'32/40');
  assert.equal(ui.elements.get('wave').textContent,24);assert.equal(ui.elements.get('phaseName').textContent,'Welle läuft');assert.match(ui.elements.get('waveHeadline').textContent,/Welle 24/);
- ui.elements.get('duoQuickMap').listeners.click();assert.equal(ui.elements.get('duoMapLabel').textContent,'Partnerkarte');assert.match(ui.elements.get('duoMapLabel').title,/Nur anschauen/);assert.equal(ui.elements.get('duoQuickMap').textContent,'Meine Karte');assert.equal(ui.elements.get('wave').textContent,24);
+ ui.elements.get('duoQuickMap').listeners.click();assert.equal(ui.elements.get('duoMapLabel').textContent,'Partnerkarte');assert.match(ui.elements.get('duoMapLabel').title,/Nur anschauen/);assert.equal(ui.elements.get('duoQuickMap').textContent,'Meine Karte (M)');assert.equal(ui.elements.get('wave').textContent,24);
  ui.elements.get('duoQuickMap').listeners.click();v.phase='prepare';v.boards[0].phase='build';v.boards[1].phase='build';v.boards[1].waveRunning=false;v.revision++;duo.receive(v);assert.equal(ui.elements.get('wave').textContent,25);assert.match(ui.elements.get('waveHeadline').textContent,/Welle 25/);
+});
+
+test('a ready player regains upgrades and focus controls after a connection pause',()=>{
+ const duo={real:true,calls:[]},ui=load({duo}),room=createRoom({seed:'ready-reconnect-controls',loadouts:Array(2).fill(['archer','catapult','chain','freeze','mine'])}),a=room.connect(0);room.connect(1);
+ const descendants=n=>n?[n,...(n.children||[]).flatMap(descendants)]:[];
+ ui.document.querySelectorAll=selector=>selector.split(',').flatMap(part=>{
+   const m=part.match(/^#(\w+) button$/);if(!m)return [];
+   return descendants(ui.elements.get(m[1])).filter(n=>n._upgradeName||n.className?.includes('towerFocusCopy'));
+ });
+ const view=room.view(a.token);view.ready[0]=true;view.boards[0].phase='build';view.boards[0].gold=200;
+ view.boards[0].map.push({q:1,r:0,type:'straight',rotation:0,roads:[0,3],slots:1,towers:[{type:'archer',level:1,paid:25,statId:1}],buildingSlots:0,buildings:[]});duo.receive(view);ui.rendererCommands.selectTower(1,0,0);
+ const buttons=()=>descendants(ui.elements.get('towerUpgrades'));
+ const upgrade=()=>buttons().find(b=>b._upgradeName),copy=()=>buttons().find(b=>b.textContent==='Fokus kopieren');
+ assert.equal(upgrade().disabled,false);assert.notEqual(copy().disabled,true);
+ view.connection.paused=true;view.revision++;duo.receive(view);assert.equal(upgrade().disabled,true);assert.equal(copy().disabled,true);
+ view.connection.paused=false;view.revision++;duo.receive(view);assert.equal(upgrade().disabled,false);assert.notEqual(copy().disabled,true);assert.equal(view.ready[0],true);
+ upgrade().listeners.click();assert.equal(duo.calls.at(-1).action,'upgrade');
 });

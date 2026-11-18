@@ -1,6 +1,7 @@
 /* Shared local/server tower commands. Targets and prices are validated before mutation. */
 const HexTowerCommands=(()=>{
   const TOWERS=HexData.TOWERS,key=HexMap.key;
+  function editable(state){return ['place','build','wave'].includes(state.phase)||state.duoMode&&state.phase==='duoWait';}
   function validSlot(slot){return slot&&Number.isInteger(slot.q)&&Number.isInteger(slot.r)&&Number.isInteger(slot.index)&&slot.index>=0;}
   function buildPrice(state,slot,base,index=0){if(state.challengeKind==='towerDraft')return 0;return (state.freeTowerBuilds||0)>index?0:Math.max(0,HexBuildings.cost(state,slot,base)-(typeof HexAugmentCards!=='undefined'&&index===(state.freeTowerBuilds||0)?HexAugmentCards.marketDiscount(state):0));}
   function buy(state,type,selectedSlots){
@@ -8,7 +9,7 @@ const HexTowerCommands=(()=>{
     if(state.challengeKind==='towerDraft'&&(!Array.isArray(selectedSlots)||!HexTowerDraft.canBuild(state,type,selectedSlots.length)))return {ok:false,reason:'inventory'};
     if(state.challengeKind==='powerGrid'&&!HexPowerGrid.planning(state))return {ok:false,reason:'powerLocked'};
     if(state.challengeKind==='detour')return {ok:false,reason:'fixed'};
-    if(!['place','build','wave'].includes(state.phase)||state.hp<=0||!Object.hasOwn(TOWERS,type)||!state.towerLoadout.includes(type)||!Array.isArray(selectedSlots)||!selectedSlots.length)return {ok:false,reason:'invalid'};
+    if(!editable(state)||state.hp<=0||!Object.hasOwn(TOWERS,type)||!state.towerLoadout.includes(type)||!Array.isArray(selectedSlots)||!selectedSlots.length)return {ok:false,reason:'invalid'};
     const seen=new Set();
     for(const s of selectedSlots){if(!validSlot(s))return {ok:false,reason:'invalid'};const tile=state.map.get(key(s.q,s.r)),id=s.q+','+s.r+':'+s.index;if(!tile||s.index>=tile.slots||tile.towers[s.index]||seen.has(id))return {ok:false,reason:'invalid'};seen.add(id);}
     const tdef=TOWERS[type],total=selectedSlots.reduce((sum,slot,index)=>sum+buildPrice(state,slot,tdef.cost,index),0);
@@ -28,7 +29,7 @@ const HexTowerCommands=(()=>{
     if(state.challengeKind==='towerDraft'&&(!HexTowerDraft.canUpgrade(state)||String(branch).startsWith('ultimate:')))return false;
     if(state.challengeKind==='powerGrid'&&!HexPowerGrid.planning(state))return false;
     if(state.challengeKind==='detour')return false;
-    if(!['place','build','wave'].includes(state.phase)||state.hp<=0||!validSlot(selected))return false;
+    if(!editable(state)||state.hp<=0||!validSlot(selected))return false;
     const tower=state.map.get(key(selected.q,selected.r))?.towers?.[selected.index];if(!tower||tower.guestOwner!==undefined)return false;
     const ultimateId='ultimate:'+tower.type,isUltimate=branch===ultimateId,upgrade=isUltimate?HexData.ultimateDefinition(tower):HexData.UPGRADES[branch];
     const allowed=isUltimate?tower.finalUpgrade&&!tower.ultimate&&HexData.ultimateAvailable(state,tower):HexData.availableUpgrades(tower).some(([id])=>id===branch),price=upgrade?HexBuildings.cost(state,selected,upgrade.cost):Infinity;
@@ -40,5 +41,5 @@ const HexTowerCommands=(()=>{
 
     return true;
   }
-  return {buy,upgrade,buildPrice};
+  return {buy,upgrade,buildPrice,editable};
 })();

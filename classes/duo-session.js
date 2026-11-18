@@ -35,10 +35,17 @@ const HexDuoSession=(()=>{
     s.gold-=cost;HexDeck.addReward(match.boards[1-player].state,cardId);
     match.hexGifts??=[null,null];match.hexGifts[player]={count:count+1,wave:match.wave,cardId};return true;
   }
-  const same=(a,b)=>a&&b&&a.q===b.q&&a.r===b.r&&a.index===b.index;
   function slotAt(state,slot){if(!slot||![slot.q,slot.r,slot.index].every(Number.isInteger)||slot.index<0)return null;const tile=state.map.get(HexMap.key(slot.q,slot.r));return tile&&slot.index<tile.slots?tile:null;}
-  function cleanGuests(match){for(const run of match.boards){for(const tile of run.state.map.values())tile.towers=tile.towers.map(t=>t?.guestOwner!==undefined?null:t);run.state.mines=(run.state.mines||[]).filter(m=>m.source?.guestOwner===undefined);HexBuildings.refresh(run.state);}match.pendingHelp=[null,null];}
-  function launchHelp(match){for(let sender=0;sender<2;sender++){const help=match.pendingHelp[sender],recipient=1-sender;if(!help||help.at>match.elapsedMs)continue;match.pendingHelp[sender]=null;if(match.finished[recipient])continue;const state=match.boards[recipient].state,slot=match.portals[recipient],tile=slotAt(state,slot);if(!tile||tile.towers[slot.index])continue;tile.towers[slot.index]={...help.tower,guestOwner:sender,statId:undefined,biome:HexBiomes.forTile(state,tile),tileType:tile.type,rangeFactor:1,paid:0,lastShot:state.elapsedMs};HexBuildings.refresh(state);}}
+  function cleanGuests(match){
+    for(const {state} of match.boards){
+      let removed=false;
+      for(const tile of state.map.values())for(let i=0;i<tile.towers.length;i++)if(tile.towers[i]?.guestOwner!==undefined){tile.towers[i]=null;removed=true;}
+      state.mines=(state.mines||[]).filter(m=>m.source?.guestOwner===undefined);
+      if(state.towerEffects)state.towerEffects=state.towerEffects.filter(fx=>fx.source?.guestOwner===undefined);
+      if(removed)HexBuildings.refresh(state);
+    }
+    match.pendingHelp=[null,null];
+  }
   function sync(match){for(const run of match.boards){run.state.hp=match.hp;run.state.maxHp=match.maxHp;}}
   function boardOptions(state){
     return {heroId:state.heroId,difficulty:state.difficulty,unlocks:[...state.ultimateUnlocks,...state.buildingUnlocks]};
@@ -104,21 +111,19 @@ const HexDuoSession=(()=>{
         if(!landmark||landmark.type!=='boss'||!landmark.claimed||!['pending','ready'].includes(landmark.status)||!Array.isArray(landmark.consent))return false;
         landmark.consent[player]=payload.value;landmark.status=landmark.consent.every(Boolean)?'ready':'pending';match.ready=[false,false];ok=true;
       }
-      else if(action==='portal'&&match.phase==='prepare'){const tile=slotAt(s,payload.slot);if(payload.slot===null){match.portals[player]=null;ok=true;}else if(tile&&!tile.towers[payload.slot.index]){match.portals[player]={...payload.slot};ok=true;}}
-      else if(action==='reinforcement'&&match.phase==='prepare'){const tile=slotAt(s,payload.slot),tower=tile?.towers[payload.slot.index];if(payload.slot===null){match.reinforcements[player]=null;ok=true;}else if(tower&&tower.guestOwner===undefined){match.reinforcements[player]={...payload.slot};ok=true;}}
       else if(action==='giftHex')ok=giftHex(match,player,payload.cardId);
       else if(action==='delivery')ok=deliver(match,player,payload);
       else if(action==='deliveryWish')ok=wishDelivery(match,player,payload);
       else if(action==='place'&&match.phase==='prepare')ok=!!HexRunSession.place(s,run.random,payload);
       else if(action==='reward'&&match.phase==='prepare')ok=HexRunSession.choose(s,run.random,payload.offerId,payload.index);
       else if(action==='acknowledge'&&match.phase==='prepare')ok=HexRunSession.acknowledge(s);
-      else if(action==='tower'&&!payload.slots?.some(slot=>same(slot,match.portals[player])))ok=HexTowerCommands.buy(s,payload.type,payload.slots).ok;
+      else if(action==='tower')ok=HexTowerCommands.buy(s,payload.type,payload.slots).ok;
       else if(action==='upgrade'&&slotAt(s,payload.slot)?.towers[payload.slot.index]?.guestOwner===undefined)ok=HexTowerCommands.upgrade(s,payload.slot,payload.upgrade);
       else if(action==='consumable')ok=HexCombat.buyConsumable(s,payload.kind,payload.slot);
       else if(action==='baseUpgrade')ok=HexHeroes.buy(s,payload.kind);
       else if(action==='buildingTarget')ok=HexBuildings.setTarget(s,payload.slot,payload.target);
       else if(action==='sellBuilding')ok=HexBuildings.sell(s,payload.slot);
-      else if(action==='sellTower'){const tile=slotAt(s,payload.slot),tower=tile?.towers[payload.slot.index],refund=HexData.towerRefund(s,tower);if(refund){HexData.recordTowerStat(s,tower,'refundGold',refund.amount);if(s.runTowerDetails[tower.statId])s.runTowerDetails[tower.statId].sold=true;s.gold+=refund.amount;tile.towers[payload.slot.index]=null;if(same(payload.slot,match.reinforcements[player]))match.reinforcements[player]=null;ok=true;}}
+      else if(action==='sellTower'){const tile=slotAt(s,payload.slot),tower=tile?.towers[payload.slot.index],refund=HexData.towerRefund(s,tower);if(refund){HexData.recordTowerStat(s,tower,'refundGold',refund.amount);if(s.runTowerDetails[tower.statId])s.runTowerDetails[tower.statId].sold=true;s.gold+=refund.amount;tile.towers[payload.slot.index]=null;ok=true;}}
       else if(action==='targetPriority'){const tower=slotAt(s,payload.slot)?.towers[payload.slot.index],allowed=['closestBase','furthestBase','mostHealth','leastHealth','mostArmor','mostMagic','boss','healer','closestTower','furthestTower'];if(tower&&tower.guestOwner===undefined&&Array.isArray(payload.priorities)&&payload.priorities.length===3&&new Set(payload.priorities).size===3&&payload.priorities.every(p=>allowed.includes(p))){tower.targetPriority=[...payload.priorities];ok=true;}}
       else if(action==='building')ok=HexBuildings.buy(s,payload.slot,payload.type);
       else if(action==='buildingUpgrade')ok=HexBuildings.upgrade(s,payload.slot);
@@ -128,26 +133,35 @@ const HexDuoSession=(()=>{
       else if(action==='tunnel'&&match.phase==='prepare')ok=HexRunRuntime.rescueTunnel(s);
     }
     if(!ok)return false;
-    // A successful edit cancels only this player's readiness. Failed purchases and
-    // clock controls leave readiness intact. Ordinary edits do not unready the partner.
-    if(match.phase==='prepare'&&!['ready','pause','speed'].includes(action))match.ready[player]=false;
+    // Upgrades and focus changes are legal while ready and keep that commitment.
+    // Edits that change the build plan still withdraw only the acting player's readiness.
+    if(match.phase==='prepare'&&!['ready','pause','speed','upgrade','buildingUpgrade','targetPriority'].includes(action))match.ready[player]=false;
     match.receipts[player].push(id);match.receipts[player]=match.receipts[player].slice(-256);collectHealth(match,s,hp,max);
     if(match.phase==='prepare'&&match.ready.every(Boolean)){
       if(!match.boards.every(canReady)){match.ready=[false,false];return true;}
       for(const board of match.boards)HexRunFlow.start(board.state,board.random);
-      match.waveHelp=match.boards.map((board,i)=>{const slot=match.reinforcements[i],t=slotAt(board.state,slot)?.towers[slot?.index];if(!t)return null;const copy={};for(const name of ['type','level','branch','finalUpgrade','ultimate','targetPriority'])if(t[name]!==undefined)copy[name]=Array.isArray(t[name])?[...t[name]]:t[name];return copy;});match.leaked=[false,false];match.pendingHelp=[null,null];
       match.wave++;match.phase='combat';match.finished=[false,false];match.ready=[false,false];
     }
     return true;
   }
   function tick(match){
     if(match.paused||match.phase!=='combat')return;
-    match.elapsedMs+=50;launchHelp(match);
+    match.elapsedMs+=50;
     for(let i=0;i<2;i++){
-      const run=match.boards[i],s=run.state;if(match.finished[i]){s.elapsedMs=match.elapsedMs;continue;}
+      const run=match.boards[i],s=run.state;if(match.finished[i]){
+        // Finish visual tails without simulating attacks or paying the wave twice.
+        s.elapsedMs+=50;
+        for(const p of s.projectiles)p.ttl-=.05;
+        s.projectiles=s.projectiles.filter(p=>p.ttl>0);
+        continue;
+      }
       const hp=s.hp,max=s.maxHp,result=HexRunRuntime.advance(s,run.random,.05);if(s.hp<hp)match.leaked[i]=true;for(const [owner,types] of Object.entries(s.duoSupport||{}))for(const [type,damage] of Object.entries(types))match.support[owner][type]=(match.support[owner][type]||0)+damage;s.duoSupport={};collectHealth(match,s,hp,max);
       if(match.phase==='gameover')return;
-      if(result==='complete'){match.finished[i]=true;s.waveRunning=false;s.phase='duoWait';if(!match.leaked[i]&&match.waveHelp[i])match.pendingHelp[i]={at:match.elapsedMs+1500,tower:match.waveHelp[i]};}
+      if(result==='complete'){
+        match.finished[i]=true;s.waveRunning=false;s.phase='duoWait';
+        s.mines=[];s.augmentEchoes=[];HexCombat.clearConsumables(s);
+        for(const tile of s.map.values())for(const tower of tile.towers||[])if(tower)tower.souls=[];
+      }
     }
     if(match.finished.every(Boolean)){
       cleanGuests(match);match.phase='prepare';
@@ -176,6 +190,10 @@ const HexDuoSession=(()=>{
     if(snapshot.duo?.hexGifts!==undefined){const gifts=snapshot.duo.hexGifts;if(!Array.isArray(gifts)||gifts.length!==2||gifts.some(g=>g&&(!Number.isSafeInteger(g.count)||g.count<1||!Number.isInteger(g.wave)||g.wave<0||g.wave>match.wave||!HEX_GIFT.cards.includes(g.cardId))))throw Error('Invalid hex gifts');match.hexGifts=JSON.parse(JSON.stringify(gifts));}
     match.speed=snapshot.duo?.speed||1;match.paused=!!snapshot.duo?.paused;
     for(const field of ['portals','reinforcements','waveHelp','pendingHelp','leaked','support']){if(!Array.isArray(snapshot.duo?.[field])||snapshot.duo[field].length!==2)throw new Error('Invalid Duo checkpoint');match[field]=JSON.parse(JSON.stringify(snapshot.duo[field]));}
+    // Retire temporary partner support from old checkpoints, retaining owned towers
+    // and historical support totals used by completed results.
+    cleanGuests(match);
+    match.portals=[null,null];match.reinforcements=[null,null];match.waveHelp=[null,null];
     match.delivery=snapshot.version===2?null:JSON.parse(JSON.stringify(snapshot.duo.delivery??null));
     if(snapshot.duo?.endless!==undefined&&typeof snapshot.duo.endless!=='boolean')throw Error('Invalid endless flag');
     if(snapshot.duo?.endless){

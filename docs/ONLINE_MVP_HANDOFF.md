@@ -60,13 +60,13 @@ Für den bestehenden Host unter `/var/www/html/net.zlyfer.autohextd` gilt jetzt 
 
 Auf Branch `codex/multiplayer-test`: Lobby erstellen/beitreten führt zuerst in einen eigenen Warteraum. Beide Spieler bestätigen ausdrücklich „Bereit“, erst danach wechseln beide auf `index.html#duo=…`. Der Server verhindert einen Spielstart vor beiden Bestätigungen. Gespeicherte ältere laufende Partien bleiben direkt fortsetzbar.
 
-Die Partie verwendet dieselbe 3D-Karte, Kartenhand, Bau-/Upgrade-Menüs, Deckansicht und Einstellungen wie Solo. Aktionen gehen zum Server; im Browser läuft keine zweite Simulation. Tempo und Pause gelten gemeinsam. Das Duo-Menü ergänzt Partneransicht (nur anschauen), Portalreservierung, Turmverstärkung, Geschenke und gemeinsame Wächterfreigabe. Portal und Verstärkung werden auf der 3D-Karte markiert. Serverupdates erhalten offene Auswahlen. Kartenwechsel räumt lokale Vorschauen auf.
+Die Partie verwendet dieselbe 3D-Karte, Kartenhand, Bau-/Upgrade-Menüs, Deckansicht und Einstellungen wie Solo. Aktionen gehen zum Server; im Browser läuft keine zweite Simulation. Tempo und Pause gelten gemeinsam. Das Duo-Menü ergänzt Partneransicht (nur anschauen), Geschenke und gemeinsame Wächterfreigabe. Die frühere Portal-/Turmverstärkung ist entfernt. M wechselt zwischen eigener Karte und Partnerkarte. Serverupdates erhalten offene Auswahlen. Kartenwechsel räumt lokale Vorschauen auf.
 
 Lokaler Test nach Neustart des Servers mit `npm run start:duo`:
 1. `http://localhost:8090/duo-lobby.html` öffnen und Lobby erstellen. Das Spiel darf noch nicht erscheinen.
 2. Einladung in einem zweiten Browser/privaten Fenster öffnen und beitreten. Nach nur einer Bereitschaftsbestätigung bleiben beide in der Lobby; erst die zweite startet die gemeinsame Bauphase.
 3. Beide Hexe legen, Türme bauen/verbessern und je „Bereit für die Welle“ wählen. Offene Bauauswahl während Updates beobachten.
-4. Einen freien Turmplatz als Partner-Portal reservieren, einen eigenen Turm zur Verstärkung wählen. Nach verlustfreiem Wellenabschluss hilft eine Kopie auf der noch kämpfenden Partnerkarte. Partneransicht, Markierungen und Ankunft prüfen.
+4. Während eigener Bereitschaft einen Turm verbessern: Kauf und Bereitschaft bleiben wirksam. M wechselt in beide Richtungen zwischen den Karten. Nach längerer Baupause muss die nächste Welle ohne Kartenwechsel flüssig laufen; neue Gegner erscheinen erst auf ihrer Darstellungszeitlinie.
 5. Nach Welle 5 Geschenke wählen; danach weiterbauen. Pause/Tempo, Wiederbeitritt und gemeinsamer Neustart prüfen.
 6. Auf schmalem Bildschirm Menüs, Karte, Tooltip-Positionen und Deutsch/Englisch prüfen.
 

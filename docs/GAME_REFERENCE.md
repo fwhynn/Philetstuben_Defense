@@ -360,7 +360,7 @@ Prozedurale Straßen (Spiegel-Abzweig, Fächer-/Seitenkreuzung, Sackgasse und Re
 
 Bei laufendem lokalen Server `duo-prototype.html` öffnen (standardmäßig `http://localhost:8080/duo-prototype.html`). Beide Seiten werden an einem Gerät gesteuert: je ein Hex legen, Verteidigung bauen und beide bereit melden. Zwei getrennte Maps, Goldkonten und Decks teilen sich 40 HP. Abschlussbelohnungen gibt es erst nach beiden Kämpfen.
 
-Karten drehen, Türme/Gebäude bauen und verbessern, Belohnungen wählen sowie 1×/2× sind verfügbar. „Checkpoint merken“ sichert beide Seiten nur im geöffneten Tab; kein dauerhafter Spielstand. Kein Zugriff auf Solo-Diamanten. Freien Slot anklicken und als Partner-Portal reservieren; eigenen Turm anklicken und als Verstärkung wählen. Nach sauberem Abschluss hilft eine Kopie nach 1,5 Spielsekunden beim Partner. Unterstützungs-Schaden wird dem Sender zugerechnet. Noch ohne Online-Verbindung, Lieferungen, Verkäufe oder Base-Ausbau. 246 automatisierte Tests bestanden; visuelle Prüfung durch den Nutzer.
+Karten drehen, Türme/Gebäude bauen und verbessern, Belohnungen wählen sowie 1×/2× sind verfügbar. „Checkpoint merken“ sichert beide Seiten nur im geöffneten Tab; kein dauerhafter Spielstand. Kein Zugriff auf Solo-Diamanten. Die frühere Portal-/Turmverstärkung ist entfernt. Upgrades bleiben während der Bereitschaft möglich. Noch ohne Online-Verbindung, Lieferungen, Verkäufe oder Base-Ausbau. 246 automatisierte Tests bestanden; visuelle Prüfung durch den Nutzer.
 
 ## Kampagne und Bosswellen
 

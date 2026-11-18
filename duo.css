@@ -25,8 +25,6 @@
 .duoGame #startWaveBtn.duoReadyOn{background:#2f6b45;outline:2px solid var(--duo-ready)}
 
 .duoGame #message{top:212px}.duoGame .towerPanel{z-index:30}.duoGame #activeSeed{display:none}
-.duoTransfer{position:absolute;top:262px;left:50%;transform:translateX(-50%);z-index:13;padding:8px 14px;border-radius:10px;background:#1d2922f0;border:1px solid var(--duo-ready);color:var(--text);pointer-events:none;font-weight:700}
-.duoTransfer .researchIcon{width:48px;height:48px;display:block;margin:4px auto}
 
 /* ===== Duo menu (inside the top-left menu bar) ===== */
 .duoHud{position:absolute;top:100px;left:16px;z-index:25;max-width:min(360px,calc(100vw - 32px));color:var(--text);background:var(--panel);border:1px solid #607c61;border-radius:12px;box-shadow:0 8px 24px #0005}
@@ -37,9 +35,7 @@
 .duoHudBody p{margin:6px 0;font-size:13px;line-height:1.5}.duoHelpText{color:var(--muted)}
 .duoHudBody button{min-height:40px;margin:4px 0;width:100%}
 .duoMapSwitch{display:flex;gap:8px}.duoMapSwitch button{flex:1}.duoMapSwitch [aria-pressed=true]{outline:2px solid var(--accent);background:#3d5a45}
-.duoSupportRow{display:grid;grid-template-columns:1fr auto auto;gap:6px;align-items:center;margin:8px 0;padding:8px;border-radius:10px;background:#0002;border:1px solid #ffffff12}
-.duoSupportRow>div{display:flex;flex-direction:column;min-width:0}.duoSupportRow strong{font-size:13px}.duoSupportRow small{font-size:12px;color:var(--muted)}
-.duoSupportRow button{width:auto;min-height:36px;margin:0;padding:6px 10px;font-size:13px}
+
 .duoHudBody .duoDanger{background:#5b2e29;border:1px solid #a95146}
 #duoGuardians button{background:#4a3a20;border:1px solid #c4a050}
 
@@ -51,15 +47,15 @@
  .duoTurn{top:60px;left:12px;right:12px;width:auto;transform:none}
  .duoSeats{padding:6px 10px;gap:6px}.duoTeamInfo{padding:0 6px}.duoTurnBody{padding:6px 10px 8px}.duoTurnBody strong{font-size:14px}
  .duoTurnBody p{font-size:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
- .duoGame #message{top:180px}.duoTransfer{top:220px}
+ .duoGame #message{top:180px}
 }
 @media(max-height:600px){
  .duoTurn{top:56px;left:12px;right:12px;width:auto;transform:none}
  .duoTurnBody p,.duoTurn .duoMapLabel{display:none}.duoTurn .duoQuickMap{margin-top:4px;min-height:28px;padding:3px 10px}.duoTurnBody{padding:4px 10px 6px}.duoTurnBody strong{font-size:13px}
- .duoGame #message{top:126px;max-width:40vw}.duoTransfer{top:126px}
+ .duoGame #message{top:126px;max-width:40vw}
 }
 @media(max-width:900px),(max-height:600px){.dockTL .duoHud{width:100%;max-width:none}.dockTL .duoHudBody{position:static;width:100%;max-height:none;overflow:visible;border:0;box-shadow:none}}
-@media(prefers-reduced-motion:reduce){.duoSeat[data-state=todo] .duoSeatDot{animation:none}.duoTransfer{animation:none}}
+@media(prefers-reduced-motion:reduce){.duoSeat[data-state=todo] .duoSeatDot{animation:none}}
 
 /* ===== Lobby page ===== */
 html:has(.duoLobbyPage),.duoLobbyPage{height:auto;min-height:100%;overflow:auto}

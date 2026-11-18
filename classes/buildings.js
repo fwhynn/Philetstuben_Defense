@@ -10,7 +10,7 @@ const HexBuildings=(()=>{
   function definition(building,state){if(!building||!definitions[building.type])return null;if(building.type==='portal')return {...definitions.portal};const def={...definitions[building.type],...(upgrades[building.type][Math.min(3,building.level||1)-2]||{})};if(building.type==='house'&&building.special)def.income=16+(state?2*Math.min(2,Math.max(0,patricianCount(state)-1)):0);def.desc=building.type==='bastion'?'+'+Math.round((def.range-1)*100)+' % Turmreichweite auf diesem Hex und seinen Nachbarhexen. Nicht stapelbar.':building.type==='house'?'+'+def.income+' Gold je Wave.':building.type==='forge'?'+'+Math.round((def.damage-1)*100)+' % Turmschaden auf diesem Hex und seinen Nachbarhexen. Nicht stapelbar.':Math.round((1-def.discount)*100)+' % Rabatt auf Turmbau und Upgrades auf diesem Hex und seinen Nachbarhexen. Nicht stapelbar.';return def;}
   function applies(source,target,building,def=definition(building)){if(!def)return false;const dq=source.q-target.q,dr=source.r-target.r;return Math.max(Math.abs(dq),Math.abs(dr),Math.abs(dq+dr))<=def.radius||(building.special&&building.target===target.q+','+target.r);}
   function nextUpgrade(state,building){if(!building||!upgrades[building.type])return null;const level=building.level||1;if(level<3)return upgrades[building.type][level-1];if(!building.special&&state.buildingUnlocks?.includes('building:'+building.type))return specials[building.type];return null;}
-  function upgrade(state,slot){const tile=slot&&state.map.get(slot.q+','+slot.r),b=tile?.buildings?.[slot.index],next=nextUpgrade(state,b);if(!next||state.hp<=0||!['place','build','wave'].includes(state.phase)||state.gold<next.cost)return false;const before=definition(b);if((b.level||1)<3)b.level=(b.level||1)+1;else b.special=true;b.paid+=next.cost;state.gold-=next.cost;state.income+=(definition(b).income||0)-(before.income||0);state.buildingVersion=(state.buildingVersion||0)+1;refresh(state);return true;}
+  function upgrade(state,slot){const tile=slot&&state.map.get(slot.q+','+slot.r),b=tile?.buildings?.[slot.index],next=nextUpgrade(state,b);if(!next||state.hp<=0||!(['place','build','wave'].includes(state.phase)||state.duoMode&&state.phase==='duoWait')||state.gold<next.cost)return false;const before=definition(b);if((b.level||1)<3)b.level=(b.level||1)+1;else b.special=true;b.paid+=next.cost;state.gold-=next.cost;state.income+=(definition(b).income||0)-(before.income||0);state.buildingVersion=(state.buildingVersion||0)+1;refresh(state);return true;}
   function targetRemaining(building,state){
     if(building?.type!=='market')return Infinity;
     if(!building.target)return 1;
@@ -35,7 +35,7 @@ const HexBuildings=(()=>{
     return false;
   }
   function canTarget(state,slot,target){const source=slot&&state.map.get(slot.q+','+slot.r),b=source?.buildings?.[slot.index],tile=state.map.get(target);if(!b?.special||b.type==='house'||!tile||targetRemaining(b,state)<=0||b.target===target)return false;if(['forge','bastion'].includes(b.type))for(const t of state.map.values())for(const other of t.buildings||[])if(other?.type===b.type&&applies(t,tile,other))return false;return true;}
-  function setTarget(state,slot,target){const source=slot&&state.map.get(slot.q+','+slot.r),b=source?.buildings?.[slot.index];if(!canTarget(state,slot,target)||state.hp<=0||!['place','build','wave'].includes(state.phase))return false;b.target=target;state.buildingVersion=(state.buildingVersion||0)+1;refresh(state);return true;}
+  function setTarget(state,slot,target){const source=slot&&state.map.get(slot.q+','+slot.r),b=source?.buildings?.[slot.index];if(!canTarget(state,slot,target)||state.hp<=0||!(['place','build','wave'].includes(state.phase)||state.duoMode&&state.phase==='duoWait'))return false;b.target=target;state.buildingVersion=(state.buildingVersion||0)+1;refresh(state);return true;}
   function effects(map,target){
     let damage=1,discount=1,shrineDamage=1,range=1,buildingRange=1;if(!target) return {damage,discount};
     for(const tile of map.values()){
@@ -105,7 +105,7 @@ const count=patricianCount(state),bonus=2*count*Math.min(2,Math.max(0,count-1));
   function buy(state,slot,type){
     if(state.challengeKind==='detour')return false;
     const def=definitions[type],tile=slot?state.map.get(slot.q+','+slot.r):null;
-    if(!def||!tile||buildBlockReason(tile,type)||!allowedTypes(tile).includes(type)||(type==='portal'&&(!['place','build'].includes(state.phase)||state.waveRunning))||!['place','build','wave'].includes(state.phase)||state.hp<=0||state.gold<def.cost||slot.index<0||slot.index>=(tile.buildingSlots||0)) return false;
+    if(!def||!tile||buildBlockReason(tile,type)||!allowedTypes(tile).includes(type)||(type==='portal'&&(!['place','build'].includes(state.phase)||state.waveRunning))||!(['place','build','wave'].includes(state.phase)||state.duoMode&&state.phase==='duoWait')||state.hp<=0||state.gold<def.cost||slot.index<0||slot.index>=(tile.buildingSlots||0)) return false;
     tile.buildings??=Array(tile.buildingSlots).fill(null);
     if(tile.buildings[slot.index]) return false;
     tile.buildings[slot.index]={type,level:1,paid:def.cost,builtOnWave:['place','build'].includes(state.phase)?state.wave:null};state.gold-=def.cost;state.income+=def.income||0;state.buildingVersion=(state.buildingVersion||0)+1;refresh(state);return true;

@@ -5,6 +5,11 @@ function setup(api){
  return {ui:c.HexRunRanking,host:doc.createElement('section'),storage,text:h=>h.children.map(n=>n.textContent).join(' ')};
 }
 const run={runId:'r1',mode:'single',wave:35,kills:400,ruleset:'1.0.7'};
+test('compact Duo results still submit and show rank while omitting accepted and comparison fine print',async()=>{
+ let submitted=0;const api={isLoggedIn:()=>true,submitRunRanking:async()=>{submitted++;return {status:'accepted'};},previewRunRanking:async()=>({mode:'duo',rank:3})};
+ const t=setup(api);await t.ui.show(t.host,{...run,mode:'duo'},{api,compact:true});assert.equal(submitted,1);assert.match(t.host.children[0].textContent,/Platz 3/);assert.equal(t.host.children[2].hidden,true);assert.ok(!t.host.children.some(n=>/Vorläufiger Vergleich/.test(n.textContent)));
+ await t.ui.refresh();assert.equal(t.host.children[2].hidden,true,'compact presentation survives account refresh');
+});
 test('guest sees provisional rank and registration CTA; same run survives login and is submitted pending',async()=>{
  let logged=false,claims=[],mode;const api={isLoggedIn:()=>logged,previewRunRanking:async()=>({mode:'single',rank:6}),submitRunRanking:async r=>{claims.push(r);return {status:'pending'};}};
  const t=setup(api);await t.ui.show(t.host,run,{api,onAccount:m=>mode=m});assert.match(t.text(t.host),/Platz 6/);assert.equal(claims.length,0);t.host.children.find(n=>n.tag==='button').events.click();assert.equal(mode,'register');

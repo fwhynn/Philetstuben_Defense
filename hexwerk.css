@@ -2402,3 +2402,34 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
  html[data-compact=towers] .duoGame #quickLoadout,html[data-compact=biomes] .duoGame #biomeRail{top:calc(env(safe-area-inset-top,0px) + var(--duo-bar-h) + 62px)}
 }
 @media(max-width:480px){.duoEdgeBar .duoTeamInfo{flex-direction:column;gap:0}.duoEdgeBar .duoTeamInfo .hxi-heart{width:12px;height:12px}}
+
+/* Deck overview: full collection first, two clearly separated piles below. */
+.deckOverview{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.deckOverview>section{min-width:0;padding:0 0 16px}
+.deckOverview>.deckOverviewFull{grid-column:1 / -1;border-bottom:1px solid #57725b}
+.deckOverview>.deckOverviewPile{padding:14px;border:1px solid #57725b;border-radius:8px;background:#10281e}
+.deckOverview h3{margin:0 0 14px}
+.deckOverview .deckHexGrid{gap:10px}
+.duoEdgeBar #duoHud{width:min(520px,calc(100vw / var(--hx-k,1) - 32px))}
+.duoEdgeBar .duoHudSection:first-child{border-top:0;padding-top:0}
+.duoEdgeBar .duoHexGiftChoices{gap:12px}
+.duoEdgeBar .duoHexGiftChoices .card{min-height:160px;margin:0}
+.duoEdgeBar #duoHexGiftInfo{font-size:14px;margin-bottom:14px}
+.duoEdgeBar #duoHexGiftReceipt:empty{display:none}
+#duoLeave.duoDanger{color:#ffc6b9;border-color:#b95b45;background:#3c201c}
+#rewardOverlay.duoResult .rewardBox{width:min(860px,calc(100vw - 32px))}
+#rewardOverlay.duoResult #rewardDescription{font-size:17px;margin:12px 0 24px}
+#rewardOverlay.duoResult #rewardChoices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.duoResultSummary{grid-column:1 / -1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 12px}
+.duoResultSummary>div{display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px 10px;border:1px solid #668166;border-radius:10px;background:#10271c}
+.duoResultSummary strong{font-size:32px;color:#ffe095;line-height:1.2}
+.duoResultSummary span{color:#dbe6d6;font-size:15px}
+#rewardOverlay .duoResultAction{min-height:52px;margin:0;width:100%;font-size:17px;white-space:normal}
+#rewardOverlay .duoResultAction.primary{grid-column:1 / -1;background:linear-gradient(#ffe38a,#ecb63d);color:#292111;border:2px solid #f7ce60;font-size:20px}
+.duoResultRanking,.duoResultDetails{grid-column:1 / -1}
+.duoResultRanking{padding:14px 0 0;text-align:center}
+.duoResultRanking h3{margin:0 0 8px}
+.duoResultDetails{border-top:1px solid #57725b;padding-top:14px}
+.duoResultDetails summary{cursor:pointer;padding:8px 0}
+#rewardOverlay.duoResult .rewardFooter{display:none}
+@media(max-width:620px){.deckOverview{grid-template-columns:minmax(0,1fr);gap:16px}.duoResultSummary{gap:6px}.duoResultSummary strong{font-size:25px}.duoResultSummary span{font-size:13px}#rewardOverlay.duoResult #rewardChoices{grid-template-columns:minmax(0,1fr)}}

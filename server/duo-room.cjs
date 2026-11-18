@@ -5,6 +5,7 @@ const loadCore = require('../headless-core.cjs');
 const RULESET = require('../package.json').version;
 // Reviewed checkpoint compatibility, including legacy 20-gold gift migration.
 function compatibleRuleset(source,target=RULESET){
+  if(target==='1.3.3'&&['1.2.8','1.2.9','1.3.0','1.3.1','1.3.2'].includes(source))return true;
   if(target==='1.3.2'&&['1.2.8','1.2.9','1.3.0','1.3.1'].includes(source))return true;
   if(target==='1.3.1'&&['1.2.8','1.2.9','1.3.0'].includes(source))return true;
   if(target==='1.3.0'&&['1.2.8','1.2.9'].includes(source))return true;
@@ -38,7 +39,6 @@ function payloadValid(action, p) {
     case 'buildingTarget': return exact(p, ['slot', 'target']) && slot(p.slot) && typeof p.target === 'string' && /^-?\d{1,4},-?\d{1,4}$/.test(p.target);
     case 'sellTower': case 'sellBuilding':
     case 'buildingUpgrade': return exact(p, ['slot']) && slot(p.slot);
-    case 'portal': case 'reinforcement': return exact(p, ['slot']) && (p.slot === null || slot(p.slot));
     case 'giftHex': return exact(p,['cardId'])&&['straight','smallCurve','bigCurve'].includes(p.cardId);
     case 'delivery': return exact(p, ['offerId', 'index']) && typeof p.offerId === 'string' && p.offerId.length <= 200 && integer(p.index, 0, 2);
     case 'deliveryWish': return exact(p, ['offerId', 'index']) && typeof p.offerId === 'string' && p.offerId.length <= 200 && (p.index === null || integer(p.index, 0, 2));
@@ -132,6 +132,7 @@ function createRoom({ seed = crypto.randomUUID(), loadouts, now = () => Date.now
     if (packet.sequence !== session.next) return { ok: false, reason: 'sequence', next: session.next };
     matchGeneration++; // A validated command may mutate state even when rejected.
     let result;
+    const clockBoundary=[match.phase,match.wave,!!match.paused].join(':');
     const presence = connection();
     if (presence.paused) result = { ok: false, reason: ended ? 'match-ended' : presence.maintenance ? 'maintenance' : presence.expired ? 'reconnect-expired' : 'disconnected' };
     else if (packet.action === 'lobbyLoadout') {
@@ -158,6 +159,9 @@ function createRoom({ seed = crypto.randomUUID(), loadouts, now = () => Date.now
     else if (!lobby.started) result = { ok: false, reason: 'lobby-not-ready' };
     else if (packet.wave !== match.wave || packet.phase !== match.boards[player].state.phase) result = { ok: false, reason: 'stale' };
     else { let payload = packet.payload; if (packet.action === 'reward' || packet.action === 'delivery' || packet.action === 'deliveryWish') { const offer = packet.action === 'deliveryWish' ? match.delivery?.offers[1-player] : packet.action === 'delivery' ? match.delivery?.offers[player] : match.boards[player].state.rewardOffer; payload = { ...payload, offerId: offer && offerId(offer.id) === payload.offerId ? offer.id : '' }; } const ok = core.duo.command(match, player, { id: epoch + ':' + player + ':' + packet.sequence, wave: packet.wave, action: packet.action, payload }); if (ok) revision++; result = { ok, reason: ok ? null : 'illegal' }; }
+    // The first frame of a new wave/resume starts now, not at the end of the
+    // previous wave. Clients must never interpolate through minutes of planning.
+    if(clockBoundary!==[match.phase,match.wave,!!match.paused].join(':'))frameTime=now();
     result = { ...result, sequence: packet.sequence, next: ++session.next, revision }; session.last = { fingerprint, result }; return { ...result };
   }
   const placementCache = new WeakMap();

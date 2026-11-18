@@ -639,7 +639,6 @@ function create(host0,commands){
   const duoRings=[new THREE.Mesh(torus,basic('#a879ff',.95)),new THREE.Mesh(torus,basic('#61dfd1',.95))];
   for(const ring of duoRings){ring.visible=false;ring.renderOrder=59;ring.material.depthTest=false;ring.material.depthWrite=false;layer.dynamic.add(ring);}
   function syncSelection(){
-    [state.duoPortal,state.duoReinforcement].forEach((slot,i)=>{const tile=slot&&state.map.get(key(slot.q,slot.r)),p=tile&&slotPositions(tile)[slot.index],ring=duoRings[i];ring.visible=!!p;if(p){ring.position.set(p.x,4,p.y);ring.scale.setScalar(i===0?23:28);}});
     previewRangeFill.visible=previewRangeRing.visible=false;
     for(const record of objectRecords.values())for(const hint of record.slotHints||[])hint.visible=state.showSlotHints!==false&&['place','build','wave'].includes(state.phase)&&state.hp>0;
     for(const record of objectRecords.values())if(record.baseHint)record.baseHint.visible=HexHeroes.upgradeAvailable(state);
@@ -699,6 +698,7 @@ function create(host0,commands){
   function syncEnemies(){
     const alive=new Set();
     for(const e of state.enemies){
+      if(e.remoteSpawnPending)continue;
       alive.add(e.id);let obj=enemyObjects.get(e.id);if(!obj){obj=makeEnemy(e);enemyObjects.set(e.id,obj);}
       obj.enemy=e;
       if(obj.articulated)for(const limb of obj.limbs)applyEnemyPose(limb.g,limb.base,enemyPose(e.type,limb.name,obj.phase,e));
@@ -844,6 +844,12 @@ function create(host0,commands){
         }
         if(t<.5){const k=1-t/.5;p.pts.slice(1).forEach(pt=>fx.flash.ball(pt.x,DST_H,pt.y,2+3.5*k,p.color||'#93a5ff',k*.8));}   // Funken an jedem getroffenen Gegner
         if(!done.hit){done.hit=true;(p.hits||[]).forEach(popEnemy);}
+      }else if(p.tower==='poison'||p.tower==='gamble'){
+        const poison=p.tower==='poison',f=clamp01(t/.75),at=flight(src,dst,srcH,poison&&!p.splash?2:10),color=p.color;
+        if(f<1){const head=at(f),tail=at(Math.max(0,f-.12));
+          if(poison){fx.glow.segment(tail.x,tail.y,tail.z,head.x,head.y,head.z,1.3,color,.7);fx.orbs.ball(head.x,head.y,head.z,p.splash?4:2,color);}
+          else{fx.rocks.ball(head.x,head.y,head.z,4.2,color);for(let i=0;i<3;i++)fx.orbs.ball(head.x+2,head.y+i*1.5-1.5,head.z+2,.6,'#fff0c5');}
+        }else{const k=clamp01((t-.75)/.25);fx.flash.ball(dst.x,DST_H,dst.y,3+7*k,color,(1-k)*.65);if(poison&&p.splash&&high)for(let i=0;i<5;i++){const a=i*1.256;fx.smoke.ball(dst.x+Math.cos(a)*p.splash*k*.5,8+8*k,dst.y+Math.sin(a)*p.splash*k*.5,4*(1-k),color);}if(!done.hit){done.hit=true;(p.hits||[]).forEach(popEnemy);}}
       }else if(p.tower==='element'&&p.variant==='elementWind'){        // Windkern: drei verdrillte Luftbänder bis zum Linienende
         const f=clamp01(t/.85),at=flight(src,dst,srcH,0),fade=1-t*.6,px=-uy,pz=ux;
         for(let s=0;s<3;s++){let last=null;
@@ -941,13 +947,11 @@ function create(host0,commands){
   }
   function syncLabels(){
     for(const tile of state.map.values())(tile.towers||[]).forEach((t,i)=>{if(t&&(t.overloadPending||t.overloadUntil>state.elapsedMs)){const p=slotPositions(tile)[i];label('overload:'+key(tile.q,tile.r)+':'+i,p.x,p.y,'ϟ Überladung','',95);}});
-    for(const [id,slot,text] of [['duo:portal',state.duoPortal,'Partner-Portal'],['duo:reinforcement',state.duoReinforcement,'Verstärkung']]){const tile=slot&&state.map.get(key(slot.q,slot.r)),p=tile&&slotPositions(tile)[slot.index];if(p)label(id,p.x,p.y,text,'',id==='duo:portal'?30:85);}
-    for(const tile of state.map.values())(tile.towers||[]).forEach((t,i)=>{if(t?.guestOwner!==undefined){const p=slotPositions(tile)[i];label('duo:guest:'+key(tile.q,tile.r)+':'+i,p.x,p.y,'Partnerhilfe','',85);}});
-    for(const e of state.enemies)if(e.alive&&(['splitter','shard','healer','elementCarrier'].includes(e.type)||HexWaves.enemyAssets[e.type])){const entry=label('enemy-ability:'+e.id,e.x,e.y,(e.type==='shieldbearer'?'▣ '+(e.shieldHits||0):e.type==='ramBeetle'?'» '+Math.round((e.charge||0)*100)+'%':e.abilityIcon)||({splitter:'◆ → ◆◆',shard:'◆',healer:'✚'})[e.type],'',38);entry.el.title=e.name+(e.description?' · '+e.description:'');entry.el.style.color=e.color||(e.type==='healer'?'#73e49c':'#e5e8de');}
-    for(const e of state.enemies)if(e.alive&&e.bossKind)label('boss-name:'+e.id,e.x,e.y,e.name+' · '+({iron:'Rüstung',hunter:'Tempo',summoner:'MR · Beschwörung'})[e.bossKind],'',85);
+    for(const e of state.enemies)if(e.alive&&!e.remoteSpawnPending&&(['splitter','shard','healer','elementCarrier'].includes(e.type)||HexWaves.enemyAssets[e.type])){const entry=label('enemy-ability:'+e.id,e.x,e.y,(e.type==='shieldbearer'?'▣ '+(e.shieldHits||0):e.type==='ramBeetle'?'» '+Math.round((e.charge||0)*100)+'%':e.abilityIcon)||({splitter:'◆ → ◆◆',shard:'◆',healer:'✚'})[e.type],'',38);entry.el.title=e.name+(e.description?' · '+e.description:'');entry.el.style.color=e.color||(e.type==='healer'?'#73e49c':'#e5e8de');}
+    for(const e of state.enemies)if(e.alive&&!e.remoteSpawnPending&&e.bossKind)label('boss-name:'+e.id,e.x,e.y,e.name+' · '+({iron:'Rüstung',hunter:'Tempo',summoner:'MR · Beschwörung'})[e.bossKind],'',85);
     if(state.tunnelOffer&&state.tunnelConfirmed){const p=state.tunnelOffer,[q,r]=p.source.split(',').map(Number);for(const [name,t] of [['Eingang',{q,r}],['Ausgang',p]]){const c=axialToWorld(t.q,t.r);label('tunnel-preview:'+name,c.x,c.y,'Tunnel '+name+' · Vorschau','',30);}}
 
-    for(const e of state.enemies)if(e.alive&&e.caravan){const entry=label('caravan:'+e.id,e.x,e.y,'🪙','',55);if(!entry.caravan){entry.caravan=true;const el=entry.el;el.style.pointerEvents='auto';el.style.cursor='help';el.setAttribute('role','button');el.tabIndex=0;el.setAttribute('aria-label',e.splitOnDeath?'Geldtransport: 18 Gold verteilt auf Golem und Splitter. Erreicht der Golem die Basis, verlierst du 10 Gold.':'Geldtransport: Besiegen bringt 15 Gold extra. Erreicht er die Basis, verlierst du 10 Gold.');el.title=el.getAttribute('aria-label');for(const name of ['pointerdown','pointerup'])el.addEventListener(name,event=>event.stopPropagation());el.addEventListener('click',event=>{event.stopPropagation();commands.inspectCaravan?.();});el.addEventListener('keydown',event=>{if(['Enter',' '].includes(event.key)){event.preventDefault();event.stopPropagation();commands.inspectCaravan?.();}});}}
+    for(const e of state.enemies)if(e.alive&&!e.remoteSpawnPending&&e.caravan){const entry=label('caravan:'+e.id,e.x,e.y,'🪙','',55);if(!entry.caravan){entry.caravan=true;const el=entry.el;el.style.pointerEvents='auto';el.style.cursor='help';el.setAttribute('role','button');el.tabIndex=0;el.setAttribute('aria-label',e.splitOnDeath?'Geldtransport: 18 Gold verteilt auf Golem und Splitter. Erreicht der Golem die Basis, verlierst du 10 Gold.':'Geldtransport: Besiegen bringt 15 Gold extra. Erreicht er die Basis, verlierst du 10 Gold.');el.title=el.getAttribute('aria-label');for(const name of ['pointerdown','pointerup'])el.addEventListener(name,event=>event.stopPropagation());el.addEventListener('click',event=>{event.stopPropagation();commands.inspectCaravan?.();});el.addEventListener('keydown',event=>{if(['Enter',' '].includes(event.key)){event.preventDefault();event.stopPropagation();commands.inspectCaravan?.();}});}}
     const gridState=state.powerGrid?HexPowerGrid.evaluate(state):null;
     if(state.villages)for(const m of HexVillages.markers(state)){const entry=label('village-attack:'+m.id,m.x,m.y,m.text,'',95);entry.el.style.color='#ffce84';entry.el.style.background='#542719';entry.el.style.padding='5px 9px';entry.el.style.border='2px solid #ffba75';entry.el.style.borderRadius='8px';}
     for(const tile of state.map.values()){
@@ -982,7 +986,8 @@ function create(host0,commands){
     if(pickDirty){pickables=[...objectRecords.values()].flatMap(r=>r.picks).concat(layer.targets.children.map(g=>g.children[1]));layer.objects.updateMatrixWorld(true);layer.targets.updateMatrixWorld(true);pickDirty=false;}
     refreshPointerCursor();
   }
-  function renderMotion(){if(state&&ready)syncEnemies();}
+  let motionMines=null,motionConsumables=null;
+  function renderMotion(){if(state&&ready){syncEnemies();if(motionMines!==state.mines){syncMines();motionMines=state.mines;}if(motionConsumables!==state.consumables){syncConsumables();motionConsumables=state.consumables;}syncProjectiles();}}
   function project(position,height=30){
     camera.updateMatrixWorld(true);
     tmp.set(position.x,height,position.y).project(camera);if(tmp.z>1) return null;
@@ -1015,7 +1020,7 @@ function create(host0,commands){
     }else slowFrames=0;
     const dt=Math.min((now-last)/1000,.1);last=now;
     if(state&&ready){
-      const enemies=state.enemies||[],aimDistances=new Map();let rangeQuery;
+      const enemies=(state.enemies||[]).filter(e=>!e.remoteSpawnPending),aimDistances=new Map();let rangeQuery;
       const nearby=(pos,range)=>(rangeQuery??=HexCombat.presentationRange(enemies))(pos,range);
       const aimDistance=e=>{if(!aimDistances.has(e))aimDistances.set(e,HexCombat.remainingDistance(e));return aimDistances.get(e);};
       for(const ring of overloadRings)ring.rotation.y=now*.004;
@@ -1025,7 +1030,7 @@ function create(host0,commands){
         if(obj.hint.visible) obj.hint.position.y=66+Math.sin(now/220)*3;
         if(!obj.turret||obj.def.aura) continue;
         const tower=state.map.get(key(obj.tile.q,obj.tile.r))?.towers[obj.index]||obj.tower,definition=HexData.towerDefinition(tower);
-        const shot=tower.aim,shooting=shot&&state.elapsedMs-shot.time<350;
+        const shot=tower.aim,shotAge=(state.remoteRenderTime??state.elapsedMs)-shot?.time,shooting=shot&&shotAge>=0&&shotAge<350;
         const best=shooting?shot:HexCombat.targetByPriority(nearby(obj.pos,definition.range).filter(e=>e.alive&&!e.sporeHidden&&(!e.immunity||e.immunity!==definition.damageType)),tower,obj.pos,aimDistance);
         if(best){const wanted=Math.atan2(-(best.y-obj.pos.y),best.x-obj.pos.x),diff=Math.atan2(Math.sin(wanted-obj.angle),Math.cos(wanted-obj.angle));obj.angle+=diff*(shooting?1:Math.min(1,dt*10));obj.turret.rotation.y=obj.angle;}
         if(obj.kick>0){obj.kick=Math.max(0,obj.kick-dt*9);const k=obj.kick*obj.kick*.045;obj.turret.position.set(obj.turretBase.x-Math.cos(obj.angle)*k,obj.turretBase.y,obj.turretBase.z+Math.sin(obj.angle)*k);}   // Rückstoß entgegen der Schussrichtung

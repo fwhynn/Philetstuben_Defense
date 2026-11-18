@@ -1,5 +1,41 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const {motionAlongRoad}=require('../classes/duo-game.js'),{motionPath}=require('../server/duo-room.cjs');
+test('mine hits, damage and deaths share the enemy presentation timeline at 1x and 8x',()=>{
+ const {createMotionBuffer}=require('../classes/duo-game.js');
+ for(const speed of [1,8]){
+  const b=createMotionBuffer(150),state={},enemy=(x,hp)=>({id:1,x,y:0,hp,maxHp:100,alive:true,motionPath:[{x:0,y:0},{x,y:0}]}),mine={x:10,y:0};
+  const before={elapsedMs:0,enemies:[enemy(0,100)],mines:[mine],projectiles:[]};
+  const hit={elapsedMs:100*speed,enemies:[enemy(10,70)],mines:[],projectiles:[{kind:'blast',x:10,y:0,r:20,ttl:.3,max:.3}]};
+  b.push(before.enemies,0,0,false,before);b.push(hit.enemies,100,100,false,hit);
+  b.drawState(state,200);assert.equal(state.enemies[0].x,5);assert.equal(state.enemies[0].hp,100);assert.equal(state.mines.length,1);assert.equal(state.projectiles.length,0);
+  b.drawState(state,250);assert.equal(state.enemies[0].x,10);assert.equal(state.enemies[0].hp,70);assert.equal(state.mines.length,0);assert.equal(state.projectiles.length,1);
+  const dead={elapsedMs:200*speed,enemies:[],mines:[],projectiles:[]};b.push([],200,200,false,dead);
+  b.drawState(state,300);assert.equal(state.enemies.length,1,'death waits for the same clock, rather than removing the latest enemy early');
+  b.drawState(state,350);assert.equal(state.enemies.length,0);assert.equal(state.projectiles.length,0);
+  assert.equal(hit.enemies[0].x,10);assert.equal(hit.projectiles[0].ttl,.3);assert.equal(before.enemies[0].x,0,'presentation cannot mutate server snapshots');
+ }
+});
+
+test('teleports commit at their snapshot, never before damage and effects',()=>{
+ const {createMotionBuffer}=require('../classes/duo-game.js'),b=createMotionBuffer(),state={};
+ const start={elapsedMs:0,enemies:[{id:1,x:20,y:0,motionRevision:0}]},end={elapsedMs:100,enemies:[{id:1,x:0,y:0,motionRevision:1}]};
+ b.push(start.enemies,0,0,false,start);b.push(end.enemies,100,100,false,end);
+ b.drawState(state,200);assert.equal(state.enemies[0].x,20);
+ b.drawState(state,250);assert.equal(state.enemies[0].x,0);
+});
+
+test('switching maps or pausing shows existing units immediately without treating them as new spawns',()=>{
+ const {createMotionBuffer}=require('../classes/duo-game.js'),b=createMotionBuffer(),state={};
+ const snapshot={elapsedMs:5000,enemies:[{id:1,x:10,y:0}],mines:[],projectiles:[]};
+ b.push(snapshot.enemies,10000,10000,true,snapshot);b.drawState(state,10000);assert.equal(state.enemies[0].remoteSpawnPending,false);assert.equal(state.enemies[0].x,10);
+});
+
+test('a purchase between combat ticks updates consumables without rewriting the movement history',()=>{
+ const {createMotionBuffer}=require('../classes/duo-game.js'),b=createMotionBuffer(),state={};
+ const snapshot={elapsedMs:0,enemies:[],mines:[],projectiles:[],consumables:[]};
+ b.push([],1000,1000,true,snapshot);b.drawState(state,1000);assert.equal(state.consumables.length,0);
+ const purchased={...snapshot,consumables:[{kind:'spikes',q:1,r:0,charges:20}]};b.push([],1000,1100,false,purchased);b.drawState(state,1100);assert.equal(state.consumables.length,1);assert.equal(snapshot.consumables.length,0);
+});
 test('Duo interpolation follows a bend instead of the direct chord',()=>{
  const end={x:10,y:10,motionPath:[{x:0,y:0},{x:10,y:0},{x:10,y:10}]};
  assert.deepEqual(motionAlongRoad({x:0,y:0},end,.5),{x:10,y:0});
@@ -64,4 +100,55 @@ test('adaptive buffering reduces recurring stalls without reversing, speeding up
    return stalls;
  }
  const fixed=measure(false),adaptive=measure(true);assert.ok(fixed>0);assert.ok(adaptive<fixed/2,JSON.stringify({fixed,adaptive}));
+});
+
+test('a stale wave-start frame cannot make the playhead catch up through the entire build break',()=>{
+ const {createMotionBuffer}=require('../classes/duo-game.js'),b=createMotionBuffer(150,{adaptive:true});
+ const enemy=x=>({id:1,x,y:0,motionPath:[{x:0,y:0},{x,y:0}]}),shown=[enemy(0)];
+ b.push([],1000,61000,true);b.draw(shown,61000);
+ let last=null,stalls=0;
+ for(let t=61050;t<=64050;t+=10){
+   if((t-61050)%100===0){b.push([enemy(t-61000)],t,t);Object.assign(shown[0],enemy(t-61000));}
+   b.draw(shown,t);
+   if(t>61550){if(shown[0].x===last)stalls++;assert.ok(shown[0].x>=last);assert.ok(shown[0].x-last<=11.001);}
+   last=shown[0].x;
+ }
+ assert.equal(stalls,0);assert.ok(shown[0].x>2700,'tracks this wave, not the old timestamp');
+});
+
+test('spawns enter the delayed timeline instead of visibly waiting for it at the entrance',()=>{
+ const {createMotionBuffer}=require('../classes/duo-game.js'),b=createMotionBuffer(150),enemy=x=>({id:3,x,y:0,motionPath:[{x:0,y:0},{x,y:0}]}),shown=[enemy(10)];
+ b.push([],0,0);b.push([enemy(10)],100,100);b.draw(shown,100);assert.equal(shown[0].remoteSpawnPending,true);
+ b.push([enemy(20)],200,200);b.draw(shown,200);assert.equal(shown[0].remoteSpawnPending,true);
+ b.draw(shown,250);assert.equal(shown[0].remoteSpawnPending,false);assert.equal(shown[0].x,10);
+ for(let t=260;t<=300;t+=10){const old=shown[0].x;b.draw(shown,t);assert.ok(shown[0].x>old);assert.equal(shown[0].remoteSpawnPending,false);}
+});
+
+test('each wave starts smoothly on the own map after long planning, at 1x and 8x without switching maps',()=>{
+ const {load}=require('./helpers/game.cjs'),{createRoom}=require('../server/duo-room.cjs');
+ for(const speed of [1,8]){
+   let clock=1000;const duo={real:true,calls:[]};load({duo,now:()=>clock});
+   const room=createRoom({seed:'repeat-motion-'+speed,loadouts:Array(2).fill(['archer','catapult','chain','freeze','mine'])}),a=room.connect(0);room.connect(1);
+   const view=room.view(a.token);view.frameTime=clock;duo.receive(structuredClone(view));
+   for(let wave=1;wave<=3;wave++){
+     view.phase='prepare';for(const b of view.boards){b.phase='build';b.enemies=[];}view.revision++;duo.receive(structuredClone(view));
+     clock+=30000+wave*17000;
+     view.wave=wave;view.phase='combat';view.speed=speed;for(const b of view.boards){b.phase='wave';b.wave=wave;}view.revision++;
+     // Include the old timestamp from an in-flight wave-start acknowledgment.
+     duo.receive(structuredClone(view));
+     const start=clock;let last=null,stalls=0;
+     for(let dt=50;dt<=2050;dt+=10){
+       clock=start+dt;
+       if((dt-50)%100===0){
+         view.frameTime=clock;view.revision++;
+         for(const [i,b]of view.boards.entries()){const x=(dt-50)*speed;b.enemies=[{id:wave,type:'grunt',x,y:i*10,motionPath:[{x:0,y:i*10},{x,y:i*10}],hp:100,maxHp:100,armorHp:0,magicHp:0,alive:true}];}
+         const raw=structuredClone(view),expected=JSON.stringify(raw);duo.receive(raw);assert.equal(JSON.stringify(raw),expected,'rendering cannot modify network positions');
+       }
+       duo.bridge.animate(clock);const e=duo.api.getState().enemies[0];
+       if(dt>550){assert.equal(e.remoteSpawnPending,false);assert.ok(e.x>=last);assert.ok(e.x-last<=speed*11.01);if(e.x===last)stalls++;}
+       last=e?.x??null;
+     }
+     assert.equal(stalls,0,'no repeated stalls in wave '+wave+' at '+speed+'x');assert.ok(last>1600*speed);
+   }
+ }
 });

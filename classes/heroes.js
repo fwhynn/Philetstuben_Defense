@@ -32,7 +32,7 @@ const HexHeroes=(()=>{
     if(['detour','villages','powerGrid'].includes(state.challengeKind))return 'In dieser Mission bleibt die Verteidigung unverändert.';
     if(state.hp<=0||state.phase==='gameover')return 'Der Run ist beendet.';
     const next=offer(state,kind);if(!next)return 'Maximalstufe erreicht.';
-    if(!['place','build','wave'].includes(state.phase))return 'Schließe zuerst die offene Belohnung oder Auswahl ab.';
+    if(!['place','build','wave'].includes(state.phase)&&!(state.duoMode&&state.phase==='duoWait'))return 'Schließe zuerst die offene Belohnung oder Auswahl ab.';
     if(state.gold<next.cost)return `Noch ${next.cost-state.gold} Gold nötig.`;
     return '';
   }

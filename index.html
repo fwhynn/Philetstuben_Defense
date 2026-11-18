@@ -110,37 +110,16 @@
       <details id="duoHud" class="duoHud hidden">
         <summary id="duoSummary">Duo · Team</summary>
         <div class="duoHudBody">
-          <section class="duoHudSection"><h3 id="duoTurnTitle"></h3><p id="duoTurnText"></p></section>
-          <section class="duoHudSection">
-            <h3>Karte wechseln</h3>
-            <div class="duoMapSwitch"><button id="duoOwnMap">Meine Karte</button><button
-                id="duoPartnerMap">Partnerkarte</button></div>
-            <p id="duoPartnerStatus"></p>
-          </section>
-          <section class="duoHudSection">
-            <h3>Partnerhilfe</h3>
-            <p id="duoSupportInfo" class="duoHelpText"></p>
-            <div class="duoSupportRow">
-              <div><strong>Dein Portal</strong><small id="duoPortalState">Noch nicht gesetzt</small></div><button
-                id="duoReservePortal">Platz wählen</button><button id="duoClearPortal"
-                class="secondary">Aufheben</button>
-            </div>
-            <div class="duoSupportRow">
-              <div><strong>Deine Verstärkung</strong><small id="duoTowerState">Noch nicht gewählt</small></div><button
-                id="duoSendTower">Turm wählen</button><button id="duoClearTower" class="secondary">Abwählen</button>
-            </div>
-          </section>
-          <section class="duoHudSection"><h3>Hex für den Partner kaufen</h3><p id="duoHexGiftInfo"></p><div id="duoHexGiftChoices" class="duoHexGiftChoices"></div><p id="duoHexGiftReceipt" role="status"></p></section>
-          <section id="duoGifts" class="duoHudSection hidden"><h3>Partnergeschenke</h3><p id="duoGiftReceived" class="duoGiftReceived hidden" role="status"></p><div id="duoGiftHistory"></div></section>
+          <section class="duoHudSection"><h3>Ein Hex verschenken</h3><p id="duoHexGiftInfo"></p><div id="duoHexGiftChoices" class="duoHexGiftChoices"></div><p id="duoHexGiftReceipt" role="status"></p></section>
           <section id="duoGuardianSection" class="duoHudSection hidden">
             <h3>Wächter</h3>
             <p class="duoHelpText">Wächter starten erst, wenn ihr beide zustimmt.</p>
             <div id="duoGuardians"></div>
           </section>
-          <section class="duoHudSection">
-            <h3>Sitzung &amp; Verbindung</h3>
+          <section id="duoConnectionSection" class="duoHudSection hidden">
+            <h3>Verbindung</h3>
             <p id="duoNetworkStatus" role="status"></p><button id="duoTakeover" class="hidden">Sitzung hier
-              übernehmen</button><button id="duoLeave" class="duoDanger">Partie verlassen</button>
+              übernehmen</button>
           </section>
         </div>
       </details>
@@ -150,14 +129,13 @@
         <div class="duoTeamInfo" aria-live="polite"><span class="hxi hxi-heart" aria-hidden="true"></span><strong id="duoTeamHp"></strong></div>
         <div id="duoSeatSelf" class="duoSeat" data-state="todo"><span class="duoSeatDot" aria-hidden="true"></span><span class="duoSeatText"><strong>Du</strong><small id="duoSeatSelfText"></small></span></div>
         <div id="duoSeatPartner" class="duoSeat duoSeatPartner" data-state="waiting"><span class="duoSeatDot" aria-hidden="true"></span><span class="duoSeatText"><strong id="duoPartnerName" data-no-translate>Partner</strong><small id="duoSeatPartnerText"></small></span></div>
-        <button id="duoQuickMap" class="duoQuickMap hidden" type="button">Partnerkarte</button>
-        <div id="duoSupportMenu"><button id="duoSupportShortcut" class="duoSupportShortcut" type="button" aria-label="Partnerhilfe und Geschenke" title="Partnerhilfe und Geschenke" aria-controls="duoHud" aria-expanded="false"><span class="hxi hxi-partner" aria-hidden="true"></span></button></div>
+        <button id="duoQuickMap" class="duoQuickMap hidden" type="button" aria-keyshortcuts="M">Partnerkarte (M)</button>
+        <div id="duoSupportMenu"><button id="duoSupportShortcut" class="duoSupportShortcut" type="button" aria-label="Team-Aktionen" title="Team-Aktionen" aria-controls="duoHud" aria-expanded="false"><span class="hxi hxi-partner" aria-hidden="true"></span></button></div>
       </section>
       <aside id="duoGiftNotice" class="duoGiftNotice hidden" aria-label="Geschenk erhalten">
         <button id="duoGiftNoticeClose" type="button" aria-label="Geschenkmeldung schließen">×</button>
         <div role="status" aria-live="polite" aria-atomic="true"><span id="duoGiftNoticeTitle"></span><div id="duoGiftNoticeContent"></div></div>
       </aside>
-      <div id="duoTransfer" class="duoTransfer hidden" role="status"></div>
       <nav id="quickLoadout" class="mapRail loadoutRail" aria-label="Loadout: Turm auf einen freien Platz ziehen"></nav>
       <aside id="biomeIntro" class="biomeIntro hidden" role="status"><strong id="biomeIntroTitle">Neues Biom
           entdeckt</strong>
@@ -204,7 +182,6 @@
               <h2>Goldplanung</h2>
               <p id="goldHeadline" class="planHeadline"></p>
               <details class="planDetail"><summary>Wellen-Ertrag</summary><p id="goldForecast"></p></details>
-              <details class="planDetail"><summary>Turmpreise</summary><p id="towerBudget"></p></details>
               <details class="planDetail"><summary>Einnahmen im Run</summary><p id="goldSources"></p></details>
             </div>
           </details>
@@ -487,6 +464,7 @@
                     <h4 class="hxGroupTitle">Kamera</h4>
                     <div class="keyRow"><span>Kamera bewegen</span><span class="keys"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span></div>
                     <div class="keyRow"><span>Kamera drehen (halten)</span><span class="keys"><kbd>Q</kbd>/<kbd>E</kbd></span></div>
+                    <div class="keyRow"><span>Duo: Eigene / Partnerkarte</span><span class="keys"><kbd>M</kbd></span></div>
                     <div class="keyRow"><span>Zoomen</span><span class="keys"><kbd>Mausrad</kbd></span></div>
                     <div class="keyRow"><span>Kamera bewegen/drehen</span><span class="keys"><kbd>Ziehen</kbd></span></div>
                   </section>
@@ -532,6 +510,7 @@
         <footer class="hxWinFoot">
           <span class="settingsRunState"><span class="hxi hxi-pause" aria-hidden="true"></span><span data-settings-runstate>Welle 0</span></span>
           <span class="settingsSaved"><span class="savedCheck" aria-hidden="true">✓</span><span>Änderungen werden automatisch gespeichert.<small data-settings-account></small></span></span>
+          <button id="duoLeave" class="duoDanger secondary hidden" type="button">Duo-Partie verlassen</button>
           <button id="openMainMenuBtn" class="secondary hxOutline">‹ Speichern &amp; Hauptmenü</button>
           <button class="primary drawerClose settingsBackBtn" type="button">Zurück zum Spiel ›</button>
         </footer>
