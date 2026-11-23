@@ -1,5 +1,51 @@
 [
   {
+    "version": "next",
+    "title": "Duo-Lobby: klarer und flexibler",
+    "summary": "Ausgerichtete Aktionen und ein freier Platz für einen neuen Partner, wenn der Host jemanden entfernt.",
+    "overview": [
+      {
+        "title": "Verbessert",
+        "items": [
+          "Lobby-Aktionen auf gleicher Höhe"
+        ]
+      },
+      {
+        "title": "Neu",
+        "items": [
+          "Partner als Host entfernen"
+        ]
+      }
+    ],
+    "sections": [
+      {
+        "title": "Gemeinsam vorbereiten",
+        "entries": [
+          {
+            "title": "Übersichtliche Aktionen",
+            "bullets": [
+              "Bereit beziehungsweise Spiel starten und Lobby verlassen stehen auf gleicher Höhe. Der Hinweistext steht darüber und verschiebt die Buttons nicht mehr."
+            ],
+            "stats": []
+          },
+          {
+            "title": "Partner wechseln",
+            "bullets": [
+              "Der Host kann seinen Partner vor dem Spielstart über das X rechts neben dessen Namen aus der Lobby entfernen – auch bei unterbrochener Verbindung.",
+              "Nach dem Entfernen kann ein neuer Partner beitreten. Die Auswahl des entfernten Partners und seine Bereitschaft werden zurückgesetzt; die Vorbereitung des Hosts bleibt erhalten."
+            ],
+            "stats": []
+          }
+        ]
+      }
+    ],
+    "changes": [
+      "Bereit beziehungsweise Spiel starten und Lobby verlassen stehen auf gleicher Höhe. Der Hinweistext steht darüber und verschiebt die Buttons nicht mehr.",
+      "Der Host kann seinen Partner vor dem Spielstart über das X rechts neben dessen Namen aus der Lobby entfernen – auch bei unterbrochener Verbindung.",
+      "Nach dem Entfernen kann ein neuer Partner beitreten. Die Auswahl des entfernten Partners und seine Bereitschaft werden zurückgesetzt; die Vorbereitung des Hosts bleibt erhalten."
+    ]
+  },
+  {
     "version": "1.3.4",
     "title": "Sieben neue Türme, vierzehn Ultimates",
     "summary": "Gravitation, Wind, Gift, Meteore, Laser, Glücksspiel und Portale erweitern dein Arsenal – im Solo und Duo.",

@@ -32,7 +32,7 @@
  <div class="lobbyInvite"><label for="invite">Einladungslink</label><div class="lobbyInviteRow"><input id="invite" readonly><button id="copyInvite">Link kopieren</button></div><p id="roomCode" class="lobbyCode"></p></div>
  <div class="lobbySeats">
   <div id="seatOwn" class="lobbySeat" data-state="notready"><span class="lobbyAvatar">Du</span><div><strong id="ownName" data-no-translate>Du</strong><p id="ownReady">Nicht bereit</p></div></div>
-  <div id="seatFriend" class="lobbySeat" data-state="open"><span class="lobbyAvatar">P</span><div><strong id="friendName" data-no-translate>Dein Partner</strong><p id="friendReady">Wartet auf Beitritt …</p></div></div>
+  <div id="seatFriend" class="lobbySeat" data-state="open"><span class="lobbyAvatar">P</span><div class="lobbySeatIdentity"><strong id="friendName" data-no-translate>Dein Partner</strong><p id="friendReady">Wartet auf Beitritt …</p></div><button id="lobbyKick" class="lobbyKick" type="button" aria-label="Partner aus der Lobby entfernen" title="Partner aus der Lobby entfernen" hidden><span aria-hidden="true">×</span></button></div>
  </div>
  <section class="lobbyLoadouts" aria-label="Turmauswahl">
   <div class="lobbyOwnSetup"><h2>Deine Festung</h2>
@@ -42,9 +42,9 @@
   <div class="lobbyPartnerSetup"><h2>Festung deines Partners</h2><p id="lobbyPartnerFortress"></p><h2>Turmauswahl deines Partners</h2><div id="lobbyPartnerLoadout" class="lobbyTowerChoices"></div></div>
  </section>
  <div id="lobbyAugments" role="status"></div>
- <button id="lobbyReady" class="lobbyPrimary" disabled>Bereit</button>
- <p id="lobbyHint" class="lobbyHint"></p>
- <div class="lobbySecondary"><button id="lobbyTakeover" hidden>Sitzung hier übernehmen</button><button id="lobbyLeave" class="lobbyGhost">Lobby verlassen</button></div>
+ <p id="lobbyHint" class="lobbyHint" role="status"></p>
+ <button id="lobbyTakeover" hidden>Sitzung hier übernehmen</button>
+ <div class="lobbyActions"><button id="lobbyLeave" class="lobbyGhost">Lobby verlassen</button><button id="lobbyReady" class="lobbyPrimary" aria-describedby="lobbyHint" disabled>Bereit</button></div>
 </section>
 <p id="status" role="status" class="lobbyStatus"></p>
 <p class="lobbyFoot">Freunde-Beta: Zwei getrennte Browser oder Geräte nutzen. Die Partie wird auf dem Server gespeichert. Diamanten und Duo-Bestwelle werden nach dem gemeinsamen Abschluss deinem Profil gutgeschrieben.</p>

@@ -5,6 +5,7 @@ const loadCore = require('../headless-core.cjs');
 const RULESET = require('../package.json').version;
 // Reviewed checkpoint compatibility, including legacy 20-gold gift migration.
 function compatibleRuleset(source,target=RULESET){
+  if(target==='1.3.5'&&['1.2.8','1.2.9','1.3.0','1.3.1','1.3.2','1.3.3','1.3.4'].includes(source))return true;
   if(target==='1.3.4'&&['1.2.8','1.2.9','1.3.0','1.3.1','1.3.2','1.3.3'].includes(source))return true;
   if(target==='1.3.3'&&['1.2.8','1.2.9','1.3.0','1.3.1','1.3.2'].includes(source))return true;
   if(target==='1.3.2'&&['1.2.8','1.2.9','1.3.0','1.3.1'].includes(source))return true;
@@ -24,6 +25,7 @@ function payloadValid(action, p) {
     case 'guardian': return exact(p, ['board', 'id', 'value']) && integer(p.board, 0, 1) && typeof p.id === 'string' && /^-?\d{1,4},-?\d{1,4}$/.test(p.id) && typeof p.value === 'boolean';
     case 'lobbyLoadout': return (exact(p,['towers']) || exact(p,['towers','heroId','difficulty']) && word(p.heroId) && ['normal','dual'].includes(p.difficulty)) && Array.isArray(p.towers) && p.towers.length===5 && new Set(p.towers).size===5 && p.towers.every(word);
     case 'lobbyStart': return exact(p, []);
+    case 'lobbyKick': return exact(p, ['seatId']) && typeof p.seatId === 'string' && /^[a-f0-9]{64}$/.test(p.seatId);
     case 'lobbyReady':
     case 'pause':
     case 'rematch':
@@ -135,7 +137,17 @@ function createRoom({ seed = crypto.randomUUID(), loadouts, now = () => Date.now
     let result;
     const clockBoundary=[match.phase,match.wave,!!match.paused].join(':');
     const presence = connection();
-    if (presence.paused) result = { ok: false, reason: ended ? 'match-ended' : presence.maintenance ? 'maintenance' : presence.expired ? 'reconnect-expired' : 'disconnected' };
+    // A disconnected guest must not trap the host in an unstarted lobby.
+    // Bind removal to this seat incarnation, never a replacement who joins later.
+    if(packet.action==='lobbyKick'){
+      const ok=player===0&&!lobby.started&&!ended&&!presence.maintenance&&!!seats[1]&&packet.payload.seatId===offerId('seat:'+seats[1].token);
+      if(ok){
+        core.duo.configureBoard(match,1,{loadout:[...core.profile.START_TOWERS],heroId:'standard',difficulty:match.boards[0].state.difficulty,unlocks:[],metaAugments:{version:1,cards:[]}});
+        seats[1]=null;lobby.ready=[false,false];match.ready=[false,false];expired=false;revision++;connection();
+      }
+      result={ok,reason:ok?null:presence.maintenance?'maintenance':'illegal'};
+    }
+    else if (presence.paused) result = { ok: false, reason: ended ? 'match-ended' : presence.maintenance ? 'maintenance' : presence.expired ? 'reconnect-expired' : 'disconnected' };
     else if (packet.action === 'lobbyLoadout') {
       const s=match.boards[player].state,{towers,heroId=s.heroId,difficulty=s.difficulty}=packet.payload;
       const access=session.setupOptions||{heroes:['standard'],twoFronts:false};
@@ -228,6 +240,7 @@ function createRoom({ seed = crypto.randomUUID(), loadouts, now = () => Date.now
       ...(index === player ? { ...pick(s, ['removalSource', 'metaAugments', 'augmentMarketWave', 'runTowerStats', 'runTowerDetails', 'baseKills', 'consumableKills', 'baseDamage', 'patricianBonusIncome']), duoDiamondEstimate: Math.max(0, core.profile.waveDiamonds(Math.min(...match.boards.map(r => r.state.lastCompletedWave || 0))) + (s.earnedMeta?.periodicBosses || 0) * 5 + match.boards.reduce((n, r) => n + (r.state.earnedMeta?.explorationBosses || 0), 0) * 3 - (match.victoryPaid?.[index] || 0)), hand: [...s.hand], placements: copy(placements(s)), rescueCard: s.rescueCard ? copy(s.rescueCard) : null, tunnelOffer: s.tunnelOffer ? copy(s.tunnelOffer) : null, ultimateUnlocks: [...s.ultimateUnlocks], buildingUnlocks: [...s.buildingUnlocks], wavePlans: wavePlans(s), drawPile: [...s.drawPile], discard: [...s.discard], deckCounts: s.deck.reduce((a, id) => (a[id] = (a[id] || 0) + 1, a), {}), loadout: [...s.towerLoadout], rewardOffer: s.rewardOffer ? { ...pick(s.rewardOffer, ['kind', 'choices', 'skippable']), ...(s.rewardOffer.kind==='shrine'?{shrineEffect:core.exploration.shrineEffect(s.landmarks,s.pendingShrine)}:s.rewardOffer.kind==='boss'?{rarity:core.exploration.bossRewardRarity(s.seed,s.bossRewards[0])}:{}), id: offerId(s.rewardOffer.id) } : null, celebration: s.activeCelebration ? copy(s.activeCelebration) : null } : {}),
     });});
     const value={ lobbyState: {...copy(lobby),names:seats.map((seat,i)=>seat?.identity?.username||('Gast '+(i+1))),host:0,...(!lobby.started?{setupOptions:copy(seats[player].setupOptions||{heroes:['standard'],twoFronts:false})}:{}),augments:match.boards.map(r=>copy(r.state.metaAugments?.cards||[])),loadouts:match.boards.map(r=>[...r.state.towerLoadout])}, speed: match.speed || 1, paused: !!match.paused, protocol: 1, frameTime, serverId, epoch, revision, player, connection: presence, next: seats[player].next, hp: match.hp, maxHp: match.maxHp, wave: match.wave, phase: match.phase, ready: [...match.ready], finished: [...match.finished], portals: copy(match.portals), reinforcements: copy(match.reinforcements), pendingHelp: match.pendingHelp.map(h => h ? { at: h.at } : null), result: publicResult(), endless:!!match.endless, endlessVotes:copy(match.endlessVotes||[false,false]), rematch: copy(match.rematch || [false, false]), support: copy(match.support), hexGifts:copy(match.hexGifts||[null,null]), delivery: match.delivery ? { wave: match.delivery.wave, offers: match.delivery.offers.map((o, i) => i === player ? { ...copy(o), id: offerId(o.id) } : { id:offerId(o.id), index:o.index, wish:o.wish??null, choices:copy(o.choices) }) } : null, boards };
+    if(!lobby.started)value.lobbyState.seatIds=seats.map(s=>s?offerId('seat:'+s.token):null);
     return value;
   }
   function publicResult() { return match.result ? { ...copy(match.result), id: offerId(match.result.id) } : null; }

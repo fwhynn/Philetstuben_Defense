@@ -1,7 +1,7 @@
 (async()=>{
  await globalThis.HexLocalStore?.ready;
  const $=id=>document.getElementById(id),params=new URLSearchParams(location.hash.slice(1));
- const code=$('code'),status=$('status');code.value=HexDuoClient.inviteCode(params.get('join'));let pending=null,client=null,view=null,navigating=false,noticeUntil=0,draftLoadout=null,loadoutKey='',loadoutRenderKey='',savingLoadout=false,augmentSession=null,draftHero='standard',draftFronts='normal';
+ const code=$('code'),status=$('status');code.value=HexDuoClient.inviteCode(params.get('join'));let pending=null,client=null,view=null,navigating=false,noticeUntil=0,draftLoadout=null,loadoutKey='',loadoutRenderKey='',savingLoadout=false,kicking=false,augmentSession=null,draftHero='standard',draftFronts='normal';
  let lobbyProfile=HexProfile.load(HexData.TOWERS);
  const canCreate=()=>HexProfile.modesUnlocked(lobbyProfile);
  const lockCreate=()=>{const open=canCreate();$('create').disabled=!open;$('createLocked').hidden=open;};lockCreate();
@@ -78,8 +78,9 @@
    $('seatOwn').dataset.state=ready[own]?'ready':'notready';$('ownReady').textContent=ready[own]?'Bereit ✓':'Noch nicht bereit';
    $('seatFriend').dataset.state=!joined?'open':!online?'offline':ready[other]?'ready':'notready';
    $('friendReady').textContent=!joined?'Wartet auf Beitritt …':!online?'Verbindung unterbrochen':ready[other]?'Bereit ✓':'Noch nicht bereit';
+   const kick=$('lobbyKick');kick.hidden=own!==0||!joined||next.lobbyState.started;kick.disabled=kicking||savingLoadout||!next.lobbyState.seatIds?.[other]||next.connection.maintenance||!!next.connection.ended;kick.setAttribute('aria-busy',String(kicking));
    step('stepInvite',joined?'done':'current');step('stepJoin',joined?'done':'');step('stepReady',ready.every(Boolean)?'done':joined?'current':'');
-   $('lobbyReady').textContent=own===0?(ready[other]?'Spiel starten':'Warte auf Partner · noch nicht bereit'):ready[own]?'Bereitschaft zurücknehmen':'Ich bin bereit';renderLoadouts(next);$('lobbyReady').disabled=!joined||next.connection.paused||savingLoadout||!augmentSession?.loaded||draftKey()!==loadoutKey||draftLoadout.length!==5||own===0&&!ready[other];
+   $('lobbyReady').textContent=own===0?(ready[other]?'Spiel starten':'Warte auf Partner · noch nicht bereit'):ready[own]?'Bereitschaft zurücknehmen':'Ich bin bereit';renderLoadouts(next);$('lobbyReady').disabled=kicking||!joined||next.connection.paused||savingLoadout||!augmentSession?.loaded||draftKey()!==loadoutKey||draftLoadout.length!==5||own===0&&!ready[other];
    $('lobbyHint').textContent=!joined?'Schicke deinem Partner den Link. Sobald er beitritt, könnt ihr euch bereit melden.':!online?'Dein Partner ist gerade nicht verbunden. Warte kurz, bis er zurück ist.':ready[own]&&!ready[other]?'Du bist bereit. Das Spiel startet, sobald dein Partner auch bereit ist.':!ready[own]&&ready[other]?'Dein Partner ist bereit. Du kannst das Spiel starten.':'Wählt eure Türme. Der Partner bestätigt mit Bereit, der Host startet.';
  }
  async function syncAugments(){
@@ -129,7 +130,7 @@
    }});client.start();
  }
  // Expired or removed rooms answer 401 forever; drop the stale link instead of retrying.
- function closed(token){client?.stop();client=null;view=null;augmentSession=null;savingLoadout=false;draftLoadout=null;loadoutRenderKey='';if(localStorage.getItem('autohex-duo-session')===token)localStorage.removeItem('autohex-duo-session');$('resumeDuo')?.remove();history.replaceState(null,'',location.pathname);$('waitingLobby').hidden=true;$('lobbyEntry').hidden=false;notice('Diese Duo-Lobby existiert nicht mehr oder ist abgelaufen.');}
+ function closed(token){client?.stop();client=null;view=null;augmentSession=null;savingLoadout=false;draftLoadout=null;loadoutRenderKey='';if(localStorage.getItem('autohex-duo-session')===token)localStorage.removeItem('autohex-duo-session');$('resumeDuo')?.remove();history.replaceState(null,'',location.pathname);$('waitingLobby').hidden=true;$('lobbyEntry').hidden=false;notice('Dein Platz in dieser Duo-Lobby ist nicht mehr verfügbar.');}
  $('lobbyHero').addEventListener('change',()=>{draftHero=$('lobbyHero').value;show(view);saveSelection();});
  $('lobbyFronts').addEventListener('change',()=>{draftFronts=$('lobbyFronts').value;show(view);saveSelection();});
  $('lobbyPreset').addEventListener('change',()=>{const preset=$('lobbyPreset').value;if(preset){draftLoadout=preset.split('|');show(view);saveSelection();}});
@@ -138,6 +139,12 @@
    if(!view||savingLoadout)return;const ready=!view.lobbyState.ready[view.player];savingLoadout=true;show(view);
    try{if(view.player===0){await client.send('lobbyStart',{});}else{if(ready)await syncAugments();await client.send('lobbyReady',{value:ready});}}
    catch(error){notice(error.message);}finally{savingLoadout=false;if(view)show(view);}
+ });
+ $('lobbyKick').addEventListener('click',async()=>{
+   if(!client||!view||view.player!==0||view.lobbyState.started||view.lobby.players<2||kicking||savingLoadout)return;
+   const seatId=view.lobbyState.seatIds?.[1];if(!seatId)return;kicking=true;show(view);
+   try{await client.send('lobbyKick',{seatId});notice('Partner entfernt. Du kannst jetzt jemanden einladen.');}
+   catch(error){notice(error.message);}finally{kicking=false;if(view)show(view);}
  });
  $('lobbyTakeover').addEventListener('click',()=>client.takeover().catch(e=>notice(e.message)));
  $('lobbyLeave').addEventListener('click',async()=>{try{await client.leave();localStorage.removeItem('autohex-duo-session');location.replace('/duo-lobby.html');}catch(e){notice(e.message);}});

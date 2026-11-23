@@ -159,6 +159,12 @@ body.hxPage{margin:0;min-height:100vh;color:#f4ecd6;font:600 17px/1.6 var(--hx-f
 .duoLobbyPage .lobbyTowerChoices{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:10px 0}
 .duoLobbyPage .lobbyTowerChoice{width:100%;min-width:0;padding:8px 3px;font-size:14px;line-height:1.15}
 .duoLobbyPage #lobbyAugments{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0}
-.duoLobbyPage #lobbyAugments>small{grid-column:1/-1}.duoLobbyPage #lobbyReady{grid-column:2;grid-row:auto;margin:0;align-self:center}
-.duoLobbyPage .lobbySecondary{grid-column:1;grid-row:auto;margin:0}.duoLobbyPage .lobbyHint{grid-column:1/-1;margin:0}
+.duoLobbyPage #lobbyAugments>small{grid-column:1/-1}
+.duoLobbyPage .lobbyHint,.duoLobbyPage #lobbyTakeover{grid-column:1/-1;margin:0}
+.duoLobbyPage .lobbyActions{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 24px;align-items:stretch}
+.duoLobbyPage .lobbyActions>button{min-height:54px;margin:0;min-width:0;overflow-wrap:anywhere}
+.duoLobbyPage .lobbySeatIdentity{flex:1;min-width:0;overflow-wrap:anywhere}
+.duoLobbyPage .lobbyKick{flex:0 0 44px;width:44px;min-height:44px;margin-inline-start:auto;padding:0;align-self:center;font-size:26px;line-height:1;color:#efb8a7}
+.duoLobbyPage .lobbyKick:hover:not(:disabled){background:#542d28;border-color:#da8b78;color:#fff1e9}
+.duoLobbyPage .lobbyKick[hidden],.duoLobbyPage #lobbyTakeover[hidden]{display:none}
 @media(max-width:800px){.duoLobbyPage .lobbyTop,.duoLobbyPage .lobbyMain{width:calc(100% - 24px)}.duoLobbyPage #waitingLobby{display:flex;flex-direction:column;padding:16px;max-height:none}.duoLobbyPage .lobbyLoadouts,.duoLobbyPage #lobbyAugments{grid-template-columns:1fr}.duoLobbyPage .lobbyInvite{display:block}.duoLobbyPage .lobbySteps{display:none}.duoLobbyPage .lobbyTowerChoices{grid-template-columns:repeat(5,minmax(0,1fr))}}
