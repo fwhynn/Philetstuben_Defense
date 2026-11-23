@@ -1,6 +1,6 @@
 [
   {
-    "version": "next",
+    "version": "1.3.5",
     "title": "Duo-Lobby: klarer und flexibler",
     "summary": "Ausgerichtete Aktionen und ein freier Platz für einen neuen Partner, wenn der Host jemanden entfernt.",
     "overview": [
@@ -43,7 +43,8 @@
       "Bereit beziehungsweise Spiel starten und Lobby verlassen stehen auf gleicher Höhe. Der Hinweistext steht darüber und verschiebt die Buttons nicht mehr.",
       "Der Host kann seinen Partner vor dem Spielstart über das X rechts neben dessen Namen aus der Lobby entfernen – auch bei unterbrochener Verbindung.",
       "Nach dem Entfernen kann ein neuer Partner beitreten. Die Auswahl des entfernten Partners und seine Bereitschaft werden zurückgesetzt; die Vorbereitung des Hosts bleibt erhalten."
-    ]
+    ],
+    "date": "2026-11-23"
   },
   {
     "version": "1.3.4",

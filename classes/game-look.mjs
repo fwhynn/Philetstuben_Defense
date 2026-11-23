@@ -9,7 +9,7 @@ import {Pass} from 'three/addons/postprocessing/Pass.js';
 import {ShaderPass} from 'three/addons/postprocessing/ShaderPass.js';
 import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
 import {SMAAPass} from 'three/addons/postprocessing/SMAAPass.js';
-import {gradeShader} from './grade-shader.mjs?v=855219d4ed91cf02';
+import {gradeShader} from './grade-shader.mjs?v=9360074f65fe8666';
 
 export const GAME_GRADE={saturation:.9,contrast:1.07,vignette:.26,shadowTint:[.93,.98,1.07],lightTint:[1.05,1,.93]};
 
