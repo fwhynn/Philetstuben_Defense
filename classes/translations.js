@@ -3191,6 +3191,15 @@ Object.assign(HexTranslations.en,{
 });
 
 HexTranslations.add(`
+Mehr Glanz und lesbare Turmnamen|More shine and readable tower names
+Legendäre Karten fallen in Deck und Kartenstapeln deutlicher auf. Lange Turmnamen lassen dem Schließen-Button Platz.|Legendary cards stand out more in your deck and card piles. Long tower names leave room for the close button.
+Legendäre Karten klar erkennbar|Legendary cards clearly visible
+Lange Turmnamen vollständig lesbar|Long tower names fully readable
+Deck und Turminfos|Deck and tower details
+Legendär mit Goldglanz|Legendary with a golden glow
+Platz für lange Namen|Room for long names
+Legendäre Karten erhalten in Deck und Kartenstapeln einen kräftigen Goldrahmen, einen goldenen Hintergrund und einen Goldschein. Kartenbild, Anzahl und Bauplätze bleiben sichtbar.|Legendary cards in your deck and card piles now have a stronger gold border, a golden background and a golden glow. Card art, counts and building slots remain visible.
+Lange Turmnamen brechen im Infofenster um, statt den Schließen-Button zu überlagern. Das X bleibt oben rechts frei und erreichbar.|Long tower names wrap in the details panel instead of overlapping the close button. The X stays clear and accessible at the top right.
 Partner aus der Lobby entfernen|Remove partner from the lobby
 Partner entfernt. Du kannst jetzt jemanden einladen.|Partner removed. You can now invite someone.
 Dein Platz in dieser Duo-Lobby ist nicht mehr verfügbar.|Your seat in this co-op lobby is no longer available.

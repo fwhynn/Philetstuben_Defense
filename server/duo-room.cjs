@@ -5,6 +5,7 @@ const loadCore = require('../headless-core.cjs');
 const RULESET = require('../package.json').version;
 // Reviewed checkpoint compatibility, including legacy 20-gold gift migration.
 function compatibleRuleset(source,target=RULESET){
+  if(target==='1.3.6'&&['1.2.8','1.2.9','1.3.0','1.3.1','1.3.2','1.3.3','1.3.4','1.3.5'].includes(source))return true;
   if(target==='1.3.5'&&['1.2.8','1.2.9','1.3.0','1.3.1','1.3.2','1.3.3','1.3.4'].includes(source))return true;
   if(target==='1.3.4'&&['1.2.8','1.2.9','1.3.0','1.3.1','1.3.2','1.3.3'].includes(source))return true;
   if(target==='1.3.3'&&['1.2.8','1.2.9','1.3.0','1.3.1','1.3.2'].includes(source))return true;

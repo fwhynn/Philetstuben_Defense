@@ -1,5 +1,44 @@
 [
   {
+    "version": "next",
+    "title": "Mehr Glanz und lesbare Turmnamen",
+    "summary": "Legendäre Karten fallen in Deck und Kartenstapeln deutlicher auf. Lange Turmnamen lassen dem Schließen-Button Platz.",
+    "overview": [
+      {
+        "title": "Verbessert",
+        "items": [
+          "Legendäre Karten klar erkennbar",
+          "Lange Turmnamen vollständig lesbar"
+        ]
+      }
+    ],
+    "sections": [
+      {
+        "title": "Deck und Turminfos",
+        "entries": [
+          {
+            "title": "Legendär mit Goldglanz",
+            "bullets": [
+              "Legendäre Karten erhalten in Deck und Kartenstapeln einen kräftigen Goldrahmen, einen goldenen Hintergrund und einen Goldschein. Kartenbild, Anzahl und Bauplätze bleiben sichtbar."
+            ],
+            "stats": []
+          },
+          {
+            "title": "Platz für lange Namen",
+            "bullets": [
+              "Lange Turmnamen brechen im Infofenster um, statt den Schließen-Button zu überlagern. Das X bleibt oben rechts frei und erreichbar."
+            ],
+            "stats": []
+          }
+        ]
+      }
+    ],
+    "changes": [
+      "Legendäre Karten erhalten in Deck und Kartenstapeln einen kräftigen Goldrahmen, einen goldenen Hintergrund und einen Goldschein. Kartenbild, Anzahl und Bauplätze bleiben sichtbar.",
+      "Lange Turmnamen brechen im Infofenster um, statt den Schließen-Button zu überlagern. Das X bleibt oben rechts frei und erreichbar."
+    ]
+  },
+  {
     "version": "1.3.5",
     "title": "Duo-Lobby: klarer und flexibler",
     "summary": "Ausgerichtete Aktionen und ein freier Platz für einen neuen Partner, wenn der Host jemanden entfernt.",
