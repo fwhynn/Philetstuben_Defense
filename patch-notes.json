@@ -1,6 +1,6 @@
 [
   {
-    "version": "next",
+    "version": "1.3.7",
     "title": "Rettungstunnel mit freier Richtungswahl",
     "summary": "Nähere Ausgänge und bis zu drei Positionen mit klarer Vorschau – im Solo und Duo.",
     "overview": [
@@ -43,7 +43,8 @@
       "Wähle den Ausgang über nummerierte Markierungen auf der Karte oder über die Positionsbuttons. Eine gestrichelte Linie zeigt die Tunnelverbindung, Pfeile zeigen die offenen Straßen.",
       "Der kostenlose Tunnel wird erst nach deiner Bestätigung gebaut. Im Modus mit zwei Straßenöffnungen haben die angebotenen Ausgänge ebenfalls zwei ausbaubare Öffnungen.",
       "Die Auswahl funktioniert im Solo und Duo. Auch ältere Spielstände mit einem ausstehenden Rettungstunnel erhalten die neuen Vorschläge."
-    ]
+    ],
+    "date": "2026-11-26"
   },
   {
     "version": "1.3.6",

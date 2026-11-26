@@ -3,11 +3,11 @@
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
-import {MODEL_ENEMIES,isEnemyJoint,enemyPose,applyEnemyPose} from './enemy-motion.mjs?v=c85e5e3ae2e39e6e';
-import {flameDetails,bossDetails} from './model-details.mjs?v=c85e5e3ae2e39e6e';
-import {MineBatches} from './mine-batches.mjs?v=c85e5e3ae2e39e6e';
-import {createGameLook} from './game-look.mjs?v=c85e5e3ae2e39e6e';
-import {polishMaterials,GAME_POLISH} from './material-polish.mjs?v=c85e5e3ae2e39e6e';
+import {MODEL_ENEMIES,isEnemyJoint,enemyPose,applyEnemyPose} from './enemy-motion.mjs?v=3f2bb5c481cd0d44';
+import {flameDetails,bossDetails} from './model-details.mjs?v=3f2bb5c481cd0d44';
+import {MineBatches} from './mine-batches.mjs?v=3f2bb5c481cd0d44';
+import {createGameLook} from './game-look.mjs?v=3f2bb5c481cd0d44';
+import {polishMaterials,GAME_POLISH} from './material-polish.mjs?v=3f2bb5c481cd0d44';
 
 const S=54,STEP=Math.PI/3,TILT=55*Math.PI/180,PITCH_MIN=12*Math.PI/180,PITCH_MAX=88*Math.PI/180,DIST_MIN=220,DIST_MAX=3400,DIST_START=950,SKY='#4a86ad';                 // Himmel gedämpfter (vorher #3384bd), passend zur zurückhaltenderen Farbkorrektur im Spiel
 const PREFIX={tiles:'tile',landmarks:'landmark',towers:'tower',enemies:'enemy',buildings:'building',effects:'mine',bases:'base',consumables:'consumable'};

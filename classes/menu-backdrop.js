@@ -5,10 +5,10 @@
    Rein optisch. Rendert nur, solange eines dieser Fenster sichtbar ist; ohne WebGL bleibt der reine Farbverlauf. */
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
-import {MENU_MAPS} from './menu-maps.mjs?v=c85e5e3ae2e39e6e';
-import {MODEL_ENEMIES,isEnemyJoint,enemyPose} from './enemy-motion.mjs?v=c85e5e3ae2e39e6e';
-import {createMenuLook,LOOK_FILES} from './menu-look.mjs?v=c85e5e3ae2e39e6e';
-import {polishMaterials} from './material-polish.mjs?v=c85e5e3ae2e39e6e';
+import {MENU_MAPS} from './menu-maps.mjs?v=3f2bb5c481cd0d44';
+import {MODEL_ENEMIES,isEnemyJoint,enemyPose} from './enemy-motion.mjs?v=3f2bb5c481cd0d44';
+import {createMenuLook,LOOK_FILES} from './menu-look.mjs?v=3f2bb5c481cd0d44';
+import {polishMaterials} from './material-polish.mjs?v=3f2bb5c481cd0d44';
 
 const WATCHED=['mainMenu','loadoutOverlay','arsenalOverlay','saveOverlay','playModeOverlay','leaderboardOverlay'];
 const TILE=1.1,STEP=Math.PI/3,SQRT3=Math.sqrt(3);
