@@ -47,7 +47,6 @@ function create(svg,commands){
       }
       scene=worldLayer;
     }
-    if(state.tunnelOffer&&state.tunnelConfirmed){const p=state.tunnelOffer,[q,r]=p.source.split(',').map(Number);for(const [name,t] of [['Eingang',{q,r}],['Ausgang',p]]){const c=axialToWorld(t.q,t.r),label=text(c.x,c.y-20,'Tunnel '+name+' · Vorschau',12,'#8ff3ff','700');label.style.pointerEvents='none';hintLayer.appendChild(label);}}
     // Landmarks are independent of placed tiles; they reveal through map expansion.
     for(const landmark of state.landmarks?.values()||[]){
       if(landmark.claimed) continue;const visibility=HexExploration.visibility(state.map,landmark);if(visibility==='hidden') continue;
@@ -116,7 +115,7 @@ function create(svg,commands){
         for(const [dx,dy] of [[5,5],[5,-5],[0,6]]){const spike=line(p.x+x-dx,p.y+y-dy,p.x+x+dx,p.y+y+dy,'#ded9c6',2);spike.style.pointerEvents='none';scene.appendChild(spike);}
       }
     }
-    drawUpgradeHints();drawBuildingUpgradeHints();drawTileOverlays();drawSelectionRings();drawBuildingTargets();scene=worldLayer;
+    drawUpgradeHints();drawBuildingUpgradeHints();drawTileOverlays();drawSelectionRings();drawBuildingTargets();drawTunnelPreview();scene=worldLayer;
     for(const mine of state.mines||[]) drawMine(mine);
     for(const e of state.enemies)if(!e.remoteSpawnPending) drawEnemy(e);
     for(const p of state.projectiles) drawProjectile(p);
@@ -127,6 +126,24 @@ function create(svg,commands){
       for(const tile of state.map.values()) drawTile(tile,'objects');
       scene=worldLayer;
     }
+  }
+
+  function drawTunnelPreview(){
+    const preview=state.tunnelConfirmed?HexMap.tunnelPreview(state):null;if(!preview)return;
+    const p=preview.selected,[q,r]=p.source.split(',').map(Number),from=axialToWorld(q,r),to=axialToWorld(p.q,p.r),tr=value=>globalThis.HexI18n?.text(value)||value;
+    roadPolyline([from,to],'#ffe09b',3,scene,true);
+    drawPoly(from.x,from.y,HEX-4,'none','#ffe09b');
+    scene.appendChild(text(from.x,from.y-25,tr('Bisherige Straße'),12,'#ffe09b','700'));
+    preview.choices.forEach((plan,index)=>{
+      const c=axialToWorld(plan.q,plan.r),selected=index===preview.index,color=selected?'#ffe09b':'#8ff3df';
+      const hit=drawPoly(c.x,c.y,HEX-3,selected?'#79652dcc':'#24574dcc',color);hit.dataset.tunnelChoice=String(index);hit.style.pointerEvents='all';hit.style.cursor='pointer';
+      hit.setAttribute('role','button');hit.setAttribute('tabindex','0');hit.setAttribute('aria-label',tr('Position '+(index+1)));hit.setAttribute('aria-pressed',String(selected));hit.setAttribute('aria-disabled',String(!!state.consumablesLocked));
+      hit.addEventListener('click',e=>{e.stopPropagation();commands.selectTunnel?.(index);});hit.addEventListener('keydown',e=>{if(['Enter',' '].includes(e.key)){e.preventDefault();e.stopPropagation();commands.selectTunnel?.(index);}});
+      for(const d of plan.roads){const tip=HexMap.edgePoint(c.x,c.y,d,.86),dx=(tip.x-c.x)*.22,dy=(tip.y-c.y)*.22;
+        roadPolyline([c,tip],color,6);roadPolyline([{x:tip.x-dx-dy*.6,y:tip.y-dy+dx*.6},tip,{x:tip.x-dx+dy*.6,y:tip.y-dy-dx*.6}],color,4);
+      }
+      const badge=text(c.x,c.y-14,String(index+1)+(selected?' ✓':''),20,color,'700');badge.style.pointerEvents='none';scene.appendChild(badge);
+    });
   }
 
   function drawSelectionRings(){

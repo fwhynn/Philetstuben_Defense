@@ -6,9 +6,15 @@
   function switchBoard(index) { activeBoard = index; document.querySelectorAll('main article').forEach((panel, i) => panel.hidden = i !== index); for (let i = 0; i < 2; i++)document.getElementById('view' + i).setAttribute('aria-pressed', String(i === index)); render(); }
   for (let i = 0; i < 2; i++)document.getElementById('view' + i).addEventListener('click', () => switchBoard(i));
   const views = [{}, {}], message = document.getElementById('message');
+  function selectTunnel(player,index){
+    if(remote&&player!==remote.player||match.ready[player])return;
+    const plan=HexMap.tunnelPreview(match.boards[player].state)?.choices[index];if(!plan)return;
+    views[player].tunnelChoice={q:plan.q,r:plan.r,source:plan.source};views[player].tunnelConfirmed=true;render();
+  }
   function button(parent, label, action, disabled = false) { const b = document.createElement('button'); b.textContent = label; b.disabled = disabled; b.addEventListener('click', action); parent.appendChild(b); return b; }
   function send(player, action, payload = {}) { if (remote) { if (player !== remote.player || remote.busy) return false; remote.send(action, payload).then(() => { message.textContent = 'Aktion bestätigt.'; }).catch(error => { message.textContent = error.message; }); return false; } const ok = HexDuoSession.command(match, player, { id: 'local-' + (++sequence), wave: match.wave, action, payload }); message.textContent = ok ? '' : 'Aktion aktuell nicht möglich. Prüfe Phase, Auswahl und Gold.'; render(); return ok; }
   const renderers = [0, 1].map(player => HexSvgRenderer.create(document.getElementById('board' + player), {
+    selectTunnel(index){selectTunnel(player,index);},
     placeTile(q, r) { const s = match.boards[player].state; if(s.selectedCard == null || s.selectedCard < 0)return; send(player, 'place', { q, r, index: s.selectedCard || 0, rotation: s.rotation || 0 }); },
     selectSlot(q, r, index) { views[player].slot = { q, r, index }; views[player].tower = null; views[player].building = null; render(); },
     selectTower(q, r, index) { views[player].tower = { q, r, index }; views[player].slot = null; views[player].building = null; render(); },
@@ -33,6 +39,7 @@
     document.getElementById('teamStatus').textContent = 'Team ' + match.hp + '/' + match.maxHp + ' HP · Wave ' + match.wave + (match.phase === 'gameover' ? ' · Verloren' : '');
     for (let player = 0; player < 2; player++) {
       const s = match.boards[player].state, v = views[player]; if(!remote&&handRefs.get(s)!==s.hand){s.selectedCard=-1;handRefs.set(s,s.hand);} s.selectedCard ??= -1; if (s.selectedCard >= s.hand.length) s.selectedCard = -1; s.rotation ??= 0; s.showSlotHints = true; s.selectedSlot = v.slot; s.selectedTower = v.tower; s.selectedBuilding = v.building;
+      s.tunnelChoice=v.tunnelChoice;s.tunnelConfirmed=!!s.tunnelOffer&&!!v.tunnelConfirmed;if(!s.tunnelOffer){delete v.tunnelChoice;delete v.tunnelConfirmed;}
       document.getElementById('status' + player).textContent = '· ' + s.gold + ' Gold · ' + (match.ready[player] ? 'Bereit' : phases[s.phase] || s.phase);
       renderers[player].render(s, targets(s));
       const box = document.getElementById('controls' + player); box.replaceChildren();
@@ -76,7 +83,10 @@
       if (v.slot) for (const type of s.towerLoadout) { const price = HexBuildings.cost(s, v.slot, HexData.TOWERS[type].cost); button(box, HexData.TOWERS[type].name + ' · ' + price, () => { if (send(player, 'tower', { type, slots: [v.slot] })) { views[player] = {}; render(); } }, s.gold < price); }
       if (v.tower) { const tower = s.map.get(HexMap.key(v.tower.q, v.tower.r))?.towers[v.tower.index]; if (tower && tower.guestOwner === undefined) for (const [upgrade, d] of HexData.runUpgrades(s, tower)) { const price = HexBuildings.cost(s, v.tower, d.cost); button(box, d.name + ' · ' + price, () => send(player, 'upgrade', { slot: v.tower, upgrade }), s.gold < price); } }
       if (v.building) { const building = s.map.get(HexMap.key(v.building.q, v.building.r))?.buildings?.[v.building.index]; if (!building) for (const [type, d] of Object.entries(HexBuildings.definitions).filter(([type])=>HexBuildings.allowedTypes(s.map.get(HexMap.key(v.building.q,v.building.r))).includes(type))) button(box, d.name + ' · ' + d.cost + (HexBuildings.buildBlockReason(s.map.get(HexMap.key(v.building.q,v.building.r)),type)?' · '+HexBuildings.buildBlockReason(s.map.get(HexMap.key(v.building.q,v.building.r)),type):''), () => send(player, 'building', { slot: v.building, type }), !!HexBuildings.buildBlockReason(s.map.get(HexMap.key(v.building.q,v.building.r)),type) || s.gold < d.cost); else { const d = HexBuildings.nextUpgrade(s, building); if (d) button(box, 'Gebäude ausbauen · ' + d.cost, () => send(player, 'buildingUpgrade', { slot: v.building }), s.gold < d.cost); } }
-      if (s.tunnelOffer) button(box, 'Kostenlosen Rettungstunnel bauen', () => { if (confirm(HexI18n.text('Rettungstunnel nach ' + s.tunnelOffer.q + ',' + s.tunnelOffer.r + ' bauen?'))) send(player, 'tunnel'); }, match.ready[player]);
+      if (s.tunnelOffer){const preview=HexMap.tunnelPreview(s);
+        if(s.tunnelConfirmed)preview?.choices.forEach((p,index)=>button(box,'Position '+(index+1),()=>selectTunnel(player,index),match.ready[player]).setAttribute('aria-pressed',String(index===preview.index)));
+        button(box,s.tunnelConfirmed?'Tunnel kostenlos bauen':'Rettungstunnel ansehen',()=>{if(!s.tunnelConfirmed){selectTunnel(player,preview.index);return;}const {q,r,source}=preview.selected;send(player,'tunnel',{q,r,source});},match.ready[player]);
+      }
       if (s.phase === 'build') button(box, match.ready[player] ? 'Bereitschaft zurücknehmen' : 'Bereit für nächste Wave', () => send(player, 'ready', { value: !match.ready[player] }));
     }
   }

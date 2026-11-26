@@ -5,6 +5,7 @@ const loadCore = require('../headless-core.cjs');
 const RULESET = require('../package.json').version;
 // Reviewed checkpoint compatibility, including legacy 20-gold gift migration.
 function compatibleRuleset(source,target=RULESET){
+  if(target==='1.3.7'&&['1.2.8','1.2.9','1.3.0','1.3.1','1.3.2','1.3.3','1.3.4','1.3.5','1.3.6'].includes(source))return true;
   if(target==='1.3.6'&&['1.2.8','1.2.9','1.3.0','1.3.1','1.3.2','1.3.3','1.3.4','1.3.5'].includes(source))return true;
   if(target==='1.3.5'&&['1.2.8','1.2.9','1.3.0','1.3.1','1.3.2','1.3.3','1.3.4'].includes(source))return true;
   if(target==='1.3.4'&&['1.2.8','1.2.9','1.3.0','1.3.1','1.3.2','1.3.3'].includes(source))return true;
@@ -48,7 +49,8 @@ function payloadValid(action, p) {
     case 'deliveryWish': return exact(p, ['offerId', 'index']) && typeof p.offerId === 'string' && p.offerId.length <= 200 && (p.index === null || integer(p.index, 0, 2));
     case 'reward': return exact(p, ['offerId', 'index']) && typeof p.offerId === 'string' && p.offerId.length <= 200 && (p.index === null || integer(p.index, 0, 1000));
     case 'merchant': return exact(p,['site','item']) && typeof p.site==='string' && /^-?\d{1,4},-?\d{1,4}$/.test(p.site) && ['repair','protection'].includes(p.item);
-    case 'redraw': case 'extraHex': case 'acknowledge': case 'tunnel': return exact(p, []);
+    case 'tunnel': return exact(p,[]) || exact(p,['q','r','source']) && integer(p.q,-1000,1000) && integer(p.r,-1000,1000) && typeof p.source==='string' && /^-?\d{1,4},-?\d{1,4}$/.test(p.source);
+    case 'redraw': case 'extraHex': case 'acknowledge': return exact(p, []);
     default: return false;
   }
 }

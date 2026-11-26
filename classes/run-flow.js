@@ -62,7 +62,7 @@ const HexRunFlow=(()=>{
         [state.hand[index],pile[i]]=[pile[i],state.hand[index]];break outer;
       }
     }
-    state.tunnelOffer=null;state.tunnelConfirmed=false;
+    state.tunnelOffer=null;state.tunnelChoice=null;state.tunnelConfirmed=false;
     if((state.map.size<=1||HexMap.hasExteriorFront(state.map,state.landmarks))&&ensurePlayableHand())return 'ready';
 
     state.discard.push(...state.hand);
@@ -71,7 +71,7 @@ const HexRunFlow=(()=>{
     if(state.rescueCard)return 'rescue';
 
     state.phase='build';
-    state.tunnelOffer=HexMap.tunnelPlan(state.map,state.landmarks,true);
+    state.tunnelOffer=HexMap.tunnelPlan(state.map,state.landmarks,true,state.difficulty==='dual'?2:1);
     return state.tunnelOffer?'tunnel':'blocked';
   }
   function start(state,random){

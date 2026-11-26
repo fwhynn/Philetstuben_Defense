@@ -2164,6 +2164,9 @@ details.biomeRules[open]>summary.hxGroupTitle::before{rotate:180deg;translate:0 
 .diamondPayout{padding:12px 0;border-bottom:1px solid #536d53;font-size:19px}.diamondPayout strong{color:#ffe09b}
 .diamondPanel dl{margin:12px 0}.diamondPanel dl>div{padding:3px 0}.diamondPanel [hidden]{display:none!important}
 .handDock>.tunnelRescuePanel{flex:none;max-width:330px;text-align:center}.handDock>.tunnelRescuePanel p{font-size:16px}
+.tunnelRescueChoices{display:flex;gap:8px;margin-bottom:10px}
+.tunnelRescueChoices>button{flex:1;min-width:0;width:auto;padding:8px 6px;font-size:16px}
+.tunnelRescueChoices>button[aria-pressed="true"]{border-color:#ffe09b!important;background:#f4c65f!important;color:#263420!important;box-shadow:0 0 0 2px #ffe09b55}
 @media(max-width:680px){.ruleSteps{grid-template-columns:1fr;gap:5px}.ruleSteps li{padding:7px 10px}.rulesScroll summary{padding-block:10px}}
 
 /* Arsenal: die mitgenommene Stufe 4 leuchtet, freigeschaltete aber nicht mitgenommene bleiben ruhig */

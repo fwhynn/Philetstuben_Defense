@@ -140,14 +140,18 @@ const HexRunRuntime=(()=>{
     HexCombat.step(state,refs,HexData.TOWERS,dt,time,emit);
     return state.hp<=0?'defeat':state.pendingSpawns===0&&state.enemies.length===0?'complete':'running';
   }
-  function rescueTunnel(state){
+  function rescueTunnel(state,selection={}){
     if(['detour','villages','powerGrid','expedition','towerDraft','movingFortress'].includes(state.challengeKind))return false;
     if(state.phase!=='build'||state.waveRunning||state.hp<=0)return false;
-    const plan=HexMap.tunnelPlan(state.map,state.landmarks,!!state.tunnelOffer);if(!plan)return false;
+    if(!selection||typeof selection!=='object'||Array.isArray(selection))return false;
+    const explicit=Object.keys(selection).length>0;
+    if(explicit&&(Object.keys(selection).sort().join(',')!=='q,r,source'||!Number.isInteger(selection.q)||!Number.isInteger(selection.r)||typeof selection.source!=='string'))return false;
+    const choices=HexMap.tunnelPlans(state.map,state.landmarks,!!state.tunnelOffer,state.difficulty==='dual'?2:1);
+    const plan=explicit?choices.find(p=>p.q===selection.q&&p.r===selection.r&&p.source===selection.source):choices[0];if(!plan)return false;
     const id=key(plan.q,plan.r),source=state.map.get(plan.source),number=state.nextTunnelId=(state.nextTunnelId||0)+1;
     source.tunnels??=[];source.tunnels.push(id);source.tunnelLabel='Tunnel '+number;
-    state.map.set(id,{q:plan.q,r:plan.r,type:'rescueTunnel',roads:state.difficulty==='dual'?[plan.dir,(plan.dir+1)%6]:[plan.dir],rotation:plan.dir,slots:0,towers:[],buildingSlots:0,buildings:[],income:0,tunnels:[plan.source],tunnelLabel:'Tunnel '+number});
-    state.vision=HexExploration.expand(state.landmarks,state.map);state.tunnelOffer=null;state.tunnelConfirmed=false;state.drawResult='ready';return true;
+    state.map.set(id,{q:plan.q,r:plan.r,type:'rescueTunnel',roads:[...plan.roads],rotation:plan.dir,slots:0,towers:[],buildingSlots:0,buildings:[],income:0,tunnels:[plan.source],tunnelLabel:'Tunnel '+number});
+    state.vision=HexExploration.expand(state.landmarks,state.map);state.tunnelOffer=null;state.tunnelChoice=null;state.tunnelConfirmed=false;state.drawResult='ready';return true;
   }
   function advanceIntroduction(state){
     const intro=state.introduction;if(!intro||state.challengeDay||state.duoMode)return;

@@ -107,7 +107,8 @@ test('3D cursor is refreshed by render after legality changes without another po
  const render=source.match(/  function render\(nextState,placementTargets=\[\]\)\{[\s\S]*?\n  \}/)[0];
  const refresh=source.match(/  function refreshPointerCursor\(\)\{[\s\S]*?\n  \}/)[0];
  const state={},dom={style:{}},context={state,dom,ready:true,pickDirty:true,pickables:[],objectRecords:new Map(),targetList:[],pointerPosition:{clientX:20,clientY:20},drag:null,layer:{objects:{updateMatrixWorld(){}},targets:{children:[],updateMatrixWorld(){context.matricesReady=true;}}},pick(){assert.equal(context.matricesReady,true);return {kind:'target',legal:context.targetList[0].legal};}};
- for(const name of ['syncTileOverlays','syncTiles','syncLandmarks','syncEmpty','syncObjects','syncTargets','syncGhost','syncSelection','syncMines','syncConsumables','syncEnemies','syncProjectiles','syncPowerVisuals','syncLabels'])context[name]=()=>{};
+ context.tunnelVisuals={children:[],updateMatrixWorld(){}};
+ for(const name of ['syncTileOverlays','syncTiles','syncLandmarks','syncEmpty','syncObjects','syncTargets','syncGhost','syncTunnelVisuals','syncSelection','syncMines','syncConsumables','syncEnemies','syncProjectiles','syncPowerVisuals','syncLabels'])context[name]=()=>{};
  vm.runInNewContext(render+'\n'+refresh+'\nglobalThis.draw=render;',context);
  context.draw(state,[{legal:false}]);assert.equal(dom.style.cursor,'not-allowed');
  context.pickDirty=true;context.matricesReady=false;context.draw(state,[{legal:true}]);assert.equal(dom.style.cursor,'pointer');

@@ -130,7 +130,7 @@ const HexDuoSession=(()=>{
       else if(action==='redraw'&&match.phase==='prepare')ok=HexRewards.redraw(s,run.random);
       else if(action==='merchant'&&match.phase==='prepare')ok=HexRewards.trade(s,payload.site,payload.item);
       else if(action==='extraHex'&&match.phase==='prepare')ok=HexRunSession.buyExtraHex(s,run.random);
-      else if(action==='tunnel'&&match.phase==='prepare')ok=HexRunRuntime.rescueTunnel(s);
+      else if(action==='tunnel'&&match.phase==='prepare')ok=HexRunRuntime.rescueTunnel(s,payload);
     }
     if(!ok)return false;
     // Upgrades and focus changes are legal while ready and keep that commitment.

@@ -3200,6 +3200,26 @@ Legendär mit Goldglanz|Legendary with a golden glow
 Platz für lange Namen|Room for long names
 Legendäre Karten erhalten in Deck und Kartenstapeln einen kräftigen Goldrahmen, einen goldenen Hintergrund und einen Goldschein. Kartenbild, Anzahl und Bauplätze bleiben sichtbar.|Legendary cards in your deck and card piles now have a stronger gold border, a golden background and a golden glow. Card art, counts and building slots remain visible.
 Lange Turmnamen brechen im Infofenster um, statt den Schließen-Button zu überlagern. Das X bleibt oben rechts frei und erreichbar.|Long tower names wrap in the details panel instead of overlapping the close button. The X stays clear and accessible at the top right.
+Tunnelausgang wählen|Choose tunnel exit
+Rettungstunnel mit freier Richtungswahl|Choose where your rescue tunnel leads
+Nähere Ausgänge und bis zu drei Positionen mit klarer Vorschau – im Solo und Duo.|Closer exits and up to three positions with a clear preview, in solo and co-op.
+Tunnelausgänge näher an der Karte|Tunnel exits closer to the map
+Bis zu drei Positionen zur Auswahl|Choose from up to three positions
+Klare Vorschau vor dem Bau|Clear preview before building
+Weiterbauen, wo es passt|Keep building where it fits
+Näher an deiner Verteidigung|Closer to your defences
+Erst ansehen, dann bauen|Preview first, then build
+Rettungstunnel können direkt neben bestehenden Hexen enden, wenn die neuen Straßen frei und weiter ausbaubar bleiben.|Rescue tunnels can end directly beside existing hexes when the new roads remain clear and can be extended.
+Bis zu drei gültige Positionen stehen zur Auswahl. Alle behalten denselben Anschluss an die bisherige Straße; bestehende Gegnerwege werden nicht verkürzt.|Choose from up to three valid positions. All keep the same connection to the existing road, without shortening existing enemy routes.
+Wähle den Ausgang über nummerierte Markierungen auf der Karte oder über die Positionsbuttons. Eine gestrichelte Linie zeigt die Tunnelverbindung, Pfeile zeigen die offenen Straßen.|Choose the exit using numbered map markers or the position buttons. A dashed line shows the tunnel connection, and arrows show the open roads.
+Der kostenlose Tunnel wird erst nach deiner Bestätigung gebaut. Im Modus mit zwei Straßenöffnungen haben die angebotenen Ausgänge ebenfalls zwei ausbaubare Öffnungen.|The free tunnel is only built after your confirmation. In two-front mode, the offered exits also have two openings that can be extended.
+Die Auswahl funktioniert im Solo und Duo. Auch ältere Spielstände mit einem ausstehenden Rettungstunnel erhalten die neuen Vorschläge.|The selection works in solo and co-op. Older saves with a pending rescue tunnel also receive the new suggestions.
+Position 1|Position 1
+Position 2|Position 2
+Position 3|Position 3
+Bisherige Straße|Existing road
+Wähle einen Ausgang mit zwei offenen Straßen. Gestrichelt: Verbindung zur bisherigen Straße.|Choose an exit with two open roads. Dashed line: connection to the existing road.
+Wähle einen Ausgang. Gestrichelt: Verbindung zur bisherigen Straße.|Choose an exit. Dashed line: connection to the existing road.
 Partner aus der Lobby entfernen|Remove partner from the lobby
 Partner entfernt. Du kannst jetzt jemanden einladen.|Partner removed. You can now invite someone.
 Dein Platz in dieser Duo-Lobby ist nicht mehr verfügbar.|Your seat in this co-op lobby is no longer available.

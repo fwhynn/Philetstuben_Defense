@@ -118,22 +118,67 @@ const HexMap=(()=>{
       }}
     return false;
   }
-  function tunnelPlan(map,landmarks,allowExterior=false){
-    if(!allowExterior&&hasExteriorFront(map,landmarks))return null;
+  function tunnelPlans(map,landmarks,allowExterior=false,minExits=1){
+    if(!allowExterior&&hasExteriorFront(map,landmarks))return [];
     const connected=reachable(map),roads=[...map.values()].filter(t=>t.type!=='base'&&connected.has(key(t.q,t.r))&&t.roads?.length);
     const tips=roads.filter(t=>t.roads.some(d=>{const n=neighbor(t.q,t.r,d);return !map.has(key(n.q,n.r));}));
     // Older saves can already be completely closed by a dead end. They still
     // need a tunnel entrance, even when no open road tip survives.
     const sources=tips.length?tips:roads;
-    if(!sources.length)return null;
-    const outside=exterior(map,landmarks),options=[];
-    for(const id of outside){const [q,r]=id.split(',').map(Number);if(Array.from({length:6},(_,d)=>neighbor(q,r,d)).some(n=>map.has(key(n.q,n.r))||landmarks?.get(key(n.q,n.r))?.prefab))continue;
-      for(const source of sources){const distance=Math.max(Math.abs(q-source.q),Math.abs(r-source.r),Math.abs(q+r-source.q-source.r));options.push({q,r,source:key(source.q,source.r),distance});}}
-    options.sort((a,b)=>a.distance-b.distance||a.q-b.q||a.r-b.r||a.source.localeCompare(b.source));
-    const chosen=options[0];if(!chosen)return null;
+    if(!sources.length)return [];
+    minExits=minExits===2?2:1;
     const distance=(a,b)=>Math.max(Math.abs(a.q-b.q),Math.abs(a.r-b.r),Math.abs(a.q+a.r-b.q-b.r));
-    chosen.dir=Array.from({length:6},(_,d)=>({d,score:Math.min(...[...map.values()].map(t=>distance(neighbor(chosen.q,chosen.r,d),t)))})).sort((a,b)=>b.score-a.score||a.d-b.d)[0].d;
-    return chosen;
+    const outside=exterior(map,landmarks),tiles=[...map.values()],occupied=new Map(map),options=[];
+    // Landmarks, including unrevealed ones, must never be overwritten.
+    for(const [id,l] of landmarks||[])if(!l.claimed&&!occupied.has(id))occupied.set(id,{...l.prefab,q:l.q,r:l.r});
+    const free=p=>!occupied.has(key(p.q,p.r));
+    const compare=(a,b)=>a.distance-b.distance||a.edgeDistance-b.edgeDistance||a.q-b.q||a.r-b.r||a.source.localeCompare(b.source);
+    for(const id of outside){
+      const [q,r]=id.split(',').map(Number),p={q,r};if(!free(p))continue;
+      const neighbors=Array.from({length:6},(_,d)=>neighbor(q,r,d));
+      // Side-by-side ground is allowed. Connecting to a second road would make
+      // the tunnel a shortcut through existing defences, so keep those edges shut.
+      if(neighbors.some((n,d)=>occupied.get(key(n.q,n.r))?.roads?.includes(OPP(d))))continue;
+      const exits=neighbors.flatMap((n,d)=>free(n)&&outside.has(key(n.q,n.r))?[d]:[]);
+      if(exits.length<minExits)continue;
+      const source=sources.reduce((best,t)=>{const order=distance(p,t)-distance(p,best)||t.q-best.q||t.r-best.r;return order<0?t:best;});
+      options.push({...p,source:key(source.q,source.r),distance:distance(p,source),edgeDistance:Math.min(...tiles.map(t=>distance(p,t))),exits});
+    }
+    // Only validate the best candidates, instead of flood-filling for every cell.
+    function validate(p){
+      const candidate=new Map(map);candidate.set(key(p.q,p.r),{q:p.q,r:p.r,roads:[],type:'rescueTunnel'});
+      const beyond=exterior(candidate,landmarks);
+      const exits=p.exits.filter(d=>{
+        const n=neighbor(p.q,p.r,d);if(!beyond.has(key(n.q,n.r)))return false;
+        const extended=new Map(candidate);extended.set(key(n.q,n.r),{...n,roads:[]});
+        const nextOutside=exterior(extended,landmarks);
+        return Array.from({length:6},(_,e)=>neighbor(n.q,n.r,e)).some(next=>free(next)&&!extended.has(key(next.q,next.r))&&nextOutside.has(key(next.q,next.r)));
+      });
+      if(exits.length<minExits)return null;
+      const clearances=new Map(exits.map(d=>{const n=neighbor(p.q,p.r,d);return [d,Array.from({length:6},(_,e)=>neighbor(n.q,n.r,e)).filter(next=>free(next)&&!candidate.has(key(next.q,next.r))&&beyond.has(key(next.q,next.r))).length];}));
+      const combinations=minExits===2?exits.flatMap((d,i)=>exits.slice(i+1).map(e=>[d,e])):exits.map(d=>[d]);
+      const score=ds=>ds.reduce((sum,d)=>sum+clearances.get(d),0)+(ds.length===2?Math.min((ds[1]-ds[0]+6)%6,(ds[0]-ds[1]+6)%6):0);
+      combinations.sort((a,b)=>score(b)-score(a)||a[0]-b[0]||(a[1]||0)-(b[1]||0));
+      return {q:p.q,r:p.r,source:p.source,distance:p.distance,dir:combinations[0][0],roads:combinations[0]};
+    }
+    options.sort(compare);let first;
+    for(const option of options){first=validate(option);if(first)break;}
+    if(!first)return [];
+    // Every alternative keeps the SAME entrance and therefore the old route.
+    const anchor=map.get(first.source),choices=[first];
+    const alternatives=options.filter(p=>p.q!==first.q||p.r!==first.r).map(p=>({...p,source:first.source,distance:distance(p,anchor)})).sort(compare);
+    for(const option of alternatives){const plan=validate(option);if(plan)choices.push(plan);if(choices.length===3)break;}
+    return choices;
+  }
+  function tunnelPlan(map,landmarks,allowExterior=false,minExits=1){
+    const choices=tunnelPlans(map,landmarks,allowExterior,minExits);
+    return choices.length?{...choices[0],choices}:null;
+  }
+  function tunnelPreview(state){
+    if(!state.tunnelOffer||state.phase!=='build'||state.waveRunning||state.hp<=0||state.duoPartnerView)return null;
+    const offer=state.tunnelOffer,choices=offer.choices||[{...offer,roads:offer.roads||(state.difficulty==='dual'?[offer.dir,(offer.dir+1)%6]:[offer.dir])}];
+    const chosen=state.tunnelChoice,index=Math.max(0,choices.findIndex(p=>chosen&&p.q===chosen.q&&p.r===chosen.r&&p.source===chosen.source));
+    return {choices,selected:choices[index],index};
   }
   function rescue(map,landmarks,minExits=1){
     let best=null;
@@ -250,7 +295,7 @@ const HexMap=(()=>{
     }
     return {graph,geometry,distances};
   }
-  return {exterior,hasExteriorFront,tunnelPlan,SQRT3,HEX,OPP,key,axialToWorld,hexPoints,edgePoint,neighbor,rotatedRoads,canPlace,canPlaceOpening,randomBaseExits,rescue,buildGraph,pathToBase,roadGeometry,routeGraph,length,slotOffsets,slotPositions,buildingPosition,axialToPixel:axialToWorld};
+  return {exterior,hasExteriorFront,tunnelPlans,tunnelPlan,tunnelPreview,SQRT3,HEX,OPP,key,axialToWorld,hexPoints,edgePoint,neighbor,rotatedRoads,canPlace,canPlaceOpening,randomBaseExits,rescue,buildGraph,pathToBase,roadGeometry,routeGraph,length,slotOffsets,slotPositions,buildingPosition,axialToPixel:axialToWorld};
 })();
 
 

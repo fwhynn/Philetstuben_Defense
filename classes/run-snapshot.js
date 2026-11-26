@@ -96,9 +96,13 @@ const HexRunSnapshot=(()=>{
         else {
           const blockedDraw=['tunnel','blocked'].includes(state.drawResult);
           const blockedRoad=blockedDraw||!HexMap.rescue(state.map,state.landmarks,state.difficulty==='dual'?2:1);
-          if(blockedRoad){state.tunnelOffer=HexMap.tunnelPlan(state.map,state.landmarks,true);state.tunnelConfirmed=false;}
+          if(blockedRoad){state.tunnelOffer=HexMap.tunnelPlan(state.map,state.landmarks,true,state.difficulty==='dual'?2:1);state.tunnelConfirmed=false;}
         }
       }
+    }
+    if(state.tunnelOffer){
+      state.tunnelOffer=HexMap.tunnelPlan(state.map,state.landmarks,true,state.difficulty==='dual'?2:1);
+      if(!state.tunnelOffer?.choices.some(p=>p.q===state.tunnelChoice?.q&&p.r===state.tunnelChoice?.r&&p.source===state.tunnelChoice?.source))state.tunnelChoice=null;
     }
     state.biomeLayoutVersion??=1;
     // Support multipliers are derived from buildings, not permanent purchases.

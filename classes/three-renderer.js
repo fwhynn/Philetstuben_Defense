@@ -634,6 +634,35 @@ function create(host0,commands){
     rotateHint.style.display='block';rotateHint.style.left=left+'px';rotateHint.style.top=top+'px';
   }
 
+  // Rescue preview geometry is rebuilt only when its choices or selection change.
+  const tunnelVisuals=new THREE.Group();scene.add(tunnelVisuals);let tunnelVisualSignature='';
+  function clearTunnelVisuals(){
+    tunnelVisuals.traverse(o=>{if(o.geometry&&o.geometry!==flatHex&&o.geometry!==outline)o.geometry.dispose();o.material?.dispose();});
+    tunnelVisuals.clear();tunnelVisualSignature='';pickDirty=true;
+  }
+  function syncTunnelVisuals(){
+    const preview=state.tunnelConfirmed?HexMap.tunnelPreview(state):null,signature=preview?JSON.stringify([preview.choices,preview.index]):'';
+    if(signature===tunnelVisualSignature)return;
+    clearTunnelVisuals();tunnelVisualSignature=signature;if(!preview)return;
+    function mesh(geometry,color,opacity,x,z){const m=new THREE.Mesh(geometry,basic(color,opacity));m.position.set(x,8,z);m.material.transparent=true;m.material.depthTest=false;m.material.depthWrite=false;m.renderOrder=65;tunnelVisuals.add(m);return m;}
+    function stroke(a,b,color,radius=2){
+      const direction=new THREE.Vector3(b.x-a.x,0,b.y-a.y),length=direction.length();if(!length)return;
+      const m=mesh(new THREE.CylinderGeometry(radius,radius,length,6),color,1,(a.x+b.x)/2,(a.y+b.y)/2);m.renderOrder=67;m.position.y=10;m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),direction.normalize());
+    }
+    for(const [index,plan] of preview.choices.entries()){
+      const c=axialToWorld(plan.q,plan.r),selected=index===preview.index,color=selected?'#ffe09b':'#8ff3df';
+      const fill=mesh(flatHex,selected?'#c69e3b':'#296e68',selected?.7:.45,c.x,c.y);fill.userData.pick={kind:'tunnel',index};
+      mesh(outline,color,1,c.x,c.y).renderOrder=66;
+      for(const d of plan.roads){const tip=HexMap.edgePoint(c.x,c.y,d,.86),dx=(tip.x-c.x)*.22,dy=(tip.y-c.y)*.22;
+        stroke(c,tip,color,3);stroke(tip,{x:tip.x-dx-dy*.6,y:tip.y-dy+dx*.6},color);stroke(tip,{x:tip.x-dx+dy*.6,y:tip.y-dy-dx*.6},color);
+      }
+    }
+    const p=preview.selected,[q,r]=p.source.split(',').map(Number),from=axialToWorld(q,r),to=axialToWorld(p.q,p.r);
+    mesh(outline,'#ffe09b',1,from.x,from.y);
+    const link=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(from.x,18,from.y),new THREE.Vector3(to.x,18,to.y)]),new THREE.LineDashedMaterial({color:'#ffe09b',dashSize:9,gapSize:6,transparent:true,depthTest:false,depthWrite:false}));
+    link.computeLineDistances();link.renderOrder=64;tunnelVisuals.add(link);
+  }
+
   // ---- Auswahl, Reichweite, Upgrade-Hinweise ----
   const selectionRings=[];
   const duoRings=[new THREE.Mesh(torus,basic('#a879ff',.95)),new THREE.Mesh(torus,basic('#61dfd1',.95))];
@@ -970,7 +999,18 @@ function create(host0,commands){
     for(const tile of state.map.values())(tile.towers||[]).forEach((t,i)=>{if(t&&(t.overloadPending||t.overloadUntil>state.elapsedMs)){const p=slotPositions(tile)[i];label('overload:'+key(tile.q,tile.r)+':'+i,p.x,p.y,'ϟ Überladung','',95);}});
     for(const e of state.enemies)if(e.alive&&!e.remoteSpawnPending&&(['splitter','shard','healer','elementCarrier'].includes(e.type)||HexWaves.enemyAssets[e.type])){const entry=label('enemy-ability:'+e.id,e.x,e.y,(e.type==='shieldbearer'?'▣ '+(e.shieldHits||0):e.type==='ramBeetle'?'» '+Math.round((e.charge||0)*100)+'%':e.abilityIcon)||({splitter:'◆ → ◆◆',shard:'◆',healer:'✚'})[e.type],'',38);entry.el.title=e.name+(e.description?' · '+e.description:'');entry.el.style.color=e.color||(e.type==='healer'?'#73e49c':'#e5e8de');}
     for(const e of state.enemies)if(e.alive&&!e.remoteSpawnPending&&e.bossKind)label('boss-name:'+e.id,e.x,e.y,e.name+' · '+({iron:'Rüstung',hunter:'Tempo',summoner:'MR · Beschwörung'})[e.bossKind],'',85);
-    if(state.tunnelOffer&&state.tunnelConfirmed){const p=state.tunnelOffer,[q,r]=p.source.split(',').map(Number);for(const [name,t] of [['Eingang',{q,r}],['Ausgang',p]]){const c=axialToWorld(t.q,t.r);label('tunnel-preview:'+name,c.x,c.y,'Tunnel '+name+' · Vorschau','',30);}}
+    const tunnelPreview=state.tunnelConfirmed?HexMap.tunnelPreview(state):null;
+    if(tunnelPreview){
+      const tr=value=>globalThis.HexI18n?.text(value)||value,[q,r]=tunnelPreview.selected.source.split(',').map(Number),source=axialToWorld(q,r);
+      const sourceLabel=label('tunnel-preview:source',source.x,source.y,tr('Bisherige Straße'),'',38).el;
+      Object.assign(sourceLabel.style,{fontSize:'15px',padding:'5px 8px',borderRadius:'6px',background:'#17352e',border:'1px solid #ffe09b'});
+      tunnelPreview.choices.forEach((p,index)=>{
+        const c=axialToWorld(p.q,p.r),selected=index===tunnelPreview.index,entry=label('tunnel-choice:'+index,c.x,c.y,String(index+1)+(selected?' ✓':''),'',32),el=entry.el;
+        Object.assign(el.style,{pointerEvents:'auto',cursor:'pointer',fontSize:'18px',background:selected?'#f4c65f':'#17352e',color:selected?'#20351c':'#b6fff0',textShadow:'none',border:'2px solid '+(selected?'#fff0bc':'#8ff3df'),borderRadius:'9px',padding:'8px 12px',minWidth:'20px',textAlign:'center'});
+        el.setAttribute('aria-label',tr('Position '+(index+1)));el.setAttribute('aria-pressed',String(selected));el.setAttribute('aria-disabled',String(!!state.consumablesLocked));
+        if(!entry.tunnelChoice){entry.tunnelChoice=true;el.tabIndex=0;el.setAttribute('role','button');for(const name of ['pointerdown','pointerup'])el.addEventListener(name,e=>e.stopPropagation());el.addEventListener('click',e=>{e.stopPropagation();commands.selectTunnel?.(index);});el.addEventListener('keydown',e=>{if(['Enter',' '].includes(e.key)){e.preventDefault();e.stopPropagation();commands.selectTunnel?.(index);}});}
+      });
+    }
 
     for(const e of state.enemies)if(e.alive&&!e.remoteSpawnPending&&e.caravan){const entry=label('caravan:'+e.id,e.x,e.y,'🪙','',55);if(!entry.caravan){entry.caravan=true;const el=entry.el;el.style.pointerEvents='auto';el.style.cursor='help';el.setAttribute('role','button');el.tabIndex=0;el.setAttribute('aria-label',e.splitOnDeath?'Geldtransport: 18 Gold verteilt auf Golem und Splitter. Erreicht der Golem die Basis, verlierst du 10 Gold.':'Geldtransport: Besiegen bringt 15 Gold extra. Erreicht er die Basis, verlierst du 10 Gold.');el.title=el.getAttribute('aria-label');for(const name of ['pointerdown','pointerup'])el.addEventListener(name,event=>event.stopPropagation());el.addEventListener('click',event=>{event.stopPropagation();commands.inspectCaravan?.();});el.addEventListener('keydown',event=>{if(['Enter',' '].includes(event.key)){event.preventDefault();event.stopPropagation();commands.inspectCaravan?.();}});}}
     const gridState=state.powerGrid?HexPowerGrid.evaluate(state):null;
@@ -1003,8 +1043,8 @@ function create(host0,commands){
     if(state!==nextState){if(state) rebuildAll();state=nextState;}
     targetList=placementTargets;if(!ready) return;
     landmarkVisibilityCache=new WeakMap();
-    syncTileOverlays();syncTiles();syncLandmarks();syncEmpty();syncObjects();syncTargets();syncGhost();syncSelection();syncMines();syncConsumables();syncEnemies();syncProjectiles();syncPowerVisuals();syncLabels();
-    if(pickDirty){pickables=[...objectRecords.values()].flatMap(r=>r.picks).concat(layer.targets.children.map(g=>g.children[1]));layer.objects.updateMatrixWorld(true);layer.targets.updateMatrixWorld(true);pickDirty=false;}
+    syncTileOverlays();syncTiles();syncLandmarks();syncEmpty();syncObjects();syncTargets();syncGhost();syncTunnelVisuals();syncSelection();syncMines();syncConsumables();syncEnemies();syncProjectiles();syncPowerVisuals();syncLabels();
+    if(pickDirty){pickables=[...objectRecords.values()].flatMap(r=>r.picks).concat(layer.targets.children.map(g=>g.children[1]),tunnelVisuals.children.filter(o=>o.userData.pick));layer.objects.updateMatrixWorld(true);layer.targets.updateMatrixWorld(true);tunnelVisuals.updateMatrixWorld(true);pickDirty=false;}
     refreshPointerCursor();
   }
   let motionMines=null,motionConsumables=null;
@@ -1015,7 +1055,7 @@ function create(host0,commands){
     const box=host.getBoundingClientRect(),outer=wrap.getBoundingClientRect();
     return {x:(tmp.x+1)/2*box.width+box.left-outer.left,y:(1-tmp.y)/2*box.height+box.top-outer.top,width:outer.width,height:outer.height};
   }
-  function reset(){clearPowerVisuals();consumablePreview.visible=false;clearOverlays();hoverBuildingKey=null;seenShots.clear();rebuildAll();for(const obj of enemyObjects.values()){layer.dynamic.remove(obj.group);obj.sprite?.material.dispose();}enemyObjects.clear();mineBatches.clear();clearConsumables();state=null;hoverPick=null;rotateAnchor=null;positionRotateHint();resetView(false);}
+  function reset(){clearTunnelVisuals();clearPowerVisuals();consumablePreview.visible=false;clearOverlays();hoverBuildingKey=null;seenShots.clear();rebuildAll();for(const obj of enemyObjects.values()){layer.dynamic.remove(obj.group);obj.sprite?.material.dispose();}enemyObjects.clear();mineBatches.clear();clearConsumables();state=null;hoverPick=null;rotateAnchor=null;positionRotateHint();resetView(false);}
 
   // ---- Animation ----
   let last=performance.now(),raf=0,lastDraw=0,slowFrames=0,renderedFrameCount=0;
@@ -1144,6 +1184,7 @@ function create(host0,commands){
       }
       const hit=pick(e);
       if(!hit) commands.clearSelection();
+      else if(hit.kind==='tunnel') commands.selectTunnel?.(hit.index);
       else if(hit.kind==='target') {
         if(e.pointerType==='touch'&&state.phase==='place'&&!state.buildingTarget&&!state.consumablePickUI&&state.hoveredPlacement!==key(hit.q,hit.r)){commands.hoverPlacement(key(hit.q,hit.r));hoverPick=key(hit.q,hit.r);render(state,targetList);}
         else commands.placeTile(hit.q,hit.r);
@@ -1173,7 +1214,7 @@ function create(host0,commands){
     return HexUiLayout.pickScreenSlot(slots,event.clientX-box.left,event.clientY-box.top,box.width,box.height);
   },focusAt(p){cam.x=p.x;cam.z=p.y;applyCamera();commands.viewChanged?.();},rotateView,panView,zoom:factor=>zoom(factor),resetView:()=>resetView(true),getView,
     destroy(){
-      destroyed=true;stopEditionWatch?.();cancelAnimationFrame(raf);resize.disconnect();for(const [name,fn,options] of listeners) dom.removeEventListener(name,fn,options);
+      destroyed=true;clearTunnelVisuals();scene.remove(tunnelVisuals);stopEditionWatch?.();cancelAnimationFrame(raf);resize.disconnect();for(const [name,fn,options] of listeners) dom.removeEventListener(name,fn,options);
       windPool.mesh.geometry.dispose();windPool.mesh.material.dispose();windPool.mesh.dispose();for(const pool of [flakePool,rainPool]){pool.mesh.geometry.dispose();pool.mesh.material.dispose();pool.mesh.dispose();}mistPool.mesh.geometry.dispose();mistPool.mesh.material.dispose();mistPool.mesh.dispose();
       for(const materials of Object.values(biomeOverlayMaterials)){materials.fill.dispose();materials.border.dispose();}
       clearPowerVisuals();scene.remove(powerVisuals);clearOverlays();for(const material of previewMaterials)material.dispose();basePick.dispose();slotPick.dispose();baseTurretPad.dispose();baseTurretMaterial.dispose();buildingPadGeometry.dispose();buildingPadMaterial.dispose();slotDiamondGeometry.dispose();gridGeometry.dispose();buffGeometry.dispose();gridMaterial.dispose();otherBuffMaterial.dispose();otherBuffBorder.dispose();buffMaterial.dispose();buffBorderMaterial.dispose();

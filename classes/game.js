@@ -25,7 +25,7 @@
       return true;
     },
     togglePowerField(id){if(HexPowerGrid.toggleField(state,id)){renderAll();saveRunAutosave(true);}else setMessage(state.waveRunning?'Stromnetz während der Welle gesperrt.':'Maximal sechs Leitfelder: Schalte zuerst ein gelbes Feld aus.');},
-    placeTile, inspectCaravan() { document.getElementById('waveDropdown').open = true; }, selectSlot(q, r, index, multiple, pointerType) { if (!applyBuildingTarget(q, r)) selectSlot(q, r, index, multiple, pointerType); }, inspectBiome,
+    placeTile, selectTunnel, inspectCaravan() { document.getElementById('waveDropdown').open = true; }, selectSlot(q, r, index, multiple, pointerType) { if (!applyBuildingTarget(q, r)) selectSlot(q, r, index, multiple, pointerType); }, inspectBiome,
     fieldClick() { document.getElementById('towerDrawer').classList.add('hidden'); if (state?.dragTower) { cancelQuickTower(); renderAll(); } },
     selectBase(event) { if (applyBuildingTarget(0, 0)) return; if (globalThis.HexCompact?.small()) HexCompact.open('stats',event); document.getElementById('towerDrawer').classList.add('hidden'); state.selectedBase = true; state.selectedTower = null; state.selectedSlot = null; state.selectedBuilding = null; document.getElementById('baseDropdown').open = true; renderAll(); },
     hoverBuilding(slot) { state.hoverBuilding = slot; renderBoard(); },
@@ -552,14 +552,36 @@
     if (paint) { renderBoard(); renderUI(); }
   }
 
+  function selectTunnel(index) {
+    const preview=HexMap.tunnelPreview(state),plan=preview?.choices[index];
+    if(!plan||state.consumablesLocked)return;
+    state.tunnelChoice={q:plan.q,r:plan.r,source:plan.source};state.tunnelConfirmed=true;
+    state.selectedTower=state.selectedSlot=state.selectedBuilding=state.previewTower=state.previewUpgrade=state.buildingTarget=null;
+    renderAll();if(!duoToken)saveRunAutosave();
+  }
   function buildRescueTunnel() {
-    if (duoToken) { duoAction('tunnel'); return; }
-    if (!state.tunnelOffer || state.phase !== 'build' || state.waveRunning || state.hp <= 0) return;
-    const plan = HexMap.tunnelPlan(state.map, state.landmarks, !!state.tunnelOffer); if (!plan) { setMessage('Kein gültiger Rettungstunnel verfügbar.'); return; }
-    if (!state.tunnelConfirmed) { state.tunnelConfirmed = true; setMessage('Rettungstunnel von Hex ' + plan.source + ' nach ' + plan.q + ',' + plan.r + '. Kostenlos, keine Gebäude werden entfernt.'); renderAll(); return; }
-    const built = HexRunRuntime.rescueTunnel(state); renderAll(); if(built)saveRunAutosave(); setMessage(built ? 'Rettungstunnel geöffnet. Erweitere die neue Straße in der nächsten Runde.' : 'Kein gültiger Rettungstunnel verfügbar.');
+    const preview=HexMap.tunnelPreview(state);if(!preview||state.consumablesLocked)return;
+    if (!state.tunnelConfirmed) { selectTunnel(preview.index); return; }
+    const {q,r,source}=preview.selected;
+    if (duoToken) { duoAction('tunnel',{q,r,source}); return; }
+    const built = HexRunRuntime.rescueTunnel(state,{q,r,source}); renderAll(); if(built)saveRunAutosave(); setMessage(built ? 'Rettungstunnel geöffnet. Erweitere die neue Straße in der nächsten Runde.' : 'Kein gültiger Rettungstunnel verfügbar.');
   }
   document.getElementById('tunnelRescueBtn').addEventListener('click', buildRescueTunnel);
+  let tunnelChoiceKey='';
+  function renderTunnelChoices(){
+    const preview=HexMap.tunnelPreview(state),visible=!!preview;
+    document.getElementById('tunnelRescuePanel').classList.toggle('hidden',!visible);
+    const button=document.getElementById('tunnelRescueBtn'),choices=document.getElementById('tunnelRescueChoices');
+    button.classList.toggle('hidden',!visible);button.disabled=!!state.consumablesLocked;
+    button.textContent=state.tunnelConfirmed?'Tunnel kostenlos bauen':'Rettungstunnel ansehen';
+    document.getElementById('tunnelRescueText').textContent=state.tunnelConfirmed?(state.difficulty==='dual'?'Wähle einen Ausgang mit zwei offenen Straßen. Gestrichelt: Verbindung zur bisherigen Straße.':'Wähle einen Ausgang. Gestrichelt: Verbindung zur bisherigen Straße.'):'Kein Rettungshex passt. Ein kostenloser Tunnel öffnet einen neuen Straßenanfang.';
+    choices.classList.toggle('hidden',!visible||!state.tunnelConfirmed);
+    const signature=JSON.stringify(preview?.choices||[]);
+    if(signature!==tunnelChoiceKey){tunnelChoiceKey=signature;choices.replaceChildren();
+      preview?.choices.forEach((plan,index)=>{const choice=document.createElement('button');choice.type='button';choice.className='secondary';choice.textContent='Position '+(index+1);choice.addEventListener('click',()=>selectTunnel(index));choices.appendChild(choice);});
+    }
+    Array.from(choices.children).forEach((choice,index)=>{choice.setAttribute('aria-pressed',String(index===preview?.index));choice.disabled=!!state.consumablesLocked;});
+  }
   function renderBoard() {
     state.showSlotHints=showSlotHints&&(state.challengeKind!=='towerDraft'||Object.values(state.towerDraft.inventory).some(n=>n>0));
     if (state.previewUpgrade) { const selected = state.selectedTower, tower = selected && state.map.get(key(selected.q, selected.r))?.towers[selected.index]; if (tower !== state.previewUpgrade.tower) state.previewUpgrade = null; }
@@ -699,10 +721,7 @@ R dreht die Karte, dann Feld anklicken.`;
     if(state.challengeKind==='villages'){villageHud.replaceChildren();for(const g of state.villages.goals){const box=document.createElement('div'),label=document.createElement('strong'),bar=document.createElement('progress');box.title=g.name;label.textContent=['N','M','S'][g.id]+' ♥ '+g.hp+'/'+g.maxHp;bar.max=g.maxHp;bar.value=g.hp;bar.setAttribute('aria-label',g.name);box.appendChild(label);box.appendChild(bar);villageHud.appendChild(box);}}
     const touchControls = !!globalThis.HexCompact?.touch?.();
     document.getElementById('rotateHexBtn').textContent = touchControls ? 'Drehen' : 'Drehen (R)';
-    const tunnelAvailable=!!state.tunnelOffer&&state.phase==='build'&&!state.waveRunning&&state.hp>0;
-    document.getElementById('tunnelRescuePanel').classList.toggle('hidden',!tunnelAvailable);
-    const tunnelButton = document.getElementById('tunnelRescueBtn'); tunnelButton.classList.toggle('hidden',!tunnelAvailable); tunnelButton.textContent = duoToken || state.tunnelConfirmed ? 'Tunnel kostenlos bauen' : 'Rettungstunnel ansehen';
-    document.getElementById('tunnelRescueText').textContent=state.tunnelConfirmed?'Kostenlos eine neue Front öffnen. Bestehende Hexe und Gebäude bleiben erhalten.':'Kein Rettungshex passt. Ein kostenloser Tunnel öffnet einen neuen Straßenanfang.';
+    renderTunnelChoices();
     renderQuickControls(); renderIntroductionNotice();
     uxFeedback();
     renderBasePanel(); renderTutorial();
@@ -2369,6 +2388,7 @@ R dreht die Karte, dann Feld anklicken.`;
       token: duoToken, getState: () => state, render: renderAll, renderer, cardElement, setMessage,
       profileSettled(nextProfile){profile=nextProfile;scheduleCloudSave();},
       accept(next, switched = false, profileChanged = true) {
+        if(switched||JSON.stringify(state.tunnelOffer)!==JSON.stringify(next.tunnelOffer)){state.tunnelChoice=null;state.tunnelConfirmed=false;}
         // A disconnect can disable cached menu controls. Rebuild their contents
         // when editing becomes available again, including focus controls.
         if (state.consumablesLocked !== next.consumablesLocked) towerMenuKey = towerPanelKey = buildingPanelKey = '';

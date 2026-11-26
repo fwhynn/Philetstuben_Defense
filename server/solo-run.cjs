@@ -50,7 +50,7 @@ function createSoloRun({ options, season, account = null, now = Date.now, persis
     if (action === 'redraw') return core.rewards.redraw(s,run.random);
     if (action === 'merchant') return core.rewards.trade(s,p.site,p.item);
     if (action === 'extraHex') return core.session.buyExtraHex(s, run.random);
-    if (action === 'tunnel') return core.runtime.rescueTunnel(s);
+    if (action === 'tunnel') return core.runtime.rescueTunnel(s,p);
     if (action === 'targetPriority') { const tower = slotTower(p.slot); if (!tower) return false; tower.targetPriority = [...p.priorities]; return true; }
     if (action === 'sellTower') {
       const tower = slotTower(p.slot), refund = core.data.towerRefund(s, tower); if (!refund) return false;

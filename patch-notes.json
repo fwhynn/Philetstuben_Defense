@@ -1,5 +1,51 @@
 [
   {
+    "version": "next",
+    "title": "Rettungstunnel mit freier Richtungswahl",
+    "summary": "Nähere Ausgänge und bis zu drei Positionen mit klarer Vorschau – im Solo und Duo.",
+    "overview": [
+      {
+        "title": "Verbessert",
+        "items": [
+          "Tunnelausgänge näher an der Karte",
+          "Bis zu drei Positionen zur Auswahl",
+          "Klare Vorschau vor dem Bau"
+        ]
+      }
+    ],
+    "sections": [
+      {
+        "title": "Weiterbauen, wo es passt",
+        "entries": [
+          {
+            "title": "Näher an deiner Verteidigung",
+            "bullets": [
+              "Rettungstunnel können direkt neben bestehenden Hexen enden, wenn die neuen Straßen frei und weiter ausbaubar bleiben.",
+              "Bis zu drei gültige Positionen stehen zur Auswahl. Alle behalten denselben Anschluss an die bisherige Straße; bestehende Gegnerwege werden nicht verkürzt."
+            ],
+            "stats": []
+          },
+          {
+            "title": "Erst ansehen, dann bauen",
+            "bullets": [
+              "Wähle den Ausgang über nummerierte Markierungen auf der Karte oder über die Positionsbuttons. Eine gestrichelte Linie zeigt die Tunnelverbindung, Pfeile zeigen die offenen Straßen.",
+              "Der kostenlose Tunnel wird erst nach deiner Bestätigung gebaut. Im Modus mit zwei Straßenöffnungen haben die angebotenen Ausgänge ebenfalls zwei ausbaubare Öffnungen.",
+              "Die Auswahl funktioniert im Solo und Duo. Auch ältere Spielstände mit einem ausstehenden Rettungstunnel erhalten die neuen Vorschläge."
+            ],
+            "stats": []
+          }
+        ]
+      }
+    ],
+    "changes": [
+      "Rettungstunnel können direkt neben bestehenden Hexen enden, wenn die neuen Straßen frei und weiter ausbaubar bleiben.",
+      "Bis zu drei gültige Positionen stehen zur Auswahl. Alle behalten denselben Anschluss an die bisherige Straße; bestehende Gegnerwege werden nicht verkürzt.",
+      "Wähle den Ausgang über nummerierte Markierungen auf der Karte oder über die Positionsbuttons. Eine gestrichelte Linie zeigt die Tunnelverbindung, Pfeile zeigen die offenen Straßen.",
+      "Der kostenlose Tunnel wird erst nach deiner Bestätigung gebaut. Im Modus mit zwei Straßenöffnungen haben die angebotenen Ausgänge ebenfalls zwei ausbaubare Öffnungen.",
+      "Die Auswahl funktioniert im Solo und Duo. Auch ältere Spielstände mit einem ausstehenden Rettungstunnel erhalten die neuen Vorschläge."
+    ]
+  },
+  {
     "version": "1.3.6",
     "title": "Mehr Glanz und lesbare Turmnamen",
     "summary": "Legendäre Karten fallen in Deck und Kartenstapeln deutlicher auf. Lange Turmnamen lassen dem Schließen-Button Platz.",
